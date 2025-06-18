@@ -1,0 +1,88 @@
+.profile-screen-new {
+  padding: 16px;
+}
+
+.profile-header-new {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.icon-button img {
+  width: 24px;
+  height: 24px;
+}
+
+.user-info-card {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 16px;
+  text-align: center;
+  position: relative;
+}
+
+.user-icon-container {
+  position: relative;
+  display: inline-block;
+}
+
+.user-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+}
+
+.verified-badge {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.user-info-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+}
+
+.menu-list {
+  margin-top: 24px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.menu-item-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+}
+
+.menu-item-text h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.menu-item-text p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #888;
+}
+
+.menu-item-arrow {
+  position: absolute;
+  right: 16px;
+  font-size: 20px;
+  color: #888;
+}
