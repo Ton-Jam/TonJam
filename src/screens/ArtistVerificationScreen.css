@@ -1,0 +1,42 @@
+.artist-verification-screen {
+  padding: 40px 20px;
+  text-align: center;
+  color: white;
+  background: linear-gradient(145deg, #000428, #004e92);
+  min-height: 100vh;
+}
+
+.artist-verification-screen h2 {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.artist-verification-screen p {
+  font-size: 16px;
+  margin-bottom: 32px;
+  color: #ccc;
+}
+
+.spotify-button {
+  background: #1DB954;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-size: 16px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.spotify-button:hover {
+  background: #1aa34a;
+}
+
+.spotify-button img {
+  width: 20px;
+  height: 20px;
+}

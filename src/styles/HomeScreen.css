@@ -1,0 +1,32 @@
+.home-screen {
+  background: linear-gradient(to bottom right, #0d1a2d, #1a2b45);
+  color: white;
+  min-height: 100vh;
+  padding-top: 70px; /* space for fixed header */
+  padding-bottom: 100px; /* space for bottom nav */
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.welcome-note {
+  padding: 16px 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+section {
+  margin-bottom: 24px;
+}
+
+/* Hide scrollbar globally (especially for horizontal sections) */
+.home-screen ::-webkit-scrollbar {
+  display: none;
+}
+
+.home-screen {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

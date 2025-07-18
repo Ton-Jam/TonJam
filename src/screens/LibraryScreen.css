@@ -1,0 +1,73 @@
+.library-screen {
+  padding: 1.5rem;
+  color: white;
+  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  min-height: 100vh;
+}
+
+.library-screen h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.empty-library {
+  text-align: center;
+  opacity: 0.7;
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.track-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
+}
+
+.track-card img {
+  width: 70px;
+  height: 70px;
+  border-radius: 0.75rem;
+  object-fit: cover;
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.track-info h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.track-info p {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.track-info button {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #00bfff;
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.track-info button:hover {
+  background: #008bb5;
+}

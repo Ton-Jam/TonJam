@@ -1,0 +1,38 @@
+.language-settings-screen {
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #000c1f, #000814);
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.settings-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 24px;
+  background: linear-gradient(45deg, #3b82f6, #9333ea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-section label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #ddd;
+}
+
+.settings-section select {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  outline: none;
+}

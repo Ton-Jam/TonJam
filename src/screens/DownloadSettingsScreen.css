@@ -1,0 +1,50 @@
+.download-settings-screen {
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #000b1e, #000711);
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.settings-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 24px;
+  background: linear-gradient(45deg, #0ea5e9, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-section label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #ccc;
+}
+
+.settings-section select,
+.toggle-option input[type="checkbox"] {
+  margin-top: 6px;
+}
+
+.settings-section select {
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  outline: none;
+}
+
+.toggle-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}

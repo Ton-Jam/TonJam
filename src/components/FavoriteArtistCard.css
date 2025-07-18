@@ -1,0 +1,71 @@
+/* Filename: src/components/FavoriteArtistCard.css */
+
+.fav-artist-card {
+  width: 250px; /* Wider than other cards to feel more important */
+  flex-shrink: 0;
+  margin-right: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2a2f4c 0%, #1a1f3a 100%);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #3a4065;
+  cursor: pointer;
+}
+
+.fav-artist-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.fav-artist-info {
+  padding: 15px;
+  flex-grow: 1; /* Makes this section take up available space */
+}
+
+.fav-artist-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.fav-artist-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.fav-artist-verified {
+  width: 20px;
+  height: 20px;
+}
+
+.fav-artist-release {
+  margin: 0;
+  font-size: 13px;
+  color: #b3b3b3;
+}
+
+.fire-emoji {
+  font-size: 14px;
+  margin-right: 4px;
+}
+
+.follow-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: none;
+  width: calc(100% - 30px); /* Full width minus padding */
+  margin: 0 15px 15px 15px;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.follow-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}

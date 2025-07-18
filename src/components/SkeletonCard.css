@@ -1,0 +1,68 @@
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-radius: 16px;
+  background: #1e1e1e;
+  padding: 8px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.skeleton-image {
+  width: 100%;
+  border-radius: 12px;
+  background-color: #2c2c2c;
+  margin-bottom: 8px;
+}
+
+.skeleton-text {
+  height: 12px;
+  width: 80%;
+  background-color: #333;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+/* Type-specific widths and heights */
+.skeleton-track, .skeleton-nft, .skeleton-album, .skeleton-playlist {
+  width: 140px;
+  height: auto;
+}
+
+.skeleton-artist {
+  width: 100px;
+  height: auto;
+  align-items: center;
+}
+
+.skeleton-track .skeleton-image,
+.skeleton-nft .skeleton-image {
+  height: 140px;
+}
+
+.skeleton-album .skeleton-image,
+.skeleton-playlist .skeleton-image {
+  height: 140px;
+}
+
+.skeleton-artist .skeleton-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: #1e1e1e;
+  }
+  50% {
+    background-color: #2a2a2a;
+  }
+  100% {
+    background-color: #1e1e1e;
+  }
+}

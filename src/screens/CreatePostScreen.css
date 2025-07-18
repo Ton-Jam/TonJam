@@ -1,0 +1,40 @@
+.create-post-screen {
+  padding: 20px;
+  color: white;
+  background: linear-gradient(to bottom, #08121c, #0e1e33);
+  min-height: 100vh;
+}
+
+.create-post-screen textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: none;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 16px;
+  resize: none;
+  margin-top: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.actions button {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.emoji-picker-wrapper {
+  margin-top: 10px;
+  background: white;
+  border-radius: 8px;
+  max-width: 320px;
+}

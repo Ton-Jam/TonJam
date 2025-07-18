@@ -1,0 +1,58 @@
+.slide-menu {
+  position: fixed;
+  top: 0;
+  right: -280px;
+  width: 280px;
+  height: 100vh;
+  background: rgba(10, 10, 30, 0.95);
+  backdrop-filter: blur(12px);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 20px;
+  z-index: 9999;
+  transition: right 0.3s ease-in-out;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.slide-menu.open {
+  right: 0;
+}
+
+.slide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.slide-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+}
+
+.slide-options {
+  list-style: none;
+  padding: 0;
+}
+
+.slide-options li {
+  margin-bottom: 16px;
+}
+
+.slide-options button {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  text-align: left;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.slide-options button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}

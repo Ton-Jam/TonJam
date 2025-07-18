@@ -1,0 +1,48 @@
+/* src/styles/LibraryScreen.css */
+.library-screen {
+  min-height: 100vh;
+  overflow-y: auto;
+  padding: 24px;
+  background: linear-gradient(to bottom right, #091540, #1e3a8a);
+  color: white;
+  font-family: "Poppins", sans-serif;
+}
+
+.library-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 24px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.library-section {
+  margin-bottom: 32px;
+}
+
+.library-section h2 {
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+  color: #b3ccff;
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.track-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 16px 20px;
+  font-size: 1rem;
+  transition: background 0.3s ease, transform 0.2s;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.track-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-3px);
+}

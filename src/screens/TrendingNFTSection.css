@@ -1,0 +1,91 @@
+.trending-nft-section {
+  padding: 16px;
+  color: none;
+}
+
+.trending-nft-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trending-nft-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 14px;
+  padding-bottom: 10px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trending-nft-row::-webkit-scrollbar {
+  display: none;
+}
+
+.nft-card {
+  background: none;
+  border-radius: 0px;
+  padding: 10px 10px 12px;
+  min-width: 110px;
+  max-width: 110px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 0 6px rgba(0, 162, 255, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.nft-card:hover {
+  transform: scale(1.05);
+}
+
+.nft-image {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 0px;
+}
+
+.nft-info {
+  margin-top: 6px;
+  width: 100%;
+  text-align: center;
+}
+
+.nft-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nft-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nft-price {
+  background: #1f6feb;
+  color: white;
+  font-weight: bold;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ton-icon {
+  width: 14px;
+  height: 14px;
+}

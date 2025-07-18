@@ -1,0 +1,26 @@
+.side-drawer {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background-color: var(--background);
+  color: var(--text);
+  transition: left 0.3s ease-in-out;
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.side-drawer.open {
+  left: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: inherit;
+  margin-bottom: 20px;
+}

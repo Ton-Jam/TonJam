@@ -1,0 +1,68 @@
+/* styles/MiniPlayer.css */
+.mini-player {
+  position: fixed;
+  bottom: 80px; /* above bottom navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 500px;
+  background: rgba(24, 24, 36, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  color: white;
+}
+
+.mini-player img.cover {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+.mini-player .info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.mini-player .title {
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-player .artist {
+  font-size: 12px;
+  color: #bbb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-player button.play-btn {
+  background: #308aff;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.mini-player button.play-btn:active {
+  transform: scale(0.95);
+}
+
+.mini-player button.play-btn img {
+  width: 20px;
+  height: 20px;
+}

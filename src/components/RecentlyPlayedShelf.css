@@ -1,0 +1,54 @@
+/* src/components/RecentlyPlayedShelf.css */
+.recently-played-section {
+  margin-top: 40px;
+}
+
+.recently-played-section h2 {
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.recently-played-list {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.recently-played-list::-webkit-scrollbar {
+  display: none;
+}
+
+.recently-played-card {
+  min-width: 140px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 12px;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease;
+}
+
+.recently-played-card:hover {
+  transform: scale(1.05);
+}
+
+.recently-played-card img {
+  width: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.recently-played-info h4 {
+  font-size: 0.95rem;
+  color: #ffffff;
+  margin: 0;
+}
+
+.recently-played-info p {
+  font-size: 0.8rem;
+  color: #bbbbbb;
+  margin: 0;
+}

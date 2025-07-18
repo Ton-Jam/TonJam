@@ -1,0 +1,1 @@
+.filter-pills-container-main{display:flex;gap:10px;margin-bottom:25px}.filter-pill-main{background-color:rgba(26,31,58,0.7);border:1px solid #3a4065;color:#fff;padding:8px 18px;border-radius:50px;font-size:14px;font-weight:500;cursor:pointer}.filter-pill-main.active{background-color:#fff;color:#000;border-color:#fff;font-weight:700}

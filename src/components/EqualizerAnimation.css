@@ -1,0 +1,44 @@
+.equalizer {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  align-items: flex-end;
+  height: 20px;
+  gap: 3px;
+}
+
+.equalizer-bar {
+  width: 3px;
+  background: #1db954; /* Spotify green or any theme color */
+  border-radius: 2px;
+  animation: equalize 1s infinite ease-in-out;
+}
+
+.equalizer-bar:nth-child(1) {
+  animation-delay: 0s;
+}
+.equalizer-bar:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.equalizer-bar:nth-child(3) {
+  animation-delay: 0.4s;
+}
+.equalizer-bar:nth-child(4) {
+  animation-delay: 0.1s;
+}
+.equalizer-bar:nth-child(5) {
+  animation-delay: 0.3s;
+}
+
+@keyframes equalize {
+  0% {
+    height: 20%;
+  }
+  50% {
+    height: 100%;
+  }
+  100% {
+    height: 20%;
+  }
+}

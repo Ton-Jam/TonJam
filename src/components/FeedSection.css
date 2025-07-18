@@ -1,0 +1,25 @@
+.auto-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0 16px;
+}
+
+.auto-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.feed-card {
+  min-width: 280px;
+  height: 160px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #111;
+}
+
+.feed-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

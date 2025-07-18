@@ -1,0 +1,48 @@
+.playlist-card {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 50, 0.5);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 12px;
+  margin: 10px 0;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+}
+
+.playlist-cover {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-right: 16px;
+}
+
+.playlist-details {
+  flex: 1;
+}
+
+.playlist-details h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.playlist-details p {
+  margin: 4px 0;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.playlist-play-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.play-icon {
+  width: 24px;
+  height: 24px;
+  filter: invert(1);
+}

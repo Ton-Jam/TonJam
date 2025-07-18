@@ -1,0 +1,19 @@
+.artist-list-screen {
+  padding: 20px;
+  color: white;
+  background: #0b0f1a;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.artist-list-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.artist-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

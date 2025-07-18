@@ -1,0 +1,54 @@
+.vertical-list-screen {
+  padding: 20px;
+  color: white;
+  background: #0b0b0b;
+  min-height: 100vh;
+}
+
+.screen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.vertical-list-screen h2 {
+  font-size: 22px;
+}
+
+.sort-dropdown {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #1c1c1c;
+  color: white;
+  border: none;
+  font-size: 14px;
+}
+
+.filter-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  margin: 16px 0;
+  font-size: 15px;
+  background: #1b1b1b;
+  color: white;
+}
+
+.filter-input::placeholder {
+  color: #888;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.no-results {
+  text-align: center;
+  color: #999;
+  margin-top: 40px;
+  font-size: 16px;
+}

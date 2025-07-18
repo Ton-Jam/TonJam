@@ -1,0 +1,15 @@
+.tracks-list-screen {
+  padding: 20px;
+  color: white;
+}
+
+.tracks-list-screen h2 {
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.tracks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}

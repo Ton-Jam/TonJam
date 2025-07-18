@@ -1,0 +1,66 @@
+.trending-topics-section {
+  padding: 16px 20px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.topics-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding: 10px 0;
+  scroll-behavior: smooth;
+}
+
+.topics-container::-webkit-scrollbar {
+  display: none;
+}
+
+.topic-card {
+  min-width: 260px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(14px);
+  border-radius: 16px;
+  padding: 16px;
+  flex-shrink: 0;
+  color: white;
+  transition: transform 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.topic-card:hover {
+  transform: scale(1.03);
+}
+
+.topic-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.topic-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 8px;
+  border: 1px solid #00bfff;
+}
+
+.topic-author {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #00bfff;
+}
+
+.topic-title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.topic-meta {
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  opacity: 0.8;
+}

@@ -1,0 +1,6 @@
+// JamSpaceScreen.css .jam-space-screen { padding: 20px; background-color: #0b0b0b; color: white; min-height: 100vh; position: relative; }
+
+.jam-header { font-size: 24px; font-weight: bold; padding-bottom: 16px; position: sticky; top: 0; background: #0b0b0b; z-index: 10; }
+
+.feed-list { display: flex; flex-direction: column; gap: 20px; }
+

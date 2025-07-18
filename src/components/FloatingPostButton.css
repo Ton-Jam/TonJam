@@ -1,0 +1,34 @@
+.floating-post-button {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background-color: #00bcd4;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  box-shadow: 0 4px 15px rgba(0, 188, 212, 0.5);
+  cursor: pointer;
+  animation: glow 2s ease-in-out infinite;
+}
+
+.floating-post-button:hover {
+  background-color: #00acc1;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 8px rgba(0, 188, 212, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(0, 188, 212, 1);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(0, 188, 212, 0.6);
+  }
+}

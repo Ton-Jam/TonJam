@@ -1,0 +1,56 @@
+.user-info-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.15); /* white glass effect */
+  border-radius: 20px;
+  padding: 16px 20px;
+  margin: 16px 20px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.user-info-card:hover {
+  transform: translateY(-2px);
+}
+
+.user-icon-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #fff;
+  padding: 3px;
+}
+
+.user-info-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-info-text h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.user-info-text p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.user-info-arrow {
+  font-size: 20px;
+  color: white;
+}

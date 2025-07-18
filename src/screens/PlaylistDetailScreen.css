@@ -1,0 +1,114 @@
+/* PlaylistDetailScreen.css */
+
+.playlist-detail-container {
+  padding: 20px;
+  background: url('/background.png') center/cover no-repeat;
+  min-height: 100vh;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.playlist-header {
+  text-align: center;
+  background: rgba(0, 0, 50, 0.5);
+  padding: 20px;
+  border-radius: 30px;
+  backdrop-filter: blur(15px);
+  margin-bottom: 30px;
+}
+
+.playlist-cover {
+  width: 160px;
+  height: 160px;
+  border-radius: 20px;
+  margin-bottom: 15px;
+}
+
+.playlist-title {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.playlist-description {
+  font-size: 14px;
+  color: #ccc;
+  margin: 10px 0;
+}
+
+.playlist-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.play-btn,
+.shuffle-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.play-btn {
+  background-color: #00bfff;
+}
+
+.shuffle-btn {
+  background-color: #ff9900;
+}
+
+.play-btn:hover {
+  background-color: #009acd;
+}
+
+.shuffle-btn:hover {
+  background-color: #e68a00;
+}
+
+.track-list-section h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 30, 0.5);
+  padding: 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  gap: 15px;
+}
+
+.track-item img {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.track-item h4 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.track-item span {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.track-item .duration {
+  margin-left: auto;
+  font-size: 13px;
+  color: #aaa;
+}

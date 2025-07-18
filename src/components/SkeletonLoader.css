@@ -1,0 +1,94 @@
+.skeleton-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.skeleton-card,
+.skeleton-artist,
+.skeleton-feed,
+.skeleton-album {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 12px;
+  width: 120px;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-card {
+  width: 140px;
+}
+
+.skeleton-feed {
+  width: 100%;
+  max-width: 340px;
+}
+
+.skeleton-line {
+  height: 10px;
+  background: #333;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+.skeleton-line:not(.short) {
+  width: 100%;
+}
+
+.skeleton-img {
+  width: 100%;
+  height: 100px;
+  border-radius: 12px;
+  background: #222;
+  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-img.square {
+  height: 120px;
+}
+
+.skeleton-img.wide {
+  height: 180px;
+  width: 100%;
+}
+
+.skeleton-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-avatar.small {
+  width: 40px;
+  height: 40px;
+}
+
+/* Skeleton Album/Playlist */
+.skeleton-album {
+  width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

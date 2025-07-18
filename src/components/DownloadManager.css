@@ -1,0 +1,54 @@
+/* src/components/DownloadManager.css */
+.download-manager-section {
+  margin-top: 40px;
+}
+
+.download-manager-section h2 {
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.download-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.download-item {
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px;
+  border-radius: 12px;
+  align-items: center;
+  transition: background 0.3s;
+  backdrop-filter: blur(6px);
+}
+
+.download-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.download-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.download-info h4 {
+  font-size: 1rem;
+  margin: 0;
+  color: #ffffff;
+}
+
+.download-info p {
+  margin: 2px 0;
+  color: #cccccc;
+  font-size: 0.85rem;
+}
+
+.download-info span {
+  font-size: 0.75rem;
+  color: #999999;
+}

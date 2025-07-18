@@ -1,0 +1,56 @@
+.ai-section {
+  padding: 24px;
+  background: linear-gradient(to right, #0f0f0f, #151515);
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.2);
+  margin-bottom: 40px;
+  color: white;
+  overflow: hidden;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.ai-section h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: #66d9ef;
+}
+
+.ai-card-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+}
+
+.ai-card {
+  min-width: 160px;
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 12px;
+  scroll-snap-align: start;
+  transition: transform 0.3s;
+}
+
+.ai-card:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #2c2c2c, #222);
+}
+
+.ai-card img {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  height: 160px;
+}
+
+.ai-card-title {
+  font-size: 14px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

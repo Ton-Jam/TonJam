@@ -1,0 +1,19 @@
+.spotify-verification-screen {
+  padding: 20px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  text-align: center;
+}
+
+.verify-btn {
+  padding: 12px 30px;
+  background: var(--accent-color);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+.verify-btn:hover {
+  background: #00c37a;
+}

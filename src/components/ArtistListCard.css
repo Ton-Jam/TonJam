@@ -1,0 +1,63 @@
+.artist-list-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  margin: 10px 0;
+  border-radius: 16px;
+  color: white;
+  backdrop-filter: blur(12px);
+  transition: transform 0.25s ease;
+}
+
+.artist-list-card:hover {
+  transform: translateY(-3px);
+}
+
+.artist-list-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.artist-list-info {
+  flex: 1;
+  margin-left: 14px;
+}
+
+.artist-list-name {
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.artist-followers {
+  font-size: 12px;
+  color: #ccc;
+  margin-top: 2px;
+}
+
+.verified-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.follow-btn {
+  background: linear-gradient(to right, #00b3ff, #1e90ff);
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.follow-btn:hover {
+  background: #007fdc;
+}

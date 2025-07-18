@@ -1,0 +1,13 @@
+/* NFTMarketScreen.css */
+.nft-market-screen {
+  padding: 20px;
+  background-color: #0b0b0b;
+  color: white;
+  min-height: 100vh;
+}
+
+.nft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}

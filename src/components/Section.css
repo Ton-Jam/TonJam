@@ -1,0 +1,30 @@
+.section {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 16px 8px;
+}
+
+.section-header h3 {
+  color: white;
+  font-size: 18px;
+  margin: 0;
+}
+
+.view-more {
+  color: #40a9ff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.scroll-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 0 16px;
+  scroll-behavior: smooth;
+}

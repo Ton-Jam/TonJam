@@ -1,0 +1,40 @@
+.track-card-vertical {
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.track-card-vertical:hover {
+  transform: scale(1.02);
+}
+
+.track-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.track-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.track-details h4 {
+  font-size: 16px;
+  margin: 0;
+  color: white;
+}
+
+.track-details p {
+  font-size: 14px;
+  color: #ccc;
+  margin: 4px 0 0;
+}

@@ -1,0 +1,36 @@
+.post-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(0, 0, 50, 0.4);
+  border-radius: 16px;
+  padding: 16px;
+  color: white;
+}
+
+.post-composer textarea {
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  resize: none;
+  min-height: 80px;
+}
+
+.post-composer input[type="file"] {
+  color: white;
+}
+
+.post-composer button {
+  align-self: flex-end;
+  background-color: #3399ff;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.post-composer button:hover {
+  background-color: #007bff;
+}

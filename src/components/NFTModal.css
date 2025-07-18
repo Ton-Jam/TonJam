@@ -1,0 +1,67 @@
+/* NFTModal.css */
+
+.nft-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 10, 10, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.nft-modal-container {
+  background: rgba(0, 17, 34, 0.95);
+  padding: 20px;
+  border-radius: 20px;
+  max-width: 90%;
+  width: 350px;
+  text-align: center;
+  color: #fff;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 20px #00f0ff33;
+}
+
+.nft-modal-image {
+  width: 100%;
+  border-radius: 16px;
+  margin-bottom: 15px;
+}
+
+.nft-modal-audio {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.nft-modal-price {
+  margin: 10px 0;
+  font-size: 1.1rem;
+  color: #facc15;
+}
+
+.nft-modal-btn {
+  background: #00f0ff;
+  border: none;
+  padding: 10px 18px;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.3s ease;
+}
+
+.nft-modal-btn:hover {
+  background: #00cfe3;
+}
+
+.nft-modal-close {
+  margin-top: 15px;
+  background: transparent;
+  color: #ccc;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+}

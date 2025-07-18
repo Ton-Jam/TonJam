@@ -1,0 +1,23 @@
+.trending-songs-section {
+  margin-top: 20px;
+  padding: 0 16px;
+}
+
+.section-title {
+  font-size: 25px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* Hide scrollbar */
+.songs-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.songs-scroll::-webkit-scrollbar {
+  display: none;
+}

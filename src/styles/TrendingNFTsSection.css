@@ -1,0 +1,24 @@
+.trending-nfts-section {
+  margin-top: 20px;
+  padding: 10px 16px;
+}
+
+.section-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.nft-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 14px;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nft-scroll-container::-webkit-scrollbar {
+  display: none;
+}

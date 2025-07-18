@@ -1,0 +1,48 @@
+.now-playing-bar {
+  position: fixed;
+  bottom: 64px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(0, 50, 80, 0.6);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 500;
+  cursor: pointer;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.np-thumbnail {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+.np-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.np-title {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.np-artist {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.np-toggle {
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: white;
+}

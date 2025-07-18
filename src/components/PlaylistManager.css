@@ -1,0 +1,68 @@
+/* src/components/PlaylistManager.css */
+.playlist-manager {
+  background: rgba(0, 40, 80, 0.5);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px rgba(0, 150, 255, 0.1);
+  margin-bottom: 20px;
+}
+
+.playlist-manager h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.playlist-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.playlist-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.playlist-input button {
+  background: #00aaff;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.playlist-input button:hover {
+  background: #0077cc;
+}
+
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.playlist-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px 15px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.open-btn {
+  background: transparent;
+  border: 1px solid #00aaff;
+  padding: 6px 12px;
+  border-radius: 10px;
+  color: #00aaff;
+  cursor: pointer;
+}

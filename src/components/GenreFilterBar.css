@@ -1,0 +1,27 @@
+.genre-filter-bar {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 10px 0;
+  scrollbar-width: none;
+}
+
+.genre-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.genre-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #bbb;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.genre-pill.active {
+  background: #00bfff;
+  color: white;
+}

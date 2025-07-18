@@ -1,0 +1,29 @@
+.genre-filter {
+  margin: 12px 0 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0 16px;
+  display: flex;
+  gap: 10px;
+  scrollbar-width: none;
+}
+
+.genre-filter::-webkit-scrollbar {
+  display: none;
+}
+
+.genre-pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.genre-pill.active {
+  background: #40a9ff;
+  color: white;
+}

@@ -1,0 +1,72 @@
+.nft-market-screen {
+  padding: 20px;
+  padding-top: 80px; /* space for fixed header */
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #0f0f0f, #1a1a1a);
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.nft-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  backdrop-filter: blur(12px);
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nft-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.pill-button {
+  background: #00ffd5;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: #000;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.pill-button:hover {
+  background: #00c9aa;
+}
+
+.nft-search {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  margin: 20px 0;
+  border: none;
+  font-size: 15px;
+  background: #1d1d1d;
+  color: white;
+  outline: none;
+}
+
+.nft-search::placeholder {
+  color: #888;
+}
+
+.nft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.no-results {
+  text-align: center;
+  margin-top: 40px;
+  color: #bbb;
+  font-size: 15px;
+}

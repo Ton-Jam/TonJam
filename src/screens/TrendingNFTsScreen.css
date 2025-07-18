@@ -1,0 +1,44 @@
+/* TrendingNFTsScreen.css */
+
+.top-three-stack {
+  position: relative;
+  height: 280px;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nft-stack-item {
+  position: absolute;
+  transition: transform 0.4s ease, z-index 0.4s ease;
+}
+
+.stack-1 {
+  z-index: 3;
+  transform: translateX(0px) scale(1.1);
+}
+
+.stack-2 {
+  z-index: 2;
+  transform: translateX(-60px) scale(0.9);
+}
+
+.stack-3 {
+  z-index: 1;
+  transform: translateX(60px) scale(0.9);
+}
+
+.vertical-list-screen .card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 40px;
+}
+
+.no-results {
+  text-align: center;
+  color: #aaa;
+  margin-top: 40px;
+  font-size: 18px;
+}

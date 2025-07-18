@@ -1,0 +1,73 @@
+.nft-card {
+  background: rgba(0, 51, 102, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 16px;
+  width: 220px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.nft-card:hover {
+  transform: scale(1.02);
+}
+
+.nft-thumbnail {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.nft-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.nft-artist {
+  font-size: 0.875rem;
+  color: #b0c4de;
+  margin-bottom: 12px;
+}
+
+.nft-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nft-play-btn,
+.nft-mint-btn {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.nft-play-btn {
+  background: #00bfff;
+  color: white;
+}
+
+.nft-play-btn:hover {
+  background: #009acd;
+}
+
+.nft-mint-btn {
+  background: linear-gradient(90deg, #ffcc00, #ffaa00);
+  color: #222;
+}
+
+.nft-mint-btn:hover {
+  background: linear-gradient(90deg, #ffdd33, #ffbb00);
+}

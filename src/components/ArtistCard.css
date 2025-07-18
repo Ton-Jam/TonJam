@@ -1,0 +1,57 @@
+.artist-card {
+  background: rgba(0, 0, 50, 0.3);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 10px 0;
+  color: white;
+}
+
+.artist-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.artist-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.artist-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.verified-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.followers-count {
+  font-size: 0.85rem;
+  color: #ccc;
+  margin-top: 2px;
+}
+
+.follow-btn {
+  margin-top: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 10px;
+  background: #3399ff;
+  color: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.follow-btn:hover {
+  background: #1e80e0;
+}
