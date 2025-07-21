@@ -1,0 +1,51 @@
+/* TrendingTopicsSection.css */
+
+.trending-topics-section {
+  margin: 24px 0;
+  padding: 0 16px;
+}
+
+.trending-topics-section h2 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.trending-topic-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+}
+
+.trending-topic-card {
+  flex: 0 0 auto;
+  width: 240px;
+  background: rgba(0, 85, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 12px;
+  scroll-snap-align: start;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.trending-topic-card:hover {
+  transform: translateY(-3px);
+}
+
+.trending-topic-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.trending-topic-description {
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.4;
+}

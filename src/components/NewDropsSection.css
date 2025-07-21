@@ -1,0 +1,61 @@
+.new-drops-section {
+  margin: 24px 0;
+}
+
+.drops-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding: 0 8px;
+}
+
+.drop-card {
+  min-width: 160px;
+  background: rgba(0, 119, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.drop-cover {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.drop-info {
+  margin-top: 8px;
+}
+
+.drop-info h4 {
+  margin: 6px 0 2px;
+  font-size: 14px;
+  color: #fff;
+}
+
+.drop-info p {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.mint-btn,
+.play-btn {
+  margin-top: 6px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.mint-btn {
+  background: #1e90ff;
+}
+
+.play-btn {
+  background: #00c977;
+}

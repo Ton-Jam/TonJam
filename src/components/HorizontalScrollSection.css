@@ -1,0 +1,23 @@
+.horizontal-section {
+  padding: 0 16px;
+  margin-top: 24px;
+}
+
+.horizontal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.horizontal-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}

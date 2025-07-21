@@ -1,0 +1,78 @@
+.nft-marketplace-container {
+  padding: 1rem;
+  backdrop-filter: blur(20px);
+  background: rgba(0, 0, 50, 0.4);
+  min-height: 100vh;
+  color: white;
+}
+
+.marketplace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.wallet-button {
+  background: linear-gradient(135deg, #4fd1c5, #3182ce);
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.nft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.nft-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1rem;
+  backdrop-filter: blur(12px);
+  transition: transform 0.2s ease-in-out;
+  text-align: center;
+}
+
+.nft-card:hover {
+  transform: scale(1.03);
+}
+
+.nft-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-bottom: 0.5rem;
+}
+
+.nft-info h3 {
+  margin: 0.2rem 0;
+  font-size: 1rem;
+}
+
+.price-tag {
+  color: #f0b90b;
+  font-weight: bold;
+  margin: 0.3rem 0;
+}
+
+.mint-btn {
+  background: #1e90ff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.4rem 1rem;
+  color: white;
+  cursor: pointer;
+  margin-top: 0.4rem;
+}
+
+.empty-msg {
+  text-align: center;
+  font-size: 1.1rem;
+  opacity: 0.7;
+}

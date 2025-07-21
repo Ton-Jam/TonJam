@@ -1,0 +1,64 @@
+.sponsored-jam-section {
+  margin: 20px 0;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+
+.jam-feed-scroll {
+  display: flex;
+  overflow-x: auto;
+  padding: 0 10px;
+  gap: 15px;
+  scroll-snap-type: x mandatory;
+}
+
+.jam-feed-card {
+  min-width: 220px;
+  flex-shrink: 0;
+  background: rgba(0, 89, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 10px;
+  scroll-snap-align: start;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: transform 0.3s;
+}
+
+.jam-feed-card:hover {
+  transform: scale(1.02);
+}
+
+.jam-feed-img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.jam-feed-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.jam-feed-content p {
+  font-size: 0.85rem;
+  color: #ccc;
+  margin: 2px 0 6px 0;
+}
+
+.sponsored-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  background: linear-gradient(to right, gold, goldenrod);
+  color: #111;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-weight: 600;
+}

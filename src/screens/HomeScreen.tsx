@@ -1,66 +1,82 @@
-import React, { useState } from 'react'; import './HomeScreen.css'; import TrackCard from '../components/TrackCard'; import NFTCard from '../components/NFTCard'; import JamFeedCard from '../components/JamFeedCard'; import ArtistCard from '../components/ArtistCard'; import AIPLCard from '../components/AIPLCard'; import PlaylistCard from '../components/PlaylistCard';
+import React from 'react';
+import './HomeScreen.css';
+import Section from '../components/Section';
+import ArtistAvatar from '../components/ArtistAvatar';
+import TrackCard from '../components/TrackCard';
+import NFTCard from '../components/NFTCard';
+// import JamFeedSlider from '../components/JamFeedSlider'; // Temporarily commented out
 
-const HomeScreen = () => { const [filter, setFilter] = useState('all');
+const HomeScreen: React.FC = () => {
+  const trendingArtists = [
+    { id: 1, name: 'Sina Vibes', image: '/Artist1.png' },
+    { id: 2, name: 'Krisswave', image: '/Artist2.png' },
+    { id: 3, name: 'ZazaTon', image: '/Artist3.png' },
+  ];
 
-const trendingSongs = [...Array(4).keys()].map(i => ({ id: i, title: Song ${i + 1} })); const trendingNFTs = [...Array(3).keys()].map(i => ({ id: i, title: NFT ${i + 1} })); const trendingAlbums = [...Array(2).keys()].map(i => ({ id: i, title: Album ${i + 1} })); const jamFeeds = [...Array(3).keys()].map(i => ({ id: i, type: i % 2 === 0 ? 'track' : 'nft', title: Feed ${i + 1} })); const trendingArtists = [...Array(4).keys()].map(i => ({ id: i, name: Artist ${i + 1} })); const aiPlaylists = [...Array(2).keys()].map(i => ({ id: i, title: AI Playlist ${i + 1} })); const recommendedPlaylists = [...Array(3).keys()].map(i => ({ id: i, title: Recommended ${i + 1} }));
+  const newDrops = [
+    { id: 1, title: 'Blockchain Party', artist: 'DJ Crypto', image: '/Track1.png' },
+    { id: 2, title: 'Meta Nights', artist: 'Lil Ton', image: '/Track2.png' },
+  ];
 
-return ( <div className="home-screen"> <div className="filter-bar"> <button onClick={() => setFilter('all')} className={filter === 'all' ? 'active' : ''}>All</button> <button onClick={() => setFilter('songs')} className={filter === 'songs' ? 'active' : ''}>Songs</button> <button onClick={() => setFilter('nfts')} className={filter === 'nfts' ? 'active' : ''}>NFTs</button> </div>
+  const trendingNFTs = [
+    { id: 1, title: 'TON Banger', price: '25 TON', image: '/NFT1.png' },
+    { id: 2, title: 'Chainz Heat', price: '18 TON', image: '/NFT2.png' },
+  ];
 
-{(filter === 'all' || filter === 'songs') && (
-    <section className="section">
-      <h2>Trending Songs</h2>
-      <div className="horizontal-scroll">
-        {trendingSongs.map(song => <TrackCard key={song.id} {...song} />)}
+  return (
+    <div className="home-container">
+      <header className="home-header">
+        <img src="/icon-tonjam.png" alt="TonJam" className="header-icon" />
+        <h1>TonJam</h1>
+        <div className="header-right">
+          <img src="/icon-earn-tj.png" alt="Earn TJ" className="header-icon" />
+          <img src="/icon-user.png" alt="User" className="header-user" />
+        </div>
+      </header>
+
+      <div className="pill-nav">
+        <button className="pill-button">Trending NFTs</button>
+        <button className="pill-button">Recommended NFTs</button>
       </div>
-    </section>
-  )}
 
-  {(filter === 'all' || filter === 'nfts') && (
-    <section className="section">
-      <h2>Trending NFTs</h2>
-      <div className="horizontal-scroll">
-        {trendingNFTs.map(nft => <NFTCard key={nft.id} {...nft} />)}
-      </div>
-    </section>
-  )}
+      <Section title="What’s up! TON Community">
+        {/* <JamFeedSlider /> */}
+        <p className="coming-soon-text">Sponsored Jam Feed coming soon!</p>
+      </Section>
 
-  <section className="section">
-    <h2>Trending Albums</h2>
-    <div className="horizontal-scroll">
-      {trendingAlbums.map(album => <TrackCard key={album.id} {...album} />)}
+      <Section title="New Drops">
+        <div className="card-row">
+          {newDrops.map(drop => (
+            <TrackCard key={drop.id} {...drop} />
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Top Trending Songs">
+        <div className="card-row">
+          {newDrops.map(track => (
+            <TrackCard key={track.id} {...track} />
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Trending Artists">
+        <div className="card-row">
+          {trendingArtists.map(artist => (
+            <ArtistAvatar key={artist.id} {...artist} />
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Trending NFTs">
+        <div className="card-row">
+          {trendingNFTs.map(nft => (
+            <NFTCard key={nft.id} {...nft} />
+          ))}
+        </div>
+      </Section>
     </div>
-  </section>
-
-  <section className="section">
-    <h2>Jam Feeds</h2>
-    <div className="vertical-scroll">
-      {jamFeeds.map(feed => <JamFeedCard key={feed.id} {...feed} />)}
-    </div>
-  </section>
-
-  <section className="section">
-    <h2>Trending Artists</h2>
-    <div className="horizontal-scroll">
-      {trendingArtists.map(artist => <ArtistCard key={artist.id} {...artist} />)}
-    </div>
-  </section>
-
-  <section className="section">
-    <h2>Featured AI Playlists</h2>
-    <div className="horizontal-scroll">
-      {aiPlaylists.map(p => <AIPLCard key={p.id} {...p} />)}
-    </div>
-  </section>
-
-  <section className="section">
-    <h2>Recommended Playlists</h2>
-    <div className="horizontal-scroll">
-      {recommendedPlaylists.map(p => <PlaylistCard key={p.id} {...p} />)}
-    </div>
-  </section>
-</div>
-
-); };
+  );
+};
 
 export default HomeScreen;
-

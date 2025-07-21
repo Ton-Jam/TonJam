@@ -1,0 +1,46 @@
+.trend-picks-section {
+  margin: 24px 0;
+}
+
+.trend-pick-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 14px;
+  padding: 0 8px;
+}
+
+.trend-pick-card {
+  background: rgba(0, 128, 255, 0.12);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  width: 140px;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(0, 170, 255, 0.07);
+  overflow: hidden;
+  text-align: center;
+}
+
+.trend-pick-image {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+}
+
+.trend-pick-info {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.trend-pick-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+}
+
+.trend-pick-type {
+  font-size: 11px;
+  color: #00c2ff;
+  margin-top: 2px;
+}

@@ -1,0 +1,60 @@
+.jam-feed-slide {
+  background: rgba(0, 0, 50, 0.4);
+  border-radius: 20px;
+  padding: 16px;
+  width: 280px;
+  min-width: 280px;
+  margin-right: 16px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.jam-feed-image {
+  width: 100%;
+  border-radius: 16px;
+  height: 160px;
+  object-fit: cover;
+}
+
+.jam-feed-info {
+  margin-top: 10px;
+}
+
+.jam-feed-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.jam-feed-artist {
+  color: #ccc;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.sponsored-tag {
+  color: gold;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.play-button {
+  background: #0af;
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.play-button:hover {
+  background: #09c;
+}

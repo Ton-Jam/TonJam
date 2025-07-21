@@ -1,0 +1,26 @@
+.pill-nav {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.pill {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.pill.active,
+.pill:hover {
+  background: #007aff;
+  color: #fff;
+  border-color: #007aff;
+}

@@ -1,0 +1,66 @@
+.jam-space-container {
+  padding: 1rem;
+  background: rgba(0, 0, 50, 0.4);
+  backdrop-filter: blur(10px);
+  min-height: 100vh;
+  color: #fff;
+}
+
+.jam-header {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #e0e0ff;
+}
+
+.jam-post-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #888;
+  border-radius: 12px;
+  padding: 0.75rem;
+  width: 100%;
+  color: #fff;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.jam-post-button {
+  background: #3399ff;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.2s ease-in-out;
+}
+
+.jam-post-button:hover {
+  background: #0077ff;
+}
+
+.jam-post {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.jam-post:hover {
+  transform: scale(1.01);
+}
+
+.jam-post-user {
+  font-weight: bold;
+  color: #aad7ff;
+  margin-bottom: 0.25rem;
+}
+
+.jam-post-content {
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #f2f2f2;
+}

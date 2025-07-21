@@ -1,0 +1,87 @@
+.artist-dashboard {
+  padding: 16px;
+  background: linear-gradient(to bottom, #0f0f1f, #000);
+  min-height: 100vh;
+  color: #fff;
+}
+
+.artist-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 16px;
+}
+
+.artist-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #00bfff;
+}
+
+.artist-info h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.artist-info p {
+  font-size: 14px;
+  color: #aaa;
+  margin: 4px 0 0;
+}
+
+.upload-btn {
+  margin-left: auto;
+  background: #00bfff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.minted-title {
+  font-size: 18px;
+  margin: 20px 0 10px;
+}
+
+.minted-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.minted-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.minted-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+.minted-details {
+  flex: 1;
+}
+
+.minted-name {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.minted-date {
+  font-size: 12px;
+  color: #ccc;
+}

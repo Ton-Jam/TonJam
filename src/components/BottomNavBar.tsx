@@ -1,56 +1,17 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import "./BottomNavBar.css";
+// src/components/BottomNavBar.tsx
+import React from 'react';
+import './BottomNavBar.css';
 
-const BottomNavBar = () => {
-  const location = useLocation();
-
-  const navItems = [
-    {
-      path: "/",
-      label: "Jam up!",
-      icon: "/jamup-icon.png", // single logo for TonJam
-    },
-    {
-      path: "/search",
-      label: "Search",
-      icon: "/search-icon.png",
-    },
-    {
-      path: "/space",
-      label: "Space",
-      icon: "/space-icon.png",
-    },
-    {
-      path: "/library",
-      label: "Library",
-      icon: "/library-icon.png",
-    },
-    {
-      path: "/nfts",
-      label: "NFTs",
-      icon: "/nft-icon.png",
-    },
-  ];
-
+function BottomNavBar() {
   return (
     <div className="bottom-nav">
-      {navItems.map((item) => {
-        const isActive = location.pathname === item.path;
-
-        return (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`nav-item ${isActive ? "active" : ""}`}
-          >
-            <img src={item.icon} alt={item.label} />
-            <span>{item.label}</span>
-          </Link>
-        );
-      })}
+      <img src="/icon-tonjam.png" alt="Jam Up" />
+      <img src="/icon-search.png" alt="Search" />
+      <img src="/icon-space.png" alt="Space" />
+      <img src="/icon-library.png" alt="Library" />
+      <img src="/icon-nft.png" alt="NFTs" />
     </div>
   );
-};
+}
 
 export default BottomNavBar;

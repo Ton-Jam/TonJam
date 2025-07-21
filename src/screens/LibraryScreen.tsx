@@ -1,62 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { getFromLocalStorage } from '../utils/localStorageHelper';
+import React from 'react';
 import './LibraryScreen.css';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 
-interface Track {
-  id: number;
-  title: string;
-  artist: string;
-  coverImage: string;
-  audioUrl: string;
-  isNFT?: boolean;
-}
+const LibraryScreen: React.FC = () => {
+  const { playTrack, pauseTrack, isPlaying, currentTrack } = useAudioPlayer();
 
-const LibraryScreen = () => {
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  const [playingId, setPlayingId] = useState<number | null>(null);
-
-  useEffect(() => {
-    const savedTracks = getFromLocalStorage('tonjam_tracks');
-    setTracks(savedTracks);
-  }, []);
-
-  const togglePlay = (track: Track) => {
-    if (currentAudio) {
-      currentAudio.pause();
-      if (playingId === track.id) {
-        setPlayingId(null);
-        return;
-      }
-    }
-
-    const audio = new Audio(track.audioUrl);
-    audio.play();
-    setCurrentAudio(audio);
-    setPlayingId(track.id);
-  };
+  const sampleTrack = 'https://Godplan.mp3'; // Replace with real track
 
   return (
     <div className="library-screen">
-      <h2>My Library</h2>
-      {tracks.length === 0 ? (
-        <p className="empty-library">No tracks uploaded yet.</p>
-      ) : (
-        <div className="track-list">
-          {tracks.map((track) => (
-            <div className="track-card" key={track.id}>
-              <img src={track.coverImage} alt="Cover" />
-              <div className="track-info">
-                <h4>{track.title}</h4>
-                <p>{track.artist}</p>
-                <button onClick={() => togglePlay(track)}>
-                  {playingId === track.id ? 'Pause' : 'Play'}
-                </button>
-              </div>
-            </div>
-          ))}
+      <h2 className="library-title">Your Library</h2>
+
+      <section className="library-section">
+        <h3>Liked Songs</h3>
+        <div className="library-placeholder">
+          You haven’t liked any songs yet.
+          <button onClick={() => playTrack(sampleTrack)} className="play-btn">
+            {isPlaying && currentTrack === sampleTrack ? 'Pause' : 'Play'}
+          </button>
         </div>
-      )}
+      </section>
+
+      <section className="library-section">
+        <h3>Playlists</h3>
+        <div className="library-placeholder">Create your first playlist and jam away!</div>
+      </section>
+
+      <section className="library-section">
+        <h3>Recently Played</h3>
+        <div className="library-placeholder">Your recent jams will appear here.</div>
+      </section>
     </div>
   );
 };

@@ -1,12 +1,1 @@
-# Dependencies
-/node_modules
-
-# Build output
-/dist
-
-# Environment variables
-.env
-.env.local
-
-# Logs
-npm-debug.log*
+node_modules/\ndist/\n.env\n.DS_Store

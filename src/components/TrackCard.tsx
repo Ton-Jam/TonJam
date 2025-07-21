@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import './TrackCard.css';
 import Equalizer from './Equalizer';
-import { PlayerContext } from '../context/PlayerContext';
+import { PlayerContext } from '../context/AudioPlayerContext';
 
 const TrackCard = ({ track }) => {
   const { currentTrack, isPlaying, playTrack } = useContext(PlayerContext);

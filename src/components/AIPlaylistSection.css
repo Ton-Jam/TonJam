@@ -1,56 +1,65 @@
-.ai-section {
-  padding: 24px;
-  background: linear-gradient(to right, #0f0f0f, #151515);
-  border-radius: 16px;
-  box-shadow: 0 0 20px rgba(0, 200, 255, 0.2);
-  margin-bottom: 40px;
-  color: white;
-  overflow: hidden;
-  animation: fadeIn 0.8s ease-in-out;
-}
-
-.ai-section h3 {
-  font-size: 20px;
-  margin-bottom: 16px;
-  color: #66d9ef;
-}
-
-.ai-card-container {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 8px;
-}
-
-.ai-card {
-  min-width: 160px;
-  background: #1e1e1e;
-  border-radius: 12px;
-  padding: 12px;
-  scroll-snap-align: start;
-  transition: transform 0.3s;
-}
-
-.ai-card:hover {
-  transform: scale(1.05);
-  background: linear-gradient(135deg, #2c2c2c, #222);
-}
-
-.ai-card img {
+.ai-playlist-section {
   width: 100%;
-  border-radius: 8px;
+  padding: 10px 0;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  padding-left: 8px;
+  color: #ffffff;
+}
+
+.ai-playlist-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding: 0 8px;
+  scrollbar-width: none;
+}
+
+.ai-playlist-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.ai-playlist-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  width: 160px;
+  flex: 0 0 auto;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease;
+}
+
+.ai-playlist-card:hover {
+  transform: translateY(-4px);
+}
+
+.ai-cover {
+  width: 100%;
+  height: 100px;
   object-fit: cover;
-  height: 160px;
+  border-radius: 12px;
+  margin-bottom: 8px;
 }
 
-.ai-card-title {
+.ai-info {
+  color: white;
+}
+
+.ai-title {
   font-size: 14px;
-  margin-top: 8px;
-  font-weight: 500;
+  font-weight: 600;
+  margin: 0;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.ai-theme {
+  font-size: 12px;
+  opacity: 0.75;
+  margin: 0;
 }

@@ -1,19 +1,20 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
-import { UserProvider } from "./context/UserContext";
-import { GlobalPlayerProvider } from "./context/GlobalPlayerContext";
-import { FollowProvider } from "./context/FollowContext";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+import { AuthProvider } from './context/AuthContext';
+import { FollowProvider } from './context/FollowContext';
+import { AudioPlayerProvider } from './context/AudioPlayerContext';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <UserProvider>
-      <GlobalPlayerProvider>
-        <FollowProvider>
+    <AuthProvider>
+      <FollowProvider>
+        <AudioPlayerProvider>
           <App />
-        </FollowProvider>
-      </GlobalPlayerProvider>
-    </UserProvider>
+        </AudioPlayerProvider>
+      </FollowProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

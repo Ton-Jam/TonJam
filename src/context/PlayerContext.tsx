@@ -1,43 +1,37 @@
-import React, { createContext, useContext, useState, useRef } from 'react';
+// src/context/PlayerContext.tsx
+import React, { createContext, useState, useContext, ReactNode } from "react";
 
-const AudioPlayerContext = createContext(null);
+type Track = {
+  id: string;
+  title: string;
+  artist: string;
+  audioUrl: string;
+  coverImage: string;
+};
 
-export const AudioPlayerProvider = ({ children }) => {
-  const [currentTrackUrl, setCurrentTrackUrl] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+type PlayerContextType = {
+  currentTrack: Track | null;
+  play: (track: Track) => void;
+  stop: () => void;
+};
 
-  const playTrack = (url: string) => {
-    if (audioRef.current && currentTrackUrl === url) {
-      // Toggle
-      if (isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        audioRef.current.play();
-        setIsPlaying(true);
-      }
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      const newAudio = new Audio(url);
-      audioRef.current = newAudio;
-      newAudio.play();
-      setCurrentTrackUrl(url);
-      setIsPlaying(true);
+const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
-      newAudio.onended = () => {
-        setIsPlaying(false);
-      };
-    }
-  };
+export const PlayerProvider = ({ children }: { children: ReactNode }) => {
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+
+  const play = (track: Track) => setCurrentTrack(track);
+  const stop = () => setCurrentTrack(null);
 
   return (
-    <AudioPlayerContext.Provider value={{ currentTrackUrl, isPlaying, playTrack }}>
+    <PlayerContext.Provider value={{ currentTrack, play, stop }}>
       {children}
-    </AudioPlayerContext.Provider>
+    </PlayerContext.Provider>
   );
 };
 
-export const useAudioPlayer = () => useContext(AudioPlayerContext);
+export const usePlayer = () => {
+  const context = useContext(PlayerContext);
+  if (!context) throw new Error("usePlayer must be used within PlayerProvider");
+  return context;
+};

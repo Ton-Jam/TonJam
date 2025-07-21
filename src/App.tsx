@@ -1,43 +1,38 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import WelcomeScreen from "./screens/WelcomeScreen";
 import HomeScreen from "./screens/HomeScreen";
-import SearchScreen from "./screens/SearchScreen";
-import JamSpaceScreen from "./screens/JamSpaceScreen";
-import LibraryScreen from "./screens/LibraryScreen";
-import NFTMarketScreen from "./screens/NFTMarketScreen";
-import PlaylistScreen from "./screens/PlaylistScreen";
-import ArtistScreen from "./screens/ArtistScreen";
-import UploadTrackScreen from "./screens/UploadTrackScreen";
+import TaskScreen from "./screens/TaskScreen";
+import ProfileScreen from "./screens/ProfileScreen";
 import BottomNavBar from "./components/BottomNavBar";
-import { AuthProvider } from "./context/AuthContext";
-import { FollowProvider } from "./context/FollowContext";
-
 import "./App.css";
 
-function App() {
+const App = () => {
   return (
-    <AuthProvider>
-      <FollowProvider>
-        <div className="app-container">
-          <Router>
-            <Routes>
-              <Route path="/" element={<WelcomeScreen />} />
-              <Route path="/home" element={<HomeScreen />} />
-              <Route path="/search" element={<SearchScreen />} />
-              <Route path="/jamspace" element={<JamSpaceScreen />} />
-              <Route path="/library" element={<LibraryScreen />} />
-              <Route path="/marketplace" element={<NFTMarketScreen />} />
-              <Route path="/playlist/:id" element={<PlaylistScreen />} />
-              <Route path="/artist/:id" element={<ArtistScreen />} />
-              <Route path="/upload" element={<UploadTrackScreen />} />
-            </Routes>
-            <BottomNavBar />
-          </Router>
-        </div>
-      </FollowProvider>
-    </AuthProvider>
+    <Router>
+      <div className="app-container">
+        <header className="app-header">
+          <div className="header-left">
+            <img src="/icon-tonjam.png" alt="TonJam" className="app-logo" />
+            <span className="app-name">TonJam</span>
+          </div>
+          <div className="header-right">
+            <a href="/tasks" className="earn-tj-button">Earn TJ</a>
+            <img src="/icon-user.png" alt="Profile" className="profile-icon" />
+          </div>
+        </header>
+
+        <main className="home-screen">
+          <Routes>
+            <Route path="/" element={<HomeScreen />} />
+            <Route path="/tasks" element={<TaskScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+          </Routes>
+        </main>
+
+        <BottomNavBar />
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;

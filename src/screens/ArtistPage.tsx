@@ -1,29 +1,51 @@
-import React from "react"; import "./ArtistPage.css";
+import React from 'react';
+import '../screens/ArtistPage.css';
+import ArtistHeader from '../components/ArtistHeader';
+import TrackCard from '../components/TrackCard';
+import NFTCard from '../components/NFTCard';
 
-const artistData = { name: "Krushman", image: "/Artist9.png", followers: "12.5K", bio: "Afrobeats producer & singer. Telling African stories through sound.", tracks: [ { id: 1, title: "Neon Lagos", image: "/song1.jpg", minted: true }, { id: 2, title: "Tribe Vibes", image: "/song2.jpg", minted: false }, { id: 3, title: "Island Fever", image: "/song3.jpg", minted: true }, ] };
+const ArtistPage: React.FC = () => {
+  const artist = {
+    name: 'Krusher Krupy',
+    bio: 'Verified Afrobeat sensation on TON. Minting exclusive drops for fans.',
+    followers: 12800,
+    image: '/Artist9.png',
+    verified: true,
+  };
 
-const ArtistPage = () => { return ( <div className="artist-page"> <div className="artist-header"> <img src={artistData.image} alt={artistData.name} className="artist-avatar" /> <div className="artist-details"> <h1 className="artist-name"> {artistData.name} <img src="/icon-verified-check.png" alt="Verified" className="verified-badge" /> </h1> <p className="artist-followers">{artistData.followers} followers</p> <p className="artist-bio">{artistData.bio}</p> <button className="follow-btn">Follow</button> </div> </div>
+  const tracks = [
+    { id: 1, title: 'TON Vibes', cover: '/track1.png', plays: '42.3K', duration: '2:58' },
+    { id: 2, title: 'Chain Melody', cover: '/track2.png', plays: '31.2K', duration: '3:14' },
+  ];
 
-<h2 className="section-title">Top Tracks</h2>
-  <div className="track-list">
-    {artistData.tracks.map(track => (
-      <div className="track-card" key={track.id}>
-        <img src={track.image} alt={track.title} className="track-image" />
-        <div className="track-info">
-          <h3>{track.title}</h3>
-          <div className="track-actions">
-            <button className="play-btn">
-              <img src="/play-icon.png" alt="Play" />
-            </button>
-            {track.minted && <button className="mint-btn">Mint</button>}
-          </div>
+  const nfts = [
+    { id: 1, title: 'Blue Flame NFT', image: '/nft1.png', price: '24 TON' },
+    { id: 2, title: 'Vibe Token', image: '/nft2.png', price: '18 TON' },
+  ];
+
+  return (
+    <div className="artist-page">
+      <ArtistHeader artist={artist} />
+
+      <div className="artist-section">
+        <h2>Top Tracks</h2>
+        <div className="track-list">
+          {tracks.map(track => (
+            <TrackCard key={track.id} {...track} />
+          ))}
         </div>
       </div>
-    ))}
-  </div>
-</div>
 
-); };
+      <div className="artist-section">
+        <h2>Minted NFTs</h2>
+        <div className="nft-list">
+          {nfts.map(nft => (
+            <NFTCard key={nft.id} {...nft} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default ArtistPage;
-
