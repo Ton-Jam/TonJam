@@ -1,0 +1,7 @@
+{
+  "manifest_version": "0.1.0",
+  "name": "TonJam",
+  "description": "Stream and mint music NFTs on TON",
+  "iconUrl": "https://tonjam.onrender.com/icon-tonjam.png",
+  "url": "https://tonjam.onrender.com"
+}

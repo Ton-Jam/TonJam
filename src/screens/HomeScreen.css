@@ -1,55 +1,270 @@
-.home-container {
-  padding: 16px;
-  color: white;
-  background: linear-gradient(180deg, #001f3f, #000);
-  min-height: 100vh;
+.home-screen {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #FFFFFF;
+  background-color: #1E1E1E;
 }
 
-.home-header {
+.home-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  background: rgba(0, 89, 255, 0.2);
-  backdrop-filter: blur(10px);
-  padding: 12px 16px;
-  border-radius: 16px;
-  margin-bottom: 16px;
+  background-color: rgba(70, 130, 180, 0.8); /* Semi-transparent Steel Blue */
+  z-index: 1000;
 }
 
-.header-icon {
-  height: 32px;
-  margin-right: 12px;
+.spinner {
+  width: 64px;
+  height: 64px;
+  border: 8px solid #E0E0E0; /* Light gray border */
+  border-top: 8px solid transparent; /* Transparent top for spin effect */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  background: linear-gradient(45deg, #1E90FF, #4682B4); /* Gradient from Dodger Blue to Steel Blue */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.header-user {
-  height: 36px;
+.spinner-inner {
+  width: 40px;
+  height: 40px;
+  background: #FFFFFF; /* White center */
   border-radius: 50%;
 }
 
-.pill-nav {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.pill-button {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+.loader-text {
+  color: #FFFFFF;
+  font-size: 1.5rem;
+  margin-top: 20px;
+}
+
+.greeting-section {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #4682B4;
+}
+
+.greeting-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.greeting-section p {
+  font-size: 1.2rem;
+  color: #FFFFFF;
+  margin-bottom: 15px;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.section h3 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #1E90FF;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(30, 144, 255, 0.2);
+}
+
+.artist-card h4 {
+  font-size: 1.2rem;
+  margin: 0 0 10px;
+  color: #4682B4;
+}
+
+.artist-card p {
+  color: #4682B4;
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.follow-btn {
+  background-color: #1E90FF;
+  color: #FFFFFF;
   border: none;
-  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
 }
 
-.card-row {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 8px;
+.follow-btn:hover {
+  background-color: #4682B4;
 }
 
-.coming-soon-text {
-  font-style: italic;
-  color: #aaa;
-  padding: 8px 0;
+.audio-card h4 {
+  font-size: 1.2rem;
+  margin: 0 0 10px;
+  color: #4682B4;
+}
+
+.play-btn {
+  background-color: #1E90FF;
+  color: #FFFFFF;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.play-btn:hover {
+  background-color: #4682B4;
+}
+
+.nft-card {
+  height: 250px;
+}
+
+.nft-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.nft-card h4 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #4682B4;
+}
+
+@media (max-width: 768px) {
+  .home-screen {
+    padding: 15px;
+  }
+
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border-width: 6px;
+  }
+
+  .spinner-inner {
+    width: 30px;
+    height: 30px;
+  }
+
+  .loader-text {
+    font-size: 1.2rem;
+  }
+
+  .greeting-section h2 {
+    font-size: 2rem;
+  }
+
+  .greeting-section p {
+    font-size 1rem;
+  }
+
+  .section h3 {
+    font-size: 1.5rem;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+  }
+
+  .card {
+    padding: 10px;
+    height: 180px;
+  }
+
+  .artist-card h4, .audio-card h4, .nft-card h4 {
+    font-size: 1rem;
+  }
+
+  .follow-btn, .play-btn {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
+
+  .nft-image {
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 4px;
+  }
+
+  .spinner-inner {
+    width: 20px;
+    height: 20px;
+  }
+
+  .loader-text {
+    font-size 1rem;
+  }
+
+  .greeting-section {
+    padding: 15px;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  .card {
+    height: 160px;
+  }
+
+  .nft-image {
+    height: 100px;
+  }
+
+  .follow-btn, .play-btn {
+    padding: 4px 8px;
+    font-size: 0.6rem;
+  }
 }

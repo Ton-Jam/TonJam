@@ -1,0 +1,37 @@
+.terms-of-service-screen {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #fff;
+  background-color: #121212;
+}
+
+.terms-of-service-screen h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.terms-of-service-screen p {
+  font-size: 1rem;
+  color: #b3b3b3;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.terms-of-service-screen strong {
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .terms-of-service-screen {
+    padding: 15px;
+  }
+
+  .terms-of-service-screen h2 {
+    font-size: 1.75rem;
+  }
+
+  .terms-of-service-screen p {
+    font-size: 0.9rem;
+  }
+}

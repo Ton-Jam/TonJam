@@ -1,28 +1,38 @@
-import React, { createContext, useContext, useState } from "react";
-import { supabase } from "../App";
+import React, { createContext, useContext, useState } from 'react';
 
-const AudioPlayerContext = createContext();
+interface AudioPlayerContextType {
+  isPlaying: boolean;
+  currentTrack: string | null;
+  play: (url: string) => void;
+  pause: () => void;
+}
 
-export function AudioPlayerProvider({ children }) {
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [error, setError] = useState(null);
+const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
 
-  const playTrack = async (filePath) => {
-    try {
-      const { data } = supabase.storage.from("audio").getPublicUrl(filePath);
-      if (!data.publicUrl) throw new Error("Invalid track URL");
-      setCurrentTrack(data.publicUrl);
-      setError(null);
-    } catch (err) {
-      setError(`Playback error: ${err.message}`);
-    }
+export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+
+  const play = (url: string) => {
+    setCurrentTrack(url);
+    setIsPlaying(true);
+    // Add audio player logic here
+  };
+
+  const pause = () => {
+    setIsPlaying(false);
+    // Add pause logic here
   };
 
   return (
-    <AudioPlayerContext.Provider value={{ currentTrack, playTrack, error }}>
+    <AudioPlayerContext.Provider value={{ isPlaying, currentTrack, play, pause }}>
       {children}
     </AudioPlayerContext.Provider>
   );
-}
+};
 
-export const useAudioPlayer = () => useContext(AudioPlayerContext);
+export const useAudioPlayer = () => {
+  const context = useContext(AudioPlayerContext);
+  if (!context) throw new Error('useAudioPlayer must be used within an AudioPlayerProvider');
+  return context;
+};

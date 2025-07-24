@@ -1,0 +1,37 @@
+.privacy-policy-screen {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #fff;
+  background-color: #121212;
+}
+
+.privacy-policy-screen h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.privacy-policy-screen p {
+  font-size: 1rem;
+  color: #b3b3b3;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.privacy-policy-screen strong {
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .privacy-policy-screen {
+    padding: 15px;
+  }
+
+  .privacy-policy-screen h2 {
+    font-size: 1.75rem;
+  }
+
+  .privacy-policy-screen p {
+    font-size: 0.9rem;
+  }
+}

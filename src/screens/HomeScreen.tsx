@@ -1,80 +1,135 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useFollow } from '../context/FollowContext';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import './HomeScreen.css';
-import Section from '../components/Section';
-import ArtistAvatar from '../components/ArtistAvatar';
-import TrackCard from '../components/TrackCard';
-import NFTCard from '../components/NFTCard';
-// import JamFeedSlider from '../components/JamFeedSlider'; // Temporarily commented out
 
 const HomeScreen: React.FC = () => {
-  const trendingArtists = [
-    { id: 1, name: 'Sina Vibes', image: '/Artist1.png' },
-    { id: 2, name: 'Krisswave', image: '/Artist2.png' },
-    { id: 3, name: 'ZazaTon', image: '/Artist3.png' },
-  ];
+  console.log('HomeScreen rendering...');
+  const { user } = useAuth() || { user: null };
+  console.log('useAuth result:', user);
+  const { followUser, unfollowUser, following = [] } = useFollow() || {};
+  console.log('useFollow result:', { followUser, unfollowUser, following });
+  const { play, pause, isPlaying = false } = useAudioPlayer() || {};
+  console.log('useAudioPlayer result:', { play, pause, isPlaying });
 
-  const newDrops = [
-    { id: 1, title: 'Blockchain Party', artist: 'DJ Crypto', image: '/Track1.png' },
-    { id: 2, title: 'Meta Nights', artist: 'Lil Ton', image: '/Track2.png' },
-  ];
+  const [isLoading, setIsLoading] = useState(true);
 
-  const trendingNFTs = [
-    { id: 1, title: 'TON Banger', price: '25 TON', image: '/NFT1.png' },
-    { id: 2, title: 'Chainz Heat', price: '18 TON', image: '/NFT2.png' },
-  ];
+  const trendingArtists = Array.from({ length: 10 }, (_, i) => ({
+    id: (i + 1).toString(),
+    name: `Artist ${String.fromCharCode(65 + i)}`,
+    isVerified: i % 2 === 0,
+  }));
+
+  const newReleases = Array.from({ length: 10 }, (_, i) => ({
+    id: (i + 1).toString(),
+    title: `Track ${i + 1}`,
+    url: `https://example.com/track${i + 1}.mp3`,
+  }));
+
+  const featuredNFTs = Array.from({ length: 10 }, (_, i) => ({
+    id: (i + 1).toString(),
+    title: `NFT Art ${i + 1}`,
+    image: `https://via.placeholder.com/150?text=NFT${i + 1}`,
+  }));
+
+  useEffect(() => {
+    console.log('HomeScreen useEffect triggered');
+    const initialFollowStatus: { [key: string]: boolean } = {};
+    trendingArtists.forEach((artist) => {
+      initialFollowStatus[artist.id] = Math.random() > 0.5;
+    });
+    setIsLoading(false); // Simulate data load
+  }, []);
+
+  const handleFollow = (artistId: string) => {
+    if (followUser) followUser(artistId);
+  };
+
+  const handleUnfollow = (artistId: string) => {
+    if (unfollowUser) unfollowUser(artistId);
+  };
+
+  const handlePlayPause = (url: string) => {
+    if (play && pause) {
+      if (isPlaying) {
+        pause();
+      } else {
+        play(url);
+      }
+    }
+  };
+
+  const isFollowing = (artistId: string) => following.includes(artistId);
+
+  if (isLoading) {
+    return (
+      <div className="home-loader">
+        <div className="spinner">
+          <div className="spinner-inner"></div>
+        </div>
+        <p className="loader-text">Loading Home Content...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="home-container">
-      <header className="home-header">
-        <img src="/icon-tonjam.png" alt="TonJam" className="header-icon" />
-        <h1>TonJam</h1>
-        <div className="header-right">
-          <img src="/icon-earn-tj.png" alt="Earn TJ" className="header-icon" />
-          <img src="/icon-user.png" alt="User" className="header-user" />
-        </div>
-      </header>
-
-      <div className="pill-nav">
-        <button className="pill-button">Trending NFTs</button>
-        <button className="pill-button">Recommended NFTs</button>
+    <div className="home-screen">
+      <div className="greeting-section">
+        <h2>Welcome to TonJam! 🎶</h2>
+        {user && <p>Welcome, {user.email || user.id}!</p>}
+        <p>Explore trending artists, new releases, and NFTs.</p>
       </div>
-
-      <Section title="What’s up! TON Community">
-        {/* <JamFeedSlider /> */}
-        <p className="coming-soon-text">Sponsored Jam Feed coming soon!</p>
-      </Section>
-
-      <Section title="New Drops">
-        <div className="card-row">
-          {newDrops.map(drop => (
-            <TrackCard key={drop.id} {...drop} />
+      <div className="section">
+        <h3>Trending Artists</h3>
+        <div className="card-grid">
+          {trendingArtists.map((artist) => (
+            <div key={artist.id} className="card artist-card">
+              <h4>{artist.name}</h4>
+              <p>{artist.isVerified ? 'Verified' : 'Unverified'}</p>
+              {user && user.id !== artist.id && (
+                <button
+                  onClick={() =>
+                    isFollowing(artist.id)
+                      ? handleUnfollow(artist.id)
+                      : handleFollow(artist.id)
+                  }
+                  className="follow-btn"
+                >
+                  {isFollowing(artist.id) ? 'Unfollow' : 'Follow'}
+                </button>
+              )}
+            </div>
           ))}
         </div>
-      </Section>
-
-      <Section title="Top Trending Songs">
-        <div className="card-row">
-          {newDrops.map(track => (
-            <TrackCard key={track.id} {...track} />
+      </div>
+      <div className="section">
+        <h3>New Releases</h3>
+        <div className="card-grid">
+          {newReleases.map((release) => (
+            <div key={release.id} className="card audio-card">
+              <h4>{release.title}</h4>
+              <button
+                onClick={() => handlePlayPause(release.url)}
+                className="play-btn"
+              >
+                {isPlaying ? 'Pause' : 'Play'}
+              </button>
+            </div>
           ))}
         </div>
-      </Section>
-
-      <Section title="Trending Artists">
-        <div className="card-row">
-          {trendingArtists.map(artist => (
-            <ArtistAvatar key={artist.id} {...artist} />
+      </div>
+      <div className="section">
+        <h3>Featured NFTs</h3>
+        <div className="card-grid">
+          {featuredNFTs.map((nft) => (
+            <div key={nft.id} className="card nft-card">
+              <img src={nft.image} alt={nft.title} className="nft-image" />
+              <h4>{nft.title}</h4>
+            </div>
           ))}
         </div>
-      </Section>
-
-      <Section title="Trending NFTs">
-        <div className="card-row">
-          {trendingNFTs.map(nft => (
-            <NFTCard key={nft.id} {...nft} />
-          ))}
-        </div>
-      </Section>
+      </div>
     </div>
   );
 };

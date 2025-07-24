@@ -1,34 +1,40 @@
+/* Root container for the entire app, ensuring full viewport height */
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-  background: linear-gradient(145deg, #0e1224, #0b0e1a);
+  min-height: 100vh; /* Ensures app fills viewport */
+  background-color: #4682B4; /* Steel Blue background */
 }
 
-/* Fix header */
-.app-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: rgba(0, 100, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  color: white;
+/* Main content area, scrollable with padding for fixed bottom nav */
+.main-content {
+  flex: 1; /* Fills available space */
+  overflow-y: auto; /* Enables vertical scrolling */
+  padding-top: 0; /* No Header */
+  padding-bottom: 70px; /* Space for BottomNavBar (60px + 10px padding) */
+  box-sizing: border-box; /* Ensures padding doesn’t affect width */
 }
 
-/* Make the home screen scrollable below fixed header */
-.home-screen {
-  margin-top: 60px;
-  overflow-y: auto;
-  flex: 1;
-  padding: 16px;
-  color: white;
+/* Ensure content doesn’t overflow horizontally */
+.main-content > * {
+  max-width: 100%; /* Prevents content from exceeding container width */
+  overflow-x: hidden; /* Hides horizontal overflow */
+}
+
+/* Smooth scrolling behavior for better user experience */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .main-content {
+    padding-bottom: 58px; /* Adjusted for smaller padding */
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding-bottom: 48px; /* Further reduced for mobile */
+  }
 }

@@ -1,15 +1,33 @@
-// src/components/BottomNavBar.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import './BottomNavBar.css';
 
+const navItems = [
+  { name: 'tonjam', icon: '/icon-tonjam.png', title: 'Jam Up' },
+  { name: 'search', icon: '/icon-search.png', title: 'Search' },
+  { name: 'space', icon: '/icon-space.png', title: 'Space' },
+  { name: 'library', icon: '/icon-library.png', title: 'Library' },
+  { name: 'nft', icon: '/icon-nft.png', title: 'NFTs' },
+];
+
 function BottomNavBar() {
+  const [active, setActive] = useState('tonjam');
+
   return (
     <div className="bottom-nav">
-      <img src="/icon-tonjam.png" alt="Jam Up" />
-      <img src="/icon-search.png" alt="Search" />
-      <img src="/icon-space.png" alt="Space" />
-      <img src="/icon-library.png" alt="Library" />
-      <img src="/icon-nft.png" alt="NFTs" />
+      {navItems.map((item) => {
+        const isActive = active === item.name;
+        const isTonjam = item.name === 'tonjam';
+        return (
+          <div
+            key={item.name}
+            className={`nav-item ${isActive ? 'active' : ''} ${isTonjam ? 'tonjam-icon' : ''}`}
+            onClick={() => setActive(item.name)}
+          >
+            <img src={item.icon} alt={item.title} className="nav-icon" />
+            <span className="nav-title">{item.title}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
