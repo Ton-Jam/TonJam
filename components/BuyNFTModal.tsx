@@ -1,0 +1,91 @@
+import React, { useState } from 'react';
+import { TON_LOGO } from '../constants';
+import { useAudio } from '../context/AudioContext';
+import { NFTItem } from '../types';
+import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
+import { buyNFT } from '../services/tonService';
+
+interface BuyNFTModalProps {
+  nft: NFTItem;
+  onClose: () => void;
+}
+
+const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
+  const { addNotification } = useAudio();
+  const [tonConnectUI] = useTonConnectUI();
+  const userAddress = useTonAddress();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const price = parseFloat(nft.price);
+  const gasFee = 0.05;
+  const total = (price + gasFee).toFixed(2);
+
+  const handlePurchase = async () => {
+    if (!userAddress) {
+      addNotification("Connect wallet to initialize sync.", "warning");
+      return;
+    }
+    setIsProcessing(true);
+    addNotification("Requesting wallet signature...", "info");
+    try {
+      await buyNFT(tonConnectUI, nft.owner, nft.price, nft.title);
+      addNotification("Asset successfully synced to vault.", "success");
+      onClose();
+    } catch (e) {
+      addNotification("Sync protocol aborted.", "error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={onClose}></div>
+      <div className="relative glass w-full max-w-sm rounded-[2.5rem] border border-blue-500/20 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8">
+          <header className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Purchase Asset</h2>
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40"><i className="fas fa-times"></i></button>
+          </header>
+
+          <div className="flex items-center gap-4 mb-8 p-4 bg-white/5 rounded-2xl border border-white/5">
+            <img src={nft.imageUrl} className="w-16 h-16 rounded-xl object-cover" alt="" />
+            <div>
+              <p className="text-[10px] font-black text-white uppercase italic truncate w-32">{nft.title}</p>
+              <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">Creator: {nft.creator}</p>
+            </div>
+          </div>
+
+          <div className="space-y-4 mb-8 bg-black/50 p-6 rounded-2xl border border-white/5">
+            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+              <span className="text-white/30">Asset Price</span>
+              <span className="text-white">{price} TON</span>
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+              <span className="text-white/30">Network Gas (est)</span>
+              <span className="text-white/60">~{gasFee} TON</span>
+            </div>
+            <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+              <span className="text-xs font-black text-blue-400 uppercase tracking-widest italic">Total Required</span>
+              <div className="flex items-center gap-2">
+                <img src={TON_LOGO} className="w-4 h-4" alt="" />
+                <span className="text-2xl font-black text-white italic tracking-tighter">{total}</span>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            onClick={handlePurchase}
+            disabled={isProcessing}
+            className="w-full py-4 electric-blue-bg rounded-xl text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+          >
+            {isProcessing ? <i className="fas fa-circle-notch animate-spin"></i> : <i className="fas fa-check-circle"></i>}
+            {isProcessing ? 'SYNCING...' : 'CONFIRM PURCHASE'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BuyNFTModal;

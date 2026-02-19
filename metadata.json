@@ -1,0 +1,7 @@
+{
+  "name": "TonJam",
+  "description": "A Web3 music streaming, NFT marketplace, and social platform built on the TON blockchain vibe with electric blue accents and glassmorphism UI.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
