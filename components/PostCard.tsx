@@ -21,8 +21,16 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState<{id: string, user: string, avatar: string, text: string, time: string}[]>([]);
+  const [comments, setComments] = useState<{
+    id: string, 
+    user: string, 
+    avatar: string, 
+    text: string, 
+    time: string,
+    reactions: Record<string, number>
+  }[]>([]);
   
+  const REACTION_EMOJIS = ['🔥', '💎', '🚀', '🎧', '⚡'];
   const isFollowing = followedUserIds.includes(post.userId);
   const isMe = post.userId === MOCK_USER.id;
 
@@ -72,12 +80,24 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
       user: MOCK_USER.name,
       avatar: MOCK_USER.avatar,
       text: commentText,
-      time: 'Just now'
+      time: 'Just now',
+      reactions: {}
     };
     
     setComments([newComment, ...comments]);
     setCommentText('');
     addNotification('Comment synchronized', 'success');
+  };
+
+  const handleCommentReaction = (commentId: string, emoji: string) => {
+    setComments(prev => prev.map(c => {
+      if (c.id === commentId) {
+        const newReactions = { ...c.reactions };
+        newReactions[emoji] = (newReactions[emoji] || 0) + 1;
+        return { ...c, reactions: newReactions };
+      }
+      return c;
+    }));
   };
 
   return (
@@ -118,6 +138,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
               >
                 {post.userName}
               </h4>
+              {artist?.verified && <i className="fas fa-check-circle text-blue-500 text-[10px]"></i>}
               {!isMe && (
                 <button 
                   onClick={(e) => { e.stopPropagation(); toggleFollowUser(post.userId); }}
@@ -203,14 +224,47 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
 
             <div className="space-y-6">
               {comments.map(comment => (
-                <div key={comment.id} className="flex gap-4 animate-in fade-in duration-300">
+                <div key={comment.id} className="flex gap-4 animate-in fade-in duration-300 group/comment">
                   <img src={comment.avatar} className="w-8 h-8 rounded-full border border-white/10 flex-shrink-0" alt="" />
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
                       <h5 className="text-[10px] font-black text-white uppercase italic">{comment.user}</h5>
                       <span className="text-[8px] text-white/20 font-black uppercase tracking-widest">{comment.time}</span>
                     </div>
-                    <p className="text-[11px] text-white/60 italic leading-relaxed">{comment.text}</p>
+                    <p className="text-[11px] text-white/60 italic leading-relaxed mb-2">{comment.text}</p>
+                    
+                    <div className="flex items-center gap-2">
+                      {/* Existing Reactions */}
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(comment.reactions).map(([emoji, count]) => (
+                          <div 
+                            key={emoji}
+                            className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-2 py-0.5 text-[8px] text-white/40"
+                          >
+                            <span>{emoji}</span>
+                            <span className="font-black">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Reaction Picker Trigger */}
+                      <div className="relative group/picker">
+                        <button className="text-[8px] font-black text-white/10 hover:text-blue-500 uppercase tracking-widest transition-colors">
+                          + React
+                        </button>
+                        <div className="absolute bottom-full left-0 mb-2 hidden group-hover/picker:flex items-center gap-1 bg-[#0a0a0a] border border-white/10 p-1 rounded-lg shadow-2xl z-20">
+                          {REACTION_EMOJIS.map(emoji => (
+                            <button 
+                              key={emoji}
+                              onClick={() => handleCommentReaction(comment.id, emoji)}
+                              className="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition-colors text-xs"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

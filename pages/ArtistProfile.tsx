@@ -112,10 +112,10 @@ const ArtistProfile: React.FC = () => {
   };
 
   const StatBox = ({ label, value, sub }: { label: string, value: string, sub?: string }) => (
-    <div className="flex flex-col">
-      <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.4em] mb-1 italic">{label}</span>
+    <div className="flex flex-col glass backdrop-blur-md bg-white/[0.02] border border-white/5 p-3 rounded-xl hover:border-blue-500/30 transition-all group">
+      <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.4em] mb-1 italic group-hover:text-blue-400/50 transition-colors">{label}</span>
       <div className="flex items-baseline gap-1.5">
-        <span className="text-xl font-black text-white italic tracking-tighter leading-none">{value}</span>
+        <span className="text-xl font-black text-white italic tracking-tighter leading-none group-hover:text-blue-400 transition-colors">{value}</span>
         {sub && <span className="text-[8px] font-black text-blue-500 uppercase italic">{sub}</span>}
       </div>
     </div>
@@ -155,7 +155,7 @@ const ArtistProfile: React.FC = () => {
                 <div className="absolute -inset-1 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full blur opacity-30 group-hover:opacity-80 transition duration-1000"></div>
                 <div className="relative p-1 rounded-full bg-black">
                   <img src={artist.avatarUrl} className="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover border border-white/10" alt={artist.name} />
-                  {artist.isVerified && (
+                  {artist.verified && (
                     <div className="absolute bottom-1 right-1 w-6 h-6 bg-blue-600 rounded-full border-2 border-black flex items-center justify-center shadow-xl">
                       <i className="fas fa-check text-white text-[8px]"></i>
                     </div>
@@ -195,9 +195,12 @@ const ArtistProfile: React.FC = () => {
                 <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.4em] italic">NODE_SYNC: ACTIVE</span>
               </div>
-              <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-none mb-1">
-                {artist.name}
-              </h1>
+              <div className="flex items-center gap-4 mb-1">
+                <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-none">
+                  {artist.name}
+                </h1>
+                {artist.verified && <i className="fas fa-check-circle text-blue-500 text-2xl md:text-4xl"></i>}
+              </div>
               <p className="text-blue-500 font-black text-[10px] uppercase tracking-[0.4em] italic opacity-70">
                 @sonic_architect_{artist.id}
               </p>
@@ -284,27 +287,28 @@ const ArtistProfile: React.FC = () => {
           {/* Left: Intelligence Sidebar */}
           <div className="lg:col-span-4 space-y-6">
             {/* Sonic DNA Panel */}
-            <section className="glass p-8 rounded-2xl border-blue-500/10 border relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-6 opacity-5"><i className="fas fa-dna text-3xl"></i></div>
-               <h3 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.4em] mb-6 italic">Neural DNA Signature</h3>
+            <section className="glass backdrop-blur-2xl bg-white/[0.02] p-8 rounded-2xl border-blue-500/20 border relative overflow-hidden group shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+               <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><i className="fas fa-dna text-3xl text-blue-500"></i></div>
+               <div className="absolute -left-20 -top-20 w-40 h-40 bg-blue-600/10 blur-[80px] rounded-full"></div>
+               <h3 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.4em] mb-6 italic relative z-10">Neural DNA Signature</h3>
                
                {isDNAStreaming ? (
-                 <div className="py-8 flex flex-col items-center gap-4">
+                 <div className="py-8 flex flex-col items-center gap-4 relative z-10">
                     <div className="flex gap-1 items-end h-6">
                       {[0.1, 0.4, 0.2, 0.8, 0.5].map((d, i) => (
-                        <div key={i} className="w-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: `${d}s`, height: `${d * 100}%` }}></div>
+                        <div key={i} className="w-1 bg-blue-500 rounded-full animate-bounce shadow-[0_0_8px_rgba(59,130,246,0.5)]" style={{ animationDelay: `${d}s`, height: `${d * 100}%` }}></div>
                       ))}
                     </div>
                     <p className="text-[8px] font-black text-white/20 uppercase tracking-widest animate-pulse">Scanning Frequencies...</p>
                  </div>
                ) : sonicDNA ? (
-                 <div className="space-y-6 animate-in fade-in duration-700">
+                 <div className="space-y-6 animate-in fade-in duration-700 relative z-10">
                     <p className="text-xs text-white/60 leading-relaxed italic border-l border-blue-500/30 pl-6">
                       "{sonicDNA.signature}"
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {sonicDNA.vibes.map(vibe => (
-                        <span key={vibe} className="px-3 py-1.5 bg-blue-500/5 border border-blue-500/10 rounded-lg text-[8px] font-black text-blue-400 uppercase tracking-widest">#{vibe}</span>
+                        <span key={vibe} className="px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg text-[8px] font-black text-blue-400 uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all cursor-default">#{vibe}</span>
                       ))}
                     </div>
                  </div>
@@ -313,28 +317,29 @@ const ArtistProfile: React.FC = () => {
 
             {/* Market Insights */}
             {marketStats && (
-              <section className="glass p-8 rounded-2xl border-amber-500/10 border relative bg-amber-500/[0.01]">
-                <h3 className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.4em] mb-6 italic">Market Ledger</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[8px] font-black text-white/20 uppercase">Floor</span>
-                    <span className="text-xs font-black text-white italic">{marketStats.floor} TON</span>
+              <section className="glass backdrop-blur-xl bg-white/[0.02] p-8 rounded-2xl border-amber-500/20 border relative shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full"></div>
+                <h3 className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.4em] mb-6 italic relative z-10">Market Ledger</h3>
+                <div className="space-y-4 relative z-10">
+                  <div className="flex justify-between items-center group/stat">
+                    <span className="text-[8px] font-black text-white/20 uppercase group-hover/stat:text-white/40 transition-colors">Floor</span>
+                    <span className="text-xs font-black text-white italic group-hover:text-amber-500 transition-colors">{marketStats.floor} TON</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[8px] font-black text-white/20 uppercase">Volume</span>
-                    <span className="text-xs font-black text-white italic">{marketStats.volume} TON</span>
+                  <div className="flex justify-between items-center group/stat">
+                    <span className="text-[8px] font-black text-white/20 uppercase group-hover/stat:text-white/40 transition-colors">Volume</span>
+                    <span className="text-xs font-black text-white italic group-hover:text-amber-500 transition-colors">{marketStats.volume} TON</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[8px] font-black text-white/20 uppercase">Holders</span>
-                    <span className="text-xs font-black text-white italic">{marketStats.holders}</span>
+                  <div className="flex justify-between items-center group/stat">
+                    <span className="text-[8px] font-black text-white/20 uppercase group-hover/stat:text-white/40 transition-colors">Holders</span>
+                    <span className="text-xs font-black text-white italic group-hover:text-amber-500 transition-colors">{marketStats.holders}</span>
                   </div>
-                  <button onClick={() => navigate('/marketplace')} className="w-full py-3 border border-amber-500/20 rounded-xl text-[7px] font-black text-amber-500 uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all mt-2">Trade Assets</button>
+                  <button onClick={() => navigate('/marketplace')} className="w-full py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[7px] font-black text-amber-500 uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all mt-2 shadow-lg shadow-amber-500/5">Trade Assets</button>
                 </div>
               </section>
             )}
 
             {/* Biography */}
-            <section className="p-8 bg-[#050505] rounded-2xl border border-white/5">
+            <section className="p-8 glass backdrop-blur-xl bg-white/[0.01] rounded-2xl border border-white/5">
               <h3 className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-6 italic">Origin Narrative</h3>
               <p className="text-xs text-white/40 leading-relaxed italic">{artist.bio || "No biographical record in neural archive."}</p>
             </section>

@@ -9,6 +9,7 @@ export interface Track {
   duration: number; // in seconds
   genre: string;
   isNFT: boolean;
+  artistVerified?: boolean;
   price?: string; 
   bpm?: number;
   key?: string;
@@ -65,7 +66,7 @@ export interface Artist {
   name: string;
   avatarUrl: string;
   followers: number;
-  isVerified: boolean;
+  verified: boolean;
   bio?: string;
   bannerUrl?: string;
   socials?: {

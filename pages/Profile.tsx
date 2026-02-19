@@ -66,13 +66,14 @@ const Profile: React.FC = () => {
   };
 
   const StatBlock = ({ label, value, icon, subValue }: { label: string, value: string, icon?: string, subValue?: string }) => (
-    <div className="bg-[#080808] border border-white/5 p-6 rounded-lg group hover:border-blue-500/30 transition-all shadow-xl">
-      <div className="flex justify-between items-start mb-4">
-        <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em] italic leading-none">{label}</span>
-        {icon && <i className={`fas ${icon} text-[10px] text-blue-500/40 group-hover:text-blue-500 transition-colors`}></i>}
+    <div className="glass backdrop-blur-2xl bg-white/[0.02] border border-white/10 p-6 rounded-2xl group hover:border-blue-500/40 transition-all shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden">
+      <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-blue-500/5 blur-2xl rounded-full group-hover:bg-blue-500/10 transition-colors"></div>
+      <div className="flex justify-between items-start mb-4 relative z-10">
+        <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.4em] italic leading-none">{label}</span>
+        {icon && <i className={`fas ${icon} text-[10px] text-blue-500/50 group-hover:text-blue-400 transition-colors`}></i>}
       </div>
-      <div className="flex items-baseline gap-2">
-        <h4 className="text-2xl font-black italic tracking-tighter text-white leading-none">{value}</h4>
+      <div className="flex items-baseline gap-2 relative z-10">
+        <h4 className="text-2xl font-black italic tracking-tighter text-white leading-none group-hover:text-blue-400 transition-colors">{value}</h4>
         {subValue && <span className="text-[10px] font-black text-blue-500 italic uppercase leading-none">{subValue}</span>}
       </div>
     </div>
@@ -145,9 +146,16 @@ const Profile: React.FC = () => {
                 className="bg-white/5 border border-white/10 rounded-lg px-6 py-3 text-4xl font-black italic tracking-tighter outline-none focus:border-blue-500 text-white w-full max-w-lg md:text-left"
               />
             ) : (
-              <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter text-white uppercase leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] mb-2">
-                {localUser.name}
-              </h1>
+              <div className="flex items-center gap-4 mb-2">
+                <h1 
+                  onClick={() => setIsEditing(true)}
+                  className="text-4xl md:text-7xl font-black italic tracking-tighter text-white uppercase leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] cursor-pointer hover:text-blue-400 transition-colors group/name relative"
+                >
+                  {localUser.name}
+                  <i className="fas fa-pencil text-xs ml-4 opacity-0 group-hover/name:opacity-100 transition-opacity align-middle"></i>
+                </h1>
+                {localUser.isVerifiedArtist && <i className="fas fa-check-circle text-blue-500 text-2xl md:text-4xl"></i>}
+              </div>
             )}
             <p className="text-blue-500 font-black text-sm md:text-base uppercase tracking-[0.6em] italic drop-shadow-md">
               {localUser.handle}
@@ -210,41 +218,50 @@ const Profile: React.FC = () => {
               <StatBlock label="Reward Credits" value="1,450" subValue="TJ" icon="fa-coins" />
             </div>
 
-            <div className="bg-[#050505] border border-white/5 p-8 rounded-lg relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-4 opacity-5"><i className="fas fa-dna text-4xl"></i></div>
-               <h3 className="text-[8px] font-black text-blue-500 uppercase tracking-[0.4em] mb-6 italic">Neural Signature</h3>
+            <div className="glass backdrop-blur-xl bg-white/[0.02] border border-white/10 p-8 rounded-2xl relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><i className="fas fa-dna text-4xl text-blue-500"></i></div>
+               <div className="absolute -left-20 -top-20 w-40 h-40 bg-blue-600/10 blur-[80px] rounded-full"></div>
+               <h3 className="text-[8px] font-black text-blue-500 uppercase tracking-[0.4em] mb-6 italic relative z-10">Neural Signature</h3>
                
                {isDNASyncing ? (
-                 <div className="py-6 flex flex-col items-center gap-4">
+                 <div className="py-6 flex flex-col items-center gap-4 relative z-10">
                    <i className="fas fa-circle-notch animate-spin text-blue-500"></i>
                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Resonating frequencies...</p>
                  </div>
                ) : (
-                 <div className="space-y-6">
+                 <div className="space-y-6 relative z-10">
                     <p className="text-xs text-white/60 leading-relaxed italic border-l-2 border-blue-500/40 pl-6 py-2">
                       "Primary resonance: Deep House & Synthwave. Collector profile indicates a preference for high-bitrate genesis protocols and atmospheric textures."
                     </p>
                     <div className="flex flex-wrap gap-2">
                        {['Atmospheric', 'Synth-Heavy', 'Collector', 'Curator'].map(tag => (
-                         <span key={tag} className="px-3 py-1 bg-white/5 border border-white/5 rounded-md text-[7px] font-black text-white/40 uppercase tracking-widest">#{tag}</span>
+                         <span key={tag} className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-md text-[7px] font-black text-blue-400 uppercase tracking-widest">#{tag}</span>
                        ))}
                     </div>
-                    <button onClick={handleSyncDNA} className="w-full py-3 border border-blue-500/20 rounded-md text-[8px] font-black text-blue-500 uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all">Re-Sync DNA</button>
+                    <button onClick={handleSyncDNA} className="w-full py-3 bg-blue-600/10 border border-blue-500/30 rounded-xl text-[8px] font-black text-blue-500 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-lg shadow-blue-500/5">Re-Sync DNA</button>
                  </div>
                )}
             </div>
 
-            <div className="bg-[#050505] border border-white/5 p-8 rounded-lg">
+            <div className="glass backdrop-blur-xl bg-white/[0.02] border border-white/10 p-8 rounded-2xl relative overflow-hidden">
                <h3 className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em] mb-8 italic">Origin Narrative</h3>
                {isEditing ? (
                  <textarea 
                    value={localUser.bio}
                    onChange={(e) => setLocalUser({...localUser, bio: e.target.value})}
-                   className="w-full bg-black border border-white/10 rounded-lg p-4 text-xs text-white outline-none focus:border-blue-500 h-32 italic leading-relaxed"
+                   className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-blue-500 h-32 italic leading-relaxed backdrop-blur-md"
                    placeholder="Identify your frequency..."
                  />
                ) : (
-                 <p className="text-xs text-white/40 leading-relaxed italic">{localUser.bio || "No biographical signals detected."}</p>
+                 <div 
+                   onClick={() => setIsEditing(true)}
+                   className="cursor-pointer group/bio relative"
+                 >
+                   <p className="text-xs text-white/40 leading-relaxed italic group-hover:text-white/60 transition-colors">
+                     {localUser.bio || "No biographical signals detected."}
+                   </p>
+                   <i className="fas fa-pencil text-[8px] text-blue-500 absolute -top-4 right-0 opacity-0 group-hover/bio:opacity-100 transition-opacity"></i>
+                 </div>
                )}
             </div>
 

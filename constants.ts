@@ -6,12 +6,12 @@ export const TJ_COIN_ICON = "https://i.postimg.cc/s2QHHMSF/TonjamCoin.png";
 export const TON_LOGO = "https://i.postimg.cc/jj7HksNw/ton-symbol.png";
 
 export const MOCK_TRACKS: Track[] = [
-  { id: '1', title: 'Solar Pulse', artist: 'Neon Voyager', artistId: 'a1', coverUrl: 'https://picsum.photos/400/400?random=1', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', duration: 210, genre: 'Electronic', isNFT: true, price: '2.5', bpm: 128, key: 'C# min', bitrate: 'FLAC', playCount: 12500, likes: 840 },
-  { id: '2', title: 'Cyber Drift', artist: 'Byte Beat', artistId: 'a2', coverUrl: 'https://picsum.photos/400/400?random=2', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', duration: 185, genre: 'Synthwave', isNFT: false, bpm: 110, key: 'D maj', bitrate: '320kbps', playCount: 8400, likes: 420 },
-  { id: '3', title: 'Deep Horizon', artist: 'Echo Phase', artistId: 'a3', coverUrl: 'https://picsum.photos/400/400?random=3', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', duration: 245, genre: 'Ambient', isNFT: true, price: '5.0', bpm: 85, key: 'A min', bitrate: 'FLAC', playCount: 15600, likes: 1200 },
-  { id: '4', title: 'Velvet Sky', artist: 'Luna Ray', artistId: 'a4', coverUrl: 'https://picsum.photos/400/400?random=4', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', duration: 195, genre: 'Pop', isNFT: false, bpm: 120, key: 'G maj', bitrate: '320kbps', playCount: 22000, likes: 3100 },
-  { id: '5', title: 'Neon Nights', artist: 'City Ghost', artistId: 'a5', coverUrl: 'https://picsum.photos/400/400?random=5', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', duration: 220, genre: 'Electronic', isNFT: true, price: '1.2', bpm: 124, key: 'F# min', bitrate: '320kbps', playCount: 5400, likes: 210 },
-  { id: '6', title: 'Prism Shift', artist: 'Prism Core', artistId: 'a6', coverUrl: 'https://picsum.photos/400/400?random=6', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', duration: 205, genre: 'Techno', isNFT: true, price: '3.0', bpm: 132, key: 'E min', bitrate: 'FLAC', playCount: 9800, likes: 650 },
+  { id: '1', title: 'Solar Pulse', artist: 'Neon Voyager', artistId: 'a1', coverUrl: 'https://picsum.photos/400/400?random=1', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', duration: 210, genre: 'Electronic', isNFT: true, artistVerified: true, price: '2.5', bpm: 128, key: 'C# min', bitrate: 'FLAC', playCount: 12500, likes: 840 },
+  { id: '2', title: 'Cyber Drift', artist: 'Byte Beat', artistId: 'a2', coverUrl: 'https://picsum.photos/400/400?random=2', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', duration: 185, genre: 'Synthwave', isNFT: false, artistVerified: true, bpm: 110, key: 'D maj', bitrate: '320kbps', playCount: 8400, likes: 420 },
+  { id: '3', title: 'Deep Horizon', artist: 'Echo Phase', artistId: 'a3', coverUrl: 'https://picsum.photos/400/400?random=3', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', duration: 245, genre: 'Ambient', isNFT: true, artistVerified: false, price: '5.0', bpm: 85, key: 'A min', bitrate: 'FLAC', playCount: 15600, likes: 1200 },
+  { id: '4', title: 'Velvet Sky', artist: 'Luna Ray', artistId: 'a4', coverUrl: 'https://picsum.photos/400/400?random=4', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', duration: 195, genre: 'Pop', isNFT: false, artistVerified: true, bpm: 120, key: 'G maj', bitrate: '320kbps', playCount: 22000, likes: 3100 },
+  { id: '5', title: 'Neon Nights', artist: 'City Ghost', artistId: 'a5', coverUrl: 'https://picsum.photos/400/400?random=5', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', duration: 220, genre: 'Electronic', isNFT: true, artistVerified: false, price: '1.2', bpm: 124, key: 'F# min', bitrate: '320kbps', playCount: 5400, likes: 210 },
+  { id: '6', title: 'Prism Shift', artist: 'Prism Core', artistId: 'a6', coverUrl: 'https://picsum.photos/400/400?random=6', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', duration: 205, genre: 'Techno', isNFT: true, artistVerified: true, price: '3.0', bpm: 132, key: 'E min', bitrate: 'FLAC', playCount: 9800, likes: 650 },
 ];
 
 export const MOCK_USER: UserProfile = {
@@ -162,7 +162,7 @@ export const MOCK_ARTISTS: Artist[] = [
     name: 'Neon Voyager', 
     avatarUrl: 'https://picsum.photos/200/200?random=21', 
     followers: 12400, 
-    isVerified: true,
+    verified: true,
     bio: "Pioneering the sound of the digital frontier. Synthwave frequencies forged in the TON core.",
     bannerUrl: "https://picsum.photos/1200/400?random=1001",
     socials: { x: 'https://x.com/neon_voyager', spotify: 'https://spotify.com/artist/neon_voyager', instagram: 'https://instagram.com/neon_voyager' }
@@ -172,7 +172,7 @@ export const MOCK_ARTISTS: Artist[] = [
     name: 'Byte Beat', 
     avatarUrl: 'https://picsum.photos/200/200?random=22', 
     followers: 8900, 
-    isVerified: true,
+    verified: true,
     bio: "Algorithmically generated beats for the decentralized generation.",
     bannerUrl: "https://picsum.photos/1200/400?random=1002",
     socials: { x: 'https://x.com/byte_beat', spotify: 'https://spotify.com/artist/byte_beat' }
@@ -182,7 +182,7 @@ export const MOCK_ARTISTS: Artist[] = [
     name: 'Echo Phase', 
     avatarUrl: 'https://picsum.photos/200/200?random=23', 
     followers: 5600, 
-    isVerified: false,
+    verified: false,
     bio: "Ambient explorations through the blockchain void.",
     bannerUrl: "https://picsum.photos/1200/400?random=1003",
     socials: { website: 'https://echophase.io' }
@@ -192,7 +192,7 @@ export const MOCK_ARTISTS: Artist[] = [
     name: 'Luna Ray', 
     avatarUrl: 'https://picsum.photos/200/200?random=24', 
     followers: 15200, 
-    isVerified: true,
+    verified: true,
     bio: "Ethereal pop melodies floating on top of complex electronic soundscapes.",
     bannerUrl: "https://picsum.photos/1200/400?random=1004",
     socials: { x: 'https://x.com/lunaray', instagram: 'https://instagram.com/lunaray' }
@@ -202,7 +202,7 @@ export const MOCK_ARTISTS: Artist[] = [
     name: 'City Ghost', 
     avatarUrl: 'https://picsum.photos/200/200?random=25', 
     followers: 4300, 
-    isVerified: false,
+    verified: false,
     bio: "Lo-fi beats captured from the heart of the urban jungle.",
     bannerUrl: "https://picsum.photos/1200/400?random=1005",
     socials: { spotify: 'https://spotify.com/artist/cityghost' }
@@ -212,7 +212,7 @@ export const MOCK_ARTISTS: Artist[] = [
     name: 'Prism Core', 
     avatarUrl: 'https://picsum.photos/200/200?random=26', 
     followers: 7800, 
-    isVerified: true,
+    verified: true,
     bio: "Shattering sonic boundaries with experimental techno and hard-hitting rhythms.",
     bannerUrl: "https://picsum.photos/1200/400?random=1006",
     socials: { x: 'https://x.com/prismcore', website: 'https://prismcore.tech' }

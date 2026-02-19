@@ -57,12 +57,15 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
         </div>
         <div className="flex-1 min-w-0">
           <h4 className={`text-[10px] font-black uppercase truncate leading-none tracking-tight mb-1 italic ${isActive ? 'text-blue-400' : 'text-white'}`}>{track.title}</h4>
-          <p 
-            onClick={handleArtistClick} 
-            className={`text-[8px] font-black uppercase tracking-widest hover:text-blue-400 transition-colors italic inline-block ${isActive ? 'text-blue-400/60' : 'text-white/30'}`}
-          >
-            {track.artist}
-          </p>
+          <div className="flex items-center gap-1">
+            <p 
+              onClick={handleArtistClick} 
+              className={`text-[8px] font-black uppercase tracking-widest hover:text-blue-400 transition-colors italic inline-block ${isActive ? 'text-blue-400/60' : 'text-white/30'}`}
+            >
+              {track.artist}
+            </p>
+            {track.artistVerified && <i className="fas fa-check-circle text-blue-500 text-[6px]"></i>}
+          </div>
         </div>
         <div className="flex items-center gap-4">
           {showReorder && activePlaylistId && (
@@ -128,12 +131,15 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
         <h3 className={`font-black truncate text-[10px] uppercase tracking-tighter italic leading-tight ${isActive ? 'text-blue-400' : 'text-white'}`}>
           {track.title}
         </h3>
-        <p 
-          onClick={handleArtistClick} 
-          className={`text-[8px] font-black truncate uppercase tracking-widest italic hover:text-blue-400 transition-colors w-fit ${isActive ? 'text-blue-400/60' : 'text-white/20'}`}
-        >
-          {track.artist}
-        </p>
+        <div className="flex items-center gap-1">
+          <p 
+            onClick={handleArtistClick} 
+            className={`text-[8px] font-black truncate uppercase tracking-widest italic hover:text-blue-400 transition-colors w-fit ${isActive ? 'text-blue-400/60' : 'text-white/20'}`}
+          >
+            {track.artist}
+          </p>
+          {track.artistVerified && <i className="fas fa-check-circle text-blue-500 text-[7px]"></i>}
+        </div>
       </div>
     </div>
   );
