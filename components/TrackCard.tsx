@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Track } from '../types';
 import { useAudio } from '../context/AudioContext';
@@ -12,6 +12,7 @@ interface TrackCardProps {
 const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReorder = false }) => {
   const navigate = useNavigate();
   const { currentTrack, isPlaying, playTrack, setOptionsTrack, likedTrackIds, toggleLikeTrack, activePlaylistId, reorderTrackInPlaylist } = useAudio();
+  const [showComments, setShowComments] = useState(false);
   const isActive = currentTrack?.id === track.id;
   const isLiked = likedTrackIds.includes(track.id);
 
@@ -35,6 +36,11 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
     if (activePlaylistId) {
       reorderTrackInPlaylist(activePlaylistId, track.id, direction);
     }
+  };
+
+  const handleCommentClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowComments(true);
   };
 
   const formatDuration = (seconds: number) => {
@@ -90,6 +96,12 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
           >
             <i className={`${isLiked ? 'fas' : 'far'} fa-heart text-[10px]`}></i>
           </button>
+          <button 
+            onClick={handleCommentClick}
+            className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-white transition-all rounded-full hover:bg-white/5"
+          >
+            <i className="far fa-comment text-[10px]"></i>
+          </button>
           <span className="text-[9px] font-mono font-black text-white/20 italic">{formatDuration(track.duration)}</span>
           <button 
             onClick={handleOptionsClick}
@@ -121,6 +133,12 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
           <i className={`${isLiked ? 'fas' : 'far'} fa-heart text-[9px]`}></i>
         </button>
         <button 
+          onClick={handleCommentClick}
+          className="absolute top-10 left-2 w-7 h-7 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/10 z-10 text-white/60 hover:text-white"
+        >
+          <i className="far fa-comment text-[9px]"></i>
+        </button>
+        <button 
           onClick={handleOptionsClick}
           className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/10 z-10"
         >
@@ -141,6 +159,42 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
           {track.artistVerified && <i className="fas fa-check-circle text-blue-500 text-[7px]"></i>}
         </div>
       </div>
+
+      {showComments && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowComments(false)}></div>
+          <div className="relative glass w-full max-w-md rounded-[2rem] p-8 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-sm font-black italic uppercase tracking-tighter text-white">Track Comments</h3>
+              <button onClick={() => setShowComments(false)} className="text-white/40 hover:text-white transition-colors">
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="space-y-4 mb-6 max-h-60 overflow-y-auto no-scrollbar">
+              <div className="flex gap-3">
+                <img src="https://picsum.photos/40/40?random=1" className="w-8 h-8 rounded-full" alt="" />
+                <div>
+                  <p className="text-[10px] font-black text-white uppercase italic">CryptoPioneer</p>
+                  <p className="text-xs text-white/60 italic">This drop is insane! 🔥</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <img src="https://picsum.photos/40/40?random=2" className="w-8 h-8 rounded-full" alt="" />
+                <div>
+                  <p className="text-[10px] font-black text-white uppercase italic">SynthFan99</p>
+                  <p className="text-xs text-white/60 italic">Need this on repeat 24/7.</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <input type="text" placeholder="Add a comment..." className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-blue-500 transition-colors italic" />
+              <button className="px-4 py-2 bg-blue-600/20 text-blue-400 rounded-xl hover:bg-blue-600 hover:text-white transition-colors">
+                <i className="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

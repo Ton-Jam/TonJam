@@ -24,11 +24,8 @@ const Discover: React.FC = () => {
   const initialVibe = queryParams.get('vibe') === 'true';
 
   const [search, setSearch] = useState(initialSearch);
-  const [isVibeSearch, setIsVibeSearch] = useState(initialVibe);
-  const [vibeResults, setVibeResults] = useState<Track[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists'>('Tracks');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-  const [activeVibe, setActiveVibe] = useState<string | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
   
@@ -76,39 +73,47 @@ const Discover: React.FC = () => {
   const handleRecentSearchClick = (term: string) => {
     setSearch(term);
     setIsSearchFocused(false);
-    // If it's a known vibe chip, switch to vibe search
-    if (VIBE_CHIPS.includes(term)) {
-      setIsVibeSearch(true);
-      setActiveVibe(term);
-    } else {
-      setIsVibeSearch(false);
-    }
     addToRecentSearches(term);
   };
 
-  const filteredTracks = useMemo(() => {
-    let list = MOCK_TRACKS;
+  const filteredResults = useMemo(() => {
+    let results: any[] = [];
 
-    if (isVibeSearch && vibeResults.length > 0) {
-      list = vibeResults;
-    } 
-    else if (search && !isVibeSearch) {
-      list = list.filter(t => 
-        t.title.toLowerCase().includes(search.toLowerCase()) || 
-        t.artist.toLowerCase().includes(search.toLowerCase())
-      );
+    if (activeFilter === 'Tracks') {
+      results = MOCK_TRACKS;
+      if (search) {
+        results = results.filter(t => 
+          t.title.toLowerCase().includes(search.toLowerCase()) || 
+          t.artist.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+      if (selectedGenre) {
+        results = results.filter(t => t.genre.toLowerCase() === selectedGenre.toLowerCase());
+      }
+    } else if (activeFilter === 'Artists') {
+      results = MOCK_ARTISTS;
+      if (search) {
+        results = results.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
+      }
+    } else if (activeFilter === 'NFTs') {
+      results = MOCK_NFTS;
+      if (search) {
+        results = results.filter(n => 
+          n.title.toLowerCase().includes(search.toLowerCase()) || 
+          n.creator.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+    } else if (activeFilter === 'Playlists') {
+      // Mocking playlists for search since we don't have a global playlist constant
+      results = [];
     }
 
-    if (selectedGenre) {
-      list = list.filter(t => t.genre.toLowerCase() === selectedGenre.toLowerCase());
-    }
+    return results;
+  }, [search, activeFilter, selectedGenre]);
 
-    return list;
-  }, [search, isVibeSearch, vibeResults, selectedGenre]);
-
-  const visibleTracks = useMemo(() => {
-    return filteredTracks.slice(0, displayLimit);
-  }, [filteredTracks, displayLimit]);
+  const visibleResults = useMemo(() => {
+    return filteredResults.slice(0, displayLimit);
+  }, [filteredResults, displayLimit]);
 
   const nftTrackRecommendations = useMemo(() => {
     return MOCK_NFTS.slice(0, 6);
@@ -130,65 +135,19 @@ const Discover: React.FC = () => {
       .slice(0, 4);
   }, []);
 
-  useEffect(() => {
-    const performSemanticSearch = async () => {
-      if (isVibeSearch && search.length > 3) {
-        setIsSearching(true);
-        try {
-          const ids = await semanticSearchTracks(search, MOCK_TRACKS);
-          const matches = MOCK_TRACKS.filter(t => ids.includes(t.id));
-          setVibeResults(matches);
-          setDisplayLimit(INITIAL_LIMIT);
-          addToRecentSearches(search);
-        } catch (e: any) {
-          addNotification(e.message || "Vibe sync failed.", "warning");
-          setVibeResults([]);
-        } finally {
-          setIsSearching(false);
-        }
-      } else if (!search) {
-        setVibeResults([]);
-      }
-    };
-
-    const timer = setTimeout(performSemanticSearch, 800);
-    return () => clearTimeout(timer);
-  }, [search, isVibeSearch]);
-
   const handleGenreToggle = (genre: string) => {
     setDisplayLimit(INITIAL_LIMIT);
-    setActiveVibe(null);
     if (selectedGenre === genre) {
       setSelectedGenre(null);
     } else {
       setSelectedGenre(genre);
-      if (isVibeSearch) {
-        setVibeResults([]);
-      }
       addToRecentSearches(genre);
-    }
-  };
-
-  const handleVibeToggle = (vibe: string) => {
-    setDisplayLimit(INITIAL_LIMIT);
-    setSelectedGenre(null);
-    if (activeVibe === vibe) {
-      setActiveVibe(null);
-      setSearch('');
-    } else {
-      setActiveVibe(vibe);
-      setSearch(vibe);
-      setIsVibeSearch(true);
-      addNotification(`Locking ${vibe} frequencies`, "info");
-      addToRecentSearches(vibe);
     }
   };
 
   const clearInput = () => {
     setSearch('');
-    setActiveVibe(null);
     setSelectedGenre(null);
-    setVibeResults([]);
   };
 
   const SectionHeader = ({ title, onAction }: { title: string, onAction?: () => void }) => (
@@ -210,36 +169,42 @@ const Discover: React.FC = () => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 bg-black min-h-screen">
-      <div className="px-4 md:px-12 mb-8 pt-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex flex-col">
-            <h1 className="text-3xl font-black tracking-tighter italic text-white uppercase leading-none">DISCOVER</h1>
-            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.5em] italic mt-2">Frequency Scanner v1.2</p>
+      <div className="px-4 md:px-12 mb-6 pt-6">
+        {/* GENRE CHIPS - At the very top */}
+        {activeFilter === 'Tracks' && (
+          <div className="mb-4 space-y-2">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mask-linear-fade">
+              <button 
+                onClick={() => setSelectedGenre(null)}
+                className={`flex-shrink-0 px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${
+                  !selectedGenre 
+                  ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]' 
+                  : 'bg-white/5 text-white/40 border-white/5 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                All Signals
+              </button>
+              {GENRES.map(tag => (
+                <button 
+                  key={tag} 
+                  onClick={() => handleGenreToggle(tag)} 
+                  className={`flex-shrink-0 px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${
+                    selectedGenre === tag 
+                    ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]' 
+                    : 'bg-white/5 text-white/40 border-white/5 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
           </div>
-          
-          <div className="flex items-center gap-1.5 bg-white/5 p-1.5 rounded-full border border-white/10">
-            <button 
-              onClick={() => setIsVibeSearch(false)}
-              className={`px-6 py-2 rounded-full text-[8px] font-black uppercase tracking-widest transition-all ${!isVibeSearch ? 'bg-white/10 text-white shadow-sm' : 'text-white/20 hover:text-white/40'}`}
-            >
-              Keyword
-            </button>
-            <button 
-              onClick={() => {
-                setIsVibeSearch(true);
-                setVibeResults([]);
-              }}
-              className={`px-6 py-2 rounded-full text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${isVibeSearch ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/20 hover:text-white/40'}`}
-            >
-              <i className="fas fa-sparkles text-[7px]"></i>
-              Vibe AI
-            </button>
-          </div>
-        </div>
+        )}
         
-        <div className="relative mb-12" ref={searchContainerRef}>
+        {/* SEARCH BAR */}
+        <div className="relative mb-4" ref={searchContainerRef}>
           <div className="relative z-20">
-            <i className={`fas ${isVibeSearch ? 'fa-wand-magic-sparkles' : 'fa-search'} absolute left-5 top-1/2 -translate-y-1/2 text-white/30 text-sm transition-all ${isSearching ? 'text-blue-400 animate-pulse' : ''} ${isVibeSearch ? 'text-blue-500/50' : ''}`}></i>
+            <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-xs"></i>
             <input 
               type="text" 
               value={search}
@@ -250,28 +215,20 @@ const Discover: React.FC = () => {
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  if (!isVibeSearch) {
-                    addToRecentSearches(search);
-                    setIsSearchFocused(false);
-                  }
+                  addToRecentSearches(search);
+                  setIsSearchFocused(false);
                 }
               }}
-              placeholder={isVibeSearch ? "Describe a mood or frequency..." : "Search tracks, artists, editions..."} 
-              className={`w-full bg-white/5 border rounded-xl py-5 pl-14 pr-14 text-sm outline-none transition-all placeholder:text-white/10 shadow-inner shadow-black/20 text-white italic ${isVibeSearch ? 'border-blue-500/30 focus:border-blue-500 focus:shadow-[0_0_20px_rgba(37,99,235,0.1)]' : 'border-white/10 focus:border-white/30'}`}
+              placeholder={`Search ${activeFilter.toLowerCase()}...`} 
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-10 text-xs outline-none transition-all placeholder:text-white/20 shadow-inner shadow-black/20 text-white italic focus:border-blue-500/50"
             />
             {search && (
               <button 
                 onClick={clearInput}
-                className="absolute right-5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/20 hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-white/20 hover:text-white transition-colors"
               >
-                <i className="fas fa-times-circle text-sm"></i>
+                <i className="fas fa-times-circle text-xs"></i>
               </button>
-            )}
-            {isSearching && (
-              <div className="absolute right-14 top-1/2 -translate-y-1/2 flex items-center gap-2 bg-blue-600 px-4 py-2 rounded-full text-white shadow-xl">
-                 <span className="text-[8px] font-black uppercase tracking-widest">Neural Syncing</span>
-                 <i className="fas fa-circle-notch animate-spin text-[8px]"></i>
-              </div>
             )}
           </div>
 
@@ -307,118 +264,80 @@ const Discover: React.FC = () => {
           )}
         </div>
 
-        {/* VIBE CHIPS - Horizontal Scroll */}
-        <div className="mb-10 space-y-4">
-          <div className="flex items-center gap-3 ml-2">
-            <i className="fas fa-sparkles text-blue-500 text-[9px]"></i>
-            <h3 className="text-[8px] font-black text-white/30 uppercase tracking-[0.4em] italic">Vibe Protocols</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 mask-linear-fade">
-            {VIBE_CHIPS.map(vibe => (
-              <button 
-                key={vibe} 
-                onClick={() => handleVibeToggle(vibe)} 
-                className={`flex-shrink-0 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
-                  activeVibe === vibe 
-                  ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_25px_rgba(37,99,235,0.4)]' 
-                  : 'bg-white/5 text-white/40 border-white/5 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                {vibe}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* GENRE CHIPS - Horizontal Scroll */}
-        <div className="mb-8 space-y-4">
-          <div className="flex items-center gap-3 ml-2">
-            <i className="fas fa-music text-white/10 text-[9px]"></i>
-            <h3 className="text-[8px] font-black text-white/30 uppercase tracking-[0.4em] italic">Classic Frequencies</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 mask-linear-fade">
+        {/* ENTITY FILTER */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+          {['Artists', 'Tracks', 'NFTs', 'Playlists'].map(filter => (
             <button 
-              onClick={() => setSelectedGenre(null)}
-              className={`flex-shrink-0 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
-                !selectedGenre && !activeVibe 
-                ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
-                : 'bg-white/5 text-white/40 border-white/5 hover:text-white hover:bg-white/10'
-              }`}
+              key={filter}
+              onClick={() => {
+                setActiveFilter(filter as any);
+                setDisplayLimit(INITIAL_LIMIT);
+              }}
+              className={`flex-shrink-0 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${activeFilter === filter ? 'bg-white text-black shadow-sm' : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/5'}`}
             >
-              All Signals
+              {filter}
             </button>
-            {GENRES.map(tag => (
-              <button 
-                key={tag} 
-                onClick={() => handleGenreToggle(tag)} 
-                className={`flex-shrink-0 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
-                  selectedGenre === tag 
-                  ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
-                  : 'bg-white/5 text-white/40 border-white/5 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
 
-      <div className="space-y-20">
+      <div className="space-y-12">
         <section className="px-4 md:px-12">
           <SectionHeader 
-            title={isVibeSearch && search.length > 3 ? 'Neural Sync Result' : (search || selectedGenre ? `Scanner Output: ${search || selectedGenre}` : 'Network Trends')} 
-            onAction={() => navigate(`/explore/tracks?title=${encodeURIComponent(search || selectedGenre || 'Network Trends')}`)}
+            title={search || selectedGenre ? `Scanner Output: ${search || selectedGenre}` : `Network ${activeFilter}`} 
+            onAction={() => navigate(`/explore/${activeFilter.toLowerCase()}?title=${encodeURIComponent(search || selectedGenre || `Network ${activeFilter}`)}`)}
           />
           
-          <div className="flex overflow-x-auto no-scrollbar gap-6 pb-6 mask-linear-fade">
-            {visibleTracks.length > 0 ? (
-              visibleTracks.map((track, idx) => (
-                <div key={track.id} className="flex-shrink-0 w-48 md:w-64 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
-                  <TrackCard track={track} />
+          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+            {visibleResults.length > 0 ? (
+              visibleResults.map((item, idx) => (
+                <div key={item.id} className="flex-shrink-0 w-44 md:w-56 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
+                  {activeFilter === 'Tracks' && <TrackCard track={item as Track} />}
+                  {activeFilter === 'Artists' && <UserCard user={item as any} variant="portrait" />}
+                  {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
+                  {activeFilter === 'Playlists' && <div className="p-4 glass rounded-xl text-white/50 text-xs italic">Playlist rendering...</div>}
                 </div>
               ))
             ) : (
-              <div className="w-full py-28 text-center flex flex-col items-center glass rounded-xl border border-dashed border-white/10 bg-[#050505]/50">
-                 <i className="fas fa-satellite-dish text-5xl text-white/5 mb-6 animate-pulse"></i>
-                 <p className="text-white/10 text-[10px] font-black uppercase tracking-[0.5em] italic px-8 leading-relaxed text-center">Protocol Mismatch. Zero signals detected in this range.</p>
-                 <button onClick={clearInput} className="mt-8 text-[9px] font-black text-blue-500 uppercase tracking-[0.3em] border-b border-blue-500/20 pb-1">Reset All Protocols</button>
+              <div className="w-full py-20 text-center flex flex-col items-center glass rounded-xl border border-dashed border-white/10 bg-[#050505]/50">
+                 <i className="fas fa-satellite-dish text-4xl text-white/5 mb-4 animate-pulse"></i>
+                 <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.5em] italic px-8 leading-relaxed text-center">Protocol Mismatch. Zero signals detected.</p>
+                 <button onClick={clearInput} className="mt-6 text-[8px] font-black text-blue-500 uppercase tracking-[0.3em] border-b border-blue-500/20 pb-1">Reset Filters</button>
               </div>
             )}
           </div>
         </section>
 
-        {/* Trending Protocols - New Section */}
+        {/* Trending Protocols - Horizontal Scroll */}
         <section className="px-4 md:px-12">
           <SectionHeader title="Trending Protocols" onAction={() => navigate('/marketplace')} />
-          <div className="flex overflow-x-auto no-scrollbar gap-6 pb-6 mask-linear-fade">
+          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
             {trendingNfts.map((nft, idx) => (
-              <div key={nft.id} className="flex-shrink-0 w-48 md:w-64 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 150}ms` }}>
+              <div key={nft.id} className="flex-shrink-0 w-44 md:w-56 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
                 <NFTCard nft={nft} />
               </div>
             ))}
           </div>
         </section>
 
-        {/* Recommended NFT Frequencies */}
+        {/* Recommended NFT Frequencies - Horizontal Scroll */}
         <section className="px-4 md:px-12">
           <SectionHeader title="Recommended NFT Frequencies" />
-          <div className="flex overflow-x-auto no-scrollbar gap-6 pb-6 mask-linear-fade">
+          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
             {featuredNFTTracks.map((nft, idx) => (
-              <div key={nft.id} className="flex-shrink-0 w-48 md:w-64 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 150}ms` }}>
+              <div key={nft.id} className="flex-shrink-0 w-44 md:w-56 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
                 <NFTCard nft={nft} />
               </div>
             ))}
           </div>
         </section>
 
-        <section>
-          <div className="px-4 md:px-12">
-            <SectionHeader title="Alpha Collectibles" onAction={() => navigate('/explore/nfts?title=Alpha%20Collectibles')} />
-          </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-8 px-4 md:px-12">
+        {/* Alpha Collectibles - Horizontal Scroll */}
+        <section className="px-4 md:px-12">
+          <SectionHeader title="Alpha Collectibles" onAction={() => navigate('/explore/nfts?title=Alpha%20Collectibles')} />
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 mask-linear-fade">
             {nftTrackRecommendations.map((nft, idx) => (
-              <div key={nft.id} className="flex-shrink-0 w-44 md:w-56" style={{ animationDelay: `${idx * 150}ms` }}>
+              <div key={nft.id} className="flex-shrink-0 w-44 md:w-56 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
                 <NFTCard nft={nft} isAuction={nft.id === 'n1'} />
               </div>
             ))}

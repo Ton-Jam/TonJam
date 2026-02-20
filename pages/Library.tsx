@@ -1,10 +1,11 @@
 
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MOCK_TRACKS, MOCK_NFTS } from '../constants';
+import { MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS } from '../constants';
 import TrackCard from '../components/TrackCard';
 import NFTCard from '../components/NFTCard';
 import PlaylistCard from '../components/PlaylistCard';
+import UserCard from '../components/UserCard';
 import { useAudio } from '../context/AudioContext';
 import { Track } from '../types';
 
@@ -138,41 +139,41 @@ const Library: React.FC = () => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 px-4 md:px-12">
-      <div className="relative mb-12 pt-8">
-        <i className="fas fa-search absolute left-7 top-1/2 -translate-y-1/2 text-white/20 text-sm"></i>
+      <header className="mb-6 pt-8">
+        <h1 className="text-2xl md:text-3xl font-black italic tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
+        <p className="text-[8px] font-black text-white/40 uppercase tracking-[0.5em] italic">STORAGE PROTOCOL ACTIVE</p>
+      </header>
+
+      <div className="relative mb-10">
+        <i className="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-white/40 text-xs"></i>
         <input 
           type="text" 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Filter your digital assets..." 
-          className="w-full bg-[#111111] border border-white/5 py-5 pl-16 pr-10 text-sm outline-none focus:border-blue-500/30 transition-all placeholder:text-white/10 rounded-xl shadow-inner text-white italic"
+          className="w-full bg-[#111111] border border-white/10 py-3 pl-12 pr-10 text-xs outline-none focus:border-blue-500/50 transition-all placeholder:text-white/30 rounded-xl shadow-inner text-white italic"
         />
       </div>
 
-      <header className="mb-14">
-        <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter uppercase text-white leading-none mb-4">DIGITAL VAULT</h1>
-        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] italic">STORAGE PROTOCOL ACTIVE</p>
-      </header>
-
       {/* Recently Played Section */}
       {recentlyPlayed.length > 0 && (
-        <section className="mb-20 animate-in fade-in slide-in-from-left duration-700">
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-6 electric-blue-bg rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
-              <h3 className="text-[11px] font-black text-white/40 uppercase tracking-[0.5em] italic">Recent Frequencies</h3>
+        <section className="mb-12 animate-in fade-in slide-in-from-left duration-700">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-4 electric-blue-bg rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
+              <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">Recent Frequencies</h3>
             </div>
             <button 
               onClick={clearRecentlyPlayed}
-              className="text-[9px] font-black text-white/10 uppercase tracking-widest hover:text-red-500/60 transition-colors"
+              className="text-[8px] font-black text-white/30 uppercase tracking-widest hover:text-red-500/80 transition-colors"
             >
               PURGE HISTORY
             </button>
           </div>
           
-          <div className="flex gap-6 overflow-x-auto no-scrollbar pb-6">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 mask-linear-fade">
             {recentlyPlayed.map(track => (
-              <div key={`recent-${track.id}`} className="flex-shrink-0 w-40 md:w-48">
+              <div key={`recent-${track.id}`} className="flex-shrink-0 w-36 md:w-44">
                 <TrackCard track={track} />
               </div>
             ))}
@@ -180,21 +181,27 @@ const Library: React.FC = () => {
         </section>
       )}
 
-      <section className="mb-20">
-        <div className="flex items-center justify-between mb-10">
-          <h3 className="text-[11px] font-black text-white/40 uppercase tracking-[0.5em] italic">Sequences</h3>
-          <button 
+      {/* My Playlists Section */}
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">My Playlists</h3>
+        </div>
+        
+        <div className="flex gap-6 overflow-x-auto no-scrollbar pb-6 mask-linear-fade">
+          {/* Create Playlist Card */}
+          <div 
             onClick={() => {
               const name = prompt("IDENTIFY NEW SYNC SEQUENCE:");
               if (name) createNewPlaylist(name);
             }}
-            className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-2.5 hover:text-white transition-colors"
+            className="flex-shrink-0 w-36 md:w-44 aspect-square border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center group cursor-pointer hover:border-blue-500/30 hover:bg-white/5 transition-all"
           >
-            <i className="fas fa-plus"></i> NEW SYNC
-          </button>
-        </div>
-        
-        <div className="flex gap-12 overflow-x-auto no-scrollbar pb-10">
+            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors">
+              <i className="fas fa-plus text-white/40 group-hover:text-blue-400 text-lg"></i>
+            </div>
+            <span className="text-[9px] font-black text-white/40 uppercase tracking-widest group-hover:text-white transition-colors">Create Sync</span>
+          </div>
+
           {playlists.map(playlist => (
             <PlaylistCard 
               key={playlist.id} 
@@ -205,54 +212,77 @@ const Library: React.FC = () => {
         </div>
       </section>
 
-      <div className="flex items-center gap-5 mb-12 border-t border-white/5 pt-12">
-        <button 
-          onClick={() => setActiveTab('tracks')}
-          className={`px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'tracks' ? 'electric-blue-bg text-white shadow-xl shadow-blue-500/20' : 'bg-white/5 text-white/30 hover:text-white'}`}
-        >
-          Tracks
-        </button>
-        <button 
-          onClick={() => setActiveTab('liked')}
-          className={`px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'liked' ? 'electric-blue-bg text-white shadow-xl shadow-blue-500/20' : 'bg-white/5 text-white/30 hover:text-white'}`}
-        >
-          Liked
-        </button>
-        <button 
-          onClick={() => setActiveTab('nfts')}
-          className={`px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'nfts' ? 'electric-blue-bg text-white shadow-xl shadow-blue-500/20' : 'bg-white/5 text-white/30 hover:text-white'}`}
-        >
-          Assets
-        </button>
-      </div>
-
-      <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4">
-        {activeTab === 'tracks' ? (
-          filteredTracks.map(track => (
-            <div key={track.id} className="flex-shrink-0 w-44 md:w-56">
-              <TrackCard track={track} />
+      {/* Followed Artists Section */}
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">Followed Nodes</h3>
+        </div>
+        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+          {MOCK_ARTISTS.slice(0, 5).map(artist => (
+            <div key={`followed-${artist.id}`} className="flex-shrink-0 w-36 md:w-44">
+              <UserCard user={artist} variant="portrait" />
             </div>
-          ))
-        ) : activeTab === 'liked' ? (
-          filteredLikedTracks.length > 0 ? (
+          ))}
+        </div>
+      </section>
+
+      {/* Favorite Tracks Section */}
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">Favorite Tracks</h3>
+        </div>
+        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+          {filteredLikedTracks.length > 0 ? (
             filteredLikedTracks.map(track => (
-              <div key={track.id} className="flex-shrink-0 w-44 md:w-56">
+              <div key={track.id} className="flex-shrink-0 w-40 md:w-52">
                 <TrackCard track={track} />
               </div>
             ))
           ) : (
-            <div className="w-full py-20 text-center glass rounded-xl border-dashed border-white/5">
-              <p className="text-[11px] font-black text-white/20 uppercase tracking-widest italic">No frequencies saved in vault.</p>
+            <div className="w-full py-12 text-center glass rounded-xl border-dashed border-white/10">
+              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest italic">No frequencies saved in vault.</p>
             </div>
-          )
-        ) : (
-          filteredNFTs.map(nft => (
-            <div key={nft.id} className="flex-shrink-0 w-44 md:w-56">
-              <NFTCard nft={nft} />
+          )}
+        </div>
+      </section>
+
+      {/* My NFT Collection Section */}
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">My NFT Collection</h3>
+        </div>
+        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+          {filteredNFTs.length > 0 ? (
+            filteredNFTs.map(nft => (
+              <div key={nft.id} className="flex-shrink-0 w-40 md:w-52">
+                <NFTCard nft={nft} />
+              </div>
+            ))
+          ) : (
+            <div className="w-full py-12 text-center glass rounded-xl border-dashed border-white/10">
+              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest italic">No assets detected.</p>
             </div>
-          ))
-        )}
-      </div>
+          )}
+        </div>
+      </section>
+
+      {/* Recommended Frequencies Section */}
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <i className="fas fa-satellite-dish text-blue-500 text-[10px]"></i>
+            <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">Recommended Frequencies</h3>
+          </div>
+        </div>
+        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+          {MOCK_TRACKS.slice(0, 6).map(track => (
+            <div key={`rec-${track.id}`} className="flex-shrink-0 w-40 md:w-52">
+              <TrackCard track={track} />
+            </div>
+          ))}
+        </div>
+      </section>
+
     </div>
   );
 };

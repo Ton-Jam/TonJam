@@ -111,9 +111,20 @@ const ArtistProfile: React.FC = () => {
     }
   };
 
-  const StatBox = ({ label, value, sub }: { label: string, value: string, sub?: string }) => (
-    <div className="flex flex-col glass backdrop-blur-md bg-white/[0.02] border border-white/5 p-3 rounded-xl hover:border-blue-500/30 transition-all group">
-      <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.4em] mb-1 italic group-hover:text-blue-400/50 transition-colors">{label}</span>
+  const StatBox = ({ label, value, sub, tooltip }: { label: string, value: string, sub?: string, tooltip?: string }) => (
+    <div className="flex flex-col glass backdrop-blur-md bg-white/[0.02] border border-white/5 p-3 rounded-xl hover:border-blue-500/30 transition-all group relative">
+      <div className="flex items-center gap-1 mb-1">
+        <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.4em] italic group-hover:text-blue-400/50 transition-colors">{label}</span>
+        {tooltip && (
+          <div className="relative group/tooltip">
+            <i className="fas fa-info-circle text-[6px] text-white/20 hover:text-blue-400 cursor-help transition-colors"></i>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-black/90 backdrop-blur-xl border border-white/10 rounded-lg text-[8px] text-white/70 normal-case tracking-normal font-medium opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-50 text-center pointer-events-none">
+              {tooltip}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-white/10"></div>
+            </div>
+          </div>
+        )}
+      </div>
       <div className="flex items-baseline gap-1.5">
         <span className="text-xl font-black text-white italic tracking-tighter leading-none group-hover:text-blue-400 transition-colors">{value}</span>
         {sub && <span className="text-[8px] font-black text-blue-500 uppercase italic">{sub}</span>}
@@ -209,9 +220,9 @@ const ArtistProfile: React.FC = () => {
 
           <div className="flex flex-col items-center lg:items-end gap-5">
             <div className="flex gap-8 md:gap-10">
-              <StatBox label="Fans" value={artist.followers.toLocaleString()} />
-              <StatBox label="Tracks" value={artistTracks.length.toString()} />
-              {marketStats && <StatBox label="Floor" value={marketStats.floor} sub="TON" />}
+              <StatBox label="Fans" value={artist.followers.toLocaleString()} tooltip="Total number of users synchronized with this artist's neural network." />
+              <StatBox label="Tracks" value={artistTracks.length.toString()} tooltip="Total number of sonic frequencies broadcasted by this artist." />
+              {marketStats && <StatBox label="Floor" value={marketStats.floor} sub="TON" tooltip="The lowest current market price for this artist's Genesis NFTs." />}
             </div>
 
             <div className="flex items-center gap-2">

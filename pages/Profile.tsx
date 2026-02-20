@@ -1,10 +1,11 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS } from '../constants';
+import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS } from '../constants';
 import TrackCard from '../components/TrackCard';
 import NFTCard from '../components/NFTCard';
 import PlaylistCard from '../components/PlaylistCard';
 import PostCard from '../components/PostCard';
+import UserCard from '../components/UserCard';
 import MintModal from '../components/MintModal';
 import SellNFTModal from '../components/SellNFTModal';
 import { useAudio } from '../context/AudioContext';
@@ -40,6 +41,18 @@ const Profile: React.FC = () => {
     MOCK_POSTS.filter(p => p.userId === userProfile.id), 
     [userProfile.id]
   );
+
+  const royaltyStats = useMemo(() => {
+    // Simulate royalty calculations
+    const streamingRevenue = MOCK_TRACKS.filter(t => t.artistId === localUser.id).reduce((acc, t) => acc + (t.playCount || 0) * 0.001, 0);
+    const nftRevenue = MOCK_NFTS.filter(n => n.creator === localUser.name).reduce((acc, n) => acc + parseFloat(n.price) * (n.royalty || 0) / 100, 0);
+    return {
+      total: (streamingRevenue + nftRevenue).toFixed(2),
+      streaming: streamingRevenue.toFixed(2),
+      nft: nftRevenue.toFixed(2),
+      pending: (Math.random() * 10).toFixed(2)
+    };
+  }, [localUser]);
 
   const handleSave = () => {
     setUserProfile(localUser);
@@ -94,7 +107,7 @@ const Profile: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-1000 pb-32">
       {/* Banner Section */}
-      <div className="relative h-[25vh] md:h-[40vh] w-full overflow-hidden bg-black">
+      <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-black">
         <img src={localUser.bannerUrl} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
         
@@ -107,20 +120,20 @@ const Profile: React.FC = () => {
       </div>
 
       {/* IDENTITY SECTION: Avatar Round on the left, Stats on the right */}
-      <div className="max-w-6xl mx-auto px-4 md:px-12 -mt-20 md:-mt-28 relative z-30 flex flex-col md:flex-row items-center md:items-end w-full gap-8 md:gap-12">
+      <div className="max-w-6xl mx-auto px-4 md:px-12 -mt-16 md:-mt-20 relative z-30 flex flex-col md:flex-row items-center md:items-end w-full gap-6 md:gap-10">
         
         {/* Left: Round Avatar centerpiece */}
         <div className="relative group md:mb-2 flex-shrink-0">
           <div className={`p-1.5 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 shadow-[0_0_50px_rgba(37,99,235,0.3)] transition-transform duration-500 group-hover:scale-105`}>
             <img 
               src={localUser.avatar} 
-              className="w-28 h-28 md:w-44 md:h-44 rounded-full border-4 border-black object-cover" 
+              className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-black object-cover" 
               alt={localUser.name} 
             />
           </div>
           {localUser.isVerifiedArtist && (
-            <div className="absolute bottom-1.5 right-1.5 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-4 border-black shadow-xl">
-              <i className="fas fa-check text-white text-[10px]"></i>
+            <div className="absolute bottom-1 right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center border-2 border-black shadow-xl">
+              <i className="fas fa-check text-white text-[8px]"></i>
             </div>
           )}
           {isEditing && (
@@ -135,80 +148,81 @@ const Profile: React.FC = () => {
         </div>
 
         {/* Right: Name, Handle, Stats, and Actions */}
-        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
-          {/* Name & Handle */}
-          <div className="mb-6 w-full">
-            {isEditing ? (
-              <input 
-                type="text" 
-                value={localUser.name} 
-                onChange={(e) => setLocalUser({...localUser, name: e.target.value})}
-                className="bg-white/5 border border-white/10 rounded-lg px-6 py-3 text-4xl font-black italic tracking-tighter outline-none focus:border-blue-500 text-white w-full max-w-lg md:text-left"
-              />
-            ) : (
-              <div className="flex items-center gap-4 mb-2">
-                <h1 
+        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full">
+          <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-4 mb-6">
+            {/* Name & Handle */}
+            <div className="w-full md:w-auto">
+              {isEditing ? (
+                <input 
+                  type="text" 
+                  value={localUser.name} 
+                  onChange={(e) => setLocalUser({...localUser, name: e.target.value})}
+                  className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-2xl md:text-3xl font-black italic tracking-tighter outline-none focus:border-blue-500 text-white w-full max-w-lg md:text-left"
+                />
+              ) : (
+                <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
+                  <h1 
+                    onClick={() => setIsEditing(true)}
+                    className="text-3xl md:text-5xl font-black italic tracking-tighter text-white uppercase leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] cursor-pointer hover:text-blue-400 transition-colors group/name relative"
+                  >
+                    {localUser.name}
+                  </h1>
+                  {localUser.isVerifiedArtist && <i className="fas fa-check-circle text-blue-500 text-xl md:text-2xl"></i>}
+                </div>
+              )}
+              <p className="text-blue-500 font-black text-xs md:text-sm uppercase tracking-[0.6em] italic drop-shadow-md">
+                {localUser.handle}
+              </p>
+            </div>
+
+            {/* Edit/Save Actions */}
+            <div className="flex gap-3 justify-center md:justify-end">
+              {!isEditing ? (
+                <button 
                   onClick={() => setIsEditing(true)}
-                  className="text-4xl md:text-7xl font-black italic tracking-tighter text-white uppercase leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] cursor-pointer hover:text-blue-400 transition-colors group/name relative"
+                  className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white hover:bg-white/10 transition-all active:scale-95 shadow-lg flex items-center gap-2"
                 >
-                  {localUser.name}
-                  <i className="fas fa-pencil text-xs ml-4 opacity-0 group-hover/name:opacity-100 transition-opacity align-middle"></i>
-                </h1>
-                {localUser.isVerifiedArtist && <i className="fas fa-check-circle text-blue-500 text-2xl md:text-4xl"></i>}
-              </div>
-            )}
-            <p className="text-blue-500 font-black text-sm md:text-base uppercase tracking-[0.6em] italic drop-shadow-md">
-              {localUser.handle}
-            </p>
+                  <i className="fas fa-pencil"></i> Edit Profile
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg text-[8px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all">Abort</button>
+                  <button onClick={handleSave} className="px-5 py-2 electric-blue-bg text-white rounded-lg text-[8px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95">Save</button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Stats Cluster (Followers/Collectors, Settings, Following) */}
-          <div className="flex items-center gap-6 md:gap-10 mb-8">
-            <div className="flex items-center gap-4 group">
+          <div className="flex items-center justify-center md:justify-start gap-6 md:gap-8 mb-4">
+            <div className="flex items-center gap-3 group">
               <div className="text-center md:text-left cursor-pointer">
-                <p className="text-xl md:text-2xl font-black text-white italic leading-none group-hover:text-blue-400 transition-colors">
+                <p className="text-lg md:text-xl font-black text-white italic leading-none group-hover:text-blue-400 transition-colors">
                   {localUser.followers.toLocaleString()}
                 </p>
                 <p className="text-[7px] text-white/20 font-black uppercase tracking-widest mt-1">Collectors</p>
               </div>
               <Link 
                 to="/settings" 
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all hover:rotate-90 duration-500"
+                className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all hover:rotate-90 duration-500"
                 title="Protocol Settings"
               >
-                <i className="fas fa-cog text-xs md:text-base"></i>
+                <i className="fas fa-cog text-[10px] md:text-xs"></i>
               </Link>
             </div>
 
             <div className="text-center md:text-left group cursor-pointer">
-              <p className="text-xl md:text-2xl font-black text-white italic leading-none group-hover:text-blue-400 transition-colors">
+              <p className="text-lg md:text-xl font-black text-white italic leading-none group-hover:text-blue-400 transition-colors">
                 {localUser.following.toLocaleString()}
               </p>
               <p className="text-[7px] text-white/20 font-black uppercase tracking-widest mt-1">Following</p>
             </div>
           </div>
-
-          {/* Edit/Save Actions */}
-          <div className="flex gap-4 w-full max-w-xs md:max-w-none">
-            {!isEditing ? (
-              <button 
-                onClick={() => setIsEditing(true)}
-                className="px-8 py-3.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white hover:bg-white/10 transition-all active:scale-95 shadow-lg"
-              >
-                Configure Identity
-              </button>
-            ) : (
-              <div className="flex gap-2 w-full md:w-auto">
-                <button onClick={() => setIsEditing(false)} className="px-6 py-3.5 bg-red-500/10 text-red-500 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all">Abort</button>
-                <button onClick={handleSave} className="px-8 py-3.5 electric-blue-bg text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95">Commit Sync</button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
       {/* Main Dashboard Layout */}
-      <div className="max-w-7xl mx-auto px-4 md:px-12 mt-20">
+      <div className="max-w-7xl mx-auto px-4 md:px-12 mt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           {/* Left Sidebar: Network Ledger */}
@@ -301,16 +315,74 @@ const Profile: React.FC = () => {
 
             {/* RELEASES SECTION (If Artist) */}
             {(localUser.isVerifiedArtist || MOCK_TRACKS.some(t => t.artistId === localUser.id)) && (
-              <section>
-                <SectionHeader title="Authored Protocols" actionLabel="Mint New" onAction={() => setShowMintModal(true)} />
-                <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 px-4 md:px-0">
-                  {MOCK_TRACKS.slice(0, 5).map(track => (
-                    <div key={track.id} className="flex-shrink-0 w-44 md:w-52">
-                      <TrackCard track={track} />
+              <>
+                <section>
+                  <SectionHeader title="Authored Protocols" actionLabel="Mint New" onAction={() => setShowMintModal(true)} />
+                  <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 px-4 md:px-0">
+                    {MOCK_TRACKS.slice(0, 5).map(track => (
+                      <div key={track.id} className="flex-shrink-0 w-44 md:w-52">
+                        <TrackCard track={track} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* ROYALTIES SECTION */}
+                <section className="glass backdrop-blur-xl bg-white/[0.02] border border-white/10 p-8 rounded-2xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><i className="fas fa-chart-line text-4xl text-blue-500"></i></div>
+                  <div className="absolute -left-20 -bottom-20 w-40 h-40 bg-blue-600/10 blur-[80px] rounded-full"></div>
+                  <SectionHeader title="Royalty Distribution Ledger" />
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 relative z-10">
+                    <div>
+                      <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.4em] italic block mb-1">Total Earned</span>
+                      <span className="text-2xl font-black italic tracking-tighter text-white">{royaltyStats.total} <span className="text-[10px] text-blue-500">TON</span></span>
                     </div>
-                  ))}
-                </div>
-              </section>
+                    <div>
+                      <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.4em] italic block mb-1">Streaming</span>
+                      <span className="text-xl font-black italic tracking-tighter text-white">{royaltyStats.streaming} <span className="text-[10px] text-blue-500">TON</span></span>
+                    </div>
+                    <div>
+                      <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.4em] italic block mb-1">NFT Royalties</span>
+                      <span className="text-xl font-black italic tracking-tighter text-white">{royaltyStats.nft} <span className="text-[10px] text-blue-500">TON</span></span>
+                    </div>
+                    <div>
+                      <span className="text-[8px] font-black text-amber-500/60 uppercase tracking-[0.4em] italic block mb-1">Pending Sync</span>
+                      <span className="text-xl font-black italic tracking-tighter text-amber-500">{royaltyStats.pending} <span className="text-[10px]">TON</span></span>
+                    </div>
+                  </div>
+
+                  <div className="relative z-10">
+                    <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] italic mb-4">Recent Distributions</h4>
+                    <div className="space-y-2">
+                      {[
+                        { id: 1, type: 'Streaming', amount: '2.4', date: 'Today, 14:30', track: 'Solar Pulse' },
+                        { id: 2, type: 'NFT Resale', amount: '0.9', date: 'Yesterday', track: 'Deep Horizon #042' },
+                        { id: 3, type: 'Streaming', amount: '1.1', date: 'Oct 24', track: 'Cyber Drift' }
+                      ].map(tx => (
+                        <div key={tx.id} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${tx.type === 'Streaming' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                              <i className={`fas ${tx.type === 'Streaming' ? 'fa-play' : 'fa-gem'} text-[10px]`}></i>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-black text-white uppercase italic">{tx.type} Revenue</p>
+                              <p className="text-[8px] text-white/40 uppercase tracking-widest">{tx.track}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-black text-green-400 italic">+{tx.amount} TON</p>
+                            <p className="text-[8px] text-white/30 uppercase tracking-widest">{tx.date}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="w-full mt-4 py-3 bg-blue-600/10 border border-blue-500/30 rounded-xl text-[8px] font-black text-blue-500 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-lg shadow-blue-500/5">
+                      Withdraw to Wallet
+                    </button>
+                  </div>
+                </section>
+              </>
             )}
 
             {/* SEQUENCES SECTION */}
@@ -345,6 +417,34 @@ const Profile: React.FC = () => {
                     <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em]">Signal void detected.</p>
                   </div>
                 )}
+              </div>
+            </section>
+
+            {/* RECOMMENDATIONS SECTION */}
+            <section className="glass backdrop-blur-xl bg-white/[0.02] border border-white/10 p-8 rounded-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-6 opacity-10"><i className="fas fa-satellite-dish text-4xl text-blue-500"></i></div>
+              <SectionHeader title="Network Suggestions" />
+              
+              <div className="space-y-8 relative z-10">
+                <div>
+                  <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] italic mb-4">Suggested Nodes</h4>
+                  <div className="flex overflow-x-auto no-scrollbar gap-4 pb-2">
+                    {MOCK_ARTISTS.slice(0, 4).map(artist => (
+                      <div key={artist.id} className="flex-shrink-0 w-48">
+                        <UserCard user={artist} variant="compact" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] italic mb-4">Curated Frequencies</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {MOCK_TRACKS.slice(0, 4).map(track => (
+                      <TrackCard key={track.id} track={track} variant="row" />
+                    ))}
+                  </div>
+                </div>
               </div>
             </section>
 
