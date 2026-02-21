@@ -12,6 +12,7 @@ const GENRES = ['Electronic', 'Synthwave', 'Ambient', 'Lofi', 'Pop', 'Hip Hop', 
 const VIBE_CHIPS = ['Night Drive', 'Cyberpunk', 'Focus', 'After-Hours', 'Neural Chill', 'Glitch-Hop', 'Distopian', 'Hyperpop', 'Basement Techno'];
 const RECENT_SEARCHES_KEY = 'tonjam_recent_searches';
 const INITIAL_LIMIT = 12;
+const TRACK_SORT_OPTIONS = ['Newest', 'Popularity', 'Most Liked'];
 
 const Discover: React.FC = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const Discover: React.FC = () => {
   const [search, setSearch] = useState(initialSearch);
   const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists'>('Tracks');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState('Newest');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
   
@@ -80,7 +82,7 @@ const Discover: React.FC = () => {
     let results: any[] = [];
 
     if (activeFilter === 'Tracks') {
-      results = MOCK_TRACKS;
+      results = [...MOCK_TRACKS];
       if (search) {
         results = results.filter(t => 
           t.title.toLowerCase().includes(search.toLowerCase()) || 
@@ -89,6 +91,15 @@ const Discover: React.FC = () => {
       }
       if (selectedGenre) {
         results = results.filter(t => t.genre.toLowerCase() === selectedGenre.toLowerCase());
+      }
+
+      // Apply sorting for tracks
+      if (sortBy === 'Popularity') {
+        results.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+      } else if (sortBy === 'Most Liked') {
+        results.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      } else if (sortBy === 'Newest') {
+        results.sort((a, b) => parseInt(b.id) - parseInt(a.id));
       }
     } else if (activeFilter === 'Artists') {
       results = MOCK_ARTISTS;
@@ -109,7 +120,7 @@ const Discover: React.FC = () => {
     }
 
     return results;
-  }, [search, activeFilter, selectedGenre]);
+  }, [search, activeFilter, selectedGenre, sortBy]);
 
   const visibleResults = useMemo(() => {
     return filteredResults.slice(0, displayLimit);
@@ -264,20 +275,37 @@ const Discover: React.FC = () => {
           )}
         </div>
 
-        {/* ENTITY FILTER */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
-          {['Artists', 'Tracks', 'NFTs', 'Playlists'].map(filter => (
-            <button 
-              key={filter}
-              onClick={() => {
-                setActiveFilter(filter as any);
-                setDisplayLimit(INITIAL_LIMIT);
-              }}
-              className={`flex-shrink-0 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${activeFilter === filter ? 'bg-white text-black shadow-sm' : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/5'}`}
-            >
-              {filter}
-            </button>
-          ))}
+        {/* ENTITY FILTER & SORT */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+            {['Artists', 'Tracks', 'NFTs', 'Playlists'].map(filter => (
+              <button 
+                key={filter}
+                onClick={() => {
+                  setActiveFilter(filter as any);
+                  setDisplayLimit(INITIAL_LIMIT);
+                }}
+                className={`flex-shrink-0 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${activeFilter === filter ? 'bg-white text-black shadow-sm' : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/5'}`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+
+          {activeFilter === 'Tracks' && (
+            <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-2 self-start md:self-auto">
+              <span className="text-[8px] font-black text-white/20 uppercase tracking-widest mr-3">Sort:</span>
+              <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent text-white text-[9px] font-black uppercase outline-none cursor-pointer pr-1"
+              >
+                  {TRACK_SORT_OPTIONS.map(opt => (
+                      <option key={opt} value={opt} className="bg-[#050505]">{opt}</option>
+                  ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
