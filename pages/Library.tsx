@@ -1,6 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS } from '../constants';
 import TrackCard from '../components/TrackCard';
 import NFTCard from '../components/NFTCard';
@@ -10,8 +9,6 @@ import { useAudio } from '../context/AudioContext';
 import { Track } from '../types';
 
 const Library: React.FC = () => {
-  // Fix: Initialized navigate hook from react-router-dom to handle navigation
-  const navigate = useNavigate();
   const { 
     playAll, 
     playlists, 
@@ -26,7 +23,6 @@ const Library: React.FC = () => {
     setActivePlaylistId
   } = useAudio();
   
-  const [activeTab, setActiveTab] = useState<'tracks' | 'nfts' | 'liked'>('tracks');
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -34,13 +30,6 @@ const Library: React.FC = () => {
     playlists.find(p => p.id === selectedPlaylistId), 
     [playlists, selectedPlaylistId]
   );
-
-  const filteredTracks = useMemo(() => {
-    return MOCK_TRACKS.filter(t => 
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      t.artist.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
 
   const filteredNFTs = useMemo(() => {
     return MOCK_NFTS.filter(n => 
@@ -65,7 +54,7 @@ const Library: React.FC = () => {
   }, [followedUserIds]);
 
   // Sync active playlist ID to context for options modal
-  React.useEffect(() => {
+  useEffect(() => {
     setActivePlaylistId(selectedPlaylistId);
     return () => setActivePlaylistId(null);
   }, [selectedPlaylistId, setActivePlaylistId]);
