@@ -76,7 +76,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className="w-14 h-14 object-contain" 
             />
             <div className="flex flex-col">
-              <span className="font-black text-base tracking-tighter italic text-white uppercase leading-none">TONJAM</span>
+              <span className="font-black text-base tracking-tighter text-white uppercase leading-none">TONJAM</span>
               <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest leading-none mt-1">TESTNET</span>
             </div>
           </div>
@@ -92,7 +92,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               }}
               onFocus={() => setIsSearchOpen(true)}
               placeholder="Search frequencies..." 
-              className="bg-transparent border-none outline-none text-sm w-full text-white placeholder:text-white/40 italic font-medium"
+              className="bg-transparent border-none outline-none text-sm w-full text-white placeholder:text-white/40 font-medium"
             />
             
             {/* Search Dropdown */}
@@ -103,7 +103,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   {/* Artists */}
                   {searchResults.artists.length > 0 && (
                     <div>
-                      <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] italic mb-3">Nodes</h4>
+                      <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] mb-3">Nodes</h4>
                       <div className="space-y-2">
                         {searchResults.artists.map(artist => (
                           <div 
@@ -118,7 +118,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <img src={artist.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-white/10" alt="" />
                             <div>
                               <div className="flex items-center gap-1">
-                                <p className="text-xs font-black text-white italic group-hover:text-blue-400 transition-colors">{artist.name}</p>
+                                <p className="text-xs font-black text-white group-hover:text-blue-400 transition-colors">{artist.name}</p>
                                 {artist.verified && <i className="fas fa-check-circle text-blue-500 text-[8px]"></i>}
                               </div>
                               <p className="text-[8px] text-white/40 uppercase tracking-widest">{artist.followers.toLocaleString()} Fans</p>
@@ -132,7 +132,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   {/* Tracks */}
                   {searchResults.tracks.length > 0 && (
                     <div>
-                      <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] italic mb-3">Frequencies</h4>
+                      <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] mb-3">Frequencies</h4>
                       <div className="space-y-2">
                         {searchResults.tracks.map(track => (
                           <div 
@@ -146,7 +146,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                           >
                             <img src={track.coverUrl} className="w-10 h-10 rounded-lg object-cover border border-white/10" alt="" />
                             <div>
-                              <p className="text-xs font-black text-white italic group-hover:text-blue-400 transition-colors">{track.title}</p>
+                              <p className="text-xs font-black text-white group-hover:text-blue-400 transition-colors">{track.title}</p>
                               <p className="text-[8px] text-white/40 uppercase tracking-widest">{track.artist}</p>
                             </div>
                           </div>
@@ -158,7 +158,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   {/* NFTs */}
                   {searchResults.nfts.length > 0 && (
                     <div>
-                      <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] italic mb-3">Assets</h4>
+                      <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] mb-3">Assets</h4>
                       <div className="space-y-2">
                         {searchResults.nfts.map(nft => (
                           <div 
@@ -172,7 +172,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                           >
                             <img src={nft.imageUrl} className="w-10 h-10 rounded-lg object-cover border border-white/10" alt="" />
                             <div>
-                              <p className="text-xs font-black text-white italic group-hover:text-blue-400 transition-colors">{nft.title}</p>
+                              <p className="text-xs font-black text-white group-hover:text-blue-400 transition-colors">{nft.title}</p>
                               <p className="text-[8px] text-blue-500 uppercase tracking-widest">{nft.price} TON</p>
                             </div>
                           </div>
@@ -183,7 +183,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                   {searchResults.artists.length === 0 && searchResults.tracks.length === 0 && searchResults.nfts.length === 0 && (
                     <div className="py-8 text-center">
-                      <p className="text-[10px] font-black text-white/20 uppercase tracking-widest italic">No signals detected.</p>
+                      <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">No signals detected.</p>
                     </div>
                   )}
                 </div>
@@ -234,7 +234,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             className="w-16 h-16 object-contain group-hover:rotate-12 transition-transform" 
           />
           <div className="flex flex-col">
-            <span className="font-black text-xl tracking-tighter italic text-white uppercase leading-none">TONJAM</span>
+            <span className="font-black text-xl tracking-tighter text-white uppercase leading-none">TONJAM</span>
             <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-none mt-1">TESTNET</span>
           </div>
         </Link>

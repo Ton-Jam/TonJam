@@ -80,8 +80,8 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
         <div className="p-8">
           <header className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Asset Protocol</h2>
-              <p className="text-[7px] font-black text-blue-400 uppercase tracking-[0.4em] italic mt-1">Manage Listing Parameters</p>
+              <h2 className="text-xl font-black uppercase tracking-tighter text-white">Asset Protocol</h2>
+              <p className="text-[7px] font-black text-blue-400 uppercase tracking-[0.4em] mt-1">Manage Listing Parameters</p>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"><i className="fas fa-times"></i></button>
           </header>
@@ -106,13 +106,13 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
             <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/5">
               <img src={nft.imageUrl} className="w-12 h-12 rounded-lg object-cover" alt="" />
               <div className="flex-1 min-w-0">
-                <p className="text-[9px] font-black uppercase text-white italic truncate">{nft.title}</p>
+                <p className="text-[9px] font-black uppercase text-white truncate">{nft.title}</p>
                 <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mt-1">Status: Ready for broadcast</p>
               </div>
             </div>
 
             <div className="space-y-3">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-2 italic">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-2">
                 {listingType === 'fixed' ? 'LISTING PRICE (TON)' : 'STARTING BID (TON)'}
               </label>
               <div className="relative">
@@ -128,7 +128,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
 
             {listingType === 'fixed' ? (
               <div className="space-y-3 animate-in fade-in duration-300">
-                <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-2 italic">LISTING DURATION</label>
+                <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-2">LISTING DURATION</label>
                 <div className="grid grid-cols-4 gap-2">
                   {DURATIONS.map((d) => (
                     <button
@@ -149,7 +149,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
               <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-2 italic">START PROTOCOL</label>
+                    <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-2">START PROTOCOL</label>
                     <input 
                       type="datetime-local" 
                       value={startTime}
@@ -158,7 +158,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-2 italic">END PROTOCOL</label>
+                    <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-2">END PROTOCOL</label>
                     <input 
                       type="datetime-local" 
                       value={endTime}
@@ -180,10 +180,10 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
                 <span>-{breakdown.fee}</span>
               </div>
               <div className="pt-3 border-t border-white/5 flex justify-between items-center">
-                <span className={`text-[9px] font-black uppercase tracking-widest italic ${listingType === 'fixed' ? 'text-blue-400' : 'text-amber-400'}`}>
+                <span className={`text-[9px] font-black uppercase tracking-widest ${listingType === 'fixed' ? 'text-blue-400' : 'text-amber-400'}`}>
                   {listingType === 'fixed' ? 'Estimated Proceeds' : 'Minimum Step'}
                 </span>
-                <span className="text-lg font-black text-white italic">{breakdown.proceeds} TON</span>
+                <span className="text-lg font-black text-white">{breakdown.proceeds} TON</span>
               </div>
             </div>
 

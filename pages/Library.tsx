@@ -18,9 +18,11 @@ const Library: React.FC = () => {
     createNewPlaylist, 
     deletePlaylist,
     updatePlaylist,
+    createRecommendedPlaylist,
     recentlyPlayed,
     clearRecentlyPlayed,
     likedTrackIds,
+    followedUserIds,
     setActivePlaylistId
   } = useAudio();
   
@@ -57,6 +59,10 @@ const Library: React.FC = () => {
       t.artist.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [likedTracks, searchQuery]);
+
+  const followedArtists = useMemo(() => {
+    return MOCK_ARTISTS.filter(a => followedUserIds.includes(a.id));
+  }, [followedUserIds]);
 
   // Sync active playlist ID to context for options modal
   React.useEffect(() => {
@@ -140,8 +146,8 @@ const Library: React.FC = () => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 px-4 md:px-12">
       <header className="mb-6 pt-8">
-        <h1 className="text-2xl md:text-3xl font-black italic tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
-        <p className="text-[8px] font-black text-white/40 uppercase tracking-[0.5em] italic">STORAGE PROTOCOL ACTIVE</p>
+        <h1 className="text-2xl md:text-3xl font-black tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
+        <p className="text-[8px] font-black text-white/40 uppercase tracking-[0.5em]">STORAGE PROTOCOL ACTIVE</p>
       </header>
 
       <div className="relative mb-10">
@@ -151,7 +157,7 @@ const Library: React.FC = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Filter your digital assets..." 
-          className="w-full bg-[#111111] border border-white/10 py-3 pl-12 pr-10 text-xs outline-none focus:border-blue-500/50 transition-all placeholder:text-white/30 rounded-xl shadow-inner text-white italic"
+          className="w-full bg-[#111111] border border-white/10 py-3 pl-12 pr-10 text-xs outline-none focus:border-blue-500/50 transition-all placeholder:text-white/30 rounded-xl shadow-inner text-white"
         />
       </div>
 
@@ -161,7 +167,7 @@ const Library: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-1 h-4 electric-blue-bg rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
-              <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">Recent Frequencies</h3>
+              <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em]">Recent Frequencies</h3>
             </div>
             <button 
               onClick={clearRecentlyPlayed}
@@ -184,7 +190,7 @@ const Library: React.FC = () => {
       {/* My Playlists Section */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">My Playlists</h3>
+          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em]">My Playlists</h3>
         </div>
         
         <div className="flex gap-6 overflow-x-auto no-scrollbar pb-6 mask-linear-fade">
@@ -202,6 +208,21 @@ const Library: React.FC = () => {
             <span className="text-[9px] font-black text-white/40 uppercase tracking-widest group-hover:text-white transition-colors">Create Sync</span>
           </div>
 
+          {/* AI Recommended Playlist Card */}
+          <div 
+            onClick={createRecommendedPlaylist}
+            className="flex-shrink-0 w-36 md:w-44 aspect-square border-2 border-dashed border-blue-500/20 rounded-xl flex flex-col items-center justify-center group cursor-pointer hover:bg-blue-500/10 transition-all relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mb-4 group-hover:bg-blue-500/30 group-hover:text-blue-400 transition-colors relative z-10">
+              <i className="fas fa-sparkles text-blue-400/60 group-hover:text-blue-400 text-lg"></i>
+            </div>
+            <span className="text-[9px] font-black text-blue-400/60 uppercase tracking-widest group-hover:text-blue-400 transition-colors relative z-10">AI Sync</span>
+            <div className="absolute top-2 right-2">
+              <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+
           {playlists.map(playlist => (
             <PlaylistCard 
               key={playlist.id} 
@@ -215,21 +236,27 @@ const Library: React.FC = () => {
       {/* Followed Artists Section */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">Followed Nodes</h3>
+          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em]">Followed Nodes</h3>
         </div>
         <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
-          {MOCK_ARTISTS.slice(0, 5).map(artist => (
-            <div key={`followed-${artist.id}`} className="flex-shrink-0 w-36 md:w-44">
-              <UserCard user={artist} variant="portrait" />
+          {followedArtists.length > 0 ? (
+            followedArtists.map(artist => (
+              <div key={`followed-${artist.id}`} className="flex-shrink-0 w-36 md:w-44">
+                <UserCard user={artist} variant="portrait" />
+              </div>
+            ))
+          ) : (
+            <div className="w-full py-12 text-center glass rounded-xl border-dashed border-white/10">
+              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">No nodes synchronized.</p>
             </div>
-          ))}
+          )}
         </div>
       </section>
 
       {/* Favorite Tracks Section */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">Favorite Tracks</h3>
+          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em]">Favorite Tracks</h3>
         </div>
         <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
           {filteredLikedTracks.length > 0 ? (
@@ -240,7 +267,7 @@ const Library: React.FC = () => {
             ))
           ) : (
             <div className="w-full py-12 text-center glass rounded-xl border-dashed border-white/10">
-              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest italic">No frequencies saved in vault.</p>
+              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">No frequencies saved in vault.</p>
             </div>
           )}
         </div>
@@ -249,7 +276,7 @@ const Library: React.FC = () => {
       {/* My NFT Collection Section */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">My NFT Collection</h3>
+          <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em]">My NFT Collection</h3>
         </div>
         <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
           {filteredNFTs.length > 0 ? (
@@ -260,7 +287,7 @@ const Library: React.FC = () => {
             ))
           ) : (
             <div className="w-full py-12 text-center glass rounded-xl border-dashed border-white/10">
-              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest italic">No assets detected.</p>
+              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">No assets detected.</p>
             </div>
           )}
         </div>
@@ -271,7 +298,7 @@ const Library: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <i className="fas fa-satellite-dish text-blue-500 text-[10px]"></i>
-            <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em] italic">Recommended Frequencies</h3>
+            <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em]">Recommended Frequencies</h3>
           </div>
         </div>
         <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">

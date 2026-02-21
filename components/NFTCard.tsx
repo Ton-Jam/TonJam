@@ -1,9 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NFTItem } from '../types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER } from '../constants';
 import { useAudio } from '../context/AudioContext';
+import BuyNFTModal from './BuyNFTModal';
+import SellNFTModal from './SellNFTModal';
+import BidModal from './BidModal';
 
 interface NFTCardProps {
   nft: NFTItem;
@@ -13,6 +16,9 @@ interface NFTCardProps {
 const NFTCard: React.FC<NFTCardProps> = ({ nft, onSell }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying, setOptionsTrack } = useAudio();
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [showSellModal, setShowSellModal] = useState(false);
+  const [showBidModal, setShowBidModal] = useState(false);
   
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
@@ -34,12 +40,22 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onSell }) => {
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isOwner) {
+      setShowSellModal(true);
+    } else if (nft.listingType === 'auction') {
+      setShowBidModal(true);
+    } else {
+      setShowBuyModal(true);
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
     navigate(`/nft/${nft.id}`);
   };
 
   return (
     <div 
-      onClick={handleActionClick}
+      onClick={handleCardClick}
       className="relative cursor-pointer group w-full bg-[#050505] rounded-xl p-2.5 border border-white/5 hover:border-blue-500/30 transition-all hover:-translate-y-1 overflow-hidden shadow-2xl"
     >
       {/* Artwork Area */}
@@ -78,32 +94,38 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onSell }) => {
       {/* Enhanced Info Area */}
       <div className="px-1 flex flex-col gap-1 pb-1">
         <div className="flex justify-between items-start gap-2">
-          <h3 className={`text-[11px] font-black uppercase tracking-tighter truncate italic leading-tight flex-1 ${isActive ? 'text-blue-400' : 'text-white'}`}>
+          <h3 className={`text-[11px] font-black uppercase tracking-tighter truncate leading-tight flex-1 ${isActive ? 'text-blue-400' : 'text-white'}`}>
             {nft.title}
           </h3>
           {nft.listingType === 'auction' && (
             <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse mt-1"></div>
           )}
         </div>
-        <p className="text-[8px] font-black uppercase tracking-widest italic text-white/20 mb-2 truncate">@{nft.creator}</p>
+        <p className="text-[8px] font-black uppercase tracking-widest text-white/20 mb-2 truncate">@{nft.creator}</p>
 
         <div className="flex items-center justify-between pt-2 border-t border-white/5">
           <div className="flex flex-col">
             <span className="text-[7px] font-black text-white/10 uppercase tracking-widest mb-0.5">Price</span>
             <div className="flex items-center gap-1.5">
               <img src={TON_LOGO} className="w-3.5 h-3.5" alt="TON" />
-              <span className="text-sm font-black italic text-white tracking-tighter">
+              <span className="text-sm font-semibold text-white tracking-tighter">
                 {nft.price}
               </span>
             </div>
           </div>
           <button 
-            className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] text-white shadow-lg active:scale-95 transition-all border ${isOwner ? 'bg-white/5 border-white/10 text-white/30' : 'electric-blue-bg border-white/10 shadow-blue-500/10'}`}
+            onClick={handleActionClick}
+            className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] text-white shadow-lg active:scale-95 transition-all border ${isOwner ? 'bg-white/5 border-white/10 text-white/30 hover:text-white hover:bg-white/10' : 'electric-blue-bg border-white/10 shadow-blue-500/10'}`}
           >
             {isOwner ? 'MANAGE' : nft.listingType === 'auction' ? 'BID' : 'BUY'}
           </button>
         </div>
       </div>
+
+      {/* Modals */}
+      {showBuyModal && <BuyNFTModal nft={nft} onClose={() => setShowBuyModal(false)} />}
+      {showSellModal && <SellNFTModal nft={nft} onClose={() => setShowSellModal(false)} />}
+      {showBidModal && <BidModal nft={nft} onClose={() => setShowBidModal(false)} />}
     </div>
   );
 };

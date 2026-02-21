@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { Track, Playlist, UserProfile } from '../types';
-import { MOCK_PLAYLISTS, MOCK_USER } from '../constants';
+import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS } from '../constants';
 
 interface Notification {
   id: string;
@@ -55,6 +55,7 @@ interface AudioContextType {
   createNewPlaylist: (name: string, description?: string, initialTrack?: Track) => void;
   deletePlaylist: (playlistId: string) => void;
   updatePlaylist: (playlistId: string, updates: Partial<Playlist>) => void;
+  createRecommendedPlaylist: () => void;
   clearRecentlyPlayed: () => void;
   setUserProfile: (profile: UserProfile) => void;
   setGenesisContractAddress: (address: string | null) => void;
@@ -381,7 +382,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const newPlaylist: Playlist = {
       id: Date.now().toString(),
       title: name,
-      coverUrl: initialTrack ? initialTrack.coverUrl : `https://picsum.photos/400/400?random=${Math.floor(Math.random() * 1000)}`,
+      coverUrl: '', // Leave empty for dynamic collage/placeholder
       trackCount: initialTrack ? 1 : 0,
       creator: 'You',
       description,
@@ -403,6 +404,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updatePlaylist = (playlistId: string, updates: Partial<Playlist>) => {
     setPlaylists(prev => prev.map(pl => pl.id === playlistId ? { ...pl, ...updates } : pl));
     addNotification("Sequence protocol updated", "success");
+  };
+
+  const createRecommendedPlaylist = () => {
+    // Simulate recommendation logic by picking random tracks
+    const shuffled = [...MOCK_TRACKS].sort(() => 0.5 - Math.random());
+    const recommendedTracks = shuffled.slice(0, 5);
+    const name = `Neural Sync ${playlists.length + 1}`;
+    
+    const newPlaylist: Playlist = {
+      id: Date.now().toString(),
+      title: name,
+      coverUrl: '', // Leave empty for dynamic collage
+      trackCount: recommendedTracks.length,
+      creator: 'TonJam AI',
+      description: "Neural-sync sequence generated based on your sonic profile.",
+      trackIds: recommendedTracks.map(t => t.id)
+    };
+    
+    setPlaylists(prev => [newPlaylist, ...prev]);
+    addNotification(`AI Sequence "${name}" initialized with ${recommendedTracks.length} tracks`, 'success');
   };
 
   // Fix: Implemented clearRecentlyPlayed function to purge history
@@ -458,7 +479,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       volume, isMuted,
       playTrack, togglePlay, nextTrack, prevTrack, addToQueue, playAll, seek, setVolume, toggleMute, toggleLikeTrack, toggleFollowUser, closePlayer, setFullPlayerOpen,
       toggleShuffle, toggleRepeat, addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist, removeTrackFromPlaylist,
-      reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, resetProtocol
+      reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, resetProtocol
     }}>
       {children}
       

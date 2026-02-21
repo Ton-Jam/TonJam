@@ -225,6 +225,6 @@ export const MOCK_POSTS: Post[] = [
 ];
 
 export const MOCK_PLAYLISTS: Playlist[] = [
-  { id: 'pl1', title: 'Gaming Vibes', coverUrl: 'https://picsum.photos/400/400?random=41', trackCount: 24, creator: 'User123', trackIds: ['1', '2'] },
+  { id: 'pl1', title: 'Gaming Vibes', coverUrl: '', trackCount: 4, creator: 'User123', trackIds: ['1', '2', '3', '4'] },
   { id: 'pl2', title: 'Late Night Study', coverUrl: 'https://picsum.photos/400/400?random=42', trackCount: 15, creator: 'LofiGirl', trackIds: ['3'] },
 ];

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Track } from '../types';
 import { useAudio } from '../context/AudioContext';
+import { MOCK_USER } from '../constants';
 
 interface TrackCardProps {
   track: Track;
@@ -11,8 +12,22 @@ interface TrackCardProps {
 
 const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReorder = false }) => {
   const navigate = useNavigate();
-  const { currentTrack, isPlaying, playTrack, setOptionsTrack, likedTrackIds, toggleLikeTrack, activePlaylistId, reorderTrackInPlaylist } = useAudio();
+  const { currentTrack, isPlaying, playTrack, setOptionsTrack, likedTrackIds, toggleLikeTrack, activePlaylistId, reorderTrackInPlaylist, addNotification } = useAudio();
   const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState<{
+    id: string, 
+    user: string, 
+    avatar: string, 
+    text: string, 
+    time: string,
+    reactions: Record<string, number>
+  }[]>([
+    { id: '1', user: 'CryptoPioneer', avatar: 'https://picsum.photos/40/40?random=1', text: 'This drop is insane! 🔥', time: '2h ago', reactions: { '🔥': 12, '🚀': 5 } },
+    { id: '2', user: 'SynthFan99', avatar: 'https://picsum.photos/40/40?random=2', text: 'Need this on repeat 24/7.', time: '1h ago', reactions: { '🎧': 8 } }
+  ]);
+
+  const REACTION_EMOJIS = ['🔥', '💎', '🚀', '🎧', '⚡'];
   const isActive = currentTrack?.id === track.id;
   const isLiked = likedTrackIds.includes(track.id);
 
@@ -43,6 +58,35 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
     setShowComments(true);
   };
 
+  const handleAddComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+    
+    const newComment = {
+      id: Date.now().toString(),
+      user: MOCK_USER.name,
+      avatar: MOCK_USER.avatar,
+      text: commentText,
+      time: 'Just now',
+      reactions: {}
+    };
+    
+    setComments([newComment, ...comments]);
+    setCommentText('');
+    addNotification('Comment synchronized', 'success');
+  };
+
+  const handleCommentReaction = (commentId: string, emoji: string) => {
+    setComments(prev => prev.map(c => {
+      if (c.id === commentId) {
+        const newReactions = { ...c.reactions };
+        newReactions[emoji] = (newReactions[emoji] || 0) + 1;
+        return { ...c, reactions: newReactions };
+      }
+      return c;
+    }));
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = String(seconds % 60).padStart(2, '0');
@@ -62,11 +106,11 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className={`text-[10px] font-black uppercase truncate leading-none tracking-tight mb-1 italic ${isActive ? 'text-blue-400' : 'text-white'}`}>{track.title}</h4>
+          <h4 className={`text-[10px] font-black uppercase truncate leading-none tracking-tight mb-1 ${isActive ? 'text-blue-400' : 'text-white'}`}>{track.title}</h4>
           <div className="flex items-center gap-1">
             <p 
               onClick={handleArtistClick} 
-              className={`text-[8px] font-black uppercase tracking-widest hover:text-blue-400 transition-colors italic inline-block ${isActive ? 'text-blue-400/60' : 'text-white/30'}`}
+              className={`text-[8px] font-black uppercase tracking-widest hover:text-blue-400 transition-colors inline-block ${isActive ? 'text-blue-400/60' : 'text-white/30'}`}
             >
               {track.artist}
             </p>
@@ -102,7 +146,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
           >
             <i className="far fa-comment text-[10px]"></i>
           </button>
-          <span className="text-[9px] font-mono font-black text-white/20 italic">{formatDuration(track.duration)}</span>
+          <span className="text-[9px] font-mono font-semibold text-white/20">{formatDuration(track.duration)}</span>
           <button 
             onClick={handleOptionsClick}
             className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white transition-all rounded-full hover:bg-white/5"
@@ -121,9 +165,21 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
     >
       <div className="relative aspect-square mb-3 overflow-hidden rounded-lg border border-white/10">
         <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s] ease-out" alt={track.title} />
-        <div className={`absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center ${isActive ? 'opacity-100' : ''}`}>
-          <div className="w-12 h-12 rounded-full electric-blue-bg flex items-center justify-center shadow-2xl border border-white/10">
+        <div className={`absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center ${isActive ? 'opacity-100' : ''}`}>
+          <div className="w-12 h-12 rounded-full electric-blue-bg flex items-center justify-center shadow-2xl border border-white/10 transform group-hover:scale-110 transition-transform duration-500">
             <i className={`fas ${isActive && isPlaying ? 'fa-pause' : 'fa-play'} text-white text-xs`}></i>
+          </div>
+          
+          {/* Hover Reveal Info */}
+          <div className="absolute bottom-3 left-0 right-0 flex justify-between px-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+            <div className="flex items-center gap-1.5">
+              <i className="fas fa-headphones text-[8px] text-blue-400"></i>
+              <span className="text-[9px] font-semibold text-white uppercase tracking-widest">{track.playCount?.toLocaleString() || '0'}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <i className="fas fa-clock text-[8px] text-white/40"></i>
+              <span className="text-[9px] font-semibold text-white uppercase tracking-widest">{formatDuration(track.duration)}</span>
+            </div>
           </div>
         </div>
         <button 
@@ -146,13 +202,13 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
         </button>
       </div>
       <div className="px-1 flex flex-col gap-0.5 pb-1">
-        <h3 className={`font-black truncate text-[10px] uppercase tracking-tighter italic leading-tight ${isActive ? 'text-blue-400' : 'text-white'}`}>
+        <h3 className={`font-black truncate text-[10px] uppercase tracking-tighter leading-tight ${isActive ? 'text-blue-400' : 'text-white'}`}>
           {track.title}
         </h3>
         <div className="flex items-center gap-1">
           <p 
             onClick={handleArtistClick} 
-            className={`text-[8px] font-black truncate uppercase tracking-widest italic hover:text-blue-400 transition-colors w-fit ${isActive ? 'text-blue-400/60' : 'text-white/20'}`}
+            className={`text-[8px] font-black truncate uppercase tracking-widest hover:text-blue-400 transition-colors w-fit ${isActive ? 'text-blue-400/60' : 'text-white/20'}`}
           >
             {track.artist}
           </p>
@@ -164,33 +220,87 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300" onClick={(e) => e.stopPropagation()}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowComments(false)}></div>
           <div className="relative glass w-full max-w-md rounded-[2rem] p-8 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-sm font-black italic uppercase tracking-tighter text-white">Track Comments</h3>
-              <button onClick={() => setShowComments(false)} className="text-white/40 hover:text-white transition-colors">
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center gap-4">
+                <img src={track.coverUrl} className="w-12 h-12 rounded-lg object-cover border border-white/10" alt="" />
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-tighter text-white leading-none mb-1">{track.title}</h3>
+                  <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">{track.artist}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowComments(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
                 <i className="fas fa-times"></i>
               </button>
             </div>
-            <div className="space-y-4 mb-6 max-h-60 overflow-y-auto no-scrollbar">
-              <div className="flex gap-3">
-                <img src="https://picsum.photos/40/40?random=1" className="w-8 h-8 rounded-full" alt="" />
-                <div>
-                  <p className="text-[10px] font-black text-white uppercase italic">CryptoPioneer</p>
-                  <p className="text-xs text-white/60 italic">This drop is insane! 🔥</p>
-                </div>
+
+            <form onSubmit={handleAddComment} className="flex gap-4 mb-8">
+              <img src={MOCK_USER.avatar} className="w-8 h-8 rounded-full border border-white/10" alt="" />
+              <div className="flex-1 relative">
+                <input 
+                  type="text" 
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-xs outline-none focus:border-blue-500/50 transition-all text-white"
+                />
+                <button 
+                  type="submit"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-white transition-colors"
+                >
+                  <i className="fas fa-paper-plane text-[10px]"></i>
+                </button>
               </div>
-              <div className="flex gap-3">
-                <img src="https://picsum.photos/40/40?random=2" className="w-8 h-8 rounded-full" alt="" />
-                <div>
-                  <p className="text-[10px] font-black text-white uppercase italic">SynthFan99</p>
-                  <p className="text-xs text-white/60 italic">Need this on repeat 24/7.</p>
+            </form>
+
+            <div className="space-y-6 mb-2 max-h-80 overflow-y-auto no-scrollbar">
+              {comments.map(comment => (
+                <div key={comment.id} className="flex gap-4 animate-in fade-in duration-300 group/comment">
+                  <img src={comment.avatar} className="w-8 h-8 rounded-full border border-white/10 flex-shrink-0" alt="" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <h5 className="text-[10px] font-black text-white uppercase">{comment.user}</h5>
+                      <span className="text-[8px] text-white/20 font-black uppercase tracking-widest">{comment.time}</span>
+                    </div>
+                    <p className="text-[11px] text-white/60 leading-relaxed mb-2">{comment.text}</p>
+                    
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(comment.reactions).map(([emoji, count]) => (
+                          <div 
+                            key={emoji}
+                            className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-2 py-0.5 text-[8px] text-white/40"
+                          >
+                            <span>{emoji}</span>
+                            <span className="font-black">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="relative group/picker">
+                        <button className="text-[8px] font-black text-white/10 hover:text-blue-500 uppercase tracking-widest transition-colors">
+                          + React
+                        </button>
+                        <div className="absolute bottom-full left-0 mb-2 hidden group-hover/picker:flex items-center gap-1 bg-[#0a0a0a] border border-white/10 p-1 rounded-lg shadow-2xl z-20">
+                          {REACTION_EMOJIS.map(emoji => (
+                            <button 
+                              key={emoji}
+                              onClick={() => handleCommentReaction(comment.id, emoji)}
+                              className="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition-colors text-xs"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <input type="text" placeholder="Add a comment..." className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-blue-500 transition-colors italic" />
-              <button className="px-4 py-2 bg-blue-600/20 text-blue-400 rounded-xl hover:bg-blue-600 hover:text-white transition-colors">
-                <i className="fas fa-paper-plane"></i>
-              </button>
+              ))}
+              {comments.length === 0 && (
+                <p className="text-center py-8 text-[9px] font-black text-white/10 uppercase tracking-[0.4em]">
+                  No signals detected in this sector.
+                </p>
+              )}
             </div>
           </div>
         </div>

@@ -66,17 +66,17 @@ const FullAudioPlayer: React.FC = () => {
             </div>
           ) : (
             <div className="w-full h-full max-h-[450px] overflow-y-auto no-scrollbar py-10 px-4 space-y-12">
-               <p className="text-4xl font-black text-white uppercase italic tracking-tighter leading-tight text-left">Frequencies locked, we're forging the soul</p>
-               <p className="text-4xl font-black text-blue-400 uppercase italic tracking-tighter leading-tight text-left">Digital diamonds in a decentralized bowl</p>
-               <p className="text-4xl font-black text-white/20 uppercase italic tracking-tighter leading-tight text-left">TON blockchain rhythm, heart under control</p>
+               <p className="text-4xl font-black text-white uppercase tracking-tighter leading-tight text-left">Frequencies locked, we're forging the soul</p>
+               <p className="text-4xl font-black text-blue-400 uppercase tracking-tighter leading-tight text-left">Digital diamonds in a decentralized bowl</p>
+               <p className="text-4xl font-black text-white/20 uppercase tracking-tighter leading-tight text-left">TON blockchain rhythm, heart under control</p>
             </div>
           )}
 
           <div className="w-full text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-black mb-2 tracking-tighter uppercase italic text-white leading-none truncate px-4">{currentTrack.title}</h2>
+            <h2 className="text-3xl md:text-4xl font-black mb-2 tracking-tighter uppercase text-white leading-none truncate px-4">{currentTrack.title}</h2>
             <p 
               onClick={handleArtistClick}
-              className="text-blue-500 font-black text-base md:text-lg tracking-widest uppercase italic cursor-pointer hover:text-white transition-colors"
+              className="text-blue-500 font-black text-base md:text-lg tracking-widest uppercase cursor-pointer hover:text-white transition-colors"
             >
               {currentTrack.artist}
             </p>
@@ -87,7 +87,7 @@ const FullAudioPlayer: React.FC = () => {
               <input type="range" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" value={progress} onChange={(e) => seek(Number(e.target.value))} />
               <div className="absolute top-0 left-0 h-full bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.7)]" style={{ width: `${progress}%` }}></div>
             </div>
-            <div className="flex justify-between text-[10px] font-black text-white/30 tracking-widest uppercase italic">
+            <div className="flex justify-between text-[10px] font-black text-white/30 tracking-widest uppercase">
               <span>{Math.floor((progress / 100) * currentTrack.duration / 60)}:{String(Math.floor(((progress / 100) * currentTrack.duration) % 60)).padStart(2, '0')}</span>
               <span>{Math.floor(currentTrack.duration / 60)}:{String(currentTrack.duration % 60).padStart(2, '0')}</span>
             </div>

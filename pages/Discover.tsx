@@ -152,7 +152,7 @@ const Discover: React.FC = () => {
 
   const SectionHeader = ({ title, onAction }: { title: string, onAction?: () => void }) => (
     <div className="flex items-center justify-between mb-6">
-      <h2 className="text-xl font-black italic tracking-tighter uppercase text-white flex items-center gap-3 leading-none">
+      <h2 className="text-xl font-black tracking-tighter uppercase text-white flex items-center gap-3 leading-none">
         <i className="fas fa-bolt text-blue-400 text-xs"></i>
         {title}
       </h2>
@@ -220,7 +220,7 @@ const Discover: React.FC = () => {
                 }
               }}
               placeholder={`Search ${activeFilter.toLowerCase()}...`} 
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-10 text-xs outline-none transition-all placeholder:text-white/20 shadow-inner shadow-black/20 text-white italic focus:border-blue-500/50"
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-10 text-xs outline-none transition-all placeholder:text-white/20 shadow-inner shadow-black/20 text-white focus:border-blue-500/50"
             />
             {search && (
               <button 
@@ -237,7 +237,7 @@ const Discover: React.FC = () => {
             <div className="absolute top-full left-0 right-0 mt-3 z-50 bg-[#0A0A0A] rounded-2xl border border-white/10 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 backdrop-blur-3xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5 px-2">
-                  <h3 className="text-[9px] font-black text-white/30 uppercase tracking-[0.5em] italic">Relay Logs</h3>
+                  <h3 className="text-[9px] font-black text-white/30 uppercase tracking-[0.5em]">Relay Logs</h3>
                   <button onClick={clearRecentSearches} className="text-[9px] font-black text-blue-500 hover:text-white transition-colors uppercase tracking-widest border-b border-blue-500/20 pb-0.5">Purge Archives</button>
                 </div>
                 <div className="space-y-1.5">
@@ -251,7 +251,7 @@ const Discover: React.FC = () => {
                         <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/20 group-hover:text-blue-400 group-hover:bg-blue-500/10 transition-all">
                           <i className="fas fa-history text-xs"></i>
                         </div>
-                        <span className="text-[13px] font-black italic uppercase tracking-tight text-white/60 group-hover:text-white">{term}</span>
+                        <span className="text-[13px] font-black uppercase tracking-tight text-white/60 group-hover:text-white">{term}</span>
                       </div>
                       <button onClick={(e) => removeRecentSearch(e, term)} className="opacity-0 group-hover:opacity-100 p-3 text-white/10 hover:text-red-500 transition-all transform hover:scale-110">
                         <i className="fas fa-times text-[10px]"></i>
@@ -295,13 +295,13 @@ const Discover: React.FC = () => {
                   {activeFilter === 'Tracks' && <TrackCard track={item as Track} />}
                   {activeFilter === 'Artists' && <UserCard user={item as any} variant="portrait" />}
                   {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
-                  {activeFilter === 'Playlists' && <div className="p-4 glass rounded-xl text-white/50 text-xs italic">Playlist rendering...</div>}
+                  {activeFilter === 'Playlists' && <div className="p-4 glass rounded-xl text-white/50 text-xs">Playlist rendering...</div>}
                 </div>
               ))
             ) : (
               <div className="w-full py-20 text-center flex flex-col items-center glass rounded-xl border border-dashed border-white/10 bg-[#050505]/50">
                  <i className="fas fa-satellite-dish text-4xl text-white/5 mb-4 animate-pulse"></i>
-                 <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.5em] italic px-8 leading-relaxed text-center">Protocol Mismatch. Zero signals detected.</p>
+                 <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.5em] px-8 leading-relaxed text-center">Protocol Mismatch. Zero signals detected.</p>
                  <button onClick={clearInput} className="mt-6 text-[8px] font-black text-blue-500 uppercase tracking-[0.3em] border-b border-blue-500/20 pb-1">Reset Filters</button>
               </div>
             )}
@@ -351,10 +351,10 @@ const Discover: React.FC = () => {
               <div className="text-center md:text-left space-y-4">
                 <div className="flex items-center justify-center md:justify-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.6em] italic">Genesis Mainnet</span>
+                  <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.6em]">Genesis Mainnet</span>
                 </div>
-                <h3 className="text-4xl font-black italic uppercase tracking-tighter text-white leading-none">The NFT Revolution</h3>
-                <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] italic font-black max-w-md">Holders gain access to private neural syncs, VIP stem archives, and direct artist royalties.</p>
+                <h3 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">The NFT Revolution</h3>
+                <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black max-w-md">Holders gain access to private neural syncs, VIP stem archives, and direct artist royalties.</p>
               </div>
               <button 
                 onClick={() => navigate('/marketplace')}

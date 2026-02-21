@@ -160,9 +160,9 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
               )}
             </div>
             <div className="flex-1 min-w-0 pt-2">
-              <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-none mb-4 truncate">{track.title}</h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white leading-none mb-4 truncate">{track.title}</h2>
               <div className="flex items-center justify-center md:justify-start gap-3 mb-6 cursor-pointer group" onClick={() => handleArtistClick(track.artistId)}>
-                <p className="text-lg text-blue-500 uppercase font-black tracking-widest italic group-hover:text-white transition-colors">{track.artist}</p>
+                <p className="text-lg text-blue-500 uppercase font-black tracking-widest group-hover:text-white transition-colors">{track.artist}</p>
                 <div className="w-5 h-5 rounded-full bg-blue-600/20 flex items-center justify-center border border-blue-500/20">
                   <i className="fas fa-check text-[8px] text-blue-400"></i>
                 </div>
@@ -170,11 +170,11 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
               <div className="flex justify-center md:justify-start gap-3">
                 <div className="px-5 py-2 bg-white/5 rounded-xl border border-white/10 flex items-center gap-3">
                   <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">Scanner BPM</span>
-                  <span className="text-sm font-black text-white italic">{track.bpm || '128'}</span>
+                  <span className="text-sm font-black text-white">{track.bpm || '128'}</span>
                 </div>
                 <div className="px-5 py-2 bg-white/5 rounded-xl border border-white/10 flex items-center gap-3">
                   <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">Frequency Key</span>
-                  <span className="text-sm font-black text-white italic uppercase">{track.key || 'C#m'}</span>
+                  <span className="text-sm font-black text-white uppercase">{track.key || 'C#m'}</span>
                 </div>
               </div>
             </div>
@@ -189,7 +189,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
               <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500 transition-all">
                 <i className="fas fa-hand-holding-dollar text-blue-500 text-lg group-hover:text-white"></i>
               </div>
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white italic">Tip Producer</span>
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Tip Producer</span>
             </button>
             <button 
               onClick={handlePrimaryAction}
@@ -200,14 +200,14 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
                   <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center">
                     <img src={TON_LOGO} className="w-5 h-5 invert" alt="" />
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] italic">Buy {nftData.price} TON</span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">Buy {nftData.price} TON</span>
                 </>
               ) : (
                 <>
                   <div className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center">
                     <i className="fas fa-plus-circle text-lg"></i>
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] italic">Mint Edition</span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">Mint Edition</span>
                 </>
               )}
             </button>
@@ -216,7 +216,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
           {/* Protocol Menu - Refined Bolder Actions */}
           <div className="space-y-3 mb-16">
             <div className="px-2 mb-4">
-              <h3 className="text-[9px] font-black text-white/20 uppercase tracking-[0.5em] italic">Network Protocols</h3>
+              <h3 className="text-[9px] font-black text-white/20 uppercase tracking-[0.5em]">Network Protocols</h3>
             </div>
             
             <MenuAction 
@@ -270,7 +270,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
             <div className="flex items-center justify-between mb-8 px-2">
               <div className="flex items-center gap-3">
                 <i className="fas fa-dna text-blue-500 text-[10px] animate-pulse"></i>
-                <h4 className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] italic">Neural Relay: Sonic DNA</h4>
+                <h4 className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Neural Relay: Sonic DNA</h4>
               </div>
               {isRelatedLoading && <i className="fas fa-circle-notch animate-spin text-blue-500 text-[10px]"></i>}
             </div>
@@ -289,7 +289,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
                         <i className="fas fa-bolt text-[8px] text-white"></i>
                       </div>
                     </div>
-                    <span className="text-[10px] font-black text-white/50 uppercase italic tracking-tighter truncate w-full text-center group-hover:text-blue-400 transition-colors">{related.name}</span>
+                    <span className="text-[10px] font-black text-white/50 uppercase tracking-tighter truncate w-full text-center group-hover:text-blue-400 transition-colors">{related.name}</span>
                   </div>
                 ))
               ) : (
@@ -307,7 +307,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
           <div className="mb-16" id="social-relay">
             <div className="flex items-center gap-6 mb-10">
                <div className="h-px flex-1 bg-white/5"></div>
-               <h3 className="text-[9px] font-black text-white/10 uppercase tracking-[0.6em] italic whitespace-nowrap">Global Broadcast</h3>
+               <h3 className="text-[9px] font-black text-white/10 uppercase tracking-[0.6em] whitespace-nowrap">Global Broadcast</h3>
                <div className="h-px flex-1 bg-white/5"></div>
             </div>
             <div className="flex justify-around items-center">
@@ -328,7 +328,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose })
 
           <button 
             onClick={onClose}
-            className="w-full py-7 text-white/30 font-black uppercase text-xs tracking-[0.8em] hover:text-red-500 transition-all italic text-center bg-white/[0.02] rounded-[2rem] border border-white/5 active:bg-red-500/10 active:border-red-500/50"
+            className="w-full py-7 text-white/30 font-black uppercase text-xs tracking-[0.8em] hover:text-red-500 transition-all text-center bg-white/[0.02] rounded-[2rem] border border-white/5 active:bg-red-500/10 active:border-red-500/50"
           >
             ABORT SYNC
           </button>
@@ -346,7 +346,7 @@ const MenuAction = ({ icon, label, onClick, color = "text-white/40", active = fa
     <div className={`w-14 h-14 flex-shrink-0 flex items-center justify-center ${active ? 'text-blue-400 bg-blue-500/10 border-blue-500/30' : color + ' bg-white/5 border-white/10'} group-hover:text-blue-400 group-hover:bg-blue-500/10 transition-all rounded-2xl border`}>
       <i className={`fas ${icon} text-xl`}></i>
     </div>
-    <span className={`text-base font-black uppercase tracking-tighter italic ${active ? 'text-white' : 'text-white/60'} group-hover:text-white transition-colors`}>
+    <span className={`text-base font-black uppercase tracking-tighter ${active ? 'text-white' : 'text-white/60'} group-hover:text-white transition-colors`}>
       {label}
     </span>
     <div className="ml-auto opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">

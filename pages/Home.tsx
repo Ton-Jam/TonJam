@@ -78,8 +78,8 @@ const Home: React.FC = () => {
   const SectionHeader = ({ title, subtitle, onAction }: { title: string, subtitle?: string, onAction?: () => void }) => (
     <div className="flex items-center justify-between mb-4 px-4 md:px-12">
       <div>
-        <h2 className="text-xl md:text-2xl font-black italic tracking-tighter uppercase text-white leading-none">{title}</h2>
-        {subtitle && <p className="text-white/20 text-[8px] font-black uppercase tracking-[0.4em] mt-1 italic">{subtitle}</p>}
+        <h2 className="text-xl md:text-2xl font-black tracking-tighter uppercase text-white leading-none">{title}</h2>
+        {subtitle && <p className="text-white/20 text-[8px] font-black uppercase tracking-[0.4em] mt-1">{subtitle}</p>}
       </div>
       {onAction && (
         <button onClick={onAction} className="text-[9px] font-black uppercase tracking-widest text-blue-500 hover:text-white transition-all">View All</button>
@@ -120,7 +120,7 @@ const Home: React.FC = () => {
           <div className="absolute -top-48 -right-48 w-96 h-96 bg-blue-500/5 blur-[120px] rounded-full pointer-events-none"></div>
           <div className="flex flex-col gap-8 relative z-10">
             <div className="w-full">
-              <h2 className="text-3xl md:text-6xl font-black italic tracking-tighter mb-2 uppercase text-white">
+              <h2 className="text-3xl md:text-6xl font-black tracking-tighter mb-2 uppercase text-white">
                 VIBE <span className="text-blue-500">SYNC</span>
               </h2>
               <div className="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2 -mx-1 px-1">
@@ -140,7 +140,7 @@ const Home: React.FC = () => {
                   value={mood}
                   onChange={(e) => setMood(e.target.value)}
                   placeholder="Describe your current state..." 
-                  className="w-full bg-black border border-white/5 py-4 pl-6 pr-16 text-xs md:text-lg outline-none focus:border-blue-500/50 transition-all text-white italic rounded-xl"
+                  className="w-full bg-black border border-white/5 py-4 pl-6 pr-16 text-xs md:text-lg outline-none focus:border-blue-500/50 transition-all text-white rounded-xl"
                 />
                 <button 
                   onClick={() => handleAIDiscover()}
@@ -174,8 +174,8 @@ const Home: React.FC = () => {
                 <div className="inline-block px-3 py-1 bg-blue-600/20 backdrop-blur-xl text-white text-[8px] font-black uppercase tracking-[0.4em] mb-4 border border-blue-500/30 rounded-full w-fit">
                   {card.tag}
                 </div>
-                <h1 className="text-3xl md:text-6xl font-black mb-3 tracking-tighter leading-none uppercase italic text-white">{card.title}</h1>
-                <p className="text-white/60 text-[11px] md:text-lg leading-snug mb-8 max-w-lg font-bold italic uppercase tracking-tighter">{card.desc}</p>
+                <h1 className="text-3xl md:text-6xl font-black mb-3 tracking-tighter leading-none uppercase text-white">{card.title}</h1>
+                <p className="text-white/60 text-[11px] md:text-lg leading-snug mb-8 max-w-lg font-bold uppercase tracking-tighter">{card.desc}</p>
                 <button onClick={() => navigate('/marketplace')} className="bg-blue-600 w-fit px-8 py-4 font-black text-[10px] uppercase tracking-[0.2em] transition-all text-white rounded-xl shadow-2xl shadow-blue-500/20 active:scale-95">
                   {card.cta}
                 </button>
@@ -209,7 +209,7 @@ const Home: React.FC = () => {
 
       <footer className="bg-black border-t border-white/5 py-16 flex flex-col items-center">
         <img src={APP_LOGO} className="w-10 h-10 opacity-20 mb-6" alt="" />
-        <p className="text-white/10 text-[9px] font-black uppercase tracking-[0.8em] italic">TONJAM PROTOCOL V.1.0</p>
+        <p className="text-white/10 text-[9px] font-black uppercase tracking-[0.8em]">TONJAM PROTOCOL V.1.0</p>
       </footer>
     </div>
   );

@@ -66,21 +66,21 @@ const MintModal: React.FC<MintModalProps> = ({ onClose }) => {
       <div className="relative glass w-full max-w-2xl rounded-[3rem] border border-blue-500/20 p-12 shadow-2xl animate-in zoom-in-95 duration-300">
           <header className="flex justify-between items-center mb-10">
             <div>
-               <h2 className="text-3xl font-black italic uppercase text-white">MINT PROTOCOL</h2>
+               <h2 className="text-3xl font-black uppercase text-white">MINT PROTOCOL</h2>
                {genesisContractAddress && <p className="text-[7px] font-black text-blue-400 uppercase tracking-widest mt-1">Targeting: {genesisContractAddress.slice(0, 16)}...</p>}
             </div>
             <button onClick={onClose} className="text-white/40"><i className="fas fa-times"></i></button>
           </header>
 
           <div className="space-y-6">
-            <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Asset Title" className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white outline-none focus:border-blue-500 italic font-bold" />
+            <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Asset Title" className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white outline-none focus:border-blue-500 font-bold" />
             
             <div className="relative">
               <button onClick={handleLoreGen} disabled={isGeneratingLore} className="absolute right-4 top-4 text-[8px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1">
                 {isGeneratingLore ? <i className="fas fa-circle-notch animate-spin"></i> : <i className="fas fa-sparkles"></i>}
                 AI Forge
               </button>
-              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Description forged in the void..." className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white h-32 resize-none italic" />
+              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Description forged in the void..." className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white h-32 resize-none" />
             </div>
 
             <button onClick={handleMint} disabled={isMinting} className="w-full py-5 bg-blue-600 rounded-2xl text-white font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50">

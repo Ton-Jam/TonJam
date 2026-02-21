@@ -77,7 +77,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'full' }) => {
           )}
         </div>
         <div className="flex items-center gap-1.5 group-hover:text-blue-400 transition-colors">
-          <span className="font-black text-[10px] md:text-xs uppercase tracking-tight text-center truncate italic">{user.name}</span>
+          <span className="font-black text-[10px] md:text-xs uppercase tracking-tight text-center truncate">{user.name}</span>
           {user.verified && <i className="fas fa-check-circle text-blue-500 text-[10px]"></i>}
         </div>
         <span className="text-[8px] text-white/20 uppercase tracking-[0.2em] font-black mt-0.5 mb-3">{user.followers.toLocaleString()} FANS</span>
@@ -117,7 +117,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'full' }) => {
         <h3 className="text-sm font-black text-white group-hover:text-blue-400 transition-colors uppercase tracking-tight">{user.name}</h3>
         {user.verified && <i className="fas fa-check-circle text-blue-500 text-xs"></i>}
       </div>
-      <p className="text-[9px] text-white/30 uppercase tracking-[0.2em] font-black mb-6 italic">{user.followers.toLocaleString()} COLLECTORS</p>
+      <p className="text-[9px] text-white/30 uppercase tracking-[0.2em] font-black mb-6">{user.followers.toLocaleString()} COLLECTORS</p>
       
       <button 
         onClick={handleFollow}

@@ -114,7 +114,7 @@ const ArtistProfile: React.FC = () => {
   const StatBox = ({ label, value, sub, tooltip }: { label: string, value: string, sub?: string, tooltip?: string }) => (
     <div className="flex flex-col glass backdrop-blur-md bg-white/[0.02] border border-white/5 p-3 rounded-xl hover:border-blue-500/30 transition-all group relative">
       <div className="flex items-center gap-1 mb-1">
-        <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.4em] italic group-hover:text-blue-400/50 transition-colors">{label}</span>
+        <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.4em] group-hover:text-blue-400/50 transition-colors">{label}</span>
         {tooltip && (
           <div className="relative group/tooltip">
             <i className="fas fa-info-circle text-[6px] text-white/20 hover:text-blue-400 cursor-help transition-colors"></i>
@@ -126,8 +126,8 @@ const ArtistProfile: React.FC = () => {
         )}
       </div>
       <div className="flex items-baseline gap-1.5">
-        <span className="text-xl font-black text-white italic tracking-tighter leading-none group-hover:text-blue-400 transition-colors">{value}</span>
-        {sub && <span className="text-[8px] font-black text-blue-500 uppercase italic">{sub}</span>}
+        <span className="text-xl font-black text-white tracking-tighter leading-none group-hover:text-blue-400 transition-colors">{value}</span>
+        {sub && <span className="text-[8px] font-black text-blue-500 uppercase">{sub}</span>}
       </div>
     </div>
   );
@@ -204,15 +204,15 @@ const ArtistProfile: React.FC = () => {
             <div className="flex flex-col items-center md:items-start text-center md:text-left mb-1">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.4em] italic">NODE_SYNC: ACTIVE</span>
+                <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.4em]">NODE_SYNC: ACTIVE</span>
               </div>
               <div className="flex items-center gap-4 mb-1">
-                <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-none">
+                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white leading-none">
                   {artist.name}
                 </h1>
                 {artist.verified && <i className="fas fa-check-circle text-blue-500 text-2xl md:text-4xl"></i>}
               </div>
-              <p className="text-blue-500 font-black text-[10px] uppercase tracking-[0.4em] italic opacity-70">
+              <p className="text-blue-500 font-black text-[10px] uppercase tracking-[0.4em] opacity-70">
                 @sonic_architect_{artist.id}
               </p>
             </div>
@@ -248,7 +248,7 @@ const ArtistProfile: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 mt-12 animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-1 h-4 electric-blue-bg rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
-            <h2 className="text-[9px] font-black text-white/40 uppercase tracking-[0.5em] italic">Trending Frequencies</h2>
+            <h2 className="text-[9px] font-black text-white/40 uppercase tracking-[0.5em]">Trending Frequencies</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -271,17 +271,17 @@ const ArtistProfile: React.FC = () => {
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[7px] font-black text-blue-500 uppercase italic">#{idx + 1} Trending</span>
+                      <span className="text-[7px] font-black text-blue-500 uppercase">#{idx + 1} Trending</span>
                     </div>
-                    <h3 className="text-sm font-black text-white uppercase italic tracking-tighter truncate leading-tight mb-1">{track.title}</h3>
+                    <h3 className="text-sm font-black text-white uppercase tracking-tighter truncate leading-tight mb-1">{track.title}</h3>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1">
                         <i className="fas fa-play text-[7px] text-white/20"></i>
-                        <span className="text-[8px] font-black text-white/40 italic">{(track.playCount || 0).toLocaleString()}</span>
+                        <span className="text-[8px] font-black text-white/40">{(track.playCount || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <i className="fas fa-heart text-[7px] text-red-500/40"></i>
-                        <span className="text-[8px] font-black text-white/40 italic">{(track.likes || 0).toLocaleString()}</span>
+                        <span className="text-[8px] font-black text-white/40">{(track.likes || 0).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -301,7 +301,7 @@ const ArtistProfile: React.FC = () => {
             <section className="glass backdrop-blur-2xl bg-white/[0.02] p-8 rounded-2xl border-blue-500/20 border relative overflow-hidden group shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><i className="fas fa-dna text-3xl text-blue-500"></i></div>
                <div className="absolute -left-20 -top-20 w-40 h-40 bg-blue-600/10 blur-[80px] rounded-full"></div>
-               <h3 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.4em] mb-6 italic relative z-10">Neural DNA Signature</h3>
+               <h3 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.4em] mb-6 relative z-10">Neural DNA Signature</h3>
                
                {isDNAStreaming ? (
                  <div className="py-8 flex flex-col items-center gap-4 relative z-10">
@@ -314,7 +314,7 @@ const ArtistProfile: React.FC = () => {
                  </div>
                ) : sonicDNA ? (
                  <div className="space-y-6 animate-in fade-in duration-700 relative z-10">
-                    <p className="text-xs text-white/60 leading-relaxed italic border-l border-blue-500/30 pl-6">
+                    <p className="text-xs text-white/60 leading-relaxed border-l border-blue-500/30 pl-6">
                       "{sonicDNA.signature}"
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -330,19 +330,19 @@ const ArtistProfile: React.FC = () => {
             {marketStats && (
               <section className="glass backdrop-blur-xl bg-white/[0.02] p-8 rounded-2xl border-amber-500/20 border relative shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                 <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full"></div>
-                <h3 className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.4em] mb-6 italic relative z-10">Market Ledger</h3>
+                <h3 className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.4em] mb-6 relative z-10">Market Ledger</h3>
                 <div className="space-y-4 relative z-10">
                   <div className="flex justify-between items-center group/stat">
                     <span className="text-[8px] font-black text-white/20 uppercase group-hover/stat:text-white/40 transition-colors">Floor</span>
-                    <span className="text-xs font-black text-white italic group-hover:text-amber-500 transition-colors">{marketStats.floor} TON</span>
+                    <span className="text-xs font-black text-white group-hover:text-amber-500 transition-colors">{marketStats.floor} TON</span>
                   </div>
                   <div className="flex justify-between items-center group/stat">
                     <span className="text-[8px] font-black text-white/20 uppercase group-hover/stat:text-white/40 transition-colors">Volume</span>
-                    <span className="text-xs font-black text-white italic group-hover:text-amber-500 transition-colors">{marketStats.volume} TON</span>
+                    <span className="text-xs font-black text-white group-hover:text-amber-500 transition-colors">{marketStats.volume} TON</span>
                   </div>
                   <div className="flex justify-between items-center group/stat">
                     <span className="text-[8px] font-black text-white/20 uppercase group-hover/stat:text-white/40 transition-colors">Holders</span>
-                    <span className="text-xs font-black text-white italic group-hover:text-amber-500 transition-colors">{marketStats.holders}</span>
+                    <span className="text-xs font-black text-white group-hover:text-amber-500 transition-colors">{marketStats.holders}</span>
                   </div>
                   <button onClick={() => navigate('/marketplace')} className="w-full py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[7px] font-black text-amber-500 uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all mt-2 shadow-lg shadow-amber-500/5">Trade Assets</button>
                 </div>
@@ -351,8 +351,8 @@ const ArtistProfile: React.FC = () => {
 
             {/* Biography */}
             <section className="p-8 glass backdrop-blur-xl bg-white/[0.01] rounded-2xl border border-white/5">
-              <h3 className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-6 italic">Origin Narrative</h3>
-              <p className="text-xs text-white/40 leading-relaxed italic">{artist.bio || "No biographical record in neural archive."}</p>
+              <h3 className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-6">Origin Narrative</h3>
+              <p className="text-xs text-white/40 leading-relaxed">{artist.bio || "No biographical record in neural archive."}</p>
             </section>
           </div>
 
@@ -379,7 +379,7 @@ const ArtistProfile: React.FC = () => {
                     <section>
                       <div className="flex items-center gap-2 mb-5">
                         <i className="fas fa-fire text-amber-500 text-[8px]"></i>
-                        <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] italic">Popular Syncs</h4>
+                        <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em]">Popular Syncs</h4>
                       </div>
                       <div className="space-y-1">
                         {artistTracks.slice(0, 4).map(t => (
@@ -393,7 +393,7 @@ const ArtistProfile: React.FC = () => {
                   <section>
                     <div className="flex items-center gap-2 mb-6">
                       <i className="fas fa-list-ul text-white/20 text-[8px]"></i>
-                      <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] italic">All Frequencies</h4>
+                      <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em]">All Frequencies</h4>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
                       {artistTracks.map(t => (
@@ -402,7 +402,7 @@ const ArtistProfile: React.FC = () => {
                     </div>
                     {artistTracks.length === 0 && (
                        <div className="py-24 text-center glass rounded-2xl border-dashed border-white/10">
-                          <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em] italic">No tracks broadcasted.</p>
+                          <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em]">No tracks broadcasted.</p>
                        </div>
                     )}
                   </section>
@@ -414,7 +414,7 @@ const ArtistProfile: React.FC = () => {
                   {artistNFTs.map(n => <NFTCard key={n.id} nft={n} />)}
                   {artistNFTs.length === 0 && (
                      <div className="col-span-full py-24 text-center glass rounded-2xl border-dashed border-white/10">
-                        <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em] italic">No assets detected.</p>
+                        <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em]">No assets detected.</p>
                      </div>
                   )}
                 </div>
@@ -426,7 +426,7 @@ const ArtistProfile: React.FC = () => {
                       artistPosts.map(p => <PostCard key={p.id} post={p} />)
                    ) : (
                      <div className="py-24 text-center glass rounded-2xl border-dashed border-white/10">
-                        <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em] italic">Signal void detected.</p>
+                        <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em]">Signal void detected.</p>
                      </div>
                    )}
                 </div>
@@ -437,8 +437,8 @@ const ArtistProfile: React.FC = () => {
                   {/* Proximity Matching */}
                   <section className="glass p-10 rounded-[2.5rem] border border-white/5 relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-8 opacity-5"><i className="fas fa-microchip text-5xl"></i></div>
-                     <h3 className="text-lg font-black italic tracking-tighter text-white mb-1">Sonic Proximity</h3>
-                     <p className="text-[8px] font-black text-blue-400 uppercase tracking-[0.4em] mb-10 italic">Neural Matching Protocol Active</p>
+                     <h3 className="text-lg font-black tracking-tighter text-white mb-1">Sonic Proximity</h3>
+                     <p className="text-[8px] font-black text-blue-400 uppercase tracking-[0.4em] mb-10">Neural Matching Protocol Active</p>
                      
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                        {isRelatedLoading ? (
@@ -452,7 +452,7 @@ const ArtistProfile: React.FC = () => {
                              <div className="relative w-20 h-20 mx-auto mb-3">
                                 <img src={related.avatarUrl} className="w-full h-full object-cover rounded-full border border-white/10 group-hover:border-blue-500 transition-all" alt="" />
                              </div>
-                             <h4 className="text-[10px] font-black uppercase text-white italic tracking-tight">{related.name}</h4>
+                             <h4 className="text-[10px] font-black uppercase text-white tracking-tight">{related.name}</h4>
                              <p className="text-[6px] font-black text-white/20 uppercase tracking-widest mt-1">{related.followers.toLocaleString()} Fans</p>
                           </div>
                        ))}
@@ -466,8 +466,8 @@ const ArtistProfile: React.FC = () => {
                            <i className="fas fa-shield-check text-white text-xl"></i>
                         </div>
                         <div>
-                           <h4 className="text-lg font-black italic text-white uppercase tracking-tighter">Verified Architect</h4>
-                           <p className="text-[8px] font-black text-white/30 uppercase tracking-widest italic mt-1">Confirmed Identity on TON Blockchain</p>
+                           <h4 className="text-lg font-black text-white uppercase tracking-tighter">Verified Architect</h4>
+                           <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1">Confirmed Identity on TON Blockchain</p>
                         </div>
                      </div>
                      <button className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Report Identity</button>

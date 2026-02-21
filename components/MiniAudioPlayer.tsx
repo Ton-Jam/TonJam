@@ -37,10 +37,10 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({ onOptionsClick }) => 
           )}
         </div>
         <div className="min-w-0">
-          <h4 className="text-[8.5px] font-bold truncate text-white uppercase tracking-tight italic leading-tight">{currentTrack.title}</h4>
+          <h4 className="text-[8.5px] font-bold truncate text-white uppercase tracking-tight leading-tight">{currentTrack.title}</h4>
           <p 
             onClick={handleArtistClick}
-            className="text-[9px] text-white/30 truncate uppercase font-black tracking-widest italic hover:text-blue-400 transition-colors inline-block leading-tight"
+            className="text-[9px] text-white/30 truncate uppercase font-black tracking-widest hover:text-blue-400 transition-colors inline-block leading-tight"
           >
             {currentTrack.artist}
           </p>
