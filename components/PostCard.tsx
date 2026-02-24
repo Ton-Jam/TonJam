@@ -101,13 +101,17 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
   };
 
   return (
-    <div className="bg-[#050505] rounded-[2rem] p-8 border border-white/5 hover:border-white/10 transition-all group relative animate-in fade-in duration-500 shadow-2xl overflow-hidden">
+    <div 
+      onClick={() => navigate(`/post/${post.id}`)}
+      className="bg-[#080808] rounded-[2.5rem] p-10 border border-white/5 hover:border-white/10 transition-all group relative animate-in fade-in duration-500 shadow-2xl overflow-hidden cursor-pointer"
+    >
       
-      {/* Top Right Options - Naked icon (no backdrop) */}
-      <div className="absolute top-8 right-8 z-10">
+      {/* Subtle Background Glow */}
+      <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/5 blur-[100px] rounded-full pointer-events-none group-hover:bg-blue-600/10 transition-all duration-1000"></div>
+      <div className="absolute top-6 right-6 z-10">
         <button 
           onClick={(e) => { e.stopPropagation(); setShowOptions(true); }}
-          className="w-10 h-10 flex items-center justify-center text-white/30 hover:text-blue-400 transition-all bg-transparent"
+          className="w-8 h-8 flex items-center justify-center text-white/30 hover:text-blue-400 transition-all bg-transparent"
         >
           <i className="fas fa-ellipsis-v text-xs"></i>
         </button>
@@ -125,7 +129,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
               className="w-12 h-12 rounded-full border-2 border-white/5 group-hover/avatar:border-blue-500 transition-all object-cover shadow-xl" 
               alt={post.userName} 
             />
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-black flex items-center justify-center">
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-black flex items-center justify-center shadow-[0_0_10px_rgba(37,99,235,0.5)]">
                <i className="fas fa-bolt text-[6px] text-white"></i>
             </div>
           </div>
@@ -142,15 +146,19 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
               {!isMe && (
                 <button 
                   onClick={(e) => { e.stopPropagation(); toggleFollowUser(post.userId); }}
-                  className={`text-[8px] font-black uppercase tracking-widest transition-colors ${isFollowing ? 'text-blue-500' : 'text-white/20 hover:text-blue-400'}`}
+                  className={`text-[8px] font-black uppercase tracking-widest transition-colors px-2 py-0.5 rounded border ${isFollowing ? 'text-blue-500 border-blue-500/20 bg-blue-500/5' : 'text-white/20 border-white/5 hover:text-blue-400 hover:border-blue-400/20'}`}
                 >
-                  {isFollowing ? '• Following' : '• Follow'}
+                  {isFollowing ? 'Following' : 'Follow'}
                 </button>
               )}
             </div>
-            <span className="text-[9px] text-white/30 uppercase tracking-[0.3em] font-black">
-              {post.timestamp}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-white/30 uppercase tracking-[0.3em] font-black">
+                {post.timestamp}
+              </span>
+              <div className="w-1 h-1 rounded-full bg-blue-500/20"></div>
+              <span className="text-[7px] text-blue-500/40 uppercase font-black tracking-widest">Neural Sync Active</span>
+            </div>
           </div>
         </div>
         
@@ -158,9 +166,24 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
           {post.content}
         </p>
 
+        {post.imageUrl && (
+          <div className="mb-6 rounded-[1.5rem] overflow-hidden border border-white/5 shadow-xl">
+            {post.imageUrl.startsWith('data:video') ? (
+              <video src={post.imageUrl} controls className="w-full max-h-96 object-cover" />
+            ) : (
+              <img src={post.imageUrl} className="w-full max-h-96 object-cover" alt="Post media" />
+            )}
+          </div>
+        )}
+
         {track && (
-          <div className="mb-6 scale-[0.98] hover:scale-100 transition-transform origin-left">
+          <div className="mb-6 scale-[0.98] hover:scale-100 transition-all duration-500 origin-left relative group/track">
+            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-blue-600 rounded-full opacity-0 group-hover/track:opacity-100 transition-opacity"></div>
+            <div className="absolute -inset-2 bg-blue-600/5 blur-xl rounded-[2rem] opacity-0 group-hover/track:opacity-100 transition-opacity pointer-events-none"></div>
             <TrackCard track={track} variant="row" />
+            <div className="absolute top-4 right-4 px-3 py-1 bg-blue-600 rounded-lg shadow-xl border border-white/20 z-10 scale-0 group-hover/track:scale-100 transition-transform duration-300">
+               <span className="text-[7px] font-black text-white uppercase tracking-widest">Alpha Signal</span>
+            </div>
           </div>
         )}
 
@@ -168,15 +191,18 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
         <div className="flex items-center gap-10 pt-5 border-t border-white/5">
           <button 
             onClick={handleLike}
-            className={`flex items-center gap-3 transition-all transform active:scale-90 ${liked ? 'text-red-500' : 'text-white/20 hover:text-red-400'}`}
+            className={`flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 group/like ${liked ? 'text-red-500' : 'text-white/20 hover:text-red-400'}`}
           >
-            <i className={`${liked ? 'fas' : 'far'} fa-heart text-sm`}></i>
+            <div className="relative">
+              {liked && <div className="absolute inset-0 bg-red-500/40 blur-md rounded-full animate-ping"></div>}
+              <i className={`${liked ? 'fas' : 'far'} fa-heart text-sm relative z-10 group-hover/like:scale-110 transition-transform`}></i>
+            </div>
             <span className="text-[10px] font-black uppercase tracking-widest">{likesCount}</span>
           </button>
           
           <button 
-            onClick={() => setShowComments(!showComments)}
-            className={`flex items-center gap-3 transition-all active:scale-90 ${showComments ? 'text-blue-400' : 'text-white/20 hover:text-blue-400'}`}
+            onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
+            className={`flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 ${showComments ? 'text-blue-400' : 'text-white/20 hover:text-blue-400'}`}
           >
             <i className={`${showComments ? 'fas' : 'far'} fa-comment text-sm`}></i>
             <span className="text-[10px] font-black uppercase tracking-widest">{post.comments + comments.length}</span>
@@ -184,7 +210,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
           
           <button 
             onClick={handleRepost}
-            className={`flex items-center gap-3 transition-all transform active:scale-90 ${reposted ? 'text-green-500' : 'text-white/20 hover:text-green-400'}`}
+            className={`flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 ${reposted ? 'text-green-500' : 'text-white/20 hover:text-green-400'}`}
           >
             <i className="fas fa-retweet text-sm"></i>
             <span className="text-[10px] font-black uppercase tracking-widest">{repostsCount}</span>
@@ -202,7 +228,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
 
         {/* Comments Section */}
         {showComments && (
-          <div className="mt-8 pt-8 border-t border-white/5 animate-in slide-in-from-top-4 duration-500">
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="mt-8 pt-8 border-t border-white/5 animate-in slide-in-from-top-4 duration-500"
+          >
             <form onSubmit={handleAddComment} className="flex gap-4 mb-8">
               <img src={MOCK_USER.avatar} className="w-8 h-8 rounded-full border border-white/10" alt="" />
               <div className="flex-1 relative">

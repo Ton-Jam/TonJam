@@ -1,13 +1,14 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MOCK_NFTS, TON_LOGO, MOCK_USER } from '../constants';
+import { MOCK_NFTS, TON_LOGO, MOCK_USER, MOCK_ARTISTS } from '../constants';
 import NFTCard from '../components/NFTCard';
 import MintModal from '../components/MintModal';
+import TopChartNFTs from '../components/TopChartNFTs';
 import { useAudio } from '../context/AudioContext';
 import { NFTItem } from '../types';
 
-const TABS = ['Trending', 'Auctions', 'Genesis', 'Limited', 'My Bids'];
+const TABS = ['Trending', 'Auctions', 'Genesis', 'Limited', 'My Bids', 'My NFTs'];
 const SORT_OPTIONS = ['Newest', 'Price: Low', 'Price: High', 'Rarity'];
 
 const Marketplace: React.FC = () => {
@@ -44,8 +45,27 @@ const Marketplace: React.FC = () => {
     );
   }, []);
 
+  const myNfts = useMemo(() => {
+    return MOCK_NFTS.filter(nft => nft.owner === MOCK_USER.walletAddress);
+  }, []);
+
   const filteredNfts = useMemo(() => {
     let list = [...MOCK_NFTS].filter(nft => {
+      // For My NFTs tab, we want to show them regardless of listing status if they are owned by user
+      // But for other tabs, we might only want listed ones. 
+      // The original code filtered by `!nft.listingType` at the start.
+      // We should adjust this.
+      
+      const isMyNft = nft.owner === MOCK_USER.walletAddress;
+      
+      // If we are in "My NFTs" tab, we show all owned NFTs
+      if (activeTab === 'My NFTs') {
+        if (!isMyNft) return false;
+      } else {
+        // For other tabs, generally show listed items
+        if (!nft.listingType) return false;
+      }
+
       const matchesSearch = nft.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            nft.creator.toLowerCase().includes(searchQuery.toLowerCase());
       
@@ -54,6 +74,7 @@ const Marketplace: React.FC = () => {
       if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited';
       if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction';
       if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === MOCK_USER.walletAddress);
+      if (activeTab === 'My NFTs') return matchesSearch && isMyNft;
       return matchesSearch;
     });
 
@@ -90,7 +111,7 @@ const Marketplace: React.FC = () => {
   };
 
   return (
-    <div className="animate-in fade-in duration-700 pb-40 w-full bg-black min-h-screen">
+    <div className="animate-in fade-in duration-700 pb-40 w-full min-h-screen">
       
       {/* 1. COMPACT MARKET TICKER */}
       <div className="sticky top-0 z-[45] bg-black/95 backdrop-blur-xl border-b border-white/5 py-1.5 px-6 flex items-center justify-between overflow-hidden whitespace-nowrap">
@@ -115,6 +136,58 @@ const Marketplace: React.FC = () => {
               <i className={`fas fa-caret-${stat.up ? 'up text-green-500' : 'down text-red-500'} text-[6px]`}></i>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* 3. REFINED CONTROLS (Compact & Integrated) - MOVED TO TOP */}
+      <div className="sticky top-[28px] md:top-[28px] z-[39] bg-black/95 backdrop-blur-xl py-4 w-full px-4 md:px-8 border-y border-white/5 mb-8">
+        <div className="max-w-[1280px] mx-auto flex flex-col xl:flex-row items-center justify-between gap-6">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar w-full xl:w-auto pb-1">
+            {TABS.map(tab => (
+              <button 
+                key={tab} 
+                onClick={() => setActiveTab(tab)}
+                className={`flex-shrink-0 px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${
+                  activeTab === tab 
+                  ? 'bg-blue-600 border-blue-500 text-white shadow-xl shadow-blue-500/20' 
+                  : 'bg-white/5 text-white/30 border-white/5 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {tab}
+                {tab === 'My Bids' && userBids.length > 0 && (
+                  <span className="ml-2 text-blue-400">({userBids.length})</span>
+                )}
+                {tab === 'My NFTs' && myNfts.length > 0 && (
+                  <span className="ml-2 text-blue-400">({myNfts.length})</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 w-full xl:w-auto">
+            <div className="relative flex-1 xl:w-[280px]">
+              <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-white/20 text-[10px]"></i>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Scan Network..." 
+                className="w-full bg-white/5 border border-white/10 py-2 pl-10 pr-4 rounded-full text-[11px] outline-none focus:border-blue-500/40 transition-all placeholder:text-white/10 text-white"
+              />
+            </div>
+            <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-2">
+              <span className="text-[8px] font-black text-white/20 uppercase tracking-widest mr-3">Sort:</span>
+              <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent text-white text-[9px] font-black uppercase outline-none cursor-pointer pr-1"
+              >
+                  {SORT_OPTIONS.map(opt => (
+                      <option key={opt} value={opt} className="bg-[#050505]">{opt}</option>
+                  ))}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -163,6 +236,9 @@ const Marketplace: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <img src={`https://picsum.photos/40/40?seed=${nft.creator}`} className="w-4 h-4 rounded-full border border-blue-500/30" alt="" />
                             <p className="text-[9px] font-black uppercase tracking-widest">@{nft.creator}</p>
+                            {MOCK_ARTISTS.find(a => a.name === nft.creator)?.verified && (
+                              <i className="fas fa-check-circle text-blue-500 text-[8px]"></i>
+                            )}
                           </div>
                           <div className="h-3 w-px bg-white/10"></div>
                           <div className="flex flex-col">
@@ -203,114 +279,76 @@ const Marketplace: React.FC = () => {
           </div>
         </section>
 
-        {/* 2.5 TRENDING PROTOCOLS */}
-        <section className="mb-12 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-6 electric-blue-bg rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
-              <div>
-                <h2 className="text-xl font-black tracking-tighter uppercase text-white leading-none">Trending Protocols</h2>
-                <p className="text-[7px] font-black text-white/20 uppercase tracking-[0.4em] mt-1">High-bandwidth market signals detected</p>
+        {/* 2.5 TRENDING PROTOCOLS & TOP CHARTS */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
+          <section className="lg:col-span-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 electric-blue-bg rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
+                <div>
+                  <h2 className="text-xl font-black tracking-tighter uppercase text-white leading-none">Trending Protocols</h2>
+                  <p className="text-[7px] font-black text-white/20 uppercase tracking-[0.4em] mt-1">High-bandwidth market signals detected</p>
+                </div>
               </div>
-            </div>
-            <button 
-              onClick={() => setActiveTab('Trending')}
-              className="text-[9px] font-black text-white/30 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-2"
-            >
-              VIEW ALL <i className="fas fa-arrow-right text-[7px]"></i>
-            </button>
-          </div>
- 
-          <div className="flex overflow-x-auto no-scrollbar gap-5 pb-4 mask-linear-fade">
-            {trendingNfts.map((nft, idx) => (
-              <div 
-                key={nft.id}
-                onClick={() => navigate(`/nft/${nft.id}`)}
-                className="flex-shrink-0 w-56 md:w-64 group relative cursor-pointer"
+              <button 
+                onClick={() => setActiveTab('Trending')}
+                className="text-[9px] font-black text-white/30 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-2"
               >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <div className="relative glass rounded-xl p-4 border border-white/5 hover:border-blue-500/30 transition-all bg-[#0a0a0a]/40 overflow-hidden">
-                  <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
-                    <img src={nft.imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={nft.title} />
-                    <div className="absolute top-2 right-2">
-                      <div className="px-2 py-1 glass rounded-md text-[7px] font-black uppercase tracking-widest text-white border border-white/10 flex items-center gap-1.5">
-                        <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
-                        {nft.price} TON
+                VIEW ALL <i className="fas fa-arrow-right text-[7px]"></i>
+              </button>
+            </div>
+  
+            <div className="flex overflow-x-auto no-scrollbar gap-5 pb-4 mask-linear-fade">
+              {trendingNfts.map((nft, idx) => (
+                <div 
+                  key={nft.id}
+                  onClick={() => navigate(`/nft/${nft.id}`)}
+                  className="flex-shrink-0 w-56 md:w-64 group relative cursor-pointer"
+                >
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                  <div className="relative glass rounded-xl p-4 border border-white/5 hover:border-blue-500/30 transition-all bg-[#0a0a0a]/40 overflow-hidden">
+                    <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
+                      <img src={nft.imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={nft.title} />
+                      <div className="absolute top-2 right-2">
+                        <div className="px-2 py-1 glass rounded-md text-[7px] font-black uppercase tracking-widest text-white border border-white/10 flex items-center gap-1.5">
+                          <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
+                          {nft.price} TON
+                        </div>
                       </div>
                     </div>
-                  </div>
-                    <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-black text-white uppercase tracking-tighter truncate flex-1">{nft.title}</h3>
-                      <span className="text-[6px] font-black text-blue-500 uppercase tracking-widest ml-2">{nft.edition}</span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                      <div className="flex items-center gap-2">
-                        <img src={`https://picsum.photos/40/40?seed=${nft.creator}`} className="w-3.5 h-3.5 rounded-full border border-white/10" alt="" />
-                        <span className="text-[8px] font-black text-white/40 uppercase tracking-tighter">@{nft.creator}</span>
+                      <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-black text-white uppercase tracking-tighter truncate flex-1">{nft.title}</h3>
+                        <span className="text-[6px] font-black text-blue-500 uppercase tracking-widest ml-2">{nft.edition}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <i className="fas fa-chart-line text-[7px] text-green-500"></i>
-                        <span className="text-[8px] font-black text-white">{nft.offers?.length || 0} Bids</span>
+                      
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                        <div className="flex items-center gap-2">
+                          <img src={`https://picsum.photos/40/40?seed=${nft.creator}`} className="w-3.5 h-3.5 rounded-full border border-white/10" alt="" />
+                          <span className="text-[8px] font-black text-white/40 uppercase tracking-tighter">@{nft.creator}</span>
+                          {MOCK_ARTISTS.find(a => a.name === nft.creator)?.verified && (
+                            <i className="fas fa-check-circle text-blue-500 text-[7px]"></i>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <i className="fas fa-chart-line text-[7px] text-green-500"></i>
+                          <span className="text-[8px] font-black text-white">{nft.offers?.length || 0} Bids</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 3. REFINED CONTROLS (Compact & Integrated) */}
-        <div className="sticky top-[42px] z-[39] bg-black/95 backdrop-blur-xl py-4 -mx-4 px-4 border-b border-white/5 mb-10">
-          <div className="flex flex-col xl:flex-row items-center justify-between gap-6">
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar w-full xl:w-auto pb-1">
-              {TABS.map(tab => (
-                <button 
-                  key={tab} 
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex-shrink-0 px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${
-                    activeTab === tab 
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-xl shadow-blue-500/20' 
-                    : 'bg-white/5 text-white/30 border-white/5 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {tab}
-                  {tab === 'My Bids' && userBids.length > 0 && (
-                    <span className="ml-2 text-blue-400">({userBids.length})</span>
-                  )}
-                </button>
               ))}
             </div>
+          </section>
 
-            <div className="flex items-center gap-3 w-full xl:w-auto">
-              <div className="relative flex-1 xl:w-[280px]">
-                <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-white/20 text-[10px]"></i>
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Scan Network..." 
-                  className="w-full bg-white/5 border border-white/10 py-2 pl-10 pr-4 rounded-full text-[11px] outline-none focus:border-blue-500/40 transition-all placeholder:text-white/10 text-white"
-                />
-              </div>
-              <div className="flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-2">
-                <span className="text-[8px] font-black text-white/20 uppercase tracking-widest mr-3">Sort:</span>
-                <select 
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-transparent text-white text-[9px] font-black uppercase outline-none cursor-pointer pr-1"
-                >
-                    {SORT_OPTIONS.map(opt => (
-                        <option key={opt} value={opt} className="bg-[#050505]">{opt}</option>
-                    ))}
-                </select>
-              </div>
-            </div>
-          </div>
+          <section className="lg:col-span-4">
+            <TopChartNFTs nfts={MOCK_NFTS} title="Top Chart NFTs" />
+          </section>
         </div>
+      </div>
 
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8">
         {/* 4. COMPACT MARKET GRID */}
         <section>
           {filteredNfts.length > 0 ? (

@@ -3,7 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, TON_LOGO } from '../constants';
 import TrackCard from '../components/TrackCard';
 import NFTCard from '../components/NFTCard';
-import PostCard from '../components/PostCard';
+import SocialFeed from '../components/SocialFeed';
+import MintModal from '../components/MintModal';
+import VerifyArtistModal from '../components/VerifyArtistModal';
 import { useAudio } from '../context/AudioContext';
 import { Artist, Track, Post } from '../types';
 import { getArtistSonicDNA, findRelatedArtists } from '../services/geminiService';
@@ -11,7 +13,7 @@ import { getArtistSonicDNA, findRelatedArtists } from '../services/geminiService
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification, playAll, currentTrack, isPlaying, followedUserIds, toggleFollowUser } = useAudio();
+  const { addNotification, playAll, currentTrack, isPlaying, followedUserIds, toggleFollowUser, userProfile } = useAudio();
   const [activeTab, setActiveTab] = useState<'tracks' | 'nfts' | 'signals' | 'about'>('tracks');
   
   const isFollowing = useMemo(() => id ? followedUserIds.includes(id) : false, [id, followedUserIds]);
@@ -20,6 +22,8 @@ const ArtistProfile: React.FC = () => {
   const [relatedArtists, setRelatedArtists] = useState<Artist[]>([]);
   const [isRelatedLoading, setIsRelatedLoading] = useState(false);
   const [customBanner, setCustomBanner] = useState<string | null>(null);
+  const [showMintModal, setShowMintModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const artist = useMemo(() => MOCK_ARTISTS.find(a => a.id === id), [id]);
@@ -133,7 +137,7 @@ const ArtistProfile: React.FC = () => {
   );
 
   return (
-    <div className="animate-in fade-in duration-1000 pb-32 bg-black min-h-screen font-sans">
+    <div className="animate-in fade-in duration-1000 pb-32 min-h-screen font-sans">
       {/* 1. COMPACT CINEMATIC BANNER */}
       <div className="relative h-[30vh] md:h-[35vh] overflow-hidden group/banner">
         <img 
@@ -210,7 +214,8 @@ const ArtistProfile: React.FC = () => {
                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white leading-none">
                   {artist.name}
                 </h1>
-                {artist.verified && <i className="fas fa-check-circle text-blue-500 text-2xl md:text-4xl"></i>}
+                {artist.verified && <i className="fas fa-check-circle text-blue-500 text-2xl md:text-4xl" title="Verified on TON"></i>}
+                {artist.socials?.spotify && <i className="fab fa-spotify text-[#1DB954] text-2xl md:text-4xl" title="Verified on Spotify"></i>}
               </div>
               <p className="text-blue-500 font-black text-[10px] uppercase tracking-[0.4em] opacity-70">
                 @sonic_architect_{artist.id}
@@ -226,6 +231,22 @@ const ArtistProfile: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              {artist.id === userProfile.id && userProfile.isVerifiedArtist && (
+                <button 
+                  onClick={() => setShowMintModal(true)}
+                  className="px-6 py-2.5 bg-white/5 border border-white/10 text-white rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all flex items-center gap-2"
+                >
+                  <i className="fas fa-plus text-[7px]"></i> FORGE_PROTOCOL
+                </button>
+              )}
+              {artist.id === userProfile.id && !artist.verified && (
+                <button 
+                  onClick={() => setShowVerifyModal(true)}
+                  className="px-6 py-2.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2"
+                >
+                  <i className="fas fa-shield-check text-[7px]"></i> VERIFY_ARTIST
+                </button>
+              )}
               <button 
                 onClick={() => playAll(artistTracks)}
                 className="px-6 py-2.5 electric-blue-bg text-white rounded-lg font-black text-[8px] uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2"
@@ -292,7 +313,23 @@ const ArtistProfile: React.FC = () => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-6 mt-16">
+      {/* Sticky Tab Navigation */}
+      <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-xl py-4 border-y border-white/5 mt-12 mb-8 w-full px-6">
+        <div className="max-w-7xl mx-auto flex items-center gap-8 overflow-x-auto no-scrollbar">
+          {['tracks', 'nfts', 'signals', 'about'].map(tab => (
+            <button 
+              key={tab}
+              onClick={() => setActiveTab(tab as any)}
+              className={`pb-2 text-[9px] font-black uppercase tracking-[0.3em] transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab ? 'text-blue-500' : 'text-white/20 hover:text-white'}`}
+            >
+              {tab}
+              {activeTab === tab && <div className="absolute -bottom-4 left-0 right-0 h-0.5 bg-blue-500 rounded-full"></div>}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           
           {/* Left: Intelligence Sidebar */}
@@ -358,19 +395,6 @@ const ArtistProfile: React.FC = () => {
 
           {/* Right: Content Feed */}
           <div className="lg:col-span-8">
-            <nav className="flex items-center gap-8 border-b border-white/5 mb-8 overflow-x-auto no-scrollbar">
-              {['tracks', 'nfts', 'signals', 'about'].map(tab => (
-                <button 
-                  key={tab}
-                  onClick={() => setActiveTab(tab as any)}
-                  className={`pb-4 text-[9px] font-black uppercase tracking-[0.3em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-blue-500' : 'text-white/20 hover:text-white'}`}
-                >
-                  {tab}
-                  {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full"></div>}
-                </button>
-              ))}
-            </nav>
-
             <div className="min-h-[500px]">
               {activeTab === 'tracks' && (
                 <div className="space-y-10 animate-in fade-in duration-500">
@@ -421,14 +445,8 @@ const ArtistProfile: React.FC = () => {
               )}
 
               {activeTab === 'signals' && (
-                <div className="space-y-5 animate-in slide-in-from-bottom-4 duration-500">
-                   {artistPosts.length > 0 ? (
-                      artistPosts.map(p => <PostCard key={p.id} post={p} />)
-                   ) : (
-                     <div className="py-24 text-center glass rounded-2xl border-dashed border-white/10">
-                        <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em]">Signal void detected.</p>
-                     </div>
-                   )}
+                <div className="animate-in slide-in-from-bottom-4 duration-500">
+                   <SocialFeed posts={artistPosts} emptyMessage="Signal void detected." />
                 </div>
               )}
 
@@ -452,7 +470,10 @@ const ArtistProfile: React.FC = () => {
                              <div className="relative w-20 h-20 mx-auto mb-3">
                                 <img src={related.avatarUrl} className="w-full h-full object-cover rounded-full border border-white/10 group-hover:border-blue-500 transition-all" alt="" />
                              </div>
-                             <h4 className="text-[10px] font-black uppercase text-white tracking-tight">{related.name}</h4>
+                             <div className="flex items-center justify-center gap-1.5">
+                                <h4 className="text-[10px] font-black uppercase text-white tracking-tight">{related.name}</h4>
+                                {related.verified && <i className="fas fa-check-circle text-blue-500 text-[8px]"></i>}
+                             </div>
                              <p className="text-[6px] font-black text-white/20 uppercase tracking-widest mt-1">{related.followers.toLocaleString()} Fans</p>
                           </div>
                        ))}
@@ -479,6 +500,8 @@ const ArtistProfile: React.FC = () => {
         </div>
       </div>
       <div className="h-32"></div>
+      {showMintModal && <MintModal onClose={() => setShowMintModal(false)} />}
+      {showVerifyModal && artist && <VerifyArtistModal onClose={() => setShowVerifyModal(false)} artistName={artist.name} />}
     </div>
   );
 };

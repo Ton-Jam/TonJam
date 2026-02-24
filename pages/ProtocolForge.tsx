@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { useAudio } from '../context/AudioContext';
 import { beginCell, toNano, Address } from '@ton/core';
 import { APP_LOGO, TON_LOGO } from '../constants';
+import MintModal from '../components/MintModal';
 
 const TACT_SNIPPET = `
 contract TonJamGenesis {
@@ -25,7 +27,8 @@ contract TonJamGenesis {
 `;
 
 const ProtocolForge: React.FC = () => {
-  const { addNotification, genesisContractAddress, setGenesisContractAddress, resetProtocol } = useAudio();
+  const navigate = useNavigate();
+  const { addNotification, genesisContractAddress, setGenesisContractAddress, resetProtocol, userProfile } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   
@@ -36,7 +39,29 @@ const ProtocolForge: React.FC = () => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [deploymentStep, setDeploymentStep] = useState(0); // 0: None, 1: Compiling, 2: Broadcasting, 3: Indexing
+  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
+
+  if (!userProfile.isVerifiedArtist) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center animate-in fade-in duration-700">
+        <div className="w-24 h-24 rounded-full bg-blue-500/10 flex items-center justify-center mb-8 border border-blue-500/20">
+          <i className="fas fa-lock text-blue-500 text-3xl"></i>
+        </div>
+        <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Protocol Access Restricted</h2>
+        <p className="text-white/40 max-w-md leading-relaxed mb-10">
+          The Protocol Forge is reserved for <span className="text-blue-500 font-black">Verified Artists</span>. 
+          Establish your sonic identity via Spotify or TON verification to unlock genesis deployment capabilities.
+        </p>
+        <button 
+          onClick={() => navigate('/settings')}
+          className="px-10 py-4 electric-blue-bg rounded-xl font-black text-[10px] uppercase tracking-[0.3em] text-white shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+        >
+          Initialize Verification
+        </button>
+      </div>
+    );
+  }
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -135,9 +160,9 @@ const ProtocolForge: React.FC = () => {
         <div>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-            <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.6em] italic">Genesis Setup Wizard</span>
+            <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.6em]">Genesis Setup Wizard</span>
           </div>
-          <h1 className="text-4xl md:text-8xl font-black italic tracking-tighter uppercase text-white leading-none">
+          <h1 className="text-4xl md:text-8xl font-black tracking-tighter uppercase text-white leading-none">
             Protocol <span className="text-blue-500">Forge</span>
           </h1>
         </div>
@@ -155,8 +180,8 @@ const ProtocolForge: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in zoom-in-95 duration-700">
           <div className="space-y-12">
             <section className="glass p-12 rounded-[3.5rem] border-blue-500/20 border-2 bg-blue-500/[0.03] shadow-2xl">
-              <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter mb-4">Initialize Neural Genesis</h3>
-              <p className="text-sm text-white/40 italic leading-relaxed mb-10">
+              <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Initialize Neural Genesis</h3>
+              <p className="text-sm text-white/40 leading-relaxed mb-10">
                 A fresh start begins by deploying the <span className="text-white">TonJam Genesis Contract</span>. This smart contract will govern all NFT mints, royalties, and artist verification on your personal node.
               </p>
               <button 
@@ -168,7 +193,7 @@ const ProtocolForge: React.FC = () => {
             </section>
 
             <div className="glass p-10 rounded-[2.5rem] border-white/10 border">
-              <h4 className="text-sm font-black text-white/60 uppercase italic tracking-widest mb-6">Already have a contract?</h4>
+              <h4 className="text-sm font-black text-white/60 uppercase tracking-widest mb-6">Already have a contract?</h4>
               <div className="flex flex-col md:flex-row gap-4">
                 <input 
                   type="text" 
@@ -205,10 +230,10 @@ const ProtocolForge: React.FC = () => {
                         <i className="fas fa-satellite-dish text-white text-xl"></i>
                      </div>
                      <div>
-                        <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter">
+                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
                           {isDeploying ? "Neural Forge Active" : "Genesis Online"}
                         </h3>
-                        <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest italic mt-1">
+                        <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mt-1">
                           {isDeploying ? "Deploying Protocol..." : "Contract Synchronized"}
                         </p>
                      </div>
@@ -235,16 +260,23 @@ const ProtocolForge: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                        <div className="p-6 bg-black rounded-2xl border border-white/5">
-                          <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1 italic">Network</p>
-                          <p className="text-xl font-black text-white italic tracking-tighter">TON TESTNET</p>
+                          <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Network</p>
+                          <p className="text-xl font-black text-white tracking-tighter">TON TESTNET</p>
                        </div>
                        <div className="p-6 bg-black rounded-2xl border border-white/5">
-                          <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1 italic">Type</p>
-                          <p className="text-xl font-black text-white italic tracking-tighter">NFT COLLECTION</p>
+                          <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Type</p>
+                          <p className="text-xl font-black text-white tracking-tighter">NFT COLLECTION</p>
                        </div>
                     </div>
-                 </div>
-               )}
+                    
+                    <button 
+                      onClick={() => setIsMintModalOpen(true)}
+                      className="w-full py-6 electric-blue-bg rounded-2xl font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-blue-500/30 text-white flex items-center justify-center gap-4 mt-4"
+                    >
+                      <i className="fas fa-plus-circle"></i> Mint New Track Protocol
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
 
@@ -260,6 +292,8 @@ const ProtocolForge: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {isMintModalOpen && <MintModal onClose={() => setIsMintModalOpen(false)} />}
     </div>
   );
 };

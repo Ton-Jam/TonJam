@@ -97,62 +97,67 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
     return (
       <div 
         onClick={() => playTrack(track)}
-        className={`flex items-center gap-4 p-3 rounded-md hover:bg-white/5 group transition-all cursor-pointer border-b border-white/5 ${isActive ? 'bg-blue-600/10 border-blue-500/20' : ''}`}
+        className={`flex items-center gap-4 p-3 rounded-2xl hover:bg-white/[0.03] group transition-all cursor-pointer border border-transparent hover:border-white/5 ${isActive ? 'bg-blue-600/5 border-blue-500/20' : ''}`}
       >
-        <div className="relative w-14 h-14 flex-shrink-0">
-          <img src={track.coverUrl} className="w-full h-full object-cover rounded-md border border-white/5" alt={track.title} />
-          <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-md ${isActive ? 'opacity-100' : ''}`}>
-            <i className={`fas ${isActive && isPlaying ? 'fa-pause' : 'fa-play'} text-white text-[10px]`}></i>
+        <div className="relative w-12 h-12 flex-shrink-0">
+          <img src={track.coverUrl} className="w-full h-full object-cover rounded-xl border border-white/5" alt={track.title} />
+          <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl ${isActive ? 'opacity-100' : ''}`}>
+            {isActive && isPlaying ? (
+              <div className="flex items-end gap-0.5 h-3">
+                <div className="w-0.5 bg-blue-500 animate-[bounce_0.6s_infinite]"></div>
+                <div className="w-0.5 bg-blue-500 animate-[bounce_0.8s_infinite]"></div>
+                <div className="w-0.5 bg-blue-500 animate-[bounce_0.5s_infinite]"></div>
+              </div>
+            ) : (
+              <i className="fas fa-play text-white text-[10px]"></i>
+            )}
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className={`text-[10px] font-black uppercase truncate leading-none tracking-tight mb-1 ${isActive ? 'text-blue-400' : 'text-white'}`}>{track.title}</h4>
-          <div className="flex items-center gap-1">
+          <h4 className={`text-[10px] font-black uppercase truncate leading-none tracking-tight mb-1.5 ${isActive ? 'text-blue-400' : 'text-white/80 group-hover:text-white'}`}>{track.title}</h4>
+          <div className="flex items-center gap-2">
             <p 
               onClick={handleArtistClick} 
-              className={`text-[8px] font-black uppercase tracking-widest hover:text-blue-400 transition-colors inline-block ${isActive ? 'text-blue-400/60' : 'text-white/30'}`}
+              className={`text-[8px] font-black uppercase tracking-widest hover:text-blue-400 transition-colors inline-block ${isActive ? 'text-blue-400/60' : 'text-white/20'}`}
             >
               {track.artist}
             </p>
             {track.artistVerified && <i className="fas fa-check-circle text-blue-500 text-[6px]"></i>}
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          {showReorder && activePlaylistId && (
-            <div className="flex flex-col gap-1">
-              <button 
-                onClick={(e) => handleReorder(e, 'up')}
-                className="w-6 h-6 flex items-center justify-center text-white/20 hover:text-blue-400 transition-all"
-              >
-                <i className="fas fa-chevron-up text-[8px]"></i>
-              </button>
-              <button 
-                onClick={(e) => handleReorder(e, 'down')}
-                className="w-6 h-6 flex items-center justify-center text-white/20 hover:text-blue-400 transition-all"
-              >
-                <i className="fas fa-chevron-down text-[8px]"></i>
-              </button>
-            </div>
-          )}
+        <div className="flex items-center gap-1">
           <button 
             onClick={handleLikeClick}
-            className={`w-8 h-8 flex items-center justify-center transition-all rounded-full hover:bg-white/5 ${isLiked ? 'text-red-500' : 'text-white/20 hover:text-white'}`}
+            className={`w-8 h-8 flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 rounded-full hover:bg-white/5 ${isLiked ? 'text-red-500' : 'text-white/10 hover:text-white'}`}
           >
             <i className={`${isLiked ? 'fas' : 'far'} fa-heart text-[10px]`}></i>
           </button>
-          <button 
-            onClick={handleCommentClick}
-            className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-white transition-all rounded-full hover:bg-white/5"
-          >
-            <i className="far fa-comment text-[10px]"></i>
-          </button>
-          <span className="text-[9px] font-mono font-semibold text-white/20">{formatDuration(track.duration)}</span>
-          <button 
-            onClick={handleOptionsClick}
-            className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white transition-all rounded-full hover:bg-white/5"
-          >
-            <i className="fas fa-ellipsis-v text-[10px]"></i>
-          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === 'small') {
+    return (
+      <div 
+        onClick={() => playTrack(track)}
+        className="group relative bg-transparent rounded-2xl p-2 transition-all border border-transparent hover:bg-white/[0.02] hover:border-white/5 cursor-pointer w-full flex flex-col"
+      >
+        <div className="relative aspect-square mb-3 overflow-hidden rounded-xl border border-white/5">
+          <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s] ease-out" alt={track.title} />
+          <div className={`absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center ${isActive ? 'opacity-100' : ''}`}>
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+              <i className={`fas ${isActive && isPlaying ? 'fa-pause' : 'fa-play'} text-white text-[8px]`}></i>
+            </div>
+          </div>
+        </div>
+        <div className="px-1 flex flex-col gap-0.5">
+          <h3 className={`font-black truncate text-[9px] uppercase tracking-tight leading-tight ${isActive ? 'text-blue-400' : 'text-white/80'}`}>
+            {track.title}
+          </h3>
+          <p className="text-[7px] font-black truncate uppercase tracking-widest text-white/20">
+            {track.artist}
+          </p>
         </div>
       </div>
     );
@@ -161,58 +166,66 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'large', showReo
   return (
     <div 
       onClick={() => playTrack(track)}
-      className="group relative bg-transparent rounded-lg p-2 transition-all border border-transparent hover:border-blue-500/30 cursor-pointer w-full flex flex-col"
+      className="group relative bg-[#080808] rounded-[2rem] p-4 transition-all border border-white/5 hover:border-blue-500/20 cursor-pointer w-full flex flex-col shadow-2xl overflow-hidden"
     >
-      <div className="relative aspect-square mb-3 overflow-hidden rounded-lg border border-white/10">
+      <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-600/5 blur-3xl rounded-full pointer-events-none group-hover:bg-blue-600/10 transition-all"></div>
+      
+      <div className="relative aspect-square mb-5 overflow-hidden rounded-2xl border border-white/10 shadow-xl">
         <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s] ease-out" alt={track.title} />
         <div className={`absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center ${isActive ? 'opacity-100' : ''}`}>
-          <div className="w-12 h-12 rounded-full electric-blue-bg flex items-center justify-center shadow-2xl border border-white/10 transform group-hover:scale-110 transition-transform duration-500">
-            <i className={`fas ${isActive && isPlaying ? 'fa-pause' : 'fa-play'} text-white text-xs`}></i>
+          <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.4)] border border-white/20 transform group-hover:scale-110 transition-transform duration-500">
+            <i className={`fas ${isActive && isPlaying ? 'fa-pause' : 'fa-play'} text-white text-base`}></i>
           </div>
           
           {/* Hover Reveal Info */}
-          <div className="absolute bottom-3 left-0 right-0 flex justify-between px-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-            <div className="flex items-center gap-1.5">
-              <i className="fas fa-headphones text-[8px] text-blue-400"></i>
-              <span className="text-[9px] font-semibold text-white uppercase tracking-widest">{track.playCount?.toLocaleString() || '0'}</span>
+          <div className="absolute bottom-4 left-0 right-0 flex justify-between px-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+            <div className="flex items-center gap-2">
+              <i className="fas fa-headphones text-[10px] text-blue-400"></i>
+              <span className="text-[10px] font-black text-white uppercase tracking-widest">{track.playCount?.toLocaleString() || '0'}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <i className="fas fa-clock text-[8px] text-white/40"></i>
-              <span className="text-[9px] font-semibold text-white uppercase tracking-widest">{formatDuration(track.duration)}</span>
+            <div className="flex items-center gap-2">
+              <i className="fas fa-clock text-[10px] text-white/40"></i>
+              <span className="text-[10px] font-black text-white uppercase tracking-widest">{formatDuration(track.duration)}</span>
             </div>
           </div>
         </div>
-        <button 
-          onClick={handleLikeClick}
-          className={`absolute top-2 left-2 w-7 h-7 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/10 z-10 ${isLiked ? 'text-red-500' : 'text-white/60 hover:text-white'}`}
-        >
-          <i className={`${isLiked ? 'fas' : 'far'} fa-heart text-[9px]`}></i>
-        </button>
-        <button 
-          onClick={handleCommentClick}
-          className="absolute top-10 left-2 w-7 h-7 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/10 z-10 text-white/60 hover:text-white"
-        >
-          <i className="far fa-comment text-[9px]"></i>
-        </button>
+        
+        {/* Quick Actions */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0 duration-500 z-20">
+          <button 
+            onClick={handleLikeClick}
+            className={`w-9 h-9 bg-black/60 backdrop-blur-md rounded-xl flex items-center justify-center transform hover:scale-110 active:scale-95 border border-white/10 ${isLiked ? 'text-red-500' : 'text-white/60 hover:text-white'}`}
+          >
+            <i className={`${isLiked ? 'fas' : 'far'} fa-heart text-[11px]`}></i>
+          </button>
+          <button 
+            onClick={handleCommentClick}
+            className="w-9 h-9 bg-black/60 backdrop-blur-md rounded-xl flex items-center justify-center transform hover:scale-110 active:scale-95 border border-white/10 text-white/60 hover:text-white"
+          >
+            <i className="far fa-comment text-[11px]"></i>
+          </button>
+        </div>
+        
         <button 
           onClick={handleOptionsClick}
-          className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/10 z-10"
+          className="absolute top-3 right-3 w-9 h-9 bg-black/60 backdrop-blur-md rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110 active:scale-95 border border-white/10 z-20 translate-x-[10px] group-hover:translate-x-0 duration-500"
         >
-          <i className="fas fa-ellipsis-v text-[9px] text-white/60 hover:text-white"></i>
+          <i className="fas fa-ellipsis-v text-[11px] text-white/60 hover:text-white"></i>
         </button>
       </div>
-      <div className="px-1 flex flex-col gap-0.5 pb-1">
-        <h3 className={`font-black truncate text-[10px] uppercase tracking-tighter leading-tight ${isActive ? 'text-blue-400' : 'text-white'}`}>
+      
+      <div className="px-1 flex flex-col gap-1 pb-2">
+        <h3 className={`font-black truncate text-xs uppercase tracking-tight leading-tight ${isActive ? 'text-blue-400' : 'text-white'}`}>
           {track.title}
         </h3>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <p 
             onClick={handleArtistClick} 
-            className={`text-[8px] font-black truncate uppercase tracking-widest hover:text-blue-400 transition-colors w-fit ${isActive ? 'text-blue-400/60' : 'text-white/20'}`}
+            className={`text-[9px] font-black truncate uppercase tracking-[0.2em] hover:text-blue-400 transition-colors w-fit ${isActive ? 'text-blue-400/60' : 'text-white/20'}`}
           >
             {track.artist}
           </p>
-          {track.artistVerified && <i className="fas fa-check-circle text-blue-500 text-[7px]"></i>}
+          {track.artistVerified && <i className="fas fa-check-circle text-blue-500 text-[8px]"></i>}
         </div>
       </div>
 

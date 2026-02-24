@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS } from '../constants';
 import TrackCard from '../components/TrackCard';
@@ -7,17 +7,22 @@ import NFTCard from '../components/NFTCard';
 import { semanticSearchTracks } from '../services/geminiService';
 import { Track } from '../types';
 import { useAudio } from '../context/AudioContext';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 
 const GENRES = ['Electronic', 'Synthwave', 'Ambient', 'Lofi', 'Pop', 'Hip Hop', 'Rock', 'Techno', 'House', 'Phonk', 'Experimental'];
 const VIBE_CHIPS = ['Night Drive', 'Cyberpunk', 'Focus', 'After-Hours', 'Neural Chill', 'Glitch-Hop', 'Distopian', 'Hyperpop', 'Basement Techno'];
 const RECENT_SEARCHES_KEY = 'tonjam_recent_searches';
 const INITIAL_LIMIT = 12;
+const LOAD_MORE_COUNT = 12;
 const TRACK_SORT_OPTIONS = ['Newest', 'Popularity', 'Most Liked'];
 
 const Discover: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification } = useAudio();
+  const { addNotification, userTracks, userNFTs } = useAudio();
+  
+  const allTracks = useMemo(() => [...userTracks, ...MOCK_TRACKS], [userTracks]);
+  const allNFTs = useMemo(() => [...userNFTs, ...MOCK_NFTS], [userNFTs]);
   
   // Initialize state from URL if present
   const queryParams = new URLSearchParams(location.search);
@@ -37,6 +42,12 @@ const Discover: React.FC = () => {
   });
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  const loadMore = useCallback(() => {
+    setDisplayLimit(prev => prev + LOAD_MORE_COUNT);
+  }, []);
+
+  const sentinelRef = useInfiniteScroll(loadMore);
 
   useEffect(() => {
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recentSearches));
@@ -102,9 +113,12 @@ const Discover: React.FC = () => {
         results.sort((a, b) => parseInt(b.id) - parseInt(a.id));
       }
     } else if (activeFilter === 'Artists') {
-      results = MOCK_ARTISTS;
+      results = [...MOCK_ARTISTS];
       if (search) {
         results = results.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
+      }
+      if (selectedGenre) {
+        results = results.filter(a => a.genre?.toLowerCase() === selectedGenre.toLowerCase());
       }
     } else if (activeFilter === 'NFTs') {
       results = MOCK_NFTS;
@@ -179,10 +193,10 @@ const Discover: React.FC = () => {
   );
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 bg-black min-h-screen">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 min-h-screen">
       <div className="px-4 md:px-12 mb-6 pt-6">
         {/* GENRE CHIPS - At the very top */}
-        {activeFilter === 'Tracks' && (
+        {(activeFilter === 'Tracks' || activeFilter === 'Artists') && (
           <div className="mb-4 space-y-2">
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mask-linear-fade">
               <button 
@@ -318,14 +332,21 @@ const Discover: React.FC = () => {
           
           <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
             {visibleResults.length > 0 ? (
-              visibleResults.map((item, idx) => (
-                <div key={item.id} className="flex-shrink-0 w-44 md:w-56 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
-                  {activeFilter === 'Tracks' && <TrackCard track={item as Track} />}
-                  {activeFilter === 'Artists' && <UserCard user={item as any} variant="portrait" />}
-                  {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
-                  {activeFilter === 'Playlists' && <div className="p-4 glass rounded-xl text-white/50 text-xs">Playlist rendering...</div>}
-                </div>
-              ))
+              <>
+                {visibleResults.map((item, idx) => (
+                  <div key={item.id} className="flex-shrink-0 w-44 md:w-56 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
+                    {activeFilter === 'Tracks' && <TrackCard track={item as Track} />}
+                    {activeFilter === 'Artists' && <UserCard user={item as any} variant="portrait" />}
+                    {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
+                    {activeFilter === 'Playlists' && <div className="p-4 glass rounded-xl text-white/50 text-xs">Playlist rendering...</div>}
+                  </div>
+                ))}
+                {visibleResults.length < filteredResults.length && (
+                  <div ref={sentinelRef} className="flex-shrink-0 w-10 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="w-full py-20 text-center flex flex-col items-center glass rounded-xl border border-dashed border-white/10 bg-[#050505]/50">
                  <i className="fas fa-satellite-dish text-4xl text-white/5 mb-4 animate-pulse"></i>

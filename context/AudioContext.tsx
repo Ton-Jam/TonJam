@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
-import { Track, Playlist, UserProfile } from '../types';
+import { Track, Playlist, UserProfile, NFTItem } from '../types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS } from '../constants';
 
 interface Notification {
@@ -59,7 +59,10 @@ interface AudioContextType {
   clearRecentlyPlayed: () => void;
   setUserProfile: (profile: UserProfile) => void;
   setGenesisContractAddress: (address: string | null) => void;
-  resetProtocol: () => void;
+  userTracks: Track[];
+  userNFTs: NFTItem[];
+  addUserTrack: (track: Track) => void;
+  addUserNFT: (nft: NFTItem) => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -107,6 +110,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [trackToAddToPlaylist, setTrackToAddToPlaylist] = useState<Track | null>(null);
   const [optionsTrack, setOptionsTrack] = useState<Track | null>(null);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
   const [volume, setVolumeState] = useState<number>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.VOLUME);
@@ -137,11 +141,51 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return saved ? JSON.parse(saved) : [];
   });
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [userTracks, setUserTracks] = useState<Track[]>(() => {
+    const saved = localStorage.getItem('tonjam_user_tracks');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [userNFTs, setUserNFTs] = useState<NFTItem[]>(() => {
+    const saved = localStorage.getItem('tonjam_user_nfts');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(userProfile));
-  }, [userProfile]);
+    localStorage.setItem('tonjam_user_tracks', JSON.stringify(userTracks));
+  }, [userTracks]);
+
+  useEffect(() => {
+    localStorage.setItem('tonjam_user_nfts', JSON.stringify(userNFTs));
+  }, [userNFTs]);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Only handle if not in an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setVolume(volume + 0.05);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setVolume(volume - 0.05);
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [volume]);
+
+  const addUserTrack = (track: Track) => {
+    setUserTracks(prev => [track, ...prev]);
+    addNotification(`Protocol "${track.title}" initialized`, "success");
+  };
+
+  const addUserNFT = (nft: NFTItem) => {
+    setUserNFTs(prev => [nft, ...prev]);
+    addNotification(`Asset "${nft.title}" minted to vault`, "success");
+  };
 
   useEffect(() => {
     if (genesisContractAddress) {
@@ -479,7 +523,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       volume, isMuted,
       playTrack, togglePlay, nextTrack, prevTrack, addToQueue, playAll, seek, setVolume, toggleMute, toggleLikeTrack, toggleFollowUser, closePlayer, setFullPlayerOpen,
       toggleShuffle, toggleRepeat, addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist, removeTrackFromPlaylist,
-      reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, resetProtocol
+      reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, resetProtocol,
+      userTracks, userNFTs, addUserTrack, addUserNFT
     }}>
       {children}
       
@@ -501,7 +546,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setTrackToAddToPlaylist(null)}></div>
           <div className="relative glass w-full max-w-sm rounded-[2.5rem] p-8 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
              <div className="flex justify-between items-center mb-8">
-               <h3 className="text-xl font-black italic uppercase tracking-tighter">Sync to Playlist</h3>
+               <h3 className="text-xl font-black uppercase tracking-tighter">Sync to Playlist</h3>
                <button onClick={() => setTrackToAddToPlaylist(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"><i className="fas fa-times"></i></button>
              </div>
              
@@ -546,7 +591,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                    </button>
                  ))
                ) : (
-                 <p className="text-center py-8 text-[10px] font-black text-white/20 uppercase tracking-widest italic">No sequences detected</p>
+                 <p className="text-center py-8 text-[10px] font-black text-white/20 uppercase tracking-widest">No sequences detected</p>
                )}
              </div>
           </div>

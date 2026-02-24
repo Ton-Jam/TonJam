@@ -42,12 +42,12 @@ if (!rootElement) {
 
 /**
  * TON Connect 2.0 Manifest Resolution
- * Requested Canonical URL: https://ai.studio/apps/drive/1DYnWx2X10bO4UK9CDeGbz9JVBuR3VigU
+ * Requested Canonical URL: https://ton-jam.vercel.app
  */
 const getManifestUrl = () => {
   try {
     const manifest = {
-      url: "https://ai.studio/apps/drive/1DYnWx2X10bO4UK9CDeGbz9JVBuR3VigU",
+      url: "https://ton-jam.vercel.app",
       name: "TonJam",
       iconUrl: "https://i.postimg.cc/63GsZHzq/TonJam-icon.png",
       description: "Web3 Music & NFT Marketplace on TON"

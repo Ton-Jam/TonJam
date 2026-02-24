@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO } from '../constants';
+import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS } from '../constants';
 import { useAudio } from '../context/AudioContext';
 import { NFTItem, Track } from '../types';
 import { generateNFTLore } from '../services/geminiService';
+import { fetchNFTMetadata } from '../services/nftService';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import BuyNFTModal from '../components/BuyNFTModal';
 import SellNFTModal from '../components/SellNFTModal';
 import BidModal from '../components/BidModal';
+import BidAcceptanceModal from '../components/BidAcceptanceModal';
+import { NFTOffer } from '../types';
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,17 +25,37 @@ const NFTDetail: React.FC = () => {
   const [isGeneratingLore, setIsGeneratingLore] = useState(false);
   const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers'>('details');
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
+  const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
 
   // Modal states
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
   const [showBidModal, setShowBidModal] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState<NFTOffer | null>(null);
 
   useEffect(() => {
     const nft = MOCK_NFTS.find(n => n.id === id);
     if (nft) {
       setLocalNft(nft);
       setAssociatedTrack(MOCK_TRACKS.find(t => t.id === nft.trackId) || null);
+      
+      // Fetch dynamic metadata
+      if (nft.contractAddress) {
+        setIsFetchingMetadata(true);
+        fetchNFTMetadata(nft.contractAddress)
+          .then(metadata => {
+            setLocalNft(prev => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                description: metadata.description || prev.description,
+                traits: metadata.traits || prev.traits
+              };
+            });
+          })
+          .catch(err => console.error("Failed to fetch metadata", err))
+          .finally(() => setIsFetchingMetadata(false));
+      }
     }
     window.scrollTo(0, 0);
   }, [id]);
@@ -90,6 +113,11 @@ const NFTDetail: React.FC = () => {
     return MOCK_NFTS.filter(n => relatedTrackIds.includes(n.trackId) && n.id !== localNft.id).slice(0, 4);
   }, [localNft, associatedTrack]);
 
+  const highestOfferPrice = useMemo(() => {
+    if (!localNft?.offers || localNft.offers.length === 0) return 0;
+    return Math.max(...localNft.offers.map(o => parseFloat(o.price)));
+  }, [localNft]);
+
   if (!localNft) return null;
 
   const handleAction = () => {
@@ -106,12 +134,15 @@ const NFTDetail: React.FC = () => {
     if (associatedTrack) playTrack(associatedTrack);
   };
 
-  const handleAcceptOffer = (offerer: string, price: string) => {
-    addNotification(`Accepting offer: ${price} TON from ${offerer}`, "info");
+  const handleAcceptOffer = (offer: NFTOffer) => {
+    setSelectedOffer(offer);
+  };
+
+  const onConfirmAcceptance = () => {
+    addNotification("Asset ownership transfer protocol complete.", "success");
     setTimeout(() => {
-        addNotification("Asset ownership transfer protocol complete.", "success");
         navigate('/profile');
-    }, 2000);
+    }, 1000);
   };
 
   const handleDeclineOffer = (offerer: string) => {
@@ -132,8 +163,16 @@ const NFTDetail: React.FC = () => {
     }
   };
 
+  const handleCancelListing = () => {
+    addNotification("Initiating listing cancellation protocol...", "info");
+    setTimeout(() => {
+      addNotification("Listing cancelled. Asset returned to vault.", "success");
+      setLocalNft(prev => prev ? { ...prev, listingType: undefined } : null);
+    }, 1500);
+  };
+
   return (
-    <div className="relative min-h-screen pb-24 animate-in fade-in duration-500 bg-black">
+    <div className="relative min-h-screen pb-24 animate-in fade-in duration-500">
       <div className="relative z-10 max-w-5xl mx-auto px-6 pt-4">
         <button 
           onClick={() => navigate(-1)} 
@@ -147,7 +186,7 @@ const NFTDetail: React.FC = () => {
           {/* Left Column: Artwork */}
           <div className="space-y-6">
             <div className="relative group cursor-pointer" onClick={handlePlayClick}>
-              <div className="relative aspect-square rounded-[3rem] overflow-hidden border border-white/10 shadow-xl bg-[#0a0a0a]">
+              <div className="relative aspect-square rounded-lg overflow-hidden border border-white/10 shadow-xl bg-[#0a0a0a]">
                 <img src={localNft.imageUrl} className="w-full h-full object-cover transition-transform duration-[6s] group-hover:scale-105" alt={localNft.title} />
                 <div className={`absolute inset-0 flex items-center justify-center bg-blue-600/5 backdrop-blur-[1px] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                   <div className="w-14 h-14 rounded-full electric-blue-bg flex items-center justify-center shadow-2xl border-2 border-white/20 active:scale-90 transition-all">
@@ -155,13 +194,13 @@ const NFTDetail: React.FC = () => {
                   </div>
                 </div>
                 <div className="absolute top-6 left-6">
-                   <div className="px-4 py-2 glass rounded-xl border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/80">
+                   <div className="px-4 py-2 glass rounded-lg border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/80">
                      {localNft.edition} Edition
                    </div>
                 </div>
                 {isAuction && (
                   <div className="absolute bottom-6 left-6 right-6">
-                    <div className="glass px-6 py-4 rounded-2xl border border-white/10 flex justify-between items-center shadow-2xl backdrop-blur-2xl">
+                    <div className="glass px-6 py-4 rounded-xl border border-white/10 flex justify-between items-center shadow-2xl backdrop-blur-2xl">
                       <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
                         Live Auction
@@ -173,13 +212,14 @@ const NFTDetail: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                {[
                  { label: 'BPM', val: associatedTrack?.bpm || '128' },
                  { label: 'KEY', val: associatedTrack?.key || 'C#m' },
-                 { label: 'BIT', val: associatedTrack?.bitrate || 'FLAC' }
+                 { label: 'BIT', val: associatedTrack?.bitrate || 'FLAC' },
+                 { label: 'RELEASE', val: associatedTrack?.releaseDate || '2023-10-01' }
                ].map((stat, i) => (
-                 <div key={i} className="glass py-4 rounded-2xl border border-white/5 text-center shadow-inner">
+                 <div key={i} className="glass py-4 rounded-xl border border-white/5 text-center shadow-inner">
                     <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5">{stat.label}</p>
                     <p className="text-sm font-black text-white tracking-tighter">{stat.val}</p>
                  </div>
@@ -190,18 +230,61 @@ const NFTDetail: React.FC = () => {
           {/* Right Column: Info & Action */}
           <div className="flex flex-col">
             <header className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <img src={`https://picsum.photos/100/100?seed=${localNft.creator}`} className="w-8 h-8 rounded-full border border-blue-500/30" alt="" />
-                <p className="text-blue-500 font-black text-xs uppercase tracking-widest">{localNft.creator}</p>
-                <i className="fas fa-check-circle text-[10px] text-blue-500"></i>
+              <div className="flex items-center gap-4 mb-4">
+                <div 
+                  className="flex items-center gap-2 cursor-pointer group/creator"
+                  onClick={() => {
+                    const artist = MOCK_ARTISTS.find(a => a.name === localNft.creator);
+                    if (artist) navigate(`/artist/${artist.id}`);
+                  }}
+                >
+                  <div className="relative">
+                    <img src={`https://picsum.photos/100/100?seed=${localNft.creator}`} className="w-8 h-8 rounded-full border border-blue-500/30 group-hover/creator:border-blue-500 transition-all" alt="" />
+                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black"></div>
+                  </div>
+                  <p className="text-blue-500 font-black text-xs uppercase tracking-widest group-hover:text-blue-400 transition-colors">{localNft.creator}</p>
+                  <i className="fas fa-check-circle text-[10px] text-blue-500"></i>
+                </div>
+
+                {!isOwner && (
+                  <div 
+                    className="flex items-center gap-2 cursor-pointer group/owner border-l border-white/10 pl-4"
+                    onClick={() => {
+                      const artist = MOCK_ARTISTS.find(a => a.name === localNft.owner);
+                      if (artist) {
+                        navigate(`/artist/${artist.id}`);
+                      } else if (localNft.owner === MOCK_USER.walletAddress) {
+                        navigate('/profile');
+                      }
+                    }}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover/owner:border-blue-500/50 transition-all">
+                      <i className="fas fa-user text-[10px] text-white/40 group-hover/owner:text-blue-400"></i>
+                    </div>
+                    <p className="text-white/40 font-black text-[10px] uppercase tracking-widest group-hover:text-white transition-colors">Owner: {localNft.owner.slice(0, 6)}...{localNft.owner.slice(-4)}</p>
+                  </div>
+                )}
               </div>
               <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-white leading-none mb-3">{localNft.title}</h1>
-              <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.5em]">UID: {localNft.id.toUpperCase()}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.5em]">UID: {localNft.id.toUpperCase()}</p>
+                {localNft.contractAddress && (
+                  <a 
+                    href={`https://tonviewer.com/${localNft.contractAddress}`} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="text-[8px] font-black text-blue-500/40 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-1.5"
+                  >
+                    <i className="fas fa-external-link-alt"></i>
+                    View on Explorer
+                  </a>
+                )}
+              </div>
             </header>
 
             {/* DEDICATED BIDDING SECTION */}
             {isAuction ? (
-              <div className="glass p-10 rounded-[3rem] border-amber-500/20 border-2 mb-10 bg-amber-500/[0.02] shadow-[0_0_80px_rgba(245,158,11,0.05)] animate-in slide-in-from-bottom-2">
+              <div className="glass p-10 rounded-xl border-amber-500/20 border-2 mb-10 bg-amber-500/[0.02] shadow-[0_0_80px_rgba(245,158,11,0.05)] animate-in slide-in-from-bottom-2">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_15px_#f59e0b]"></div>
                   <h3 className="text-[11px] font-black text-amber-500 uppercase tracking-[0.5em]">Auction Protocol Active</h3>
@@ -224,15 +307,32 @@ const NFTDetail: React.FC = () => {
                   </div>
                 </div>
 
-                <button 
-                  onClick={handleAction}
-                  className="w-full py-6 bg-amber-500 hover:bg-amber-400 text-black rounded-2xl font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-amber-500/20"
-                >
-                  {isOwner ? 'MANAGE AUCTION' : 'PLACE BID NOW'}
-                </button>
+                {isOwner ? (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button 
+                      onClick={() => setShowListModal(true)}
+                      className={`flex-1 py-5 rounded-lg font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-xl ${localNft.listingType ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/10' : 'electric-blue-bg text-white shadow-blue-500/20'}`}
+                    >
+                      {localNft.listingType ? 'MANAGE AUCTION' : 'LIST'}
+                    </button>
+                    <button 
+                      onClick={handleCancelListing}
+                      className="flex-1 py-5 bg-white/5 border border-white/10 text-white/60 hover:text-white rounded-lg font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all"
+                    >
+                      CANCEL LISTING
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleAction}
+                    className="w-full py-6 bg-amber-500 hover:bg-amber-400 text-black rounded-lg font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-amber-500/20"
+                  >
+                    PLACE BID NOW
+                  </button>
+                )}
               </div>
             ) : (
-              <div className="glass p-10 rounded-[3rem] border-blue-500/20 border-2 mb-10 bg-[#0a0a0a] shadow-2xl">
+              <div className="glass p-10 rounded-xl border-blue-500/20 border-2 mb-10 bg-[#0a0a0a] shadow-2xl">
                 <div className="flex items-center justify-between mb-10">
                   <div>
                     <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Fixed Valuation</p>
@@ -243,23 +343,40 @@ const NFTDetail: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Instant Sync</p>
-                    <div className="mt-2 w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 ml-auto">
+                    <div className="mt-2 w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20 ml-auto">
                         <i className="fas fa-bolt text-blue-500 text-sm"></i>
                     </div>
                   </div>
                 </div>
 
-                <button 
-                  onClick={handleAction}
-                  className={`w-full py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl ${isOwner ? 'bg-white/5 border border-white/10 text-white/60 hover:text-white' : 'electric-blue-bg text-white shadow-blue-500/30'}`}
-                >
-                  {isOwner ? 'MANAGE LISTING' : 'PURCHASE ASSET'}
-                </button>
+                {isOwner ? (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button 
+                      onClick={() => setShowListModal(true)}
+                      className={`flex-1 py-5 rounded-lg font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-xl ${localNft.listingType ? 'electric-blue-bg text-white shadow-blue-500/20' : 'electric-blue-bg text-white shadow-blue-500/20'}`}
+                    >
+                      {localNft.listingType ? 'MANAGE LISTING' : 'LIST'}
+                    </button>
+                    <button 
+                      onClick={handleCancelListing}
+                      className="flex-1 py-5 bg-white/5 border border-white/10 text-white/60 hover:text-white rounded-lg font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all"
+                    >
+                      CANCEL LISTING
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleAction}
+                    className="w-full py-6 electric-blue-bg text-white rounded-lg font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-blue-500/30"
+                  >
+                    PURCHASE ASSET
+                  </button>
+                )}
               </div>
             )}
 
             {/* AI Lore Section */}
-            <div className="mb-10 glass p-8 rounded-[2.5rem] border-white/5 border relative overflow-hidden">
+            <div className="mb-10 glass p-8 rounded-xl border-white/5 border relative overflow-hidden">
                <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
                   <i className="fas fa-scroll text-5xl"></i>
                </div>
@@ -291,16 +408,16 @@ const NFTDetail: React.FC = () => {
               {activeTab === 'details' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-left duration-500">
                   {localNft.traits?.map((trait, i) => (
-                    <div key={i} className="p-5 glass rounded-2xl border border-white/5 flex justify-between items-center group hover:border-blue-500/20 transition-all">
+                    <div key={i} className="p-5 glass rounded-xl border border-white/5 flex justify-between items-center group hover:border-blue-500/20 transition-all">
                       <span className="text-[9px] font-black text-white/20 uppercase tracking-widest group-hover:text-white/40">{trait.trait_type}</span>
                       <span className="text-[11px] font-black text-white tracking-tight">{trait.value}</span>
                     </div>
                   ))}
-                  <div className="p-5 glass rounded-2xl border border-white/5 flex justify-between items-center">
+                  <div className="p-5 glass rounded-xl border border-white/5 flex justify-between items-center">
                     <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Asset Class</span>
                     <span className="text-[11px] font-black text-white tracking-tight">{localNft.edition}</span>
                   </div>
-                  <div className="p-5 glass rounded-2xl border border-white/5 flex justify-between items-center">
+                  <div className="p-5 glass rounded-xl border border-white/5 flex justify-between items-center">
                     <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Royalties</span>
                     <span className="text-[11px] font-black text-blue-500 tracking-tight">{localNft.royalty}%</span>
                   </div>
@@ -310,9 +427,9 @@ const NFTDetail: React.FC = () => {
               {activeTab === 'history' && (
                 <div className="space-y-3 animate-in fade-in slide-in-from-right duration-500">
                   {localNft.history?.map((h, i) => (
-                    <div key={i} className="flex items-center justify-between p-5 glass rounded-2xl border border-white/5 hover:bg-white/[0.02] transition-all">
+                    <div key={i} className="flex items-center justify-between p-5 glass rounded-xl border border-white/5 hover:bg-white/[0.02] transition-all">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10">
                            <i className={`fas ${h.event === 'Minted' ? 'fa-magic' : 'fa-handshake'} text-white/30 text-xs`}></i>
                         </div>
                         <div className="flex flex-col">
@@ -332,27 +449,40 @@ const NFTDetail: React.FC = () => {
               {activeTab === 'offers' && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom duration-500">
                   {localNft.offers && localNft.offers.length > 0 ? (
-                    localNft.offers.map((o, i) => (
+                    localNft.offers.map((o, i) => {
+                      const isTopBid = parseFloat(o.price) === highestOfferPrice;
+                      return (
                       <div 
                         key={i} 
-                        className={`group p-6 glass rounded-[2.5rem] border transition-all flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] ${isAuction ? 'border-amber-500/10 hover:border-amber-500/30' : 'border-white/5 hover:border-blue-500/30'}`}
+                        className={`group p-6 glass rounded-xl border transition-all flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] ${isTopBid ? (isAuction ? 'border-amber-500/40 bg-amber-500/[0.02]' : 'border-blue-500/40 bg-blue-500/[0.02]') : 'border-white/5 opacity-60 hover:opacity-100'}`}
                       >
                         <div className="flex items-center gap-5 w-full md:w-auto">
                           <div className="relative">
-                            <div className="w-14 h-14 rounded-2xl bg-[#080808] border border-white/10 flex items-center justify-center overflow-hidden">
+                            <div className={`w-14 h-14 rounded-full bg-[#080808] border flex items-center justify-center overflow-hidden ${isTopBid ? (isAuction ? 'border-amber-500/50' : 'border-blue-500/50') : 'border-white/10'}`}>
                                <img src={`https://picsum.photos/100/100?seed=${o.offerer}`} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all" alt="" />
                             </div>
-                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-600 rounded-lg flex items-center justify-center border-2 border-black">
-                               <i className="fas fa-check text-[7px] text-white"></i>
-                            </div>
+                            {isTopBid ? (
+                              <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center ${isAuction ? 'bg-amber-500' : 'bg-blue-500'}`}>
+                                <i className="fas fa-crown text-[6px] text-white"></i>
+                              </div>
+                            ) : (
+                              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-gray-500 rounded-full border-2 border-black"></div>
+                            )}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-black text-white uppercase tracking-tight truncate w-32 md:w-40">
-                              {o.offerer}
-                            </span>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-black text-white uppercase tracking-tight truncate max-w-[120px] md:max-w-[160px]">
+                                {o.offerer}
+                              </span>
+                              {isTopBid ? (
+                                <span className={`text-[7px] px-1.5 py-0.5 rounded-sm font-black uppercase tracking-widest ${isAuction ? 'bg-amber-500/20 text-amber-500' : 'bg-blue-500/20 text-blue-500'}`}>Top Bid</span>
+                              ) : (
+                                <span className="text-[7px] px-1.5 py-0.5 rounded-sm font-black uppercase tracking-widest bg-white/10 text-white/40">Outbid</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
                                <i className="far fa-clock text-[8px] text-white/30"></i>
-                               <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">Expires in {o.duration}</span>
+                               <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">{o.timestamp} • Expires in {o.duration}</span>
                             </div>
                           </div>
                         </div>
@@ -360,47 +490,60 @@ const NFTDetail: React.FC = () => {
                         <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
                           <div className="text-right">
                             <div className="flex items-center gap-2.5">
-                              <span className={`text-2xl font-black tracking-tighter ${isAuction ? 'text-amber-500' : 'text-blue-500'}`}>
+                              <span className={`text-2xl font-black tracking-tighter ${isTopBid ? (isAuction ? 'text-amber-500' : 'text-blue-500') : 'text-white/40'}`}>
                                 {o.price}
                               </span>
-                              <img src={TON_LOGO} className="w-5 h-5 opacity-80" alt="" />
+                              <img src={TON_LOGO} className={`w-5 h-5 ${isTopBid ? 'opacity-100' : 'opacity-40 grayscale'}`} alt="" />
                             </div>
-                            <p className="text-[7px] font-black text-white/10 uppercase tracking-widest mt-0.5">Valuation Protocol</p>
+                            <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mt-0.5">Valuation Protocol</p>
                           </div>
 
                           {isOwner ? (
                             <div className="flex gap-2">
-                               <button 
-                                onClick={() => handleAcceptOffer(o.offerer, o.price)}
-                                className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:scale-110 active:scale-90 transition-all shadow-xl shadow-blue-500/20"
-                                title="Accept Protocol"
-                               >
-                                  <i className="fas fa-check"></i>
-                               </button>
-                               <button 
-                                onClick={() => handleDeclineOffer(o.offerer)}
-                                className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 text-white/40 flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 transition-all"
-                                title="Reject Protocol"
-                               >
-                                  <i className="fas fa-times"></i>
-                               </button>
+                               {isTopBid ? (
+                                 <>
+                                   <button 
+                                    onClick={() => handleAcceptOffer(o)}
+                                    className={`px-4 py-2 text-white rounded-lg font-black text-[8px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center gap-2 ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`}
+                                    title="Accept Protocol"
+                                   >
+                                      <i className="fas fa-check"></i> ACCEPT
+                                   </button>
+                                   <button 
+                                    onClick={() => handleDeclineOffer(o.offerer)}
+                                    className="px-4 py-2 bg-white/5 border border-white/10 text-white/40 rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 transition-all flex items-center gap-2"
+                                    title="Reject Protocol"
+                                   >
+                                      <i className="fas fa-times"></i> DECLINE
+                                   </button>
+                                 </>
+                               ) : (
+                                 <button 
+                                  onClick={() => handleDeclineOffer(o.offerer)}
+                                  className="px-4 py-2 bg-white/5 border border-white/10 text-white/40 rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 transition-all flex items-center gap-2"
+                                  title="Reject Protocol"
+                                 >
+                                    <i className="fas fa-times"></i> DECLINE
+                                 </button>
+                               )}
                             </div>
                           ) : (
-                            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 text-white/10">
-                               <i className="fas fa-arrow-right-to-bracket text-xs"></i>
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center border ${isTopBid ? (isAuction ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-blue-500/10 border-blue-500/20 text-blue-500') : 'bg-white/5 border-white/10 text-white/10'}`}>
+                               <i className={`fas ${isTopBid ? 'fa-bolt' : 'fa-arrow-right-to-bracket'} text-xs`}></i>
                             </div>
                           )}
                         </div>
                       </div>
-                    ))
+                    );
+                    })
                   ) : (
-                    <div className="py-24 flex flex-col items-center justify-center glass rounded-[3.5rem] border-2 border-dashed border-white/5 text-center px-12">
-                      <div className="w-20 h-20 rounded-3xl bg-white/[0.02] flex items-center justify-center mb-8">
+                    <div className="py-24 flex flex-col items-center justify-center glass rounded-xl border-2 border-dashed border-white/5 text-center px-12">
+                      <div className="w-20 h-20 rounded-lg bg-white/[0.02] flex items-center justify-center mb-8">
                         <i className="fas fa-satellite-dish text-white/10 text-3xl animate-pulse"></i>
                       </div>
                       <h4 className="text-lg font-black text-white/40 uppercase tracking-tighter mb-2">Signal Mismatch</h4>
                       <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em] leading-loose max-w-xs mx-auto">Zero active valuation signals detected from the neural relay network.</p>
-                      <button onClick={handleAction} className="mt-8 px-10 py-4 bg-white/5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 transition-all border border-white/5">Initiate Broadcast</button>
+                      <button onClick={handleAction} className="mt-8 px-10 py-4 bg-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 transition-all border border-white/5">Initiate Broadcast</button>
                     </div>
                   )}
                 </div>
@@ -431,7 +574,7 @@ const NFTDetail: React.FC = () => {
                   onClick={() => navigate(`/nft/${nft.id}`)}
                   className="group cursor-pointer"
                 >
-                  <div className="relative aspect-square rounded-3xl overflow-hidden border border-white/5 bg-[#0a0a0a] mb-4">
+                  <div className="relative aspect-square rounded-xl overflow-hidden border border-white/5 bg-[#0a0a0a] mb-4">
                     <img src={nft.imageUrl} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={nft.title} />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
@@ -474,7 +617,7 @@ const NFTDetail: React.FC = () => {
                   onClick={() => navigate(`/nft/${nft.id}`)}
                   className="group cursor-pointer"
                 >
-                  <div className="relative aspect-square rounded-3xl overflow-hidden border border-white/5 bg-[#0a0a0a] mb-4">
+                  <div className="relative aspect-square rounded-xl overflow-hidden border border-white/5 bg-[#0a0a0a] mb-4">
                     <img src={nft.imageUrl} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={nft.title} />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
@@ -503,6 +646,14 @@ const NFTDetail: React.FC = () => {
       {showBuyModal && <BuyNFTModal nft={localNft} onClose={() => setShowBuyModal(false)} />}
       {showListModal && <SellNFTModal nft={localNft} onClose={() => setShowListModal(false)} />}
       {showBidModal && <BidModal nft={localNft} onClose={() => setShowBidModal(false)} />}
+      {selectedOffer && (
+        <BidAcceptanceModal 
+          nft={localNft} 
+          offer={selectedOffer} 
+          onClose={() => setSelectedOffer(null)} 
+          onAccept={onConfirmAcceptance} 
+        />
+      )}
     </div>
   );
 };

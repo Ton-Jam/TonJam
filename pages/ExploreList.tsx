@@ -10,7 +10,7 @@ const ExploreList: React.FC = () => {
   const { type } = useParams<{ type: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const { addNotification } = useAudio();
+  const { addNotification, userTracks, userNFTs } = useAudio();
   
   const queryParams = new URLSearchParams(location.search);
   const title = queryParams.get('title') || 'Explore';
@@ -24,16 +24,16 @@ const ExploreList: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     let initialData: any[] = [];
-    if (type === 'tracks') initialData = MOCK_TRACKS;
+    if (type === 'tracks') initialData = [...userTracks, ...MOCK_TRACKS];
     if (type === 'artists') initialData = MOCK_ARTISTS;
-    if (type === 'nfts') initialData = MOCK_NFTS;
+    if (type === 'nfts') initialData = [...userNFTs, ...MOCK_NFTS];
     
     // Simulate API delay
     setTimeout(() => {
       setItems(initialData);
       setLoading(false);
     }, 800);
-  }, [type]);
+  }, [type, userTracks, userNFTs]);
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -90,14 +90,14 @@ const ExploreList: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={`Search in ${type}...`} 
-                className="w-full bg-white/5 border border-white/5 py-2.5 pl-12 pr-6 text-xs outline-none focus:border-blue-500/30 transition-all placeholder:text-white/10 rounded-xl italic text-white"
+                className="w-full bg-white/5 border border-white/5 py-2.5 pl-12 pr-6 text-xs outline-none focus:border-blue-500/30 transition-all placeholder:text-white/10 rounded-xl text-white"
               />
             </div>
           </div>
 
           {/* Bottom Row: Section Title */}
           <div className="px-1">
-            <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-none">
+            <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white leading-none">
               {title}
             </h1>
           </div>
@@ -130,7 +130,7 @@ const ExploreList: React.FC = () => {
       {!loading && filteredItems.length === 0 && (
         <div className="py-48 text-center flex flex-col items-center">
           <i className="fas fa-satellite-dish text-white/5 text-6xl mb-8"></i>
-          <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] italic">Zero signals detected</p>
+          <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em]">Zero signals detected</p>
           <button 
             type="button"
             onClick={() => setSearch('')}

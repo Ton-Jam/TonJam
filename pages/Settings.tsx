@@ -1,29 +1,98 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAudio } from '../context/AudioContext';
+import { useAuth } from '../context/AuthContext';
 import { TON_LOGO, MOCK_USER } from '../constants';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
+import { supabase } from '../services/supabaseClient';
 
 type SettingsCategory = 'General' | 'Audio' | 'Web3' | 'Social' | 'Advanced';
 
 const Settings: React.FC = () => {
   const { addNotification, userProfile, setUserProfile } = useAudio();
+  const { user, signInWithGoogle, signOut } = useAuth();
   const userAddress = useTonAddress();
   const [tonConnectUI] = useTonConnectUI();
   
   const [activeCategory, setActiveCategory] = useState<SettingsCategory>('General');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [spotifyProfile, setSpotifyProfile] = useState<any>(null);
   
+  const [currentTheme, setCurrentTheme] = useState(localStorage.getItem('tonjam_theme') || 'dark');
+
+  const themes = [
+    { id: 'dark', name: 'Midnight', color: 'bg-black border-white/20' },
+    { id: 'light', name: 'Sun', color: 'bg-white border-black/10' },
+    { id: 'cyberpunk', name: 'Cyberpunk', color: 'bg-[#050014] border-[#00fff2]/50' },
+    { id: 'ocean', name: 'Ocean', color: 'bg-[#02040a] border-[#38bdf8]/50' },
+    { id: 'forest', name: 'Forest', color: 'bg-[#020a02] border-[#34d399]/50' },
+  ];
+
+  const handleThemeChange = (themeId: string) => {
+    setCurrentTheme(themeId);
+    localStorage.setItem('tonjam_theme', themeId);
+    document.documentElement.classList.remove('light', 'cyberpunk', 'ocean', 'forest');
+    if (themeId !== 'dark') {
+      document.documentElement.classList.add(themeId);
+    }
+    addNotification(`${themes.find(t => t.id === themeId)?.name} theme activated`, 'success');
+  };
+
   const [settings, setSettings] = useState({
     notifications: true,
     autoplay: true,
     audioQuality: 'Extreme (Lossless)',
-    darkMode: !document.documentElement.classList.contains('light'),
     publicProfile: true,
     allowTips: true,
     explicitContent: false,
     downloadOverCellular: false
   });
+
+  useEffect(() => {
+    // Check if user has spotify data
+    if (user?.user_metadata?.spotify) {
+      setSpotifyProfile(user.user_metadata.spotify);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data?.type === 'SPOTIFY_VERIFIED') {
+        const profile = event.data.data;
+        setSpotifyProfile(profile);
+        addNotification(`Verified as ${profile.display_name}`, 'success');
+        
+        if (user) {
+          const { error } = await supabase.auth.updateUser({
+            data: { spotify: profile }
+          });
+          if (error) {
+            console.error('Error saving Spotify profile:', error);
+            addNotification('Failed to save verification status', 'error');
+          } else {
+            addNotification('Verification saved to profile', 'success');
+          }
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [user, addNotification]);
+
+  const handleSpotifyConnect = async () => {
+    try {
+      const response = await fetch('/api/auth/spotify/url');
+      const { url } = await response.json();
+      const width = 600;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      window.open(url, 'Spotify Verification', `width=${width},height=${height},top=${top},left=${left}`);
+    } catch (error) {
+      console.error('Failed to start Spotify auth:', error);
+      addNotification('Failed to start Spotify verification', 'error');
+    }
+  };
 
   const categories: { id: SettingsCategory; icon: string }[] = [
     { id: 'General', icon: 'fa-sliders' },
@@ -36,20 +105,6 @@ const Settings: React.FC = () => {
   const toggleSetting = (key: keyof typeof settings) => {
     const newValue = !settings[key];
     setSettings(prev => ({ ...prev, [key]: newValue }));
-    
-    if (key === 'darkMode') {
-      if (newValue) {
-        document.documentElement.classList.remove('light');
-        localStorage.setItem('tonjam_theme', 'dark');
-        addNotification("Neural Dark enabled", 'info');
-      } else {
-        document.documentElement.classList.add('light');
-        localStorage.setItem('tonjam_theme', 'light');
-        addNotification("Solar Light enabled", 'info');
-      }
-      return;
-    }
-
     addNotification(`${String(key).replace(/([A-Z])/g, ' $1').trim()} updated`, 'success');
   };
 
@@ -61,8 +116,8 @@ const Settings: React.FC = () => {
 
   const SectionHeader = ({ title, description }: { title: string; description: string }) => (
     <div className="mb-8">
-      <h2 className="text-xl font-black italic tracking-tighter uppercase text-white mb-2">{title}</h2>
-      <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black italic">{description}</p>
+      <h2 className="text-xl font-black tracking-tighter uppercase text-white mb-2">{title}</h2>
+      <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">{description}</p>
     </div>
   );
 
@@ -71,9 +126,9 @@ const Settings: React.FC = () => {
       <header className="py-12 flex flex-col items-center md:items-start">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-          <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.6em] italic">Network Protocols</span>
+          <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.6em]">Network Protocols</span>
         </div>
-        <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter uppercase text-white leading-none mb-10">
+        <h1 className="text-4xl md:text-7xl font-black tracking-tighter uppercase text-white leading-none mb-10">
           Settings
         </h1>
 
@@ -104,12 +159,30 @@ const Settings: React.FC = () => {
               <section className="glass p-10 rounded-lg border-white/5 border">
                 <SectionHeader title="Interface Identity" description="Adjust your sensory experience" />
                 <div className="space-y-8">
-                  <SettingToggle 
-                    label="Dark Interface" 
-                    description="High-contrast neural theme optimized for night synchronization" 
-                    active={settings.darkMode} 
-                    onToggle={() => toggleSetting('darkMode')} 
-                  />
+                  <div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight mb-4">Interface Theme</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      {themes.map(theme => (
+                        <button
+                          key={theme.id}
+                          onClick={() => handleThemeChange(theme.id)}
+                          className={`relative p-4 rounded-xl border transition-all group overflow-hidden ${
+                            currentTheme === theme.id 
+                              ? 'border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
+                              : 'border-white/10 hover:border-white/30'
+                          }`}
+                        >
+                          <div className={`absolute inset-0 opacity-20 ${theme.color}`}></div>
+                          <div className="relative z-10 flex flex-col items-center gap-2">
+                            <div className={`w-8 h-8 rounded-full border-2 ${theme.color} shadow-lg`}></div>
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${currentTheme === theme.id ? 'text-blue-400' : 'text-white/40'}`}>
+                              {theme.name}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <SettingToggle 
                     label="Native Notifications" 
                     description="Push alerts for new drops, biddings, and feed signals" 
@@ -119,11 +192,39 @@ const Settings: React.FC = () => {
                 </div>
               </section>
 
+              {/* Supabase Integration */}
+              <section className="glass p-10 rounded-lg border-green-500/20 border bg-green-500/[0.02]">
+                <SectionHeader title="Cloud Sync" description="Synchronize profile with Supabase Network" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">Supabase Status</h4>
+                    <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mt-1">
+                      {user ? `Connected: ${user.email}` : "Disconnected"}
+                    </p>
+                  </div>
+                  {user ? (
+                    <button 
+                      onClick={signOut}
+                      className="px-6 py-2 bg-red-500/10 text-red-500 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all"
+                    >
+                      Disconnect Cloud
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={signInWithGoogle}
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-green-500 transition-all shadow-lg shadow-green-500/20"
+                    >
+                      Connect Google
+                    </button>
+                  )}
+                </div>
+              </section>
+
               {/* Connection Doctor */}
               <section className="glass p-10 rounded-lg border-blue-500/20 border bg-blue-500/[0.02]">
                 <SectionHeader title="Connection Doctor" description="Troubleshoot wallet pairing issues" />
                 <div className="space-y-6">
-                  <p className="text-[10px] text-white/40 leading-relaxed uppercase font-black italic">
+                  <p className="text-[10px] text-white/40 leading-relaxed uppercase font-black">
                     If Tonkeeper is not opening or failing to connect, try resetting the bridge state. Remember to enable <span className="text-blue-500">Testnet mode</span> in Tonkeeper settings (tap version 5 times).
                   </p>
                   <button 
@@ -144,7 +245,7 @@ const Settings: React.FC = () => {
                 <div className="space-y-8">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-black text-white uppercase italic tracking-tight">Active Wallet</h4>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight">Active Wallet</h4>
                       <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mt-1">
                         {userAddress ? userAddress : "Disconnected"}
                       </p>
@@ -169,6 +270,41 @@ const Settings: React.FC = () => {
                </section>
             </div>
           )}
+
+          {activeCategory === 'Social' && (
+            <div className="animate-in slide-in-from-right-4 duration-500 space-y-8">
+               <section className="glass p-10 rounded-lg border-white/5 border">
+                <SectionHeader title="Artist Verification" description="Prove your identity across platforms" />
+                <div className="space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${spotifyProfile ? 'bg-[#1DB954]' : 'bg-white/5'}`}>
+                            <i className="fab fa-spotify text-2xl text-white"></i>
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-black text-white uppercase tracking-tight">Spotify</h4>
+                            <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mt-1">
+                                {spotifyProfile ? `Verified: ${spotifyProfile.display_name}` : "Not Verified"}
+                            </p>
+                        </div>
+                    </div>
+                    {spotifyProfile ? (
+                      <div className="px-4 py-2 bg-[#1DB954]/10 text-[#1DB954] rounded-lg text-[9px] font-black uppercase tracking-widest border border-[#1DB954]/20">
+                        Verified
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={handleSpotifyConnect}
+                        className="px-6 py-2 bg-[#1DB954] text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-[#1ed760] transition-all shadow-lg shadow-[#1DB954]/20"
+                      >
+                        Verify Artist
+                      </button>
+                    )}
+                  </div>
+                </div>
+               </section>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -185,8 +321,8 @@ interface SettingToggleProps {
 const SettingToggle: React.FC<SettingToggleProps> = ({ label, description, active, onToggle }) => (
   <div className="flex items-center justify-between gap-8 group">
     <div className="flex-1">
-      <h4 className="text-sm font-black text-white uppercase italic tracking-tight mb-1 group-hover:text-blue-400 transition-colors">{label}</h4>
-      <p className="text-[10px] text-white/30 uppercase tracking-wider font-bold italic">{description}</p>
+      <h4 className="text-sm font-black text-white uppercase tracking-tight mb-1 group-hover:text-blue-400 transition-colors">{label}</h4>
+      <p className="text-[10px] text-white/30 uppercase tracking-wider font-bold">{description}</p>
     </div>
     <button 
       onClick={onToggle}

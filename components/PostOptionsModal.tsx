@@ -12,25 +12,36 @@ interface PostOptionsModalProps {
 const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, isOwner, onClose, onDelete }) => {
   const { addNotification } = useAudio();
 
-  const handleAction = (label: string, action?: () => void) => {
-    if (action) {
-      action();
-    } else {
-      // In a real app, this would trigger an API call
-      console.log(`${label} protocol initiated for post ${post.id}`);
-    }
+  const handleSaveToVault = () => {
+    addNotification("Signal saved to vault", "success");
     onClose();
+  };
+
+  const handleReport = () => {
+    addNotification("Glitch reported to moderation node", "info");
+    onClose();
+  };
+
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to purge this signal from the network? This action cannot be reversed.")) {
+      if (onDelete) {
+        onDelete();
+        addNotification("Signal purged from network", "success");
+      } else {
+        addNotification("Unable to purge signal (Permission denied)", "error");
+      }
+      onClose();
+    }
   };
 
   const copyLink = () => {
     navigator.clipboard.writeText(`https://tonjam.app/post/${post.id}`);
-    // addNotification is globally disabled as per current project settings but kept in logic
-    // We'll use a local alert or similar if needed, but per context it's suppressed
+    addNotification("Signal coordinates copied", "success");
     onClose();
   };
 
   const shareToPlatform = (platform: string) => {
-    // Simulate sharing
+    addNotification(`Broadcasting to ${platform}...`, "info");
     onClose();
   };
 
@@ -42,7 +53,7 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, isOwner, onCl
         <div className="p-1">
           {/* Header */}
           <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
-            <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] italic">Signal Controls</span>
+            <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Signal Controls</span>
             <button onClick={onClose} className="text-white/20 hover:text-white transition-colors">
               <i className="fas fa-times text-[10px]"></i>
             </button>
@@ -50,7 +61,7 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, isOwner, onCl
 
           {/* Share Section */}
           <div className="p-3">
-            <p className="text-[7px] font-black text-white/10 uppercase tracking-widest mb-3 ml-2 italic">Relay to Network</p>
+            <p className="text-[7px] font-black text-white/10 uppercase tracking-widest mb-3 ml-2">Relay to Network</p>
             <div className="grid grid-cols-4 gap-2 mb-4">
               <ShareIcon icon="fa-link" onClick={copyLink} color="bg-white/5" />
               <ShareIcon icon="fa-telegram" onClick={() => shareToPlatform('Telegram')} color="bg-blue-500/10 text-blue-400" />
@@ -63,22 +74,22 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, isOwner, onCl
               <OptionButton 
                 icon="fa-bookmark" 
                 label="Save to Vault" 
-                onClick={() => handleAction('Vault')} 
+                onClick={handleSaveToVault} 
               />
               
               {isOwner ? (
                 <OptionButton 
                   icon="fa-trash-can" 
-                  label="Purge Signal" 
+                  label="Delete" 
                   variant="danger" 
-                  onClick={() => handleAction('Purge', onDelete)} 
+                  onClick={handleDelete} 
                 />
               ) : (
                 <OptionButton 
                   icon="fa-triangle-exclamation" 
-                  label="Report Glitch" 
+                  label="Report" 
                   variant="danger" 
-                  onClick={() => handleAction('Report')} 
+                  onClick={handleReport} 
                 />
               )}
             </div>
@@ -87,7 +98,7 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, isOwner, onCl
           {/* Abort */}
           <button 
             onClick={onClose}
-            className="w-full py-4 text-[9px] font-black uppercase text-white/20 tracking-[0.5em] hover:text-white hover:bg-white/5 transition-all italic border-t border-white/5"
+            className="w-full py-4 text-[9px] font-black uppercase text-white/20 tracking-[0.5em] hover:text-white hover:bg-white/5 transition-all border-t border-white/5"
           >
             Abort Protocol
           </button>
@@ -114,7 +125,7 @@ const OptionButton = ({ icon, label, onClick, variant = 'default' }: { icon: str
     <div className={`w-8 h-8 rounded-lg flex items-center justify-center border border-white/5 transition-all flex-shrink-0 ${variant === 'danger' ? 'bg-red-500/10 text-red-500 group-hover:bg-red-500 group-hover:text-white' : 'bg-white/5 text-white/40 group-hover:text-blue-400 group-hover:bg-blue-500/10'}`}>
       <i className={`fas ${icon} text-[10px]`}></i>
     </div>
-    <span className={`text-[10px] font-black uppercase tracking-tight italic ${variant === 'danger' ? 'text-red-500/50 group-hover:text-red-500' : 'text-white/40 group-hover:text-white'}`}>
+    <span className={`text-[10px] font-black uppercase tracking-tight ${variant === 'danger' ? 'text-red-500/50 group-hover:text-red-500' : 'text-white/40 group-hover:text-white'}`}>
       {label}
     </span>
   </button>

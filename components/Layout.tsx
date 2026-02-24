@@ -65,10 +65,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen pb-32 lg:pb-0 lg:pl-64 bg-black text-white">
+    <div className="min-h-screen pb-32 lg:pb-0 lg:pl-64 text-white transition-colors duration-300">
       {/* Top Header - Strictly Home Screen Only */}
       {isHome && (
-        <header className="fixed top-0 left-0 right-0 z-40 bg-black border-b border-white/5 px-4 md:px-12 py-2 flex items-center justify-between lg:left-64">
+        <header className="fixed top-0 left-0 right-0 z-40 bg-black/90 backdrop-blur-md border-b border-white/5 px-4 md:px-12 py-2 flex items-center justify-between lg:left-64 transition-colors duration-300">
           <div className="flex items-center gap-2 lg:hidden">
             <img 
               src={APP_LOGO} 
@@ -226,7 +226,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-black border-r border-white/5 flex-col p-8 z-50 overflow-y-auto no-scrollbar">
+      <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-black/90 backdrop-blur-md border-r border-white/5 flex-col p-8 z-50 overflow-y-auto no-scrollbar transition-colors duration-300">
         <Link to="/" className="flex items-center gap-3 mb-16 group">
           <img 
             src={APP_LOGO} 
@@ -245,8 +245,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <NavItem to="/jamspace" icon="fa-users" label="JamSpace" />
           <NavItem to="/library" icon="fa-layer-group" label="Library" />
           <NavItem to="/marketplace" icon="fa-store" label="NFTs" />
-          <div className="pt-8 pb-3 text-[8px] font-black text-white/30 uppercase tracking-[0.4em] px-5">Developer</div>
-          <NavItem to="/forge" icon="fa-code-branch" label="Protocol Forge" />
+          {userProfile.isVerifiedArtist && (
+            <>
+              <div className="pt-8 pb-3 text-[8px] font-black text-white/30 uppercase tracking-[0.4em] px-5">Developer</div>
+              <NavItem to="/forge" icon="fa-code-branch" label="Protocol Forge" />
+            </>
+          )}
           <div className="pt-8 pb-3 text-[8px] font-black text-white/30 uppercase tracking-[0.4em] px-5">Rewards</div>
           <NavItem to="/tasks" icon="fa-gem" label="Earn TJ" />
           <div className="pt-8 pb-3 text-[8px] font-black text-white/30 uppercase tracking-[0.4em] px-5">Account</div>
@@ -267,7 +271,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <MobileNavItem to="/" icon="fa-house" />
         <MobileNavItem to="/discover" icon="fa-magnifying-glass" />
         <MobileNavItem to="/jamspace" icon="fa-users" />
-        <MobileNavItem to="/forge" icon="fa-code-branch" />
+        {userProfile.isVerifiedArtist && <MobileNavItem to="/forge" icon="fa-code-branch" />}
         <MobileNavItem to="/library" icon="fa-layer-group" />
         <MobileNavItem to="/marketplace" icon="fa-store" />
       </nav>

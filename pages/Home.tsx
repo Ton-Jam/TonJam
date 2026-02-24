@@ -4,6 +4,7 @@ import TrackCard from '../components/TrackCard';
 import UserCard from '../components/UserCard';
 import NFTCard from '../components/NFTCard';
 import PostCard from '../components/PostCard';
+import HorizontalChart from '../components/HorizontalChart';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, MOCK_POSTS, APP_LOGO, TON_LOGO } from '../constants';
 import { getAIRecommendations } from '../services/geminiService';
 import { Track } from '../types';
@@ -33,14 +34,17 @@ const Home: React.FC = () => {
   const [recommendedTracks, setRecommendedTracks] = useState<Track[]>([]);
   const [mood, setMood] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
-  const { addNotification } = useAudio();
+  const { addNotification, userTracks, userNFTs } = useAudio();
   
+  const allTracks = useMemo(() => [...userTracks, ...MOCK_TRACKS], [userTracks]);
+  const allNFTs = useMemo(() => [...userNFTs, ...MOCK_NFTS], [userNFTs]);
+
   const heroScrollRef = useRef<HTMLDivElement>(null);
   const [activeHeroIdx, setActiveHeroIdx] = useState(0);
 
   useEffect(() => {
-    setRecommendedTracks(MOCK_TRACKS.slice(0, 4));
-  }, []);
+    setRecommendedTracks(allTracks.slice(0, 4));
+  }, [allTracks]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -64,9 +68,9 @@ const Home: React.FC = () => {
     setMood(selectedMood);
     setLoadingAI(true);
     try {
-      const ids = await getAIRecommendations(selectedMood, MOCK_TRACKS);
-      const filtered = MOCK_TRACKS.filter(t => ids.includes(t.id));
-      setRecommendedTracks(filtered.length ? filtered : MOCK_TRACKS.slice(0, 4));
+      const ids = await getAIRecommendations(selectedMood, allTracks);
+      const filtered = allTracks.filter(t => ids.includes(t.id));
+      setRecommendedTracks(filtered.length ? filtered : allTracks.slice(0, 4));
       if (filtered.length) addNotification(`Neural Sync complete: ${filtered.length} matches found.`, 'success');
     } catch (e: any) {
       addNotification(e.message || "Neural Sync failed.", "error");
@@ -91,12 +95,42 @@ const Home: React.FC = () => {
     return [...MOCK_POSTS].sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments)).slice(0, 5);
   }, []);
 
+  const topArtists = useMemo(() => {
+    return [...MOCK_ARTISTS].sort((a, b) => (b.followers || 0) - (a.followers || 0)).slice(0, 8).map(artist => ({
+      id: artist.id,
+      title: artist.name,
+      subtitle: artist.genre || 'Various',
+      imageUrl: `https://picsum.photos/200/200?seed=${artist.name}`,
+      statValue: `${(artist.followers || 0).toLocaleString()}`,
+      statLabel: 'Followers',
+      trend: Math.floor(Math.random() * 40 - 10),
+      type: 'artist' as const
+    }));
+  }, []);
+
+  const topNFTs = useMemo(() => {
+    return [...MOCK_NFTS].sort((a, b) => {
+      const scoreA = (a.offers?.length || 0) * 10 + parseFloat(a.price);
+      const scoreB = (b.offers?.length || 0) * 10 + parseFloat(b.price);
+      return scoreB - scoreA;
+    }).slice(0, 8).map(nft => ({
+      id: nft.id,
+      title: nft.title,
+      subtitle: nft.creator,
+      imageUrl: nft.imageUrl,
+      statValue: nft.price,
+      statLabel: 'TON',
+      trend: Math.floor(Math.random() * 40 - 10),
+      type: 'nft' as const
+    }));
+  }, []);
+
   return (
-    <div className="animate-in fade-in duration-700 w-full bg-black overflow-x-hidden pb-32">
+    <div className="animate-in fade-in duration-700 w-full overflow-x-hidden pb-32">
       <section className="mb-10 pt-6">
         <SectionHeader title="Alpha Drops" subtitle="Genesis Collections" onAction={() => navigate('/explore/nfts?title=Alpha%20Drops')} />
         <div className="flex overflow-x-auto no-scrollbar gap-4 px-4 md:px-12 pb-2">
-          {MOCK_NFTS.slice(0, 6).map(nft => (
+          {allNFTs.slice(0, 6).map(nft => (
             <div key={nft.id} className="flex-shrink-0 w-44 md:w-56 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <NFTCard nft={nft} />
             </div>
@@ -107,13 +141,27 @@ const Home: React.FC = () => {
       <section className="mb-10">
         <SectionHeader title="New Drops" subtitle="Fresh Frequencies" onAction={() => navigate('/explore/tracks?title=New%20Drops')} />
         <div className="flex overflow-x-auto no-scrollbar gap-4 px-4 md:px-12 pb-2">
-          {MOCK_TRACKS.slice(0, 6).map(track => (
+          {allTracks.slice(0, 6).map(track => (
             <div key={track.id} className="flex-shrink-0 w-44 md:w-56 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <TrackCard track={track} />
             </div>
           ))}
         </div>
       </section>
+
+      <HorizontalChart 
+        title="Top Artists" 
+        subtitle="Most Followed Maestros" 
+        items={topArtists} 
+        onViewAll={() => navigate('/chart/artists')} 
+      />
+
+      <HorizontalChart 
+        title="Top NFTs" 
+        subtitle="Highest Value Protocols" 
+        items={topNFTs} 
+        onViewAll={() => navigate('/chart/nfts')} 
+      />
 
       <section className="mb-12 px-4 md:px-12">
         <div className="bg-[#050505] rounded-xl border border-white/5 relative overflow-hidden p-6 md:p-12">

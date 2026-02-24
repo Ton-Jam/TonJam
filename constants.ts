@@ -6,12 +6,12 @@ export const TJ_COIN_ICON = "https://i.postimg.cc/s2QHHMSF/TonjamCoin.png";
 export const TON_LOGO = "https://i.postimg.cc/jj7HksNw/ton-symbol.png";
 
 export const MOCK_TRACKS: Track[] = [
-  { id: '1', title: 'Solar Pulse', artist: 'Neon Voyager', artistId: 'a1', coverUrl: 'https://picsum.photos/400/400?random=1', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', duration: 210, genre: 'Electronic', isNFT: true, artistVerified: true, price: '2.5', bpm: 128, key: 'C# min', bitrate: 'FLAC', playCount: 12500, likes: 840 },
-  { id: '2', title: 'Cyber Drift', artist: 'Byte Beat', artistId: 'a2', coverUrl: 'https://picsum.photos/400/400?random=2', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', duration: 185, genre: 'Synthwave', isNFT: false, artistVerified: true, bpm: 110, key: 'D maj', bitrate: '320kbps', playCount: 8400, likes: 420 },
-  { id: '3', title: 'Deep Horizon', artist: 'Echo Phase', artistId: 'a3', coverUrl: 'https://picsum.photos/400/400?random=3', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', duration: 245, genre: 'Ambient', isNFT: true, artistVerified: false, price: '5.0', bpm: 85, key: 'A min', bitrate: 'FLAC', playCount: 15600, likes: 1200 },
-  { id: '4', title: 'Velvet Sky', artist: 'Luna Ray', artistId: 'a4', coverUrl: 'https://picsum.photos/400/400?random=4', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', duration: 195, genre: 'Pop', isNFT: false, artistVerified: true, bpm: 120, key: 'G maj', bitrate: '320kbps', playCount: 22000, likes: 3100 },
-  { id: '5', title: 'Neon Nights', artist: 'City Ghost', artistId: 'a5', coverUrl: 'https://picsum.photos/400/400?random=5', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', duration: 220, genre: 'Electronic', isNFT: true, artistVerified: false, price: '1.2', bpm: 124, key: 'F# min', bitrate: '320kbps', playCount: 5400, likes: 210 },
-  { id: '6', title: 'Prism Shift', artist: 'Prism Core', artistId: 'a6', coverUrl: 'https://picsum.photos/400/400?random=6', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', duration: 205, genre: 'Techno', isNFT: true, artistVerified: true, price: '3.0', bpm: 132, key: 'E min', bitrate: 'FLAC', playCount: 9800, likes: 650 },
+  { id: '1', title: 'Solar Pulse', artist: 'Neon Voyager', artistId: 'a1', coverUrl: 'https://picsum.photos/400/400?random=1', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', duration: 210, genre: 'Electronic', isNFT: true, artistVerified: true, price: '2.5', bpm: 128, key: 'C# min', bitrate: 'FLAC', playCount: 12500, likes: 840, releaseDate: '2023-10-15' },
+  { id: '2', title: 'Cyber Drift', artist: 'Byte Beat', artistId: 'a2', coverUrl: 'https://picsum.photos/400/400?random=2', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', duration: 185, genre: 'Synthwave', isNFT: false, artistVerified: true, bpm: 110, key: 'D maj', bitrate: '320kbps', playCount: 8400, likes: 420, releaseDate: '2023-11-02' },
+  { id: '3', title: 'Deep Horizon', artist: 'Echo Phase', artistId: 'a3', coverUrl: 'https://picsum.photos/400/400?random=3', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', duration: 245, genre: 'Ambient', isNFT: true, artistVerified: false, price: '5.0', bpm: 85, key: 'A min', bitrate: 'FLAC', playCount: 15600, likes: 1200, releaseDate: '2023-09-20' },
+  { id: '4', title: 'Velvet Sky', artist: 'Luna Ray', artistId: 'a4', coverUrl: 'https://picsum.photos/400/400?random=4', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', duration: 195, genre: 'Pop', isNFT: false, artistVerified: true, bpm: 120, key: 'G maj', bitrate: '320kbps', playCount: 22000, likes: 3100, releaseDate: '2023-12-01' },
+  { id: '5', title: 'Neon Nights', artist: 'City Ghost', artistId: 'a5', coverUrl: 'https://picsum.photos/400/400?random=5', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', duration: 220, genre: 'Electronic', isNFT: true, artistVerified: false, price: '1.2', bpm: 124, key: 'F# min', bitrate: '320kbps', playCount: 5400, likes: 210, releaseDate: '2023-11-28' },
+  { id: '6', title: 'Prism Shift', artist: 'Prism Core', artistId: 'a6', coverUrl: 'https://picsum.photos/400/400?random=6', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', duration: 205, genre: 'Techno', isNFT: true, artistVerified: true, price: '3.0', bpm: 132, key: 'E min', bitrate: 'FLAC', playCount: 9800, likes: 650, releaseDate: '2023-10-30' },
 ];
 
 export const MOCK_USER: UserProfile = {
@@ -56,7 +56,9 @@ export const MOCK_NFTS: NFTItem[] = [
       { event: 'Auction Started', from: 'Neon Voyager', to: 'Marketplace', date: '2023-10-02', price: '5' }
     ],
     offers: [
-      { id: 'off1', offerer: 'UQDa...X9y1', price: '12', duration: '3 days', timestamp: '2023-10-06' }
+      { id: 'off1', offerer: 'UQDa...X9y1', price: '12', duration: '3 days', timestamp: '2023-10-06' },
+      { id: 'off2', offerer: '0xTon...A12B', price: '10.5', duration: '1 day', timestamp: '2023-10-05' },
+      { id: 'off3', offerer: 'UQCc...8xZ2', price: '8', duration: 'Expired', timestamp: '2023-10-01' }
     ]
   },
   { 
@@ -83,7 +85,8 @@ export const MOCK_NFTS: NFTItem[] = [
       { event: 'Sale', from: 'Echo Phase', to: '0xTon...A12B', date: '2023-09-20', price: '45' }
     ],
     offers: [
-      { id: 'off3', offerer: 'UQCc...8xZ2', price: '40', duration: '7 days', timestamp: '2023-11-01' }
+      { id: 'off3', offerer: 'UQCc...8xZ2', price: '40', duration: '7 days', timestamp: '2023-11-01' },
+      { id: 'off4', offerer: 'UQDa...X9y1', price: '35', duration: 'Expired', timestamp: '2023-10-25' }
     ]
   },
   { 
@@ -163,6 +166,8 @@ export const MOCK_ARTISTS: Artist[] = [
     avatarUrl: 'https://picsum.photos/200/200?random=21', 
     followers: 12400, 
     verified: true,
+    isVerifiedArtist: true,
+    genre: 'Electronic',
     bio: "Pioneering the sound of the digital frontier. Synthwave frequencies forged in the TON core.",
     bannerUrl: "https://picsum.photos/1200/400?random=1001",
     socials: { x: 'https://x.com/neon_voyager', spotify: 'https://spotify.com/artist/neon_voyager', instagram: 'https://instagram.com/neon_voyager' }
@@ -173,6 +178,8 @@ export const MOCK_ARTISTS: Artist[] = [
     avatarUrl: 'https://picsum.photos/200/200?random=22', 
     followers: 8900, 
     verified: true,
+    isVerifiedArtist: true,
+    genre: 'Synthwave',
     bio: "Algorithmically generated beats for the decentralized generation.",
     bannerUrl: "https://picsum.photos/1200/400?random=1002",
     socials: { x: 'https://x.com/byte_beat', spotify: 'https://spotify.com/artist/byte_beat' }
@@ -183,6 +190,8 @@ export const MOCK_ARTISTS: Artist[] = [
     avatarUrl: 'https://picsum.photos/200/200?random=23', 
     followers: 5600, 
     verified: false,
+    isVerifiedArtist: false,
+    genre: 'Ambient',
     bio: "Ambient explorations through the blockchain void.",
     bannerUrl: "https://picsum.photos/1200/400?random=1003",
     socials: { website: 'https://echophase.io' }
@@ -193,6 +202,8 @@ export const MOCK_ARTISTS: Artist[] = [
     avatarUrl: 'https://picsum.photos/200/200?random=24', 
     followers: 15200, 
     verified: true,
+    isVerifiedArtist: true,
+    genre: 'Pop',
     bio: "Ethereal pop melodies floating on top of complex electronic soundscapes.",
     bannerUrl: "https://picsum.photos/1200/400?random=1004",
     socials: { x: 'https://x.com/lunaray', instagram: 'https://instagram.com/lunaray' }
@@ -203,6 +214,8 @@ export const MOCK_ARTISTS: Artist[] = [
     avatarUrl: 'https://picsum.photos/200/200?random=25', 
     followers: 4300, 
     verified: false,
+    isVerifiedArtist: false,
+    genre: 'Electronic',
     bio: "Lo-fi beats captured from the heart of the urban jungle.",
     bannerUrl: "https://picsum.photos/1200/400?random=1005",
     socials: { spotify: 'https://spotify.com/artist/cityghost' }
@@ -213,6 +226,8 @@ export const MOCK_ARTISTS: Artist[] = [
     avatarUrl: 'https://picsum.photos/200/200?random=26', 
     followers: 7800, 
     verified: true,
+    isVerifiedArtist: true,
+    genre: 'Techno',
     bio: "Shattering sonic boundaries with experimental techno and hard-hitting rhythms.",
     bannerUrl: "https://picsum.photos/1200/400?random=1006",
     socials: { x: 'https://x.com/prismcore', website: 'https://prismcore.tech' }
@@ -220,8 +235,60 @@ export const MOCK_ARTISTS: Artist[] = [
 ];
 
 export const MOCK_POSTS: Post[] = [
-  { id: 'p1', userId: 'u1', userName: 'Alex Rivera', userAvatar: 'https://picsum.photos/100/100?random=31', content: 'Just dropped my new single on TonJam! Check it out.', trackId: '1', likes: 245, comments: 12, timestamp: '2h ago' },
-  { id: 'p2', userId: 'u2', userName: 'Sarah Jenkins', userAvatar: 'https://picsum.photos/100/100?random=32', content: 'The marketplace is booming today. Nabbed a Neon Voyager NFT!', likes: 89, comments: 5, timestamp: '4h ago' },
+  { 
+    id: 'p1', 
+    userId: 'u1', 
+    userName: 'Alex Rivera', 
+    userAvatar: 'https://picsum.photos/100/100?random=31', 
+    content: 'Just dropped my new single on TonJam! Check it out.', 
+    trackId: '1', 
+    likes: 245, 
+    comments: 2, 
+    timestamp: '2h ago',
+    commentList: [
+      {
+        id: 'c1',
+        userId: 'u2',
+        userName: 'Sarah Jenkins',
+        userAvatar: 'https://picsum.photos/100/100?random=32',
+        content: 'This is fire! 🔥',
+        timestamp: '1h ago',
+        likes: 12,
+        reactions: { '🔥': 5 }
+      },
+      {
+        id: 'c2',
+        userId: 'a1',
+        userName: 'Neon Voyager',
+        userAvatar: 'https://picsum.photos/200/200?random=21',
+        content: 'Great work on the production here.',
+        timestamp: '30m ago',
+        likes: 8,
+        reactions: { '🚀': 3 }
+      }
+    ]
+  },
+  { 
+    id: 'p2', 
+    userId: 'u2', 
+    userName: 'Sarah Jenkins', 
+    userAvatar: 'https://picsum.photos/100/100?random=32', 
+    content: 'The marketplace is booming today. Nabbed a Neon Voyager NFT!', 
+    likes: 89, 
+    comments: 1, 
+    timestamp: '4h ago',
+    commentList: [
+      {
+        id: 'c3',
+        userId: 'u1',
+        userName: 'CryptoPioneer',
+        userAvatar: 'https://picsum.photos/200/200?random=50',
+        content: 'Nice grab! That one is a classic.',
+        timestamp: '2h ago',
+        likes: 4
+      }
+    ]
+  },
 ];
 
 export const MOCK_PLAYLISTS: Playlist[] = [

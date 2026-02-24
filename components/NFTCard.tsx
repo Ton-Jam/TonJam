@@ -1,24 +1,18 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NFTItem } from '../types';
-import { TON_LOGO, MOCK_TRACKS, MOCK_USER } from '../constants';
+import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '../constants';
 import { useAudio } from '../context/AudioContext';
-import BuyNFTModal from './BuyNFTModal';
-import SellNFTModal from './SellNFTModal';
-import BidModal from './BidModal';
 
 interface NFTCardProps {
   nft: NFTItem;
-  onSell?: (nft: NFTItem) => void;
+  onAction?: (nft: NFTItem) => void;
 }
 
-const NFTCard: React.FC<NFTCardProps> = ({ nft, onSell }) => {
+const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying, setOptionsTrack } = useAudio();
-  const [showBuyModal, setShowBuyModal] = useState(false);
-  const [showSellModal, setShowSellModal] = useState(false);
-  const [showBidModal, setShowBidModal] = useState(false);
   
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
@@ -40,12 +34,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onSell }) => {
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isOwner) {
-      setShowSellModal(true);
-    } else if (nft.listingType === 'auction') {
-      setShowBidModal(true);
+    if (onAction) {
+      onAction(nft);
     } else {
-      setShowBuyModal(true);
+      navigate(`/nft/${nft.id}`);
     }
   };
 
@@ -101,7 +93,38 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onSell }) => {
             <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse mt-1"></div>
           )}
         </div>
-        <p className="text-[8px] font-black uppercase tracking-widest text-white/20 mb-2 truncate">@{nft.creator}</p>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <p className="text-[8px] font-black uppercase tracking-widest text-white/20 truncate">@{nft.creator}</p>
+            {MOCK_ARTISTS.find(a => a.name === nft.creator)?.verified && (
+              <i className="fas fa-check-circle text-blue-500 text-[7px]"></i>
+            )}
+          </div>
+          {!isOwner && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                const artist = MOCK_ARTISTS.find(a => a.name === nft.owner);
+                if (artist) {
+                  navigate(`/artist/${artist.id}`);
+                } else {
+                  // If it's a wallet address, we don't have a specific profile page yet,
+                  // but we can show the owner's address or a placeholder action.
+                  // For now, let's just navigate to a search or profile if it's a known user.
+                  // Since we only have MOCK_ARTISTS and MOCK_USER, we'll check if it's the mock user
+                  if (nft.owner === MOCK_USER.walletAddress) {
+                    navigate('/profile');
+                  }
+                }
+              }}
+              className="flex-shrink-0 px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[6px] font-black uppercase tracking-widest text-blue-500/60 hover:text-blue-400 hover:border-blue-500/20 transition-all flex items-center gap-1"
+              title={`Owner: ${nft.owner}`}
+            >
+              <i className="fas fa-user"></i>
+              Owner
+            </button>
+          )}
+        </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-white/5">
           <div className="flex flex-col">
@@ -115,17 +138,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onSell }) => {
           </div>
           <button 
             onClick={handleActionClick}
-            className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] text-white shadow-lg active:scale-95 transition-all border ${isOwner ? 'bg-white/5 border-white/10 text-white/30 hover:text-white hover:bg-white/10' : 'electric-blue-bg border-white/10 shadow-blue-500/10'}`}
+            className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] text-white shadow-lg active:scale-95 transition-all border ${isOwner ? (nft.listingType ? 'bg-white/5 border-white/10 text-white/30 hover:text-white hover:bg-white/10' : 'electric-blue-bg border-white/10 shadow-blue-500/10') : 'electric-blue-bg border-white/10 shadow-blue-500/10'}`}
           >
-            {isOwner ? 'MANAGE' : nft.listingType === 'auction' ? 'BID' : 'BUY'}
+            {isOwner ? (nft.listingType ? 'MANAGE' : 'LIST') : nft.listingType === 'auction' ? 'BID' : 'BUY'}
           </button>
         </div>
       </div>
-
-      {/* Modals */}
-      {showBuyModal && <BuyNFTModal nft={nft} onClose={() => setShowBuyModal(false)} />}
-      {showSellModal && <SellNFTModal nft={nft} onClose={() => setShowSellModal(false)} />}
-      {showBidModal && <BidModal nft={nft} onClose={() => setShowBidModal(false)} />}
     </div>
   );
 };

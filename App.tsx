@@ -15,7 +15,9 @@ import ExploreList from './pages/ExploreList';
 import Notifications from './pages/Notifications';
 import ProtocolForge from './pages/ProtocolForge';
 import LoadingScreen from './components/LoadingScreen';
+import PostDetail from './pages/PostDetail';
 import { AudioProvider } from './context/AudioContext';
+import { AuthProvider } from './context/AuthContext';
 
 const App: React.FC = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
@@ -23,10 +25,9 @@ const App: React.FC = () => {
   useEffect(() => {
     // Initialize theme from localStorage
     const savedTheme = localStorage.getItem('tonjam_theme') || 'dark';
-    if (savedTheme === 'light') {
-      document.documentElement.classList.add('light');
-    } else {
-      document.documentElement.classList.remove('light');
+    document.documentElement.classList.remove('light', 'cyberpunk', 'ocean', 'forest');
+    if (savedTheme !== 'dark') {
+      document.documentElement.classList.add(savedTheme);
     }
 
     // Simulate initial asset loading
@@ -37,27 +38,30 @@ const App: React.FC = () => {
   if (isAppLoading) return <LoadingScreen />;
 
   return (
-    <AudioProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/discover" element={<Discover />} />
-            <Route path="/jamspace" element={<JamSpace />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/nft/:id" element={<NFTDetail />} />
-            <Route path="/explore/:type" element={<ExploreList />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/artist/:id" element={<ArtistProfile />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/forge" element={<ProtocolForge />} />
-          </Routes>
-        </Layout>
-      </Router>
-    </AudioProvider>
+    <AuthProvider>
+      <AudioProvider>
+        <Router>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/jamspace" element={<JamSpace />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/nft/:id" element={<NFTDetail />} />
+              <Route path="/explore/:type" element={<ExploreList />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/artist/:id" element={<ArtistProfile />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/forge" element={<ProtocolForge />} />
+              <Route path="/post/:id" element={<PostDetail />} />
+            </Routes>
+          </Layout>
+        </Router>
+      </AudioProvider>
+    </AuthProvider>
   );
 };
 

@@ -16,6 +16,7 @@ export interface Track {
   bitrate?: string; // e.g. "FLAC", "320kbps"
   playCount?: number;
   likes?: number;
+  releaseDate?: string;
 }
 
 export interface NFTTrait {
@@ -67,6 +68,9 @@ export interface Artist {
   avatarUrl: string;
   followers: number;
   verified: boolean;
+  isVerifiedArtist?: boolean;
+  genre?: string;
+  monthlyListeners?: number;
   bio?: string;
   bannerUrl?: string;
   socials?: {
@@ -75,6 +79,17 @@ export interface Artist {
     instagram?: string;
     website?: string;
   };
+}
+
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  content: string;
+  timestamp: string;
+  likes: number;
+  reactions?: Record<string, number>;
 }
 
 export interface Post {
@@ -87,6 +102,7 @@ export interface Post {
   trackId?: string;
   likes: number;
   comments: number;
+  commentList?: Comment[];
   timestamp: string;
 }
 

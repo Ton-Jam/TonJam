@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS } from '../constants';
 import TrackCard from '../components/TrackCard';
 import NFTCard from '../components/NFTCard';
@@ -7,6 +7,10 @@ import PlaylistCard from '../components/PlaylistCard';
 import UserCard from '../components/UserCard';
 import { useAudio } from '../context/AudioContext';
 import { Track } from '../types';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+
+const INITIAL_LIMIT = 10;
+const LOAD_MORE_COUNT = 10;
 
 const Library: React.FC = () => {
   const { 
@@ -20,11 +24,27 @@ const Library: React.FC = () => {
     clearRecentlyPlayed,
     likedTrackIds,
     followedUserIds,
-    setActivePlaylistId
+    setActivePlaylistId,
+    userNFTs,
+    userTracks,
+    userProfile
   } = useAudio();
   
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [favTracksLimit, setFavTracksLimit] = useState(INITIAL_LIMIT);
+  const [recTracksLimit, setRecTracksLimit] = useState(INITIAL_LIMIT);
+
+  const loadMoreFavs = useCallback(() => {
+    setFavTracksLimit(prev => prev + LOAD_MORE_COUNT);
+  }, []);
+
+  const loadMoreRecs = useCallback(() => {
+    setRecTracksLimit(prev => prev + LOAD_MORE_COUNT);
+  }, []);
+
+  const favSentinelRef = useInfiniteScroll(loadMoreFavs);
+  const recSentinelRef = useInfiniteScroll(loadMoreRecs);
 
   const selectedPlaylist = useMemo(() => 
     playlists.find(p => p.id === selectedPlaylistId), 
@@ -32,15 +52,17 @@ const Library: React.FC = () => {
   );
 
   const filteredNFTs = useMemo(() => {
-    return MOCK_NFTS.filter(n => 
+    const allNFTs = [...userNFTs, ...MOCK_NFTS];
+    return allNFTs.filter(n => 
       n.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
       n.creator.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, userNFTs]);
 
   const likedTracks = useMemo(() => {
-    return MOCK_TRACKS.filter(t => likedTrackIds.includes(t.id));
-  }, [likedTrackIds]);
+    const allTracks = [...userTracks, ...MOCK_TRACKS];
+    return allTracks.filter(t => likedTrackIds.includes(t.id));
+  }, [likedTrackIds, userTracks]);
 
   const filteredLikedTracks = useMemo(() => {
     return likedTracks.filter(t => 
@@ -83,8 +105,8 @@ const Library: React.FC = () => {
           </div>
           
           <div className="flex-1 space-y-8">
-            <h1 className="text-4xl md:text-8xl font-black italic tracking-tighter uppercase leading-none text-white drop-shadow-2xl">{selectedPlaylist.title}</h1>
-            <p className="text-sm md:text-lg text-white/40 font-medium italic max-w-2xl leading-relaxed">{selectedPlaylist.description || "Synthesized sequence of high-fidelity frequencies."}</p>
+            <h1 className="text-4xl md:text-8xl font-black tracking-tighter uppercase leading-none text-white drop-shadow-2xl">{selectedPlaylist.title}</h1>
+            <p className="text-sm md:text-lg text-white/40 font-medium max-w-2xl leading-relaxed">{selectedPlaylist.description || "Synthesized sequence of high-fidelity frequencies."}</p>
             <div className="flex flex-wrap gap-5 pt-4">
               <button 
                 onClick={() => playAll(tracksInPlaylist)}
@@ -124,7 +146,7 @@ const Library: React.FC = () => {
           ))}
           {tracksInPlaylist.length === 0 && (
             <div className="py-28 text-center glass rounded-xl border-dashed border-white/5">
-              <p className="text-[11px] font-black text-white/20 uppercase tracking-widest italic">Vault currently empty for this frequency.</p>
+              <p className="text-[11px] font-black text-white/20 uppercase tracking-widest">Vault currently empty for this frequency.</p>
             </div>
           )}
         </div>
@@ -249,11 +271,18 @@ const Library: React.FC = () => {
         </div>
         <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
           {filteredLikedTracks.length > 0 ? (
-            filteredLikedTracks.map(track => (
-              <div key={track.id} className="flex-shrink-0 w-40 md:w-52">
-                <TrackCard track={track} />
-              </div>
-            ))
+            <>
+              {filteredLikedTracks.slice(0, favTracksLimit).map(track => (
+                <div key={track.id} className="flex-shrink-0 w-40 md:w-52">
+                  <TrackCard track={track} />
+                </div>
+              ))}
+              {favTracksLimit < filteredLikedTracks.length && (
+                <div ref={favSentinelRef} className="flex-shrink-0 w-10 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="w-full py-12 text-center glass rounded-xl border-dashed border-white/10">
               <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">No frequencies saved in vault.</p>
@@ -261,6 +290,22 @@ const Library: React.FC = () => {
           )}
         </div>
       </section>
+
+      {/* My Uploaded Tracks Section (For Artists) */}
+      {userProfile.isVerifiedArtist && userTracks.length > 0 && (
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[9px] font-black text-white/60 uppercase tracking-[0.5em]">My Forged Protocols</h3>
+          </div>
+          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+            {userTracks.map(track => (
+              <div key={`upload-${track.id}`} className="flex-shrink-0 w-40 md:w-52">
+                <TrackCard track={track} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* My NFT Collection Section */}
       <section className="mb-12">
@@ -291,11 +336,16 @@ const Library: React.FC = () => {
           </div>
         </div>
         <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
-          {MOCK_TRACKS.slice(0, 6).map(track => (
+          {MOCK_TRACKS.slice(0, recTracksLimit).map(track => (
             <div key={`rec-${track.id}`} className="flex-shrink-0 w-40 md:w-52">
               <TrackCard track={track} />
             </div>
           ))}
+          {recTracksLimit < MOCK_TRACKS.length && (
+            <div ref={recSentinelRef} className="flex-shrink-0 w-10 flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
         </div>
       </section>
 
