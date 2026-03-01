@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Sparkles, Antenna } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
-import { MOCK_NFTS, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
+import { MOCK_NFTS, MOCK_TRACKS, MOCK_ARTISTS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import PlaylistCard from '@/components/PlaylistCard';
@@ -64,7 +64,7 @@ const Library: React.FC = () => {
   }, []);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 px-4 md:px-12">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 px-4 w-full">
       <header className="mb-6 pt-8">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
         <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.5em]">STORAGE PROTOCOL ACTIVE</p>
@@ -85,9 +85,9 @@ const Library: React.FC = () => {
             </div>
             <button onClick={clearRecentlyPlayed} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-red-500/80 transition-colors" > PURGE HISTORY </button>
           </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 mask-linear-fade">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
             {recentlyPlayed.map(track => (
-              <div key={`recent-${track.id}`} className="flex-shrink-0 w-36 md:w-44">
+              <div key={`recent-${track.id}`} className="flex-shrink-0 w-40 sm:w-48">
                 <TrackCard track={track} />
               </div>
             ))}
@@ -100,9 +100,9 @@ const Library: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My Playlists</h3>
         </div>
-        <div className="flex gap-6 overflow-x-auto no-scrollbar pb-6 mask-linear-fade">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {/* Create Playlist Card */}
-          <div onClick={() => { const name = prompt("IDENTIFY NEW SYNC SEQUENCE:"); if (name) createNewPlaylist(name); }} className="flex-shrink-0 w-36 md:w-44 aspect-square rounded-[10px] flex flex-col items-center justify-center group cursor-pointer hover:bg-white/5 transition-all" >
+          <div onClick={() => { const name = prompt("IDENTIFY NEW SYNC SEQUENCE:"); if (name) createNewPlaylist(name); }} className="flex-shrink-0 w-40 sm:w-48 aspect-square rounded-[5px] flex flex-col items-center justify-center group cursor-pointer hover:bg-white/5 transition-all border border-white/5" >
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors">
               <Plus className="text-white/40 group-hover:text-blue-400 h-6 w-6" />
             </div>
@@ -110,7 +110,7 @@ const Library: React.FC = () => {
           </div>
 
           {/* AI Recommended Playlist Card */}
-          <div onClick={createRecommendedPlaylist} className="flex-shrink-0 w-36 md:w-44 aspect-square rounded-[10px] flex flex-col items-center justify-center group cursor-pointer hover:bg-blue-500/10 transition-all relative overflow-hidden" >
+          <div onClick={createRecommendedPlaylist} className="flex-shrink-0 w-40 sm:w-48 aspect-square rounded-[5px] flex flex-col items-center justify-center group cursor-pointer hover:bg-blue-500/10 transition-all relative overflow-hidden border border-white/5" >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mb-4 group-hover:bg-blue-500/30 group-hover:text-blue-400 transition-colors relative z-10">
               <Sparkles className="text-blue-400/60 group-hover:text-blue-400 h-6 w-6" />
@@ -122,7 +122,7 @@ const Library: React.FC = () => {
           </div>
 
           {playlists.map(playlist => (
-            <div key={playlist.id} className="flex-shrink-0 w-36 md:w-44">
+            <div key={playlist.id} className="flex-shrink-0 w-40 sm:w-48">
               <PlaylistCard playlist={playlist} onClick={() => navigate(`/playlist/${playlist.id}`)} />
             </div>
           ))}
@@ -134,15 +134,15 @@ const Library: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Followed Nodes</h3>
         </div>
-        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {followedArtists.length > 0 ? (
             followedArtists.map(artist => (
-              <div key={`followed-${artist.id}`} className="flex-shrink-0 w-36 md:w-44">
+              <div key={`followed-${artist.id}`} className="flex-shrink-0 w-40 sm:w-48">
                 <UserCard user={artist} variant="portrait" />
               </div>
             ))
           ) : (
-            <div className="w-full py-12 text-center glass border border-blue-500/10 rounded-[10px]">
+            <div className="w-full py-12 text-center border border-white/5 rounded-[5px] bg-white/[0.02]">
               <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">No nodes synchronized.</p>
             </div>
           )}
@@ -154,22 +154,22 @@ const Library: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Favorite Tracks</h3>
         </div>
-        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {filteredLikedTracks.length > 0 ? (
             <>
               {filteredLikedTracks.slice(0, favTracksLimit).map(track => (
-                <div key={track.id} className="flex-shrink-0 w-40 md:w-52">
+                <div key={track.id} className="flex-shrink-0 w-40 sm:w-48">
                   <TrackCard track={track} />
                 </div>
               ))}
               {favTracksLimit < filteredLikedTracks.length && (
-                <div ref={favSentinelRef} className="flex-shrink-0 w-10 flex items-center justify-center">
-                  <div className="w-6 h-6 border border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div ref={favSentinelRef} className="flex-shrink-0 w-20 flex justify-center items-center">
+                  <img src={APP_LOGO} className="w-6 h-6 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
                 </div>
               )}
             </>
           ) : (
-            <div className="w-full py-12 text-center glass border border-blue-500/10 rounded-[10px]">
+            <div className="w-full py-12 text-center border border-white/5 rounded-[5px] bg-white/[0.02]">
               <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">No frequencies saved in vault.</p>
             </div>
           )}
@@ -197,15 +197,15 @@ const Library: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My NFT Collection</h3>
         </div>
-        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {filteredNFTs.length > 0 ? (
             filteredNFTs.map(nft => (
-              <div key={nft.id} className="flex-shrink-0 w-40 md:w-52">
+              <div key={nft.id} className="flex-shrink-0 w-40 sm:w-48">
                 <NFTCard nft={nft} />
               </div>
             ))
           ) : (
-            <div className="w-full py-12 text-center glass border border-blue-500/10 rounded-[10px]">
+            <div className="w-full py-12 text-center border border-white/5 rounded-[5px] bg-white/[0.02]">
               <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">No assets detected.</p>
             </div>
           )}
@@ -228,7 +228,7 @@ const Library: React.FC = () => {
           ))}
           {recTracksLimit < MOCK_TRACKS.length && (
             <div ref={recSentinelRef} className="flex-shrink-0 w-10 flex items-center justify-center">
-              <div className="w-6 h-6 border border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <img src={APP_LOGO} className="w-6 h-6 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
             </div>
           )}
         </div>

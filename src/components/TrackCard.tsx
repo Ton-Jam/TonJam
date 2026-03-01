@@ -25,10 +25,10 @@ const TrackCard: React.FC<TrackCardProps> = ({ track }) => {
 
   return (
     <div 
-      className="group relative bg-white/5 border border-white/10 rounded-2xl p-3 transition-all hover:bg-white/10 hover:-translate-y-1 overflow-hidden"
+      className="group relative border border-white/5 rounded-[5px] p-2 transition-all hover:bg-white/5 overflow-hidden"
       onClick={handlePlay}
     >
-      <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-neutral-900">
+      <div className="relative aspect-square rounded-[5px] overflow-hidden mb-3 bg-neutral-900">
         <img 
           src={track.coverUrl} 
           alt={track.title} 
@@ -57,7 +57,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track }) => {
 
         {track.isNFT && (
           <div className="absolute top-3 left-3">
-            <span className="px-3 py-1 bg-blue-600/80 backdrop-blur-md rounded-full text-[8px] font-bold uppercase tracking-widest text-white shadow-lg">
+            <span className="px-3 py-1 bg-blue-600/80 backdrop-blur-md rounded-[5px] text-[8px] font-bold uppercase tracking-widest text-white shadow-lg">
               NFT
             </span>
           </div>
@@ -65,26 +65,26 @@ const TrackCard: React.FC<TrackCardProps> = ({ track }) => {
       </div>
 
       <div className="px-1 space-y-1">
-        <h3 className={`text-sm font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-white'}`}>
+        <h3 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-white'}`}>
           {track.title}
         </h3>
-        <div className="flex items-center gap-1.5 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 truncate">
+        <div className="flex items-center gap-1 min-w-0">
+          <p className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate">
             {track.artist}
           </p>
-          {track.artistVerified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
+          {track.artistVerified && <CheckCircle2 className="h-2.5 w-2.5 text-blue-500" />}
         </div>
         
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-1.5">
-            <Headphones className="h-3 w-3 text-white/20" />
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
+        <div className="flex items-center justify-between pt-1.5">
+          <div className="flex items-center gap-1">
+            <Headphones className="h-2.5 w-2.5 text-white/20" />
+            <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
               {(track.playCount || 0).toLocaleString()}
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-3 w-3 text-white/20" />
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
+          <div className="flex items-center gap-1">
+            <Clock className="h-2.5 w-2.5 text-white/20" />
+            <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
               {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
             </span>
           </div>

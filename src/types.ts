@@ -159,5 +159,13 @@ export interface UserProfile {
   streamingEarnings?: string;
   nftEarnings?: string;
   followedArtists?: string[];
+  followedUserIds?: string[];
   friends?: string[];
+  socials?: {
+    x?: string;
+    instagram?: string;
+    website?: string;
+    telegram?: string;
+    spotify?: string;
+  };
 }

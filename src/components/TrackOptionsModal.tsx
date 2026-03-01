@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ListMusic, Plus, Coins, Share2, Network, Gem, Trash2 } from 'lucide-react';
 import { Track, Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
-import { MOCK_ARTISTS } from '@/constants';
+import { MOCK_ARTISTS, APP_LOGO } from '@/constants';
 import { analyzeRelatedArtists } from '@/services/geminiService';
 import MintModal from './MintModal';
 
@@ -143,7 +143,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
         )}
         {loadingRelated && (
           <div className="p-8 flex flex-col items-center gap-3">
-            <div className="w-6 h-6 -2px -purple-500 -t-transparent rounded-full animate-spin"></div>
+            <img src={APP_LOGO} className="w-6 h-6 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." />
             <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Analyzing Sonic DNA...</p>
           </div>
         )}

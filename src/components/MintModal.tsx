@@ -4,6 +4,7 @@ import { useAudio } from '@/context/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { generateNFTLore } from '@/services/geminiService';
 import { NFTItem, Track } from '@/types';
+import { APP_LOGO } from '@/constants';
 
 interface MintModalProps {
   onClose: () => void;
@@ -198,7 +199,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                 <div className="flex justify-between items-center">
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">AI-Generated Artifact Lore</label>
                   <button onClick={handleGenerateLore} disabled={loading} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors" >
-                    <RefreshCw className={`h-3 w-3 mr-1 inline-block ${loading ? 'animate-spin' : ''}`} /> Regenerate
+                    <img src={APP_LOGO} className={`h-3 w-3 mr-1 inline-block object-contain ${loading ? 'animate-[spin_3s_linear_infinite]' : ''}`} alt="Regenerate" /> Regenerate
                   </button>
                 </div>
                 <div className="relative">
@@ -206,7 +207,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                   {loading && (
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-[10px] flex items-center justify-center">
                       <div className="flex flex-col items-center gap-3">
-                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." />
                         <p className="text-[10px] font-bold text-white uppercase tracking-widest">AI Lore Generation...</p>
                       </div>
                     </div>
@@ -277,7 +278,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
               <button onClick={handleMint} disabled={loading} className="flex-[2] py-4 bg-green-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-green-600/20 hover:bg-green-500 transition-all flex items-center justify-center gap-3" >
                 {loading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> DEPLOYING_PROTOCOL...
+                    <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80 mr-2 inline-block" alt="Loading..." /> DEPLOYING_PROTOCOL...
                   </>
                 ) : (
                   <>

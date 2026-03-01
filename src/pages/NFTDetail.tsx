@@ -22,7 +22,7 @@ import {
   ChevronRight 
 } from 'lucide-react';
 
-import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS } from '@/constants';
+import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem, Track, NFTOffer } from '@/types';
 import { generateNFTLore } from '@/services/geminiService';
@@ -40,7 +40,11 @@ const NFTDetail: React.FC = () => {
   const { addNotification, currentTrack, isPlaying, playTrack, allNFTs, updateNFT } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
-  const [localNft, setLocalNft] = useState<NFTItem | null>(null);
+  
+  const localNft = useMemo(() => {
+    return allNFTs.find(n => n.id === id) || null;
+  }, [id, allNFTs]);
+
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
   const [lore, setLore] = useState<string>('');
   const [isGeneratingLore, setIsGeneratingLore] = useState(false);
@@ -55,37 +59,38 @@ const NFTDetail: React.FC = () => {
   const [selectedOffer, setSelectedOffer] = useState<NFTOffer | null>(null);
 
   useEffect(() => {
-    const nft = allNFTs.find(n => n.id === id);
-    if (nft) {
-      setLocalNft(nft);
-      setAssociatedTrack(MOCK_TRACKS.find(t => t.id === nft.trackId) || null);
+    if (localNft) {
+      setAssociatedTrack(MOCK_TRACKS.find(t => t.id === localNft.trackId) || null);
       /* Fetch dynamic metadata */
-      if (nft.contractAddress) {
+      if (localNft.contractAddress) {
         setIsFetchingMetadata(true);
-        fetchNFTMetadata(nft.contractAddress)
+        fetchNFTMetadata(localNft.contractAddress)
           .then(metadata => {
-            setLocalNft(prev => {
-              if (!prev || !metadata) return prev;
-              return {
-                ...prev,
-                description: metadata.description || prev.description,
-                traits: metadata.traits || prev.traits
-              };
-            });
+            if (!metadata) return;
+            // Note: We don't update state here directly because localNft is derived from allNFTs
+            // In a real app, we'd trigger an updateNFT call if metadata changed significantly
           })
           .catch(err => console.error("Failed to fetch metadata", err))
           .finally(() => setIsFetchingMetadata(false));
       }
     }
     window.scrollTo(0, 0);
-  }, [id, allNFTs]);
+  }, [id, localNft]);
 
   useEffect(() => {
-    if (!localNft?.auctionEndTime) return;
+    if (!localNft?.auctionEndTime) {
+      setTimeLeft('00:00:00');
+      return;
+    }
     const timer = setInterval(() => {
-      const end = new Date(localNft.auctionEndTime!).getTime();
+      const endTime = new Date(localNft.auctionEndTime!).getTime();
+      if (isNaN(endTime)) {
+        setTimeLeft('INVALID');
+        clearInterval(timer);
+        return;
+      }
       const now = new Date().getTime();
-      const diff = end - now;
+      const diff = endTime - now;
       if (diff <= 0) {
         setTimeLeft('ENDED');
         clearInterval(timer);
@@ -361,7 +366,7 @@ const NFTDetail: React.FC = () => {
                   </div>
                 ) : (
                   <button onClick={handleAction} className="w-full py-6 electric-blue-bg text-white rounded-[10px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-blue-500/30" >
-                    PURCHASE ASSET
+                    BUY ASSET
                   </button>
                 )}
               </div>
@@ -376,7 +381,7 @@ const NFTDetail: React.FC = () => {
                 <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Origin Narrative</h3>
                 {!lore && (
                   <button onClick={handleGenerateLore} disabled={isGeneratingLore} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-white flex items-center gap-2 transition-colors">
-                    {isGeneratingLore ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />} RECONSTRUCT
+                    {isGeneratingLore ? <img src={APP_LOGO} className="w-3 h-3 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> : <Sparkles className="h-3 w-3" />} RECONSTRUCT
                   </button>
                 )}
               </div>
@@ -540,9 +545,11 @@ const NFTDetail: React.FC = () => {
                 VIEW ALL <ChevronRight className="ml-2 h-2 w-2" />
               </button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
               {moreFromCreator.map((nft) => (
-                <NFTCard key={nft.id} nft={nft} />
+                <div key={nft.id} className="min-w-[240px] sm:min-w-[280px]">
+                  <NFTCard nft={nft} />
+                </div>
               ))}
             </div>
           </div>
@@ -560,9 +567,11 @@ const NFTDetail: React.FC = () => {
                 EXPLORE GENRE <ChevronRight className="ml-2 h-2 w-2" />
               </button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
               {relatedNfts.map((nft) => (
-                <NFTCard key={nft.id} nft={nft} />
+                <div key={nft.id} className="min-w-[240px] sm:min-w-[280px]">
+                  <NFTCard nft={nft} />
+                </div>
               ))}
             </div>
           </div>

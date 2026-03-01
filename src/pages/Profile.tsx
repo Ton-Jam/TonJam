@@ -25,7 +25,7 @@ import {
   Users
 } from 'lucide-react';
 
-import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS, MOCK_USERS } from '@/constants';
+import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS, MOCK_USERS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import PlaylistCard from '@/components/PlaylistCard';
@@ -42,11 +42,25 @@ import { getArtistSonicDNA } from '@/services/geminiService';
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const userAddress = useTonAddress();
-  const { addNotification, playlists, userProfile, setUserProfile, userTracks, userNFTs, allNFTs, allTracks, currentTrack } = useAudio();
+  const { 
+    addNotification, 
+    playlists, 
+    userProfile, 
+    setUserProfile, 
+    userTracks, 
+    userNFTs, 
+    allNFTs, 
+    allTracks, 
+    currentTrack,
+    followedUserIds,
+    playTrack,
+    recentlyPlayed,
+    clearRecentlyPlayed
+  } = useAudio();
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [localUser, setLocalUser] = useState<UserProfile>(userProfile);
-  const [activeTab, setActiveTab] = useState<'inventory' | 'releases' | 'sequences' | 'activity' | 'network' | 'staking'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'releases' | 'sequences' | 'activity' | 'network' | 'staking' | 'feed'>('inventory');
   const [showMintModal, setShowMintModal] = useState(false);
   const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
   const [isDNASyncing, setIsDNASyncing] = useState(false);
@@ -172,6 +186,16 @@ const Profile: React.FC = () => {
     addNotification("Neural identity committed to chain", "success");
   };
 
+  const handleSocialChange = (platform: string, value: string) => {
+    setLocalUser(prev => ({
+      ...prev,
+      socials: {
+        ...(prev.socials || {}),
+        [platform]: value
+      }
+    }));
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
     const file = e.target.files?.[0];
     if (file) {
@@ -291,6 +315,27 @@ const Profile: React.FC = () => {
               <p className="text-blue-500 font-bold text-xs md:text-sm uppercase tracking-[0.6em] drop-shadow-md">
                 {localUser.handle}
               </p>
+              
+              {/* Social Links Display */}
+              {!isEditing && localUser.socials && (
+                <div className="flex gap-4 mt-4 justify-center md:justify-start">
+                  {localUser.socials.x && (
+                    <a href={localUser.socials.x} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-blue-400 transition-colors">
+                      <Satellite className="h-4 w-4" />
+                    </a>
+                  )}
+                  {localUser.socials.instagram && (
+                    <a href={localUser.socials.instagram} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-pink-400 transition-colors">
+                      <Camera className="h-4 w-4" />
+                    </a>
+                  )}
+                  {localUser.socials.telegram && (
+                    <a href={localUser.socials.telegram} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-blue-300 transition-colors">
+                      <Zap className="h-4 w-4" />
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Edit/Save Actions */}
@@ -346,6 +391,7 @@ const Profile: React.FC = () => {
         <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
           {[
             { id: 'inventory', label: 'Inventory', icon: Box },
+            { id: 'feed', label: 'Feed', icon: Satellite },
             { id: 'releases', label: 'Releases', icon: Disc, hidden: !userProfile.isVerifiedArtist },
             { id: 'sequences', label: 'Sequences', icon: Layers },
             { id: 'activity', label: 'Activity', icon: Zap },
@@ -388,7 +434,7 @@ const Profile: React.FC = () => {
               <h3 className="text-[8px] font-bold text-blue-500 uppercase tracking-[0.4em] mb-6 relative z-10">Neural Signature</h3>
               {isDNASyncing ? (
                 <div className="py-6 flex flex-col items-center gap-4 relative z-10">
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                  <img src={APP_LOGO} className="w-6 h-6 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
                   <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Resonating frequencies...</p>
                 </div>
               ) : (
@@ -408,7 +454,36 @@ const Profile: React.FC = () => {
             <div className="glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.02] p-8 rounded-[10px] relative overflow-hidden">
               <h3 className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em] mb-8">Origin Narrative</h3>
               {isEditing ? (
-                <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-[10px] p-4 text-xs text-white outline-none h-32 leading-relaxed backdrop-blur-md" placeholder="Identify your frequency..." />
+                <div className="space-y-4">
+                  <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-[10px] p-4 text-xs text-white outline-none h-32 leading-relaxed bg-white/5 border border-white/10" placeholder="Identify your frequency..." />
+                  
+                  <div className="space-y-3">
+                    <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Social Relays</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="X (Twitter) URL" 
+                        value={localUser.socials?.x || ''} 
+                        onChange={(e) => handleSocialChange('x', e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-[10px] px-4 py-2 text-[10px] text-white outline-none focus:border-blue-500/50"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Instagram URL" 
+                        value={localUser.socials?.instagram || ''} 
+                        onChange={(e) => handleSocialChange('instagram', e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-[10px] px-4 py-2 text-[10px] text-white outline-none focus:border-blue-500/50"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Telegram URL" 
+                        value={localUser.socials?.telegram || ''} 
+                        onChange={(e) => handleSocialChange('telegram', e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-[10px] px-4 py-2 text-[10px] text-white outline-none focus:border-blue-500/50"
+                      />
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div onClick={() => setIsEditing(true)} className="cursor-pointer group/bio relative" >
                   <p className="text-xs text-white/40 leading-relaxed group-hover:text-white/60 transition-colors">
@@ -427,6 +502,47 @@ const Profile: React.FC = () => {
 
           {/* Right Content */}
           <div className="lg:col-span-8 space-y-8">
+            {activeTab === 'feed' && (
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+                <SectionHeader title="Neural Feed" />
+                <div className="space-y-6">
+                  {/* Filtered Feed: Tracks and NFTs from followed accounts */}
+                  {[
+                    ...allTracks.filter(t => followedUserIds.includes(t.artistId) || userProfile.followedArtists?.includes(t.artistId)).map(t => ({ ...t, type: 'track' as const })),
+                    ...allNFTs.filter(n => followedUserIds.includes(n.artistId || '') || userProfile.followedArtists?.includes(n.artistId || '')).map(n => ({ ...n, type: 'nft' as const }))
+                  ].sort((a, b) => (b as any).id.localeCompare((a as any).id)).map((item, idx) => (
+                    <div key={item.id} className="glass border border-blue-500/10 p-6 rounded-[10px] flex items-center gap-6 group hover:bg-white/[0.02] transition-all">
+                      <div className="w-16 h-16 rounded-[10px] overflow-hidden flex-shrink-0">
+                        <img src={(item as any).coverUrl || (item as any).imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-[7px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${item.type === 'track' ? 'bg-blue-500/20 text-blue-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                            {item.type === 'track' ? 'New Release' : 'NFT Drop'}
+                          </span>
+                          <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Just now</span>
+                        </div>
+                        <h4 className="text-sm font-bold text-white uppercase truncate">{(item as any).title}</h4>
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{(item as any).artist || (item as any).creator}</p>
+                      </div>
+                      <button 
+                        onClick={() => item.type === 'track' ? playTrack(item as any) : navigate(`/nft/${item.id}`)}
+                        className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-[10px] text-[8px] font-bold uppercase tracking-widest text-white transition-all"
+                      >
+                        {item.type === 'track' ? 'Listen' : 'View'}
+                      </button>
+                    </div>
+                  ))}
+                  {followedUserIds.length === 0 && (userProfile.followedArtists?.length || 0) === 0 && (
+                    <div className="py-20 text-center flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-3xl">
+                      <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">Your feed is empty. Follow nodes to receive signals.</p>
+                      <button onClick={() => navigate('/discover')} className="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all">Discover Nodes</button>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
             {activeTab === 'inventory' && (
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <SectionHeader title="Digital Vault" actionLabel="Manage Assets" onAction={() => navigate('/library')} />
@@ -516,21 +632,34 @@ const Profile: React.FC = () => {
             )}
 
             {activeTab === 'sequences' && (
-              <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <SectionHeader title="Sync Sequences" onAction={() => navigate('/library')} />
-                <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
-                  {playlists.map(pl => (
-                    <div key={pl.id} className="min-w-[280px] sm:min-w-[320px]">
-                      <PlaylistCard playlist={pl} onClick={() => navigate('/library')} />
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
+                <div>
+                  <SectionHeader title="Sync Sequences" onAction={() => navigate('/library')} />
+                  <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+                    {playlists.map(pl => (
+                      <div key={pl.id} className="min-w-[280px] sm:min-w-[320px]">
+                        <PlaylistCard playlist={pl} onClick={() => navigate('/library')} />
+                      </div>
+                    ))}
+                    <div onClick={() => navigate('/library')} className="min-w-[280px] sm:min-w-[320px] aspect-square rounded-[10px] flex flex-col items-center justify-center group cursor-pointer transition-all bg-white/[0.02]" >
+                      <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/10 transition-colors">
+                        <Plus className="text-white/10 group-hover:text-blue-500 transition-colors h-6 w-6" />
+                      </div>
+                      <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/40 transition-colors">New Sequence</span>
                     </div>
-                  ))}
-                  <div onClick={() => navigate('/library')} className="min-w-[280px] sm:min-w-[320px] aspect-square rounded-[10px] flex flex-col items-center justify-center group cursor-pointer transition-all bg-white/[0.02]" >
-                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/10 transition-colors">
-                      <Plus className="text-white/10 group-hover:text-blue-500 transition-colors h-6 w-6" />
-                    </div>
-                    <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/40 transition-colors">New Sequence</span>
                   </div>
                 </div>
+
+                {recentlyPlayed.length > 0 && (
+                  <div>
+                    <SectionHeader title="Recent Frequencies" actionLabel="Clear History" onAction={clearRecentlyPlayed} />
+                    <div className="space-y-1">
+                      {recentlyPlayed.map(track => (
+                        <TrackCard key={`recent-${track.id}`} track={track} variant="row" />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </section>
             )}
 
@@ -581,17 +710,19 @@ const Profile: React.FC = () => {
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                 <div>
                   <SectionHeader title="Followed Artists" />
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 md:mx-0 md:px-0">
                     {localUser.followedArtists && localUser.followedArtists.length > 0 ? (
                       localUser.followedArtists.map(artistId => {
                         const artist = MOCK_ARTISTS.find(a => a.id === artistId);
                         if (!artist) return null;
                         return (
-                          <UserCard key={artist.id} user={artist} variant="compact" />
+                          <div key={artist.id} className="flex-shrink-0 w-40 sm:w-48">
+                            <UserCard user={artist} variant="compact" />
+                          </div>
                         );
                       })
                     ) : (
-                      <p className="col-span-full text-[10px] font-bold text-white/30 uppercase tracking-widest py-8 text-center bg-white/[0.02] rounded-[10px]">
+                      <p className="w-full text-[10px] font-bold text-white/30 uppercase tracking-widest py-8 text-center bg-white/[0.02] rounded-[10px]">
                         Not following any artists yet.
                       </p>
                     )}
@@ -600,17 +731,19 @@ const Profile: React.FC = () => {
 
                 <div>
                   <SectionHeader title="Friends" />
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 md:mx-0 md:px-0">
                     {localUser.friends && localUser.friends.length > 0 ? (
                       localUser.friends.map(friendId => {
                         const friend = MOCK_USERS.find(u => u.id === friendId);
                         if (!friend) return null;
                         return (
-                          <UserCard key={friend.id} user={friend} variant="compact" />
+                          <div key={friend.id} className="flex-shrink-0 w-40 sm:w-48">
+                            <UserCard user={friend} variant="compact" />
+                          </div>
                         );
                       })
                     ) : (
-                      <p className="col-span-full text-[10px] font-bold text-white/30 uppercase tracking-widest py-8 text-center bg-white/[0.02] rounded-[10px]">
+                      <p className="w-full text-[10px] font-bold text-white/30 uppercase tracking-widest py-8 text-center bg-white/[0.02] rounded-[10px]">
                         No friends added yet.
                       </p>
                     )}

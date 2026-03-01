@@ -29,7 +29,13 @@ export const MOCK_USER: UserProfile = {
   streamingEarnings: '45.2',
   nftEarnings: '79.3',
   followedArtists: ['a1', 'a2', 'a4'],
-  friends: ['u2', 'u3']
+  followedUserIds: ['u2', 'u3'],
+  friends: ['u2', 'u3'],
+  socials: {
+    x: 'https://x.com/pioneer_ton',
+    instagram: 'https://instagram.com/pioneer_ton',
+    telegram: 'https://t.me/pioneer_ton'
+  }
 };
 
 export const MOCK_NFTS: NFTItem[] = [

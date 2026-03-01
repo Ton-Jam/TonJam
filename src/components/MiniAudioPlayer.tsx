@@ -29,7 +29,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
 
   return (
     <div
-      className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-black/95 backdrop-blur-xl border-t border-white/5 px-4 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-white/[0.03] transition-all lg:left-64"
+      className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-black border-t border-white/5 px-4 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-white/[0.03] transition-all lg:left-64"
       onClick={() => setFullPlayerOpen(true)}
     >
       <div className="flex items-center gap-3 w-[65%] cursor-pointer">

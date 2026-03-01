@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Loader2, CheckCircle2 } from 'lucide-react';
-import { TON_LOGO } from '@/constants';
+import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
@@ -16,7 +16,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isProcessing, setIsProcessing] = useState(false);
-  const price = parseFloat(nft.price);
+  const price = parseFloat(nft.price) || 0;
   const gasFee = 0.05;
   const total = (price + gasFee).toFixed(2);
 
@@ -29,19 +29,22 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
     addNotification("Requesting wallet signature...", "info");
     try {
       await buyNFT(tonConnectUI, nft.owner, nft.price, nft.title);
-      /* Update NFT state locally to reflect purchase */
+      
       const updatedNFT = {
         ...nft,
         owner: userAddress,
-        listingType: null, /* Remove from listing */
-        price: nft.price /* Keep last price or reset? Usually keep as last sold price. */
+        listingType: undefined,
+        price: nft.price
       };
-      updateNFT(nft.id, { owner: userAddress, listingType: undefined /* Remove listing status */ });
-      /* Add to user's local inventory explicitly (though updateNFT handles allNFTs, userNFTs might need explicit add if it wasn't there before) */
-      /* But wait, updateNFT in context also updates userNFTs if the ID matches. */
-      /* However, if I am buying someone else's NFT, it wasn't in my userNFTs list before. */
-      /* So I need to add it to userNFTs. */
-      addUserNFT(updatedNFT);
+
+      // Update global state silently so we can show a custom success message
+      updateNFT(nft.id, { 
+        owner: userAddress, 
+        listingType: undefined 
+      }, true);
+      
+      addUserNFT(updatedNFT, true);
+      
       addNotification("Asset successfully synced to vault.", "success");
       onClose();
     } catch (e) {
@@ -91,7 +94,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
             onClick={handlePurchase}
             disabled={isProcessing}
             className="w-full py-4 electric-blue-bg rounded-[10px] text-[10px] font-bold uppercase tracking-widest text-white shadow-xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
-            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            {isProcessing ? <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> : <CheckCircle2 className="h-4 w-4" />}
             {isProcessing ? 'SYNCING...' : 'CONFIRM PURCHASE'}
           </button>
         </div>

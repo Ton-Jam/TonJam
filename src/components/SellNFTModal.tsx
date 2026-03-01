@@ -21,10 +21,12 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
     setIsSubmitting(true);
     
     setTimeout(() => {
+      const durationDays = parseInt(duration) || 7;
       updateNFT(nft.id, {
         listingType: listingType,
+        isAuction: listingType === 'auction',
         price: price,
-        auctionEndTime: listingType === 'auction' ? new Date(Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000).toISOString() : undefined
+        auctionEndTime: listingType === 'auction' ? new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString() : undefined
       });
       addNotification(`Asset listed for ${listingType === 'auction' ? 'auction' : 'fixed price'}.`, "success");
       setIsSubmitting(false);
@@ -92,18 +94,30 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
             </div>
 
             {listingType === 'auction' && (
-              <div className="space-y-2">
+              <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
                 <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1">Duration (Days)</label>
-                <select 
+                <div className="flex gap-2 mb-2">
+                  {['1', '3', '7', '14'].map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDuration(d)}
+                      className={`flex-1 py-2 rounded-lg text-[10px] font-bold transition-all ${duration === d ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                    >
+                      {d}D
+                    </button>
+                  ))}
+                </div>
+                <input 
+                  type="number"
+                  min="1"
+                  max="30"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white font-bold outline-none focus:border-amber-500/50 transition-all appearance-none"
-                >
-                  <option value="1" className="bg-neutral-900">1 Day</option>
-                  <option value="3" className="bg-neutral-900">3 Days</option>
-                  <option value="7" className="bg-neutral-900">7 Days</option>
-                  <option value="14" className="bg-neutral-900">14 Days</option>
-                </select>
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white font-bold outline-none focus:border-amber-500/50 transition-all"
+                  placeholder="Enter custom days..."
+                />
+                <p className="text-[8px] font-bold text-white/10 uppercase tracking-widest px-1">Protocol will automatically finalize after {duration} days.</p>
               </div>
             )}
           </div>

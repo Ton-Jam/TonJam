@@ -256,9 +256,9 @@ const JamSpace: React.FC = () => {
                   <span className="text-[7px] font-bold text-green-500 uppercase tracking-widest">Active</span>
                 </div>
               </div>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                 {artists.slice(0, 8).map(artist => (
-                  <div key={artist.id} className="relative group cursor-pointer" onClick={() => navigate(`/artist/${artist.id}`)} title={artist.name} >
+                  <div key={artist.id} className="relative group cursor-pointer flex-shrink-0 w-16" onClick={() => navigate(`/artist/${artist.id}`)} title={artist.name} >
                     <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full scale-0 group-hover:scale-110 transition-transform"></div>
                     <img src={artist.avatarUrl} className="w-full aspect-square rounded-full transition-all relative z-10 grayscale group-hover:grayscale-0 object-cover" alt="" />
                     <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full z-20"></div>

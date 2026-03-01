@@ -4,7 +4,7 @@ import { ArrowLeft, Search, Satellite } from 'lucide-react';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
 import NFTCard from '@/components/NFTCard';
-import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS } from '@/constants';
+import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 
 const ExploreList: React.FC = () => {
@@ -100,10 +100,10 @@ const ExploreList: React.FC = () => {
         </div>
       </div>
 
-      {/* Grid Content - Gap-4 for Card Sizing */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
+      {/* Horizontal Scroll Content */}
+      <div className="flex overflow-x-auto gap-4 md:gap-8 pb-8 no-scrollbar">
         {filteredItems.map((item, idx) => (
-          <div key={`${item.id}-${idx}`} className="animate-in fade-in duration-500 slide-in-from-bottom-2">
+          <div key={`${item.id}-${idx}`} className="min-w-[200px] sm:min-w-[240px] animate-in fade-in duration-500 slide-in-from-bottom-2">
             {type === 'tracks' && <TrackCard track={item} />}
             {type === 'nfts' && <NFTCard nft={item} />}
             {type === 'artists' && <UserCard user={item} variant="portrait" />}
@@ -114,11 +114,7 @@ const ExploreList: React.FC = () => {
       {/* Subtle Loading State */}
       {loading && (
         <div className="py-20 flex items-center justify-center">
-          <div className="flex gap-2 items-end h-4">
-            <div className="w-1.5 bg-blue-500/30 animate-[bounce_0.6s_infinite_0.1s] rounded-full"></div>
-            <div className="w-1.5 bg-blue-500/30 animate-[bounce_0.6s_infinite_0.2s] rounded-full"></div>
-            <div className="w-1.5 bg-blue-500/30 animate-[bounce_0.6s_infinite_0.3s] rounded-full"></div>
-          </div>
+          <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
         </div>
       )}
 

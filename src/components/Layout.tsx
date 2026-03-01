@@ -63,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <input 
               type="text" 
               placeholder="Search tracks, artists, NFTs..." 
-              className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-[5px] py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchOpen(true)}
@@ -118,7 +118,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <div className="pt-6">
-            <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[10px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
+            <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
               <PlusCircle className="h-5 w-5" />
               <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
             </button>
@@ -153,7 +153,7 @@ const NavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon; labe
   <NavLink 
     to={to} 
     className={({ isActive }) => `
-      flex items-center gap-4 px-5 py-3.5 rounded-[10px] transition-all
+      flex items-center gap-4 px-5 py-3.5 rounded-[5px] transition-all
       ${isActive ? 'bg-blue-600/10 text-blue-500 font-bold' : 'text-white/40 hover:text-white hover:bg-white/5'}
     `}
   >

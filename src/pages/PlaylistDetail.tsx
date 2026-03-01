@@ -205,9 +205,9 @@ const PlaylistDetail: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="space-y-4">
+      <div className="flex overflow-x-auto gap-4 pb-8 no-scrollbar">
         {playlistTracks.map((track, index) => (
-          <div key={track.id} className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-[10px] group transition-colors">
+          <div key={track.id} className="min-w-[280px] sm:min-w-[320px] p-3 hover:bg-white/5 rounded-[10px] group transition-colors flex items-center gap-4">
             <span className="text-white/40 w-8 text-center font-mono text-sm">{index + 1}</span>
             <div className="flex-1">
               <TrackCard track={track} variant="row" />

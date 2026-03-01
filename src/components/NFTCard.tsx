@@ -47,10 +47,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="relative cursor-pointer group w-full bg-white/5 border border-white/10 rounded-2xl p-3 transition-all hover:bg-white/10 hover:-translate-y-1 overflow-hidden shadow-2xl"
+      className="relative cursor-pointer group w-full border border-white/5 rounded-[5px] p-2 transition-all hover:bg-white/5 overflow-hidden"
     >
       {/* Artwork Area */}
-      <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-neutral-900">
+      <div className="relative aspect-square rounded-[5px] overflow-hidden mb-3 bg-neutral-900">
         <img
           src={nft.imageUrl}
           loading="lazy"
@@ -73,7 +73,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
         </div>
 
         <div className="absolute top-3 left-3">
-          <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-white">
+          <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-[5px] text-[10px] font-bold uppercase tracking-widest text-white">
             {nft.edition}
           </span>
         </div>
@@ -105,19 +105,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
 
         <div>
           <div className="flex justify-between items-start gap-2 mb-1">
-            <h3 className={`text-sm font-bold uppercase tracking-tight truncate leading-tight flex-1 ${isActive ? 'text-blue-500' : 'text-white'}`}>
+            <h3 className={`text-xs font-bold uppercase tracking-tight truncate leading-tight flex-1 ${isActive ? 'text-blue-500' : 'text-white'}`}>
               {nft.title}
             </h3>
             {nft.listingType === 'auction' && (
-              <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse mt-1 shadow-lg shadow-amber-500/50"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse mt-1 shadow-lg shadow-amber-500/50"></div>
             )}
           </div>
           
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 truncate">@{nft.creator}</p>
+            <div className="flex items-center gap-1 min-w-0">
+              <p className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate">@{nft.creator}</p>
               {MOCK_ARTISTS.find(a => a.name === nft.creator)?.verified && (
-                <CheckCircle2 className="h-3 w-3 text-blue-500" />
+                <CheckCircle2 className="h-2.5 w-2.5 text-blue-500" />
               )}
             </div>
             {!isOwner && (
@@ -128,7 +128,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
                   if (artist) navigate(`/artist/${artist.id}`);
                   else if (nft.owner === MOCK_USER.walletAddress) navigate('/profile');
                 }}
-                className="px-2 py-0.5 rounded bg-white/5 text-[8px] font-bold uppercase tracking-widest text-blue-500/60 hover:text-blue-400 transition-all flex items-center gap-1"
+                className="px-1.5 py-0.5 rounded bg-white/5 text-[7px] font-bold uppercase tracking-widest text-blue-500/60 hover:text-blue-400 transition-all flex items-center gap-1"
               >
                 <UserIcon className="h-2 w-2" /> Owner
               </button>
@@ -136,18 +136,18 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
           </div>
         </div>
 
-        <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+        <div className="pt-2 border-t border-white/5 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-0.5">Current Price</span>
-            <div className="flex items-center gap-1.5">
-              <img src={TON_LOGO} className="w-4 h-4" alt="TON" />
-              <span className="text-base font-bold text-white tracking-tighter">{nft.price}</span>
+            <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest mb-0.5">Current Price</span>
+            <div className="flex items-center gap-1">
+              <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+              <span className="text-sm font-bold text-white tracking-tighter">{nft.price}</span>
             </div>
           </div>
           
           <button 
             onClick={handleActionClick} 
-            className={`px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg
+            className={`px-3 py-1.5 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg
               ${isOwner 
                 ? 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white' 
                 : 'bg-blue-600 text-white hover:bg-blue-500 shadow-blue-600/20'}

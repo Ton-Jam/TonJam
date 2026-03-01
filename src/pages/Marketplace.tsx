@@ -99,7 +99,7 @@ const Marketplace: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 pb-40 w-full min-h-screen">
       {/* 1. COMPACT MARKET TICKER */}
-      <div className="sticky top-0 z-[45] glass border-b border-blue-500/10 py-1.5 px-6 flex items-center justify-between overflow-hidden whitespace-nowrap">
+      <div className="sticky top-0 z-[45] glass border-b border-blue-500/10 py-1.5 px-4 flex items-center justify-between overflow-hidden whitespace-nowrap">
         <div className="flex items-center gap-2 mr-8 flex-shrink-0">
           <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.3em]">NODE_RELAY: ONLINE</span>
@@ -125,11 +125,11 @@ const Marketplace: React.FC = () => {
       </div>
 
       {/* 3. REFINED CONTROLS */}
-      <div className="sticky top-[28px] md:top-[28px] z-[39] glass border-b border-blue-500/10 py-4 w-full px-4 md:px-8 mb-8">
-        <div className="max-w-[1280px] mx-auto flex flex-col xl:flex-row items-center justify-between gap-6">
+      <div className="sticky top-[28px] md:top-[28px] z-[39] glass border-b border-blue-500/10 py-4 w-full px-4 mb-8">
+        <div className="w-full flex flex-col xl:flex-row items-center justify-between gap-6">
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar w-full xl:w-auto pb-1">
             {TABS.map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-shrink-0 px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${ activeTab === tab ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20' : 'bg-white/5 text-white/30 hover:text-white hover:bg-white/10' }`} >
+              <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-shrink-0 px-6 py-2 rounded-[5px] text-[9px] font-bold uppercase tracking-widest transition-all ${ activeTab === tab ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20' : 'bg-white/5 text-white/30 hover:text-white hover:bg-white/10' }`} >
                 {tab}
                 {tab === 'My Bids' && userBids.length > 0 && (
                   <span className="ml-2 text-blue-400">({userBids.length})</span>
@@ -157,7 +157,7 @@ const Marketplace: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8 pt-6">
+      <div className="w-full px-4 pt-6">
         {/* 2. AUTO-SCROLLING BIDDING RELAY */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -173,8 +173,8 @@ const Marketplace: React.FC = () => {
           </div>
           <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2" >
             {topBiddedNfts.map((nft) => (
-              <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full max-w-[1080px] snap-center cursor-pointer group" >
-                <div className="relative aspect-[1080/480] glass border border-blue-500/10 rounded-[10px] overflow-hidden transition-all shadow-2xl">
+              <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full snap-center cursor-pointer group" >
+                <div className="relative aspect-[1080/480] glass border border-blue-500/10 rounded-[5px] overflow-hidden transition-all shadow-2xl">
                   <img src={nft.imageUrl} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-[8s] group-hover:scale-105" alt={nft.title} />
                   {/* Premium Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent flex flex-col justify-end p-5 md:p-8">
@@ -202,7 +202,7 @@ const Marketplace: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-6 glass p-4 rounded-[10px] min-w-[240px]">
+                      <div className="flex items-center gap-6 glass p-4 rounded-[5px] min-w-[240px]">
                         <div className="flex-1">
                           <p className="text-[7px] font-bold text-white/20 uppercase tracking-[0.3em] mb-0.5">Highest Bid</p>
                           <div className="flex items-center gap-1.5">
@@ -210,7 +210,7 @@ const Marketplace: React.FC = () => {
                             <span className="text-xl font-bold text-white tracking-tighter">{nft.price} TON</span>
                           </div>
                         </div>
-                        <button className="px-6 py-2.5 electric-blue-bg rounded-[10px] text-[9px] font-bold uppercase tracking-widest text-white shadow-xl active:scale-95 transition-all flex items-center gap-2"> BID NOW <ChevronRight className="h-2 w-2" /> </button>
+                        <button className="px-6 py-2.5 electric-blue-bg rounded-[5px] text-[9px] font-bold uppercase tracking-widest text-white shadow-xl active:scale-95 transition-all flex items-center gap-2"> BID NOW <ChevronRight className="h-2 w-2" /> </button>
                       </div>
                     </div>
                   </div>
@@ -218,8 +218,8 @@ const Marketplace: React.FC = () => {
               </div>
             ))}
             {/* Forge Portal */}
-            <div onClick={() => setShowMintModal(true)} className="flex-shrink-0 w-full max-w-[1080px] aspect-[1080/480] snap-center rounded-[10px] flex flex-col items-center justify-center group cursor-pointer transition-all hover:bg-white/[0.01]" >
-              <div className="w-12 h-12 rounded-[10px] bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/10 transition-all">
+            <div onClick={() => setShowMintModal(true)} className="flex-shrink-0 w-full aspect-[1080/480] snap-center rounded-[5px] flex flex-col items-center justify-center group cursor-pointer transition-all hover:bg-white/[0.01]" >
+              <div className="w-12 h-12 rounded-[5px] bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/10 transition-all">
                 <Plus className="text-white/10 group-hover:text-blue-500 transition-colors h-6 w-6" />
               </div>
               <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.5em] group-hover:text-white transition-colors">Forge New Protocol</span>
@@ -229,7 +229,7 @@ const Marketplace: React.FC = () => {
 
         {/* 2.5 TRENDING PROTOCOLS & TOP CHARTS */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
-          <section className="lg:col-span-8">
+        <section className="lg:col-span-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-1 h-6 electric-blue-bg rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
@@ -242,39 +242,25 @@ const Marketplace: React.FC = () => {
                 VIEW ALL <ArrowRight className="h-2 w-2" />
               </button>
             </div>
-            <div className="flex overflow-x-auto no-scrollbar gap-5 pb-4 mask-linear-fade">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
               {trendingNfts.map((nft, idx) => (
-                <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-56 md:w-64 group relative cursor-pointer" >
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-[10px] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                  <div className="relative glass rounded-[10px] p-4 transition-all bg-[#0a0a0a]/40 overflow-hidden">
-                    <div className="relative aspect-square rounded-[10px] overflow-hidden mb-4">
+                <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="group relative cursor-pointer flex-shrink-0 w-40 sm:w-48" >
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-[5px] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                  <div className="relative rounded-[5px] p-2 transition-all bg-[#0a0a0a]/40 overflow-hidden border border-white/5">
+                    <div className="relative aspect-square rounded-[5px] overflow-hidden mb-2">
                       <img src={nft.imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={nft.title} />
                       <div className="absolute top-2 right-2">
-                        <div className="px-2 py-1 glass rounded-[10px] text-[7px] font-bold uppercase tracking-widest text-white flex items-center gap-1.5">
+                        <div className="px-2 py-1 glass rounded-[5px] text-[7px] font-bold uppercase tracking-widest text-white flex items-center gap-1.5">
                           <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
                           {nft.price} TON
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
+                      <h3 className="text-[10px] font-bold text-white uppercase tracking-tighter truncate">{nft.title}</h3>
                       <div className="flex items-center justify-between">
-                        <h3 className="text-xs font-bold text-white uppercase tracking-tighter truncate flex-1">{nft.title}</h3>
-                        <span className="text-[6px] font-bold text-blue-500 uppercase tracking-widest ml-2">{nft.edition}</span>
-                      </div>
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-2">
-                          <img src={`https://picsum.photos/40/40?seed=${nft.creator}`} className="w-3.5 h-3.5 rounded-full" alt="" />
-                          <span className="text-[8px] font-bold text-white/40 uppercase tracking-tighter">@{nft.creator}</span>
-                          {MOCK_ARTISTS.find(a => a.name === nft.creator)?.verified && (
-                            <div className="bg-blue-500 rounded-full p-0.5">
-                              <ChevronRight className="h-1 w-1 text-white" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <TrendingUp className="h-2 w-2 text-green-500" />
-                          <span className="text-[8px] font-bold text-white">{nft.offers?.length || 0} Bids</span>
-                        </div>
+                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-tighter truncate">@{nft.creator}</span>
+                        <TrendingUp className="h-2 w-2 text-green-500" />
                       </div>
                     </div>
                   </div>
@@ -288,32 +274,32 @@ const Marketplace: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+      <div className="w-full px-4">
         {/* 4. COMPACT MARKET GRID */}
         <section>
           {filteredNfts.length > 0 ? (
-            <div className="flex overflow-x-auto no-scrollbar gap-6 pb-12 mask-linear-fade">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-12 -mx-4 px-4 lg:mx-0 lg:px-0">
               {filteredNfts.map((nft, idx) => (
-                <div key={nft.id} className="flex-shrink-0 w-56 md:w-64 animate-in slide-in-from-bottom-2" style={{ animationDelay: `${idx * 40}ms` }}>
+                <div key={nft.id} className="flex-shrink-0 w-40 sm:w-48 animate-in slide-in-from-bottom-2" style={{ animationDelay: `${idx * 40}ms` }}>
                   <NFTCard nft={nft} />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="py-32 flex flex-col items-center justify-center glass rounded-[10px] text-center bg-[#050505]/50">
+            <div className="py-32 flex flex-col items-center justify-center rounded-[5px] text-center bg-[#050505]/50 border border-white/5">
               <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6">
                 <Satellite className="h-8 w-8 text-white/5 animate-pulse" />
               </div>
               <h3 className="text-xl font-bold uppercase tracking-tighter text-white/20">Frequency Mismatch</h3>
               <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.4em] mt-2 px-8">No matching signals detected in the market relay.</p>
-              <button onClick={() => { setActiveTab('Trending'); setSearchQuery(''); }} className="px-10 py-4 mt-10 bg-white/5 rounded-[10px] text-[9px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-all active:scale-95" > Reset Scanner </button>
+              <button onClick={() => { setActiveTab('Trending'); setSearchQuery(''); }} className="px-10 py-4 mt-10 bg-white/5 rounded-[5px] text-[9px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-all active:scale-95" > Reset Scanner </button>
             </div>
           )}
         </section>
 
         {/* 5. MINIMALIST ALPHA DROP */}
         <section className="mt-16 pb-16">
-          <div className="glass border border-blue-500/10 p-8 md:p-10 rounded-[10px] flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden bg-gradient-to-br from-blue-500/[0.03] to-transparent">
+          <div className="border border-blue-500/10 p-8 md:p-10 rounded-[5px] flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden bg-gradient-to-br from-blue-500/[0.03] to-transparent">
             <div className="absolute top-0 right-0 p-10 opacity-[0.02] -rotate-12"><Zap className="h-40 w-40" /></div>
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2 mb-1.5">
@@ -324,8 +310,8 @@ const Marketplace: React.FC = () => {
               <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em] mt-1.5">Subscribe to the relay for exclusive mint protocols.</p>
             </div>
             <div className="flex gap-2 w-full md:w-auto">
-              <input type="email" placeholder="NEURAL_ID@MAIL.COM" className="flex-1 md:w-64 bg-black/50 rounded-[10px] px-4 py-3 text-[9px] font-bold outline-none text-white" />
-              <button className="px-8 py-3 electric-blue-bg text-white rounded-[10px] font-bold text-[9px] uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95 transition-all">SYNC</button>
+              <input type="email" placeholder="NEURAL_ID@MAIL.COM" className="flex-1 md:w-64 bg-black/50 rounded-[5px] px-4 py-3 text-[9px] font-bold outline-none text-white" />
+              <button className="px-8 py-3 electric-blue-bg text-white rounded-[5px] font-bold text-[9px] uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95 transition-all">SYNC</button>
             </div>
           </div>
         </section>

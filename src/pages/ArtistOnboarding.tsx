@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Music, Image, Info, Box } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { Track, NFTItem } from '@/types';
-import { MOCK_USER } from '@/constants';
+import { MOCK_USER, APP_LOGO } from '@/constants';
 
 const ArtistOnboarding: React.FC = () => {
   const navigate = useNavigate();
@@ -210,7 +210,7 @@ const ArtistOnboarding: React.FC = () => {
                 <button type="button" onClick={() => setStep(1)} className="flex-1 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Back </button>
                 <button type="submit" disabled={isLoading} className="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2" >
                   {isLoading ? (
-                    <div className="w-5 h-5 -2 -white/30 -t-white rounded-full animate-spin"></div>
+                    <img src={APP_LOGO} className="w-5 h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." />
                   ) : (
                     "Upload Track"
                   )}
@@ -257,7 +257,7 @@ const ArtistOnboarding: React.FC = () => {
                 <button type="submit" disabled={isLoading} className="flex-[2] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20" >
                   {isLoading ? (
                     <>
-                      <div className="w-5 h-5 -2 -white/30 -t-white rounded-full animate-spin"></div>
+                      <img src={APP_LOGO} className="w-5 h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." />
                       <span>Minting...</span>
                     </>
                   ) : (

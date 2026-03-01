@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Info, Loader2 } from 'lucide-react';
 import { NFTItem, NFTOffer } from '@/types';
-import { TON_LOGO } from '@/constants';
+import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 
 interface BidAcceptanceModalProps {
@@ -72,7 +72,7 @@ const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onC
             <button onClick={handleConfirm} disabled={isProcessing} className="w-full py-5 electric-blue-bg text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-2xl shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none" >
               {isProcessing ? (
                 <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" /> PROCESSING...
+                  <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> PROCESSING...
                 </span>
               ) : 'CONFIRM ACCEPTANCE'}
             </button>

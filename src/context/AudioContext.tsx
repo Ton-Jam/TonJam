@@ -66,8 +66,8 @@ interface AudioContextType {
   artists: Artist[];
   setArtists: React.Dispatch<React.SetStateAction<Artist[]>>;
   addUserTrack: (track: Track) => void;
-  addUserNFT: (nft: NFTItem) => void;
-  updateNFT: (nftId: string, updates: Partial<NFTItem>) => void;
+  addUserNFT: (nft: NFTItem, silent?: boolean) => void;
+  updateNFT: (nftId: string, updates: Partial<NFTItem>, silent?: boolean) => void;
   audioElement: HTMLAudioElement | null;
   analyser: AnalyserNode | null;
 }
@@ -152,8 +152,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [followedUserIds, setFollowedUserIds] = useState<string[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.FOLLOWED_USERS);
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : (userProfile.followedUserIds || []);
   });
+
+  useEffect(() => {
+    setUserProfile(prev => ({ ...prev, followedUserIds }));
+  }, [followedUserIds]);
 
   const [userTracks, setUserTracks] = useState<Track[]>(() => {
     const saved = localStorage.getItem('tonjam_user_tracks');
@@ -190,11 +194,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, [userNFTs]);
 
-  const updateNFT = (nftId: string, updates: Partial<NFTItem>) => {
+  const updateNFT = (nftId: string, updates: Partial<NFTItem>, silent: boolean = false) => {
     setAllNFTs(prev => prev.map(nft => nft.id === nftId ? { ...nft, ...updates } : nft));
     /* Also update userNFTs if it's one of them */
     setUserNFTs(prev => prev.map(nft => nft.id === nftId ? { ...nft, ...updates } : nft));
-    addNotification("Asset protocol updated", "success");
+    if (!silent) addNotification("Asset protocol updated", "success");
   };
 
   useEffect(() => {
@@ -218,9 +222,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addNotification(`Track "${track.title}" uploaded`, "success");
   };
 
-  const addUserNFT = (nft: NFTItem) => {
-    setUserNFTs(prev => [nft, ...prev]);
-    addNotification(`NFT "${nft.title}" minted`, "success");
+  const addUserNFT = (nft: NFTItem, silent: boolean = false) => {
+    setUserNFTs(prev => {
+      if (prev.find(n => n.id === nft.id)) return prev;
+      return [nft, ...prev];
+    });
+    if (!silent) addNotification(`NFT "${nft.title}" minted`, "success");
   };
 
   useEffect(() => {
@@ -636,17 +643,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       {trackToAddToPlaylist && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0  backdrop-blur-xl" onClick={() => setTrackToAddToPlaylist(null)}></div>
-          <div className="relative glass w-full max-w-sm rounded-[10px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setTrackToAddToPlaylist(null)}></div>
+          <div className="relative bg-[#0a0a0a] border border-white/5 w-full max-w-sm rounded-[5px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-xl font-bold uppercase tracking-tighter">Add to Playlist</h3>
-              <button onClick={() => setTrackToAddToPlaylist(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"><i className="fas fa-times"></i></button>
+              <button onClick={() => setTrackToAddToPlaylist(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+                <i className="fas fa-times"></i>
+              </button>
             </div>
             <div className="max-h-80 overflow-y-auto no-scrollbar space-y-3 mb-8">
               {/* Create New Option */}
-              <div className="p-4 rounded-[10px] bg-blue-600/10 -blue-500/20 transition-all">
+              <div className="p-4 rounded-[5px] bg-blue-600/10 border border-blue-500/20 transition-all">
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="w-10 h-10 rounded-[10px] bg-blue-500/20 flex items-center justify-center text-blue-400">
+                  <div className="w-10 h-10 rounded-[5px] bg-blue-500/20 flex items-center justify-center text-blue-400">
                     <i className="fas fa-plus"></i>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -663,15 +672,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     setTrackToAddToPlaylist(null);
                   }
                 }} className="flex gap-2">
-                  <input name="playlistName" type="text" placeholder="Playlist Name" className="flex-1 bg-black/50 rounded-[10px] px-3 py-2 text-xs text-white outline-none focus:-blue-500 -transparent transition-all" autoFocus />
-                  <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all">Create</button>
+                  <input name="playlistName" type="text" placeholder="Playlist Name" className="flex-1 bg-black/50 rounded-[5px] px-3 py-2 text-xs text-white outline-none focus:border-blue-500 border border-transparent transition-all" autoFocus />
+                  <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all">Create</button>
                 </form>
               </div>
               <div className="h-px bg-white/5 my-4"></div>
               {playlists.length > 0 ? (
                 playlists.map(pl => (
-                  <button key={pl.id} onClick={() => { addTrackToPlaylist(pl.id, trackToAddToPlaylist); setTrackToAddToPlaylist(null); }} className="w-full flex items-center gap-4 p-4 rounded-[10px] bg-white/5 hover:bg-white/10 transition-all text-left group">
-                    <div className="w-10 h-10 rounded-[10px] bg-[#111] overflow-hidden flex-shrink-0">
+                  <button key={pl.id} onClick={() => { addTrackToPlaylist(pl.id, trackToAddToPlaylist); setTrackToAddToPlaylist(null); }} className="w-full flex items-center gap-4 p-4 rounded-[5px] bg-white/5 hover:bg-white/10 transition-all text-left group">
+                    <div className="w-10 h-10 rounded-[5px] bg-[#111] overflow-hidden flex-shrink-0">
                       {pl.coverUrl ? (
                         <img src={pl.coverUrl} className="w-full h-full object-cover" alt="" />
                       ) : (
@@ -696,9 +705,98 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           </div>
         </div>
       )}
+
+      {/* Classic Track Option Screen */}
+      {optionsTrack && (
+        <div className="fixed inset-0 z-[400] flex items-end sm:items-center justify-center p-0 sm:p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setOptionsTrack(null)}></div>
+          <div className="relative bg-[#0a0a0a] border-t sm:border border-white/10 w-full max-w-md rounded-t-[20px] sm:rounded-[5px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-4 duration-300">
+            {/* Header */}
+            <div className="p-6 border-b border-white/5 flex items-center gap-4">
+              <img src={optionsTrack.coverUrl} className="w-16 h-16 rounded-[5px] object-cover shadow-lg" alt="" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-bold uppercase tracking-tight truncate text-white">{optionsTrack.title}</h3>
+                <p className="text-xs font-bold text-white/40 uppercase tracking-widest truncate">{optionsTrack.artist}</p>
+              </div>
+              <button onClick={() => setOptionsTrack(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+
+            {/* Actions List */}
+            <div className="p-2">
+              <OptionItem 
+                icon="fas fa-play" 
+                label="Play Now" 
+                onClick={() => { playTrack(optionsTrack); setOptionsTrack(null); }} 
+              />
+              <OptionItem 
+                icon="fas fa-list-ul" 
+                label="Add to Queue" 
+                onClick={() => { addToQueue(optionsTrack); setOptionsTrack(null); addNotification("Added to queue", "success"); }} 
+              />
+              <OptionItem 
+                icon="fas fa-plus-square" 
+                label="Add to Playlist" 
+                onClick={() => { setTrackToAddToPlaylist(optionsTrack); setOptionsTrack(null); }} 
+              />
+              <div className="h-px bg-white/5 my-2 mx-4"></div>
+              <OptionItem 
+                icon="fas fa-heart" 
+                label={likedTrackIds.includes(optionsTrack.id) ? "Remove from Liked" : "Add to Liked"} 
+                onClick={() => { toggleLikeTrack(optionsTrack.id); setOptionsTrack(null); }} 
+              />
+              <OptionItem 
+                icon="fas fa-user" 
+                label="Go to Artist" 
+                onClick={() => { /* Navigation logic would go here, need navigate from router */ setOptionsTrack(null); }} 
+              />
+              <OptionItem 
+                icon="fas fa-share-alt" 
+                label="Share Signal" 
+                onClick={() => { 
+                  navigator.clipboard.writeText(`${window.location.origin}/#/track/${optionsTrack.id}`);
+                  addNotification("Link copied to clipboard", "success");
+                  setOptionsTrack(null); 
+                }} 
+              />
+              {optionsTrack.isNFT && (
+                <OptionItem 
+                  icon="fas fa-gem" 
+                  label="View NFT Details" 
+                  onClick={() => { setOptionsTrack(null); }} 
+                  highlight
+                />
+              )}
+            </div>
+
+            {/* Close Button Mobile */}
+            <div className="p-4 sm:hidden">
+              <button 
+                onClick={() => setOptionsTrack(null)}
+                className="w-full py-4 bg-white/5 rounded-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-white/60"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AudioContext.Provider>
   );
 };
+
+const OptionItem = ({ icon, label, onClick, highlight }: { icon: string; label: string; onClick: () => void; highlight?: boolean }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex items-center gap-4 px-6 py-4 rounded-[5px] transition-all hover:bg-white/5 group text-left ${highlight ? 'text-blue-500' : 'text-white/60 hover:text-white'}`}
+  >
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${highlight ? 'bg-blue-500/10' : 'bg-white/5 group-hover:bg-white/10'}`}>
+      <i className={`${icon} text-xs`}></i>
+    </div>
+    <span className="text-[11px] font-bold uppercase tracking-[0.1em]">{label}</span>
+  </button>
+);
 
 export const useAudio = () => {
   const context = useContext(AudioContext);

@@ -26,6 +26,7 @@ import {
 } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
 import { Track, Artist } from "@/types";
+import TrackCard from "@/components/TrackCard";
 
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -209,32 +210,39 @@ const ArtistDashboard: React.FC = () => {
           {activeTab === "overview" && (
             <div className="space-y-10">
               {" "}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {" "}
-                <StatCard
-                  label="Total Streams"
-                  value={tracks
-                    .reduce((acc, t) => acc + (t.playCount || 0), 0)
-                    .toLocaleString()}
-                  icon="fa-play"
-                  trend="+12%"
-                />{" "}
-                <StatCard
-                  label="Followers"
-                  value={(artistData.followers || 0).toLocaleString()}
-                  icon="fa-users"
-                  trend="+5%"
-                />{" "}
-                <StatCard
-                  label="Total Earnings"
-                  value={`${artistData.earnings?.total} TON`}
-                  icon="fa-wallet"
-                />{" "}
-                <StatCard
-                  label="NFT Sales"
-                  value={artistData.earnings?.nftSales || "0"}
-                  icon="fa-gem"
-                />{" "}
+              <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+                <div className="min-w-[240px] flex-1">
+                  <StatCard
+                    label="Total Streams"
+                    value={tracks
+                      .reduce((acc, t) => acc + (t.playCount || 0), 0)
+                      .toLocaleString()}
+                    icon="fa-play"
+                    trend="+12%"
+                  />
+                </div>
+                <div className="min-w-[240px] flex-1">
+                  <StatCard
+                    label="Followers"
+                    value={(artistData.followers || 0).toLocaleString()}
+                    icon="fa-users"
+                    trend="+5%"
+                  />
+                </div>
+                <div className="min-w-[240px] flex-1">
+                  <StatCard
+                    label="Total Earnings"
+                    value={`${artistData.earnings?.total} TON`}
+                    icon="fa-wallet"
+                  />
+                </div>
+                <div className="min-w-[240px] flex-1">
+                  <StatCard
+                    label="NFT Sales"
+                    value={artistData.earnings?.nftSales || "0"}
+                    icon="fa-gem"
+                  />
+                </div>
               </div>{" "}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 {" "}
@@ -243,13 +251,12 @@ const ArtistDashboard: React.FC = () => {
                   <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
                     Recent Performance
                   </h3>{" "}
-                  <div className="h-64 flex items-end gap-2">
-                    {" "}
+                  <div className="h-64 flex items-end gap-2 overflow-x-auto no-scrollbar pb-2">
                     {[40, 70, 45, 90, 65, 85, 100, 75, 50, 80, 60, 95].map(
                       (h, i) => (
                         <div
                           key={i}
-                          className="flex-1 bg-blue-600/20 rounded-t-lg relative group"
+                          className="min-w-[40px] flex-1 bg-blue-600/20 rounded-t-lg relative group"
                         >
                           {" "}
                           <div
@@ -269,43 +276,17 @@ const ArtistDashboard: React.FC = () => {
                     <span>Jan</span> <span>Jun</span> <span>Dec</span>{" "}
                   </div>{" "}
                 </div>{" "}
-                <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] p-8">
-                  {" "}
+                <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[5px] p-8">
                   <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
                     Top Tracks
-                  </h3>{" "}
-                  <div className="space-y-6">
-                    {" "}
-                    {tracks.slice(0, 5).map((track, i) => (
-                      <div
-                        key={track.id}
-                        className="flex items-center justify-between group"
-                      >
-                        {" "}
-                        <div className="flex items-center gap-4">
-                          {" "}
-                          <span className="text-[10px] font-mono text-white/10">
-                            {i + 1}
-                          </span>{" "}
-                          <div>
-                            {" "}
-                            <p className="text-[11px] font-bold text-white uppercase truncate w-32">
-                              {track.title}
-                            </p>{" "}
-                            <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
-                              {(track.playCount || 0).toLocaleString()} streams
-                            </p>{" "}
-                          </div>{" "}
-                        </div>{" "}
-                        <div className="text-right">
-                          {" "}
-                          <p className="text-[10px] font-bold text-blue-500">
-                            +{Math.floor(Math.random() * 100)}%
-                          </p>{" "}
-                        </div>{" "}
+                  </h3>
+                  <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
+                    {tracks.slice(0, 5).map((track) => (
+                      <div key={track.id} className="min-w-[200px] sm:min-w-[240px]">
+                        <TrackCard track={track} />
                       </div>
-                    ))}{" "}
-                  </div>{" "}
+                    ))}
+                  </div>
                 </div>{" "}
               </div>{" "}
             </div>
@@ -322,128 +303,71 @@ const ArtistDashboard: React.FC = () => {
                   {tracks.length} Tracks Total
                 </span>{" "}
               </div>{" "}
-              <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] overflow-hidden">
-                {" "}
-                <table className="w-full text-left -collapse">
-                  {" "}
+              <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[5px] overflow-x-auto no-scrollbar">
+                <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
-                    {" "}
                     <tr className="border-b border-white/5 bg-white/[0.02]">
-                      {" "}
-                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-                        Track
-                      </th>{" "}
-                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-                        Genre
-                      </th>{" "}
-                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-                        Status
-                      </th>{" "}
-                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest text-right">
-                        Streams
-                      </th>{" "}
-                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest text-right">
-                        Likes
-                      </th>{" "}
-                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest text-right">
-                        Actions
-                      </th>{" "}
-                    </tr>{" "}
-                  </thead>{" "}
+                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest">Track</th>
+                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest">Genre</th>
+                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest">Status</th>
+                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest text-right">Streams</th>
+                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest text-right">Likes</th>
+                      <th className="p-6 text-[9px] font-bold text-white/20 uppercase tracking-widest text-right">Actions</th>
+                    </tr>
+                  </thead>
                   <tbody>
-                    {" "}
                     {tracks.map((track) => (
-                      <tr
-                        key={track.id}
-                        className="border-b border-white/5 hover:bg-white/[0.01] transition-colors"
-                      >
-                        {" "}
+                      <tr key={track.id} className="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
                         <td className="p-6">
-                          {" "}
                           <div className="flex items-center gap-4">
-                            {" "}
-                            <img
-                              src={track.coverUrl}
-                              className="w-10 h-10 rounded-[10px] object-cover"
-                              alt=""
-                            />{" "}
+                            <img src={track.coverUrl} className="w-10 h-10 rounded-[5px] object-cover" alt="" />
                             <div>
-                              {" "}
-                              <p className="text-[11px] font-bold text-white uppercase">
-                                {track.title}
-                              </p>{" "}
-                              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
-                                Released {track.releaseDate}
-                              </p>{" "}
-                            </div>{" "}
-                          </div>{" "}
-                        </td>{" "}
+                              <p className="text-[11px] font-bold text-white uppercase">{track.title}</p>
+                              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Released {track.releaseDate}</p>
+                            </div>
+                          </div>
+                        </td>
                         <td className="p-6">
-                          {" "}
-                          <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
-                            {track.genre}
-                          </span>{" "}
-                        </td>{" "}
+                          <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{track.genre}</span>
+                        </td>
                         <td className="p-6">
-                          {" "}
                           {track.isNFT ? (
-                            <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-[8px] font-bold uppercase rounded-[10px] border border-amber-500/20">
-                              Minted NFT
-                            </span>
+                            <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-[8px] font-bold uppercase rounded-[5px] border border-amber-500/20">Minted NFT</span>
                           ) : (
-                            <span className="px-2 py-1 bg-blue-500/10 text-blue-500 text-[8px] font-bold uppercase rounded-[10px] border border-blue-500/20">
-                              Ready to Mint
-                            </span>
-                          )}{" "}
-                        </td>{" "}
+                            <span className="px-2 py-1 bg-blue-500/10 text-blue-500 text-[8px] font-bold uppercase rounded-[5px] border border-blue-500/20">Ready to Mint</span>
+                          )}
+                        </td>
                         <td className="p-6 text-right">
-                          {" "}
-                          <span className="text-[11px] font-mono text-white">
-                            {(track.playCount || 0).toLocaleString()}
-                          </span>{" "}
-                        </td>{" "}
+                          <span className="text-[11px] font-mono text-white">{(track.playCount || 0).toLocaleString()}</span>
+                        </td>
                         <td className="p-6 text-right">
-                          {" "}
-                          <span className="text-[11px] font-mono text-white">
-                            {(track.likes || 0).toLocaleString()}
-                          </span>{" "}
-                        </td>{" "}
+                          <span className="text-[11px] font-mono text-white">{(track.likes || 0).toLocaleString()}</span>
+                        </td>
                         <td className="p-6 text-right">
-                          {" "}
                           <div className="flex items-center justify-end gap-2">
-                            {" "}
                             {!track.isNFT && (
-                              <button
+                              <button 
                                 onClick={() => {
-                                  /* In a real app, this would open a minting modal */ const updatedTracks =
-                                    tracks.map((t) =>
-                                      t.id === track.id
-                                        ? { ...t, isNFT: true, price: "1.0" }
-                                        : t,
-                                    );
+                                  const updatedTracks = tracks.map((t) => t.id === track.id ? { ...t, isNFT: true, price: "1.0" } : t );
                                   setTracks(updatedTracks);
-                                  addNotification(
-                                    "Track successfully minted as NFT",
-                                    "success",
-                                  );
+                                  addNotification( "Track successfully minted as NFT", "success" );
                                 }}
-                                className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-[10px] text-[8px] font-bold uppercase tracking-widest border border-amber-500/20 transition-all"
+                                className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-[5px] text-[8px] font-bold uppercase tracking-widest border border-amber-500/20 transition-all"
                               >
-                                {" "}
-                                Mint NFT{" "}
+                                Mint NFT
                               </button>
-                            )}{" "}
+                            )}
                             <button className="text-white/20 hover:text-white transition-colors">
-                              {" "}
-                              <Ellipsis className="h-4 w-4" />{" "}
-                            </button>{" "}
-                          </div>{" "}
-                        </td>{" "}
+                              <Ellipsis className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
-                    ))}{" "}
-                  </tbody>{" "}
-                </table>{" "}
-              </div>{" "}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+{" "}
             </div>
           )}{" "}
           {activeTab === "royalties" && (

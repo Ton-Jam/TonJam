@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, X, History, Satellite, Bolt, ChevronRight, Filter, SlidersHorizontal, Music, User, Gem } from 'lucide-react';
 
-import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS } from '@/constants';
+import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
 import NFTCard from '@/components/NFTCard';
@@ -192,7 +192,7 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="p-6 lg:p-10 space-y-10 max-w-[1600px] mx-auto pb-32">
+    <div className="p-4 lg:p-6 space-y-10 w-full pb-32">
       <div className="space-y-8">
         {/* Search & Filters */}
         <div className="space-y-6">
@@ -206,7 +206,7 @@ const Discover: React.FC = () => {
                 onChange={(e) => { setSearch(e.target.value); setDisplayLimit(INITIAL_LIMIT); }} 
                 onKeyDown={(e) => { if (e.key === 'Enter') { addToRecentSearches(search); setIsSearchFocused(false); } }} 
                 placeholder={`Search ${activeFilter.toLowerCase()}...`} 
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-sm outline-none focus:bg-white/10 focus:border-blue-500/50 transition-all placeholder:text-white/20 text-white" 
+                className="w-full bg-white/5 border border-white/10 rounded-[5px] py-4 pl-12 pr-12 text-sm outline-none focus:bg-white/10 focus:border-blue-500/50 transition-all placeholder:text-white/20 text-white" 
               />
               {search && (
                 <button onClick={clearInput} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
@@ -326,27 +326,26 @@ const Discover: React.FC = () => {
           />
           
           {visibleResults.length > 0 ? (
-            <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
               {visibleResults.map((item, idx) => (
-                <div key={item.id} className="min-w-[280px] sm:min-w-[320px] animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
+                <div key={item.id} className="flex-shrink-0 w-40 sm:w-48 animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
                   {activeFilter === 'Tracks' && <TrackCard track={item as Track} />}
                   {activeFilter === 'Artists' && <UserCard user={item as any} variant="portrait" />}
                   {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
-                  {activeFilter === 'Playlists' && <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-white/20 text-[10px] font-bold uppercase tracking-widest text-center">Playlist UI coming soon</div>}
+                  {activeFilter === 'Playlists' && <div className="p-4 bg-white/5 border border-white/10 rounded-[5px] text-white/20 text-[10px] font-bold uppercase tracking-widest text-center">Playlist UI coming soon</div>}
                 </div>
               ))}
+              {visibleResults.length < filteredResults.length && (
+                <div ref={sentinelRef} className="flex-shrink-0 w-20 flex items-center justify-center">
+                  <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
+                </div>
+              )}
             </div>
           ) : (
-            <div className="py-24 text-center flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-3xl">
+            <div className="py-24 text-center flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-[5px]">
               <Satellite className="h-12 w-12 text-white/5 mb-4 animate-pulse" />
               <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
               <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
-            </div>
-          )}
-
-          {visibleResults.length < filteredResults.length && (
-            <div ref={sentinelRef} className="py-12 flex justify-center">
-              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
         </section>
@@ -356,9 +355,9 @@ const Discover: React.FC = () => {
           <section className="space-y-10 pt-10 border-t border-white/5">
             <div>
               <SectionHeader title="Trending NFTs" viewAllLink="/marketplace" />
-              <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+              <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
                 {trendingNfts.map(nft => (
-                  <div key={nft.id} className="min-w-[280px] sm:min-w-[320px]">
+                  <div key={nft.id} className="flex-shrink-0 w-40 sm:w-48">
                     <NFTCard nft={nft} />
                   </div>
                 ))}

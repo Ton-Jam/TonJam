@@ -19,9 +19,9 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, onClick }) => {
   return (
     <div 
       onClick={onClick} 
-      className="group relative bg-white/5 border border-white/10 rounded-2xl p-3 transition-all cursor-pointer w-full flex flex-col shadow-lg hover:bg-white/10 hover:-translate-y-1"
+      className="group relative border border-white/5 rounded-[5px] p-3 transition-all cursor-pointer w-full flex flex-col hover:bg-white/5 hover:-translate-y-1"
     >
-      <div className="relative aspect-square mb-3 overflow-hidden rounded-xl bg-neutral-900">
+      <div className="relative aspect-square mb-3 overflow-hidden rounded-[5px] bg-neutral-900">
         {playlist.coverUrl ? (
           <img 
             src={playlist.coverUrl} 

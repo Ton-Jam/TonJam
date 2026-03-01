@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MoreVertical, Zap, CheckCircle2, Heart, MessageCircle, Repeat2, Share2, Send, Smile, MessageSquareOff } from 'lucide-react';
 import { Post, Comment } from '@/types';
-import { MOCK_POSTS, MOCK_USER, MOCK_TRACKS, MOCK_ARTISTS, TON_LOGO } from '@/constants';
+import { MOCK_POSTS, MOCK_USER, MOCK_TRACKS, MOCK_ARTISTS, TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import PostOptionsModal from '@/components/PostOptionsModal';
@@ -34,7 +34,7 @@ const PostDetail: React.FC = () => {
   if (!post) {
     return (
       <div className="min-h-screen bg-[#050505] pt-24 px-6 flex flex-col items-center justify-center">
-        <div className="w-12 h-12 -blue-500/20 -t-blue-500 rounded-full animate-spin mb-4"></div>
+        <img src={APP_LOGO} className="w-12 h-12 object-contain animate-[spin_3s_linear_infinite] opacity-50 mb-4" alt="Loading..." />
         <p className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px]">Synchronizing Signal...</p>
       </div>
     );

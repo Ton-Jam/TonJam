@@ -39,7 +39,7 @@ import { getArtistSonicDNA, findRelatedArtists } from '@/services/geminiService'
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification, playAll, currentTrack, isPlaying, followedUserIds, toggleFollowUser, userProfile, artists } = useAudio();
+  const { addNotification, playAll, currentTrack, isPlaying, followedUserIds, toggleFollowUser, userProfile, artists, setArtists } = useAudio();
   const [activeTab, setActiveTab] = useState<'tracks' | 'nfts' | 'signals' | 'about' | 'management'>('tracks');
   const isFollowing = useMemo(() => id ? followedUserIds.includes(id) : false, [id, followedUserIds]);
   const [sonicDNA, setSonicDNA] = useState<{ signature: string, vibes: string[] } | null>(null);
@@ -51,6 +51,8 @@ const ArtistProfile: React.FC = () => {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [editedBio, setEditedBio] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = useMemo(() => id === userProfile.id, [id, userProfile.id]);
@@ -87,10 +89,10 @@ const ArtistProfile: React.FC = () => {
   }, [id, artist]);
 
   useEffect(() => {
-    if (activeTab === 'about' && artist) {
+    if (artist) {
       handleFetchRelated();
     }
-  }, [activeTab, artist, id]);
+  }, [artist, id]);
 
   const handleSyncDNA = async () => {
     if (!artist) return;
@@ -119,6 +121,13 @@ const ArtistProfile: React.FC = () => {
     } finally {
       setIsRelatedLoading(false);
     }
+  };
+
+  const handleSaveBio = () => {
+    if (!artist) return;
+    setArtists(prev => prev.map(a => a.id === artist.id ? { ...a, bio: editedBio } : a));
+    setIsEditingBio(false);
+    addNotification("Biographical record synchronized.", "success");
   };
 
   if (!artist) return null;
@@ -387,10 +396,75 @@ const ArtistProfile: React.FC = () => {
             )}
 
             {/* Biography */}
-            <section className="p-8 glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.01] rounded-[10px]">
-              <h3 className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em] mb-6">Origin Narrative</h3>
-              <p className="text-xs text-white/40 leading-relaxed">{artist.bio || "No biographical record in neural archive."}</p>
+            <section className="p-8 glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.01] rounded-[10px] group/bio">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em]">Origin Narrative</h3>
+                {isOwnProfile && !isEditingBio && (
+                  <button 
+                    onClick={() => {
+                      setIsEditingBio(true);
+                      setEditedBio(artist.bio || "");
+                    }}
+                    className="text-[8px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors"
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
+              
+              {isEditingBio ? (
+                <div className="space-y-4">
+                  <textarea
+                    value={editedBio}
+                    onChange={(e) => setEditedBio(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-[10px] p-4 text-xs text-white/80 leading-relaxed outline-none focus:border-blue-500/50 transition-all min-h-[120px] resize-none"
+                    placeholder="Enter artist biography..."
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button 
+                      onClick={() => setIsEditingBio(false)}
+                      className="px-4 py-2 bg-white/5 text-white/40 rounded-[8px] text-[8px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleSaveBio}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
+                    >
+                      Save Protocol
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-white/40 leading-relaxed">{artist.bio || "No biographical record in neural archive."}</p>
+              )}
             </section>
+
+            {/* Similar Artists */}
+            {(relatedArtists.length > 0 || isRelatedLoading) && (
+              <section className="p-8 glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.01] rounded-[10px]">
+                <div className="flex items-center gap-2 mb-6">
+                  <Cpu className="h-3 w-3 text-blue-500" />
+                  <h3 className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em]">Similar Artists</h3>
+                </div>
+                <div className="space-y-4">
+                  {isRelatedLoading ? (
+                    [1,2,3].map(i => <div key={i} className="h-12 bg-white/5 rounded-[10px] animate-pulse"></div>)
+                  ) : relatedArtists.map(related => (
+                    <div key={related.id} onClick={() => navigate(`/artist/${related.id}`)} className="flex items-center gap-4 p-2 -mx-2 hover:bg-white/5 rounded-[10px] cursor-pointer transition-colors group">
+                      <img src={related.avatarUrl} className="w-10 h-10 rounded-full object-cover group-hover:scale-105 transition-transform" alt={related.name} />
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <h4 className="text-xs font-bold text-white tracking-tight">{related.name}</h4>
+                          {related.verified && <CheckCircle className="text-blue-500 h-3 w-3" />}
+                        </div>
+                        <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{(related.followers || 0).toLocaleString()} Fans</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Right: Content Feed */}
@@ -405,9 +479,11 @@ const ArtistProfile: React.FC = () => {
                         <Flame className="h-3 w-3 text-amber-500" />
                         <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-[0.4em]">Popular Syncs</h4>
                       </div>
-                      <div className="space-y-1">
+                      <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
                         {artistTracks.slice(0, 4).map(t => (
-                          <TrackCard key={`popular-${t.id}`} track={t} variant="row" />
+                          <div key={`popular-${t.id}`} className="min-w-[280px] sm:min-w-[320px]">
+                            <TrackCard track={t} variant="row" />
+                          </div>
                         ))}
                       </div>
                     </section>
@@ -458,38 +534,15 @@ const ArtistProfile: React.FC = () => {
 
               {activeTab === 'about' && (
                 <div className="space-y-12 animate-in fade-in duration-700">
-                  {/* Proximity Matching */}
-                  <section className="glass border border-blue-500/10 p-10 rounded-[10px] relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-5"><Cpu className="h-12 w-12" /></div>
-                    <h3 className="text-lg font-bold tracking-tighter text-white mb-1">Sonic Proximity</h3>
-                    <p className="text-[8px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-10">Neural Matching Protocol Active</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {isRelatedLoading ? (
-                        [1,2,3].map(i => <div key={i} className="h-32 bg-white/5 rounded-[10px] animate-pulse"></div>)
-                      ) : relatedArtists.map(related => (
-                        <div key={related.id} onClick={() => navigate(`/artist/${related.id}`)} className="bg-[#050505] p-5 rounded-[10px] transition-all cursor-pointer text-center group" >
-                          <div className="relative w-20 h-20 mx-auto mb-3">
-                            <img src={related.avatarUrl} className="w-full h-full object-cover rounded-full group-hover:border-blue-500 transition-all" alt="" />
-                          </div>
-                          <div className="flex items-center justify-center gap-1.5">
-                            <h4 className="text-[10px] font-bold uppercase text-white tracking-tight">{related.name}</h4>
-                            {related.verified && <CheckCircle className="text-blue-500 h-3 w-3" />}
-                          </div>
-                          <p className="text-[6px] font-bold text-white/20 uppercase tracking-widest mt-1">{(related.followers || 0).toLocaleString()} Fans</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-
                   {/* Verification Block */}
-                  <div className="p-10 bg-blue-600/5 rounded-[10px] border border-blue-500/10 flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className={`p-10 rounded-[10px] border flex flex-col md:flex-row items-center justify-between gap-6 ${artist.verified ? 'bg-blue-600/5 border-blue-500/10' : 'bg-white/5 border-white/10'}`}>
                     <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 bg-blue-500 rounded-[10px] flex items-center justify-center shadow-lg">
-                        <ShieldCheck className="text-white h-6 w-6" />
+                      <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center shadow-lg ${artist.verified ? 'bg-blue-500' : 'bg-white/10'}`}>
+                        {artist.verified ? <ShieldCheck className="text-white h-6 w-6" /> : <Info className="text-white/40 h-6 w-6" />}
                       </div>
                       <div>
-                        <h4 className="text-lg font-bold text-white uppercase tracking-tighter">Verified Architect</h4>
-                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mt-1">Confirmed Identity on TON Blockchain</p>
+                        <h4 className="text-lg font-bold text-white uppercase tracking-tighter">{artist.verified ? 'Verified Architect' : 'Unverified Identity'}</h4>
+                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mt-1">{artist.verified ? 'Confirmed Identity on TON Blockchain' : 'Identity pending verification on TON'}</p>
                       </div>
                     </div>
                     <button className="px-6 py-2.5 bg-white/5 rounded-[10px] text-[8px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-all flex items-center gap-2">

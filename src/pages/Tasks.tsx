@@ -17,10 +17,10 @@ interface TaskCardProps {
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task }) => (
-  <div className={`p-6 rounded-3xl border transition-all ${task.completed ? 'bg-green-500/5 border-green-500/20 opacity-60' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
+  <div className={`p-6 rounded-[5px] border transition-all ${task.completed ? 'bg-green-500/5 border-green-500/20 opacity-60' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${task.completed ? 'bg-green-500/20 text-green-500' : 'bg-blue-600/20 text-blue-500'}`}>
+        <div className={`w-12 h-12 rounded-[5px] flex items-center justify-center ${task.completed ? 'bg-green-500/20 text-green-500' : 'bg-blue-600/20 text-blue-500'}`}>
           {task.completed ? <CheckCircle2 className="h-6 w-6" /> : <Zap className="h-6 w-6" />}
         </div>
         <div>
@@ -52,18 +52,18 @@ const Tasks: React.FC = () => {
         <p className="text-sm font-bold text-white/20 uppercase tracking-[0.3em]">Complete protocols to earn TJ rewards</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-blue-600/10 border border-blue-500/20 rounded-3xl p-6 space-y-2">
+      <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+        <div className="min-w-[240px] flex-1 bg-blue-600/10 border border-blue-500/20 rounded-[5px] p-6 space-y-2">
           <Trophy className="h-6 w-6 text-blue-500 mb-2" />
           <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Total Earned</p>
           <p className="text-2xl font-black text-white uppercase tracking-tighter">1,240 TJ</p>
         </div>
-        <div className="bg-purple-600/10 border border-purple-500/20 rounded-3xl p-6 space-y-2">
+        <div className="min-w-[240px] flex-1 bg-purple-600/10 border border-purple-500/20 rounded-[5px] p-6 space-y-2">
           <Star className="h-6 w-6 text-purple-500 mb-2" />
           <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Current XP</p>
           <p className="text-2xl font-black text-white uppercase tracking-tighter">Level 12</p>
         </div>
-        <div className="bg-amber-600/10 border border-amber-500/20 rounded-3xl p-6 space-y-2">
+        <div className="min-w-[240px] flex-1 bg-amber-600/10 border border-amber-500/20 rounded-[5px] p-6 space-y-2">
           <Gift className="h-6 w-6 text-amber-500 mb-2" />
           <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Next Reward</p>
           <p className="text-2xl font-black text-white uppercase tracking-tighter">500 XP</p>
@@ -73,18 +73,22 @@ const Tasks: React.FC = () => {
       <div className="space-y-8">
         <section className="space-y-4">
           <SectionHeader title="Daily Protocols" subtitle="Resets in 14h 22m" />
-          <div className="space-y-3">
+          <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
             {tasks.filter(t => t.type === 'daily').map(task => (
-              <TaskCard key={task.id} task={task} />
+              <div key={task.id} className="min-w-[280px] sm:min-w-[320px]">
+                <TaskCard task={task} />
+              </div>
             ))}
           </div>
         </section>
 
         <section className="space-y-4">
           <SectionHeader title="Achievements" subtitle="Permanent network milestones" />
-          <div className="space-y-3">
+          <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
             {tasks.filter(t => t.type !== 'daily').map(task => (
-              <TaskCard key={task.id} task={task} />
+              <div key={task.id} className="min-w-[280px] sm:min-w-[320px]">
+                <TaskCard task={task} />
+              </div>
             ))}
           </div>
         </section>

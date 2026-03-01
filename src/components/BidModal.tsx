@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Loader2, Gavel } from 'lucide-react';
-import { TON_LOGO } from '@/constants';
+import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
@@ -14,7 +14,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
   const { addNotification, updateNFT } = useAudio();
   const userAddress = useTonAddress();
   const [isProcessing, setIsProcessing] = useState(false);
-  const currentBid = parseFloat(nft.price);
+  const currentBid = parseFloat(nft.price) || 0;
   const minBid = (currentBid * 1.05).toFixed(2); /* 5% minimum increase */
   const [bidAmount, setBidAmount] = useState(minBid);
 
@@ -31,6 +31,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
     addNotification("Broadcasting bid to neural relay...", "info");
     setTimeout(() => {
       const newOffer = {
+        id: `offer-${Date.now()}`,
         offerer: userAddress,
         price: bidAmount,
         timestamp: 'Just now',
@@ -89,7 +90,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
             onClick={handlePlaceBid}
             disabled={isProcessing}
             className="w-full py-5 bg-amber-500 rounded-[10px] text-[10px] font-bold uppercase tracking-widest text-black shadow-xl shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
-            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gavel className="h-4 w-4" />}
+            {isProcessing ? <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> : <Gavel className="h-4 w-4" />}
             {isProcessing ? 'BROADCASTING...' : 'PLACE BID NOW'}
           </button>
         </div>

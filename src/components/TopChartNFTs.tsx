@@ -11,7 +11,7 @@ const TopChartNFTs: React.FC<TopChartNFTsProps> = ({ nfts, title }) => {
   const top4 = [...nfts].slice(0, 4);
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-8">
+    <div className="bg-white/5 border border-white/10 rounded-[5px] p-8 space-y-8">
       <div className="flex items-center justify-between">
         <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.5em]">{title}</h3>
         <div className="flex items-center gap-2">
@@ -20,9 +20,11 @@ const TopChartNFTs: React.FC<TopChartNFTsProps> = ({ nfts, title }) => {
         </div>
       </div>
       
-      <div className="space-y-6">
+      <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
         {top4.map((nft, idx) => (
-          <ChartNFTCard key={nft.id} nft={nft} rank={idx + 1} />
+          <div key={nft.id} className="min-w-[240px]">
+            <ChartNFTCard nft={nft} rank={idx + 1} />
+          </div>
         ))}
       </div>
       

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CloudUpload, X, Music, Image, Loader2, Radio } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
+import { APP_LOGO } from '@/constants';
 
 interface TrackUploadModalProps {
   onClose: () => void;
@@ -115,7 +116,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ onClose }) => {
             >
               {isUploading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> SYNCHRONIZING_DATA...
+                  <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> SYNCHRONIZING_DATA...
                 </>
               ) : (
                 <>
