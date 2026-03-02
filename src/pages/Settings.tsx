@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Settings as SettingsIcon, Bell, Shield, User, Wallet, Moon, Sun, Globe, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/components/theme-provider';
 
 const Settings: React.FC = () => {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const SettingItem = ({ icon: Icon, label, description, children }: any) => (
     <div className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl">
@@ -45,7 +49,12 @@ const Settings: React.FC = () => {
           label="Wallet Connection" 
           description={user?.id ? "Connected to TON Mainnet" : "No wallet detected"}
         >
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-[10px] font-bold text-white uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20">Manage</button>
+          <button 
+            onClick={() => navigate('/wallet')}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-[10px] font-bold text-white uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+          >
+            Manage
+          </button>
         </SettingItem>
       </div>
 
@@ -66,15 +75,15 @@ const Settings: React.FC = () => {
         </SettingItem>
 
         <SettingItem 
-          icon={darkMode ? Moon : Sun} 
+          icon={isDark ? Moon : Sun} 
           label="Visual Interface" 
           description="Toggle between light and dark modes"
         >
           <button 
-            onClick={() => setDarkMode(!darkMode)}
-            className={`w-12 h-6 rounded-full transition-all relative ${darkMode ? 'bg-blue-600' : 'bg-white/10'}`}
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            className={`w-12 h-6 rounded-full transition-all relative ${isDark ? 'bg-blue-600' : 'bg-white/10'}`}
           >
-            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${darkMode ? 'left-7' : 'left-1'}`} />
+            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isDark ? 'left-7' : 'left-1'}`} />
           </button>
         </SettingItem>
 

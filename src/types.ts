@@ -75,6 +75,7 @@ export interface NFTItem {
 export interface Artist {
   id: string;
   name: string;
+  walletAddress?: string;
   avatarUrl: string;
   followers: number;
   verified: boolean;
@@ -156,11 +157,17 @@ export interface UserProfile {
   following: number;
   earnings: string;
   isVerifiedArtist?: boolean;
+  isPremium?: boolean;
+  jamBalance?: string;
+  stakedJam?: string;
+  pendingJamRewards?: string;
+  lastStakingUpdate?: string;
   streamingEarnings?: string;
   nftEarnings?: string;
   followedArtists?: string[];
   followedUserIds?: string[];
   friends?: string[];
+  transactions?: Transaction[];
   socials?: {
     x?: string;
     instagram?: string;
@@ -168,4 +175,20 @@ export interface UserProfile {
     telegram?: string;
     spotify?: string;
   };
+}
+
+export interface Transaction {
+  id: string;
+  type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards';
+  amount: string; // Total amount in TON
+  platformFee: string; // Total platform fee (e.g., 10% for sales)
+  artistShare: string; // Amount sent to artist
+  recipientAddress: string;
+  senderAddress?: string;
+  trackId?: string;
+  trackTitle?: string;
+  nftId?: string;
+  timestamp: string;
+  status: 'pending' | 'completed' | 'failed';
+  txHash?: string;
 }

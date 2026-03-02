@@ -36,16 +36,20 @@ const TrackCard: React.FC<TrackCardProps> = ({ track }) => {
         />
         
         <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 ${isActive ? 'opacity-100' : ''}`}>
-          <button 
-            onClick={handlePlay}
-            className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center active:scale-90 transition-all shadow-xl shadow-blue-600/40"
-          >
-            {isActive && isPlaying ? (
-              <Pause className="h-6 w-6 text-white fill-white" />
-            ) : (
+          {isActive && isPlaying ? (
+            <div className="flex items-end justify-center gap-1 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md shadow-xl shadow-black/40 p-3">
+              <div className="w-1.5 bg-blue-500 rounded-t-sm animate-[bounce_1s_infinite_0ms]"></div>
+              <div className="w-1.5 bg-blue-500 rounded-t-sm animate-[bounce_1s_infinite_200ms]"></div>
+              <div className="w-1.5 bg-blue-500 rounded-t-sm animate-[bounce_1s_infinite_400ms]"></div>
+            </div>
+          ) : (
+            <button 
+              onClick={handlePlay}
+              className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center active:scale-90 transition-all shadow-xl shadow-blue-600/40"
+            >
               <Play className="h-6 w-6 text-white fill-white ml-1" />
-            )}
-          </button>
+            </button>
+          )}
         </div>
 
         <button 

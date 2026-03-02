@@ -17,7 +17,7 @@ const Marketplace: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('Newest');
   const [showMintModal, setShowMintModal] = useState(false);
-  const { addNotification, allNFTs } = useAudio();
+  const { addNotification, allNFTs, userProfile } = useAudio();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const trendingNfts = useMemo(() => {
@@ -40,16 +40,16 @@ const Marketplace: React.FC = () => {
   }, [allNFTs]);
 
   const userBids = useMemo(() => {
-    return allNFTs.filter(nft => nft.offers?.some(offer => offer.offerer === MOCK_USER.walletAddress));
-  }, [allNFTs]);
+    return allNFTs.filter(nft => nft.offers?.some(offer => offer.offerer === userProfile.walletAddress));
+  }, [allNFTs, userProfile.walletAddress]);
 
   const myNfts = useMemo(() => {
-    return allNFTs.filter(nft => nft.owner === MOCK_USER.walletAddress);
-  }, [allNFTs]);
+    return allNFTs.filter(nft => nft.owner === userProfile.walletAddress);
+  }, [allNFTs, userProfile.walletAddress]);
 
   const filteredNfts = useMemo(() => {
     let list = [...allNFTs].filter(nft => {
-      const isMyNft = nft.owner === MOCK_USER.walletAddress;
+      const isMyNft = nft.owner === userProfile.walletAddress;
       if (activeTab === 'My NFTs') {
         if (!isMyNft) return false;
       } else {
@@ -60,7 +60,7 @@ const Marketplace: React.FC = () => {
       if (activeTab === 'Genesis') return matchesSearch && nft.edition === 'Unique';
       if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited';
       if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction';
-      if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === MOCK_USER.walletAddress);
+      if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === userProfile.walletAddress);
       if (activeTab === 'My NFTs') return matchesSearch && isMyNft;
       return matchesSearch;
     });
@@ -99,7 +99,7 @@ const Marketplace: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 pb-40 w-full min-h-screen">
       {/* 1. COMPACT MARKET TICKER */}
-      <div className="sticky top-0 z-[45] glass border-b border-blue-500/10 py-1.5 px-4 flex items-center justify-between overflow-hidden whitespace-nowrap">
+      <div className="sticky top-0 z-[45] bg-black border-b border-white/10 py-1.5 px-4 flex items-center justify-between overflow-hidden whitespace-nowrap">
         <div className="flex items-center gap-2 mr-8 flex-shrink-0">
           <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.3em]">NODE_RELAY: ONLINE</span>
@@ -125,7 +125,7 @@ const Marketplace: React.FC = () => {
       </div>
 
       {/* 3. REFINED CONTROLS */}
-      <div className="sticky top-[28px] md:top-[28px] z-[39] glass border-b border-blue-500/10 py-4 w-full px-4 mb-8">
+      <div className="sticky top-[28px] md:top-[28px] z-[39] bg-black border-b border-white/10 py-4 w-full px-4 mb-8">
         <div className="w-full flex flex-col xl:flex-row items-center justify-between gap-6">
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar w-full xl:w-auto pb-1">
             {TABS.map(tab => (
@@ -218,12 +218,14 @@ const Marketplace: React.FC = () => {
               </div>
             ))}
             {/* Forge Portal */}
-            <div onClick={() => setShowMintModal(true)} className="flex-shrink-0 w-full aspect-[1080/480] snap-center rounded-[5px] flex flex-col items-center justify-center group cursor-pointer transition-all hover:bg-white/[0.01]" >
-              <div className="w-12 h-12 rounded-[5px] bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/10 transition-all">
-                <Plus className="text-white/10 group-hover:text-blue-500 transition-colors h-6 w-6" />
+            {userProfile.isVerifiedArtist && (
+              <div onClick={() => setShowMintModal(true)} className="flex-shrink-0 w-full aspect-[1080/480] snap-center rounded-[5px] flex flex-col items-center justify-center group cursor-pointer transition-all hover:bg-white/[0.01]" >
+                <div className="w-12 h-12 rounded-[5px] bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/10 transition-all">
+                  <Plus className="text-white/10 group-hover:text-blue-500 transition-colors h-6 w-6" />
+                </div>
+                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.5em] group-hover:text-white transition-colors">Forge New Protocol</span>
               </div>
-              <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.5em] group-hover:text-white transition-colors">Forge New Protocol</span>
-            </div>
+            )}
           </div>
         </section>
 

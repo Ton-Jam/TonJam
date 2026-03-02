@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Hammer, X, FileAudio, CloudUpload, Image, RefreshCw, Rocket, Check } from 'lucide-react';
+import { Hammer, X, FileAudio, CloudUpload, Image, RefreshCw, Rocket, Check, Plus, Trash2 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
+import { toNano } from '@ton/core';
 import { generateNFTLore } from '@/services/geminiService';
 import { NFTItem, Track } from '@/types';
 import { APP_LOGO } from '@/constants';
@@ -27,8 +28,31 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
     audioFile: null as File | null,
     coverFile: null as File | null,
     audioPreview: track?.audioUrl || '',
-    coverPreview: track?.coverUrl || ''
+    coverPreview: track?.coverUrl || '',
+    traits: [
+      { trait_type: 'Genre', value: track?.genre || 'Electronic' },
+      { trait_type: 'Rarity', value: 'Common' }
+    ]
   });
+
+  const handleAddTrait = () => {
+    setMintData(prev => ({
+      ...prev,
+      traits: [...prev.traits, { trait_type: '', value: '' }]
+    }));
+  };
+
+  const handleUpdateTrait = (index: number, field: 'trait_type' | 'value', val: string) => {
+    const newTraits = [...mintData.traits];
+    newTraits[index][field] = val;
+    setMintData(prev => ({ ...prev, traits: newTraits }));
+  };
+
+  const handleRemoveTrait = (index: number) => {
+    const newTraits = [...mintData.traits];
+    newTraits.splice(index, 1);
+    setMintData(prev => ({ ...prev, traits: newTraits }));
+  };
 
   useEffect(() => {
     if (step === 2 && !lore && mintData.title) {
@@ -73,8 +97,19 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
     }
     setLoading(true);
     try {
-      /* Simulate TON transaction */
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      /* Real TON transaction for minting fee */
+      const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 120,
+        messages: [
+          {
+            address: "EQB_PLATFORM_WALLET_ADDRESS", // Platform wallet for fees
+            amount: toNano("0.06").toString(), // Total Protocol Cost (0.05 + 0.01)
+          },
+        ],
+      };
+      
+      await tonConnectUI.sendTransaction(transaction);
+
       const newNFT: NFTItem = {
         id: `nft-${Date.now()}`,
         trackId: `track-nft-${Date.now()}`,
@@ -92,10 +127,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
         description: mintData.description,
         audioUrl: mintData.audioPreview || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
         isAuction: false,
-        attributes: [
-          { trait_type: 'Rarity', value: 'Rare' },
-          { trait_type: 'Genre', value: 'Electronic' }
-        ]
+        attributes: mintData.traits.filter(t => t.trait_type && t.value)
       };
       const newTrack: Track = {
         id: newNFT.trackId,
@@ -226,6 +258,41 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                 <div className="space-y-2">
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Supply</label>
                   <input type="number" value={mintData.supply} onChange={(e) => setMintData({...mintData, supply: e.target.value})} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white" />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Custom Properties (Traits)</label>
+                  <button onClick={handleAddTrait} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-1">
+                    <Plus className="h-3 w-3" /> Add Trait
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-32 overflow-y-auto pr-2 no-scrollbar">
+                  {mintData.traits.map((trait, index) => (
+                    <div key={index} className="flex gap-3 items-center">
+                      <input 
+                        type="text" 
+                        placeholder="Type (e.g. Genre)" 
+                        value={trait.trait_type}
+                        onChange={(e) => handleUpdateTrait(index, 'trait_type', e.target.value)}
+                        className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Value (e.g. Electronic)" 
+                        value={trait.value}
+                        onChange={(e) => handleUpdateTrait(index, 'value', e.target.value)}
+                        className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white"
+                      />
+                      <button onClick={() => handleRemoveTrait(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {mintData.traits.length === 0 && (
+                    <p className="text-[10px] text-white/20 uppercase tracking-widest text-center py-2">No custom traits added</p>
+                  )}
                 </div>
               </div>
             </div>

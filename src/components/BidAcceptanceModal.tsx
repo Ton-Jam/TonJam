@@ -3,6 +3,8 @@ import { X, Info, Loader2 } from 'lucide-react';
 import { NFTItem, NFTOffer } from '@/types';
 import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
+import { useTonConnectUI } from '@tonconnect/ui-react';
+import { acceptBid } from '@/services/tonService';
 
 interface BidAcceptanceModalProps {
   nft: NFTItem;
@@ -14,23 +16,31 @@ interface BidAcceptanceModalProps {
 const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onClose, onAccept }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { addNotification } = useAudio();
+  const [tonConnectUI] = useTonConnectUI();
 
   const handleConfirm = async () => {
     setIsProcessing(true);
     addNotification("Initiating ownership transfer protocol...", "info");
-    /* Simulate blockchain transaction */
-    setTimeout(() => {
+    
+    try {
+      await acceptBid(tonConnectUI, offer.offerer);
+      
       setIsProcessing(false);
       onAccept();
       onClose();
-    }, 2500);
+    } catch (e) {
+      console.error(e);
+      addNotification("Acceptance protocol aborted.", "error");
+      setIsProcessing(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
-      <div className="relative w-full max-w-md glass border border-blue-500/10 rounded-[10px] overflow-hidden shadow-[0_0_100px_rgba(37,99,235,0.1)] animate-in zoom-in-95 duration-300">
-        <div className="p-8">
+      <div className="relative w-full max-w-md glass border border-white/10 rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/10 blur-3xl rounded-full"></div>
+        <div className="p-8 relative z-10">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-bold uppercase tracking-tighter text-white">Accept Offer</h2>
             <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
@@ -38,11 +48,11 @@ const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onC
             </button>
           </div>
 
-          <div className="flex items-center gap-4 p-4 bg-white/5 rounded-[10px] mb-8">
+          <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-[10px] mb-8">
             <img src={nft.imageUrl} className="w-16 h-16 rounded-[10px] object-cover" alt="" />
             <div>
               <h3 className="text-sm font-bold text-white uppercase tracking-tight">{nft.title}</h3>
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">@{nft.creator}</p>
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">@{nft.creator}</p>
             </div>
           </div>
 
@@ -69,7 +79,7 @@ const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onC
           </div>
 
           <div className="flex flex-col gap-3">
-            <button onClick={handleConfirm} disabled={isProcessing} className="w-full py-5 electric-blue-bg text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-2xl shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none" >
+            <button onClick={handleConfirm} disabled={isProcessing} className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed" >
               {isProcessing ? (
                 <span className="flex items-center justify-center gap-2">
                   <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> PROCESSING...

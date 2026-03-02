@@ -7,11 +7,12 @@ interface SocialFeedProps {
   posts: Post[];
   onDeletePost?: (id: string) => void;
   emptyMessage?: string;
+  layout?: 'list' | 'grid';
 }
 
 const POSTS_PER_PAGE = 5;
 
-const SocialFeed: React.FC<SocialFeedProps> = ({ posts, onDeletePost, emptyMessage = "No posts found." }) => {
+const SocialFeed: React.FC<SocialFeedProps> = ({ posts, onDeletePost, emptyMessage = "No posts found.", layout = 'list' }) => {
   const [visibleCount, setVisibleCount] = useState(POSTS_PER_PAGE);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -51,15 +52,15 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ posts, onDeletePost, emptyMessa
   const visiblePosts = posts.slice(0, visibleCount);
 
   return (
-    <div className="space-y-6">
+    <div className={layout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-6"}>
       {visiblePosts.map((post, idx) => (
-        <div key={post.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${(idx % POSTS_PER_PAGE) * 100}ms` }}>
+        <div key={post.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full" style={{ animationDelay: `${(idx % POSTS_PER_PAGE) * 100}ms` }}>
           <PostCard post={post} onDelete={onDeletePost} />
         </div>
       ))}
       
       {visibleCount < posts.length && (
-        <div ref={sentinelRef} className="py-8 flex justify-center items-center">
+        <div ref={sentinelRef} className={`py-8 flex justify-center items-center ${layout === 'grid' ? 'col-span-full' : ''}`}>
           <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
         </div>
       )}

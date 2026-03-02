@@ -4,6 +4,7 @@ import { Play, ChevronRight, Zap, TrendingUp, Music2, ShoppingBag, Sparkles, Act
 import { MOCK_TRACKS, MOCK_NFTS } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
+import ArtistCard from '@/components/ArtistCard';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import { useAudio } from '@/context/AudioContext';
 
@@ -54,7 +55,7 @@ const FEATURED_POSTS: CarouselItem[] = [
 ];
 
 const Home: React.FC = () => {
-  const { playAll, artists } = useAudio();
+  const { playAll, artists, userProfile } = useAudio();
   
   // Data slices for different sections
   const recommendedNFTs = MOCK_NFTS.slice(0, 5);
@@ -167,20 +168,9 @@ const Home: React.FC = () => {
       {/* 7. Jam Recommended Artist */}
       <HomeSection title="Jam Recommended Artists" icon={UserCheck} link="/explore/artists">
         {recommendedArtists.map(artist => (
-          <Link 
-            key={`artist-${artist.id}`} 
-            to={`/artist/${artist.id}`}
-            className="flex-shrink-0 group text-center space-y-3 snap-start"
-          >
-            <div className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-2 border-white/5 group-hover:border-blue-500/50 transition-all">
-              <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            <div>
-              <p className="text-sm font-bold uppercase tracking-tight text-white group-hover:text-blue-500 transition-colors">{artist.name}</p>
-              <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{artist.followers.toLocaleString()} Followers</p>
-            </div>
-          </Link>
+          <div key={`artist-${artist.id}`} className="flex-shrink-0 w-48 sm:w-56 snap-start">
+            <ArtistCard artist={artist} />
+          </div>
         ))}
       </HomeSection>
 
@@ -212,12 +202,19 @@ const Home: React.FC = () => {
           <div className="w-12 h-12 rounded-[5px] bg-purple-600/20 flex items-center justify-center text-purple-500">
             <TrendingUp className="h-6 w-6" />
           </div>
-          <h3 className="text-3xl font-bold uppercase tracking-tighter text-white">Artist Dashboard</h3>
+          <h3 className="text-3xl font-bold uppercase tracking-tighter text-white">
+            {userProfile.isVerifiedArtist ? 'Artist Dashboard' : 'Become an Artist'}
+          </h3>
           <p className="text-white/40 leading-relaxed">
-            Are you a creator? Manage your music, track your earnings, and connect with your fans through our powerful artist tools.
+            {userProfile.isVerifiedArtist 
+              ? 'Are you a creator? Manage your music, track your earnings, and connect with your fans through our powerful artist tools.'
+              : 'Join the revolution. Upload your music, mint limited edition NFTs, and start earning royalties directly on the TON blockchain.'}
           </p>
-          <Link to="/artist-dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-purple-500 uppercase tracking-widest hover:text-purple-400 transition-colors">
-            Go to Dashboard <ChevronRight className="h-4 w-4" />
+          <Link 
+            to={userProfile.isVerifiedArtist ? '/artist-dashboard' : '/artist-onboarding'} 
+            className="inline-flex items-center gap-2 text-sm font-bold text-purple-500 uppercase tracking-widest hover:text-purple-400 transition-colors"
+          >
+            {userProfile.isVerifiedArtist ? 'Go to Dashboard' : 'Start Onboarding'} <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
       </section>

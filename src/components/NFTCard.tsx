@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Headphones, Clock, CheckCircle2, User as UserIcon } from 'lucide-react';
+import { Play, Pause, MoreVertical, CheckCircle2, User as UserIcon } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -87,22 +87,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
       </div>
 
       {/* Info Area */}
-      <div className="px-1 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Headphones className="h-3 w-3 text-blue-500" />
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-              {(associatedTrack?.playCount || 0).toLocaleString()}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-3 w-3 text-white/40" />
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-              {associatedTrack ? `${Math.floor(associatedTrack.duration / 60)}:${String(associatedTrack.duration % 60).padStart(2, '0')}` : '0:00'}
-            </span>
-          </div>
-        </div>
-
+      <div className="px-1 space-y-3 mt-2">
         <div>
           <div className="flex justify-between items-start gap-2 mb-1">
             <h3 className={`text-xs font-bold uppercase tracking-tight truncate leading-tight flex-1 ${isActive ? 'text-blue-500' : 'text-white'}`}>

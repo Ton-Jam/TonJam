@@ -5,6 +5,7 @@ import { Search, X, History, Satellite, Bolt, ChevronRight, Filter, SlidersHoriz
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
+import ArtistCard from '@/components/ArtistCard';
 import NFTCard from '@/components/NFTCard';
 import SectionHeader from '@/components/SectionHeader';
 import { Track } from '@/types';
@@ -330,7 +331,7 @@ const Discover: React.FC = () => {
               {visibleResults.map((item, idx) => (
                 <div key={item.id} className="flex-shrink-0 w-40 sm:w-48 animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
                   {activeFilter === 'Tracks' && <TrackCard track={item as Track} />}
-                  {activeFilter === 'Artists' && <UserCard user={item as any} variant="portrait" />}
+                  {activeFilter === 'Artists' && <ArtistCard artist={item as any} />}
                   {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
                   {activeFilter === 'Playlists' && <div className="p-4 bg-white/5 border border-white/10 rounded-[5px] text-white/20 text-[10px] font-bold uppercase tracking-widest text-center">Playlist UI coming soon</div>}
                 </div>

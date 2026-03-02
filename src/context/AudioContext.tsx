@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Track, Playlist, UserProfile, NFTItem, Artist } from '@/types';
+import { useTonConnectUI } from '@tonconnect/ui-react';
+import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction } from '@/types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS } from '@/constants';
+import * as tonService from '@/services/tonService';
 
 interface Notification {
   id: string;
@@ -68,6 +70,13 @@ interface AudioContextType {
   addUserTrack: (track: Track) => void;
   addUserNFT: (nft: NFTItem, silent?: boolean) => void;
   updateNFT: (nftId: string, updates: Partial<NFTItem>, silent?: boolean) => void;
+  recordTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp' | 'status'>) => void;
+  purchaseJAM: (amount: string, jamAmount: string) => Promise<void>;
+  subscribePremium: (amount: string) => Promise<void>;
+  stakeJam: (amount: string) => Promise<void>;
+  unstakeJam: (amount: string) => Promise<void>;
+  claimJamRewards: () => Promise<void>;
+  transactions: Transaction[];
   audioElement: HTMLAudioElement | null;
   analyser: AnalyserNode | null;
 }
@@ -91,6 +100,7 @@ const STORAGE_KEYS = {
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [tonConnectUI] = useTonConnectUI();
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
     return saved ? JSON.parse(saved) : MOCK_USER;
@@ -149,6 +159,43 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const saved = localStorage.getItem(STORAGE_KEYS.LIKED_TRACKS);
     return saved ? JSON.parse(saved) : [];
   });
+
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const saved = localStorage.getItem('tonjam_transactions');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('tonjam_transactions', JSON.stringify(transactions));
+  }, [transactions]);
+
+  useEffect(() => {
+    if (isPlaying && currentTrack) {
+      const streamPaymentTimeout = setTimeout(() => {
+        // Simulate a micro-payment for the stream
+        const streamPrice = 0.001; // 0.001 TON per stream
+        const platformFee = streamPrice * 0.10;
+        const artistShare = streamPrice - platformFee;
+        
+        const artist = artists.find(a => a.id === currentTrack.artistId || a.name === currentTrack.artist);
+        
+        recordTransaction({
+          type: 'stream',
+          amount: streamPrice.toString(),
+          platformFee: platformFee.toFixed(6),
+          artistShare: artistShare.toFixed(6),
+          recipientAddress: artist?.walletAddress || 'EQ_ARTIST_FALLBACK_ADDRESS',
+          senderAddress: userProfile.walletAddress,
+          trackId: currentTrack.id,
+          trackTitle: currentTrack.title
+        });
+        
+        addNotification(`Stream royalty distributed: ${artistShare.toFixed(6)} TON to ${currentTrack.artist}`, "info");
+      }, 10000); // Trigger after 10 seconds of playback
+      
+      return () => clearTimeout(streamPaymentTimeout);
+    }
+  }, [isPlaying, currentTrack?.id]);
 
   const [followedUserIds, setFollowedUserIds] = useState<string[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.FOLLOWED_USERS);
@@ -262,6 +309,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addNotification("App reset to initial state", "warning");
   };
 
+  // Staking Reward Accumulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const staked = parseFloat(userProfile.stakedJam || '0');
+      if (staked > 0) {
+        // 15% APR roughly
+        // 0.15 / (365 * 24 * 60 * 6) -> rewards per 10 seconds
+        const rewardRate = 0.15 / (365 * 24 * 60 * 6); 
+        const reward = staked * rewardRate;
+        
+        setUserProfile(prev => ({
+          ...prev,
+          pendingJamRewards: (parseFloat(prev.pendingJamRewards || '0') + reward).toString()
+        }));
+      }
+    }, 10000); // Every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [userProfile.stakedJam]);
+
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
@@ -272,9 +339,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           audioContextRef.current = new AudioContextClass();
           analyserRef.current = audioContextRef.current.createAnalyser();
           analyserRef.current.fftSize = 256;
-          const source = audioContextRef.current.createMediaElementSource(audioRef.current);
-          source.connect(analyserRef.current);
-          analyserRef.current.connect(audioContextRef.current.destination);
+          
+          // NOTE: Disabling Web Audio API connection for now to prevent CORS-related muting issues.
+          // This ensures playback works reliably even if the mock audio servers don't send correct CORS headers.
+          // const source = audioContextRef.current.createMediaElementSource(audioRef.current);
+          // source.connect(analyserRef.current);
+          // analyserRef.current.connect(audioContextRef.current.destination);
         }
       } catch (err) {
         console.error("Failed to initialize Web Audio API:", err);
@@ -321,6 +391,228 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     else toast.info(message, { duration });
   };
 
+  const recordTransaction = (txData: Omit<Transaction, 'id' | 'timestamp' | 'status'>) => {
+    const newTx: Transaction = {
+      ...txData,
+      id: `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+      status: 'completed',
+      txHash: `0x${Math.random().toString(16).substr(2, 40)}`
+    };
+    
+    setTransactions(prev => [newTx, ...prev]);
+    
+    // Update user/artist earnings based on transaction
+    if (txData.type === 'nft_sale' || txData.type === 'stream') {
+      const share = parseFloat(txData.artistShare);
+      
+      // If the recipient is the current user, update their profile earnings
+      if (txData.recipientAddress === userProfile.walletAddress) {
+        setUserProfile(prev => ({
+          ...prev,
+          earnings: (parseFloat(prev.earnings || '0') + share).toFixed(4),
+          streamingEarnings: txData.type === 'stream' 
+            ? (parseFloat(prev.streamingEarnings || '0') + share).toFixed(4)
+            : prev.streamingEarnings,
+          nftEarnings: txData.type === 'nft_sale'
+            ? (parseFloat(prev.nftEarnings || '0') + share).toFixed(4)
+            : prev.nftEarnings
+        }));
+      }
+      
+      // Update the artist's earnings in the artists list if they exist
+      if (txData.trackId || txData.nftId) {
+        setArtists(prev => prev.map(artist => {
+          if (artist.walletAddress === txData.recipientAddress || artist.id === (txData.trackId ? MOCK_TRACKS.find(t => t.id === txData.trackId)?.artistId : MOCK_NFTS.find(n => n.id === txData.nftId)?.artistId)) {
+            const currentStreaming = parseFloat(artist.earnings?.streaming || '0');
+            const currentNft = parseFloat(artist.earnings?.nftSales || '0');
+            const newStreaming = txData.type === 'stream' ? currentStreaming + share : currentStreaming;
+            const newNft = txData.type === 'nft_sale' ? currentNft + share : currentNft;
+            
+            return {
+              ...artist,
+              earnings: {
+                streaming: newStreaming.toFixed(4),
+                nftSales: newNft.toFixed(4),
+                total: (newStreaming + newNft).toFixed(4)
+              }
+            };
+          }
+          return artist;
+        }));
+      }
+    }
+  };
+
+  const purchaseJAM = async (amount: string, jamAmount: string) => {
+    try {
+      if (!tonConnectUI.connected) {
+        addNotification("Please connect your wallet first", "error");
+        return;
+      }
+
+      const success = await tonService.purchaseJAM(tonConnectUI, amount, jamAmount);
+      
+      if (success) {
+        recordTransaction({
+          type: 'jam_purchase',
+          amount: amount,
+          platformFee: '0',
+          artistShare: '0',
+          recipientAddress: 'PLATFORM_WALLET',
+          senderAddress: userProfile.walletAddress,
+          trackTitle: `Purchased ${jamAmount} JAM`
+        });
+        
+        setUserProfile(prev => ({
+          ...prev,
+          jamBalance: (parseFloat(prev.jamBalance || '0') + parseFloat(jamAmount)).toString()
+        }));
+        
+        addNotification(`Successfully purchased ${jamAmount} JAM!`, 'success');
+      }
+    } catch (error) {
+      addNotification("Transaction failed or cancelled", "error");
+    }
+  };
+
+  const subscribePremium = async (amount: string) => {
+    try {
+      if (!tonConnectUI.connected) {
+        addNotification("Please connect your wallet first", "error");
+        return;
+      }
+
+      const success = await tonService.subscribePremium(tonConnectUI, amount);
+      
+      if (success) {
+        recordTransaction({
+          type: 'premium_subscription',
+          amount: amount,
+          platformFee: amount,
+          artistShare: '0',
+          recipientAddress: 'PLATFORM_WALLET',
+          senderAddress: userProfile.walletAddress,
+          trackTitle: 'Premium Subscription'
+        });
+        
+        setUserProfile(prev => ({
+          ...prev,
+          isPremium: true
+        }));
+        
+        addNotification('Welcome to TonJam Premium!', 'success');
+      }
+    } catch (error) {
+      addNotification("Transaction failed or cancelled", "error");
+    }
+  };
+
+  const stakeJam = async (amount: string) => {
+    const currentBalance = parseFloat(userProfile.jamBalance || '0');
+    const stakeAmount = parseFloat(amount);
+
+    if (stakeAmount <= 0) {
+      addNotification("Invalid stake amount", "error");
+      return;
+    }
+
+    if (currentBalance < stakeAmount) {
+      addNotification("Insufficient JAM balance", "error");
+      return;
+    }
+
+    // Simulate blockchain delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setUserProfile(prev => ({
+      ...prev,
+      jamBalance: (currentBalance - stakeAmount).toString(),
+      stakedJam: (parseFloat(prev.stakedJam || '0') + stakeAmount).toString(),
+      lastStakingUpdate: new Date().toISOString()
+    }));
+
+    recordTransaction({
+      type: 'stake',
+      amount: '0', // Staking is internal to JAM
+      platformFee: '0',
+      artistShare: '0',
+      recipientAddress: 'STAKING_CONTRACT',
+      senderAddress: userProfile.walletAddress,
+      trackTitle: `Staked ${amount} JAM`
+    });
+
+    addNotification(`Successfully staked ${amount} JAM`, 'success');
+  };
+
+  const unstakeJam = async (amount: string) => {
+    const currentStaked = parseFloat(userProfile.stakedJam || '0');
+    const unstakeAmount = parseFloat(amount);
+
+    if (unstakeAmount <= 0) {
+      addNotification("Invalid unstake amount", "error");
+      return;
+    }
+
+    if (currentStaked < unstakeAmount) {
+      addNotification("Insufficient staked JAM", "error");
+      return;
+    }
+
+    // Simulate blockchain delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setUserProfile(prev => ({
+      ...prev,
+      stakedJam: (currentStaked - unstakeAmount).toString(),
+      jamBalance: (parseFloat(prev.jamBalance || '0') + unstakeAmount).toString(),
+      lastStakingUpdate: new Date().toISOString()
+    }));
+
+    recordTransaction({
+      type: 'unstake',
+      amount: '0',
+      platformFee: '0',
+      artistShare: '0',
+      recipientAddress: userProfile.walletAddress || 'USER_WALLET',
+      senderAddress: 'STAKING_CONTRACT',
+      trackTitle: `Unstaked ${amount} JAM`
+    });
+
+    addNotification(`Successfully unstaked ${amount} JAM`, 'success');
+  };
+
+  const claimJamRewards = async () => {
+    const pendingRewards = parseFloat(userProfile.pendingJamRewards || '0');
+
+    if (pendingRewards <= 0) {
+      addNotification("No rewards to claim", "info");
+      return;
+    }
+
+    // Simulate blockchain delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setUserProfile(prev => ({
+      ...prev,
+      pendingJamRewards: '0',
+      jamBalance: (parseFloat(prev.jamBalance || '0') + pendingRewards).toString(),
+      lastStakingUpdate: new Date().toISOString()
+    }));
+
+    recordTransaction({
+      type: 'claim_rewards',
+      amount: '0',
+      platformFee: '0',
+      artistShare: '0',
+      recipientAddress: userProfile.walletAddress || 'USER_WALLET',
+      senderAddress: 'STAKING_CONTRACT',
+      trackTitle: `Claimed ${pendingRewards.toFixed(4)} JAM rewards`
+    });
+
+    addNotification(`Successfully claimed ${pendingRewards.toFixed(4)} JAM rewards`, 'success');
+  };
+
   const playTrack = async (track: Track) => {
     if (currentTrack?.id === track.id) {
       togglePlay();
@@ -333,6 +625,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
     if (audioRef.current) {
+      // Ensure AudioContext is running
+      if (audioContextRef.current?.state === 'suspended') {
+        audioContextRef.current.resume().catch(err => console.warn("Failed to resume AudioContext:", err));
+      }
+
       if (playPromiseRef.current) {
         await playPromiseRef.current.catch(() => { });
       }
@@ -341,25 +638,44 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const sourceUrl = track.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 
       try {
+        // Reset crossOrigin to anonymous for each new track to allow visualizer
+        // audioRef.current.crossOrigin = "anonymous"; // Disabled to ensure playback
+        audioRef.current.removeAttribute('crossorigin');
         audioRef.current.src = sourceUrl;
-        audioRef.current.load();
+        
         playPromiseRef.current = audioRef.current.play();
         if (playPromiseRef.current !== undefined) {
           playPromiseRef.current.catch(error => {
-            if (error.name === 'NotSupportedError' || error.message.includes('supported source')) {
-              console.warn("Primary source failed, attempting fallback...");
+            // Check for common playback errors
+            // We'll try fallback for almost any error except user interruption
+            const isInterrupted = error.name === 'AbortError' || error.message?.includes('interrupted');
+            
+            if (!isInterrupted) {
+              console.warn("Primary source failed (CORS, Format, or Network), attempting fallback...", error);
               if (audioRef.current) {
-                audioRef.current.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-                audioRef.current.play().catch(e => {
-                  if (e.name !== 'AbortError' && !e.message?.includes('interrupted')) {
-                    console.error("Fallback failed:", e);
-                    addNotification("Audio fallback failed.", "error");
-                  }
-                });
+                // First try: Same URL but without crossOrigin (fixes CORS issues)
+                // We need to reset the src to trigger a reload with the new crossOrigin setting
+                audioRef.current.removeAttribute('crossorigin');
+                audioRef.current.src = sourceUrl; 
+                
+                const fallbackPromise = audioRef.current.play();
+                if (fallbackPromise !== undefined) {
+                  fallbackPromise.catch(e => {
+                    // Second try: Fallback URL
+                    console.warn("Same URL without CORS failed, trying SoundHelix fallback...", e);
+                    if (audioRef.current) {
+                      audioRef.current.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+                      audioRef.current.play().catch(err => {
+                        if (err.name !== 'AbortError' && !err.message?.includes('interrupted')) {
+                          console.error("Fallback failed:", err);
+                          addNotification("Playback failed. Please check your connection.", "error");
+                          setIsPlaying(false);
+                        }
+                      });
+                    }
+                  });
+                }
               }
-            } else if (error.name !== 'AbortError' && !error.message?.includes('interrupted')) {
-              console.error("Playback error:", error);
-              addNotification("Playback failed: " + error.message, "error");
             }
           });
         }
@@ -391,6 +707,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioRef.current.pause();
     } else {
       try {
+        // Ensure AudioContext is running
+        if (audioContextRef.current?.state === 'suspended') {
+          audioContextRef.current.resume().catch(err => console.warn("Failed to resume AudioContext:", err));
+        }
+        
         playPromiseRef.current = audioRef.current.play();
         if (playPromiseRef.current !== undefined) {
           playPromiseRef.current.catch(error => {
@@ -638,7 +959,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist,
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, userTracks, userNFTs,
-      allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, audioElement: audioRef.current, analyser: analyserRef.current
+      allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current
     }}>
       {children}
       {trackToAddToPlaylist && (

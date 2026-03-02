@@ -65,9 +65,11 @@ const Library: React.FC = () => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 px-4 w-full">
-      <header className="mb-6 pt-8">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
-        <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.5em]">STORAGE PROTOCOL ACTIVE</p>
+      <header className="mb-6 pt-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
+          <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.5em]">STORAGE PROTOCOL ACTIVE</p>
+        </div>
       </header>
 
       <div className="relative mb-10">
@@ -233,6 +235,7 @@ const Library: React.FC = () => {
           )}
         </div>
       </section>
+
     </div>
   );
 };

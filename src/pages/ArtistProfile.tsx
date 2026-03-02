@@ -331,14 +331,32 @@ const ArtistProfile: React.FC = () => {
       )}
 
       {/* Sticky Tab Navigation */}
-      <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-xl py-4 mt-12 mb-8 w-full px-6">
-        <div className="max-w-7xl mx-auto flex items-center gap-8 overflow-x-auto no-scrollbar">
-          {['tracks', 'nfts', 'signals', 'about', ...(isOwnProfile ? ['management'] : [])].map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab as any)} className={`pb-2 text-[9px] font-bold uppercase tracking-[0.3em] transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab ? 'text-blue-500' : 'text-white/20 hover:text-white'}`} >
-              {tab}
-              {activeTab === tab && <div className="absolute -bottom-4 left-0 right-0 h-0.5 bg-blue-500 rounded-full"></div>}
-            </button>
-          ))}
+      <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-xl py-6 mt-12 mb-8 w-full px-6 border-b border-white/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex bg-white/5 p-1 rounded-[12px] border border-white/10">
+            {['tracks', 'nfts'].map(tab => (
+              <button 
+                key={tab} 
+                onClick={() => setActiveTab(tab as any)} 
+                className={`px-8 py-2.5 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          
+          <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+            {['signals', 'about', ...(isOwnProfile ? ['management'] : [])].map(tab => (
+              <button 
+                key={tab} 
+                onClick={() => setActiveTab(tab as any)} 
+                className={`pb-2 text-[9px] font-bold uppercase tracking-[0.3em] transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab ? 'text-blue-500' : 'text-white/20 hover:text-white'}`} 
+              >
+                {tab}
+                {activeTab === tab && <div className="absolute -bottom-4 left-0 right-0 h-0.5 bg-blue-500 rounded-full"></div>}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

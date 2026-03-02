@@ -37,7 +37,7 @@ import NFTCard from '@/components/NFTCard';
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification, currentTrack, isPlaying, playTrack, allNFTs, updateNFT } = useAudio();
+  const { addNotification, currentTrack, isPlaying, playTrack, allNFTs, updateNFT, userProfile } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   
@@ -107,7 +107,7 @@ const NFTDetail: React.FC = () => {
   const isActive = useMemo(() => currentTrack?.id === localNft?.trackId, [currentTrack, localNft]);
   const isOwner = useMemo(() => {
     if (!localNft) return false;
-    const currentWallet = userAddress || MOCK_USER.walletAddress;
+    const currentWallet = userAddress || userProfile.walletAddress;
     return localNft.owner === currentWallet;
   }, [localNft, userAddress]);
 
@@ -278,7 +278,7 @@ const NFTDetail: React.FC = () => {
                     const artist = MOCK_ARTISTS.find(a => a.name === localNft.owner);
                     if (artist) {
                       navigate(`/artist/${artist.id}`);
-                    } else if (localNft.owner === MOCK_USER.walletAddress) {
+                    } else if (localNft.owner === userProfile.walletAddress) {
                       navigate('/profile');
                     }
                   }} >

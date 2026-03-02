@@ -12,14 +12,19 @@ import {
   PlusCircle,
   LucideIcon,
   Wallet,
-  LayoutDashboard
+  LayoutDashboard,
+  Upload,
+  Shield,
+  TrendingUp
 } from 'lucide-react';
-import { APP_LOGO, MOCK_USER, TJ_COIN_ICON } from '@/constants';
+import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import MiniAudioPlayer from './MiniAudioPlayer';
 import FullPlayer from './FullPlayer';
+import TrackUploadModal from './TrackUploadModal';
+import { ModeToggle } from './ModeToggle';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -28,11 +33,12 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentTrack, notifications, isFullPlayerOpen } = useAudio();
+  const { currentTrack, notifications, isFullPlayerOpen, userProfile } = useAudio();
   const { user } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   
   const isHome = location.pathname === '/';
@@ -52,13 +58,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex min-h-screen bg-black text-white transition-colors duration-300">
       {/* Header */}
       {isHome && (
-        <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/5 px-4 py-3 flex items-center justify-between lg:left-64 transition-colors duration-300">
+        <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/5 px-4 md:px-6 py-3 flex items-center justify-between lg:left-64 transition-colors duration-300">
           <div className="flex items-center gap-3 lg:hidden">
             <img src={APP_LOGO} alt="App Logo" className="w-8 h-8 object-contain" />
-            <span className="font-bold text-lg tracking-tight text-white uppercase">TonJam</span>
+            <span className="font-bold text-base tracking-tight text-white uppercase">TonJam</span>
           </div>
           
-          <div className="hidden lg:flex flex-1 max-w-xl relative" ref={searchRef}>
+          <div className="hidden lg:flex flex-1 max-w-xl relative mx-auto lg:mx-0" ref={searchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
             <input 
               type="text" 
@@ -70,26 +76,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
             {/* TonJam Coin Icon -> Tasks */}
-            <Link to="/tasks" className="p-2 hover:opacity-80 transition-opacity">
-              <img src={TJ_COIN_ICON} alt="Tasks" className="w-6 h-6 object-contain" />
+            <Link to="/tasks" className="flex items-center justify-center hover:opacity-80 transition-opacity">
+              <img src={TJ_COIN_ICON} alt="Tasks" className="w-8 h-8 object-contain drop-shadow-md" />
             </Link>
 
             {/* Wallet Icon -> TonConnect */}
             <button 
               onClick={() => tonConnectUI.openModal()}
-              className="p-2 text-white hover:text-blue-400 transition-colors"
+              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:text-blue-400 transition-all"
             >
-              <Wallet className="w-6 h-6" />
+              <Wallet className="w-4 h-4" />
             </button>
             
             {/* Avatar -> Profile */}
-            <Link to="/profile" className="p-1 hover:opacity-80 transition-opacity">
+            <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-white/10 hover:border-white/30 transition-all flex items-center justify-center bg-white/5">
               {user?.user_metadata?.avatar_url ? (
-                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <User className="w-6 h-6 text-white" />
+                <User className="w-4 h-4 text-white/70" />
               )}
             </Link>
           </div>
@@ -98,10 +104,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-black border-r border-white/5 flex-col p-6 z-50 overflow-y-auto transition-colors duration-300">
-        <Link to="/" className="flex items-center gap-3 mb-10">
-          <img src={APP_LOGO} alt="App Logo" className="w-10 h-10 object-contain" />
-          <span className="font-bold text-xl tracking-tight text-white uppercase italic">TonJam</span>
-        </Link>
+        <div className="flex items-center justify-between mb-10">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={APP_LOGO} alt="App Logo" className="w-10 h-10 object-contain" />
+            <span className="font-bold text-lg tracking-tight text-white uppercase italic">TonJam</span>
+          </Link>
+          <ModeToggle />
+        </div>
 
         <nav className="flex-1 space-y-2">
           <NavItem to="/" icon={HomeIcon} label="Home" />
@@ -113,15 +122,41 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="pt-6 pb-2">
             <p className="px-5 text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] mb-4">Account</p>
             <NavItem to="/artist-dashboard" icon={LayoutDashboard} label="Artist Dashboard" />
+            <NavItem to="/admin" icon={Shield} label="Admin Console" />
             <NavItem to="/profile" icon={User} label="Profile" />
+            <NavItem to="/wallet" icon={Wallet} label="Wallet" />
+            <NavItem to="/staking" icon={TrendingUp} label="Staking" />
             <NavItem to="/settings" icon={SettingsIcon} label="Settings" />
           </div>
 
-          <div className="pt-6">
-            <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
-              <PlusCircle className="h-5 w-5" />
-              <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
-            </button>
+          {userProfile.isVerifiedArtist && (
+            <div className="pt-6 space-y-3">
+              <button 
+                onClick={() => setIsUploadModalOpen(true)}
+                className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
+              >
+                <Upload className="h-5 w-5" />
+                <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Upload Track</span>
+              </button>
+              <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-white/5 text-white/60 font-bold hover:bg-white/10 transition-all border border-white/5">
+                <PlusCircle className="h-5 w-5" />
+                <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
+              </button>
+            </div>
+          )}
+
+          {/* TJ Coin Price Widget */}
+          <div className="mt-8 p-4 rounded-[5px] bg-white/5 border border-white/10 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={TJ_COIN_ICON} alt="JAM" className="w-6 h-6 object-contain" />
+              <div>
+                <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">JAM Price</p>
+                <p className="text-sm font-bold text-white tracking-tighter">${JAM_PRICE_USD.toFixed(3)}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[9px] font-bold text-green-500 uppercase tracking-widest">+2.4%</p>
+            </div>
           </div>
         </nav>
       </aside>
@@ -136,6 +171,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Audio Player */}
       {currentTrack && !isFullPlayerOpen && <MiniAudioPlayer />}
       {isFullPlayerOpen && <FullPlayer />}
+
+      <TrackUploadModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
 
       {/* Mobile Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-lg border-t border-white/5 h-20 px-2 flex justify-around items-center shadow-2xl">

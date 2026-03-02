@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Rss, Flame, Zap, Users, Plus, Sparkles, Filter } from 'lucide-react';
+import { Search, Bell, Rss, Flame, Zap, Users, Plus, Sparkles, Filter, LayoutGrid, List } from 'lucide-react';
 import { MOCK_POSTS, MOCK_ARTISTS, MOCK_USER, MOCK_TRACKS, APP_LOGO } from '@/constants';
 import UserCard from '@/components/UserCard';
 import TrackCard from '@/components/TrackCard';
@@ -18,6 +18,7 @@ const JamSpace: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'All' | 'Following' | 'Trending' | 'Alpha'>('All');
   const [filterType, setFilterType] = useState<'All' | 'Posts' | 'Tracks' | 'NFTs'>('All');
   const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest'>('Newest');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   /* Trending topic mocks */
   const trendingTopics = [
@@ -69,6 +70,15 @@ const JamSpace: React.FC = () => {
     return basePosts;
   }, [posts, search, activeTab, followedUserIds, filterType, sortOrder]);
 
+  // Auto-switch view mode based on filter type
+  useEffect(() => {
+    if (filterType === 'Tracks' || filterType === 'NFTs') {
+      setViewMode('grid');
+    } else {
+      setViewMode('list');
+    }
+  }, [filterType]);
+
   const handleCreatePost = (content: string, mediaUrl?: string) => {
     const newPost: Post = {
       id: Date.now().toString(),
@@ -89,7 +99,7 @@ const JamSpace: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a2a] to-black pb-40 relative overflow-x-hidden">
+    <div className="min-h-screen bg-black pb-40 relative overflow-x-hidden">
       {/* Immersive Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
@@ -97,7 +107,7 @@ const JamSpace: React.FC = () => {
       </div>
 
       {/* Live Signal Ticker */}
-      <div className="bg-blue-600/10 backdrop-blur-md py-1.5 px-4 overflow-hidden whitespace-nowrap relative z-50">
+      <div className="bg-black border-b border-white/10 py-1.5 px-4 overflow-hidden whitespace-nowrap relative z-50">
         <div className="flex items-center gap-12 animate-marquee">
           {[1,2,3,4,5].map(i => (
             <div key={i} className="flex items-center gap-6">
@@ -117,7 +127,7 @@ const JamSpace: React.FC = () => {
       </div>
 
       {/* Premium Header */}
-      <header className="px-4 md:px-12 py-4 flex items-center justify-between gap-8 bg-[#0a0a2a] sticky top-0 z-40">
+      <header className="px-4 md:px-12 py-4 flex items-center justify-between gap-8 bg-black border-b border-white/10 sticky top-0 z-40">
         <div className="flex items-center gap-8 flex-1">
           <div className="relative flex-1 max-w-2xl group">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 h-3 w-3 group-focus-within:text-blue-500 transition-colors" />
@@ -237,12 +247,27 @@ const JamSpace: React.FC = () => {
                       <div className={`w-0 h-0 border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-t-[4px] ${sortOrder === 'Newest' ? 'border-t-blue-500' : 'border-t-white/20'}`}></div>
                     </div>
                   </button>
+
+                  <div className="flex items-center bg-white/5 rounded-[8px] p-0.5 border border-white/5">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-1 rounded-[6px] transition-all ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                    >
+                      <List className="h-3 w-3" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-1 rounded-[6px] transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                    >
+                      <LayoutGrid className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Main Feed */}
-            <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." />
+            <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={viewMode} />
           </main>
 
           {/* Right Column: Recommendations & Live */}

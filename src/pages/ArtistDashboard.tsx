@@ -17,6 +17,19 @@ import {
   CheckCircle2 
 } from 'lucide-react';
 import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
+import {
   MOCK_USER,
   MOCK_ARTISTS,
   MOCK_TRACKS,
@@ -31,24 +44,21 @@ import TrackCard from "@/components/TrackCard";
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, userProfile } = useAudio();
+  const { addNotification, userProfile, transactions, artists } = useAudio();
   
+  useEffect(() => {
+    if (!userProfile.isVerifiedArtist) {
+      addNotification("Access Denied: Artist verification required.", "error");
+      navigate('/');
+    }
+  }, [userProfile.isVerifiedArtist, navigate, addNotification]);
+
   /* Find the artist profile for the current user (mocking that MOCK_USER is Neon Voyager for this demo) */ 
-  const [artistData, setArtistData] = useState<Artist>(() => {
-    const existing = MOCK_ARTISTS.find((a) => a.name === MOCK_USER.name) || MOCK_ARTISTS[0];
-    return {
-      ...existing,
-      royaltyConfig: existing.royaltyConfig || {
-        streamingPercentage: 0.05,
-        nftSaleShare: 0.1,
-      },
-      earnings: existing.earnings || {
-        streaming: "45.2",
-        nftSales: "120.5",
-        total: "165.7",
-      },
-    };
-  });
+  const currentArtist = useMemo(() => {
+    return artists.find((a) => a.name === userProfile.name) || artists[0];
+  }, [artists, userProfile.name]);
+
+  const artistData = currentArtist;
 
   const [tracks, setTracks] = useState<Track[]>(() =>
     MOCK_TRACKS.filter((t) => t.artistId === artistData.id),
@@ -140,6 +150,35 @@ const ArtistDashboard: React.FC = () => {
       </h3>{" "}
     </div>
   );
+  const performanceData = [
+    { name: 'Jan', streams: 40000 },
+    { name: 'Feb', streams: 70000 },
+    { name: 'Mar', streams: 45000 },
+    { name: 'Apr', streams: 90000 },
+    { name: 'May', streams: 65000 },
+    { name: 'Jun', streams: 85000 },
+    { name: 'Jul', streams: 100000 },
+    { name: 'Aug', streams: 75000 },
+    { name: 'Sep', streams: 50000 },
+    { name: 'Oct', streams: 80000 },
+    { name: 'Nov', streams: 60000 },
+    { name: 'Dec', streams: 95000 },
+  ];
+
+  const salesData = [
+    { name: 'Week 1', sales: 120 },
+    { name: 'Week 2', sales: 250 },
+    { name: 'Week 3', sales: 180 },
+    { name: 'Week 4', sales: 300 },
+  ];
+
+  const followerData = [
+    { name: 'Q1', followers: 1200 },
+    { name: 'Q2', followers: 2100 },
+    { name: 'Q3', followers: 3800 },
+    { name: 'Q4', followers: 5400 },
+  ];
+
   return (
     <div className="min-h-screen bg-black pb-32 pt-24 px-6">
       {" "}
@@ -244,50 +283,93 @@ const ArtistDashboard: React.FC = () => {
                   />
                 </div>
               </div>{" "}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                {" "}
-                <div className="lg:col-span-2 glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] p-8">
-                  {" "}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                {/* Performance Analytics */}
+                <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] p-8">
                   <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
-                    Recent Performance
-                  </h3>{" "}
-                  <div className="h-64 flex items-end gap-2 overflow-x-auto no-scrollbar pb-2">
-                    {[40, 70, 45, 90, 65, 85, 100, 75, 50, 80, 60, 95].map(
-                      (h, i) => (
-                        <div
-                          key={i}
-                          className="min-w-[40px] flex-1 bg-blue-600/20 rounded-t-lg relative group"
-                        >
-                          {" "}
-                          <div
-                            className="absolute bottom-0 left-0 right-0 bg-blue-600 rounded-t-lg transition-all group-hover:bg-blue-400"
-                            style={{ height: `${h}%` }}
-                          ></div>{" "}
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[8px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                            {" "}
-                            {h}k{" "}
-                          </div>{" "}
-                        </div>
-                      ),
-                    )}{" "}
-                  </div>{" "}
-                  <div className="flex justify-between mt-4 text-[8px] font-bold text-white/20 uppercase tracking-widest">
-                    {" "}
-                    <span>Jan</span> <span>Jun</span> <span>Dec</span>{" "}
-                  </div>{" "}
-                </div>{" "}
+                    Performance Analytics
+                  </h3>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={performanceData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                        <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} />
+                        <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => `${value / 1000}k`} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '5px' }}
+                          itemStyle={{ color: '#3b82f6', fontSize: '12px', fontWeight: 'bold' }}
+                          labelStyle={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase' }}
+                        />
+                        <Line type="monotone" dataKey="streams" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#000', stroke: '#3b82f6', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#3b82f6' }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Recent Sales */}
+                <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] p-8">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
+                    Recent Sales (TON)
+                  </h3>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={salesData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                        <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} />
+                        <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '5px' }}
+                          itemStyle={{ color: '#8b5cf6', fontSize: '12px', fontWeight: 'bold' }}
+                          labelStyle={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase' }}
+                          cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                        />
+                        <Bar dataKey="sales" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Follower Growth */}
+                <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] p-8">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
+                    Follower Growth
+                  </h3>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={followerData}>
+                        <defs>
+                          <linearGradient id="colorFollowers" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                        <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} />
+                        <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '5px' }}
+                          itemStyle={{ color: '#10b981', fontSize: '12px', fontWeight: 'bold' }}
+                          labelStyle={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase' }}
+                        />
+                        <Area type="monotone" dataKey="followers" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorFollowers)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Top Tracks */}
                 <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[5px] p-8">
                   <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
                     Top Tracks
                   </h3>
-                  <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-                    {tracks.slice(0, 5).map((track) => (
-                      <div key={track.id} className="min-w-[200px] sm:min-w-[240px]">
+                  <div className="flex flex-col gap-4 pb-4 no-scrollbar">
+                    {tracks.slice(0, 3).map((track) => (
+                      <div key={track.id} className="w-full">
                         <TrackCard track={track} />
                       </div>
                     ))}
                   </div>
-                </div>{" "}
+                </div>
               </div>{" "}
             </div>
           )}{" "}
@@ -422,14 +504,14 @@ const ArtistDashboard: React.FC = () => {
                         <div>
                           {" "}
                           <p className="text-[11px] font-bold text-white uppercase mb-1">
-                            Streaming Revenue (5%)
+                            Streaming Revenue (10% Platform Fee)
                           </p>{" "}
                           <p className="text-[9px] text-white/40 leading-relaxed uppercase tracking-widest">
                             {" "}
                             Every time a user plays your track, a
                             micro-transaction is triggered on the TON
-                            blockchain. 5% of the platform's streaming pool is
-                            instantly routed to your wallet address.{" "}
+                            blockchain. 10% platform fee is deducted, and the 
+                            remaining 90% is instantly routed to your wallet address.{" "}
                           </p>{" "}
                         </div>{" "}
                       </div>{" "}
@@ -442,14 +524,13 @@ const ArtistDashboard: React.FC = () => {
                         <div>
                           {" "}
                           <p className="text-[11px] font-bold text-white uppercase mb-1">
-                            NFT Secondary Sales (10%)
+                            NFT Secondary Sales (10% Platform Fee)
                           </p>{" "}
                           <p className="text-[9px] text-white/40 leading-relaxed uppercase tracking-widest">
                             {" "}
-                            Your music NFTs are minted with a permanent royalty
-                            tag. When a collector resells your asset on the
-                            marketplace, 10% of the sale price is automatically
-                            deducted and sent to your creator balance.{" "}
+                            TonJam music NFTs are governed by the Royalty Engine. 
+                            For every transaction, a 10% fee is collected (5% from buyer, 5% from seller). 
+                            The artist receives the full listing price minus the 5% seller fee.{" "}
                           </p>{" "}
                         </div>{" "}
                       </div>{" "}
@@ -458,47 +539,54 @@ const ArtistDashboard: React.FC = () => {
                   <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] p-8">
                     {" "}
                     <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
-                      Royalty Configuration
+                      Transaction Ledger (Auditable)
                     </h3>{" "}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {" "}
-                      <div className="p-6 bg-white/[0.02] rounded-[10px]">
-                        {" "}
-                        <div className="flex items-center gap-3 mb-4">
-                          {" "}
-                          <Radio className="h-4 w-4 text-blue-500" />{" "}
-                          <h4 className="text-[10px] font-bold text-white uppercase tracking-widest">
-                            Streaming Share
-                          </h4>{" "}
-                        </div>{" "}
-                        <p className="text-2xl font-bold text-white mb-2">
-                          {(artistData.royaltyConfig?.streamingPercentage ||
-                            0) * 100}
-                          %
-                        </p>{" "}
-                        <p className="text-[9px] text-white/20 leading-relaxed uppercase tracking-widest">
-                          Automatic distribution from every stream on the
-                          network.
-                        </p>{" "}
-                      </div>{" "}
-                      <div className="p-6 bg-white/[0.02] rounded-[10px]">
-                        {" "}
-                        <div className="flex items-center gap-3 mb-4">
-                          {" "}
-                          <Gem className="h-4 w-4 text-amber-500" />{" "}
-                          <h4 className="text-[10px] font-bold text-white uppercase tracking-widest">
-                            NFT Secondary Share
-                          </h4>{" "}
-                        </div>{" "}
-                        <p className="text-2xl font-bold text-white mb-2">
-                          {(artistData.royaltyConfig?.nftSaleShare || 0) * 100}%
-                        </p>{" "}
-                        <p className="text-[9px] text-white/20 leading-relaxed uppercase tracking-widest">
-                          Perpetual royalty from every secondary marketplace
-                          sale.
-                        </p>{" "}
-                      </div>{" "}
-                    </div>{" "}
+                    <div className="overflow-x-auto no-scrollbar">
+                      <table className="w-full text-left border-collapse min-w-[600px]">
+                        <thead>
+                          <tr className="border-b border-white/5">
+                            <th className="pb-4 text-[9px] font-bold text-white/20 uppercase tracking-widest">Type</th>
+                            <th className="pb-4 text-[9px] font-bold text-white/20 uppercase tracking-widest">Asset</th>
+                            <th className="pb-4 text-[9px] font-bold text-white/20 uppercase tracking-widest">Amount</th>
+                            <th className="pb-4 text-[9px] font-bold text-white/20 uppercase tracking-widest">Fee (10%)</th>
+                            <th className="pb-4 text-[9px] font-bold text-white/20 uppercase tracking-widest">Net Share</th>
+                            <th className="pb-4 text-[9px] font-bold text-white/20 uppercase tracking-widest">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {transactions.filter(tx => tx.recipientAddress === artistData.walletAddress).length > 0 ? (
+                            transactions.filter(tx => tx.recipientAddress === artistData.walletAddress).map((tx) => (
+                              <tr key={tx.id} className="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
+                                <td className="py-4">
+                                  <span className={`text-[8px] font-bold uppercase px-2 py-1 rounded-[5px] ${tx.type === 'stream' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                                    {tx.type.replace('_', ' ')}
+                                  </span>
+                                </td>
+                                <td className="py-4">
+                                  <p className="text-[10px] font-bold text-white uppercase truncate max-w-[120px]">{tx.trackTitle || 'Unknown Asset'}</p>
+                                  <p className="text-[7px] text-white/20 font-mono">{tx.txHash?.slice(0, 10)}...</p>
+                                </td>
+                                <td className="py-4 text-[10px] font-mono text-white">{tx.amount} TON</td>
+                                <td className="py-4 text-[10px] font-mono text-red-500/60">-{tx.platformFee}</td>
+                                <td className="py-4 text-[10px] font-mono text-green-400">+{tx.artistShare}</td>
+                                <td className="py-4">
+                                  <div className="flex items-center gap-1.5">
+                                    <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+                                    <span className="text-[8px] font-bold text-green-500 uppercase tracking-widest">Verified</span>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={6} className="py-20 text-center">
+                                <p className="text-[10px] font-bold text-white/10 uppercase tracking-[0.4em]">No transactions recorded in this epoch.</p>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>{" "}
                 </div>{" "}
                 <div className="space-y-6">

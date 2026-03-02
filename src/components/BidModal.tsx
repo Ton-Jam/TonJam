@@ -4,6 +4,7 @@ import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
+import { placeBid } from '@/services/tonService';
 
 interface BidModalProps {
   nft: NFTItem;
@@ -12,6 +13,7 @@ interface BidModalProps {
 
 const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
   const { addNotification, updateNFT } = useAudio();
+  const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isProcessing, setIsProcessing] = useState(false);
   const currentBid = parseFloat(nft.price) || 0;
@@ -29,7 +31,10 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
     }
     setIsProcessing(true);
     addNotification("Broadcasting bid to neural relay...", "info");
-    setTimeout(() => {
+    
+    try {
+      await placeBid(tonConnectUI, nft.owner, bidAmount);
+      
       const newOffer = {
         id: `offer-${Date.now()}`,
         offerer: userAddress,
@@ -39,17 +44,22 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
       };
       /* Update NFT with new offer and update current price to reflect highest bid */
       updateNFT(nft.id, { price: bidAmount, offers: [newOffer, ...(nft.offers || [])] });
-      setIsProcessing(false);
       addNotification(`Bid of ${bidAmount} TON placed!`, "success");
       onClose();
-    }, 2000);
+    } catch (e) {
+      console.error(e);
+      addNotification("Bid broadcast failed.", "error");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={onClose}></div>
-      <div className="relative glass w-full max-w-sm rounded-[10px] -amber-500/20 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="p-8">
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
+      <div className="relative glass w-full max-w-sm rounded-[10px] border border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 blur-3xl rounded-full"></div>
+        <div className="p-8 relative z-10">
           <header className="flex justify-between items-center mb-8">
             <div>
               <h2 className="text-xl font-bold uppercase tracking-tighter text-white">Neural Auction</h2>
@@ -65,10 +75,10 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
               <span>Min Next Bid</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/5 p-4 rounded-[10px] text-center">
+              <div className="bg-white/5 border border-white/5 p-4 rounded-[10px] text-center">
                 <p className="text-lg font-bold text-white">{currentBid} <span className="text-[8px] text-blue-500">TON</span></p>
               </div>
-              <div className="bg-amber-500/10 -amber-500/30 p-4 rounded-[10px] text-center">
+              <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-[10px] text-center">
                 <p className="text-lg font-bold text-amber-500">{minBid} <span className="text-[8px]">TON</span></p>
               </div>
             </div>
@@ -82,14 +92,14 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
                 step="0.1"
-                className="w-full bg-black py-5 pl-14 pr-6 rounded-[10px] text-2xl font-bold text-white outline-none focus:-amber-500 transition-all"
+                className="w-full bg-black/50 border border-white/10 py-5 pl-14 pr-6 rounded-[10px] text-2xl font-bold text-white outline-none focus:border-amber-500/50 transition-all"
               />
             </div>
           </div>
           <button
             onClick={handlePlaceBid}
             disabled={isProcessing}
-            className="w-full py-5 bg-amber-500 rounded-[10px] text-[10px] font-bold uppercase tracking-widest text-black shadow-xl shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+            className="w-full py-5 bg-amber-500 hover:bg-amber-400 rounded-[10px] text-[10px] font-bold uppercase tracking-widest text-black shadow-xl shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
             {isProcessing ? <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> : <Gavel className="h-4 w-4" />}
             {isProcessing ? 'BROADCASTING...' : 'PLACE BID NOW'}
           </button>

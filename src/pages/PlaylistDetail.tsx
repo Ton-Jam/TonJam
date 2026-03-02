@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Music2, Play, Shuffle, Trash2, MinusCircle, Camera, Pencil, Check, X } from 'lucide-react';
+import { ArrowLeft, Music2, Play, Shuffle, Trash2, MinusCircle, Camera, Pencil, Check, X, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import { MOCK_TRACKS } from '@/constants';
@@ -8,7 +8,7 @@ import { MOCK_TRACKS } from '@/constants';
 const PlaylistDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist } = useAudio();
+  const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist, reorderTrackInPlaylist } = useAudio();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [isEditing, setIsEditing] = useState(false);
@@ -25,7 +25,11 @@ const PlaylistDetail: React.FC = () => {
     const tracks = [...allTracks, ...MOCK_TRACKS];
     /* Filter duplicates if any */
     const uniqueTracks = Array.from(new Map(tracks.map(item => [item.id, item])).values());
-    return uniqueTracks.filter(track => playlist.trackIds?.includes(track.id));
+    
+    // Map over trackIds to preserve the exact order of the playlist
+    return playlist.trackIds
+      .map(id => uniqueTracks.find(track => track.id === id))
+      .filter((track): track is NonNullable<typeof track> => track !== undefined);
   }, [playlist, allTracks]);
 
   const handlePlayAll = () => {
@@ -85,6 +89,13 @@ const PlaylistDetail: React.FC = () => {
 
   const cancelEditing = () => {
     setIsEditing(false);
+  };
+
+  const handleMoveTrack = (e: React.MouseEvent, trackId: string, direction: 'up' | 'down') => {
+    e.stopPropagation();
+    if (playlist) {
+      reorderTrackInPlaylist(playlist.id, trackId, direction);
+    }
   };
 
   if (!playlist) {
@@ -205,20 +216,42 @@ const PlaylistDetail: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="flex overflow-x-auto gap-4 pb-8 no-scrollbar">
+      <div className="flex flex-col gap-2 pb-8">
         {playlistTracks.map((track, index) => (
-          <div key={track.id} className="min-w-[280px] sm:min-w-[320px] p-3 hover:bg-white/5 rounded-[10px] group transition-colors flex items-center gap-4">
+          <div key={track.id} className="w-full p-2 hover:bg-white/5 rounded-[10px] group transition-colors flex items-center gap-4">
             <span className="text-white/40 w-8 text-center font-mono text-sm">{index + 1}</span>
             <div className="flex-1">
-              <TrackCard track={track} variant="row" />
+              <TrackCard track={track} />
             </div>
-            <button onClick={(e) => handleRemoveTrack(e, track.id)} className="w-8 h-8 rounded-full flex items-center justify-center text-white/20 hover:text-red-500 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100" title="Remove from playlist">
-              <MinusCircle className="h-4 w-4" />
-            </button>
+            
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex flex-col gap-1 mr-2">
+                <button 
+                  onClick={(e) => handleMoveTrack(e, track.id, 'up')} 
+                  disabled={index === 0}
+                  className="w-6 h-6 rounded flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white/40 transition-all"
+                  title="Move Up"
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </button>
+                <button 
+                  onClick={(e) => handleMoveTrack(e, track.id, 'down')} 
+                  disabled={index === playlistTracks.length - 1}
+                  className="w-6 h-6 rounded flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white/40 transition-all"
+                  title="Move Down"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
+              
+              <button onClick={(e) => handleRemoveTrack(e, track.id)} className="w-10 h-10 rounded-full flex items-center justify-center text-white/40 hover:text-red-500 hover:bg-red-500/10 transition-all" title="Remove from playlist">
+                <MinusCircle className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         ))}
         {playlistTracks.length === 0 && (
-          <div className="text-white/40 italic">No tracks in this playlist yet.</div>
+          <div className="text-white/40 italic p-4">No tracks in this playlist yet.</div>
         )}
       </div>
     </div>

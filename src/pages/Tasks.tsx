@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Circle, Zap, Trophy, Star, Shield, Gift, ChevronRight } from 'lucide-react';
+import { CheckCircle2, Circle, Zap, Trophy, Star, Shield, Gift, ChevronRight, Calendar } from 'lucide-react';
 import SectionHeader from '@/components/SectionHeader';
 
 interface Task {
@@ -10,17 +10,19 @@ interface Task {
   points: number;
   completed: boolean;
   type: 'daily' | 'achievement' | 'milestone';
+  dueDate?: string;
 }
 
 interface TaskCardProps {
   task: Task;
+  onSetDueDate: (id: string, date: string) => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task }) => (
-  <div className={`p-6 rounded-[5px] border transition-all ${task.completed ? 'bg-green-500/5 border-green-500/20 opacity-60' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
-    <div className="flex items-center justify-between gap-4">
+const TaskCard: React.FC<TaskCardProps> = ({ task, onSetDueDate }) => (
+  <div className={`p-6 rounded-[5px] border transition-all flex flex-col h-full ${task.completed ? 'bg-green-500/5 border-green-500/20 opacity-60' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
+    <div className="flex items-center justify-between gap-4 flex-1">
       <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-[5px] flex items-center justify-center ${task.completed ? 'bg-green-500/20 text-green-500' : 'bg-blue-600/20 text-blue-500'}`}>
+        <div className={`w-12 h-12 rounded-[5px] flex items-center justify-center flex-shrink-0 ${task.completed ? 'bg-green-500/20 text-green-500' : 'bg-blue-600/20 text-blue-500'}`}>
           {task.completed ? <CheckCircle2 className="h-6 w-6" /> : <Zap className="h-6 w-6" />}
         </div>
         <div>
@@ -28,10 +30,23 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => (
           <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{task.description}</p>
         </div>
       </div>
-      <div className="text-right">
+      <div className="text-right flex-shrink-0">
         <p className="text-xs font-bold text-blue-500">+{task.reward}</p>
         <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{task.points} XP</p>
       </div>
+    </div>
+    
+    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-2 text-white/40">
+        <Calendar className="w-3 h-3" />
+        <span className="text-[9px] font-bold uppercase tracking-widest">Target Date</span>
+      </div>
+      <input 
+        type="date" 
+        value={task.dueDate || ''} 
+        onChange={(e) => onSetDueDate(task.id, e.target.value)}
+        className="bg-black/50 border border-white/10 rounded-[3px] px-2 py-1 text-[10px] font-bold text-white uppercase tracking-widest outline-none focus:border-blue-500/50 transition-colors cursor-text"
+      />
     </div>
   </div>
 );
@@ -44,6 +59,10 @@ const Tasks: React.FC = () => {
     { id: '4', title: 'Signal Broadcaster', description: 'Share a track to JamSpace', reward: '5 TJ', points: 25, completed: false, type: 'daily' },
     { id: '5', title: 'High Fidelity', description: 'Listen for 10 hours total', reward: '100 TJ', points: 1000, completed: false, type: 'milestone' },
   ]);
+
+  const handleSetDueDate = (id: string, date: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, dueDate: date } : t));
+  };
 
   return (
     <div className="p-6 lg:p-10 space-y-10 max-w-4xl mx-auto pb-32">
@@ -76,7 +95,7 @@ const Tasks: React.FC = () => {
           <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
             {tasks.filter(t => t.type === 'daily').map(task => (
               <div key={task.id} className="min-w-[280px] sm:min-w-[320px]">
-                <TaskCard task={task} />
+                <TaskCard task={task} onSetDueDate={handleSetDueDate} />
               </div>
             ))}
           </div>
@@ -87,7 +106,7 @@ const Tasks: React.FC = () => {
           <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
             {tasks.filter(t => t.type !== 'daily').map(task => (
               <div key={task.id} className="min-w-[280px] sm:min-w-[320px]">
-                <TaskCard task={task} />
+                <TaskCard task={task} onSetDueDate={handleSetDueDate} />
               </div>
             ))}
           </div>
