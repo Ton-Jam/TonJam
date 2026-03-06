@@ -33,7 +33,7 @@ const ArtistOnboarding: React.FC = () => {
 
   /* Step 3: NFT State */
   const [mintData, setMintData] = useState({
-    royalty: 10,
+    royaltySplits: [{ address: userProfile.walletAddress || '', percentage: 100 }] as { address: string, percentage: number }[],
     supply: 1,
     listingType: 'fixed' as 'fixed' | 'auction',
     price: '10'
@@ -93,7 +93,7 @@ const ArtistOnboarding: React.FC = () => {
         price: mintData.price,
         imageUrl: trackData.coverPreview || 'https://picsum.photos/400/400',
         edition: `1 of ${mintData.supply}`,
-        royalty: mintData.royalty,
+        royaltySplits: mintData.royaltySplits,
         description: trackData.description,
         listingType: mintData.listingType,
         history: [
@@ -240,10 +240,38 @@ const ArtistOnboarding: React.FC = () => {
                   <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Listing Price (TON)</label>
                   <input type="number" value={mintData.price} onChange={e => setMintData({...mintData, price: e.target.value})} className="w-full bg-white/5 -white/10 rounded-[10px] px-4 py-3 text-sm font-bold text-white outline-none focus:-blue-500 transition-colors" required />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Royalty (%)</label>
-                  <input type="number" value={mintData.royalty} onChange={e => setMintData({...mintData, royalty: parseInt(e.target.value)})} className="w-full bg-white/5 -white/10 rounded-[10px] px-4 py-3 text-sm font-bold text-white outline-none focus:-blue-500 transition-colors" min="0" max="50" />
-                </div>
+              <div className="space-y-4">
+                <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Royalty Splits (%)</label>
+                {mintData.royaltySplits.map((split, index) => (
+                  <div key={index} className="flex gap-3 items-center mb-2">
+                    <input 
+                      type="text" 
+                      placeholder="Wallet Address" 
+                      value={split.address}
+                      onChange={(e) => {
+                        const newSplits = [...mintData.royaltySplits];
+                        newSplits[index].address = e.target.value;
+                        setMintData({...mintData, royaltySplits: newSplits});
+                      }}
+                      className="flex-1 bg-white/5 rounded-[10px] px-4 py-3 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                    />
+                    <input 
+                      type="number" 
+                      placeholder="%" 
+                      value={split.percentage}
+                      onChange={(e) => {
+                        const newSplits = [...mintData.royaltySplits];
+                        newSplits[index].percentage = Number(e.target.value);
+                        setMintData({...mintData, royaltySplits: newSplits});
+                      }}
+                      className="w-20 bg-white/5 rounded-[10px] px-4 py-3 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                    />
+                  </div>
+                ))}
+                <button type="button" onClick={() => setMintData({...mintData, royaltySplits: [...mintData.royaltySplits, { address: '', percentage: 0 }]})} className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">
+                  + Add Recipient
+                </button>
+              </div>
               </div>
               <div className="p-4 bg-blue-600/10 -blue-500/20 rounded-[10px] flex items-start gap-3">
                 <Info className="h-4 w-4 text-blue-400 mt-0.5" />

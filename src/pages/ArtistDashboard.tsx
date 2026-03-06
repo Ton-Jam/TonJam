@@ -38,13 +38,20 @@ import {
   TON_LOGO,
 } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
-import { Track, Artist } from "@/types";
+import { Track, Artist, NFTItem } from "@/types";
 import TrackCard from "@/components/TrackCard";
+import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
+import { ChartRevenue } from "@/components/ChartRevenue";
+
+import MintModal from "@/components/MintModal";
 
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, userProfile, transactions, artists } = useAudio();
+  const { addNotification, userProfile, transactions, artists, addUserNFT } = useAudio();
+  
+  const [showMintModal, setShowMintModal] = useState(false);
+  const [selectedTrackForMint, setSelectedTrackForMint] = useState<Track | undefined>(undefined);
   
   useEffect(() => {
     if (!userProfile.isVerifiedArtist) {
@@ -329,32 +336,9 @@ const ArtistDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Follower Growth */}
-                <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] p-8">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
-                    Follower Growth
-                  </h3>
-                  <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={followerData}>
-                        <defs>
-                          <linearGradient id="colorFollowers" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                        <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} />
-                        <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} tickLine={false} axisLine={false} />
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '5px' }}
-                          itemStyle={{ color: '#10b981', fontSize: '12px', fontWeight: 'bold' }}
-                          labelStyle={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px', textTransform: 'uppercase' }}
-                        />
-                        <Area type="monotone" dataKey="followers" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorFollowers)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
+                {/* Follower Growth - Replaced with Interactive Area Chart */}
+                <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] overflow-hidden">
+                  <ChartAreaInteractive />
                 </div>
 
                 {/* Top Tracks */}
@@ -430,9 +414,8 @@ const ArtistDashboard: React.FC = () => {
                             {!track.isNFT && (
                               <button 
                                 onClick={() => {
-                                  const updatedTracks = tracks.map((t) => t.id === track.id ? { ...t, isNFT: true, price: "1.0" } : t );
-                                  setTracks(updatedTracks);
-                                  addNotification( "Track successfully minted as NFT", "success" );
+                                  setSelectedTrackForMint(track);
+                                  setShowMintModal(true);
                                 }}
                                 className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-[5px] text-[8px] font-bold uppercase tracking-widest border border-amber-500/20 transition-all"
                               >
@@ -536,6 +519,11 @@ const ArtistDashboard: React.FC = () => {
                       </div>{" "}
                     </div>{" "}
                   </div>{" "}
+                  {/* Revenue Chart */}
+                  <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] overflow-hidden mb-10">
+                     <ChartRevenue />
+                  </div>
+
                   <div className="glass border border-blue-500/10 bg-white/[0.02] rounded-[10px] p-8">
                     {" "}
                     <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-8">
@@ -894,6 +882,16 @@ const ArtistDashboard: React.FC = () => {
           </div>{" "}
         </div>
       )}{" "}
+      
+      {showMintModal && (
+        <MintModal 
+          track={selectedTrackForMint} 
+          onClose={() => {
+            setShowMintModal(false);
+            setSelectedTrackForMint(undefined);
+          }} 
+        />
+      )}
     </div>
   );
 };

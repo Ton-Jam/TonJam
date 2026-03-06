@@ -52,7 +52,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ posts, onDeletePost, emptyMessa
   const visiblePosts = posts.slice(0, visibleCount);
 
   return (
-    <div className={layout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-6"}>
+    <div className={layout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "flex flex-col"}>
       {visiblePosts.map((post, idx) => (
         <div key={post.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full" style={{ animationDelay: `${(idx % POSTS_PER_PAGE) * 100}ms` }}>
           <PostCard post={post} onDelete={onDeletePost} />

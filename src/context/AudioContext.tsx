@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useTonConnectUI } from '@tonconnect/ui-react';
-import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction } from '@/types';
-import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS } from '@/constants';
+import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post } from '@/types';
+import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS } from '@/constants';
 import * as tonService from '@/services/tonService';
 
 interface Notification {
@@ -79,6 +79,17 @@ interface AudioContextType {
   transactions: Transaction[];
   audioElement: HTMLAudioElement | null;
   analyser: AnalyserNode | null;
+  posts: Post[];
+  createPost: (post: Partial<Post>) => void;
+  deletePost: (postId: string) => void;
+  getTrendingTracks: () => Track[];
+  getTopNFTTracks: () => Track[];
+  getTracksByGenre: (genre: string) => Track[];
+  jamTrack: (trackId: string) => Promise<void>;
+  activeJamRoom: { id: string, name: string, listeners: number, currentTrack: Track | null } | null;
+  joinJamRoom: (roomId: string) => void;
+  leaveJamRoom: () => void;
+  allPlaylists: Playlist[];
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -105,6 +116,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const saved = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
     return saved ? JSON.parse(saved) : MOCK_USER;
   });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(userProfile));
+  }, [userProfile]);
 
   const [genesisContractAddress, setGenesisContractAddress] = useState<string | null>(() => {
     return localStorage.getItem(STORAGE_KEYS.CONTRACT_ADDRESS);
@@ -165,6 +180,31 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [posts, setPosts] = useState<Post[]>(() => {
+    const saved = localStorage.getItem('tonjam_posts');
+    return saved ? JSON.parse(saved) : MOCK_POSTS;
+  });
+
+  const allPlaylists = useMemo(() => {
+    return [...CURATED_PLAYLISTS, ...playlists];
+  }, [playlists]);
+
+  const getTrendingTracks = () => {
+    return [...allTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10);
+  };
+
+  const getTopNFTTracks = () => {
+    return allTracks.filter(t => t.isNFT).sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0')).slice(0, 10);
+  };
+
+  const getTracksByGenre = (genre: string) => {
+    return allTracks.filter(t => t.genre.toLowerCase() === genre.toLowerCase());
+  };
+
+  useEffect(() => {
+    localStorage.setItem('tonjam_posts', JSON.stringify(posts));
+  }, [posts]);
+
   useEffect(() => {
     localStorage.setItem('tonjam_transactions', JSON.stringify(transactions));
   }, [transactions]);
@@ -203,7 +243,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   useEffect(() => {
-    setUserProfile(prev => ({ ...prev, followedUserIds }));
+    setUserProfile(prev => ({ 
+      ...prev, 
+      followedUserIds,
+      followedArtists: followedUserIds, // Assuming all followed users are artists for now or we just sync them
+      following: followedUserIds.length
+    }));
   }, [followedUserIds]);
 
   const [userTracks, setUserTracks] = useState<Track[]>(() => {
@@ -342,9 +387,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           
           // NOTE: Disabling Web Audio API connection for now to prevent CORS-related muting issues.
           // This ensures playback works reliably even if the mock audio servers don't send correct CORS headers.
-          // const source = audioContextRef.current.createMediaElementSource(audioRef.current);
-          // source.connect(analyserRef.current);
-          // analyserRef.current.connect(audioContextRef.current.destination);
+          const source = audioContextRef.current.createMediaElementSource(audioRef.current);
+          source.connect(analyserRef.current);
+          analyserRef.current.connect(audioContextRef.current.destination);
         }
       } catch (err) {
         console.error("Failed to initialize Web Audio API:", err);
@@ -613,6 +658,83 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addNotification(`Successfully claimed ${pendingRewards.toFixed(4)} JAM rewards`, 'success');
   };
 
+  const createPost = (postData: Partial<Post>) => {
+    const newPost: Post = {
+      id: `post-${Date.now()}`,
+      userId: userProfile.id,
+      userName: userProfile.name,
+      userAvatar: userProfile.avatar,
+      userHandle: userProfile.handle,
+      content: '',
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      timestamp: 'Just now',
+      ...postData
+    };
+    setPosts(prev => [newPost, ...prev]);
+  };
+
+  const deletePost = (postId: string) => {
+    setPosts(prev => prev.filter(p => p.id !== postId));
+  };
+
+  const [activeJamRoom, setActiveJamRoom] = useState<{ id: string, name: string, listeners: number, currentTrack: Track | null } | null>(null);
+
+  const jamTrack = async (trackId: string) => {
+    const jamCost = 1; // 1 JAM to boost
+    const currentBalance = parseFloat(userProfile.jamBalance || '0');
+
+    if (currentBalance < jamCost) {
+      addNotification("Insufficient JAM balance to boost track", "error");
+      return;
+    }
+
+    // Simulate blockchain delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    setUserProfile(prev => ({
+      ...prev,
+      jamBalance: (currentBalance - jamCost).toString()
+    }));
+
+    setPosts(prev => prev.map(p => {
+      if (p.trackId === trackId) {
+        return { ...p, likes: p.likes + 10 }; // Jamming boosts likes significantly in the feed
+      }
+      return p;
+    }));
+
+    addNotification("Track Jammed! Signal boosted across the network.", "success");
+    
+    recordTransaction({
+      type: 'jam_purchase',
+      amount: '0',
+      platformFee: '0',
+      artistShare: '0.9', // 90% goes to artist
+      recipientAddress: MOCK_TRACKS.find(t => t.id === trackId)?.artistId || 'ARTIST',
+      senderAddress: userProfile.walletAddress,
+      trackTitle: `Jammed Track: ${MOCK_TRACKS.find(t => t.id === trackId)?.title}`
+    });
+  };
+
+  const joinJamRoom = (roomId: string) => {
+    const room = {
+      id: roomId,
+      name: roomId === 'genesis' ? 'Genesis Node' : 'Cyber Drift Room',
+      listeners: Math.floor(Math.random() * 50) + 10,
+      currentTrack: MOCK_TRACKS[Math.floor(Math.random() * MOCK_TRACKS.length)]
+    };
+    setActiveJamRoom(room);
+    addNotification(`Joined Jam Room: ${room.name}`, "success");
+    if (room.currentTrack) playTrack(room.currentTrack);
+  };
+
+  const leaveJamRoom = () => {
+    setActiveJamRoom(null);
+    addNotification("Disconnected from Jam Room", "info");
+  };
+
   const playTrack = async (track: Track) => {
     if (currentTrack?.id === track.id) {
       togglePlay();
@@ -639,8 +761,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       try {
         // Reset crossOrigin to anonymous for each new track to allow visualizer
-        // audioRef.current.crossOrigin = "anonymous"; // Disabled to ensure playback
-        audioRef.current.removeAttribute('crossorigin');
+        audioRef.current.crossOrigin = "anonymous"; 
         audioRef.current.src = sourceUrl;
         
         playPromiseRef.current = audioRef.current.play();
@@ -831,6 +952,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })
       );
 
+      // Update userProfile following count and followedUserIds
+      setUserProfile(prevProfile => ({
+        ...prevProfile,
+        following: isFollowing ? Math.max(0, prevProfile.following - 1) : prevProfile.following + 1,
+        followedUserIds: isFollowing 
+          ? (prevProfile.followedUserIds || []).filter(id => id !== userId)
+          : [...(prevProfile.followedUserIds || []), userId],
+        followedArtists: isFollowing
+          ? (prevProfile.followedArtists || []).filter(id => id !== userId)
+          : [...(prevProfile.followedArtists || []), userId]
+      }));
+
       if (isFollowing) {
         addNotification("Unfollowed user", "info");
         return prev.filter(id => id !== userId);
@@ -959,7 +1092,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist,
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, userTracks, userNFTs,
-      allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current
+      allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
+      posts, createPost, deletePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists
     }}>
       {children}
       {trackToAddToPlaylist && (

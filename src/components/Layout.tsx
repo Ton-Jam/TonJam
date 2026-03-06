@@ -15,7 +15,8 @@ import {
   LayoutDashboard,
   Upload,
   Shield,
-  TrendingUp
+  TrendingUp,
+  ArrowLeft
 } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -34,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentTrack, notifications, isFullPlayerOpen, userProfile } = useAudio();
-  const { user } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -57,50 +58,84 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-black text-white transition-colors duration-300">
       {/* Header */}
-      {isHome && (
-        <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/5 px-4 md:px-6 py-3 flex items-center justify-between lg:left-64 transition-colors duration-300">
-          <div className="flex items-center gap-3 lg:hidden">
-            <img src={APP_LOGO} alt="App Logo" className="w-8 h-8 object-contain" />
-            <span className="font-bold text-base tracking-tight text-white uppercase">TonJam</span>
+      <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/5 px-4 md:px-6 py-3 flex items-center justify-between lg:left-64 transition-colors duration-300">
+        {isHome ? (
+          <>
+            <div className="flex items-center gap-3 lg:hidden">
+              <img src={APP_LOGO} alt="App Logo" className="w-8 h-8 object-contain" />
+              <span className="font-bold text-base tracking-tight text-white uppercase">TonJam</span>
+            </div>
+            
+            <div className="hidden lg:flex flex-1 max-w-xl relative mx-auto lg:mx-0" ref={searchRef}>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+              <input 
+                type="text" 
+                placeholder="Search tracks, artists, NFTs..." 
+                className="w-full bg-white/5 border border-white/10 rounded-[5px] py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchOpen(true)}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-between w-full">
+            <button onClick={() => navigate(-1)} className="text-white/60 hover:text-white">
+              <ArrowLeft className="h-6 w-6" />
+            </button>
+            
+            {isSearchOpen ? (
+              <div className="flex-1 ml-4 relative" ref={searchRef}>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                <input 
+                  type="text" 
+                  placeholder="Search..." 
+                  className="w-full bg-white/5 border border-white/10 rounded-[5px] py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <button onClick={() => setIsSearchOpen(true)} className="text-white/60 hover:text-white ml-auto">
+                <Search className="h-6 w-6" />
+              </button>
+            )}
           </div>
-          
-          <div className="hidden lg:flex flex-1 max-w-xl relative mx-auto lg:mx-0" ref={searchRef}>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
-            <input 
-              type="text" 
-              placeholder="Search tracks, artists, NFTs..." 
-              className="w-full bg-white/5 border border-white/10 rounded-[5px] py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchOpen(true)}
-            />
-          </div>
+        )}
 
+        {isHome && (
           <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-            {/* TonJam Coin Icon -> Tasks */}
             <Link to="/tasks" className="flex items-center justify-center hover:opacity-80 transition-opacity">
               <img src={TJ_COIN_ICON} alt="Tasks" className="w-8 h-8 object-contain drop-shadow-md" />
             </Link>
 
-            {/* Wallet Icon -> TonConnect */}
             <button 
               onClick={() => tonConnectUI.openModal()}
-              className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:text-blue-400 transition-all"
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all border border-white/10"
             >
-              <Wallet className="w-4 h-4" />
+              <Wallet className="h-5 w-5 text-blue-500" />
             </button>
             
-            {/* Avatar -> Profile */}
-            <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-white/10 hover:border-white/30 transition-all flex items-center justify-center bg-white/5">
-              {user?.user_metadata?.avatar_url ? (
-                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-4 h-4 text-white/70" />
-              )}
-            </Link>
+            {user ? (
+              <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-white/10 hover:border-white/30 transition-all flex items-center justify-center bg-white/5">
+                {user.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-4 h-4 text-white/70" />
+                )}
+              </Link>
+            ) : (
+              <button 
+                onClick={() => signInWithGoogle()}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-widest rounded-[5px] transition-all"
+              >
+                Sign In
+              </button>
+            )}
           </div>
-        </header>
-      )}
+        )}
+      </header>
 
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-black border-r border-white/5 flex-col p-6 z-50 overflow-y-auto transition-colors duration-300">
@@ -162,7 +197,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main Content Area */}
-      <main className={`pb-32 lg:pb-24 lg:ml-64 transition-all w-full ${isHome ? 'pt-16 lg:pt-16' : ''}`}>
+      <main className="pb-32 lg:pb-24 lg:ml-64 transition-all w-full pt-16 lg:pt-16">
         <div className="w-full">
           {children}
         </div>

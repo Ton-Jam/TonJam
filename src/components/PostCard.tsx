@@ -4,12 +4,12 @@ import { Post, Comment } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import PostOptionsModal from '@/components/PostOptionsModal';
-import { MOCK_TRACKS, MOCK_USER } from '@/constants';
+import { MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { AnimatePresence, motion } from 'motion/react';
 
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const navigate = useNavigate();
-  const { togglePlay, currentTrack, isPlaying, toggleFollowUser, followedUserIds, userProfile, addNotification } = useAudio();
+  const { togglePlay, currentTrack, isPlaying, toggleFollowUser, followedUserIds, userProfile, addNotification, allNFTs } = useAudio();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
   const [isReposted, setIsReposted] = useState(post.isReposted || false);
@@ -73,6 +73,12 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     return undefined;
   }, [post.track, post.trackId]);
 
+  const nft = useMemo(() => {
+    if (post.nft) return post.nft;
+    if (post.nftId) return allNFTs.find(n => n.id === post.nftId);
+    return undefined;
+  }, [post.nft, post.nftId, allNFTs]);
+
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
@@ -96,7 +102,24 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
   const handleProfileClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/artist/${post.userId}`);
+    if (post.userId === userProfile.id) {
+      navigate('/profile');
+    } else if (MOCK_ARTISTS.some(a => a.id === post.userId)) {
+      navigate(`/artist/${post.userId}`);
+    } else {
+      navigate(`/user/${post.userId}`);
+    }
+  };
+
+  const handleCommentProfileClick = (e: React.MouseEvent, commentUserId: string) => {
+    e.stopPropagation();
+    if (commentUserId === userProfile.id) {
+      navigate('/profile');
+    } else if (MOCK_ARTISTS.some(a => a.id === commentUserId)) {
+      navigate(`/artist/${commentUserId}`);
+    } else {
+      navigate(`/user/${commentUserId}`);
+    }
   };
 
   const handlePlayTrack = (e: React.MouseEvent) => {
@@ -109,7 +132,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const userHandle = post.userHandle || `@${post.userName.toLowerCase().replace(/\s+/g, '')}`;
 
   return (
-    <div className="glass border border-blue-500/10 bg-white/[0.02] hover:bg-white/[0.04] rounded-[10px] p-6 transition-all group relative">
+    <div className="bg-transparent border-b border-white/5 hover:bg-white/[0.02] py-6 px-2 md:px-6 transition-all group relative">
       <div className="flex gap-4">
         {/* Author Avatar */}
         <div className="flex-shrink-0 cursor-pointer" onClick={handleProfileClick}>
@@ -128,7 +151,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           <div className="flex justify-between items-start mb-2">
             <div className="cursor-pointer" onClick={handleProfileClick}>
               <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold text-white uppercase tracking-tight hover:text-blue-400 transition-colors">{post.userName}</h4>
+                <h4 className="text-sm font-bold text-white uppercase tracking-tight hover:text-blue-400 hover:underline transition-colors inline-block">{post.userName}</h4>
                 <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{post.timestamp}</span>
               </div>
               <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{userHandle}</p>
@@ -192,6 +215,33 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
                   <Plus className="h-4 w-4" />
                 </button>
+              </div>
+            </div>
+          )}
+
+          {nft && (
+            <div className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/nft cursor-pointer hover:from-blue-600/20 hover:to-purple-600/20 transition-all" onClick={() => navigate(`/nft/${nft.id}`)} >
+              <div className="relative w-16 h-16 rounded-[10px] overflow-hidden flex-shrink-0 shadow-lg">
+                <img src={nft.imageUrl} alt={nft.title} className="w-full h-full object-cover" />
+                <div className="absolute top-1 right-1">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                    <Check className="h-2 w-2 text-white" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[7px] font-bold text-blue-400 uppercase tracking-[0.3em]">Sonic Artifact Acquired</span>
+                </div>
+                <h5 className="text-xs font-bold text-white uppercase truncate tracking-tight">{nft.title}</h5>
+                <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate">Creator: {nft.creator}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Valuation</p>
+                <div className="flex items-center gap-1.5 justify-end">
+                  <span className="text-sm font-bold text-white tracking-tighter">{nft.price}</span>
+                  <span className="text-[8px] font-bold text-blue-500">TON</span>
+                </div>
               </div>
             </div>
           )}
@@ -279,11 +329,21 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                     key={comment.id}
                     className="flex gap-3 group/comment"
                   >
-                    <img src={comment.userAvatar} className="w-8 h-8 rounded-full flex-shrink-0 object-cover shadow-md" alt="" />
+                    <img 
+                      src={comment.userAvatar} 
+                      className="w-8 h-8 rounded-full flex-shrink-0 object-cover shadow-md cursor-pointer" 
+                      alt="" 
+                      onClick={(e) => handleCommentProfileClick(e, comment.userId)}
+                    />
                     <div className="flex-1">
                       <div className="bg-white/5 rounded-[10px] p-3 relative group-hover/comment:bg-white/[0.07] transition-colors border border-white/5">
                         <div className="flex items-center justify-between mb-1">
-                          <h5 className="text-[10px] font-bold text-white uppercase tracking-tight">{comment.userName}</h5>
+                          <h5 
+                            className="text-[10px] font-bold text-white uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block"
+                            onClick={(e) => handleCommentProfileClick(e, comment.userId)}
+                          >
+                            {comment.userName}
+                          </h5>
                           <span className="text-[8px] text-white/20 font-bold uppercase tracking-widest">{comment.timestamp}</span>
                         </div>
                         <p className="text-[11px] text-white/70 leading-relaxed">{comment.content}</p>

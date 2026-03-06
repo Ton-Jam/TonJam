@@ -188,7 +188,7 @@ const PlaylistDetail: React.FC = () => {
             <>
               <div className="group flex items-start gap-4 mb-2">
                 <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight">{playlist.title}</h1>
-                <button onClick={startEditing} className="mt-2 opacity-0 group-hover:opacity-100 text-white/40 hover:text-white transition-all">
+                <button onClick={startEditing} className="mt-2 text-white/40 hover:text-white transition-all" title="Edit Playlist">
                   <Pencil className="h-5 w-5" />
                 </button>
               </div>
@@ -203,12 +203,15 @@ const PlaylistDetail: React.FC = () => {
             </>
           )}
           
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <button onClick={handlePlayAll} className="flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
               <Play className="h-4 w-4 fill-current" /> Play All
             </button>
             <button onClick={handleShuffle} className="flex items-center gap-2 px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
               <Shuffle className="h-4 w-4" /> Shuffle
+            </button>
+            <button onClick={startEditing} className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Edit Playlist">
+              <Pencil className="h-4 w-4" /> Edit
             </button>
             <button onClick={handleDeletePlaylist} className="flex items-center gap-2 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Delete Playlist">
               <Trash2 className="h-4 w-4" />

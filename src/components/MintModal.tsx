@@ -22,8 +22,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
   const [mintData, setMintData] = useState({
     title: track?.title || '',
     description: '',
-    price: '5',
-    royalty: '10',
+    royaltySplits: [{ address: userAddress || '', percentage: 100 }] as { address: string, percentage: number }[],
     supply: '100',
     audioFile: null as File | null,
     coverFile: null as File | null,
@@ -32,8 +31,34 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
     traits: [
       { trait_type: 'Genre', value: track?.genre || 'Electronic' },
       { trait_type: 'Rarity', value: 'Common' }
-    ]
+    ],
+    exclusiveContent: [] as { title: string, type: 'video' | 'track' | 'image' | 'document', url: string }[]
   });
+
+  const handleAddRoyaltySplit = () => {
+    setMintData(prev => ({
+      ...prev,
+      royaltySplits: [...prev.royaltySplits, { address: '', percentage: 0 }]
+    }));
+  };
+
+  const handleUpdateRoyaltySplit = (index: number, field: 'address' | 'percentage', val: string | number) => {
+    const newSplits = [...mintData.royaltySplits];
+    if (field === 'percentage') {
+      newSplits[index][field] = Number(val);
+    } else {
+      newSplits[index][field] = val as string;
+    }
+    setMintData(prev => ({ ...prev, royaltySplits: newSplits }));
+  };
+
+  const handleRemoveRoyaltySplit = (index: number) => {
+    const newSplits = [...mintData.royaltySplits];
+    newSplits.splice(index, 1);
+    setMintData(prev => ({ ...prev, royaltySplits: newSplits }));
+  };
+
+  const totalRoyaltyPercentage = mintData.royaltySplits.reduce((sum, split) => sum + split.percentage, 0);
 
   const handleAddTrait = () => {
     setMintData(prev => ({
@@ -52,6 +77,25 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
     const newTraits = [...mintData.traits];
     newTraits.splice(index, 1);
     setMintData(prev => ({ ...prev, traits: newTraits }));
+  };
+
+  const handleAddExclusive = () => {
+    setMintData(prev => ({
+      ...prev,
+      exclusiveContent: [...prev.exclusiveContent, { title: '', type: 'video', url: '' }]
+    }));
+  };
+
+  const handleUpdateExclusive = (index: number, field: string, val: string) => {
+    const newExclusive = [...mintData.exclusiveContent];
+    (newExclusive[index] as any)[field] = val;
+    setMintData(prev => ({ ...prev, exclusiveContent: newExclusive }));
+  };
+
+  const handleRemoveExclusive = (index: number) => {
+    const newExclusive = [...mintData.exclusiveContent];
+    newExclusive.splice(index, 1);
+    setMintData(prev => ({ ...prev, exclusiveContent: newExclusive }));
   };
 
   useEffect(() => {
@@ -112,9 +156,9 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
 
       const newNFT: NFTItem = {
         id: `nft-${Date.now()}`,
-        trackId: `track-nft-${Date.now()}`,
+        trackId: track ? track.id : `track-nft-${Date.now()}`,
         title: mintData.title,
-        owner: userProfile.id,
+        owner: userProfile.walletAddress || userProfile.id,
         creator: userProfile.name,
         artist: userProfile.name,
         artistId: userProfile.id,
@@ -127,24 +171,37 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
         description: mintData.description,
         audioUrl: mintData.audioPreview || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
         isAuction: false,
-        attributes: mintData.traits.filter(t => t.trait_type && t.value)
+        attributes: mintData.traits.filter(t => t.trait_type && t.value),
+        royaltySplits: mintData.royaltySplits,
+        exclusiveContent: mintData.exclusiveContent.filter(e => e.title && e.url).map(e => ({
+          ...e,
+          id: `ex-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        }))
       };
-      const newTrack: Track = {
-        id: newNFT.trackId,
-        title: mintData.title,
-        artist: userProfile.name,
-        artistId: userProfile.id,
-        coverUrl: newNFT.imageUrl,
-        audioUrl: newNFT.audioUrl || '',
-        duration: 180,
-        playCount: 0,
-        streams: 0,
-        likes: 0,
-        genre: 'Electronic',
-        isNFT: true
-      };
+      
+      if (track) {
+        // Update existing track
+        const updatedTrack = { ...track, isNFT: true, price: mintData.price };
+        addUserTrack(updatedTrack);
+      } else {
+        const newTrack: Track = {
+          id: newNFT.trackId,
+          title: mintData.title,
+          artist: userProfile.name,
+          artistId: userProfile.id,
+          coverUrl: newNFT.imageUrl,
+          audioUrl: newNFT.audioUrl || '',
+          duration: 180,
+          playCount: 0,
+          streams: 0,
+          likes: 0,
+          genre: 'Electronic',
+          isNFT: true
+        };
+        addUserTrack(newTrack);
+      }
+      
       addUserNFT(newNFT);
-      addUserTrack(newTrack);
       addNotification("NFT Protocol successfully deployed to TON", "success");
       setStep(4);
     } catch (err) {
@@ -251,9 +308,39 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Mint Price (TON)</label>
                   <input type="number" value={mintData.price} onChange={(e) => setMintData({...mintData, price: e.target.value})} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white" />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Royalty (%)</label>
-                  <input type="number" value={mintData.royalty} onChange={(e) => setMintData({...mintData, royalty: e.target.value})} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white" />
+                <div className="space-y-4 col-span-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Royalty Splits (%)</label>
+                    <button onClick={handleAddRoyaltySplit} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-1">
+                      <Plus className="h-3 w-3" /> Add Recipient
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {mintData.royaltySplits.map((split, index) => (
+                      <div key={index} className="flex gap-3 items-center">
+                        <input 
+                          type="text" 
+                          placeholder="Wallet Address" 
+                          value={split.address}
+                          onChange={(e) => handleUpdateRoyaltySplit(index, 'address', e.target.value)}
+                          className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white"
+                        />
+                        <input 
+                          type="number" 
+                          placeholder="%" 
+                          value={split.percentage}
+                          onChange={(e) => handleUpdateRoyaltySplit(index, 'percentage', e.target.value)}
+                          className="w-20 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white"
+                        />
+                        <button onClick={() => handleRemoveRoyaltySplit(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest text-right">
+                      Total: {totalRoyaltyPercentage}%
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Supply</label>
@@ -292,6 +379,55 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                   ))}
                   {mintData.traits.length === 0 && (
                     <p className="text-[10px] text-white/20 uppercase tracking-widest text-center py-2">No custom traits added</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Exclusive Holder Content (Perks)</label>
+                  <button onClick={handleAddExclusive} className="text-[9px] font-bold text-purple-500 uppercase tracking-widest hover:text-purple-400 transition-colors flex items-center gap-1">
+                    <Plus className="h-3 w-3" /> Add Perk
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-32 overflow-y-auto pr-2 no-scrollbar">
+                  {mintData.exclusiveContent.map((item, index) => (
+                    <div key={index} className="flex gap-2 items-center bg-white/5 p-3 rounded-[10px] border border-white/5">
+                      <div className="flex-1 space-y-2">
+                        <input 
+                          type="text" 
+                          placeholder="Perk Title (e.g. BTS Video)" 
+                          value={item.title}
+                          onChange={(e) => handleUpdateExclusive(index, 'title', e.target.value)}
+                          className="w-full bg-black/20 rounded-[5px] py-1.5 px-3 text-[10px] outline-none focus:ring-1 focus:ring-purple-500/50 transition-all text-white"
+                        />
+                        <div className="flex gap-2">
+                          <select 
+                            value={item.type}
+                            onChange={(e) => handleUpdateExclusive(index, 'type', e.target.value)}
+                            className="bg-black/20 rounded-[5px] py-1.5 px-2 text-[9px] outline-none text-white/60"
+                          >
+                            <option value="video">Video</option>
+                            <option value="track">Audio</option>
+                            <option value="image">Image</option>
+                            <option value="document">PDF</option>
+                          </select>
+                          <input 
+                            type="text" 
+                            placeholder="URL (IPFS or CDN)" 
+                            value={item.url}
+                            onChange={(e) => handleUpdateExclusive(index, 'url', e.target.value)}
+                            className="flex-1 bg-black/20 rounded-[5px] py-1.5 px-3 text-[9px] outline-none focus:ring-1 focus:ring-purple-500/50 transition-all text-white"
+                          />
+                        </div>
+                      </div>
+                      <button onClick={() => handleRemoveExclusive(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {mintData.exclusiveContent.length === 0 && (
+                    <p className="text-[10px] text-white/10 uppercase tracking-widest text-center py-2">No exclusive content added</p>
                   )}
                 </div>
               </div>

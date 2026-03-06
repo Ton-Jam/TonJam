@@ -7,25 +7,40 @@ import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import PlaylistCard from '@/components/PlaylistCard';
 import UserCard from '@/components/UserCard';
+import ArtistCard from '@/components/ArtistCard';
+import CreatePlaylistModal from '@/components/CreatePlaylistModal';
+import UploadTrackModal from '@/components/UploadTrackModal';
+import { Upload } from 'lucide-react';
 
 const INITIAL_LIMIT = 10;
 
 const Library: React.FC = () => {
   const navigate = useNavigate();
-  const { playAll, playlists, createNewPlaylist, deletePlaylist, updatePlaylist, createRecommendedPlaylist, recentlyPlayed, clearRecentlyPlayed, likedTrackIds, followedUserIds, setActivePlaylistId, userNFTs, userTracks, userProfile, artists } = useAudio();
+  const { playAll, playlists, createNewPlaylist, deletePlaylist, updatePlaylist, createRecommendedPlaylist, recentlyPlayed, clearRecentlyPlayed, likedTrackIds, followedUserIds, setActivePlaylistId, userNFTs, allNFTs, userTracks, userProfile, artists } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
   const [favTracksLimit, setFavTracksLimit] = useState(INITIAL_LIMIT);
   const [recTracksLimit, setRecTracksLimit] = useState(INITIAL_LIMIT);
+  const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
+  const [isUploadTrackModalOpen, setIsUploadTrackModalOpen] = useState(false);
   const favSentinelRef = useRef<HTMLDivElement>(null);
   const recSentinelRef = useRef<HTMLDivElement>(null);
 
+  const myCollection = useMemo(() => {
+    // Filter NFTs owned by the user
+    return allNFTs.filter(nft => 
+      (nft.owner === userProfile.walletAddress) || 
+      (nft.owner === userProfile.name) ||
+      // Include user uploaded NFTs that might not have owner set yet but are in userNFTs
+      userNFTs.some(un => un.id === nft.id)
+    );
+  }, [allNFTs, userProfile, userNFTs]);
+
   const filteredNFTs = useMemo(() => {
-    const allNFTs = [...userNFTs, ...MOCK_NFTS];
-    return allNFTs.filter(n =>
+    return myCollection.filter(n =>
       n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       n.creator.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery, userNFTs]);
+  }, [searchQuery, myCollection]);
 
   const likedTracks = useMemo(() => {
     const allTracks = [...userTracks, ...MOCK_TRACKS];
@@ -101,10 +116,13 @@ const Library: React.FC = () => {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My Playlists</h3>
+          <button onClick={() => setIsUploadTrackModalOpen(true)} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-400 transition-colors group">
+            <Upload className="h-3 w-3" /> UPLOAD TRACK
+          </button>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {/* Create Playlist Card */}
-          <div onClick={() => { const name = prompt("IDENTIFY NEW SYNC SEQUENCE:"); if (name) createNewPlaylist(name); }} className="flex-shrink-0 w-40 sm:w-48 aspect-square rounded-[5px] flex flex-col items-center justify-center group cursor-pointer hover:bg-white/5 transition-all border border-white/5" >
+          <div onClick={() => setIsCreatePlaylistModalOpen(true)} className="flex-shrink-0 w-40 sm:w-48 aspect-square rounded-[5px] flex flex-col items-center justify-center group cursor-pointer hover:bg-white/5 transition-all border border-white/5" >
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors">
               <Plus className="text-white/40 group-hover:text-blue-400 h-6 w-6" />
             </div>
@@ -131,6 +149,15 @@ const Library: React.FC = () => {
         </div>
       </section>
 
+      <CreatePlaylistModal 
+        isOpen={isCreatePlaylistModalOpen} 
+        onClose={() => setIsCreatePlaylistModalOpen(false)} 
+      />
+      <UploadTrackModal 
+        isOpen={isUploadTrackModalOpen} 
+        onClose={() => setIsUploadTrackModalOpen(false)} 
+      />
+
       {/* Followed Artists Section */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
@@ -140,7 +167,7 @@ const Library: React.FC = () => {
           {followedArtists.length > 0 ? (
             followedArtists.map(artist => (
               <div key={`followed-${artist.id}`} className="flex-shrink-0 w-40 sm:w-48">
-                <UserCard user={artist} variant="portrait" />
+                <ArtistCard artist={artist} />
               </div>
             ))
           ) : (

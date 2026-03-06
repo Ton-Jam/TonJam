@@ -4,6 +4,8 @@ import { CheckCircle2, Users, UserPlus, UserCheck } from 'lucide-react';
 import { Artist, UserProfile } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 
+import { MOCK_ARTISTS } from '@/constants';
+
 interface UserCardProps {
   user: Artist | UserProfile;
   variant?: 'portrait' | 'compact' | 'row';
@@ -19,7 +21,14 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   const handleClick = (e: React.MouseEvent) => {
     // Prevent navigation if clicking the follow button
     if ((e.target as HTMLElement).closest('.follow-btn')) return;
-    navigate(`/artist/${user.id}`);
+    
+    if (isOwnProfile) {
+      navigate('/profile');
+    } else if (MOCK_ARTISTS.some(a => a.id === user.id)) {
+      navigate(`/artist/${user.id}`);
+    } else {
+      navigate(`/user/${user.id}`);
+    }
   };
 
   const handleFollow = (e: React.MouseEvent) => {

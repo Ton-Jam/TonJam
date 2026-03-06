@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import Layout from '@/components/Layout';
 import Home from '@/pages/Home';
 import Discover from '@/pages/Discover';
@@ -19,6 +20,7 @@ import ProtocolForge from '@/pages/ProtocolForge';
 import LoadingScreen from '@/components/LoadingScreen';
 import PlaylistDetail from '@/pages/PlaylistDetail';
 import PostDetail from '@/pages/PostDetail';
+import TrackDetail from '@/pages/TrackDetail';
 import AdminDashboard from '@/pages/AdminDashboard';
 import Wallet from '@/pages/Wallet';
 import Staking from '@/pages/Staking';
@@ -40,40 +42,43 @@ const App: React.FC = () => {
   if (isAppLoading) return <LoadingScreen />;
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <AuthProvider>
-        <AudioProvider>
-          <Toaster theme="dark" position="top-right" />
-          <Router>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/discover" element={<Discover />} />
-                <Route path="/jamspace" element={<JamSpace />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/nft/:id" element={<NFTDetail />} />
-                <Route path="/explore/:type" element={<ExploreList />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/user/:id" element={<UserProfile />} />
-                <Route path="/artist/:id" element={<ArtistProfile />} />
-                <Route path="/artist-dashboard" element={<ArtistDashboard />} />
-                <Route path="/artist-onboarding" element={<ArtistOnboarding />} />
-                <Route path="/library" element={<Library />} />
-                <Route path="/wallet" element={<Wallet />} />
-                <Route path="/staking" element={<Staking />} />
-                <Route path="/playlist/:id" element={<PlaylistDetail />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/tasks" element={<Tasks />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/forge" element={<ProtocolForge />} />
-                <Route path="/post/:id" element={<PostDetail />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-              </Routes>
-            </Layout>
-          </Router>
-        </AudioProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <TonConnectUIProvider manifestUrl="https://ton-jam.vercel.app/tonconnect-manifest.json">
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <AuthProvider>
+          <AudioProvider>
+            <Toaster theme="dark" position="top-right" />
+            <Router>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/discover" element={<Discover />} />
+                  <Route path="/jamspace" element={<JamSpace />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/nft/:id" element={<NFTDetail />} />
+                  <Route path="/explore/:type" element={<ExploreList />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/user/:id" element={<UserProfile />} />
+                  <Route path="/artist/:id" element={<ArtistProfile />} />
+                  <Route path="/artist-dashboard" element={<ArtistDashboard />} />
+                  <Route path="/artist-onboarding" element={<ArtistOnboarding />} />
+                  <Route path="/library" element={<Library />} />
+                  <Route path="/wallet" element={<Wallet />} />
+                  <Route path="/staking" element={<Staking />} />
+                  <Route path="/playlist/:id" element={<PlaylistDetail />} />
+                  <Route path="/track/:id" element={<TrackDetail />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/tasks" element={<Tasks />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/forge" element={<ProtocolForge />} />
+                  <Route path="/post/:id" element={<PostDetail />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                </Routes>
+              </Layout>
+            </Router>
+          </AudioProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </TonConnectUIProvider>
   );
 };
 

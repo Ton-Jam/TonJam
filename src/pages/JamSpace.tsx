@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Rss, Flame, Zap, Users, Plus, Sparkles, Filter, LayoutGrid, List } from 'lucide-react';
-import { MOCK_POSTS, MOCK_ARTISTS, MOCK_USER, MOCK_TRACKS, APP_LOGO } from '@/constants';
+import { Search, Bell, Rss, Flame, Zap, Users, Plus, Sparkles, Filter, LayoutGrid, List, Radio, Headphones } from 'lucide-react';
+import { MOCK_POSTS, MOCK_ARTISTS, MOCK_USER, MOCK_TRACKS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
 import UserCard from '@/components/UserCard';
 import TrackCard from '@/components/TrackCard';
 import PostModal from '@/components/PostModal';
@@ -11,8 +11,7 @@ import { Post, Track } from '@/types';
 
 const JamSpace: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification, followedUserIds, artists } = useAudio();
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
+  const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom } = useAudio();
   const [search, setSearch] = useState('');
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'All' | 'Following' | 'Trending' | 'Alpha'>('All');
@@ -79,23 +78,16 @@ const JamSpace: React.FC = () => {
     }
   }, [filterType]);
 
-  const handleCreatePost = (content: string, mediaUrl?: string) => {
-    const newPost: Post = {
-      id: Date.now().toString(),
-      userId: MOCK_USER.id,
-      userName: MOCK_USER.name,
-      userAvatar: MOCK_USER.avatar,
+  const handleCreatePost = (content: string, mediaUrl?: string, trackId?: string) => {
+    createPost({
       content,
       imageUrl: mediaUrl,
-      likes: 0,
-      comments: 0,
-      timestamp: 'Just now'
-    };
-    setPosts([newPost, ...posts]);
+      trackId
+    });
   };
 
   const handleDeletePost = (id: string) => {
-    setPosts(prev => prev.filter(p => p.id !== id));
+    deletePost(id);
   };
 
   return (
@@ -146,17 +138,57 @@ const JamSpace: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Navigation & Trending */}
           <aside className="hidden lg:block lg:col-span-3 space-y-8 sticky top-28 h-fit">
+            {/* Live Jam Rooms */}
+            <div className="glass border border-orange-500/20 bg-orange-500/[0.02] rounded-[10px] p-8">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-[9px] font-bold text-orange-500 uppercase tracking-[0.5em]">Live Jam Rooms</h3>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
+                  <span className="text-[7px] font-bold text-orange-500 uppercase tracking-widest">Live</span>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { id: 'genesis', name: 'Genesis Node', listeners: 124, icon: Radio },
+                  { id: 'drift', name: 'Cyber Drift', listeners: 89, icon: Headphones }
+                ].map(room => (
+                  <button 
+                    key={room.id}
+                    onClick={() => activeJamRoom?.id === room.id ? leaveJamRoom() : joinJamRoom(room.id)}
+                    className={`w-full p-4 rounded-[10px] border transition-all text-left group relative overflow-hidden ${activeJamRoom?.id === room.id ? 'bg-orange-500 border-orange-400 shadow-lg shadow-orange-500/20' : 'bg-white/5 border-white/10 hover:border-orange-500/30 hover:bg-white/10'}`}
+                  >
+                    {activeJamRoom?.id === room.id && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-shimmer"></div>
+                    )}
+                    <div className="flex items-center gap-4 relative z-10">
+                      <div className={`w-10 h-10 rounded-[8px] flex items-center justify-center transition-colors ${activeJamRoom?.id === room.id ? 'bg-white/20' : 'bg-white/5 group-hover:bg-orange-500/20'}`}>
+                        <room.icon className={`h-4 w-4 ${activeJamRoom?.id === room.id ? 'text-white' : 'text-white/40 group-hover:text-orange-500'}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-[10px] font-bold uppercase tracking-tight truncate ${activeJamRoom?.id === room.id ? 'text-white' : 'text-white/60'}`}>{room.name}</p>
+                        <p className={`text-[8px] font-bold uppercase tracking-widest mt-0.5 ${activeJamRoom?.id === room.id ? 'text-white/60' : 'text-white/20'}`}>{room.listeners} Listening</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="glass border border-blue-500/10 rounded-[10px] p-8">
               <h3 className="text-[9px] font-bold text-white/20 uppercase tracking-[0.5em] mb-8">Navigation</h3>
               <nav className="space-y-2">
                 {[
-                  { id: 'feed', label: 'Global Feed', icon: Rss, active: true },
-                  { id: 'trending', label: 'Trending', icon: Flame },
-                  { id: 'alpha', label: 'Alpha Signals', icon: Zap },
-                  { id: 'nodes', label: 'Active Nodes', icon: Users }
+                  { id: 'All', label: 'Global Feed', icon: Rss },
+                  { id: 'Following', label: 'Following', icon: Users },
+                  { id: 'Trending', label: 'Trending', icon: Flame },
+                  { id: 'Alpha', label: 'Alpha Signals', icon: Zap }
                 ].map(item => (
-                  <button key={item.id} className={`w-full flex items-center gap-4 px-4 py-3 rounded-[10px] transition-all group ${item.active ? 'bg-blue-600/10 text-blue-400' : 'text-white/40 hover:text-white hover:bg-white/5 '}`} >
-                    <item.icon className={`h-3 w-3 ${item.active ? 'text-blue-400' : 'text-white/20 group-hover:text-white'}`} />
+                  <button 
+                    key={item.id} 
+                    onClick={() => setActiveTab(item.id as any)}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-[10px] transition-all group ${activeTab === item.id ? 'bg-blue-600/10 text-blue-400' : 'text-white/40 hover:text-white hover:bg-white/5 '}`} 
+                  >
+                    <item.icon className={`h-3 w-3 ${activeTab === item.id ? 'text-blue-400' : 'text-white/20 group-hover:text-white'}`} />
                     <span className="text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
                   </button>
                 ))}
@@ -201,7 +233,12 @@ const JamSpace: React.FC = () => {
                 </div>
                 <h1 className="text-3xl md:text-5xl font-bold tracking-tighter uppercase text-white leading-none mb-8"> Broadcast your <br /> <span className="text-blue-500">Frequency</span> </h1>
                 <div className="flex items-center gap-4 p-2 bg-white/[0.03] rounded-[10px] transition-all">
-                  <img src={MOCK_USER.avatar} className="w-10 h-10 rounded-full" alt="" />
+                  <img 
+                    src={MOCK_USER.avatar} 
+                    className="w-10 h-10 rounded-full cursor-pointer hover:opacity-80 transition-opacity" 
+                    alt="" 
+                    onClick={() => navigate('/profile')}
+                  />
                   <button onClick={() => setIsPostModalOpen(true)} className="flex-1 text-left px-4 py-3 text-[11px] text-white/20 font-medium uppercase tracking-widest hover:text-white/40 transition-colors" >
                     What's resonating today?
                   </button>
@@ -267,7 +304,9 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Main Feed */}
-            <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={viewMode} />
+            <div className="bg-black/40 rounded-[10px] border border-white/5 overflow-hidden">
+              <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={viewMode} />
+            </div>
           </main>
 
           {/* Right Column: Recommendations & Live */}

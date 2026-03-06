@@ -19,7 +19,13 @@ import {
   X, 
   LogIn, 
   Satellite, 
-  ChevronRight 
+  ChevronRight,
+  Video,
+  Music as MusicIcon,
+  Image as ImageIcon,
+  FileText,
+  Lock,
+  Share2
 } from 'lucide-react';
 
 import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO } from '@/constants';
@@ -48,9 +54,10 @@ const NFTDetail: React.FC = () => {
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
   const [lore, setLore] = useState<string>('');
   const [isGeneratingLore, setIsGeneratingLore] = useState(false);
-  const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers' | 'exclusive'>('details');
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
+  const [metadataError, setMetadataError] = useState<string | null>(null);
 
   /* Modal states */
   const [showBuyModal, setShowBuyModal] = useState(false);
@@ -58,24 +65,33 @@ const NFTDetail: React.FC = () => {
   const [showBidModal, setShowBidModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<NFTOffer | null>(null);
 
+  const loadMetadata = () => {
+    if (localNft?.contractAddress) {
+      setIsFetchingMetadata(true);
+      setMetadataError(null);
+      fetchNFTMetadata(localNft.contractAddress)
+        .then(metadata => {
+          if (!metadata) return;
+          // Note: We don't update state here directly because localNft is derived from allNFTs
+          // In a real app, we'd trigger an updateNFT call if metadata changed significantly
+        })
+        .catch(err => {
+          console.error("Failed to fetch metadata", err);
+          setMetadataError("Failed to sync on-chain data.");
+          addNotification("Failed to fetch on-chain metadata.", "error");
+        })
+        .finally(() => setIsFetchingMetadata(false));
+    }
+  };
+
   useEffect(() => {
     if (localNft) {
       setAssociatedTrack(MOCK_TRACKS.find(t => t.id === localNft.trackId) || null);
       /* Fetch dynamic metadata */
-      if (localNft.contractAddress) {
-        setIsFetchingMetadata(true);
-        fetchNFTMetadata(localNft.contractAddress)
-          .then(metadata => {
-            if (!metadata) return;
-            // Note: We don't update state here directly because localNft is derived from allNFTs
-            // In a real app, we'd trigger an updateNFT call if metadata changed significantly
-          })
-          .catch(err => console.error("Failed to fetch metadata", err))
-          .finally(() => setIsFetchingMetadata(false));
-      }
+      loadMetadata();
     }
     window.scrollTo(0, 0);
-  }, [id, localNft]);
+  }, [id, localNft?.id]);
 
   useEffect(() => {
     if (!localNft?.auctionEndTime) {
@@ -138,7 +154,18 @@ const NFTDetail: React.FC = () => {
     return Math.max(...localNft.offers.map(o => parseFloat(o.price)));
   }, [localNft]);
 
-  if (!localNft) return null;
+  if (allNFTs.length === 0) return <div className="min-h-screen flex items-center justify-center text-white">Loading assets...</div>;
+  if (!localNft) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Asset Not Found</h2>
+          <p className="text-white/60">The requested NFT could not be located.</p>
+          <button onClick={() => navigate(-1)} className="mt-4 text-blue-500 hover:underline">Go Back</button>
+        </div>
+      </div>
+    );
+  }
 
   const handleAction = () => {
     if (isOwner) {
@@ -203,12 +230,47 @@ const NFTDetail: React.FC = () => {
     }, 1500);
   };
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/nft/${localNft.id}`;
+    const shareData = {
+      title: `${localNft.title} by ${localNft.creator}`,
+      text: `Check out this NFT on TonJam: ${localNft.title}`,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        addNotification('Shared successfully!', 'success');
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        addNotification('Link copied to clipboard!', 'success');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+      if ((err as Error).name !== 'AbortError') {
+        addNotification('Failed to share.', 'error');
+      }
+    }
+  };
+
   return (
     <div className="relative min-h-screen pb-24 animate-in fade-in duration-500">
+      {isFetchingMetadata && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300">
+          <Loader2 className="h-12 w-12 text-blue-500 animate-spin mb-4" />
+          <p className="text-xs font-bold text-white uppercase tracking-[0.3em] animate-pulse">Syncing Asset Data...</p>
+        </div>
+      )}
       <div className="relative z-10 max-w-5xl mx-auto px-6 pt-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-white/30 hover:text-blue-400 mb-6 transition-all group" >
-          <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" /> BACK
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-white/30 hover:text-blue-400 transition-all group" >
+            <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" /> BACK
+          </button>
+          <button onClick={handleShare} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-white/30 hover:text-blue-400 transition-all group" >
+            <Share2 className="h-3 w-3" /> SHARE
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
           {/* Left Column: Artwork */}
@@ -392,9 +454,9 @@ const NFTDetail: React.FC = () => {
 
             {/* Information Tabs */}
             <div className="flex items-center gap-8 mb-8">
-              {['details', 'history', 'offers'].map((tab) => (
+              {['details', 'history', 'offers', ...(isOwner && localNft.exclusiveContent?.length ? ['exclusive'] : [])].map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab as any)} className={`pb-4 text-[10px] font-bold uppercase tracking-[0.3em] transition-all relative ${activeTab === tab ? 'text-blue-400' : 'text-white/30 hover:text-white'}`}>
-                  {tab}
+                  {tab === 'exclusive' ? 'Exclusive Perks' : tab}
                   {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-1 electric-blue-bg rounded-full"></div>}
                 </button>
               ))}
@@ -403,6 +465,42 @@ const NFTDetail: React.FC = () => {
             <div className="min-h-[300px]">
               {activeTab === 'details' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-left duration-500">
+                  {metadataError && (
+                    <div className="col-span-1 md:col-span-2 p-5 glass rounded-[10px] bg-red-500/10 border border-red-500/20 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <X className="h-5 w-5 text-red-500" />
+                        <span className="text-xs font-bold text-red-400 uppercase tracking-widest">{metadataError}</span>
+                      </div>
+                      <button onClick={loadMetadata} className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-[5px] text-[9px] font-bold uppercase tracking-widest transition-colors">
+                        Retry Sync
+                      </button>
+                    </div>
+                  )}
+                  
+                  {associatedTrack && (
+                    <div className="col-span-1 md:col-span-2 p-5 glass rounded-[10px]">
+                      <h4 className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-4">Associated Track Metadata</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest">BPM</span>
+                          <span className="text-[11px] font-bold text-white tracking-tight">{associatedTrack.bpm || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest">Key</span>
+                          <span className="text-[11px] font-bold text-white tracking-tight">{associatedTrack.key || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest">Bitrate</span>
+                          <span className="text-[11px] font-bold text-white tracking-tight">{associatedTrack.bitrate || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest">Duration</span>
+                          <span className="text-[11px] font-bold text-white tracking-tight">{Math.floor(associatedTrack.duration / 60)}:{String(associatedTrack.duration % 60).padStart(2, '0')}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {localNft.traits?.map((trait, i) => (
                     <div key={i} className="p-5 glass rounded-[10px] flex justify-between items-center group transition-all">
                       <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/40">{trait.trait_type}</span>
@@ -527,6 +625,48 @@ const NFTDetail: React.FC = () => {
                       <button onClick={handleAction} className="mt-8 px-10 py-4 bg-white/5 rounded-[10px] text-[9px] font-bold uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 transition-all ">Initiate Broadcast</button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {activeTab === 'exclusive' && isOwner && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="p-6 glass rounded-[10px] bg-purple-500/5 border border-purple-500/10">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Crown className="h-5 w-5 text-purple-500" />
+                      <h4 className="text-sm font-bold text-white uppercase tracking-widest">Holder-Only Archives</h4>
+                    </div>
+                    <p className="text-xs text-white/60 leading-relaxed mb-6">
+                      As the verified owner of this NFT protocol, you have unlocked access to the following exclusive sonic and visual artifacts.
+                    </p>
+                    <div className="grid grid-cols-1 gap-4">
+                      {localNft.exclusiveContent?.map((item) => (
+                        <a 
+                          key={item.id}
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-[10px] border border-white/5 transition-all group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-[10px] bg-purple-500/10 flex items-center justify-center text-purple-400">
+                              {item.type === 'video' && <Video className="h-5 w-5" />}
+                              {item.type === 'track' && <MusicIcon className="h-5 w-5" />}
+                              {item.type === 'image' && <ImageIcon className="h-5 w-5" />}
+                              {item.type === 'document' && <FileText className="h-5 w-5" />}
+                            </div>
+                            <div>
+                              <p className="text-[11px] font-bold text-white uppercase tracking-tight">{item.title}</p>
+                              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{item.type} artifact</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[9px] font-bold text-purple-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Access Protocol</span>
+                            <ExternalLink className="h-4 w-4 text-white/20 group-hover:text-purple-500 transition-colors" />
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

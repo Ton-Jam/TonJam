@@ -5,6 +5,7 @@ import { useAudio } from '@/context/AudioContext';
 import { MOCK_ARTISTS, APP_LOGO } from '@/constants';
 import { analyzeRelatedArtists } from '@/services/geminiService';
 import MintModal from './MintModal';
+import AddToPlaylistModal from './AddToPlaylistModal';
 
 interface TrackOptionsModalProps {
   track: Track;
@@ -13,8 +14,9 @@ interface TrackOptionsModalProps {
 }
 
 const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, onRemove }) => {
-  const { addNotification, addToQueue, setTrackToAddToPlaylist, playlists } = useAudio();
+  const { addNotification, addToQueue } = useAudio();
   const [showMintModal, setShowMintModal] = useState(false);
+  const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
   const [relatedArtists, setRelatedArtists] = useState<Artist[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
 
@@ -25,8 +27,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
         onClose();
         break;
       case 'playlist':
-        setTrackToAddToPlaylist(track);
-        onClose();
+        setShowAddToPlaylistModal(true);
         break;
       case 'tip':
         addNotification(`Tip protocol initiated for ${track.artist}`, 'success');
@@ -65,6 +66,10 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
 
   if (showMintModal) {
     return <MintModal track={track} onClose={() => { setShowMintModal(false); onClose(); }} />;
+  }
+
+  if (showAddToPlaylistModal) {
+    return <AddToPlaylistModal track={track} onClose={() => { setShowAddToPlaylistModal(false); onClose(); }} />;
   }
 
   return (

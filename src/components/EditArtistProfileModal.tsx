@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { UserPen, X, Twitter, Send, Music, Globe } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { UserPen, X, Twitter, Send, Music, Globe, Image as ImageIcon, Upload } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 
@@ -9,9 +9,10 @@ interface EditArtistProfileModalProps {
 }
 
 const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist, onClose }) => {
-  const { addNotification } = useAudio();
+  const { addNotification, setArtists } = useAudio();
   const [name, setName] = useState(artist.name);
   const [bio, setBio] = useState(artist.bio || '');
+  const [bannerUrl, setBannerUrl] = useState(artist.bannerUrl || '');
   const [socials, setSocials] = useState({
     x: artist.socials?.x || '',
     spotify: artist.socials?.spotify || '',
@@ -19,10 +20,35 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
     website: artist.socials?.website || '',
     telegram: artist.socials?.telegram || ''
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        addNotification("File too large. Max 5MB allowed.", "error");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBannerUrl(reader.result as string);
+        addNotification("Banner preview updated.", "success");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    /* In a real app, this would call an API */
+    
+    setArtists(prev => prev.map(a => a.id === artist.id ? {
+      ...a,
+      name,
+      bio,
+      bannerUrl: bannerUrl || a.bannerUrl,
+      socials
+    } : a));
+
     addNotification("Neural profile updated successfully.", "success");
     onClose();
   };
@@ -48,6 +74,38 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         </div>
         <form onSubmit={handleSave} className="space-y-8 max-h-[60vh] overflow-y-auto pr-4 no-scrollbar">
           <div className="space-y-6">
+            
+            {/* Banner Upload Section */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Profile Banner</label>
+              <div className="relative w-full h-32 rounded-[10px] overflow-hidden group border border-white/10 bg-white/5">
+                {bannerUrl ? (
+                  <img src={bannerUrl} alt="Banner Preview" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageIcon className="h-8 w-8 text-white/20" />
+                  </div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button 
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-[8px] text-[9px] font-bold text-white uppercase tracking-widest hover:bg-white/20 transition-all flex items-center gap-2"
+                  >
+                    <Upload className="h-3 w-3" /> Upload New Banner
+                  </button>
+                </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleBannerUpload} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+              </div>
+              <p className="text-[8px] text-white/30 ml-1">Recommended size: 1500x500px. Max 5MB.</p>
+            </div>
+
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Artist Name</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:border-purple-500/50 transition-all text-white" />

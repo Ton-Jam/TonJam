@@ -17,7 +17,10 @@ export interface Track {
   playCount?: number;
   streams?: number; // Alias for playCount used in UI
   likes?: number;
+  jamScore?: number;
   releaseDate?: string;
+  ipfsUrl?: string; // Decentralized metadata/audio link
+  cid?: string; // Content Identifier
 }
 
 export interface NFTTrait {
@@ -41,6 +44,14 @@ export interface NFTOffer {
   timestamp: string;
 }
 
+export interface ExclusiveContent {
+  id: string;
+  title: string;
+  type: 'video' | 'track' | 'image' | 'document';
+  url: string;
+  description?: string;
+}
+
 export interface NFTItem {
   id: string;
   trackId: string;
@@ -58,13 +69,16 @@ export interface NFTItem {
   minted?: number;
   isAuction?: boolean;
   contractAddress?: string;
-  royalty?: number; // percentage
+  royaltySplits?: { address: string, percentage: number }[];
   stems_available?: boolean;
   description?: string;
   traits?: NFTTrait[];
   attributes?: NFTTrait[]; // Alias for traits
   history?: NFTHistory[];
   offers?: NFTOffer[];
+  exclusiveContent?: ExclusiveContent[];
+  ipfsUrl?: string; // Decentralized metadata link
+  cid?: string; // Content Identifier
   // Auction specific fields
   listingType?: 'fixed' | 'auction';
   auctionStartTime?: string; // ISO string or timestamp
@@ -126,6 +140,8 @@ export interface Post {
   video?: string;
   trackId?: string;
   track?: Track; // Optional populated track
+  nftId?: string;
+  nft?: NFTItem; // Optional populated NFT
   likes: number;
   isLiked?: boolean;
   reposts?: number;

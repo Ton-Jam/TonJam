@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Satellite } from 'lucide-react';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
+import ArtistCard from '@/components/ArtistCard';
 import NFTCard from '@/components/NFTCard';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -106,7 +107,7 @@ const ExploreList: React.FC = () => {
           <div key={`${item.id}-${idx}`} className="min-w-[200px] sm:min-w-[240px] animate-in fade-in duration-500 slide-in-from-bottom-2">
             {type === 'tracks' && <TrackCard track={item} />}
             {type === 'nfts' && <NFTCard nft={item} />}
-            {type === 'artists' && <UserCard user={item} variant="portrait" />}
+            {type === 'artists' && <ArtistCard artist={item} />}
           </div>
         ))}
       </div>

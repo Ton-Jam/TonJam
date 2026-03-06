@@ -20,7 +20,8 @@ import {
   List, 
   Cpu, 
   ShieldAlert,
-  Flame
+  Flame,
+  Coins
 } from 'lucide-react';
 
 import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, TON_LOGO } from '@/constants';
@@ -35,6 +36,7 @@ import EditArtistProfileModal from '@/components/EditArtistProfileModal';
 import { useAudio } from '@/context/AudioContext';
 import { Artist, Track, Post } from '@/types';
 import { getArtistSonicDNA, findRelatedArtists } from '@/services/geminiService';
+import { useTonConnectUI } from '@tonconnect/ui-react';
 
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +56,32 @@ const ArtistProfile: React.FC = () => {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [editedBio, setEditedBio] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [tonConnectUI] = useTonConnectUI();
+
+  const handleTipArtist = async () => {
+    if (!tonConnectUI.connected) {
+      tonConnectUI.openModal();
+      return;
+    }
+    
+    try {
+      const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
+        messages: [
+          {
+            address: artist?.walletAddress || "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c", // Fallback to a dummy address if artist has no wallet
+            amount: "100000000", // 0.1 TON in nanoton
+          }
+        ]
+      };
+      
+      await tonConnectUI.sendTransaction(transaction);
+      addNotification(`Successfully tipped ${artist?.name} 0.1 TON!`, "success");
+    } catch (e) {
+      console.error(e);
+      addNotification("Tipping transaction cancelled or failed.", "error");
+    }
+  };
 
   const isOwnProfile = useMemo(() => id === userProfile.id, [id, userProfile.id]);
   const artist = useMemo(() => artists.find(a => a.id === id), [id, artists]);
@@ -281,8 +309,18 @@ const ArtistProfile: React.FC = () => {
               <button onClick={() => playAll(artistTracks)} className="px-6 py-2.5 electric-blue-bg text-white rounded-[10px] font-bold text-[8px] uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
                 <Play className="h-3 w-3" /> SYNC_CATALOG
               </button>
-              <button onClick={handleFollow} className={`px-6 py-2.5 rounded-[10px] font-bold text-[8px] uppercase tracking-widest transition-all active:scale-95 ${isFollowing ? 'bg-white/5 text-white/40' : 'bg-white text-black shadow-lg shadow-white/5'}`} >
-                {isFollowing ? 'SYNCED' : 'FOLLOW'}
+              <button 
+                onClick={handleFollow} 
+                className={`px-6 py-2.5 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-bold uppercase tracking-widest
+                  ${isFollowing 
+                    ? 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white' 
+                    : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20'
+                  }
+                `}
+                title={isFollowing ? "Unfollow" : "Follow"}
+              >
+                {isFollowing ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                {isFollowing ? 'Following' : 'Follow'}
               </button>
             </div>
           </div>

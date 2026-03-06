@@ -1,26 +1,20 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Play, ChevronRight, Zap, TrendingUp, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic } from 'lucide-react';
-import { MOCK_TRACKS, MOCK_NFTS } from '@/constants';
+import React, { useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Play, ChevronRight, Zap, TrendingUp, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc } from 'lucide-react';
+import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import ArtistCard from '@/components/ArtistCard';
+import PlaylistCard from '@/components/PlaylistCard';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
+import SectionHeader from '@/components/SectionHeader';
 import { useAudio } from '@/context/AudioContext';
 
-const HomeSection = ({ title, icon: Icon, link, children }: { title: string, icon: React.ElementType, link: string, children: React.ReactNode }) => {
+const HomeSection = ({ title, icon: Icon, link, subtitle, children }: { title: string, icon: React.ElementType, link?: string, subtitle?: string, children: React.ReactNode }) => {
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          <Icon className="w-5 h-5 text-blue-500" />
-          <h2 className="text-[18px] font-semibold text-white">{title}</h2>
-        </div>
-        <Link to={link} className="text-sm text-blue-500 hover:text-blue-400 font-medium">
-          More →
-        </Link>
-      </div>
-      <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-4 snap-x snap-mandatory">
+    <section className="space-y-6">
+      <SectionHeader title={title} subtitle={subtitle} viewAllLink={link} />
+      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
         {children}
       </div>
     </section>
@@ -55,54 +49,52 @@ const FEATURED_POSTS: CarouselItem[] = [
 ];
 
 const Home: React.FC = () => {
-  const { playAll, artists, userProfile } = useAudio();
+  const navigate = useNavigate();
+  const { playTrack, playAll, artists, userProfile, recentlyPlayed, getTrendingTracks, getTopNFTTracks, allPlaylists } = useAudio();
+  
+  const trendingTracks = useMemo(() => getTrendingTracks(), [getTrendingTracks]);
+  const topNFTTracks = useMemo(() => getTopNFTTracks(), [getTopNFTTracks]);
   
   // Data slices for different sections
   const recommendedNFTs = MOCK_NFTS.slice(0, 5);
-  const mostTradedNFTs = [...MOCK_NFTS].reverse().slice(0, 5);
-  const trendingNFTs = MOCK_NFTS.slice(1, 6);
-  const recentTracks = MOCK_TRACKS.slice(0, 5);
-  const mostBidNFTs = [...MOCK_NFTS].sort((a, b) => (b.offers?.length || 0) - (a.offers?.length || 0)).slice(0, 5);
   const newlyMintedNFTs = MOCK_NFTS.slice(2, 7);
   const recommendedArtists = artists.slice(0, 5);
-  const featuredPlaylist = MOCK_TRACKS.slice(1, 6);
 
   return (
-    <div className="py-4 lg:py-6 space-y-12 w-full">
+    <div className="p-4 lg:p-6 space-y-16 w-full pb-32">
       {/* Featured Sponsored Posts Carousel */}
       <AutoCarousel items={FEATURED_POSTS} />
 
       {/* Hero Section */}
-      <section className="relative rounded-[5px] overflow-hidden bg-gradient-to-br from-blue-900/40 to-black border border-white/5 p-8 lg:p-16 mx-4 lg:mx-6">
-        <div className="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent blur-3xl"></div>
-        </div>
+      <section className="relative rounded-[10px] overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-transparent z-0"></div>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
         
-        <div className="relative z-10 max-w-2xl space-y-6">
+        <div className="relative z-10 p-8 lg:p-20 max-w-3xl space-y-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em]">
             <Zap className="h-3 w-3" />
             Live on TON Blockchain
           </div>
           
-          <h1 className="text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-[0.9] text-white">
-            The Future of <span className="text-blue-500">Music</span> is Decentralized
+          <h1 className="text-5xl lg:text-8xl font-black uppercase tracking-tighter leading-[0.85] text-white">
+            The Future of <span className="text-blue-500">Music</span> is Here
           </h1>
           
-          <p className="text-lg text-white/60 leading-relaxed font-medium">
-            TonJam is the ultimate platform for artists and fans. Stream high-fidelity music, collect rare NFTs, and join the revolution on the TON blockchain.
+          <p className="text-lg lg:text-xl text-white/40 leading-relaxed font-medium max-w-xl">
+            Stream high-fidelity music, collect rare artifacts, and join the decentralized revolution on the TON blockchain.
           </p>
           
           <div className="flex flex-wrap gap-4 pt-4">
             <button 
               onClick={() => playAll(MOCK_TRACKS)}
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-[5px] transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3"
+              className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-[5px] transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 group/btn"
             >
-              <Play className="h-5 w-5 fill-white" />
+              <Play className="h-5 w-5 fill-white group-hover/btn:scale-110 transition-transform" />
               Start Listening
             </button>
             <Link 
               to="/marketplace"
-              className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-widest rounded-[5px] border border-white/10 transition-all flex items-center gap-3"
+              className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-widest rounded-[5px] border border-white/10 transition-all flex items-center gap-3"
             >
               <ShoppingBag className="h-5 w-5" />
               Explore NFTs
@@ -111,62 +103,128 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* 1. Recommended NFTs */}
-      <HomeSection title="Recommended NFTs" icon={Sparkles} link="/marketplace">
-        {recommendedNFTs.map(nft => (
-          <div key={`rec-nft-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-            <NFTCard nft={nft} />
-          </div>
-        ))}
-      </HomeSection>
+      {/* Recently Played */}
+      {recentlyPlayed.length > 0 && (
+        <HomeSection title="Jump Back In" subtitle="Pick up where you left off" icon={Clock}>
+          {recentlyPlayed.map(track => (
+            <div key={`recent-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+              <TrackCard track={track} />
+            </div>
+          ))}
+        </HomeSection>
+      )}
 
-      {/* 2. Most Traded NFTs */}
-      <HomeSection title="Most Traded NFTs" icon={Activity} link="/marketplace">
-        {mostTradedNFTs.map(nft => (
-          <div key={`traded-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-            <NFTCard nft={nft} />
-          </div>
-        ))}
-      </HomeSection>
-
-      {/* 3. Trending NFTs */}
-      <HomeSection title="Trending NFTs" icon={Flame} link="/marketplace">
-        {trendingNFTs.map(nft => (
-          <div key={`trend-nft-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-            <NFTCard nft={nft} />
-          </div>
-        ))}
-      </HomeSection>
-
-      {/* 4. Recently Listed Tracks */}
-      <HomeSection title="Recently Listed Tracks" icon={Clock} link="/discover">
-        {recentTracks.map(track => (
-          <div key={`recent-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+      {/* Trending Tracks */}
+      <HomeSection title="Trending Signals" subtitle="The hottest tracks on the network" icon={Flame} link="/discover">
+        {trendingTracks.map(track => (
+          <div key={`trend-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
             <TrackCard track={track} />
           </div>
         ))}
       </HomeSection>
 
-      {/* 5. Most Bid NFTs */}
-      <HomeSection title="Most Bid NFTs" icon={Gavel} link="/marketplace">
-        {mostBidNFTs.map(nft => (
-          <div key={`bid-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-            <NFTCard nft={nft} />
+      {/* Top Charts - List View */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="lg:col-span-2 space-y-6">
+          <SectionHeader title="Global Top 10" subtitle="Most streamed across the TON ecosystem" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {trendingTracks.slice(0, 10).map((track, idx) => (
+              <div 
+                key={`chart-${track.id}`} 
+                onClick={() => playTrack(track)}
+                className="flex items-center gap-4 group cursor-pointer p-2 rounded-[5px] hover:bg-white/5 transition-all"
+              >
+                <span className="text-2xl font-black italic text-white/10 group-hover:text-blue-500/40 transition-colors w-8 text-center">
+                  {idx + 1}
+                </span>
+                <div className="w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+                  <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold uppercase tracking-tight text-white truncate group-hover:text-blue-400 transition-colors">{track.title}</h4>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest truncate">{track.artist}</p>
+                </div>
+                <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                  {(track.playCount || 0).toLocaleString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <SectionHeader title="New Releases" subtitle="Fresh signals from the void" />
+          <div className="space-y-4">
+            {MOCK_TRACKS.slice(0, 5).map(track => (
+              <div 
+                key={`new-${track.id}`} 
+                onClick={() => playTrack(track)}
+                className="flex items-center gap-4 group cursor-pointer"
+              >
+                <div className="relative w-16 h-16 rounded-[5px] overflow-hidden flex-shrink-0">
+                  <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Play className="h-4 w-4 text-white fill-white" />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-bold uppercase tracking-tight text-white truncate">{track.title}</h4>
+                  <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate">{track.artist}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-white/5 rounded text-white/40 uppercase tracking-widest">
+                      {track.genre}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <Link to="/discover" className="block text-center py-3 border border-white/5 rounded-[5px] text-[10px] font-bold text-white/40 uppercase tracking-widest hover:bg-white/5 hover:text-white transition-all">
+              View All New Music
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Curated Playlists */}
+      <HomeSection title="Curated for You" subtitle="Hand-picked by TonJam editors" icon={Sparkles} link="/discover">
+        {CURATED_PLAYLISTS.map(playlist => (
+          <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-64 md:w-72 snap-start">
+            <PlaylistCard playlist={playlist} onClick={() => navigate(`/library`)} />
           </div>
         ))}
       </HomeSection>
 
-      {/* 6. Newly Minted NFTs */}
-      <HomeSection title="Newly Minted NFTs" icon={PlusCircle} link="/marketplace">
-        {newlyMintedNFTs.map(nft => (
-          <div key={`minted-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-            <NFTCard nft={nft} />
+      {/* Genre Grid - Quick Access */}
+      <section className="space-y-6">
+        <SectionHeader title="Explore Genres" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {GENRES.map(genre => (
+            <button 
+              key={genre.id} 
+              onClick={() => navigate(`/discover?search=${genre.name}`)}
+              className="relative h-24 rounded-[10px] overflow-hidden group transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-20 group-hover:opacity-40 transition-opacity`}></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 z-10">
+                <span className="text-2xl">{genre.icon}</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">{genre.name}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Top NFT Sales */}
+      <HomeSection title="NFT Alpha" subtitle="Highest valued music artifacts" icon={Activity} link="/marketplace">
+        {topNFTTracks.map(track => (
+          <div key={`nft-alpha-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+            <TrackCard track={track} />
           </div>
         ))}
       </HomeSection>
 
-      {/* 7. Jam Recommended Artist */}
-      <HomeSection title="Jam Recommended Artists" icon={UserCheck} link="/explore/artists">
+      {/* Recommended Artists */}
+      <HomeSection title="Rising Stars" subtitle="Artists you should follow" icon={UserCheck} link="/discover">
         {recommendedArtists.map(artist => (
           <div key={`artist-${artist.id}`} className="flex-shrink-0 w-48 sm:w-56 snap-start">
             <ArtistCard artist={artist} />
@@ -174,49 +232,66 @@ const Home: React.FC = () => {
         ))}
       </HomeSection>
 
-      {/* 8. Featured Playlist */}
-      <HomeSection title="Featured Playlist" icon={ListMusic} link="/discover">
-        {featuredPlaylist.map(track => (
-          <div key={`playlist-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-            <TrackCard track={track} />
+      {/* Marketplace Highlights */}
+      <HomeSection title="New in Marketplace" subtitle="Freshly minted music NFTs" icon={PlusCircle} link="/marketplace">
+        {newlyMintedNFTs.map(nft => (
+          <div key={`minted-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+            <NFTCard nft={nft} />
           </div>
         ))}
       </HomeSection>
 
-      {/* Community Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-4 lg:px-6">
-        <div className="border border-white/5 rounded-[5px] p-8 space-y-6 bg-white/[0.02]">
+      {/* Community & Artist CTA Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="glass border border-blue-500/10 bg-white/[0.02] p-10 rounded-[10px] space-y-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Radio className="h-32 w-32 text-blue-500" />
+          </div>
           <div className="w-12 h-12 rounded-[5px] bg-blue-600/20 flex items-center justify-center text-blue-500">
             <Music2 className="h-6 w-6" />
           </div>
-          <h3 className="text-3xl font-bold uppercase tracking-tighter text-white">Join the JamSpace</h3>
-          <p className="text-white/40 leading-relaxed">
-            Connect with other music lovers, share your favorite tracks, and discover new sounds in our community-driven JamSpace.
+          <h3 className="text-4xl font-bold uppercase tracking-tighter text-white">Join the JamSpace</h3>
+          <p className="text-white/40 leading-relaxed max-w-md">
+            Connect with other music lovers, share your favorite tracks, and discover new sounds in our community-driven social feed.
           </p>
-          <Link to="/jamspace" className="inline-flex items-center gap-2 text-sm font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">
-            Enter JamSpace <ChevronRight className="h-4 w-4" />
+          <Link to="/jamspace" className="inline-flex items-center gap-2 text-xs font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors group/link">
+            Enter JamSpace <ChevronRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </div>
         
-        <div className="border border-white/5 rounded-[5px] p-8 space-y-6 bg-white/[0.02]">
+        <div className="glass border border-purple-500/10 bg-white/[0.02] p-10 rounded-[10px] space-y-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Disc className="h-32 w-32 text-purple-500" />
+          </div>
           <div className="w-12 h-12 rounded-[5px] bg-purple-600/20 flex items-center justify-center text-purple-500">
             <TrendingUp className="h-6 w-6" />
           </div>
-          <h3 className="text-3xl font-bold uppercase tracking-tighter text-white">
-            {userProfile.isVerifiedArtist ? 'Artist Dashboard' : 'Become an Artist'}
+          <h3 className="text-4xl font-bold uppercase tracking-tighter text-white">
+            {userProfile.isVerifiedArtist ? 'Artist Hub' : 'Mint Your Legacy'}
           </h3>
-          <p className="text-white/40 leading-relaxed">
+          <p className="text-white/40 leading-relaxed max-w-md">
             {userProfile.isVerifiedArtist 
-              ? 'Are you a creator? Manage your music, track your earnings, and connect with your fans through our powerful artist tools.'
-              : 'Join the revolution. Upload your music, mint limited edition NFTs, and start earning royalties directly on the TON blockchain.'}
+              ? 'Manage your music, track your earnings, and connect with your fans through our powerful artist tools.'
+              : 'Join the revolution. Upload your music, mint limited edition NFTs, and start earning royalties directly on TON.'}
           </p>
           <Link 
             to={userProfile.isVerifiedArtist ? '/artist-dashboard' : '/artist-onboarding'} 
-            className="inline-flex items-center gap-2 text-sm font-bold text-purple-500 uppercase tracking-widest hover:text-purple-400 transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-bold text-purple-500 uppercase tracking-widest hover:text-purple-400 transition-colors group/link"
           >
-            {userProfile.isVerifiedArtist ? 'Go to Dashboard' : 'Start Onboarding'} <ChevronRight className="h-4 w-4" />
+            {userProfile.isVerifiedArtist ? 'Go to Dashboard' : 'Start Onboarding'} <ChevronRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </div>
+      </section>
+
+      {/* Decentralized Footer Info */}
+      <section className="py-12 border-t border-white/5 flex flex-col items-center text-center space-y-4">
+        <div className="flex items-center gap-2 text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">
+          <Globe className="h-3 w-3" />
+          Secured by TON Blockchain
+        </div>
+        <p className="text-[10px] text-white/10 uppercase tracking-widest">
+          TonJam v2.6.4 • Decentralized Music Protocol
+        </p>
       </section>
     </div>
   );

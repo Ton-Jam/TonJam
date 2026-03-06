@@ -18,23 +18,27 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist }) => {
     toggleFollowUser(artist.id);
   };
 
+  const handleCardClick = () => {
+    navigate(`/artist/${artist.id}`);
+  };
+
   return (
     <div 
-      onClick={() => navigate(`/artist/${artist.id}`)}
-      className="group flex flex-col items-center p-4 bg-white/5 border border-white/10 rounded-[10px] hover:bg-white/10 transition-all cursor-pointer text-center"
+      onClick={handleCardClick}
+      className="group flex flex-col items-center cursor-pointer text-center h-full"
     >
-      <div className="relative w-20 h-20 mb-3">
+      <div className="relative w-full aspect-square max-w-[120px] mb-4 mx-auto">
         <div className="w-full h-full rounded-full overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300 relative">
           <img 
             src={artist.avatarUrl} 
             alt={artist.name} 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 pointer-events-none mix-blend-overlay" />
         </div>
+        
         {artist.verified && (
-          <div className="absolute bottom-0 right-0 bg-black rounded-full p-0.5 z-10">
-            <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/20" />
+          <div className="absolute bottom-1 right-1 bg-black rounded-full p-0.5 z-10">
+            <CheckCircle2 className="w-4 h-4 text-blue-500 fill-blue-500/20" />
           </div>
         )}
       </div>
@@ -43,13 +47,13 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist }) => {
         {artist.name}
       </h3>
       
-      <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-4">
+      <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-3">
         {artist.followers.toLocaleString()} Followers
       </p>
       
       <button 
         onClick={handleFollowClick}
-        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all
+        className={`mt-auto px-4 py-1.5 rounded-full flex items-center justify-center gap-1.5 transition-all text-[9px] font-bold uppercase tracking-widest
           ${isFollowing 
             ? 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white' 
             : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20'
@@ -57,7 +61,8 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist }) => {
         `}
         title={isFollowing ? "Unfollow" : "Follow"}
       >
-        {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+        {isFollowing ? <UserCheck className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
+        {isFollowing ? 'Following' : 'Follow'}
       </button>
     </div>
   );

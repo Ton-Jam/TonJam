@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification, followedUserIds, toggleFollowUser } = useAudio();
+  const { addNotification, followedUserIds, toggleFollowUser, posts, allTracks, allNFTs } = useAudio();
   const [post, setPost] = useState<Post | null>(null);
   const [liked, setLiked] = useState(false);
   const [reposted, setReposted] = useState(false);
@@ -23,13 +23,16 @@ const PostDetail: React.FC = () => {
   const REACTION_EMOJIS = ['🔥', '💎', '🚀', '🎧', '⚡'];
 
   useEffect(() => {
-    const foundPost = MOCK_POSTS.find(p => p.id === id);
+    const foundPost = posts.find(p => p.id === id);
     if (foundPost) {
       setPost(foundPost);
       setLikesCount(foundPost.likes);
       setComments(foundPost.commentList || []);
+      setLiked(foundPost.isLiked || false);
+      setReposted(foundPost.isReposted || false);
+      setRepostsCount(foundPost.reposts || 0);
     }
-  }, [id]);
+  }, [id, posts]);
 
   if (!post) {
     return (
@@ -42,8 +45,9 @@ const PostDetail: React.FC = () => {
 
   const isFollowing = followedUserIds.includes(post.userId);
   const isMe = post.userId === MOCK_USER.id;
-  const track = post.trackId ? MOCK_TRACKS.find(t => t.id === post.trackId) : null;
-  const artist = MOCK_ARTISTS.find(a => a.name === post.userName);
+  const track = post.trackId ? allTracks.find(t => t.id === post.trackId) : post.track;
+  const nft = post.nftId ? allNFTs.find(n => n.id === post.nftId) : post.nft;
+  const artist = MOCK_ARTISTS.find(a => a.name === post.userName || a.id === post.userId);
 
   const handleLike = () => {
     if (liked) {
@@ -104,6 +108,17 @@ const PostDetail: React.FC = () => {
     );
   };
 
+  const handleCommentProfileClick = (e: React.MouseEvent, commentUserId: string) => {
+    e.stopPropagation();
+    if (commentUserId === MOCK_USER.id) {
+      navigate('/profile');
+    } else if (MOCK_ARTISTS.some(a => a.id === commentUserId)) {
+      navigate(`/artist/${commentUserId}`);
+    } else {
+      navigate(`/user/${commentUserId}`);
+    }
+  };
+
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     addNotification('Signal link copied to buffer', 'success');
@@ -139,7 +154,7 @@ const PostDetail: React.FC = () => {
 
           {/* User Identity Section */}
           <div className="flex items-center gap-6 mb-10">
-            <div className="relative flex-shrink-0 cursor-pointer group/avatar" onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : null}>
+            <div className="relative flex-shrink-0 cursor-pointer group/avatar" onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : navigate(`/user/${post.userId}`)}>
               <img src={post.userAvatar} className="w-16 h-16 rounded-full group-hover/avatar:-blue-500 transition-all object-cover shadow-2xl" alt={post.userName} />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full -black flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.6)]">
                 <Zap className="h-3 w-3 text-white fill-current" />
@@ -147,7 +162,12 @@ const PostDetail: React.FC = () => {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-1">
-                <h4 className="font-bold text-lg text-white uppercase tracking-tight truncate"> {post.userName} </h4>
+                <h4 
+                  className="font-bold text-lg text-white uppercase tracking-tight truncate cursor-pointer hover:text-blue-400 hover:underline inline-block"
+                  onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : navigate(`/user/${post.userId}`)}
+                > 
+                  {post.userName} 
+                </h4>
                 {artist?.verified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
                 {!isMe && (
                   <button onClick={() => toggleFollowUser(post.userId)} className={`text-[9px] font-bold uppercase tracking-widest transition-all px-3 py-1 rounded-full ${isFollowing ? 'text-blue-500 -blue-500/20 bg-blue-500/5' : 'text-white/40 hover:text-blue-400 hover:-blue-400/20 bg-white/5'}`}>
@@ -207,6 +227,44 @@ const PostDetail: React.FC = () => {
             </div>
           )}
 
+          {nft && (
+            <div className="mb-10 p-8 rounded-[10px] glass border border-blue-500/10 bg-gradient-to-br from-blue-600/10 to-purple-600/10 relative group/nft overflow-hidden cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
+              <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover/nft:opacity-100 transition-opacity"></div>
+              <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                <div className="relative w-40 h-40 rounded-[10px] overflow-hidden shadow-2xl flex-shrink-0">
+                  <img src={nft.imageUrl} className="w-full h-full object-cover" alt={nft.title} />
+                  <div className="absolute top-2 right-2">
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Zap className="h-3 w-3 text-white fill-current" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                    <span className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em]">Sonic Artifact Acquired</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white uppercase tracking-tighter mb-2">{nft.title}</h3>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-6">Creator: {nft.creator}</p>
+                  
+                  <div className="flex items-center justify-center md:justify-start gap-6">
+                    <div>
+                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Valuation</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl font-bold text-white tracking-tighter">{nft.price}</span>
+                        <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">TON</span>
+                      </div>
+                    </div>
+                    <div className="w-px h-10 bg-white/10"></div>
+                    <div>
+                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Rarity</p>
+                      <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Legendary</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Interaction Bar */}
           <div className="flex items-center gap-12 pt-8 -t mb-12">
             <button onClick={handleLike} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 group/like ${liked ? 'text-red-500' : 'text-white/20 hover:text-red-400'}`}>
@@ -235,7 +293,12 @@ const PostDetail: React.FC = () => {
           <div className="space-y-10">
             <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] mb-8">Neural Responses</h3>
             <form onSubmit={handleAddComment} className="flex gap-6 mb-12">
-              <img src={MOCK_USER.avatar} className="w-10 h-10 rounded-full shadow-xl" alt="" />
+              <img 
+                src={MOCK_USER.avatar} 
+                className="w-10 h-10 rounded-full shadow-xl cursor-pointer hover:opacity-80 transition-opacity" 
+                alt="" 
+                onClick={() => navigate('/profile')}
+              />
               <div className="flex-1 relative">
                 <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit your response..." className="w-full bg-white/5 rounded-[10px] py-3 px-6 text-sm outline-none focus:-blue-500/50 transition-all text-white shadow-inner" />
                 <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-blue-600 rounded-[10px] text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">
@@ -248,10 +311,20 @@ const PostDetail: React.FC = () => {
               <AnimatePresence mode="popLayout">
                 {comments.map(comment => (
                   <motion.div layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} key={comment.id} className="flex gap-6 group/comment">
-                    <img src={comment.userAvatar} className="w-10 h-10 rounded-full flex-shrink-0 shadow-lg object-cover" alt="" />
+                    <img 
+                      src={comment.userAvatar} 
+                      className="w-10 h-10 rounded-full flex-shrink-0 shadow-lg object-cover cursor-pointer" 
+                      alt="" 
+                      onClick={(e) => handleCommentProfileClick(e, comment.userId)}
+                    />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h5 className="text-[11px] font-bold text-white uppercase tracking-tight">{comment.userName}</h5>
+                        <h5 
+                          className="text-[11px] font-bold text-white uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block"
+                          onClick={(e) => handleCommentProfileClick(e, comment.userId)}
+                        >
+                          {comment.userName}
+                        </h5>
                         <span className="text-[9px] text-white/20 font-bold uppercase tracking-widest">{comment.timestamp}</span>
                       </div>
                       <p className="text-[13px] text-white/70 leading-relaxed mb-4">{comment.content}</p>

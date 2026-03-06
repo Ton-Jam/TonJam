@@ -18,7 +18,8 @@ import {
   CheckCircle2,
   ListMusic,
   MessageSquare,
-  Music2
+  Music2,
+  Mic2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_ARTISTS } from '@/constants';
@@ -35,9 +36,9 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
     if (!ctx) return;
 
     let animationFrameId: number;
-    const bars = 32;
-    const heights = Array(bars).fill(2);
-    const targets = Array(bars).fill(2);
+    const bars = 64; // Increased resolution
+    const heights = Array(bars).fill(0);
+    const targets = Array(bars).fill(0);
     let phase = 0;
 
     const dataArray = analyser
@@ -60,36 +61,49 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
         analyser.getByteFrequencyData(dataArray);
       }
 
+      // Center-out visualization
+      const centerX = canvas.width / 2;
+
       for (let i = 0; i < bars; i++) {
         if (isPlaying) {
           if (analyser && dataArray) {
-            const dataIndex = Math.floor(i * (dataArray.length / bars) * 0.5);
+            // Map to frequency data, focusing on bass/mids
+            const dataIndex = Math.floor(i * (dataArray.length / bars) * 0.8);
             const value = dataArray[dataIndex] || 0;
-            targets[i] = 2 + (value / 255) * (canvas.height * 0.6);
+            targets[i] = 4 + (value / 255) * (canvas.height * 0.8);
           } else {
-            const wave = Math.sin(phase + i * 0.2) * 0.5 + 0.5;
-            if (Math.random() > 0.6) {
-              targets[i] =
-                2 +
-                wave * (canvas.height * 0.3) +
-                Math.random() * (canvas.height * 0.2);
+            // Fallback animation
+            const wave = Math.sin(phase + i * 0.15) * 0.5 + 0.5;
+            if (Math.random() > 0.5) {
+               targets[i] = 4 + wave * (canvas.height * 0.4) + Math.random() * (canvas.height * 0.3);
             }
           }
         } else {
-          targets[i] = 2;
+          targets[i] = 4;
         }
 
-        heights[i] += (targets[i] - heights[i]) * 0.2;
-        const h = Math.max(2, heights[i]);
+        // Smooth interpolation
+        heights[i] += (targets[i] - heights[i]) * 0.15;
+        
+        const h = Math.max(4, heights[i]);
+        
+        // Draw mirrored bars from center
+        const xOffset = i * width;
+        
+        // Gradient fill
+        const gradient = ctx.createLinearGradient(0, canvas.height - h, 0, canvas.height);
+        gradient.addColorStop(0, '#60a5fa'); // blue-400
+        gradient.addColorStop(1, '#2563eb'); // blue-600
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        
+        // Rounded caps
+        const barWidth = Math.max(2, width - 2);
         const x = i * width;
         const y = canvas.height - h;
-
-        ctx.fillStyle = "#3b82f6";
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#3b82f6";
-        ctx.beginPath();
-        const barWidth = Math.max(2, width - 3);
-        ctx.roundRect(x + (width - barWidth) / 2, y, barWidth, h, [3, 3, 0, 0]);
+        
+        ctx.roundRect(x + (width - barWidth) / 2, y, barWidth, h, [4, 4, 0, 0]);
         ctx.fill();
       }
       animationFrameId = requestAnimationFrame(draw);
@@ -104,8 +118,39 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
   return (
     <canvas
       ref={canvasRef}
-      className="w-full max-w-[240px] h-[30px] opacity-80 mix-blend-screen"
+      className="w-full h-[60px] opacity-90 mix-blend-screen mt-4"
     />
+  );
+};
+
+const LyricsView: React.FC<{ trackId: string }> = ({ trackId }) => {
+  // Mock lyrics with timing
+  const lyrics = [
+    { time: 0, text: "Frequencies locked, we're forging the soul" },
+    { time: 4, text: "Digital diamonds in a decentralized bowl" },
+    { time: 8, text: "TON blockchain rhythm, heart under control" },
+    { time: 12, text: "Decentralized beats, we're taking the toll" },
+    { time: 16, text: "..." },
+    { time: 20, text: "Circuit board veins, electric desire" },
+    { time: 24, text: "Setting the metaverse completely on fire" },
+    { time: 28, text: "No intermediaries, we're taking it higher" },
+    { time: 32, text: "The future of music, the ultimate choir" },
+  ];
+
+  return (
+    <div className="w-full h-[400px] overflow-y-auto no-scrollbar py-10 px-4 space-y-8 text-center mask-image-gradient">
+      {lyrics.map((line, i) => (
+        <motion.p 
+          key={i}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.1 }}
+          className={`text-2xl font-bold uppercase tracking-tighter leading-tight ${i === 1 ? 'text-blue-400 scale-110' : 'text-white/40 hover:text-white transition-colors'}`}
+        >
+          {line.text}
+        </motion.p>
+      ))}
+    </div>
   );
 };
 
@@ -133,7 +178,8 @@ const FullPlayer: React.FC = () => {
     setVolume,
     isMuted,
     toggleMute,
-    userProfile
+    userProfile,
+    addNotification
   } = useAudio();
 
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments'>('player');
@@ -160,6 +206,30 @@ const FullPlayer: React.FC = () => {
   const isLiked = likedTrackIds.includes(currentTrack.id);
   const artistData = MOCK_ARTISTS.find(a => a.id === currentTrack.artistId);
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/track/${currentTrack.id}`;
+    const shareData = {
+      title: `${currentTrack.title} by ${currentTrack.artist}`,
+      text: `Check out this track on TonJam: ${currentTrack.title}`,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        addNotification('Shared successfully!', 'success');
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        addNotification('Link copied to clipboard!', 'success');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+      if ((err as Error).name !== 'AbortError') {
+        addNotification('Failed to share track.', 'error');
+      }
+    }
+  };
+
   return (
     <motion.div 
       initial={{ y: '100%' }}
@@ -170,7 +240,7 @@ const FullPlayer: React.FC = () => {
       ref={containerRef}
     >
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-[#060c1a] border-b border-white/5">
+      <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-[#060c1a]/90 backdrop-blur-md border-b border-white/5">
         <button 
           onClick={() => setFullPlayerOpen(false)}
           className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition-all"
@@ -178,25 +248,28 @@ const FullPlayer: React.FC = () => {
           <ChevronDown className="h-6 w-6" />
         </button>
         <div className="text-center">
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mb-1">Now Playing</p>
-          <div className="flex gap-2 bg-white/5 p-1 rounded-full">
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mb-2">Now Playing</p>
+          <div className="flex gap-1 bg-white/5 p-1 rounded-full">
             <button 
               onClick={() => setActiveView('player')}
-              className={`px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'player' ? 'bg-blue-600 text-white' : 'text-white/40 hover:text-white'}`}
+              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'player' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
+              title="Player"
             >
-              Player
+              <Music2 className="h-4 w-4" />
             </button>
             <button 
               onClick={() => setActiveView('lyrics')}
-              className={`px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'lyrics' ? 'bg-blue-600 text-white' : 'text-white/40 hover:text-white'}`}
+              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'lyrics' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
+              title="Lyrics"
             >
-              Lyrics
+              <Mic2 className="h-4 w-4" />
             </button>
             <button 
               onClick={() => setActiveView('comments')}
-              className={`px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'comments' ? 'bg-blue-600 text-white' : 'text-white/40 hover:text-white'}`}
+              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'comments' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
+              title="Feed"
             >
-              Feed
+              <MessageSquare className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -207,27 +280,38 @@ const FullPlayer: React.FC = () => {
 
       <div className="max-w-xl mx-auto px-8 pb-32">
         {/* Main Player Section */}
-        <div className="flex flex-col items-center pt-8 mb-12">
+        <div className="flex flex-col items-center pt-8 mb-8">
           {/* Content Switcher */}
-          <div className="w-full mb-12 min-h-[400px] flex flex-col items-center justify-center">
+          <div className="w-full mb-8 min-h-[400px] flex flex-col items-center justify-center">
             <AnimatePresence mode="wait">
               {activeView === 'player' && (
                 <motion.div 
                   key="player"
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
                   className="w-full flex flex-col items-center"
                 >
-                  {/* Album Art */}
-                  <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.8)] mb-8 relative group">
-                    <img 
-                      src={currentTrack.coverUrl} 
-                      alt={currentTrack.title} 
-                      className={`w-full h-full object-cover transition-transform duration-[20s] ease-linear ${isPlaying ? 'scale-110' : 'scale-100'}`}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                  </div>
+                  {/* Album Art with Track Transition */}
+                  <AnimatePresence mode="wait">
+                    <motion.div 
+                      key={currentTrack.id}
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -50 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                      className="w-full aspect-square rounded-2xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.6)] mb-8 relative group"
+                    >
+                      <img 
+                        src={currentTrack.coverUrl} 
+                        alt={currentTrack.title} 
+                        className={`w-full h-full object-cover transition-transform duration-[20s] ease-linear ${isPlaying ? 'scale-110' : 'scale-100'}`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#060c1a] via-transparent to-transparent opacity-60"></div>
+                    </motion.div>
+                  </AnimatePresence>
+                  
                   <AudioVisualizer isPlaying={isPlaying} />
                 </motion.div>
               )}
@@ -238,20 +322,9 @@ const FullPlayer: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="w-full h-[400px] overflow-y-auto no-scrollbar py-10 px-4 space-y-8 text-center"
+                  className="w-full"
                 >
-                  <p className="text-2xl font-bold text-white uppercase tracking-tighter leading-tight">
-                    Frequencies locked, we're forging the soul
-                  </p>
-                  <p className="text-2xl font-bold text-blue-400 uppercase tracking-tighter leading-tight">
-                    Digital diamonds in a decentralized bowl
-                  </p>
-                  <p className="text-2xl font-bold text-white/40 uppercase tracking-tighter leading-tight">
-                    TON blockchain rhythm, heart under control
-                  </p>
-                  <p className="text-2xl font-bold text-white/20 uppercase tracking-tighter leading-tight">
-                    Decentralized beats, we're taking the toll
-                  </p>
+                  <LyricsView trackId={currentTrack.id} />
                 </motion.div>
               )}
 
@@ -295,29 +368,37 @@ const FullPlayer: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          {/* Track Info */}
-          <div className="w-full flex items-center justify-between mb-10">
-            <div className="min-w-0">
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tighter uppercase truncate mb-2">{currentTrack.title}</h2>
-              <button 
-                onClick={() => {
-                  setFullPlayerOpen(false);
-                  navigate(`/artist/${currentTrack.artistId}`);
-                }}
-                className="text-lg text-blue-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
-              >
-                {currentTrack.artist}
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => toggleLikeTrack(currentTrack.id)}
-                className={`p-3 rounded-full transition-all ${isLiked ? 'text-red-500 bg-red-500/10' : 'text-white/20 hover:text-white bg-white/5'}`}
-              >
-                <Heart className={`h-6 w-6 ${isLiked ? 'fill-current' : ''}`} />
-              </button>
-            </div>
-          </div>
+          {/* Track Info with Transition */}
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={currentTrack.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full flex items-center justify-between mb-8"
+            >
+              <div className="min-w-0">
+                <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tighter uppercase truncate mb-2">{currentTrack.title}</h2>
+                <button 
+                  onClick={() => {
+                    setFullPlayerOpen(false);
+                    navigate(`/artist/${currentTrack.artistId}`);
+                  }}
+                  className="text-lg text-blue-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
+                >
+                  {currentTrack.artist}
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => toggleLikeTrack(currentTrack.id)}
+                  className={`p-3 rounded-full transition-all ${isLiked ? 'text-red-500 bg-red-500/10' : 'text-white/20 hover:text-white bg-white/5'}`}
+                >
+                  <Heart className={`h-6 w-6 ${isLiked ? 'fill-current' : ''}`} />
+                </button>
+              </div>
+            </motion.div>
+          </AnimatePresence>
 
           {/* Progress Bar */}
           <div className="w-full mb-10 group">
@@ -342,44 +423,42 @@ const FullPlayer: React.FC = () => {
           </div>
 
           {/* Controls */}
-          <div className="w-full flex items-center justify-between mb-12">
+          <div className="w-full flex items-center justify-center gap-8 mb-12">
             <button 
               onClick={toggleShuffle}
-              className={`p-3 rounded-full transition-all ${isShuffle ? 'text-blue-400 bg-blue-400/10' : 'text-white/20 hover:text-white'}`}
+              className={`p-3 rounded-full transition-all ${isShuffle ? 'text-blue-400' : 'text-white/20 hover:text-white'}`}
             >
               <Shuffle className="h-5 w-5" />
             </button>
             
-            <div className="flex items-center gap-8">
-              <button 
-                onClick={prevTrack}
-                className="p-2 text-white/60 hover:text-white transition-all active:scale-90"
-              >
-                <SkipBack className="h-8 w-8 fill-current" />
-              </button>
-              
-              <button 
-                onClick={togglePlay}
-                className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-blue-600/40 text-white"
-              >
-                {isPlaying ? (
-                  <Pause className="h-10 w-10 fill-current" />
-                ) : (
-                  <Play className="h-10 w-10 fill-current ml-1" />
-                )}
-              </button>
-              
-              <button 
-                onClick={nextTrack}
-                className="p-2 text-white/60 hover:text-white transition-all active:scale-90"
-              >
-                <SkipForward className="h-8 w-8 fill-current" />
-              </button>
-            </div>
+            <button 
+              onClick={prevTrack}
+              className="p-2 text-white/60 hover:text-white transition-all active:scale-90"
+            >
+              <SkipBack className="h-8 w-8 fill-current" />
+            </button>
+            
+            <button 
+              onClick={togglePlay}
+              className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-blue-600/40 text-white"
+            >
+              {isPlaying ? (
+                <Pause className="h-10 w-10 fill-current" />
+              ) : (
+                <Play className="h-10 w-10 fill-current ml-1" />
+              )}
+            </button>
+            
+            <button 
+              onClick={nextTrack}
+              className="p-2 text-white/60 hover:text-white transition-all active:scale-90"
+            >
+              <SkipForward className="h-8 w-8 fill-current" />
+            </button>
             
             <button 
               onClick={toggleRepeat}
-              className={`p-3 rounded-full transition-all ${isRepeat ? 'text-blue-400 bg-blue-400/10' : 'text-white/20 hover:text-white'}`}
+              className={`p-3 rounded-full transition-all ${isRepeat ? 'text-blue-400' : 'text-white/20 hover:text-white'}`}
             >
               <Repeat className="h-5 w-5" />
             </button>
@@ -388,19 +467,19 @@ const FullPlayer: React.FC = () => {
           {/* Secondary Actions */}
           <div className="w-full grid grid-cols-4 gap-4 mb-12">
             <button className="flex flex-col items-center gap-2 group">
-              <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-white/10 group-hover:text-white transition-all">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white/40 group-hover:text-white transition-all">
                 <PlusCircle className="h-5 w-5" />
               </div>
               <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/40">Add</span>
             </button>
             <button className="flex flex-col items-center gap-2 group">
-              <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-amber-500/20 group-hover:text-amber-500 transition-all">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white/40 group-hover:text-amber-500 transition-all">
                 <Gem className="h-5 w-5" />
               </div>
               <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/40">Mint</span>
             </button>
-            <button className="flex flex-col items-center gap-2 group">
-              <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-white/10 group-hover:text-white transition-all">
+            <button onClick={handleShare} className="flex flex-col items-center gap-2 group">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white/40 group-hover:text-white transition-all">
                 <Share2 className="h-5 w-5" />
               </div>
               <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/40">Share</span>
@@ -409,7 +488,7 @@ const FullPlayer: React.FC = () => {
               onClick={() => setShowQueue(!showQueue)}
               className={`flex flex-col items-center gap-2 group ${showQueue ? 'text-blue-500' : ''}`}
             >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${showQueue ? 'bg-blue-500/20 text-blue-500' : 'bg-white/5 text-white/40 group-hover:bg-white/10 group-hover:text-white'}`}>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${showQueue ? 'text-blue-500' : 'text-white/40 group-hover:text-white'}`}>
                 <ListMusic className="h-5 w-5" />
               </div>
               <span className={`text-[8px] font-bold uppercase tracking-widest ${showQueue ? 'text-blue-500' : 'text-white/20 group-hover:text-white/40'}`}>Queue</span>

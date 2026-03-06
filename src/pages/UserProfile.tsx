@@ -10,7 +10,7 @@ import {
   Gem
 } from 'lucide-react';
 
-import { MOCK_USERS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS } from '@/constants';
+import { MOCK_USERS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import SocialFeed from '@/components/SocialFeed';
@@ -20,7 +20,7 @@ import { UserProfile as UserProfileType } from '@/types';
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { allTracks, allNFTs, userProfile, toggleFollowUser } = useAudio();
+  const { allTracks, allNFTs, userProfile, toggleFollowUser, followedUserIds } = useAudio();
   
   const [user, setUser] = useState<UserProfileType | null>(null);
   const [activeTab, setActiveTab] = useState<'inventory' | 'activity' | 'network'>('inventory');
@@ -43,8 +43,8 @@ const UserProfile: React.FC = () => {
   }, [id, userProfile.id, navigate]);
 
   const isFollowing = useMemo(() => {
-    return userProfile.friends?.includes(id || '') || false;
-  }, [userProfile.friends, id]);
+    return followedUserIds.includes(id || '');
+  }, [followedUserIds, id]);
 
   const handleFollow = () => {
     if (id) {
@@ -244,12 +244,58 @@ const UserProfile: React.FC = () => {
           )}
 
           {activeTab === 'network' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="glass p-12 rounded-[10px] border border-white/5 text-center flex flex-col items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                  <Users className="w-8 h-8 text-white/20" />
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
+              {/* Followed Artists */}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.5em] flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    Followed Artists
+                  </h3>
                 </div>
-                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Network data encrypted</p>
+                
+                {user.followedArtists && user.followedArtists.length > 0 ? (
+                  <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+                     {user.followedArtists.map(artistId => {
+                        const artist = MOCK_ARTISTS.find(a => a.id === artistId);
+                        if (!artist) return null;
+                        return (
+                          <div key={artist.id} className="min-w-[200px] sm:min-w-[240px]">
+                             <div 
+                                onClick={() => navigate(`/artist/${artist.id}`)}
+                                className="flex flex-col items-center text-center p-4 rounded-[10px] border border-white/5 hover:bg-white/5 transition-all cursor-pointer group"
+                              >
+                                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white/5 group-hover:border-blue-500/50 transition-all mb-3">
+                                  <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                </div>
+                                <h4 className="text-xs font-bold text-white uppercase tracking-tight group-hover:text-blue-500 transition-colors">{artist.name}</h4>
+                                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-1">{artist.followers.toLocaleString()} Fans</p>
+                              </div>
+                          </div>
+                        );
+                     })}
+                  </div>
+                ) : (
+                  <div className="glass p-8 rounded-[10px] border border-white/5 text-center">
+                    <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Not following any artists</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Friends / Network */}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.5em] flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                    Network Connections
+                  </h3>
+                </div>
+                 <div className="glass p-12 rounded-[10px] border border-white/5 text-center flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                    <Users className="w-8 h-8 text-white/20" />
+                  </div>
+                  <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Network data encrypted</p>
+                </div>
               </div>
             </div>
           )}

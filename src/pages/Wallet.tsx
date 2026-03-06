@@ -53,27 +53,14 @@ const Wallet: React.FC = () => {
           <h1 className="text-4xl font-bold text-white tracking-tighter uppercase">My Wallet</h1>
         </div>
         
-        {!userAddress ? (
+        <div className="flex items-center">
           <button 
             onClick={() => tonConnectUI.openModal()}
-            className="px-8 py-4 electric-blue-bg text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-3"
+            className="p-3 rounded-[5px] bg-white/5 hover:bg-white/10 transition-all border border-white/10"
           >
-            <WalletIcon className="h-4 w-4" />
-            Connect Wallet
+            <WalletIcon className="h-6 w-6 text-blue-500" />
           </button>
-        ) : (
-          <div className="flex items-center gap-4 bg-white/5 p-4 rounded-[5px] border border-white/10">
-            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
-              <WalletIcon className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Connected Address</p>
-              <p className="text-[10px] font-bold text-white uppercase tracking-tighter truncate w-32 md:w-48">
-                {userAddress}
-              </p>
-            </div>
-          </div>
-        )}
+        </div>
       </header>
 
       {/* Balance Cards */}

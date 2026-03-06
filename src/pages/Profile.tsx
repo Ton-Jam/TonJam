@@ -25,6 +25,7 @@ import {
   Users
 } from 'lucide-react';
 
+import PostCard from '@/components/PostCard';
 import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS, MOCK_USERS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
@@ -55,7 +56,10 @@ const Profile: React.FC = () => {
     followedUserIds,
     playTrack,
     recentlyPlayed,
-    clearRecentlyPlayed
+    clearRecentlyPlayed,
+    posts,
+    createPost,
+    deletePost
   } = useAudio();
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -65,9 +69,7 @@ const Profile: React.FC = () => {
   const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
   const [isDNASyncing, setIsDNASyncing] = useState(false);
   const [sonicDNA, setSonicDNA] = useState<{ signature: string; vibes: string[] } | null>(null);
-  const [deletedPostIds, setDeletedPostIds] = useState<string[]>([]);
   const [newPostContent, setNewPostContent] = useState('');
-  const [localPosts, setLocalPosts] = useState<any[]>([]);
 
   /* Check for Spotify verification */
   const isSpotifyVerified = useMemo(() => {
@@ -142,28 +144,18 @@ const Profile: React.FC = () => {
   );
 
   const userPosts = useMemo(() => {
-    const combined = [...localPosts, ...MOCK_POSTS];
-    return combined.filter(p => p.userId === userProfile.id && !deletedPostIds.includes(p.id));
-  }, [userProfile.id, deletedPostIds, localPosts]);
+    return posts.filter(p => p.userId === userProfile.id);
+  }, [userProfile.id, posts]);
 
   const handleSharePost = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPostContent.trim() && !currentTrack) return;
 
-    const newPost = {
-      id: `local_p_${Date.now()}`,
-      userId: userProfile.id,
-      userName: userProfile.name,
-      userAvatar: userProfile.avatar,
+    createPost({
       content: newPostContent || `Listening to ${currentTrack?.title}`,
       trackId: currentTrack?.id,
-      likes: 0,
-      comments: 0,
-      timestamp: 'Just now',
-      commentList: []
-    };
+    });
 
-    setLocalPosts([newPost, ...localPosts]);
     setNewPostContent('');
     addNotification('Signal broadcasted successfully', 'success');
   };
@@ -506,12 +498,21 @@ const Profile: React.FC = () => {
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                 <SectionHeader title="Neural Feed" />
                 <div className="space-y-6">
-                  {/* Filtered Feed: Tracks and NFTs from followed accounts */}
+                  {/* Filtered Feed: Tracks, NFTs, and Posts from followed accounts */}
                   {[
-                    ...allTracks.filter(t => followedUserIds.includes(t.artistId) || userProfile.followedArtists?.includes(t.artistId)).map(t => ({ ...t, type: 'track' as const })),
-                    ...allNFTs.filter(n => followedUserIds.includes(n.artistId || '') || userProfile.followedArtists?.includes(n.artistId || '')).map(n => ({ ...n, type: 'nft' as const }))
-                  ].sort((a, b) => (b as any).id.localeCompare((a as any).id)).map((item, idx) => (
-                    <div key={item.id} className="glass border border-blue-500/10 p-6 rounded-[10px] flex items-center gap-6 group hover:bg-white/[0.02] transition-all">
+                    ...allTracks.filter(t => followedUserIds.includes(t.artistId) || userProfile.followedArtists?.includes(t.artistId)).map(t => ({ ...t, type: 'track' as const, timestamp: t.releaseDate || 'Just now' })),
+                    ...allNFTs.filter(n => followedUserIds.includes(n.artistId || '') || userProfile.followedArtists?.includes(n.artistId || '')).map(n => ({ ...n, type: 'nft' as const, timestamp: 'Just now' })),
+                    ...posts.filter(p => followedUserIds.includes(p.userId)).map(p => ({ ...p, type: 'post' as const }))
+                  ].sort((a, b) => (b as any).id.localeCompare((a as any).id)).map((item, idx) => {
+                    if (item.type === 'post') {
+                      return (
+                        <div key={item.id} className="mb-6">
+                          <PostCard post={item as any} />
+                        </div>
+                      );
+                    }
+                    return (
+                    <div key={item.id} className="glass border border-blue-500/10 p-6 rounded-[10px] flex items-center gap-6 group hover:bg-white/[0.02] transition-all mb-6">
                       <div className="w-16 h-16 rounded-[10px] overflow-hidden flex-shrink-0">
                         <img src={(item as any).coverUrl || (item as any).imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                       </div>
@@ -532,7 +533,7 @@ const Profile: React.FC = () => {
                         {item.type === 'track' ? 'Listen' : 'View'}
                       </button>
                     </div>
-                  ))}
+                  )})}
                   {followedUserIds.length === 0 && (userProfile.followedArtists?.length || 0) === 0 && (
                     <div className="py-20 text-center flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-3xl">
                       <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">Your feed is empty. Follow nodes to receive signals.</p>
@@ -702,7 +703,7 @@ const Profile: React.FC = () => {
                   </form>
                 </div>
 
-                <SocialFeed posts={userPosts} onDeletePost={(id) => setDeletedPostIds(prev => [...prev, id])} emptyMessage="Signal void detected." />
+                <SocialFeed posts={userPosts} onDeletePost={deletePost} emptyMessage="Signal void detected." />
               </section>
             )}
 

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, Heart, PlusCircle, Gem, Share2, VolumeX, Volume1, Volume2, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat } from "lucide-react";
+import { ChevronDown, Heart, PlusCircle, Gem, Share2, VolumeX, Volume1, Volume2, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, Zap, Users, Disc, AlignLeft } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
 import { useNavigate } from "react-router-dom";
-import { MOCK_ARTISTS, APP_LOGO } from "@/constants";
-import MintModal from "@/components/MintModal";
+import { MOCK_ARTISTS, APP_LOGO, TJ_COIN_ICON } from "@/constants";
+import { motion, AnimatePresence } from "motion/react";
+import confetti from 'canvas-confetti';
 
 const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { analyser } = useAudio();
+  const { analyser, currentTrack } = useAudio();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -16,10 +17,11 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
     if (!ctx) return;
 
     let animationFrameId: number;
-    const bars = 32;
+    const bars = 48; // Increased for more detail
     const heights = Array(bars).fill(2);
     const targets = Array(bars).fill(2);
     let phase = 0;
+    let pulsePhase = 0;
 
     const dataArray = analyser
       ? new Uint8Array(analyser.frequencyBinCount)
@@ -36,6 +38,7 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const width = canvas.width / bars;
       phase += 0.05;
+      pulsePhase += 0.02;
 
       if (analyser && isPlaying && dataArray) {
         analyser.getByteFrequencyData(dataArray);
@@ -44,33 +47,49 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
       for (let i = 0; i < bars; i++) {
         if (isPlaying) {
           if (analyser && dataArray) {
-            const dataIndex = Math.floor(i * (dataArray.length / bars) * 0.5);
+            // Map frequency data to bars with a slight logarithmic bias for better visuals
+            const dataIndex = Math.floor(Math.pow(i / bars, 1.5) * (dataArray.length * 0.6));
             const value = dataArray[dataIndex] || 0;
-            targets[i] = 2 + (value / 255) * (canvas.height * 0.6);
+            targets[i] = 3 + (value / 255) * (canvas.height * 0.85);
           } else {
-            const wave = Math.sin(phase + i * 0.2) * 0.5 + 0.5;
-            if (Math.random() > 0.6) {
-              targets[i] =
-                2 +
-                wave * (canvas.height * 0.3) +
-                Math.random() * (canvas.height * 0.2);
-            }
+            // Fallback animation if no analyser
+            const wave = Math.sin(phase + i * 0.15) * 0.5 + 0.5;
+            targets[i] = 3 + wave * (canvas.height * 0.4) + Math.random() * 5;
           }
         } else {
-          targets[i] = 2;
+          // Subtle pulsing effect when paused
+          const pulse = Math.sin(pulsePhase + i * 0.1) * 2 + 3;
+          targets[i] = pulse;
         }
 
-        heights[i] += (targets[i] - heights[i]) * 0.2;
+        // Smooth interpolation for fluid movement
+        const lerpSpeed = isPlaying ? 0.25 : 0.1;
+        heights[i] += (targets[i] - heights[i]) * lerpSpeed;
+        
         const h = Math.max(2, heights[i]);
         const x = i * width;
         const y = canvas.height - h;
 
-        ctx.fillStyle = "#3b82f6";
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#3b82f6";
+        // Gradient for the bars
+        const gradient = ctx.createLinearGradient(0, y, 0, canvas.height);
+        gradient.addColorStop(0, "#60a5fa"); // blue-400
+        gradient.addColorStop(1, "#2563eb"); // blue-600
+
+        ctx.fillStyle = gradient;
+        ctx.shadowBlur = isPlaying ? 8 : 4;
+        ctx.shadowColor = "rgba(59, 130, 246, 0.5)";
+        
+        const barWidth = Math.max(1.5, width - 2);
+        const radius = 2;
+        
+        // Draw rounded bars
         ctx.beginPath();
-        const barWidth = Math.max(2, width - 3);
-        ctx.roundRect(x + (width - barWidth) / 2, y, barWidth, h, [3, 3, 0, 0]);
+        if (ctx.roundRect) {
+          ctx.roundRect(x + (width - barWidth) / 2, y, barWidth, h, [radius, radius, 0, 0]);
+        } else {
+          // Fallback for older browsers
+          ctx.rect(x + (width - barWidth) / 2, y, barWidth, h);
+        }
         ctx.fill();
       }
       animationFrameId = requestAnimationFrame(draw);
@@ -80,12 +99,12 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isPlaying, analyser]);
+  }, [isPlaying, analyser, currentTrack?.id]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="w-full max-w-[240px] h-[30px] opacity-80 mix-blend-screen"
+      className="w-full max-w-[320px] h-[40px] opacity-90 mix-blend-screen"
     />
   );
 };
@@ -114,10 +133,12 @@ const FullAudioPlayer: React.FC = () => {
     toggleLikeTrack,
     userProfile,
     setTrackToAddToPlaylist,
+    jamTrack,
+    activeJamRoom,
+    leaveJamRoom,
   } = useAudio();
   const [view, setView] = useState<"cover" | "lyrics">("cover");
   const [showVolume, setShowVolume] = useState(false);
-  const [showMintModal, setShowMintModal] = useState(false);
 
   const initialVolumeRef = useRef(volume);
 
@@ -136,6 +157,22 @@ const FullAudioPlayer: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [showVolume]);
+
+  const handleJam = () => {
+    if (currentTrack) {
+      jamTrack(currentTrack.id);
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#3b82f6', '#8b5cf6', '#ec4899'],
+        ticks: 200,
+        gravity: 1.2,
+        scalar: 0.7,
+        shapes: ['circle']
+      });
+    }
+  };
 
   const isLiked = currentTrack
     ? likedTrackIds.includes(currentTrack.id)
@@ -191,7 +228,7 @@ const FullAudioPlayer: React.FC = () => {
         <div className="absolute inset-0 "></div>
       </div>
 
-      <div className="relative z-10 min-h-full flex flex-col p-6 md:p-8 max-w-xl mx-auto w-full pb-32">
+      <div className="relative z-10 min-h-full flex flex-col p-6 md:p-8 max-w-xl mx-auto w-full pb-8">
         <header className="flex items-center justify-between mb-8 flex-shrink-0">
           <button
             onClick={() => setFullPlayerOpen(false)}
@@ -199,36 +236,54 @@ const FullAudioPlayer: React.FC = () => {
           >
             <ChevronDown className="h-6 w-6" />
           </button>
-          <div className="flex gap-2 bg-white/5 p-1.5 rounded-full">
+          <div className="flex gap-4 items-center">
             <button
               onClick={() => setView("cover")}
-              className={`px-6 py-2 rounded-full text-[14px] font-bold uppercase tracking-widest transition-all ${view === "cover" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "text-white/60 hover:text-white"}`}
+              className={`p-2 transition-all ${view === "cover" ? "text-blue-500" : "text-white/60 hover:text-white"}`}
             >
-              Player
+              <Disc className="h-6 w-6" />
             </button>
             <button
               onClick={() => setView("lyrics")}
-              className={`px-6 py-2 rounded-full text-[14px] font-bold uppercase tracking-widest transition-all ${view === "lyrics" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "text-white/60 hover:text-white"}`}
+              className={`p-2 transition-all ${view === "lyrics" ? "text-blue-500" : "text-white/60 hover:text-white"}`}
             >
-              Lyrics
+              <AlignLeft className="h-6 w-6" />
             </button>
           </div>
-          <button
-            onClick={handleLikeToggle}
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 ${isLiked ? "text-red-500" : "text-white/60 hover:text-white"}`}
-          >
-            <Heart className={`h-6 w-6 ${isLiked ? "fill-current" : ""}`} />
-          </button>
+          <div className="flex items-center gap-2">
+            {activeJamRoom && (
+              <button 
+                onClick={leaveJamRoom}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-[10px] font-bold text-red-500 uppercase tracking-widest animate-pulse"
+              >
+                <Users className="h-3 w-3" />
+                Live Jam
+              </button>
+            )}
+            <button
+              onClick={handleLikeToggle}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 ${isLiked ? "text-red-500" : "text-white/60 hover:text-white"}`}
+            >
+              <Heart className={`h-6 w-6 ${isLiked ? "fill-current" : ""}`} />
+            </button>
+          </div>
         </header>
 
         <div className="flex-1 flex flex-col items-center justify-center w-full pb-12">
           {view === "cover" ? (
             <div className="relative w-full aspect-square rounded-[10px] overflow-hidden shadow-2xl mb-10 group">
-              <img
-                src={currentTrack.coverUrl}
-                className={`w-full h-full object-cover transition-transform duration-[15s] ease-linear ${isPlaying ? "scale-110" : "scale-100"}`}
-                alt={currentTrack.title}
-              />
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={currentTrack.id}
+                  src={currentTrack.coverUrl}
+                  initial={{ opacity: 0, scale: 0.9, filter: "blur(20px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, scale: 1.1, filter: "blur(20px)" }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  className={`w-full h-full object-cover transition-transform duration-[15s] ease-linear ${isPlaying ? "scale-110" : "scale-100"}`}
+                  alt={currentTrack.title}
+                />
+              </AnimatePresence>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80"></div>
             </div>
           ) : (
@@ -246,15 +301,25 @@ const FullAudioPlayer: React.FC = () => {
           )}
 
           <div className="w-full text-center mb-6">
-            <h2 className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-white leading-none truncate px-4">
-              {currentTrack.title}
-            </h2>
-            <p
-              onClick={handleArtistClick}
-              className="text-blue-500 font-bold text-[14px] tracking-widest uppercase cursor-pointer hover:text-white transition-colors"
-            >
-              {currentTrack.artist}
-            </p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentTrack.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                <h2 className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-white leading-none truncate px-4">
+                  {currentTrack.title}
+                </h2>
+                <p
+                  onClick={handleArtistClick}
+                  className="text-blue-500 font-bold text-[14px] tracking-widest uppercase cursor-pointer hover:text-white transition-colors"
+                >
+                  {currentTrack.artist}
+                </p>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           <div className="w-full flex justify-center mb-6">
@@ -272,7 +337,10 @@ const FullAudioPlayer: React.FC = () => {
                 <PlusCircle className="h-6 w-6" />
               </button>
               <button
-                onClick={() => setShowMintModal(true)}
+                onClick={() => {
+                  setFullPlayerOpen(false);
+                  navigate(`/nft/${currentTrack.id}`);
+                }}
                 className="text-xl text-white/20 hover:text-white transition-all p-2"
                 title="Mint NFT"
               >
@@ -327,42 +395,59 @@ const FullAudioPlayer: React.FC = () => {
 
             {/* Row 2: Play Controls */}
             <div className="flex items-center justify-between">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={toggleShuffle}
-                className={`text-lg transition-all p-2 ${isShuffle ? "text-blue-400" : "text-white/20 hover:text-white"}`}
+                className={`text-lg transition-all p-2 rounded-full ${isShuffle ? "text-blue-400 bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.3)]" : "text-white/20 hover:text-white"}`}
                 title="Shuffle"
               >
                 <Shuffle className="h-5 w-5" />
-              </button>
+              </motion.button>
               <button
                 onClick={prevTrack}
                 className="text-2xl text-white/40 hover:text-white transition-all hover:scale-125 active:scale-90 p-2"
               >
                 <SkipBack className="h-8 w-8 fill-current" />
               </button>
-              <button
-                onClick={togglePlay}
-                className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all text-blue-500"
-              >
-                {isPlaying ? (
-                  <Pause className="h-10 w-10 md:h-12 md:w-12 fill-current" />
-                ) : (
-                  <Play className="h-10 w-10 md:h-12 md:w-12 fill-current" />
-                )}
-              </button>
+              <div className="relative flex items-center justify-center">
+                <button
+                  onClick={togglePlay}
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all text-blue-500"
+                >
+                  {isPlaying ? (
+                    <Pause className="h-10 w-10 md:h-12 md:w-12 fill-current" />
+                  ) : (
+                    <Play className="h-10 w-10 md:h-12 md:w-12 fill-current" />
+                  )}
+                </button>
+                
+                {/* JAM BUTTON */}
+                <motion.button
+                  whileHover={{ scale: 1.2, rotate: 15 }}
+                  whileTap={{ scale: 0.8, rotate: -15 }}
+                  onClick={handleJam}
+                  className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-xl shadow-orange-500/40 border-2 border-white/20 z-10 group"
+                  title="JAM (Boost Track)"
+                >
+                  <img src={TJ_COIN_ICON} className="w-6 h-6 group-hover:animate-bounce" alt="JAM" />
+                </motion.button>
+              </div>
               <button
                 onClick={nextTrack}
                 className="text-2xl text-white/40 hover:text-white transition-all hover:scale-125 active:scale-90 p-2"
               >
                 <SkipForward className="h-8 w-8 fill-current" />
               </button>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={toggleRepeat}
-                className={`text-lg transition-all p-2 ${isRepeat ? "text-blue-400" : "text-white/20 hover:text-white"}`}
+                className={`text-lg transition-all p-2 rounded-full ${isRepeat ? "text-blue-400 bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.3)]" : "text-white/20 hover:text-white"}`}
                 title="Repeat"
               >
                 <Repeat className="h-5 w-5" />
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -405,7 +490,7 @@ const FullAudioPlayer: React.FC = () => {
                 alt=""
               />
               <div>
-                <h4 className="text-[14px] font-bold text-white uppercase tracking-tight group-hover/dossier:text-blue-400 transition-colors">
+                <h4 className="text-[14px] font-bold text-white uppercase tracking-tight group-hover/dossier:text-blue-400 hover:underline transition-colors inline-block">
                   {currentTrack.artist}
                 </h4>
                 <p className="text-[12px] font-bold text-blue-500 uppercase tracking-widest">
@@ -492,8 +577,6 @@ const FullAudioPlayer: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {showMintModal && <MintModal onClose={() => setShowMintModal(false)} />}
 
       {/* Bottom Progress Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-blue-500/10 px-4 md:px-8 py-4 flex items-center gap-4">

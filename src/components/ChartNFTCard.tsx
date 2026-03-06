@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ChevronUp } from 'lucide-react';
 import { NFTItem } from '@/types';
-import { TON_LOGO, MOCK_ARTISTS } from '@/constants';
+import { TON_LOGO, MOCK_ARTISTS, MOCK_USER } from '@/constants';
 
 interface ChartNFTCardProps {
   nft: NFTItem;
@@ -40,7 +40,17 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
           {nft.title}
         </h4>
         <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
-          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate">
+          <p 
+            className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (artist) {
+                navigate(`/artist/${artist.id}`);
+              } else if (nft.creator === MOCK_USER.name) {
+                navigate('/profile');
+              }
+            }}
+          >
             {nft.creator}
           </p>
           {artist?.verified && (

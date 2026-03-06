@@ -12,7 +12,7 @@ interface BuyNFTModalProps {
 }
 
 const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
-  const { addNotification, updateNFT, addUserNFT, recordTransaction } = useAudio();
+  const { addNotification, updateNFT, addUserNFT, recordTransaction, createPost } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -60,6 +60,13 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
       }, true);
       
       addUserNFT(updatedNFT, true);
+
+      // Create a social post about the purchase
+      createPost({
+        content: `Just acquired this legendary sonic artifact: ${nft.title}! The quality is insane. 💎`,
+        nftId: nft.id,
+        nft: updatedNFT
+      });
       
       addNotification("Asset successfully synced to vault.", "success");
       onClose();
