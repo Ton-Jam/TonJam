@@ -86,6 +86,12 @@ export interface NFTItem {
   startingBid?: string;
 }
 
+export interface RoyaltySplit {
+  address: string;
+  percentage: number; // e.g. 0.05 for 5%
+  label?: string; // e.g. "Producer", "Manager"
+}
+
 export interface Artist {
   id: string;
   name: string;
@@ -106,8 +112,8 @@ export interface Artist {
     telegram?: string;
   };
   royaltyConfig?: {
-    streamingPercentage: number; // e.g. 0.05 (5%)
-    nftSaleShare: number; // e.g. 0.10 (10%)
+    streamingSplits: RoyaltySplit[];
+    nftSaleSplits: RoyaltySplit[];
   };
   earnings?: {
     streaming: string;
@@ -159,6 +165,9 @@ export interface Playlist {
   creator: string;
   description?: string;
   trackIds?: string[];
+  isPrivate?: boolean;
+  isCollaborative?: boolean;
+  tags?: string[];
 }
 
 export interface UserProfile {

@@ -54,7 +54,7 @@ interface AudioContextType {
   addTrackToPlaylist: (playlistId: string, track: Track) => void;
   removeTrackFromPlaylist: (playlistId: string, trackId: string) => void;
   reorderTrackInPlaylist: (playlistId: string, trackId: string, direction: 'up' | 'down') => void;
-  createNewPlaylist: (name: string, description?: string, initialTrack?: Track, coverUrl?: string) => void;
+  createNewPlaylist: (name: string, description?: string, initialTrack?: Track, coverUrl?: string, isPrivate?: boolean, isCollaborative?: boolean, tags?: string[]) => void;
   deletePlaylist: (playlistId: string) => void;
   updatePlaylist: (playlistId: string, updates: Partial<Playlist>) => void;
   createRecommendedPlaylist: () => void;
@@ -90,6 +90,11 @@ interface AudioContextType {
   joinJamRoom: (roomId: string) => void;
   leaveJamRoom: () => void;
   allPlaylists: Playlist[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  isCreatePlaylistModalOpen: boolean;
+  setIsCreatePlaylistModalOpen: (isOpen: boolean) => void;
+  updateRoyaltyConfig: (artistId: string, config: Artist['royaltyConfig']) => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -144,6 +149,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [trackToAddToPlaylist, setTrackToAddToPlaylist] = useState<Track | null>(null);
   const [optionsTrack, setOptionsTrack] = useState<Track | null>(null);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
+
+  const [activeJamRoom, setActiveJamRoom] = useState<{ id: string, name: string, listeners: number, currentTrack: Track | null } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -679,8 +688,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setPosts(prev => prev.filter(p => p.id !== postId));
   };
 
-  const [activeJamRoom, setActiveJamRoom] = useState<{ id: string, name: string, listeners: number, currentTrack: Track | null } | null>(null);
-
   const jamTrack = async (trackId: string) => {
     const jamCost = 1; // 1 JAM to boost
     const currentBalance = parseFloat(userProfile.jamBalance || '0');
@@ -733,6 +740,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const leaveJamRoom = () => {
     setActiveJamRoom(null);
     addNotification("Disconnected from Jam Room", "info");
+  };
+
+  const updateRoyaltyConfig = (artistId: string, config: Artist['royaltyConfig']) => {
+    setArtists(prev => prev.map(artist => 
+      artist.id === artistId ? { ...artist, royaltyConfig: config } : artist
+    ));
+    addNotification("Royalty protocol updated", "success");
   };
 
   const playTrack = async (track: Track) => {
@@ -990,7 +1004,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const toggleShuffle = () => setIsShuffle(!isShuffle);
   const toggleRepeat = () => setIsRepeat(!isRepeat);
 
-  const createNewPlaylist = (name: string, description?: string, initialTrack?: Track, coverUrl?: string) => {
+  const createNewPlaylist = (name: string, description?: string, initialTrack?: Track, coverUrl?: string, isPrivate?: boolean, isCollaborative?: boolean, tags?: string[]) => {
     const newPlaylist: Playlist = {
       id: Date.now().toString(),
       title: name,
@@ -998,7 +1012,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       trackCount: initialTrack ? 1 : 0,
       creator: 'You',
       description,
-      trackIds: initialTrack ? [initialTrack.id] : []
+      trackIds: initialTrack ? [initialTrack.id] : [],
+      isPrivate,
+      isCollaborative,
+      tags
     };
     setPlaylists(prev => [newPlaylist, ...prev]);
     if (initialTrack) {
@@ -1093,7 +1110,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, userTracks, userNFTs,
       allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
-      posts, createPost, deletePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists
+      posts, createPost, deletePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
+      searchQuery, setSearchQuery, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
+      updateRoyaltyConfig
     }}>
       {children}
       {trackToAddToPlaylist && (
@@ -1164,10 +1183,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {/* Classic Track Option Screen */}
       {optionsTrack && (
         <div className="fixed inset-0 z-[400] flex items-end sm:items-center justify-center p-0 sm:p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setOptionsTrack(null)}></div>
-          <div className="relative bg-[#0a0a0a] border-t sm:border border-white/10 w-full max-w-md rounded-t-[20px] sm:rounded-[5px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-4 duration-300">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setOptionsTrack(null)}></div>
+          <div className="relative bg-[#111] border-t sm:border border-white/10 w-full max-w-md rounded-t-[20px] sm:rounded-[5px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-4 duration-300">
             {/* Header */}
-            <div className="p-6 border-b border-white/5 flex items-center gap-4">
+            <div className="p-6 border-b border-white/5 flex items-center gap-4 bg-[#111]">
               <img src={optionsTrack.coverUrl} className="w-16 h-16 rounded-[5px] object-cover shadow-lg" alt="" />
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-bold uppercase tracking-tight truncate text-white">{optionsTrack.title}</h3>
@@ -1179,7 +1198,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             </div>
 
             {/* Actions List */}
-            <div className="p-2">
+            <div className="p-2 bg-[#111]">
               <OptionItem 
                 icon="fas fa-play" 
                 label="Play Now" 

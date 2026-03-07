@@ -187,7 +187,7 @@ const PlaylistDetail: React.FC = () => {
           ) : (
             <>
               <div className="group flex items-start gap-4 mb-2">
-                <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight">{playlist.title}</h1>
+                <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">{playlist.title}</h1>
                 <button onClick={startEditing} className="mt-2 text-white/40 hover:text-white transition-all" title="Edit Playlist">
                   <Pencil className="h-5 w-5" />
                 </button>
@@ -221,14 +221,14 @@ const PlaylistDetail: React.FC = () => {
       </div>
       <div className="flex flex-col gap-2 pb-8">
         {playlistTracks.map((track, index) => (
-          <div key={track.id} className="w-full p-2 hover:bg-white/5 rounded-[10px] group transition-colors flex items-center gap-4">
-            <span className="text-white/40 w-8 text-center font-mono text-sm">{index + 1}</span>
-            <div className="flex-1">
-              <TrackCard track={track} />
+          <div key={track.id} className="w-full flex items-center gap-2 group hover:bg-white/5 rounded-[10px] pr-2 transition-colors">
+            <span className="text-white/40 w-8 text-center font-mono text-sm flex-shrink-0">{index + 1}</span>
+            <div className="flex-1 min-w-0">
+              <TrackCard track={track} variant="row" />
             </div>
             
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="flex flex-col gap-1 mr-2">
+              <div className="flex flex-col gap-1">
                 <button 
                   onClick={(e) => handleMoveTrack(e, track.id, 'up')} 
                   disabled={index === 0}
@@ -247,8 +247,8 @@ const PlaylistDetail: React.FC = () => {
                 </button>
               </div>
               
-              <button onClick={(e) => handleRemoveTrack(e, track.id)} className="w-10 h-10 rounded-full flex items-center justify-center text-white/40 hover:text-red-500 hover:bg-red-500/10 transition-all" title="Remove from playlist">
-                <MinusCircle className="h-5 w-5" />
+              <button onClick={(e) => handleRemoveTrack(e, track.id)} className="w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-red-500 hover:bg-red-500/10 transition-all" title="Remove from playlist">
+                <MinusCircle className="h-4 w-4" />
               </button>
             </div>
           </div>

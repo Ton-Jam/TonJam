@@ -228,29 +228,50 @@ const Profile: React.FC = () => {
     setSelectedNftForListing(nft);
   };
 
-  const StatBlock = ({ label, value, icon, subValue }: { label: string, value: string, icon?: string, subValue?: string }) => (
-    <div className="glass border border-blue-500/10 backdrop-blur-2xl bg-white/[0.02] p-6 rounded-[10px] group transition-all shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden">
-      <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-blue-500/5 blur-2xl rounded-full group-hover:bg-blue-500/10 transition-colors"></div>
-      <div className="flex justify-between items-start mb-4 relative z-10">
-        <span className="text-[8px] font-bold text-white/30 uppercase tracking-[0.4em] leading-none">{label}</span>
-        {icon === 'gem' && <Gem className="h-3 w-3 text-blue-500/50 group-hover:text-blue-400 transition-colors" />}
-        {icon === 'coins' && <Coins className="h-3 w-3 text-blue-500/50 group-hover:text-blue-400 transition-colors" />}
+  const StatBlock = ({ label, value, icon, subValue, trend }: { label: string, value: string, icon?: string, subValue?: string, trend?: string }) => (
+    <div className="relative group overflow-hidden bg-[#0a0a0a] border border-white/5 p-6 rounded-[12px] transition-all hover:border-blue-500/30 shadow-2xl">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-blue-600/10 transition-colors"></div>
+      
+      <div className="flex justify-between items-start mb-6 relative z-10">
+        <div className="flex flex-col gap-1">
+          <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em] leading-none">{label}</span>
+          {trend && (
+            <span className="text-[7px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1">
+              <TrendingUp className="h-2 w-2" /> {trend}
+            </span>
+          )}
+        </div>
+        <div className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center group-hover:border-blue-500/30 transition-all">
+          {icon === 'gem' && <Gem className="h-3.5 w-3.5 text-blue-500" />}
+          {icon === 'coins' && <Coins className="h-3.5 w-3.5 text-amber-500" />}
+          {icon === 'users' && <Users className="h-3.5 w-3.5 text-purple-500" />}
+          {icon === 'zap' && <Zap className="h-3.5 w-3.5 text-blue-400" />}
+        </div>
       </div>
+      
       <div className="flex items-baseline gap-2 relative z-10">
-        <h4 className="text-2xl font-bold tracking-tighter text-white leading-none group-hover:text-blue-400 transition-colors">{value}</h4>
-        {subValue && <span className="text-[10px] font-bold text-blue-500 uppercase leading-none">{subValue}</span>}
+        <h4 className="text-3xl font-bold tracking-tighter text-white leading-none font-mono">{value}</h4>
+        {subValue && <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">{subValue}</span>}
       </div>
+      
+      {/* Micro-grid background */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '12px 12px' }}></div>
     </div>
   );
 
   const SectionHeader = ({ title, onAction, actionLabel }: { title: string, onAction?: () => void, actionLabel?: string }) => (
-    <div className="flex items-center justify-between mb-6 px-4 md:px-0">
-      <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.5em] flex items-center gap-3">
-        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-        {title}
-      </h3>
+    <div className="flex items-center justify-between mb-8 px-4 md:px-0">
+      <div className="flex items-center gap-4">
+        <div className="w-1 h-5 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
+        <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.4em]">
+          {title}
+        </h3>
+      </div>
       {onAction && (
-        <button onClick={onAction} className="text-[9px] font-bold uppercase tracking-widest text-blue-500 hover:text-white transition-all pb-0.5">{actionLabel || 'View All'}</button>
+        <button onClick={onAction} className="text-[9px] font-bold uppercase tracking-[0.3em] text-blue-500 hover:text-white transition-all flex items-center gap-2 group">
+          {actionLabel || 'View All'}
+          <Plus className="h-3 w-3 group-hover:rotate-90 transition-transform" />
+        </button>
       )}
     </div>
   );
@@ -270,128 +291,128 @@ const Profile: React.FC = () => {
       </div>
 
       {/* IDENTITY SECTION */}
-      <div className="max-w-6xl mx-auto px-4 md:px-12 -mt-16 md:-mt-20 relative z-30 flex flex-col md:flex-row items-center md:items-end w-full gap-6 md:gap-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 -mt-20 relative z-30 flex flex-col md:flex-row items-center md:items-end w-full gap-8 md:gap-12">
         {/* Left: Round Avatar centerpiece */}
         <div className="relative group md:mb-2 flex-shrink-0">
-          <div className={`p-1.5 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 shadow-[0_0_50px_rgba(37,99,235,0.3)] transition-transform duration-500 group-hover:scale-105`}>
-            <img src={localUser.avatar} className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover" alt={localUser.name} />
+          <div className="absolute inset-0 bg-blue-600/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <div className="relative p-1.5 rounded-full bg-gradient-to-tr from-blue-600 via-purple-600 to-blue-400 shadow-[0_0_60px_rgba(37,99,235,0.2)] transition-all duration-700 group-hover:scale-105 group-hover:rotate-3">
+            <div className="rounded-full overflow-hidden border-4 border-black">
+              <img src={localUser.avatar} className="w-32 h-32 md:w-44 md:h-44 object-cover" alt={localUser.name} />
+            </div>
           </div>
           {isSpotifyVerified && (
-            <div className="absolute bottom-1 right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-xl">
-              <Check className="text-white h-3 w-3" />
+            <div className="absolute bottom-2 right-2 w-8 h-8 bg-blue-600 border-4 border-black rounded-full flex items-center justify-center shadow-2xl">
+              <Check className="text-white h-4 w-4" />
             </div>
           )}
           {isEditing && (
-            <button onClick={() => avatarInputRef.current?.click()} className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" >
-              <Pencil className="text-white h-5 w-5" />
+            <button onClick={() => avatarInputRef.current?.click()} className="absolute inset-0 rounded-full flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-10" >
+              <Pencil className="text-white h-6 w-6" />
             </button>
           )}
           <input type="file" hidden ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} accept="image/*" />
         </div>
 
         {/* Right: Name, Handle, Stats, and Actions */}
-        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full">
-          <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-4 mb-6">
+        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full pb-2">
+          <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-6 mb-8">
             {/* Name & Handle */}
             <div className="w-full md:w-auto">
               {isEditing ? (
-                <input type="text" value={localUser.name} onChange={(e) => setLocalUser({...localUser, name: e.target.value})} className="bg-white/5 rounded-[10px] px-4 py-2 text-2xl md:text-3xl font-bold tracking-tighter outline-none text-white w-full max-w-lg md:text-left" />
-              ) : (
-                <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
-                  <h1 onClick={() => setIsEditing(true)} className="text-3xl md:text-5xl font-bold tracking-tighter text-white uppercase leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] cursor-pointer hover:text-blue-400 transition-colors group/name relative" >
-                    {localUser.name}
-                  </h1>
-                  {isSpotifyVerified && <CheckCircle className="text-blue-500 h-5 w-5 md:h-6 md:w-6" />}
+                <div className="space-y-4 w-full max-w-lg">
+                  <input type="text" value={localUser.name} onChange={(e) => setLocalUser({...localUser, name: e.target.value})} className="bg-white/5 border border-white/10 rounded-[12px] px-6 py-4 text-3xl font-bold tracking-tighter outline-none text-white w-full focus:border-blue-500/50 transition-all" placeholder="Display Name" />
+                  <input type="text" value={localUser.handle} onChange={(e) => setLocalUser({...localUser, handle: e.target.value})} className="bg-white/5 border border-white/10 rounded-[12px] px-6 py-3 text-sm font-bold tracking-widest outline-none text-blue-500 w-full focus:border-blue-500/50 transition-all" placeholder="@handle" />
                 </div>
-              )}
-              <p className="text-blue-500 font-bold text-xs md:text-sm uppercase tracking-[0.6em] drop-shadow-md">
-                {localUser.handle}
-              </p>
-              
-              {/* Social Links Display */}
-              {!isEditing && localUser.socials && (
-                <div className="flex gap-4 mt-4 justify-center md:justify-start">
-                  {localUser.socials.x && (
-                    <a href={localUser.socials.x} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-blue-400 transition-colors">
-                      <Satellite className="h-4 w-4" />
-                    </a>
-                  )}
-                  {localUser.socials.instagram && (
-                    <a href={localUser.socials.instagram} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-pink-400 transition-colors">
-                      <Camera className="h-4 w-4" />
-                    </a>
-                  )}
-                  {localUser.socials.telegram && (
-                    <a href={localUser.socials.telegram} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-blue-300 transition-colors">
-                      <Zap className="h-4 w-4" />
-                    </a>
-                  )}
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center md:justify-start gap-4">
+                    <h1 className="text-4xl md:text-7xl font-bold tracking-tighter text-white uppercase leading-none drop-shadow-2xl italic font-serif">
+                      {localUser.name}
+                    </h1>
+                  </div>
+                  <div className="flex items-center justify-center md:justify-start gap-3">
+                    <span className="text-blue-500 font-bold text-xs md:text-sm uppercase tracking-[0.6em] bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                      {localUser.handle}
+                    </span>
+                    <div className="flex gap-3">
+                      {localUser.socials?.x && (
+                        <a href={localUser.socials.x} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white/40 hover:text-blue-400 hover:border-blue-400/30 transition-all">
+                          <Satellite className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      {localUser.socials?.telegram && (
+                        <a href={localUser.socials.telegram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white/40 hover:text-blue-300 hover:border-blue-300/30 transition-all">
+                          <Zap className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Edit/Save Actions */}
-            <div className="flex gap-3 justify-center md:justify-end">
+            <div className="flex flex-wrap gap-3 justify-center md:justify-end">
               {localUser.isVerifiedArtist && (
-                <button onClick={() => navigate('/artist-dashboard')} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-[10px] text-[8px] font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-blue-600/20 transition-all active:scale-95 flex items-center gap-2" >
-                  <BarChart3 className="h-3 w-3" /> Artist Dashboard
+                <button onClick={() => navigate('/artist-dashboard')} className="px-8 py-4 bg-blue-600 hover:bg-blue-500 rounded-[12px] text-[10px] font-bold uppercase tracking-[0.3em] text-white shadow-2xl shadow-blue-600/20 transition-all active:scale-95 flex items-center gap-3 group" >
+                  <BarChart3 className="h-4 w-4 group-hover:scale-110 transition-transform" /> Artist_Dashboard
                 </button>
               )}
               {!localUser.isVerifiedArtist && (
-                <button onClick={() => navigate('/artist-onboarding')} className="px-5 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-[10px] text-[8px] font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-purple-600/20 transition-all active:scale-95 flex items-center gap-2" >
-                  <Star className="h-3 w-3" /> Become an Artist
+                <button onClick={() => navigate('/artist-onboarding')} className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-[12px] text-[10px] font-bold uppercase tracking-[0.3em] text-white shadow-2xl shadow-purple-600/20 transition-all active:scale-95 flex items-center gap-3 group" >
+                  <Star className="h-4 w-4 group-hover:rotate-12 transition-transform" /> Become_Artist
                 </button>
               )}
               {!isEditing ? (
-                <button onClick={() => setIsEditing(true)} className="px-5 py-2 bg-white/5 rounded-[10px] text-[8px] font-bold uppercase tracking-[0.2em] text-white/60 hover:text-white hover:bg-white/10 transition-all active:scale-95 shadow-lg flex items-center gap-2" >
-                  <Pencil className="h-3 w-3" /> Edit Profile
+                <button onClick={() => setIsEditing(true)} className="px-8 py-4 bg-white/5 border border-white/10 rounded-[12px] text-[10px] font-bold uppercase tracking-[0.3em] text-white/60 hover:text-white hover:bg-white/10 transition-all active:scale-95 flex items-center gap-3 group" >
+                  <Pencil className="h-4 w-4 group-hover:scale-110 transition-transform" /> Edit_Profile
                 </button>
               ) : (
-                <div className="flex gap-2">
-                  <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-red-500/10 text-red-500 rounded-[10px] text-[8px] font-bold uppercase tracking-widest hover:bg-red-500/20 transition-all">Abort</button>
-                  <button onClick={handleSave} className="px-5 py-2 electric-blue-bg text-white rounded-[10px] text-[8px] font-bold uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95">Save</button>
+                <div className="flex gap-3">
+                  <button onClick={() => setIsEditing(false)} className="px-8 py-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-[12px] text-[10px] font-bold uppercase tracking-widest hover:bg-red-500/20 transition-all">Abort</button>
+                  <button onClick={handleSave} className="px-10 py-4 bg-white text-black rounded-[12px] text-[10px] font-bold uppercase tracking-widest shadow-2xl active:scale-95 hover:bg-blue-500 hover:text-white transition-all">Commit_Changes</button>
                 </div>
               )}
             </div>
           </div>
 
           {/* Stats Cluster */}
-          <div className="flex items-center justify-center md:justify-start gap-6 md:gap-8 mb-4">
-            <div className="flex items-center gap-3 group">
-              <div className="text-center md:text-left cursor-pointer">
-                <p className="text-lg md:text-xl font-bold text-white leading-none group-hover:text-blue-400 transition-colors">
-                  {(localUser.followers || 0).toLocaleString()}
-                </p>
-                <p className="text-[7px] text-white/20 font-bold uppercase tracking-widest mt-1">Collectors</p>
-              </div>
-              <Link to="/settings" className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all hover:rotate-90 duration-500" title="Protocol Settings" >
-                <Settings className="h-3 w-3 md:h-4 md:w-4" />
-              </Link>
+          <div className="flex items-center justify-center md:justify-start gap-10">
+            <div className="flex flex-col items-center md:items-start group cursor-pointer">
+              <p className="text-2xl md:text-3xl font-bold text-white tracking-tighter leading-none font-mono group-hover:text-blue-500 transition-colors">
+                {(localUser.followers || 0).toLocaleString()}
+              </p>
+              <p className="text-[8px] text-white/20 font-bold uppercase tracking-[0.4em] mt-2">Collectors</p>
             </div>
-            <div className="text-center md:text-left group cursor-pointer">
-              <p className="text-lg md:text-xl font-bold text-white leading-none group-hover:text-blue-400 transition-colors">
+            <div className="w-px h-8 bg-white/10"></div>
+            <div className="flex flex-col items-center md:items-start group cursor-pointer">
+              <p className="text-2xl md:text-3xl font-bold text-white tracking-tighter leading-none font-mono group-hover:text-blue-500 transition-colors">
                 {(localUser.following || 0).toLocaleString()}
               </p>
-              <p className="text-[7px] text-white/20 font-bold uppercase tracking-widest mt-1">Following</p>
+              <p className="text-[8px] text-white/20 font-bold uppercase tracking-[0.4em] mt-2">Following</p>
             </div>
+            <div className="w-px h-8 bg-white/10"></div>
+            <Link to="/settings" className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all hover:rotate-90 duration-700" title="Protocol Settings" >
+              <Settings className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-xl py-4 mb-8 w-full px-4 md:px-12">
-        <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-2xl border-b border-white/5 py-6 mb-12 w-full px-6 md:px-12">
+        <div className="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto no-scrollbar">
           {[
-            { id: 'inventory', label: 'Inventory', icon: Box },
-            { id: 'feed', label: 'Feed', icon: Satellite },
-            { id: 'releases', label: 'Releases', icon: Disc, hidden: !userProfile.isVerifiedArtist },
+            { id: 'inventory', label: 'Vault', icon: Box },
+            { id: 'feed', label: 'Relay', icon: Satellite },
+            { id: 'releases', label: 'Protocols', icon: Disc, hidden: !userProfile.isVerifiedArtist },
             { id: 'sequences', label: 'Sequences', icon: Layers },
-            { id: 'activity', label: 'Activity', icon: Zap },
-            { id: 'network', label: 'Network', icon: Users },
+            { id: 'activity', label: 'Signals', icon: Zap },
+            { id: 'network', label: 'Nodes', icon: Users },
             { id: 'staking', label: 'Staking', icon: Coins }
           ].filter(t => !t.hidden).map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`px-6 py-2.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 flex-shrink-0 ${ activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10' }`} >
-              <tab.icon className={`h-3 w-3 ${activeTab === tab.id ? 'text-white' : 'text-white/30'}`} /> {tab.label}
+            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`px-8 py-3 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-3 flex-shrink-0 border ${ activeTab === tab.id ? 'bg-blue-600 border-blue-500 text-white shadow-2xl shadow-blue-600/30' : 'bg-white/5 border-white/5 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/10' }`} >
+              <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-white' : 'text-white/30'}`} /> {tab.label}
             </button>
           ))}
         </div>
@@ -400,7 +421,7 @@ const Profile: React.FC = () => {
       {/* Featured Collectibles Section */}
       {ownedNfts.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 md:px-12 mb-12">
-          <SectionHeader title="Featured Collectibles" onAction={() => setActiveTab('inventory')} actionLabel="View Vault" />
+          <SectionHeader title="Featured Collectibles" onAction={() => navigate('/explore/nfts?title=Featured Collectibles&filter=owned')} actionLabel="View Vault" />
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
             {ownedNfts.slice(0, 5).map(nft => (
               <div key={nft.id} className="flex-shrink-0 w-48 md:w-56">
@@ -416,78 +437,95 @@ const Profile: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Left Sidebar */}
           <div className="lg:col-span-4 space-y-8">
-            <div className="grid grid-cols-2 gap-4">
-              <StatBlock label="Network Value" value={localUser.earnings} subValue="TON" icon="gem" />
-              <StatBlock label="Reward Credits" value="1,450" subValue="TJ" icon="coins" />
+            <div className="grid grid-cols-2 gap-6">
+              <StatBlock label="Network Value" value={localUser.earnings} subValue="TON" icon="gem" trend="+12.4%" />
+              <StatBlock label="Reward Credits" value="1,450" subValue="TJ" icon="coins" trend="+5.2%" />
             </div>
-            <div className="glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.02] p-8 rounded-[10px] relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Dna className="h-10 w-10 text-blue-500" /></div>
-              <div className="absolute -left-20 -top-20 w-40 h-40 bg-blue-600/10 blur-[80px] rounded-full"></div>
-              <h3 className="text-[8px] font-bold text-blue-500 uppercase tracking-[0.4em] mb-6 relative z-10">Neural Signature</h3>
+            
+            <div className="relative group overflow-hidden bg-[#0a0a0a] border border-white/5 p-8 rounded-[16px] shadow-2xl">
+              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><Dna className="h-12 w-12 text-blue-500" /></div>
+              <div className="absolute -left-20 -top-20 w-48 h-48 bg-blue-600/10 blur-[100px] rounded-full"></div>
+              
+              <div className="flex items-center gap-3 mb-8 relative z-10">
+                <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+                <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.5em]">Neural_Signature</h3>
+              </div>
+              
               {isDNASyncing ? (
-                <div className="py-6 flex flex-col items-center gap-4 relative z-10">
-                  <img src={APP_LOGO} className="w-6 h-6 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
-                  <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Resonating frequencies...</p>
+                <div className="py-10 flex flex-col items-center gap-6 relative z-10">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse"></div>
+                    <img src={APP_LOGO} className="w-10 h-10 object-contain animate-[spin_4s_linear_infinite] relative z-10" alt="Loading..." />
+                  </div>
+                  <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.3em] animate-pulse">Resonating frequencies...</p>
                 </div>
               ) : (
-                <div className="space-y-6 relative z-10">
-                  <p className="text-xs text-white/60 leading-relaxed pl-6 py-2">
-                    {sonicDNA?.signature || "Primary resonance: Deep House & Synthwave. Collector profile indicates a preference for high-bitrate genesis protocols and atmospheric textures."}
-                  </p>
+                <div className="space-y-8 relative z-10">
+                  <div className="relative">
+                    <div className="absolute -left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-600 to-transparent opacity-30"></div>
+                    <p className="text-[11px] text-white/60 leading-relaxed font-medium italic">
+                      "{sonicDNA?.signature || "Primary resonance: Deep House & Synthwave. Collector profile indicates a preference for high-bitrate genesis protocols and atmospheric textures."}"
+                    </p>
+                  </div>
+                  
                   <div className="flex flex-wrap gap-2">
                     {(sonicDNA?.vibes || ['Atmospheric', 'Synth-Heavy', 'Collector', 'Curator']).map(tag => (
-                      <span key={tag} className="px-3 py-1 bg-blue-500/10 rounded-[10px] text-[7px] font-bold text-blue-400 uppercase tracking-widest">#{tag}</span>
+                      <span key={tag} className="px-3 py-1.5 bg-white/5 border border-white/5 rounded-full text-[8px] font-bold text-blue-400 uppercase tracking-widest hover:border-blue-500/30 transition-all cursor-default">
+                        #{tag}
+                      </span>
                     ))}
                   </div>
-                  <button onClick={handleSyncDNA} className="w-full py-3 bg-blue-600/10 rounded-[10px] text-[8px] font-bold text-blue-500 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-lg shadow-blue-500/5">Re-Sync DNA</button>
+                  
+                  <button onClick={handleSyncDNA} className="w-full py-4 bg-white/5 border border-white/5 rounded-[12px] text-[9px] font-bold text-white/40 uppercase tracking-[0.3em] hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all shadow-xl active:scale-95">
+                    RE_SYNC_DNA
+                  </button>
                 </div>
               )}
             </div>
-            <div className="glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.02] p-8 rounded-[10px] relative overflow-hidden">
-              <h3 className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em] mb-8">Origin Narrative</h3>
+
+            <div className="relative group overflow-hidden bg-[#0a0a0a] border border-white/5 p-8 rounded-[16px] shadow-2xl">
+              <div className="flex items-center gap-3 mb-8 relative z-10">
+                <div className="w-1 h-4 bg-white/20 rounded-full"></div>
+                <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.5em]">Origin_Narrative</h3>
+              </div>
+              
               {isEditing ? (
-                <div className="space-y-4">
-                  <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-[10px] p-4 text-xs text-white outline-none h-32 leading-relaxed bg-white/5 border border-white/10" placeholder="Identify your frequency..." />
+                <div className="space-y-6">
+                  <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-[12px] p-5 text-xs text-white outline-none h-40 leading-relaxed bg-white/5 border border-white/10 focus:border-blue-500/50 transition-all resize-none" placeholder="Identify your frequency..." />
                   
-                  <div className="space-y-3">
-                    <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Social Relays</p>
-                    <div className="grid grid-cols-1 gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="X (Twitter) URL" 
-                        value={localUser.socials?.x || ''} 
-                        onChange={(e) => handleSocialChange('x', e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-[10px] px-4 py-2 text-[10px] text-white outline-none focus:border-blue-500/50"
-                      />
-                      <input 
-                        type="text" 
-                        placeholder="Instagram URL" 
-                        value={localUser.socials?.instagram || ''} 
-                        onChange={(e) => handleSocialChange('instagram', e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-[10px] px-4 py-2 text-[10px] text-white outline-none focus:border-blue-500/50"
-                      />
-                      <input 
-                        type="text" 
-                        placeholder="Telegram URL" 
-                        value={localUser.socials?.telegram || ''} 
-                        onChange={(e) => handleSocialChange('telegram', e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-[10px] px-4 py-2 text-[10px] text-white outline-none focus:border-blue-500/50"
-                      />
+                  <div className="space-y-4">
+                    <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em]">Social_Relays</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      {['x', 'instagram', 'telegram'].map(platform => (
+                        <div key={platform} className="relative group/input">
+                          <input 
+                            type="text" 
+                            placeholder={`${platform.toUpperCase()} URL`} 
+                            value={(localUser.socials as any)?.[platform] || ''} 
+                            onChange={(e) => handleSocialChange(platform, e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-[10px] px-5 py-3 text-[10px] text-white outline-none focus:border-blue-500/50 transition-all"
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               ) : (
                 <div onClick={() => setIsEditing(true)} className="cursor-pointer group/bio relative" >
-                  <p className="text-xs text-white/40 leading-relaxed group-hover:text-white/60 transition-colors">
-                    {localUser.bio || "No biographical signals detected."}
+                  <p className="text-[11px] text-white/40 leading-relaxed group-hover:text-white/60 transition-colors font-medium">
+                    {localUser.bio || "No biographical signals detected in the current relay."}
                   </p>
-                  <Pencil className="h-2 w-2 text-blue-500 absolute -top-4 right-0 opacity-0 group-hover/bio:opacity-100 transition-opacity" />
+                  <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
+                    <span className="text-[8px] font-bold text-white/10 uppercase tracking-widest">Neural ID: {localUser.id.slice(0, 8)}...</span>
+                    <Pencil className="h-3 w-3 text-blue-500 opacity-0 group-hover/bio:opacity-100 transition-opacity" />
+                  </div>
                 </div>
               )}
             </div>
+            
             {!isSpotifyVerified && (
-              <button onClick={() => navigate('/settings')} className="w-full py-5 bg-[#1DB954]/10 rounded-[10px] text-[#1DB954] text-[9px] font-bold uppercase tracking-widest hover:bg-[#1DB954] hover:text-white transition-all flex items-center justify-center gap-3" >
-                <Disc className="h-4 w-4" /> Verify Artist Identity
+              <button onClick={() => navigate('/settings')} className="w-full py-5 bg-[#1DB954]/5 border border-[#1DB954]/20 rounded-[16px] text-[#1DB954] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#1DB954] hover:text-white transition-all flex items-center justify-center gap-4 shadow-2xl active:scale-95 group" >
+                <Disc className="h-5 w-5 group-hover:animate-spin" /> Verify Artist Identity
               </button>
             )}
           </div>
@@ -635,7 +673,7 @@ const Profile: React.FC = () => {
             {activeTab === 'sequences' && (
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
                 <div>
-                  <SectionHeader title="Sync Sequences" onAction={() => navigate('/library')} />
+                  <SectionHeader title="Sync Sequences" onAction={() => navigate('/explore/playlists?title=Sync Sequences&filter=my_playlists')} actionLabel="View All" />
                   <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
                     {playlists.map(pl => (
                       <div key={pl.id} className="min-w-[280px] sm:min-w-[320px]">
@@ -710,7 +748,7 @@ const Profile: React.FC = () => {
             {activeTab === 'network' && (
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                 <div>
-                  <SectionHeader title="Followed Artists" />
+                  <SectionHeader title="Followed Artists" onAction={() => navigate('/explore/artists?title=Followed Artists&filter=followed')} actionLabel="View All" />
                   <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 md:mx-0 md:px-0">
                     {localUser.followedArtists && localUser.followedArtists.length > 0 ? (
                       localUser.followedArtists.map(artistId => {
@@ -731,7 +769,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div>
-                  <SectionHeader title="Friends" />
+                  <SectionHeader title="Friends" onAction={() => navigate('/explore/artists?title=Friends&filter=friends')} actionLabel="View All" />
                   <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 md:mx-0 md:px-0">
                     {localUser.friends && localUser.friends.length > 0 ? (
                       localUser.friends.map(friendId => {
@@ -754,91 +792,142 @@ const Profile: React.FC = () => {
             )}
 
             {activeTab === 'staking' && (
-              <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-                <div className="glass border border-blue-500/10 backdrop-blur-xl bg-gradient-to-br from-blue-900/20 to-purple-900/20 p-8 rounded-[10px] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-10"><Coins className="h-16 w-16 text-blue-500" /></div>
-                  <div className="absolute -left-20 -top-20 w-60 h-60 bg-blue-600/20 blur-[100px] rounded-full"></div>
-                  <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                    <div>
-                      <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-2">Total Staked</p>
-                      <h3 className="text-4xl font-bold text-white tracking-tighter flex items-center gap-2">
-                        {(stakedBalance || 0).toLocaleString()} <span className="text-lg text-blue-500">TJ</span>
-                      </h3>
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+                <div className="relative group overflow-hidden bg-[#0a0a0a] border border-white/5 p-10 rounded-[20px] shadow-2xl">
+                  <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity"><Coins className="h-32 w-32 text-blue-500" /></div>
+                  <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-600/10 blur-[120px] rounded-full"></div>
+                  
+                  <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Total_Staked</p>
+                      <div className="flex items-baseline gap-3">
+                        <h3 className="text-5xl font-bold text-white tracking-tighter font-mono">
+                          {(stakedBalance || 0).toLocaleString()}
+                        </h3>
+                        <span className="text-xl font-bold text-blue-500 uppercase tracking-tighter">TJ</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[9px] font-bold text-emerald-500 uppercase tracking-widest">
+                        <TrendingUp className="h-3 w-3" /> +2.4% this week
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-2">Current APY</p>
-                      <h3 className="text-4xl font-bold text-green-400 tracking-tighter flex items-center gap-2">
-                        12.5% <TrendingUp className="h-5 w-5" />
-                      </h3>
+                    
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Current_APY</p>
+                      <div className="flex items-baseline gap-3">
+                        <h3 className="text-5xl font-bold text-emerald-400 tracking-tighter font-mono">
+                          12.5
+                        </h3>
+                        <span className="text-xl font-bold text-emerald-500 uppercase tracking-tighter">%</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                        <Zap className="h-3 w-3" /> Boosted by Node Rank
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-2">Pending Rewards</p>
-                      <h3 className="text-4xl font-bold text-amber-500 tracking-tighter flex items-center gap-2">
-                        {pendingRewards.toFixed(2)} <span className="text-lg">TJ</span>
-                      </h3>
+                    
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Pending_Rewards</p>
+                      <div className="flex items-baseline gap-3">
+                        <h3 className="text-5xl font-bold text-amber-500 tracking-tighter font-mono">
+                          {pendingRewards.toFixed(2)}
+                        </h3>
+                        <span className="text-xl font-bold text-amber-600 uppercase tracking-tighter">TJ</span>
+                      </div>
+                      <button onClick={handleClaimRewards} disabled={pendingRewards <= 0} className={`mt-4 px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${pendingRewards > 0 ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'bg-white/5 text-white/10 cursor-not-allowed border border-white/5'}`} >
+                        <Gift className="h-3 w-3" /> Claim_Sync_Rewards
+                      </button>
                     </div>
                   </div>
-                  <div className="relative z-10 flex flex-col md:flex-row gap-4">
-                    <button onClick={handleClaimRewards} disabled={pendingRewards <= 0} className={`flex-1 py-4 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 ${pendingRewards > 0 ? 'bg-amber-500 text-black hover:bg-amber-400 shadow-amber-500/20' : 'bg-white/5 text-white/20 cursor-not-allowed'}`} >
-                      <Gift className="h-4 w-4" /> Claim Rewards
+
+                  <div className="relative z-10 p-6 bg-white/[0.02] border border-white/5 rounded-[12px] flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-blue-600/10 border border-blue-600/20 flex items-center justify-center">
+                        <BarChart3 className="h-5 w-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-white uppercase tracking-widest">Staking Governance Active</p>
+                        <p className="text-[8px] text-white/30 uppercase tracking-[0.2em]">Your stake grants 1,450 voting power in the next protocol upgrade</p>
+                      </div>
+                    </div>
+                    <button className="px-8 py-3 bg-white/5 border border-white/10 rounded-[10px] text-[9px] font-bold uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 transition-all">
+                      Governance_Portal
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="glass border border-blue-500/10 bg-white/[0.02] p-6 rounded-[10px]">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                      <ArrowDown className="h-4 w-4 text-green-500" /> Stake (Deposit)
-                    </h4>
-                    <div className="mb-6">
-                      <div className="flex justify-between mb-2">
-                        <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Amount</span>
-                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Available: {(walletBalance || 0).toLocaleString()} TJ</span>
-                      </div>
-                      <div className="relative">
-                        <input type="number" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="0.00" className="w-full rounded-[10px] p-4 text-white font-mono outline-none transition-colors" />
-                        <button onClick={() => setStakeAmount(walletBalance.toString())} className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-white/10 hover:bg-white/20 rounded-[10px] text-[8px] font-bold text-blue-400 uppercase tracking-widest transition-colors" > Max </button>
-                      </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-[16px] shadow-2xl">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
+                      <h4 className="text-[10px] font-bold text-white uppercase tracking-[0.5em]">Initialize_Stake</h4>
                     </div>
-                    <button onClick={handleStake} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all" > Confirm Stake </button>
+                    
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-end px-1">
+                          <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Amount_to_Commit</span>
+                          <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Available: {(walletBalance || 0).toLocaleString()} TJ</span>
+                        </div>
+                        <div className="relative group/input">
+                          <input type="number" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="0.00" className="w-full bg-white/5 border border-white/10 rounded-[12px] p-5 text-xl text-white font-mono outline-none focus:border-blue-500/50 transition-all" />
+                          <button onClick={() => setStakeAmount(walletBalance.toString())} className="absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[8px] text-[8px] font-bold text-blue-500 uppercase tracking-widest transition-all" > MAX </button>
+                        </div>
+                      </div>
+                      
+                      <button onClick={handleStake} className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] text-[10px] font-bold uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/20 active:scale-95 transition-all" > 
+                        Commit_Stake_Protocol 
+                      </button>
+                    </div>
                   </div>
-                  <div className="glass border border-blue-500/10 bg-white/[0.02] p-6 rounded-[10px]">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                      <ArrowUp className="h-4 w-4 text-red-500" /> Unstake (Withdraw)
-                    </h4>
-                    <div className="mb-6">
-                      <div className="flex justify-between mb-2">
-                        <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Amount</span>
-                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Staked: {(stakedBalance || 0).toLocaleString()} TJ</span>
-                      </div>
-                      <div className="relative">
-                        <input type="number" value={unstakeAmount} onChange={(e) => setUnstakeAmount(e.target.value)} placeholder="0.00" className="w-full rounded-[10px] p-4 text-white font-mono outline-none transition-colors" />
-                        <button onClick={() => setUnstakeAmount(stakedBalance.toString())} className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-white/10 hover:bg-white/20 rounded-[10px] text-[8px] font-bold text-blue-400 uppercase tracking-widest transition-colors" > Max </button>
-                      </div>
+
+                  <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-[16px] shadow-2xl">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-1 h-4 bg-red-500 rounded-full"></div>
+                      <h4 className="text-[10px] font-bold text-white uppercase tracking-[0.5em]">Withdraw_Stake</h4>
                     </div>
-                    <button onClick={handleUnstake} className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-[10px] text-[9px] font-bold uppercase tracking-widest active:scale-95 transition-all" > Confirm Unstake </button>
+                    
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-end px-1">
+                          <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Amount_to_Release</span>
+                          <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Staked: {(stakedBalance || 0).toLocaleString()} TJ</span>
+                        </div>
+                        <div className="relative group/input">
+                          <input type="number" value={unstakeAmount} onChange={(e) => setUnstakeAmount(e.target.value)} placeholder="0.00" className="w-full bg-white/5 border border-white/10 rounded-[12px] p-5 text-xl text-white font-mono outline-none focus:border-blue-500/50 transition-all" />
+                          <button onClick={() => setUnstakeAmount(stakedBalance.toString())} className="absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[8px] text-[8px] font-bold text-blue-500 uppercase tracking-widest transition-all" > MAX </button>
+                        </div>
+                      </div>
+                      
+                      <button onClick={handleUnstake} className="w-full py-5 bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 rounded-[12px] text-[10px] font-bold uppercase tracking-[0.3em] active:scale-95 transition-all" > 
+                        Release_Stake_Signal 
+                      </button>
+                    </div>
                   </div>
                 </div>
               </section>
             )}
 
             {/* RECOMMENDATIONS SECTION */}
-            <section className="glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.02] p-8 rounded-[10px] relative overflow-hidden mt-12">
-              <div className="absolute top-0 right-0 p-6 opacity-10"><Satellite className="h-10 w-10 text-blue-500" /></div>
+            <section className="bg-[#0a0a0a] border border-white/5 p-10 rounded-[20px] shadow-2xl relative overflow-hidden mt-16">
+              <div className="absolute top-0 right-0 p-10 opacity-5"><Satellite className="h-20 w-20 text-blue-500" /></div>
+              <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-600/5 blur-[100px] rounded-full"></div>
+              
               <SectionHeader title="Network Suggestions" />
-              <div className="space-y-8 relative z-10">
+              
+              <div className="space-y-12 relative z-10">
                 <div>
-                  <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-[0.4em] mb-4">Suggested Nodes</h4>
-                  <div className="flex overflow-x-auto no-scrollbar gap-4 pb-2">
+                  <h4 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.5em] mb-6">Suggested_Nodes</h4>
+                  <div className="flex overflow-x-auto no-scrollbar gap-6 pb-4 -mx-4 px-4">
                     {MOCK_ARTISTS.slice(0, 4).map(artist => (
-                      <div key={artist.id} className="flex-shrink-0 w-48">
+                      <div key={artist.id} className="flex-shrink-0 w-56">
                         <UserCard user={artist} variant="compact" />
                       </div>
                     ))}
                   </div>
                 </div>
+                
                 <div>
-                  <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-[0.4em] mb-4">Curated Frequencies</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <h4 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.5em] mb-6">Curated_Frequencies</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {MOCK_TRACKS.slice(0, 4).map(track => (
                       <TrackCard key={track.id} track={track} variant="row" />
                     ))}

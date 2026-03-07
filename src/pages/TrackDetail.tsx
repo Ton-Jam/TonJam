@@ -52,7 +52,7 @@ const TrackDetail: React.FC = () => {
                 <p className="text-blue-500 font-bold text-xs uppercase tracking-widest">{track.artist}</p>
                 {track.artistVerified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-white leading-none mb-3">{track.title}</h1>
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tighter uppercase text-white leading-none mb-3">{track.title}</h1>
             </header>
 
             <div className="flex gap-4 mb-10">

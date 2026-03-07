@@ -270,7 +270,7 @@ const ArtistProfile: React.FC = () => {
                 <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.4em]">NODE_SYNC: ACTIVE</span>
               </div>
               <div className="flex items-center gap-4 mb-1">
-                <h1 className="text-3xl md:text-5xl font-bold tracking-tighter uppercase text-white leading-none">
+                <h1 className="text-2xl md:text-4xl font-bold tracking-tighter uppercase text-white leading-none">
                   {artist.name}
                 </h1>
                 {artist.verified && <CheckCircle className="text-blue-500 h-6 w-6 md:h-8 md:w-8" />}

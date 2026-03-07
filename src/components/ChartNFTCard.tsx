@@ -16,32 +16,32 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
   return (
     <div
       onClick={() => navigate(`/nft/${nft.id}`)}
-      className="flex items-center gap-4 p-3 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer group w-full"
+      className="flex items-center gap-5 p-4 rounded-[12px] hover:bg-white/[0.03] border border-transparent hover:border-white/5 transition-all cursor-pointer group w-full"
     >
       {/* Rank */}
-      <div className="w-8 text-center flex-shrink-0">
-        <span className={`text-lg font-bold tracking-tighter ${rank <= 3 ? 'text-blue-500' : 'text-white/20'}`}>
-          {rank}
+      <div className="w-6 text-center flex-shrink-0">
+        <span className={`text-xl font-bold tracking-tighter font-mono ${rank <= 3 ? 'text-blue-500' : 'text-white/10'}`}>
+          {rank.toString().padStart(2, '0')}
         </span>
       </div>
 
       {/* Image */}
-      <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-[10px] overflow-hidden flex-shrink-0 ">
+      <div className="relative w-14 h-14 rounded-[8px] overflow-hidden flex-shrink-0 border border-white/5">
         <img
           src={nft.imageUrl}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           alt={nft.title}
         />
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-bold text-white uppercase tracking-tight truncate group-hover:text-blue-400 transition-colors">
+        <h4 className="text-[11px] font-bold text-white uppercase tracking-[0.05em] truncate group-hover:text-blue-400 transition-colors">
           {nft.title}
         </h4>
-        <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+        <div className="flex items-center gap-2 mt-1 min-w-0">
           <p 
-            className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block"
+            className="text-[9px] font-bold text-white/30 uppercase tracking-widest truncate hover:text-white transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               if (artist) {
@@ -54,20 +54,20 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
             {nft.creator}
           </p>
           {artist?.verified && (
-            <CheckCircle2 className="h-2 w-2 text-blue-500" />
+            <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
           )}
         </div>
       </div>
 
       {/* Price */}
       <div className="text-right flex-shrink-0">
-        <div className="flex items-center justify-end gap-1.5 mb-1">
-          <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
-          <span className="text-sm font-bold text-white tracking-tighter">{nft.price}</span>
+        <div className="flex items-center justify-end gap-2 mb-1">
+          <img src={TON_LOGO} className="w-3.5 h-3.5" alt="TON" />
+          <span className="text-sm font-bold text-white tracking-tighter font-mono">{nft.price}</span>
         </div>
-        <div className="flex items-center justify-end gap-1 text-[8px] font-bold uppercase tracking-widest text-green-400">
+        <div className="flex items-center justify-end gap-1 text-[8px] font-bold uppercase tracking-widest text-emerald-500 font-mono">
           <ChevronUp className="h-2 w-2" />
-          <span>{Math.floor(Math.random() * 20 + 5)}%</span>
+          <span>+{Math.floor(Math.random() * 20 + 5)}%</span>
         </div>
       </div>
     </div>

@@ -44,11 +44,12 @@ import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
 import { ChartRevenue } from "@/components/ChartRevenue";
 
 import MintModal from "@/components/MintModal";
+import RoyaltyConfigModal from "@/components/RoyaltyConfigModal";
 
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, userProfile, transactions, artists, addUserNFT } = useAudio();
+  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery } = useAudio();
   
   const [showMintModal, setShowMintModal] = useState(false);
   const [selectedTrackForMint, setSelectedTrackForMint] = useState<Track | undefined>(undefined);
@@ -71,6 +72,14 @@ const ArtistDashboard: React.FC = () => {
     MOCK_TRACKS.filter((t) => t.artistId === artistData.id),
   );
 
+  const filteredTracks = useMemo(() => {
+    if (!searchQuery) return tracks;
+    return tracks.filter(t => 
+      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.genre.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [tracks, searchQuery]);
+
   const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile">("overview");
 
   useEffect(() => {
@@ -83,6 +92,7 @@ const ArtistDashboard: React.FC = () => {
 
   const [isUploading, setIsUploading] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
   /* Form states */ const [newTrack, setNewTrack] = useState({
     title: "",
     genre: "Electronic",
@@ -382,7 +392,7 @@ const ArtistDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {tracks.map((track) => (
+                    {filteredTracks.map((track) => (
                       <tr key={track.id} className="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
                         <td className="p-6">
                           <div className="flex items-center gap-4">
@@ -468,6 +478,53 @@ const ArtistDashboard: React.FC = () => {
                       </div>{" "}
                     </div>{" "}
                   </div>{" "}
+                    <div className="glass border border-blue-500/10 bg-[#0a0a2a]/40 -blue-500/20 rounded-[10px] p-8 relative overflow-hidden">
+                    {" "}
+                    <div className="absolute top-0 right-0 p-8 opacity-5">
+                      <Radio className="h-16 w-16 text-blue-400" />
+                    </div>{" "}
+                    <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">
+                      Royalty Configuration
+                    </h3>{" "}
+                    <div className="space-y-4">
+                      {artistData.royaltyConfig ? (
+                        <>
+                          <div className="space-y-2">
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block mb-2">Streaming Splits</span>
+                            {artistData.royaltyConfig.streamingSplits.map((split, i) => (
+                              <div key={i} className="flex justify-between items-center bg-white/5 p-3 rounded-[6px]">
+                                <div className="flex flex-col">
+                                  <span className="text-[9px] font-bold text-white uppercase">{split.label || 'Recipient'}</span>
+                                  <span className="text-[7px] font-mono text-white/20">{split.address.slice(0, 12)}...</span>
+                                </div>
+                                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{(split.percentage * 100).toFixed(1)}%</span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="space-y-2 pt-4">
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block mb-2">NFT Secondary Splits</span>
+                            {artistData.royaltyConfig.nftSaleSplits.map((split, i) => (
+                              <div key={i} className="flex justify-between items-center bg-white/5 p-3 rounded-[6px]">
+                                <div className="flex flex-col">
+                                  <span className="text-[9px] font-bold text-white uppercase">{split.label || 'Recipient'}</span>
+                                  <span className="text-[7px] font-mono text-white/20">{split.address.slice(0, 12)}...</span>
+                                </div>
+                                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{(split.percentage * 100).toFixed(1)}%</span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-[10px] text-white/40">No royalty config set.</p>
+                      )}
+                      <button 
+                        onClick={() => setIsRoyaltyModalOpen(true)}
+                        className="w-full mt-4 py-3 bg-white/5 border border-white/10 rounded-[6px] text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:bg-white/10 transition-all"
+                      >
+                        Edit Configuration
+                      </button>
+                    </div>
+                  </div>
                   <div className="glass border border-blue-500/10 bg-[#0a0a2a]/40 -blue-500/20 rounded-[10px] p-8 relative overflow-hidden">
                     {" "}
                     <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -892,6 +949,12 @@ const ArtistDashboard: React.FC = () => {
           }} 
         />
       )}
+
+      <RoyaltyConfigModal 
+        isOpen={isRoyaltyModalOpen}
+        onClose={() => setIsRoyaltyModalOpen(false)}
+        artist={artistData}
+      />
     </div>
   );
 };

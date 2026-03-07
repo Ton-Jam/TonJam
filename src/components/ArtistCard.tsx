@@ -25,7 +25,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist }) => {
   return (
     <div 
       onClick={handleCardClick}
-      className="group flex flex-col items-center cursor-pointer text-center h-full"
+      className="group flex flex-col items-center cursor-pointer text-center h-full w-full"
     >
       <div className="relative w-full aspect-square max-w-[120px] mb-4 mx-auto">
         <div className="w-full h-full rounded-full overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300 relative">
@@ -43,7 +43,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist }) => {
         )}
       </div>
       
-      <h3 className="text-sm font-bold text-white tracking-tight mb-1 group-hover:text-blue-400 transition-colors truncate w-full px-2">
+      <h3 className="text-sm font-bold text-white tracking-tight mb-1 group-hover:text-blue-400 group-hover:underline transition-colors truncate w-full max-w-full px-2">
         {artist.name}
       </h3>
       

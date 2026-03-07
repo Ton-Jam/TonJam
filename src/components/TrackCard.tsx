@@ -68,15 +68,20 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
         addNotification('Link copied to clipboard!', 'success');
       }
     } catch (err) {
-      console.error('Error sharing:', err);
-      // Don't show an error if the user just cancelled the share dialog
-      if ((err as Error).name !== 'AbortError') {
+      // Don't log or show an error if the user just cancelled the share dialog
+      const isCancel = (err as Error).name === 'AbortError' || 
+                      (err as Error).message?.toLowerCase().includes('canceled') ||
+                      (err as Error).message?.toLowerCase().includes('aborted');
+      
+      if (!isCancel) {
+        console.error('Error sharing:', err);
         addNotification('Failed to share track.', 'error');
       }
     }
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (track.isNFT) {
       navigate(`/nft/${track.id}`);
     } else {
@@ -87,10 +92,10 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-3 rounded-[10px] border border-white/5 hover:bg-white/5 transition-all cursor-pointer"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full"
         onClick={handleCardClick}
       >
-        <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0" onClick={handlePlay}>
+        <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0" onClick={(e) => { e.stopPropagation(); handlePlay(e); }}>
           <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
           <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
              {isActive && isPlaying ? (
@@ -100,7 +105,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
                   <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_400ms]"></div>
                 </div>
              ) : (
-                <Play className="h-4 w-4 text-white fill-white" />
+                <Play className="h-3 w-3 text-white fill-white" />
              )}
           </div>
         </div>
@@ -113,10 +118,13 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
             {track.artist}
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-4">
            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest hidden sm:block">
               {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
            </span>
+           <button onClick={handleOptions} className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+             <MoreVertical className="h-4 w-4" />
+           </button>
         </div>
       </div>
     );
@@ -136,7 +144,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
         />
         
         {/* Overlay for Play Button & Badges */}
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300">
+        <div className={`absolute inset-0 transition-all duration-300 ${isActive ? 'bg-black/40' : 'bg-black/0 group-hover:bg-black/40'}`}>
            {/* Top Row */}
            <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
              <div className="flex flex-col gap-1 items-start">
@@ -156,22 +164,22 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
 
            {/* Center Play Button */}
            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className={`transition-all duration-300 transform ${isActive || isPlaying ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}>
+              <div className={`transition-all duration-300 transform ${isActive ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}>
                  {isActive && isPlaying ? (
                     <div 
-                      className="flex items-end justify-center gap-0.5 w-10 h-10 rounded-full bg-blue-600/90 backdrop-blur-md shadow-xl p-2.5 pointer-events-auto cursor-pointer"
+                      className="flex items-end justify-center gap-0.5 w-7 h-7 rounded-full bg-blue-600/90 backdrop-blur-md shadow-xl p-1.5 pointer-events-auto cursor-pointer"
                       onClick={handlePlay}
                     >
-                      <div className="w-1 bg-white rounded-t-sm animate-[bounce_1s_infinite_0ms]"></div>
-                      <div className="w-1 bg-white rounded-t-sm animate-[bounce_1s_infinite_200ms]"></div>
-                      <div className="w-1 bg-white rounded-t-sm animate-[bounce_1s_infinite_400ms]"></div>
+                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_0ms] h-full"></div>
+                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_200ms] h-full"></div>
+                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_400ms] h-full"></div>
                     </div>
                  ) : (
                     <div 
-                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-colors pointer-events-auto cursor-pointer"
+                      className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-colors pointer-events-auto cursor-pointer"
                       onClick={handlePlay}
                     >
-                       <Play className="h-4 w-4 text-white fill-white ml-0.5" />
+                       <Play className="h-3 w-3 text-white fill-white ml-0.5" />
                     </div>
                  )}
               </div>

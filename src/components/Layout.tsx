@@ -16,7 +16,10 @@ import {
   Upload,
   Shield,
   TrendingUp,
-  ArrowLeft
+  ArrowLeft,
+  LogOut,
+  LogIn,
+  PlusCircle as PlusCircleIcon
 } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -26,6 +29,8 @@ import MiniAudioPlayer from './MiniAudioPlayer';
 import FullPlayer from './FullPlayer';
 import TrackUploadModal from './TrackUploadModal';
 import { ModeToggle } from './ModeToggle';
+import CreatePlaylistModal from './CreatePlaylistModal';
+import AuthModal from './AuthModal';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,15 +39,28 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentTrack, notifications, isFullPlayerOpen, userProfile } = useAudio();
-  const { user, signInWithGoogle } = useAuth();
+  const { currentTrack, notifications, isFullPlayerOpen, userProfile, searchQuery, setSearchQuery, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen } = useAudio();
+  const { user, signInWithGoogle, signOut } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
-  const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   
   const isHome = location.pathname === '/';
+  const isExplore = location.pathname.startsWith('/explore');
+
+  const getSearchPlaceholder = () => {
+    const path = location.pathname;
+    if (path.startsWith('/marketplace')) return 'Scan Network Protocols (NFTs)...';
+    if (path.startsWith('/jamspace')) return 'Search Live Nodes & Sessions...';
+    if (path.startsWith('/library')) return 'Search Your Frequencies...';
+    if (path.startsWith('/profile')) return 'Search Releases & Activity...';
+    if (path.startsWith('/artist-dashboard')) return 'Search Your Catalog & Stats...';
+    if (path.startsWith('/discover')) return 'Search Artists, Genres, Vibes...';
+    if (path.startsWith('/wallet')) return 'Search Transactions...';
+    return 'Search tracks, artists, NFTs...';
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,84 +76,97 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-black text-white transition-colors duration-300">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/5 px-4 md:px-6 py-3 flex items-center justify-between lg:left-64 transition-colors duration-300">
-        {isHome ? (
-          <>
+      {!isExplore && (
+        <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/5 px-4 md:px-6 py-3 flex items-center justify-between lg:left-64 transition-colors duration-300">
+          <div className="flex items-center gap-4 flex-1">
+            {!isHome && (
+              <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-white/5 text-white/60 hover:text-white transition-all">
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            )}
+            
             <div className="flex items-center gap-3 lg:hidden">
-              <img src={APP_LOGO} alt="App Logo" className="w-8 h-8 object-contain" />
-              <span className="font-bold text-base tracking-tight text-white uppercase">TonJam</span>
+              {isHome ? (
+                <img src={APP_LOGO} alt="App Logo" className="w-8 h-8 object-contain" />
+              ) : (
+                <span className="font-bold text-sm tracking-tight text-white uppercase truncate max-w-[100px]">{location.pathname.split('/')[1].replace('-', ' ')}</span>
+              )}
             </div>
-            
-            <div className="hidden lg:flex flex-1 max-w-xl relative mx-auto lg:mx-0" ref={searchRef}>
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
-              <input 
-                type="text" 
-                placeholder="Search tracks, artists, NFTs..." 
-                className="w-full bg-white/5 border border-white/10 rounded-[5px] py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchOpen(true)}
-              />
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-between w-full">
-            <button onClick={() => navigate(-1)} className="text-white/60 hover:text-white">
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-            
-            {isSearchOpen ? (
-              <div className="flex-1 ml-4 relative" ref={searchRef}>
+
+            {!isHome && (
+              <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-3xl' : 'max-w-xl'}`} ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                 <input 
                   type="text" 
-                  placeholder="Search..." 
-                  className="w-full bg-white/5 border border-white/10 rounded-[5px] py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+                  placeholder={getSearchPlaceholder()} 
+                  className="w-full bg-white/5 border border-white/10 rounded-[5px] py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-white/20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
+                  onFocus={() => setIsSearchOpen(true)}
                 />
               </div>
-            ) : (
-              <button onClick={() => setIsSearchOpen(true)} className="text-white/60 hover:text-white ml-auto">
-                <Search className="h-6 w-6" />
-              </button>
             )}
-          </div>
-        )}
 
-        {isHome && (
-          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-            <Link to="/tasks" className="flex items-center justify-center hover:opacity-80 transition-opacity">
-              <img src={TJ_COIN_ICON} alt="Tasks" className="w-8 h-8 object-contain drop-shadow-md" />
-            </Link>
-
-            <button 
-              onClick={() => tonConnectUI.openModal()}
-              className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all border border-white/10"
-            >
-              <Wallet className="h-5 w-5 text-blue-500" />
-            </button>
-            
-            {user ? (
-              <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-white/10 hover:border-white/30 transition-all flex items-center justify-center bg-white/5">
-                {user.user_metadata?.avatar_url ? (
-                  <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+            {/* Mobile Search Toggle */}
+            {!isHome && (
+              <div className="lg:hidden flex-1 flex justify-end">
+                {isSearchOpen ? (
+                  <div className="flex-1 relative" ref={searchRef}>
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                    <input 
+                      type="text" 
+                      placeholder="Search..." 
+                      className="w-full bg-white/5 border border-white/10 rounded-[10px] py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
                 ) : (
-                  <User className="w-4 h-4 text-white/70" />
+                  <button onClick={() => setIsSearchOpen(true)} className="p-2 rounded-full hover:bg-white/5 text-white/60 hover:text-white transition-all">
+                    <Search className="h-5 w-5" />
+                  </button>
                 )}
-              </Link>
-            ) : (
-              <button 
-                onClick={() => signInWithGoogle()}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-widest rounded-[5px] transition-all"
-              >
-                Sign In
-              </button>
+              </div>
             )}
           </div>
-        )}
-      </header>
+
+          <div className="flex items-center gap-3 sm:gap-4 ml-4">
+            {isHome && (
+              <>
+                <Link to="/tasks" className="flex items-center justify-center hover:opacity-80 transition-opacity">
+                  <img src={TJ_COIN_ICON} alt="Tasks" className="w-8 h-8 object-contain drop-shadow-md" />
+                </Link>
+
+                <button 
+                  onClick={() => tonConnectUI.openModal()}
+                  className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all border border-white/10"
+                >
+                  <Wallet className="h-5 w-5 text-blue-500" />
+                </button>
+                
+                {user ? (
+                  <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-white/10 hover:border-white/30 transition-all flex items-center justify-center bg-white/5">
+                    {user.user_metadata?.avatar_url ? (
+                      <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-4 h-4 text-white/70" />
+                    )}
+                  </Link>
+                ) : (
+                  <button 
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all"
+                    title="Sign In"
+                  >
+                    <LogIn className="h-5 w-5" />
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </header>
+      )}
 
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-black border-r border-white/5 flex-col p-6 z-50 overflow-y-auto transition-colors duration-300">
@@ -162,6 +193,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <NavItem to="/wallet" icon={Wallet} label="Wallet" />
             <NavItem to="/staking" icon={TrendingUp} label="Staking" />
             <NavItem to="/settings" icon={SettingsIcon} label="Settings" />
+            {user && (
+              <button 
+                onClick={() => signOut()}
+                className="w-full flex items-center gap-4 px-5 py-3 rounded-[5px] text-white/40 hover:text-red-500 hover:bg-red-500/5 transition-all group mt-2"
+              >
+                <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Sign Out</span>
+              </button>
+            )}
           </div>
 
           {userProfile.isVerifiedArtist && (
@@ -197,7 +237,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="pb-32 lg:pb-24 lg:ml-64 transition-all w-full pt-16 lg:pt-16">
+      <main className={`pb-32 lg:pb-24 lg:ml-64 transition-all w-full ${isExplore ? 'pt-0' : 'pt-16 lg:pt-16'}`}>
         <div className="w-full">
           {children}
         </div>
@@ -208,6 +248,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {isFullPlayerOpen && <FullPlayer />}
 
       <TrackUploadModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
+      <CreatePlaylistModal isOpen={isCreatePlaylistModalOpen} onClose={() => setIsCreatePlaylistModalOpen(false)} />
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       {/* Mobile Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-lg border-t border-white/5 h-20 px-2 flex justify-around items-center shadow-2xl">

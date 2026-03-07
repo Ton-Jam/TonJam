@@ -7,6 +7,7 @@ import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
 import ArtistCard from '@/components/ArtistCard';
 import NFTCard from '@/components/NFTCard';
+import GenreCard from '@/components/GenreCard';
 import SectionHeader from '@/components/SectionHeader';
 import PlaylistCard from '@/components/PlaylistCard';
 import { Track } from '@/types';
@@ -21,12 +22,11 @@ const TRACK_SORT_OPTIONS = ['Newest', 'Popularity', 'Most Liked'];
 const Discover: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, artists, getTrendingTracks, getTopNFTTracks, allPlaylists } = useAudio();
+  const { addNotification, artists, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery: search, setSearchQuery: setSearch } = useAudio();
   
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get('search') || '';
 
-  const [search, setSearch] = useState(initialSearch);
   const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists'>('Tracks');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('Newest');
@@ -41,6 +41,12 @@ const Discover: React.FC = () => {
   const [suggestions, setSuggestions] = useState<{id: string, title: string, type: string, subtitle?: string}[]>([]);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (initialSearch) {
+      setSearch(initialSearch);
+    }
+  }, [initialSearch, setSearch]);
 
   const loadMore = useCallback(() => {
     setDisplayLimit(prev => prev + LOAD_MORE_COUNT);
@@ -384,7 +390,7 @@ const Discover: React.FC = () => {
         <>
           {/* Curated Playlists */}
           <section>
-            <SectionHeader title="Curated Playlists" viewAllLink="/library" />
+            <SectionHeader title="Curated Playlists" viewAllLink="/explore/playlists?title=Curated Playlists&filter=curated" />
             <div className="flex gap-6 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
               {CURATED_PLAYLISTS.map(playlist => (
                 <div key={playlist.id} className="flex-shrink-0 w-64 md:w-72">
@@ -396,7 +402,7 @@ const Discover: React.FC = () => {
 
           {/* Trending Tracks */}
           <section>
-            <SectionHeader title="Trending Now" subtitle="Most streamed tracks on TON" />
+            <SectionHeader title="Trending Now" subtitle="Most streamed tracks on TON" viewAllLink="/explore/tracks?title=Trending Now&filter=trending" />
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
               {trendingTracks.map(track => (
                 <div key={track.id} className="flex-shrink-0 w-40 sm:w-48">
@@ -420,25 +426,19 @@ const Discover: React.FC = () => {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {GENRES.map(genre => (
-                <button 
+                <GenreCard 
                   key={genre.id} 
+                  genre={genre} 
                   onClick={() => handleGenreToggle(genre.name)}
-                  className={`relative h-24 rounded-[10px] overflow-hidden group transition-all hover:scale-[1.02] active:scale-95 ${selectedGenre === genre.name ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-black' : ''}`}
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-20 group-hover:opacity-40 transition-opacity`}></div>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 z-10">
-                    <span className="text-2xl">{genre.icon}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">{genre.name}</span>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 group-hover:bg-white/20 transition-colors"></div>
-                </button>
+                  isSelected={selectedGenre === genre.name}
+                />
               ))}
             </div>
           </section>
 
           {/* Top NFT Sales */}
           <section>
-            <SectionHeader title="Top NFT Sales" subtitle="Highest valued music artifacts" viewAllLink="/marketplace" />
+            <SectionHeader title="Top NFT Sales" subtitle="Highest valued music artifacts" viewAllLink="/explore/nfts?title=Top NFT Sales&filter=top_nfts" />
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
               {topNFTTracks.map(track => (
                 <div key={track.id} className="flex-shrink-0 w-40 sm:w-48">

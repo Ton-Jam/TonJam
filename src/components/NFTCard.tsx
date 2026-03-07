@@ -48,8 +48,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Default behavior is navigating to detail page, but we can also open quick view if preferred
-    // For now, let's keep navigation as default card click
+    e.preventDefault();
     navigate(`/nft/${nft.id}`);
   };
 
@@ -133,7 +132,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
               
               <button 
                 onClick={handleActionClick} 
-                className={`px-2.5 py-1 rounded-[4px] text-[7px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg
+                className={`px-3 py-1.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg
                   ${isOwner 
                     ? 'bg-white/10 text-white hover:bg-white/20' 
                     : 'bg-blue-600 text-white hover:bg-blue-500 shadow-blue-600/20'}

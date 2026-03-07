@@ -191,13 +191,15 @@ export const MOCK_TRACKS: Track[] = [
   },
 ];
 
+import { Zap, Moon, Waves, Sparkles, Factory, Coffee } from 'lucide-react';
+
 export const GENRES = [
-  { id: 'electronic', name: 'Electronic', icon: '⚡', color: 'from-blue-500 to-cyan-500' },
-  { id: 'synthwave', name: 'Synthwave', icon: '🌃', color: 'from-pink-500 to-purple-500' },
-  { id: 'ambient', name: 'Ambient', icon: '🌊', color: 'from-emerald-500 to-teal-500' },
-  { id: 'pop', name: 'Pop', icon: '✨', color: 'from-yellow-400 to-orange-500' },
-  { id: 'techno', name: 'Techno', icon: '🏭', color: 'from-red-500 to-rose-600' },
-  { id: 'lofi', name: 'Lo-Fi', icon: '☕', color: 'from-stone-500 to-neutral-600' },
+  { id: 'electronic', name: 'Electronic', icon: Zap, color: 'from-blue-500 to-cyan-500' },
+  { id: 'synthwave', name: 'Synthwave', icon: Moon, color: 'from-pink-500 to-purple-500' },
+  { id: 'ambient', name: 'Ambient', icon: Waves, color: 'from-emerald-500 to-teal-500' },
+  { id: 'pop', name: 'Pop', icon: Sparkles, color: 'from-yellow-400 to-orange-500' },
+  { id: 'techno', name: 'Techno', icon: Factory, color: 'from-red-500 to-rose-600' },
+  { id: 'lofi', name: 'Lo-Fi', icon: Coffee, color: 'from-stone-500 to-neutral-600' },
 ];
 
 export const CURATED_PLAYLISTS: Playlist[] = [
@@ -258,7 +260,7 @@ export const MOCK_NFTS: NFTItem[] = [
   { 
     id: 'n1', 
     trackId: '1', 
-    title: 'Solar Pulse #001', 
+    title: 'Solar Pulse: Genesis Edition #001', 
     owner: 'Neon Voyager', 
     creator: 'Neon Voyager', 
     price: '12', 
@@ -290,7 +292,7 @@ export const MOCK_NFTS: NFTItem[] = [
   { 
     id: 'n2', 
     trackId: '3', 
-    title: 'Deep Horizon #042', 
+    title: 'Deep Horizon: Twilight Series #042', 
     owner: '0xTon...A12B', 
     creator: 'Echo Phase', 
     price: '45', 
@@ -318,7 +320,7 @@ export const MOCK_NFTS: NFTItem[] = [
   { 
     id: 'n3', 
     trackId: '5', 
-    title: 'Neon Nights #101', 
+    title: 'Neon Nights: Club Pass #007', 
     owner: 'UQCc...8xZ2', 
     creator: 'City Ghost', 
     price: '8', 
@@ -346,7 +348,7 @@ export const MOCK_NFTS: NFTItem[] = [
   { 
     id: 'n4', 
     trackId: '6', 
-    title: 'Prism Shift #001', 
+    title: 'Prism Shift: Monolith #001', 
     owner: 'Prism Core', 
     creator: 'Prism Core', 
     price: '25', 
@@ -368,7 +370,7 @@ export const MOCK_NFTS: NFTItem[] = [
   { 
     id: 'n5', 
     trackId: '1', 
-    title: 'Solar Pulse #002', 
+    title: 'Solar Pulse: Flare Edition #002', 
     owner: 'Neon Voyager', 
     creator: 'Neon Voyager', 
     price: '10', 
@@ -401,7 +403,10 @@ export const MOCK_ARTISTS: Artist[] = [
     bio: "Pioneering the sound of the digital frontier. Synthwave frequencies forged in the TON core.",
     bannerUrl: "https://picsum.photos/1200/400?random=1001",
     socials: { x: 'https://x.com/neon_voyager', spotify: 'https://spotify.com/artist/neon_voyager', instagram: 'https://instagram.com/neon_voyager' },
-    royaltyConfig: { streamingPercentage: 0.05, nftSaleShare: 0.10 },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.05, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.10, label: 'Main Artist' }]
+    },
     earnings: { streaming: '12.4', nftSales: '45.2', total: '57.6' }
   },
   { 
@@ -416,7 +421,10 @@ export const MOCK_ARTISTS: Artist[] = [
     bio: "Algorithmically generated beats for the decentralized generation.",
     bannerUrl: "https://picsum.photos/1200/400?random=1002",
     socials: { x: 'https://x.com/byte_beat', spotify: 'https://spotify.com/artist/byte_beat' },
-    royaltyConfig: { streamingPercentage: 0.04, nftSaleShare: 0.08 },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'EQB_Byte_Beat_Wallet_Address_7777', percentage: 0.04, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'EQB_Byte_Beat_Wallet_Address_7777', percentage: 0.08, label: 'Main Artist' }]
+    },
     earnings: { streaming: '5.2', nftSales: '12.8', total: '18.0' }
   },
   { 
@@ -431,7 +439,10 @@ export const MOCK_ARTISTS: Artist[] = [
     bio: "Ambient explorations through the blockchain void.",
     bannerUrl: "https://picsum.photos/1200/400?random=1003",
     socials: { website: 'https://echophase.io' },
-    royaltyConfig: { streamingPercentage: 0.03, nftSaleShare: 0.05 },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'EQE_Echo_Phase_Wallet_Address_8888', percentage: 0.03, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'EQE_Echo_Phase_Wallet_Address_8888', percentage: 0.05, label: 'Main Artist' }]
+    },
     earnings: { streaming: '2.1', nftSales: '8.5', total: '10.6' }
   },
   { 
@@ -446,7 +457,10 @@ export const MOCK_ARTISTS: Artist[] = [
     bio: "Ethereal pop melodies floating on top of complex electronic soundscapes.",
     bannerUrl: "https://picsum.photos/1200/400?random=1004",
     socials: { x: 'https://x.com/lunaray', instagram: 'https://instagram.com/lunaray' },
-    royaltyConfig: { streamingPercentage: 0.06, nftSaleShare: 0.12 },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'EQL_Luna_Ray_Wallet_Address_9999', percentage: 0.06, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'EQL_Luna_Ray_Wallet_Address_9999', percentage: 0.12, label: 'Main Artist' }]
+    },
     earnings: { streaming: '18.5', nftSales: '32.1', total: '50.6' }
   },
   { 
@@ -461,7 +475,10 @@ export const MOCK_ARTISTS: Artist[] = [
     bio: "Lo-fi beats captured from the heart of the urban jungle.",
     bannerUrl: "https://picsum.photos/1200/400?random=1005",
     socials: { spotify: 'https://spotify.com/artist/cityghost' },
-    royaltyConfig: { streamingPercentage: 0.02, nftSaleShare: 0.04 },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'EQC_City_Ghost_Wallet_Address_5555', percentage: 0.02, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'EQC_City_Ghost_Wallet_Address_5555', percentage: 0.04, label: 'Main Artist' }]
+    },
     earnings: { streaming: '1.2', nftSales: '4.3', total: '5.5' }
   },
   { 
@@ -476,7 +493,10 @@ export const MOCK_ARTISTS: Artist[] = [
     bio: "Shattering sonic boundaries with experimental techno and hard-hitting rhythms.",
     bannerUrl: "https://picsum.photos/1200/400?random=1006",
     socials: { x: 'https://x.com/prismcore', website: 'https://prismcore.tech' },
-    royaltyConfig: { streamingPercentage: 0.05, nftSaleShare: 0.10 },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'EQP_Prism_Core_Wallet_Address_1111', percentage: 0.05, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'EQP_Prism_Core_Wallet_Address_1111', percentage: 0.10, label: 'Main Artist' }]
+    },
     earnings: { streaming: '8.4', nftSales: '22.1', total: '30.5' }
   },
 ];

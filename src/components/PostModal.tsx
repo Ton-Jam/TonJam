@@ -82,50 +82,50 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             <div className="flex-shrink-0">
               <img
                 src={MOCK_USER.avatar}
-                className="w-10 h-10 rounded-full object-cover grayscale-[0.2] group-focus-within:grayscale-0 transition-all"
+                className="w-12 h-12 rounded-full object-cover grayscale-[0.2] group-focus-within:grayscale-0 transition-all border border-white/10"
                 alt=""
               />
             </div>
-            <div className="flex-1 flex flex-col gap-3">
+            <div className="flex-1 flex flex-col gap-4">
               <textarea
                 autoFocus
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="What's the frequency? Describe the vibe..."
-                className="w-full bg-transparent border-none outline-none resize-none text-white text-base placeholder:text-white/10 h-24 font-medium tracking-tight leading-snug no-scrollbar"
+                className="w-full bg-transparent border-none outline-none resize-none text-white text-lg placeholder:text-white/20 min-h-[120px] font-medium tracking-tight leading-relaxed no-scrollbar"
               ></textarea>
 
               {selectedTrack && (
-                <div className="relative rounded-[10px] bg-white/5 border border-white/10 p-3 flex items-center gap-3 group/track">
-                  <img src={selectedTrack.coverUrl} className="w-10 h-10 rounded-[6px] object-cover" alt="" />
+                <div className="relative rounded-[12px] bg-white/5 border border-white/10 p-3 flex items-center gap-4 group/track hover:bg-white/10 transition-colors">
+                  <img src={selectedTrack.coverUrl} className="w-12 h-12 rounded-[8px] object-cover shadow-lg" alt="" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold text-white uppercase truncate">{selectedTrack.title}</p>
-                    <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest truncate">{selectedTrack.artist}</p>
+                    <p className="text-xs font-bold text-white uppercase truncate tracking-wide">{selectedTrack.title}</p>
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest truncate mt-0.5">{selectedTrack.artist}</p>
                   </div>
-                  <button onClick={() => setSelectedTrackId(null)} className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all opacity-0 group-hover/track:opacity-100">
-                    <X className="h-3 w-3" />
+                  <button onClick={() => setSelectedTrackId(null)} className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center text-white/40 hover:text-white hover:bg-red-500/20 transition-all opacity-0 group-hover/track:opacity-100">
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               )}
 
               {mediaUrl && (
-                <div className="relative rounded-[10px] overflow-hidden group/media">
+                <div className="relative rounded-[12px] overflow-hidden group/media border border-white/10">
                   {mediaUrl.startsWith("data:video") ? (
                     <video
                       src={mediaUrl}
                       controls
-                      className="w-full max-h-48 object-cover"
+                      className="w-full max-h-64 object-cover"
                     />
                   ) : (
                     <img
                       src={mediaUrl}
-                      className="w-full max-h-48 object-cover"
+                      className="w-full max-h-64 object-cover"
                       alt="Upload preview"
                     />
                   )}
                   <button
                     onClick={() => setMediaUrl(null)}
-                    className="absolute top-2 right-2 w-8 h-8 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all opacity-0 group-hover/media:opacity-100"
+                    className="absolute top-3 right-3 w-8 h-8 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-red-500/80 transition-all opacity-0 group-hover/media:opacity-100 shadow-lg"
                   >
                     <X className="h-4 w-4" />
                   </button>

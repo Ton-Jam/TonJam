@@ -8,7 +8,6 @@ import NFTCard from '@/components/NFTCard';
 import PlaylistCard from '@/components/PlaylistCard';
 import UserCard from '@/components/UserCard';
 import ArtistCard from '@/components/ArtistCard';
-import CreatePlaylistModal from '@/components/CreatePlaylistModal';
 import UploadTrackModal from '@/components/UploadTrackModal';
 import { Upload } from 'lucide-react';
 
@@ -16,11 +15,9 @@ const INITIAL_LIMIT = 10;
 
 const Library: React.FC = () => {
   const navigate = useNavigate();
-  const { playAll, playlists, createNewPlaylist, deletePlaylist, updatePlaylist, createRecommendedPlaylist, recentlyPlayed, clearRecentlyPlayed, likedTrackIds, followedUserIds, setActivePlaylistId, userNFTs, allNFTs, userTracks, userProfile, artists } = useAudio();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { playAll, playlists, createNewPlaylist, deletePlaylist, updatePlaylist, createRecommendedPlaylist, recentlyPlayed, clearRecentlyPlayed, likedTrackIds, followedUserIds, setActivePlaylistId, userNFTs, allNFTs, userTracks, userProfile, artists, searchQuery, setIsCreatePlaylistModalOpen } = useAudio();
   const [favTracksLimit, setFavTracksLimit] = useState(INITIAL_LIMIT);
   const [recTracksLimit, setRecTracksLimit] = useState(INITIAL_LIMIT);
-  const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
   const [isUploadTrackModalOpen, setIsUploadTrackModalOpen] = useState(false);
   const favSentinelRef = useRef<HTMLDivElement>(null);
   const recSentinelRef = useRef<HTMLDivElement>(null);
@@ -82,15 +79,17 @@ const Library: React.FC = () => {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 px-4 w-full">
       <header className="mb-6 pt-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
           <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.5em]">STORAGE PROTOCOL ACTIVE</p>
         </div>
+        <button 
+          onClick={() => setIsCreatePlaylistModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full transition-all text-xs font-bold uppercase tracking-widest text-white/80 hover:text-white border border-white/5 group"
+        >
+          <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
+          <span>Create Playlist</span>
+        </button>
       </header>
-
-      <div className="relative mb-10">
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 h-4 w-4" />
-        <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Filter your digital assets..." className="w-full bg-[#111111] py-3 pl-12 pr-10 text-xs outline-none transition-all placeholder:text-white/30 rounded-[10px] shadow-inner text-white" />
-      </div>
 
       {/* Recently Played Section */}
       {recentlyPlayed.length > 0 && (
@@ -100,7 +99,10 @@ const Library: React.FC = () => {
               <div className="w-1 h-4 electric-blue-bg rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
               <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Recent Frequencies</h3>
             </div>
-            <button onClick={clearRecentlyPlayed} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-red-500/80 transition-colors" > PURGE HISTORY </button>
+            <div className="flex items-center gap-4">
+              <button onClick={() => navigate('/explore/tracks?title=Recent Frequencies&filter=recent')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
+              <button onClick={clearRecentlyPlayed} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-red-500/80 transition-colors" > PURGE HISTORY </button>
+            </div>
           </div>
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
             {recentlyPlayed.map(track => (
@@ -116,9 +118,12 @@ const Library: React.FC = () => {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My Playlists</h3>
-          <button onClick={() => setIsUploadTrackModalOpen(true)} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-400 transition-colors group">
-            <Upload className="h-3 w-3" /> UPLOAD TRACK
-          </button>
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/explore/playlists?title=My Playlists&filter=my_playlists')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
+            <button onClick={() => setIsUploadTrackModalOpen(true)} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-400 transition-colors group">
+              <Upload className="h-3 w-3" /> UPLOAD TRACK
+            </button>
+          </div>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {/* Create Playlist Card */}
@@ -149,10 +154,6 @@ const Library: React.FC = () => {
         </div>
       </section>
 
-      <CreatePlaylistModal 
-        isOpen={isCreatePlaylistModalOpen} 
-        onClose={() => setIsCreatePlaylistModalOpen(false)} 
-      />
       <UploadTrackModal 
         isOpen={isUploadTrackModalOpen} 
         onClose={() => setIsUploadTrackModalOpen(false)} 
@@ -162,6 +163,7 @@ const Library: React.FC = () => {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Followed Nodes</h3>
+          <button onClick={() => navigate('/explore/artists?title=Followed Nodes&filter=followed')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {followedArtists.length > 0 ? (
@@ -182,6 +184,7 @@ const Library: React.FC = () => {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Favorite Tracks</h3>
+          <button onClick={() => navigate('/explore/tracks?title=Favorite Tracks&filter=favorites')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {filteredLikedTracks.length > 0 ? (
@@ -210,6 +213,7 @@ const Library: React.FC = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My Forged Protocols</h3>
+            <button onClick={() => navigate('/explore/tracks?title=My Forged Protocols&filter=my_tracks')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
           </div>
           <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
             {userTracks.map(track => (
@@ -225,6 +229,7 @@ const Library: React.FC = () => {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My NFT Collection</h3>
+          <button onClick={() => navigate('/explore/nfts?title=My NFT Collection&filter=my_nfts')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
           {filteredNFTs.length > 0 ? (
@@ -248,6 +253,7 @@ const Library: React.FC = () => {
             <Antenna className="text-blue-500 h-4 w-4" />
             <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Recommended Frequencies</h3>
           </div>
+          <button onClick={() => navigate('/explore/tracks?title=Recommended Frequencies&filter=recommended')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
         </div>
         <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
           {MOCK_TRACKS.slice(0, recTracksLimit).map(track => (
