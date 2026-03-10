@@ -56,78 +56,91 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
   const selectedTrack = allTracks.find(t => t.id === selectedTrackId);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
       <div
         className="absolute inset-0 bg-black/90 backdrop-blur-md"
         onClick={onClose}
       ></div>
-      <div className="relative w-full max-w-md glass border border-blue-500/10 bg-[#0A0A0A] rounded-[10px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-blue-500/30 transition-all">
+      <div className="relative w-full max-w-sm glass border border-blue-500/10 bg-[#0A0A0A] rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-blue-500/30 transition-all">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-        <header className="flex justify-between items-center p-6 border-b border-white/5">
-          <div className="flex items-center gap-2.5">
-            <img src={APP_LOGO} className="w-5 h-5 object-contain" alt="" />
-            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white">
-              Broadcast Signal
+        <header className="flex justify-between items-center p-3 border-b border-white/5">
+          <div className="flex items-center gap-2">
+            <img src={APP_LOGO} className="w-4 h-4 object-contain" alt="" aria-hidden="true" />
+            <h2 id="modal-title" className="text-[9px] font-bold uppercase tracking-[0.2em] text-white">
+              New Signal
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-[10px] bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all"
+            className="w-6 h-6 rounded-[6px] bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all"
+            aria-label="Close modal"
           >
             <X className="h-3 w-3" />
           </button>
         </header>
-        <div className="p-6">
-          <div className="flex gap-4">
+        <div className="p-3">
+          <div className="flex gap-3">
             <div className="flex-shrink-0">
               <img
                 src={MOCK_USER.avatar}
-                className="w-12 h-12 rounded-full object-cover grayscale-[0.2] group-focus-within:grayscale-0 transition-all border border-white/10"
-                alt=""
+                className="w-8 h-8 rounded-full object-cover border border-white/10"
+                alt="Your avatar"
               />
             </div>
-            <div className="flex-1 flex flex-col gap-4">
+            <div className="flex-1 flex flex-col gap-2">
               <textarea
                 autoFocus
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="What's the frequency? Describe the vibe..."
-                className="w-full bg-transparent border-none outline-none resize-none text-white text-lg placeholder:text-white/20 min-h-[120px] font-medium tracking-tight leading-relaxed no-scrollbar"
+                placeholder="Describe the vibe..."
+                className="w-full bg-transparent border-none outline-none resize-none text-white text-sm placeholder:text-white/20 min-h-[80px] font-medium tracking-tight leading-relaxed no-scrollbar"
+                aria-label="Post content"
               ></textarea>
 
               {selectedTrack && (
-                <div className="relative rounded-[12px] bg-white/5 border border-white/10 p-3 flex items-center gap-4 group/track hover:bg-white/10 transition-colors">
-                  <img src={selectedTrack.coverUrl} className="w-12 h-12 rounded-[8px] object-cover shadow-lg" alt="" />
+                <div className="relative rounded-[10px] bg-white/5 border border-white/10 p-2 flex items-center gap-3 group/track hover:bg-white/10 transition-colors">
+                  <img src={selectedTrack.coverUrl} className="w-10 h-10 rounded-[6px] object-cover shadow-lg" alt="" aria-hidden="true" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-white uppercase truncate tracking-wide">{selectedTrack.title}</p>
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest truncate mt-0.5">{selectedTrack.artist}</p>
+                    <p className="text-[10px] font-bold text-white uppercase truncate tracking-wide">{selectedTrack.title}</p>
+                    <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate mt-0.5">{selectedTrack.artist}</p>
                   </div>
-                  <button onClick={() => setSelectedTrackId(null)} className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center text-white/40 hover:text-white hover:bg-red-500/20 transition-all opacity-0 group-hover/track:opacity-100">
-                    <X className="h-4 w-4" />
+                  <button 
+                    onClick={() => setSelectedTrackId(null)} 
+                    className="w-7 h-7 rounded-full bg-black/20 flex items-center justify-center text-white/40 hover:text-white hover:bg-red-500/20 transition-all opacity-0 group-hover/track:opacity-100"
+                    aria-label="Remove track"
+                  >
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
               )}
 
               {mediaUrl && (
-                <div className="relative rounded-[12px] overflow-hidden group/media border border-white/10">
+                <div className="relative rounded-[10px] overflow-hidden group/media border border-white/10">
                   {mediaUrl.startsWith("data:video") ? (
                     <video
                       src={mediaUrl}
                       controls
-                      className="w-full max-h-64 object-cover"
+                      className="w-full max-h-48 object-cover"
+                      aria-label="Uploaded video"
                     />
                   ) : (
                     <img
                       src={mediaUrl}
-                      className="w-full max-h-64 object-cover"
+                      className="w-full max-h-48 object-cover"
                       alt="Upload preview"
                     />
                   )}
                   <button
                     onClick={() => setMediaUrl(null)}
-                    className="absolute top-3 right-3 w-8 h-8 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-red-500/80 transition-all opacity-0 group-hover/media:opacity-100 shadow-lg"
+                    className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-red-500/80 transition-all opacity-0 group-hover/media:opacity-100 shadow-lg"
+                    aria-label="Remove media"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
               )}
@@ -136,36 +149,47 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
         </div>
 
         {showTrackPicker && (
-          <div className="absolute inset-x-0 bottom-[68px] top-[68px] bg-[#0A0A0A] z-20 overflow-y-auto no-scrollbar border-t border-white/5 p-4 animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em]">Select Track to Share</h3>
-              <button onClick={() => setShowTrackPicker(false)} className="text-white/40 hover:text-white">
+          <div 
+            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-[#0A0A0A] z-20 overflow-y-auto no-scrollbar border-t border-white/5 p-3 animate-in slide-in-from-bottom-4 duration-300"
+            role="region"
+            aria-label="Track picker"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[8px] font-bold text-white/40 uppercase tracking-[0.3em]">Select Track to Share</h3>
+              <button 
+                onClick={() => setShowTrackPicker(false)} 
+                className="text-white/40 hover:text-white p-1"
+                aria-label="Close track picker"
+              >
                 <X className="h-3 w-3" />
               </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {allTracks.map(track => (
                 <button 
                   key={track.id} 
                   onClick={() => { setSelectedTrackId(track.id); setShowTrackPicker(false); }}
-                  className={`w-full flex items-center gap-3 p-3 rounded-[10px] transition-all ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-white/5 border border-transparent hover:bg-white/10'}`}
+                  className={`w-full flex items-center gap-2.5 p-2 rounded-[8px] transition-all ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-white/5 border border-transparent hover:bg-white/10'}`}
+                  aria-label={`Select ${track.title} by ${track.artist}`}
+                  aria-pressed={selectedTrackId === track.id}
                 >
-                  <img src={track.coverUrl} className="w-8 h-8 rounded-[4px] object-cover" alt="" />
+                  <img src={track.coverUrl} className="w-7 h-7 rounded-[4px] object-cover" alt="" aria-hidden="true" />
                   <div className="flex-1 text-left min-w-0">
-                    <p className="text-[10px] font-bold text-white uppercase truncate">{track.title}</p>
-                    <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest truncate">{track.artist}</p>
+                    <p className="text-[9px] font-bold text-white uppercase truncate">{track.title}</p>
+                    <p className="text-[7px] font-bold text-white/40 uppercase tracking-widest truncate">{track.artist}</p>
                   </div>
-                  {selectedTrackId === track.id && <Check className="h-3 w-3 text-blue-500" />}
+                  {selectedTrackId === track.id && <Check className="h-3 w-3 text-blue-500" aria-hidden="true" />}
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        <footer className="flex items-center justify-between p-4 bg-white/[0.02] border-t border-white/5">
-          <div className="flex gap-1">
+        <footer className="flex items-center justify-between p-3 bg-white/[0.02] border-t border-white/5">
+          <div className="flex gap-0.5">
             <input
               type="file"
+              id="media-upload"
               ref={fileInputRef}
               onChange={handleMediaUpload}
               accept="image/*,video/*"
@@ -173,42 +197,46 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-9 h-9 rounded-[10px] flex items-center justify-center text-white/20 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn"
-              title="Upload Media"
+              className="w-8 h-8 rounded-[8px] flex items-center justify-center text-white/20 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn"
+              aria-label="Upload Media"
             >
-              <Image className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
+              <Image className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
             </button>
             <button
               onClick={() => setShowTrackPicker(!showTrackPicker)}
-              className={`w-9 h-9 rounded-[10px] flex items-center justify-center transition-all group/btn ${showTrackPicker ? 'text-blue-400 bg-blue-500/10' : 'text-white/20 hover:text-blue-400 hover:bg-blue-500/10'}`}
-              title="Attach Track"
+              className={`w-8 h-8 rounded-[8px] flex items-center justify-center transition-all group/btn ${showTrackPicker ? 'text-blue-400 bg-blue-500/10' : 'text-white/20 hover:text-blue-400 hover:bg-blue-500/10'}`}
+              aria-label="Attach Track"
+              aria-expanded={showTrackPicker}
             >
-              <Music className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
+              <Music className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
             </button>
             <button
               onClick={handleSocialShare}
-              className="w-9 h-9 rounded-[10px] flex items-center justify-center text-white/20 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn"
-              title="Share"
+              className="w-8 h-8 rounded-[8px] flex items-center justify-center text-white/20 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn"
+              aria-label="Share externally"
             >
-              <Share2 className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
+              <Share2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
             </button>
-            <button className="px-3 h-9 rounded-[10px] flex items-center gap-2 text-blue-500/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn">
+            <button 
+              className="px-2 h-8 rounded-[8px] flex items-center gap-1.5 text-blue-500/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn"
+              aria-label="Forge AI"
+            >
               <Sparkles className="h-3 w-3" />
-              <span className="text-[8px] font-bold uppercase tracking-widest">
+              <span className="text-[7px] font-bold uppercase tracking-widest">
                 Forge AI
               </span>
             </button>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-12 h-1 bg-white/5 rounded-full overflow-hidden">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2" aria-label={`Character count: ${content.length} of ${maxLength}`}>
+              <div className="w-10 h-1 bg-white/5 rounded-full overflow-hidden" aria-hidden="true">
                 <div
                   className={`h-full transition-all duration-300 ${progress > 90 ? "bg-red-500" : "bg-blue-500"}`}
                   style={{ width: `${Math.min(progress, 100)}%` }}
                 ></div>
               </div>
               <span
-                className={`text-[8px] font-bold uppercase tracking-widest tabular-nums ${content.length > maxLength ? "text-red-500" : "text-white/20"}`}
+                className={`text-[7px] font-bold uppercase tracking-widest tabular-nums ${content.length > maxLength ? "text-red-500" : "text-white/20"}`}
               >
                 {content.length}
               </span>
@@ -218,9 +246,10 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               disabled={
                 (!content.trim() && !mediaUrl && !selectedTrackId) || content.length > maxLength
               }
-              className="bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/10 px-4 py-1.5 rounded-[10px] text-[8px] font-bold uppercase tracking-widest text-white transition-all shadow-lg active:scale-95 "
+              className="bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/10 px-6 py-2 rounded-[8px] text-[9px] font-bold uppercase tracking-widest text-white transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+              aria-label="Post Signal"
             >
-              Broadcast
+              Post Signal
             </button>
           </div>
         </footer>

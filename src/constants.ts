@@ -28,7 +28,30 @@ export const MOCK_TRACKS: Track[] = [
     likes: 840, 
     releaseDate: '2023-10-15',
     cid: 'QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
-    ipfsUrl: 'ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco'
+    ipfsUrl: 'ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
+    lyrics: `[Verse 1]
+Digital horizons, neon in the sky
+Binary reflections, where the echoes lie
+I'm walking through the circuits, feeling the flow
+Where the electric rivers start to grow
+
+[Chorus]
+Solar pulse, beating in my chest
+In the city of light, we never rest
+Solar pulse, driving through the night
+Everything is clear in the neon light
+
+[Verse 2]
+Static in the air, a frequency so pure
+In this digital world, we find the cure
+The rhythm of the machine, the soul of the code
+Taking us further down this electric road
+
+[Chorus]
+Solar pulse, beating in my chest
+In the city of light, we never rest
+Solar pulse, driving through the night
+Everything is clear in the neon light`
   },
   { 
     id: '2', 
@@ -271,6 +294,8 @@ export const MOCK_NFTS: NFTItem[] = [
     stems_available: true,
     description: 'The first ever unique edition of Solar Pulse. Includes high-fidelity stem access and a VIP pass to the upcoming Neon Voyager virtual concert.',
     listingType: 'auction',
+    ipfsUrl: 'ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
+    cid: 'QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
     auctionEndTime: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // Ends in 24h
     startingBid: '5.0',
     traits: [
@@ -381,6 +406,8 @@ export const MOCK_NFTS: NFTItem[] = [
     royaltySplits: [{ address: 'Neon Voyager', percentage: 7.5 }],
     stems_available: true,
     description: 'Second edition of the Solar Pulse series.',
+    ipfsUrl: 'ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
+    cid: 'QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
     traits: [
       { trait_type: 'Bitrate', value: 'FLAC' },
       { trait_type: 'Rarity', value: 'Rare' }
@@ -402,7 +429,7 @@ export const MOCK_ARTISTS: Artist[] = [
     genre: 'Electronic',
     bio: "Pioneering the sound of the digital frontier. Synthwave frequencies forged in the TON core.",
     bannerUrl: "https://picsum.photos/1200/400?random=1001",
-    socials: { x: 'https://x.com/neon_voyager', spotify: 'https://spotify.com/artist/neon_voyager', instagram: 'https://instagram.com/neon_voyager' },
+    socials: { x: 'https://x.com/neon_voyager', spotify: 'https://spotify.com/artist/neon_voyager', instagram: 'https://instagram.com/neon_voyager', telegram: 'https://t.me/neon_voyager' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.05, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.10, label: 'Main Artist' }]

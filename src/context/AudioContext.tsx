@@ -57,6 +57,7 @@ interface AudioContextType {
   createNewPlaylist: (name: string, description?: string, initialTrack?: Track, coverUrl?: string, isPrivate?: boolean, isCollaborative?: boolean, tags?: string[]) => void;
   deletePlaylist: (playlistId: string) => void;
   updatePlaylist: (playlistId: string, updates: Partial<Playlist>) => void;
+  generateDiscoverWeekly: () => void;
   createRecommendedPlaylist: () => void;
   clearRecentlyPlayed: () => void;
   setUserProfile: (profile: UserProfile) => void;
@@ -85,6 +86,7 @@ interface AudioContextType {
   getTrendingTracks: () => Track[];
   getTopNFTTracks: () => Track[];
   getTracksByGenre: (genre: string) => Track[];
+  getRecommendations: () => { recommendedTracks: Track[], recommendedNFTs: NFTItem[] };
   jamTrack: (trackId: string) => Promise<void>;
   activeJamRoom: { id: string, name: string, listeners: number, currentTrack: Track | null } | null;
   joinJamRoom: (roomId: string) => void;
@@ -92,6 +94,8 @@ interface AudioContextType {
   allPlaylists: Playlist[];
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  isDiscoverFiltersOpen: boolean;
+  setIsDiscoverFiltersOpen: (isOpen: boolean) => void;
   isCreatePlaylistModalOpen: boolean;
   setIsCreatePlaylistModalOpen: (isOpen: boolean) => void;
   updateRoyaltyConfig: (artistId: string, config: Artist['royaltyConfig']) => void;
@@ -152,6 +156,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [activeJamRoom, setActiveJamRoom] = useState<{ id: string, name: string, listeners: number, currentTrack: Track | null } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDiscoverFiltersOpen, setIsDiscoverFiltersOpen] = useState(false);
   const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -208,6 +213,116 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const getTracksByGenre = (genre: string) => {
     return allTracks.filter(t => t.genre.toLowerCase() === genre.toLowerCase());
+  };
+
+  const getRecommendations = () => {
+    const historyIds = new Set(recentlyPlayed.map(t => t.id));
+    const likedIds = new Set(likedTrackIds);
+    const nftTrackIds = new Set(userNFTs.map(n => n.trackId));
+    
+    const preferredGenres = new Map<string, number>();
+    const preferredArtists = new Map<string, number>();
+    
+    if (userProfile.favoriteGenres) {
+      userProfile.favoriteGenres.forEach(genre => {
+        preferredGenres.set(genre, (preferredGenres.get(genre) || 0) + 5);
+      });
+    }
+
+    const analyzeTrack = (trackId: string, weight: number) => {
+      const track = allTracks.find(t => t.id === trackId);
+      if (track) {
+        preferredGenres.set(track.genre, (preferredGenres.get(track.genre) || 0) + weight);
+        preferredArtists.set(track.artistId || track.artist, (preferredArtists.get(track.artistId || track.artist) || 0) + weight);
+      }
+    };
+    
+    recentlyPlayed.forEach(t => analyzeTrack(t.id, 1));
+    likedTrackIds.forEach(id => analyzeTrack(id, 2));
+    userNFTs.forEach(n => analyzeTrack(n.trackId, 3));
+    
+    const topGenres = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+    const topArtists = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+    
+    const recommendedTracks = allTracks.filter(track => {
+      if (historyIds.has(track.id) || likedIds.has(track.id) || nftTrackIds.has(track.id)) {
+        return false;
+      }
+      
+      let score = 0;
+      if (topGenres.includes(track.genre)) {
+        score += 5 - Math.min(topGenres.indexOf(track.genre), 4);
+      }
+      if (topArtists.includes(track.artistId || track.artist)) {
+        score += 5 - Math.min(topArtists.indexOf(track.artistId || track.artist), 4);
+      }
+      
+      return score > 0;
+    }).sort((a, b) => {
+      let scoreA = 0;
+      let scoreB = 0;
+      if (topGenres.includes(a.genre)) scoreA += 5 - Math.min(topGenres.indexOf(a.genre), 4);
+      if (topArtists.includes(a.artistId || a.artist)) scoreA += 5 - Math.min(topArtists.indexOf(a.artistId || a.artist), 4);
+      if (topGenres.includes(b.genre)) scoreB += 5 - Math.min(topGenres.indexOf(b.genre), 4);
+      if (topArtists.includes(b.artistId || b.artist)) scoreB += 5 - Math.min(topArtists.indexOf(b.artistId || b.artist), 4);
+      
+      return scoreB - scoreA;
+    }).slice(0, 10);
+
+    if (recommendedTracks.length < 10) {
+      const trending = getTrendingTracks().filter(t => 
+        !recommendedTracks.find(rt => rt.id === t.id) && 
+        !historyIds.has(t.id) && 
+        !likedIds.has(t.id) && 
+        !nftTrackIds.has(t.id)
+      );
+      recommendedTracks.push(...trending.slice(0, 10 - recommendedTracks.length));
+    }
+
+    const recommendedNFTs = allNFTs.filter(nft => {
+      if (userNFTs.find(un => un.id === nft.id)) {
+        return false;
+      }
+
+      const track = allTracks.find(t => t.id === nft.trackId);
+      if (!track) return false;
+
+      let score = 0;
+      if (topGenres.includes(track.genre)) {
+        score += 5 - Math.min(topGenres.indexOf(track.genre), 4);
+      }
+      if (topArtists.includes(track.artistId || track.artist)) {
+        score += 5 - Math.min(topArtists.indexOf(track.artistId || track.artist), 4);
+      }
+      
+      return score > 0;
+    }).sort((a, b) => {
+      const trackA = allTracks.find(t => t.id === a.trackId);
+      const trackB = allTracks.find(t => t.id === b.trackId);
+      let scoreA = 0;
+      let scoreB = 0;
+      if (trackA) {
+        if (topGenres.includes(trackA.genre)) scoreA += 5 - Math.min(topGenres.indexOf(trackA.genre), 4);
+        if (topArtists.includes(trackA.artistId || trackA.artist)) scoreA += 5 - Math.min(topArtists.indexOf(trackA.artistId || trackA.artist), 4);
+      }
+      if (trackB) {
+        if (topGenres.includes(trackB.genre)) scoreB += 5 - Math.min(topGenres.indexOf(trackB.genre), 4);
+        if (topArtists.includes(trackB.artistId || trackB.artist)) scoreB += 5 - Math.min(topArtists.indexOf(trackB.artistId || trackB.artist), 4);
+      }
+      return scoreB - scoreA;
+    }).slice(0, 10);
+
+    if (recommendedNFTs.length < 10) {
+      const topNFTTracks = getTopNFTTracks();
+      const topNFTs = allNFTs.filter(nft => topNFTTracks.find(t => t.id === nft.trackId));
+      const additionalNFTs = topNFTs.filter(nft => 
+        !recommendedNFTs.find(rn => rn.id === nft.id) &&
+        !userNFTs.find(un => un.id === nft.id)
+      );
+      recommendedNFTs.push(...additionalNFTs.slice(0, 10 - recommendedNFTs.length));
+    }
+
+    return { recommendedTracks, recommendedNFTs };
   };
 
   useEffect(() => {
@@ -1035,6 +1150,87 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addNotification("Playlist updated", "success");
   };
 
+  const generateDiscoverWeekly = () => {
+    // Check if Discover Weekly already exists and was updated this week
+    const existingIndex = playlists.findIndex(p => p.title === 'Discover Weekly');
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    if (existingIndex !== -1) {
+      const existing = playlists[existingIndex];
+      // If we have a timestamp and it's less than a week old, don't regenerate
+      if (existing.updatedAt && new Date(existing.updatedAt) > oneWeekAgo) {
+        return;
+      }
+    }
+
+    // Analyze user data
+    const historyIds = new Set(recentlyPlayed.map(t => t.id));
+    const likedIds = new Set(likedTrackIds);
+    const nftTrackIds = new Set(userNFTs.map(n => n.trackId));
+    
+    // Find preferred genres and artists
+    const preferredGenres = new Map<string, number>();
+    const preferredArtists = new Map<string, number>();
+    
+    const analyzeTrack = (trackId: string, weight: number) => {
+      const track = allTracks.find(t => t.id === trackId);
+      if (track) {
+        preferredGenres.set(track.genre, (preferredGenres.get(track.genre) || 0) + weight);
+        preferredArtists.set(track.artistId || track.artist, (preferredArtists.get(track.artistId || track.artist) || 0) + weight);
+      }
+    };
+    
+    recentlyPlayed.forEach(t => analyzeTrack(t.id, 1));
+    likedTrackIds.forEach(id => analyzeTrack(id, 2));
+    userNFTs.forEach(n => analyzeTrack(n.trackId, 3));
+    
+    // Sort preferences
+    const topGenres = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+    const topArtists = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+    
+    // Generate recommendations
+    const recommendations = allTracks.filter(track => {
+      // Don't recommend tracks they already know well (liked or own NFT)
+      if (likedIds.has(track.id) || nftTrackIds.has(track.id)) return false;
+      
+      // Recommend based on genre or artist
+      const matchesGenre = topGenres.slice(0, 3).includes(track.genre);
+      const matchesArtist = topArtists.slice(0, 3).includes(track.artistId || track.artist);
+      
+      return matchesGenre || matchesArtist;
+    });
+    
+    // If we don't have enough recommendations, add some trending tracks
+    let finalTracks = recommendations.sort(() => 0.5 - Math.random()).slice(0, 10);
+    if (finalTracks.length < 10) {
+      const trending = getTrendingTracks().filter(t => !finalTracks.find(ft => ft.id === t.id));
+      finalTracks = [...finalTracks, ...trending].slice(0, 10);
+    }
+    
+    const newPlaylist: Playlist = {
+      id: existingIndex !== -1 ? playlists[existingIndex].id : `dw-${Date.now()}`,
+      title: 'Discover Weekly',
+      coverUrl: 'https://picsum.photos/seed/discover/400/400',
+      trackCount: finalTracks.length,
+      creator: 'TonJam AI',
+      description: "Your weekly dose of fresh music, personalized based on your listening history, likes, and NFT collection.",
+      trackIds: finalTracks.map(t => t.id),
+      updatedAt: now.toISOString()
+    };
+    
+    setPlaylists(prev => {
+      if (existingIndex !== -1) {
+        const updated = [...prev];
+        updated[existingIndex] = newPlaylist;
+        return updated;
+      }
+      return [newPlaylist, ...prev];
+    });
+    
+    addNotification('Your Discover Weekly playlist has been updated!', 'success');
+  };
+
   const createRecommendedPlaylist = () => {
     /* Simulate recommendation logic by picking random tracks */
     const shuffled = [...MOCK_TRACKS].sort(() => 0.5 - Math.random());
@@ -1108,10 +1304,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       toggleLikeTrack, toggleFollowUser, closePlayer, setFullPlayerOpen, toggleShuffle, toggleRepeat,
       addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist,
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
-      createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, userTracks, userNFTs,
+      generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, userTracks, userNFTs,
       allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
-      posts, createPost, deletePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
-      searchQuery, setSearchQuery, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
+      posts, createPost, deletePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
+      searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
       updateRoyaltyConfig
     }}>
       {children}
@@ -1229,8 +1425,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 icon="fas fa-share-alt" 
                 label="Share Signal" 
                 onClick={() => { 
-                  navigator.clipboard.writeText(`${window.location.origin}/#/track/${optionsTrack.id}`);
-                  addNotification("Link copied to clipboard", "success");
+                  const shareUrl = `${window.location.origin}/#/track/${optionsTrack.id}`;
+                  const shareData = {
+                    title: optionsTrack.title,
+                    text: `Check out ${optionsTrack.title} by ${optionsTrack.artist} on TonJam!`,
+                    url: shareUrl
+                  };
+
+                  if (navigator.share) {
+                    navigator.share(shareData).catch(console.error);
+                  } else {
+                    navigator.clipboard.writeText(shareUrl);
+                    addNotification("Link copied to clipboard", "success");
+                  }
                   setOptionsTrack(null); 
                 }} 
               />

@@ -207,7 +207,7 @@ const FullPlayer: React.FC = () => {
   const artistData = MOCK_ARTISTS.find(a => a.id === currentTrack.artistId);
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/track/${currentTrack.id}`;
+    const shareUrl = `${window.location.origin}/#/track/${currentTrack.id}`;
     const shareData = {
       title: `${currentTrack.title} by ${currentTrack.artist}`,
       text: `Check out this track on TonJam: ${currentTrack.title}`,
@@ -215,7 +215,7 @@ const FullPlayer: React.FC = () => {
     };
 
     try {
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      if (navigator.share) {
         await navigator.share(shareData);
         addNotification('Shared successfully!', 'success');
       } else {

@@ -25,13 +25,13 @@ import {
   Image as ImageIcon,
   FileText,
   Lock,
-  Share2
+  Share2,
+  Send
 } from 'lucide-react';
 
 import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem, Track, NFTOffer } from '@/types';
-import { generateNFTLore } from '@/services/geminiService';
 import { fetchNFTMetadata } from '@/services/nftService';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -40,6 +40,7 @@ import SellNFTModal from '@/components/SellNFTModal';
 import BidModal from '@/components/BidModal';
 import BidAcceptanceModal from '@/components/BidAcceptanceModal';
 import NFTCard from '@/components/NFTCard';
+import SendNFTModal from '@/components/SendNFTModal';
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,8 +54,6 @@ const NFTDetail: React.FC = () => {
   }, [id, allNFTs]);
 
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
-  const [lore, setLore] = useState<string>('');
-  const [isGeneratingLore, setIsGeneratingLore] = useState(false);
   const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers' | 'exclusive'>('details');
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
@@ -64,6 +63,7 @@ const NFTDetail: React.FC = () => {
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
   const [showBidModal, setShowBidModal] = useState(false);
+  const [showSendModal, setShowSendModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<NFTOffer | null>(null);
 
   const loadMetadata = () => {
@@ -207,20 +207,6 @@ const NFTDetail: React.FC = () => {
     const newOffers = localNft.offers?.filter(o => o.offerer !== offerer) || [];
     updateNFT(localNft.id, { offers: newOffers });
     addNotification(`Offer from ${offerer} rejected.`, "info");
-  };
-
-  const handleGenerateLore = async () => {
-    setIsGeneratingLore(true);
-    addNotification("Syncing digital archives...", "info");
-    try {
-      const result = await generateNFTLore(localNft.title, associatedTrack?.genre || 'Electronic', localNft.description || '');
-      setLore(result);
-      addNotification("Origin retrieved.", "success");
-    } catch (e: any) {
-      addNotification("Archive retrieval failed.", "error");
-    } finally {
-      setIsGeneratingLore(false);
-    }
   };
 
   const handleCancelListing = () => {
@@ -437,6 +423,9 @@ const NFTDetail: React.FC = () => {
                     <button onClick={() => setShowListModal(true)} className="flex-1 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all" >
                       {localNft.listingType ? 'Manage Listing' : 'List for Sale'}
                     </button>
+                    <button onClick={() => setShowSendModal(true)} className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-2" >
+                      <Send className="h-4 w-4" /> Send Asset
+                    </button>
                     {localNft.listingType && (
                       <button onClick={handleCancelListing} className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all" >
                         Cancel Listing
@@ -458,27 +447,7 @@ const NFTDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* AI Lore / Origin Narrative */}
-            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-[12px] relative overflow-hidden group mb-10">
-              <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity"><ScrollText className="h-16 w-16" /></div>
-              <div className="flex items-center justify-between mb-8 relative z-10">
-                <div className="flex items-center gap-3">
-                  <Sparkles className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.5em]">Origin Narrative</h3>
-                </div>
-                {!lore && (
-                  <button onClick={handleGenerateLore} disabled={isGeneratingLore} className="px-4 py-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 rounded-full text-[9px] font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
-                    {isGeneratingLore ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />} 
-                    <span>Reconstruct History</span>
-                  </button>
-                )}
-              </div>
-              <div className="relative z-10">
-                <p className="text-sm text-white/70 leading-relaxed font-medium italic border-l-2 border-blue-500/30 pl-6">
-                  {lore || "Digital archives are currently locked. Initiate manual reconstruction to reveal this asset's temporal origin and neural lineage."}
-                </p>
-              </div>
-            </div>
+            {/* AI Lore / Origin Narrative - Removed */}
 
             {/* Information Tabs */}
             <div className="flex items-center gap-10 mb-10 border-b border-white/5">
@@ -718,10 +687,10 @@ const NFTDetail: React.FC = () => {
         {/* More from Creator Section */}
         {moreFromCreator.length > 0 && (
           <div className="mt-40 animate-in fade-in slide-in-from-bottom duration-1000">
-            <div className="flex items-center justify-between mb-12">
-              <div className="flex items-center gap-5">
-                <div className="w-1.5 h-10 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tighter uppercase text-white">More from {localNft.creator}</h2>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
+                <h2 className="text-lg font-bold tracking-tighter uppercase text-white">More from {localNft.creator}</h2>
               </div>
               <button onClick={() => navigate(`/artist/${localNft.creator}`)} className="text-[10px] font-bold text-white/30 hover:text-blue-500 uppercase tracking-[0.3em] transition-all flex items-center group" >
                 VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
@@ -738,10 +707,10 @@ const NFTDetail: React.FC = () => {
         {/* Related NFTs Section */}
         {relatedNfts.length > 0 && (
           <div className="mt-40 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
-            <div className="flex items-center justify-between mb-12">
-              <div className="flex items-center gap-5">
-                <div className="w-1.5 h-10 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)]"></div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tighter uppercase text-white">Related {associatedTrack?.genre} Vibes</h2>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+                <h2 className="text-lg font-bold tracking-tighter uppercase text-white">Related {associatedTrack?.genre} Vibes</h2>
               </div>
               <button onClick={() => navigate('/explore/nfts?title=Related Vibes')} className="text-[10px] font-bold text-white/30 hover:text-amber-500 uppercase tracking-[0.3em] transition-all flex items-center group" >
                 EXPLORE GENRE <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
@@ -760,6 +729,7 @@ const NFTDetail: React.FC = () => {
       {showBuyModal && <BuyNFTModal nft={localNft} onClose={() => setShowBuyModal(false)} />}
       {showListModal && <SellNFTModal nft={localNft} onClose={() => setShowListModal(false)} />}
       {showBidModal && <BidModal nft={localNft} onClose={() => setShowBidModal(false)} />}
+      {showSendModal && <SendNFTModal nft={localNft} isOpen={showSendModal} onClose={() => setShowSendModal(false)} />}
       {selectedOffer && (
         <BidAcceptanceModal nft={localNft} offer={selectedOffer} onClose={() => setSelectedOffer(null)} onAccept={onConfirmAcceptance} />
       )}

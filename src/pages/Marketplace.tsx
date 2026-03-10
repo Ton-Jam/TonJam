@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap } from 'lucide-react';
 import { MOCK_NFTS, TON_LOGO, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import NFTCard from '@/components/NFTCard';
-import MintModal from '@/components/MintModal';
 import TopChartNFTs from '@/components/TopChartNFTs';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
@@ -16,7 +15,6 @@ const Marketplace: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Trending');
   const [sortBy, setSortBy] = useState('Newest');
-  const [showMintModal, setShowMintModal] = useState(false);
   const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery } = useAudio();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -260,30 +258,6 @@ const Marketplace: React.FC = () => {
           </div>
         </section>
 
-        {/* 5. CREATOR PORTAL - NEW WORLD CLASS SECTION */}
-        {userProfile.isVerifiedArtist && (
-          <section className="mb-24">
-            <div className="bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-transparent border border-white/5 p-10 rounded-[20px] flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden group">
-              <div className="absolute -left-20 -top-20 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full group-hover:bg-blue-600/20 transition-all"></div>
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                <div className="w-20 h-20 rounded-[16px] bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-blue-500/50 transition-all">
-                  <Plus className="h-8 w-8 text-blue-500" />
-                </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-2xl md:text-3xl font-bold uppercase tracking-tighter text-white mb-2">Forge New Protocol</h3>
-                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]">Initialize a new generative asset on the neural relay</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowMintModal(true)}
-                className="relative z-10 px-12 py-5 bg-white text-black rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] hover:bg-blue-500 hover:text-white transition-all active:scale-95 shadow-2xl"
-              >
-                Launch_Forge
-              </button>
-            </div>
-          </section>
-        )}
-
         {/* 5. TRENDING & TOP CHARTS - BENTO STYLE */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-24">
           <section className="lg:col-span-8">
@@ -385,7 +359,6 @@ const Marketplace: React.FC = () => {
           </div>
         </section>
       </div>
-      {showMintModal && <MintModal onClose={() => setShowMintModal(false)} />}
     </div>
   );
 };

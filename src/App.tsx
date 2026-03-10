@@ -16,7 +16,6 @@ import Tasks from '@/pages/Tasks';
 import NFTDetail from '@/pages/NFTDetail';
 import ExploreList from '@/pages/ExploreList';
 import Notifications from '@/pages/Notifications';
-import ProtocolForge from '@/pages/ProtocolForge';
 import LoadingScreen from '@/components/LoadingScreen';
 import PlaylistDetail from '@/pages/PlaylistDetail';
 import PostDetail from '@/pages/PostDetail';
@@ -69,7 +68,6 @@ const App: React.FC = () => {
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/tasks" element={<Tasks />} />
                   <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/forge" element={<ProtocolForge />} />
                   <Route path="/post/:id" element={<PostDetail />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                 </Routes>

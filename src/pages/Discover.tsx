@@ -10,6 +10,8 @@ import NFTCard from '@/components/NFTCard';
 import GenreCard from '@/components/GenreCard';
 import SectionHeader from '@/components/SectionHeader';
 import PlaylistCard from '@/components/PlaylistCard';
+import PlaylistListItem from '@/components/PlaylistListItem';
+import ArtistListItem from '@/components/ArtistListItem';
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
@@ -22,17 +24,21 @@ const TRACK_SORT_OPTIONS = ['Newest', 'Popularity', 'Most Liked'];
 const Discover: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, artists, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery: search, setSearchQuery: setSearch } = useAudio();
+  const { addNotification, artists, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery: search, setSearchQuery: setSearch, generateDiscoverWeekly, isDiscoverFiltersOpen: showFilters, setIsDiscoverFiltersOpen: setShowFilters } = useAudio();
   
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get('search') || '';
 
-  const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists'>('Tracks');
+  useEffect(() => {
+    generateDiscoverWeekly();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists' | 'All'>('All');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('Newest');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
@@ -223,54 +229,50 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="p-4 lg:p-6 space-y-12 w-full pb-32">
+    <div className="p-4 lg:p-6 space-y-8 w-full pb-32">
       {/* Hero Search Section */}
-      <div className="relative py-12 px-6 rounded-[10px] overflow-hidden group">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-transparent z-0"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
-        
-        <div className="relative z-10 max-w-2xl">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-white uppercase mb-4 leading-none">
-            Discover <span className="text-blue-500">Sonic</span> Signals
-          </h1>
-          <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.4em] mb-8">
-            Decentralized Music Discovery Engine v2.6
-          </p>
-
-          <div className="relative" ref={searchContainerRef}>
-            <div className="relative z-20 flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 h-4 w-4" />
-                <input 
-                  type="text" 
-                  value={search} 
-                  onFocus={() => setIsSearchFocused(true)} 
-                  onChange={(e) => { setSearch(e.target.value); setDisplayLimit(INITIAL_LIMIT); }} 
-                  onKeyDown={(e) => { if (e.key === 'Enter') { addToRecentSearches(search); setIsSearchFocused(false); } }} 
-                  placeholder="Search tracks, artists, or NFTs..." 
-                  className={`w-full bg-white/5 border border-white/10 rounded-[10px] py-5 pl-12 pr-12 text-base outline-none transition-all placeholder:text-white/10 text-white backdrop-blur-xl ${isSearchFocused ? 'bg-white/10 border-blue-500/50 ring-4 ring-blue-500/10' : ''}`} 
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                  {search && (
-                    <button onClick={clearInput} className="text-white/20 hover:text-white transition-colors">
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                  <button 
-                    onClick={toggleVoiceSearch} 
-                    className={`p-2 rounded-full transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-white/20 hover:text-white hover:bg-white/5'}`}
-                  >
-                    <Mic className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+      <div className="relative z-10 max-w-2xl mx-auto" ref={searchContainerRef}>
+        <div className="relative flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 h-4 w-4" />
+            <input 
+              type="text" 
+              value={search} 
+              onFocus={() => setIsSearchFocused(true)} 
+              onChange={(e) => { setSearch(e.target.value); setDisplayLimit(INITIAL_LIMIT); }} 
+              onKeyDown={(e) => { if (e.key === 'Enter') { addToRecentSearches(search); setIsSearchFocused(false); } }} 
+              placeholder="Search..." 
+              className={`w-full bg-white/5 border border-white/10 rounded-[8px] py-3 pl-10 pr-10 text-sm outline-none transition-all placeholder:text-white/10 text-white backdrop-blur-xl ${isSearchFocused ? 'bg-white/10 border-blue-500/50 ring-2 ring-blue-500/10' : ''}`} 
+            />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+              {search && (
+                <button onClick={clearInput} className="text-white/20 hover:text-white transition-colors">
+                  <X className="h-3 w-3" />
+                </button>
+              )}
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className={`p-5 rounded-[10px] border transition-all ${showFilters ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10'}`}
+                className={`transition-all ${showFilters ? 'text-blue-500' : 'text-white/20 hover:text-white'}`}
               >
-                <SlidersHorizontal className="h-5 w-5" />
+                <Filter className="h-4 w-4" />
               </button>
             </div>
+          </div>
+        </div>
+        
+        {/* Filter Pills */}
+        <div className="flex gap-2 mt-4 overflow-x-auto no-scrollbar">
+          {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists'].map(filter => (
+            <button 
+              key={filter} 
+              onClick={() => setActiveFilter(filter as any)}
+              className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/5 text-white/40 border-white/5 hover:text-white'}`}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+      </div>
 
             {/* Advanced Filters Drawer (Simulated) */}
             {showFilters && (
@@ -381,9 +383,6 @@ const Discover: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      </div>
 
       {/* Discovery Hub */}
       {!search && !selectedGenre && (
@@ -391,11 +390,13 @@ const Discover: React.FC = () => {
           {/* Curated Playlists */}
           <section>
             <SectionHeader title="Curated Playlists" viewAllLink="/explore/playlists?title=Curated Playlists&filter=curated" />
-            <div className="flex gap-6 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
-              {CURATED_PLAYLISTS.map(playlist => (
-                <div key={playlist.id} className="flex-shrink-0 w-64 md:w-72">
-                  <PlaylistCard playlist={playlist} onClick={() => navigate(`/library`)} />
-                </div>
+            <div className="flex flex-col gap-3">
+              {allPlaylists.filter(p => p.creator === 'TonJam AI' || CURATED_PLAYLISTS.find(cp => cp.id === p.id)).map(playlist => (
+                <PlaylistListItem 
+                  key={playlist.id} 
+                  playlist={playlist} 
+                  onClick={() => navigate(`/playlist/${playlist.id}`)} 
+                />
               ))}
             </div>
           </section>
@@ -403,10 +404,10 @@ const Discover: React.FC = () => {
           {/* Trending Tracks */}
           <section>
             <SectionHeader title="Trending Now" subtitle="Most streamed tracks on TON" viewAllLink="/explore/tracks?title=Trending Now&filter=trending" />
-            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
+            <div className="flex flex-col gap-4">
               {trendingTracks.map(track => (
-                <div key={track.id} className="flex-shrink-0 w-40 sm:w-48">
-                  <TrackCard track={track} />
+                <div key={track.id}>
+                  <TrackCard track={track} variant="row" />
                 </div>
               ))}
             </div>
@@ -439,10 +440,10 @@ const Discover: React.FC = () => {
           {/* Top NFT Sales */}
           <section>
             <SectionHeader title="Top NFT Sales" subtitle="Highest valued music artifacts" viewAllLink="/explore/nfts?title=Top NFT Sales&filter=top_nfts" />
-            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
+            <div className="flex flex-col gap-4">
               {topNFTTracks.map(track => (
-                <div key={track.id} className="flex-shrink-0 w-40 sm:w-48">
-                  <TrackCard track={track} />
+                <div key={track.id}>
+                  <TrackCard track={track} variant="row" />
                 </div>
               ))}
             </div>
@@ -493,7 +494,7 @@ const Discover: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              {['Tracks', 'Artists', 'NFTs', 'Playlists'].map(filter => (
+              {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists'].map(filter => (
                 <button 
                   key={filter} 
                   onClick={() => setActiveFilter(filter as any)} 
@@ -505,32 +506,116 @@ const Discover: React.FC = () => {
             </div>
           </div>
           
-          {visibleResults.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {visibleResults.map((item, idx) => (
-                <div key={item.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
-                  {activeFilter === 'Tracks' && <TrackCard track={item as Track} />}
-                  {activeFilter === 'Artists' && <ArtistCard artist={item as any} />}
-                  {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
-                  {activeFilter === 'Playlists' && <PlaylistCard playlist={item as any} onClick={() => navigate('/library')} />}
-                </div>
-              ))}
-              {visibleResults.length < filteredResults.length && (
-                <div ref={sentinelRef} className="col-span-full py-12 flex items-center justify-center">
-                  <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
-                </div>
-              )}
+          {activeFilter === 'All' ? (
+            <div className="space-y-12">
+              {/* Tracks Section */}
+              <SearchCategorySection 
+                title="Tracks" 
+                items={MOCK_TRACKS.filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                renderItem={(item) => <TrackCard track={item} variant="row" />}
+                viewAllLink={`/explore/tracks?title=Search Results: Tracks&search=${search}`}
+                isEmpty={!MOCK_TRACKS.some(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase()))}
+              />
+
+              {/* Artists Section */}
+              <SearchCategorySection 
+                title="Artists" 
+                items={artists.filter(a => a.name.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                renderItem={(item) => <ArtistListItem artist={item} />}
+                viewAllLink={`/explore/artists?title=Search Results: Artists&search=${search}`}
+                isEmpty={!artists.some(a => a.name.toLowerCase().includes(search.toLowerCase()))}
+              />
+
+              {/* NFTs Section */}
+              <SearchCategorySection 
+                title="NFTs" 
+                items={MOCK_NFTS.filter(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.creator.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                renderItem={(item) => <NFTCard nft={item} />}
+                viewAllLink={`/explore/nfts?title=Search Results: NFTs&search=${search}`}
+                grid
+                isEmpty={!MOCK_NFTS.some(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.creator.toLowerCase().includes(search.toLowerCase()))}
+              />
+
+              {/* Playlists Section */}
+              <SearchCategorySection 
+                title="Playlists" 
+                items={allPlaylists.filter(p => p.title.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                renderItem={(item) => <PlaylistListItem playlist={item} onClick={() => navigate(`/playlist/${item.id}`)} />}
+                viewAllLink={`/explore/playlists?title=Search Results: Playlists&search=${search}`}
+                isEmpty={!allPlaylists.some(p => p.title.toLowerCase().includes(search.toLowerCase()))}
+              />
             </div>
           ) : (
-            <div className="py-24 text-center flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-[10px]">
-              <Satellite className="h-12 w-12 text-white/5 mb-4 animate-pulse" />
-              <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
-              <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
-            </div>
+            <>
+              {visibleResults.length > 0 ? (
+                <div className={`grid gap-4 ${activeFilter === 'Tracks' || activeFilter === 'Artists' || activeFilter === 'Playlists' ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
+                  {visibleResults.map((item, idx) => (
+                    <div key={item.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
+                      {activeFilter === 'Tracks' && <TrackCard track={item as Track} variant="row" />}
+                      {activeFilter === 'Artists' && <ArtistListItem artist={item as any} />}
+                      {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
+                      {activeFilter === 'Playlists' && <PlaylistListItem playlist={item as any} onClick={() => navigate(`/playlist/${item.id}`)} />}
+                    </div>
+                  ))}
+                  {visibleResults.length < filteredResults.length && (
+                    <div ref={sentinelRef} className="col-span-full py-12 flex items-center justify-center">
+                      <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="py-24 text-center flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-[10px]">
+                  <Satellite className="h-12 w-12 text-white/5 mb-4 animate-pulse" />
+                  <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
+                  <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
+                </div>
+              )}
+            </>
           )}
         </section>
       )}
     </div>
+  );
+};
+
+const SearchCategorySection = ({ 
+  title, 
+  items, 
+  renderItem, 
+  viewAllLink, 
+  grid = false,
+  isEmpty = false
+}: { 
+  title: string; 
+  items: any[]; 
+  renderItem: (item: any) => React.ReactNode; 
+  viewAllLink: string;
+  grid?: boolean;
+  isEmpty?: boolean;
+}) => {
+  const navigate = useNavigate();
+  
+  if (isEmpty) return null;
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">{title}</h3>
+        <button 
+          onClick={() => navigate(viewAllLink)}
+          className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-widest flex items-center gap-1"
+        >
+          View All <ChevronRight className="h-3 w-3" />
+        </button>
+      </div>
+      <div className={grid ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" : "flex flex-col gap-3"}>
+        {items.map((item, idx) => (
+          <div key={item.id || idx} className="animate-in fade-in slide-in-from-bottom-2 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
+            {renderItem(item)}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
 

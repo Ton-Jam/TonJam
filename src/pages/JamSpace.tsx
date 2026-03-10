@@ -6,6 +6,7 @@ import UserCard from '@/components/UserCard';
 import TrackCard from '@/components/TrackCard';
 import PostModal from '@/components/PostModal';
 import SocialFeed from '@/components/SocialFeed';
+import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import { useAudio } from '@/context/AudioContext';
 import { Post, Track } from '@/types';
 
@@ -13,10 +14,37 @@ const JamSpace: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch } = useAudio();
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'All' | 'Following' | 'Trending' | 'Alpha'>('All');
-  const [filterType, setFilterType] = useState<'All' | 'Posts' | 'Tracks' | 'NFTs'>('All');
+  const [activeTab, setActiveTab] = useState<'All' | 'Following' | 'Trending'>('All');
+  const [filterType, setFilterType] = useState<'All' | 'Tracks' | 'NFTs'>('All');
   const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest'>('Newest');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+
+  const carouselItems: CarouselItem[] = [
+    {
+      id: '1',
+      title: 'Genesis Mint Event',
+      subtitle: 'Exclusive NFTs dropping from Neon Voyager',
+      imageUrl: 'https://picsum.photos/1200/400?random=101',
+      link: '/explore/nfts',
+      cta: 'View Drop'
+    },
+    {
+      id: '2',
+      title: 'Neural Beats Live',
+      subtitle: 'Join the global jam session in the Genesis Node',
+      imageUrl: 'https://picsum.photos/1200/400?random=102',
+      link: '/jamspace',
+      cta: 'Join Room'
+    },
+    {
+      id: '3',
+      title: 'TON Ecosystem Growth',
+      subtitle: 'Discover the future of decentralized music',
+      imageUrl: 'https://picsum.photos/1200/400?random=103',
+      link: '/explore',
+      cta: 'Explore'
+    }
+  ];
 
   /* Trending topic mocks */
   const trendingTopics = [
@@ -37,14 +65,10 @@ const JamSpace: React.FC = () => {
       basePosts = basePosts.filter(p => followedUserIds.includes(p.userId));
     } else if (activeTab === 'Trending') {
       basePosts = basePosts.sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
-    } else if (activeTab === 'Alpha') {
-      basePosts = basePosts.filter(p => p.trackId); /* Posts with tracks are "Alpha" */
     }
 
     // 2. Type Filtering
-    if (filterType === 'Posts') {
-      basePosts = basePosts.filter(p => !p.trackId);
-    } else if (filterType === 'Tracks') {
+    if (filterType === 'Tracks') {
       basePosts = basePosts.filter(p => p.trackId);
     } else if (filterType === 'NFTs') {
       basePosts = basePosts.filter(p => {
@@ -60,7 +84,6 @@ const JamSpace: React.FC = () => {
     }
 
     // 4. Sorting (Date)
-    // Assuming the original array is sorted by Newest first.
     if (sortOrder === 'Oldest') {
       basePosts.reverse();
     }
@@ -90,7 +113,7 @@ const JamSpace: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black pb-40 relative overflow-x-hidden">
+    <div className="min-h-screen w-full bg-black pb-40 relative overflow-x-hidden">
       {/* Immersive Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
@@ -117,7 +140,7 @@ const JamSpace: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-4 md:px-12 mt-6 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-0 sm:px-4 md:px-12 mt-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Left Column: Navigation & Trending */}
           <aside className="hidden lg:block lg:col-span-3 space-y-10 sticky top-32 h-fit">
@@ -172,8 +195,7 @@ const JamSpace: React.FC = () => {
                 {[
                   { id: 'All', label: 'Global Feed', icon: Rss },
                   { id: 'Following', label: 'Following', icon: Users },
-                  { id: 'Trending', label: 'Trending', icon: Flame },
-                  { id: 'Alpha', label: 'Alpha Signals', icon: Zap }
+                  { id: 'Trending', label: 'Trending', icon: Flame }
                 ].map(item => (
                   <button 
                     key={item.id} 
@@ -211,40 +233,13 @@ const JamSpace: React.FC = () => {
 
           {/* Center Column: Main Feed */}
           <main className="lg:col-span-6 space-y-10">
-            {/* Immersive Hero / Quick Post */}
-            <section className="relative overflow-hidden rounded-[16px] bg-[#0a0a0a] border border-white/5 p-12 shadow-2xl group/hero">
-              <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-blue-600/[0.07] via-transparent to-purple-600/[0.07] pointer-events-none"></div>
-              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.6)]"></div>
-                  <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.6em]">Neural Relay Space</span>
-                </div>
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-white leading-[0.9] mb-10"> Broadcast your <br /> <span className="text-blue-500 italic">Frequency</span> </h1>
-                <div className="flex items-center gap-5 p-3 bg-white/[0.03] border border-white/5 rounded-[12px] transition-all hover:bg-white/[0.05] hover:border-white/10">
-                  <div className="relative">
-                    <img 
-                      src={MOCK_USER.avatar} 
-                      className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80 transition-opacity border-2 border-white/5" 
-                      alt="" 
-                      onClick={() => navigate('/profile')}
-                    />
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0a0a0a]"></div>
-                  </div>
-                  <button onClick={() => setIsPostModalOpen(true)} className="flex-1 text-left px-4 py-3 text-[12px] text-white/20 font-medium uppercase tracking-widest hover:text-white/40 transition-colors" >
-                    What's resonating today?
-                  </button>
-                  <button onClick={() => setIsPostModalOpen(true)} className="w-12 h-12 flex items-center justify-center bg-blue-600 rounded-[10px] text-white shadow-xl shadow-blue-600/30 active:scale-90 transition-all hover:bg-blue-500" >
-                    <Plus className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-            </section>
+            {/* Auto Carousel at the top */}
+            <AutoCarousel items={carouselItems} />
 
             {/* Sticky Filters */}
-            <div className="sticky top-[92px] z-30 backdrop-blur-2xl py-4 w-full space-y-6 bg-black/40 -mx-2 px-2">
+            <div className="sticky top-[92px] z-30 backdrop-blur-2xl py-4 w-full space-y-6 bg-black/40 px-4">
               <div className="flex gap-3 overflow-x-auto no-scrollbar">
-                {['All', 'Following', 'Trending', 'Alpha'].map(tab => (
+                {['All', 'Following', 'Trending'].map(tab => (
                   <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-8 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-white border-blue-500 shadow-xl shadow-blue-500/20' : 'bg-white/5 text-white/40 border-white/5 hover:text-white hover:bg-white/10' }`} >
                     {tab}
                   </button>
@@ -254,7 +249,7 @@ const JamSpace: React.FC = () => {
               <div className="flex flex-wrap items-center justify-between gap-6 px-1">
                 <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
                   <Filter className="h-3.5 w-3.5 text-white/20" />
-                  {['All', 'Posts', 'Tracks', 'NFTs'].map(type => (
+                  {['All', 'Tracks', 'NFTs'].map(type => (
                     <button 
                       key={type} 
                       onClick={() => setFilterType(type as any)}
@@ -296,7 +291,7 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Main Feed */}
-            <div className="bg-transparent overflow-hidden">
+            <div className="bg-transparent">
               <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={viewMode} />
             </div>
           </main>
@@ -359,8 +354,8 @@ const JamSpace: React.FC = () => {
       {/* Mobile FAB */}
       <button onClick={() => setIsPostModalOpen(true)} className="lg:hidden fixed bottom-28 right-6 w-16 h-16 flex items-center justify-center z-50 hover:scale-110 active:scale-90 transition-all group bg-transparent" >
         <div className="absolute inset-0 bg-blue-600/40 blur-2xl rounded-full"></div>
-        <div className="w-full h-full bg-blue-600 rounded-[10px] flex items-center justify-center shadow-2xl shadow-blue-600/40 relative z-10 p-4">
-          <img src={APP_LOGO} className="w-full h-full object-contain brightness-0 invert" alt="Add Post" />
+        <div className="w-full h-full bg-blue-600 rounded-[10px] flex items-center justify-center shadow-2xl shadow-blue-600/40 relative z-10 p-3">
+          <img src={APP_LOGO} className="w-full h-full object-contain" alt="Add Post" />
         </div>
       </button>
 

@@ -10,9 +10,10 @@ interface TrackCardProps {
   track: Track;
   variant?: 'default' | 'row'; // Added variant prop to support list views if needed, though default is now 1:1
   index?: number;
+  onMint?: (track: Track) => void;
 }
 
-const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => {
+const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMint }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack } = useAudio();
   const isActive = currentTrack?.id === track.id;
@@ -22,6 +23,13 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
     e.stopPropagation();
     if (track.artistId) {
       navigate(`/artist/${track.artistId}`);
+    }
+  };
+
+  const handleMint = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onMint) {
+      onMint(track);
     }
   };
 
@@ -89,40 +97,76 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  };
+
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none"
         onClick={handleCardClick}
+        onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
+        role="button"
+        tabIndex={0}
+        aria-label={`View track: ${track.title} by ${track.artist}`}
       >
-        <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0" onClick={(e) => { e.stopPropagation(); handlePlay(e); }}>
-          <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
+        <div 
+          className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0 cursor-pointer" 
+          onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
+          onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handlePlay(e as any)); }}
+          role="button"
+          tabIndex={0}
+          aria-label={isActive && isPlaying ? `Pause ${track.title}` : `Play ${track.title}`}
+        >
+          <img src={track.coverUrl} alt="" className="w-full h-full object-cover" />
           <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
              {isActive && isPlaying ? (
-                <div className="flex items-end justify-center gap-0.5 h-3">
+                <div className="flex items-end justify-center gap-0.5 h-3" aria-hidden="true">
                   <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_0ms]"></div>
                   <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_200ms]"></div>
                   <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_400ms]"></div>
                 </div>
              ) : (
-                <Play className="h-3 w-3 text-white fill-white" />
+                <Play className="h-3 w-3 text-white fill-white" aria-hidden="true" />
              )}
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className={`text-sm font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-white'}`}>{track.title}</h4>
+          <h4 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-white'}`}>{track.title}</h4>
           <p 
-            className="text-[10px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block"
+            className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block outline-none"
             onClick={handleArtistClick}
+            onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
+            role="button"
+            tabIndex={0}
+            aria-label={`View artist: ${track.artist}`}
           >
             {track.artist}
           </p>
         </div>
         <div className="flex items-center gap-4">
-           <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest hidden sm:block">
+           {onMint && !track.isNFT && (
+             <button 
+               onClick={handleMint}
+               className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+               aria-label={`Mint NFT for ${track.title}`}
+             >
+               Mint NFT
+             </button>
+           )}
+           <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest hidden sm:block" aria-label="Duration">
               {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
            </span>
-           <button onClick={handleOptions} className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+           <button 
+             onClick={handleOptions} 
+             className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+             aria-label="Track options"
+             aria-haspopup="true"
+           >
              <MoreVertical className="h-4 w-4" />
            </button>
         </div>
@@ -132,14 +176,18 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
 
   return (
     <div 
-      className="group relative cursor-pointer"
+      className="group relative cursor-pointer outline-none"
       onClick={handleCardClick}
+      onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
+      role="button"
+      tabIndex={0}
+      aria-label={`View track: ${track.title} by ${track.artist}`}
     >
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
         <img 
           src={track.coverUrl} 
-          alt={track.title} 
+          alt="" 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
         />
         
@@ -155,32 +203,42 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
                )}
                {track.cid && (
                  <span className="px-2 py-1 bg-emerald-600/90 backdrop-blur-md rounded-[4px] text-[8px] font-bold uppercase tracking-widest text-white shadow-lg flex items-center gap-1">
-                   <Globe className="h-2 w-2" />
+                   <Globe className="h-2 w-2" aria-hidden="true" />
                    CID
                  </span>
                )}
              </div>
+             <button 
+               onClick={handleOptions} 
+               className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/60 transition-all pointer-events-auto ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+               aria-label="Track options"
+               aria-haspopup="true"
+             >
+               <MoreVertical className="h-4 w-4" />
+             </button>
            </div>
 
            {/* Center Play Button */}
            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className={`transition-all duration-300 transform ${isActive ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}>
                  {isActive && isPlaying ? (
-                    <div 
+                    <button 
                       className="flex items-end justify-center gap-0.5 w-7 h-7 rounded-full bg-blue-600/90 backdrop-blur-md shadow-xl p-1.5 pointer-events-auto cursor-pointer"
                       onClick={handlePlay}
+                      aria-label={`Pause ${track.title}`}
                     >
-                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_0ms] h-full"></div>
-                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_200ms] h-full"></div>
-                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_400ms] h-full"></div>
-                    </div>
+                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_0ms] h-full" aria-hidden="true"></div>
+                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_200ms] h-full" aria-hidden="true"></div>
+                      <div className="w-0.5 bg-white rounded-t-sm animate-[bounce_1s_infinite_400ms] h-full" aria-hidden="true"></div>
+                    </button>
                  ) : (
-                    <div 
+                    <button 
                       className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-colors pointer-events-auto cursor-pointer"
                       onClick={handlePlay}
+                      aria-label={`Play ${track.title}`}
                     >
-                       <Play className="h-3 w-3 text-white fill-white ml-0.5" />
-                    </div>
+                       <Play className="h-3 w-3 text-white fill-white ml-0.5" aria-hidden="true" />
+                    </button>
                  )}
               </div>
            </div>
@@ -189,36 +247,52 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default' }) => 
 
       {/* Content Below Card */}
       <div className="px-0.5">
-        <h3 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-400' : 'text-white'}`}>
+        <h3 className={`text-[11px] font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-400' : 'text-white'}`}>
           {track.title}
         </h3>
         <div className="flex items-center gap-1 mt-0.5 mb-1.5">
           <p 
-            className="text-[9px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block"
+            className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block outline-none"
             onClick={handleArtistClick}
+            onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
+            role="button"
+            tabIndex={0}
+            aria-label={`View artist: ${track.artist}`}
           >
             {track.artist}
           </p>
-          {track.artistVerified && <CheckCircle2 className="h-2.5 w-2.5 text-blue-500" />}
+          {track.artistVerified && <CheckCircle2 className="h-2.5 w-2.5 text-blue-500" aria-label="Verified artist" />}
         </div>
         
         {/* Stats */}
         <div className="flex items-center justify-between border-t border-white/5 pt-1.5">
-          <div className="flex items-center gap-1">
-            <Headphones className="h-2.5 w-2.5 text-white/20" />
-            <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
-              {(track.playCount || 0).toLocaleString()}
-            </span>
-            {(track.playCount || 0) > 1000 && (
-              <Zap className="h-2.5 w-2.5 text-amber-400 ml-1" />
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-2.5 w-2.5 text-white/20" />
-            <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
-              {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
-            </span>
-          </div>
+          {onMint && !track.isNFT ? (
+            <button 
+              onClick={handleMint}
+              className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+              aria-label={`Mint NFT for ${track.title}`}
+            >
+              Mint NFT
+            </button>
+          ) : (
+            <>
+              <div className="flex items-center gap-1" aria-label={`${track.playCount || 0} streams`}>
+                <Headphones className="h-2.5 w-2.5 text-white/20" aria-hidden="true" />
+                <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
+                  {(track.playCount || 0).toLocaleString()}
+                </span>
+                {(track.playCount || 0) > 1000 && (
+                  <Zap className="h-2.5 w-2.5 text-amber-400 ml-1" aria-label="Trending" />
+                )}
+              </div>
+              <div className="flex items-center gap-1" aria-label="Duration">
+                <Clock className="h-2.5 w-2.5 text-white/20" aria-hidden="true" />
+                <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
+                  {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

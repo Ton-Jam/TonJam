@@ -21,7 +21,10 @@ import {
   Cpu, 
   ShieldAlert,
   Flame,
-  Coins
+  Coins,
+  Tag,
+  Gavel,
+  Trash2
 } from 'lucide-react';
 
 import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, TON_LOGO } from '@/constants';
@@ -29,34 +32,193 @@ import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import SocialFeed from '@/components/SocialFeed';
 import MintModal from '@/components/MintModal';
+import UploadTrackModal from '@/components/UploadTrackModal';
 import VerifyArtistModal from '@/components/VerifyArtistModal';
 import RoyaltyDashboard from '@/components/RoyaltyDashboard';
-import TrackUploadModal from '@/components/TrackUploadModal';
 import EditArtistProfileModal from '@/components/EditArtistProfileModal';
+import NFTMetadataManager from '@/components/NFTMetadataManager';
+import SellNFTModal from '@/components/SellNFTModal';
 import { useAudio } from '@/context/AudioContext';
-import { Artist, Track, Post } from '@/types';
-import { getArtistSonicDNA, findRelatedArtists } from '@/services/geminiService';
+import { Artist, Track, Post, NFTItem } from '@/types';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification, playAll, currentTrack, isPlaying, followedUserIds, toggleFollowUser, userProfile, artists, setArtists } = useAudio();
-  const [activeTab, setActiveTab] = useState<'tracks' | 'nfts' | 'signals' | 'about' | 'management'>('tracks');
+  const { addNotification, playAll, currentTrack, isPlaying, followedUserIds, toggleFollowUser, userProfile, artists, setArtists, updateNFT } = useAudio();
+  const [activeTab, setActiveTab] = useState<'tracks' | 'collection' | 'signals' | 'about' | 'management'>('tracks');
   const isFollowing = useMemo(() => id ? followedUserIds.includes(id) : false, [id, followedUserIds]);
-  const [sonicDNA, setSonicDNA] = useState<{ signature: string, vibes: string[] } | null>(null);
-  const [isDNAStreaming, setIsDNAStreaming] = useState(false);
-  const [relatedArtists, setRelatedArtists] = useState<Artist[]>([]);
-  const [isRelatedLoading, setIsRelatedLoading] = useState(false);
   const [customBanner, setCustomBanner] = useState<string | null>(null);
-  const [showMintModal, setShowMintModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [editedBio, setEditedBio] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [tonConnectUI] = useTonConnectUI();
+
+  const [selectedTrackForMint, setSelectedTrackForMint] = useState<Track | null>(null);
+  const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
+
+  // Metadata Management State
+  const [editingTrackId, setEditingTrackId] = useState<string | null>(null);
+  const [metadata, setMetadata] = useState<Record<string, any>>({});
+  const [isSavingMetadata, setIsSavingMetadata] = useState<string | null>(null);
+
+  // Listing Management State
+  const [editingListingId, setEditingListingId] = useState<string | null>(null);
+  const [listingData, setListingData] = useState<Record<string, any>>({});
+  const [isSavingListing, setIsSavingListing] = useState<string | null>(null);
+
+  const handleEditListing = (nft: NFTItem) => {
+    setEditingListingId(nft.id);
+    setListingData(prev => ({
+      ...prev,
+      [nft.id]: {
+        price: nft.price || '1.0',
+        listingType: nft.listingType || 'fixed',
+        auctionEndTime: nft.auctionEndTime || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      }
+    }));
+  };
+
+  const handleListingChange = (nftId: string, field: string, value: any) => {
+    setListingData(prev => ({
+      ...prev,
+      [nftId]: {
+        ...prev[nftId],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSaveListing = async (nftId: string) => {
+    setIsSavingListing(nftId);
+    const data = listingData[nftId];
+    
+    try {
+      // Simulate API call with potential failure
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (Math.random() < 0.1) { // 10% failure rate for simulation
+            reject(new Error("Network congestion on TON blockchain. Please try again."));
+          } else {
+            resolve(true);
+          }
+        }, 1500);
+      });
+      
+      updateNFT(nftId, {
+        price: data.price,
+        listingType: data.listingType,
+        isAuction: data.listingType === 'auction',
+        auctionEndTime: data.listingType === 'auction' ? new Date(data.auctionEndTime).toISOString() : undefined
+      });
+
+      addNotification(`Marketplace protocol for "${data.title || 'NFT'}" updated successfully.`, "success");
+      setIsSavingListing(null);
+      setEditingListingId(null);
+    } catch (error: any) {
+      console.error("Listing update failed:", error);
+      addNotification(error.message || "Failed to update marketplace protocol. Check your connection.", "error");
+      setIsSavingListing(null);
+    }
+  };
+
+  const handleEditMetadata = (track: Track) => {
+    setEditingTrackId(track.id);
+    setMetadata(prev => ({
+      ...prev,
+      [track.id]: {
+        title: track.title,
+        genre: track.genre,
+        price: track.price || '1.0',
+        isNFT: track.isNFT || false,
+        description: track.description || '',
+        audioIpfsUrl: track.audioIpfsUrl || '',
+        coverIpfsUrl: track.coverIpfsUrl || '',
+        royaltySplits: track.royaltySplits || [{ address: artist?.walletAddress || '', percentage: 10, label: 'Artist' }]
+      }
+    }));
+  };
+
+  const handleAddRoyaltySplit = (trackId: string) => {
+    setMetadata(prev => {
+      const current = prev[trackId];
+      return {
+        ...prev,
+        [trackId]: {
+          ...current,
+          royaltySplits: [...(current.royaltySplits || []), { address: '', percentage: 0, label: '' }]
+        }
+      };
+    });
+  };
+
+  const handleRemoveRoyaltySplit = (trackId: string, index: number) => {
+    setMetadata(prev => {
+      const current = prev[trackId];
+      const newSplits = [...(current.royaltySplits || [])];
+      newSplits.splice(index, 1);
+      return {
+        ...prev,
+        [trackId]: {
+          ...current,
+          royaltySplits: newSplits
+        }
+      };
+    });
+  };
+
+  const handleRoyaltySplitChange = (trackId: string, index: number, field: string, value: any) => {
+    setMetadata(prev => {
+      const current = prev[trackId];
+      const newSplits = [...(current.royaltySplits || [])];
+      newSplits[index] = { ...newSplits[index], [field]: value };
+      return {
+        ...prev,
+        [trackId]: {
+          ...current,
+          royaltySplits: newSplits
+        }
+      };
+    });
+  };
+
+  const handleMetadataChange = (trackId: string, field: string, value: any) => {
+    setMetadata(prev => ({
+      ...prev,
+      [trackId]: {
+        ...prev[trackId],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSaveMetadata = async (trackId: string) => {
+    setIsSavingMetadata(trackId);
+    try {
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (Math.random() < 0.1) {
+            reject(new Error("Metadata synchronization failed. Protocol timeout."));
+          } else {
+            resolve(true);
+          }
+        }, 1000);
+      });
+      
+      const currentMetadata = metadata[trackId];
+      handleSaveNFTMetadata(trackId, currentMetadata);
+      
+      setIsSavingMetadata(null);
+      setEditingTrackId(null);
+    } catch (error: any) {
+      console.error("Metadata save failed:", error);
+      addNotification(error.message || "Failed to synchronize metadata. Please try again.", "error");
+      setIsSavingMetadata(null);
+    }
+  };
 
   const handleTipArtist = async () => {
     if (!tonConnectUI.connected) {
@@ -76,10 +238,14 @@ const ArtistProfile: React.FC = () => {
       };
       
       await tonConnectUI.sendTransaction(transaction);
-      addNotification(`Successfully tipped ${artist?.name} 0.1 TON!`, "success");
-    } catch (e) {
+      addNotification(`Successfully tipped ${artist?.name} 0.1 TON! Transaction broadcasted.`, "success");
+    } catch (e: any) {
       console.error(e);
-      addNotification("Tipping transaction cancelled or failed.", "error");
+      if (e.message?.includes("User rejected")) {
+        addNotification("Transaction rejected by user.", "warning");
+      } else {
+        addNotification("Tipping transaction failed. Ensure you have sufficient TON balance.", "error");
+      }
     }
   };
 
@@ -99,6 +265,12 @@ const ArtistProfile: React.FC = () => {
       .slice(0, 3);
   }, [artistTracks]);
 
+  const topTracks = useMemo(() => {
+    return [...artistTracks]
+      .sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
+      .slice(0, 5);
+  }, [artistTracks]);
+
   const marketStats = useMemo(() => {
     if (!artistNFTs.length) return null;
     const prices = artistNFTs.map(n => parseFloat(n.price));
@@ -111,45 +283,7 @@ const ArtistProfile: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (artist && artistTracks.length > 0) {
-      handleSyncDNA();
-    }
   }, [id, artist]);
-
-  useEffect(() => {
-    if (artist) {
-      handleFetchRelated();
-    }
-  }, [artist, id]);
-
-  const handleSyncDNA = async () => {
-    if (!artist) return;
-    setIsDNAStreaming(true);
-    try {
-      const dna = await getArtistSonicDNA(artist, artistTracks);
-      setSonicDNA(dna);
-    } catch (e: any) {
-      addNotification(e.message || "Failed to sync Sonic DNA.", "warning");
-    } finally {
-      setIsDNAStreaming(false);
-    }
-  };
-
-  const handleFetchRelated = async () => {
-    if (!artist) return;
-    setIsRelatedLoading(true);
-    try {
-      const catalog = artists.filter(a => a.id !== artist.id);
-      const relatedIds = await findRelatedArtists(artist, artistTracks, catalog);
-      const matches = artists.filter(a => relatedIds.includes(a.id));
-      setRelatedArtists(matches.slice(0, 3));
-    } catch (e: any) {
-      const fallback = artists.filter(a => a.id !== artist.id).slice(0, 3);
-      setRelatedArtists(fallback);
-    } finally {
-      setIsRelatedLoading(false);
-    }
-  };
 
   const handleSaveBio = () => {
     if (!artist) return;
@@ -158,10 +292,25 @@ const ArtistProfile: React.FC = () => {
     addNotification("Biographical record synchronized.", "success");
   };
 
+  const handleSaveNFTMetadata = (trackId: string, metadata: any) => {
+    // In a real app, this would be an API call
+    console.log(`Saving metadata for track ${trackId}:`, metadata);
+    addNotification(`Metadata for "${metadata.title}" synchronized with Forge protocol.`, "success");
+  };
+
   if (!artist) return null;
 
   const handleFollow = () => {
-    if (id) toggleFollowUser(id);
+    if (id) {
+      toggleFollowUser(id);
+      const isNowFollowing = !followedUserIds.includes(id);
+      addNotification(
+        isNowFollowing 
+          ? `Now following ${artist?.name}. Signals will appear in your feed.` 
+          : `Unfollowed ${artist?.name}.`, 
+        "success"
+      );
+    }
   };
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -292,13 +441,13 @@ const ArtistProfile: React.FC = () => {
                 </button>
               )}
               {isOwnProfile && userProfile.isVerifiedArtist && (
-                <button onClick={() => setShowUploadModal(true)} className="px-6 py-2.5 bg-blue-600/10 text-blue-400 border border-blue-500/30 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
+                <button onClick={() => setIsUploadModalOpen(true)} className="px-6 py-2.5 bg-green-600/10 text-green-400 border border-green-500/30 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-green-500/20 active:scale-95 transition-all flex items-center gap-2" >
                   <Upload className="h-3 w-3" /> UPLOAD_TRACK
                 </button>
               )}
-              {artist.id === userProfile.id && userProfile.isVerifiedArtist && (
-                <button onClick={() => setShowMintModal(true)} className="px-6 py-2.5 bg-white/5 text-white rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all flex items-center gap-2" >
-                  <Plus className="h-3 w-3" /> FORGE_PROTOCOL
+              {isOwnProfile && userProfile.isVerifiedArtist && (
+                <button onClick={() => navigate('/artist-dashboard')} className="px-6 py-2.5 bg-blue-600/10 text-blue-400 border border-blue-500/30 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
+                  <Plus className="h-3 w-3" /> ARTIST_DASHBOARD
                 </button>
               )}
               {artist.id === userProfile.id && !artist.verified && (
@@ -332,7 +481,7 @@ const ArtistProfile: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 mt-12 animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-1 h-4 electric-blue-bg rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
-            <h2 className="text-[9px] font-bold text-white/40 uppercase tracking-[0.5em]">Trending Frequencies</h2>
+            <h2 className="text-[7px] font-bold text-white/40 uppercase tracking-[0.5em]">Trending Frequencies</h2>
           </div>
           <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
             {trendingTracks.map((track, idx) => (
@@ -372,13 +521,13 @@ const ArtistProfile: React.FC = () => {
       <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-xl py-6 mt-12 mb-8 w-full px-6 border-b border-white/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex bg-white/5 p-1 rounded-[12px] border border-white/10">
-            {['tracks', 'nfts'].map(tab => (
+            {['tracks', 'collection'].map(tab => (
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab as any)} 
                 className={`px-8 py-2.5 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
               >
-                {tab}
+                {tab === 'collection' ? 'Collection' : tab}
               </button>
             ))}
           </div>
@@ -402,37 +551,11 @@ const ArtistProfile: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Left: Intelligence Sidebar */}
           <div className="lg:col-span-4 space-y-6">
-            {/* Sonic DNA Panel */}
-            <section className="glass border border-blue-500/10 backdrop-blur-2xl bg-white/[0.02] p-8 rounded-[10px] relative overflow-hidden group shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><Dna className="h-8 w-8 text-blue-500" /></div>
-              <div className="absolute -left-20 -top-20 w-40 h-40 bg-blue-600/10 blur-[80px] rounded-full"></div>
-              <h3 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-6 relative z-10">Neural DNA Signature</h3>
-              {isDNAStreaming ? (
-                <div className="py-8 flex flex-col items-center gap-4 relative z-10">
-                  <div className="flex gap-1 items-end h-6">
-                    {[0.1, 0.4, 0.2, 0.8, 0.5].map((d, i) => (
-                      <div key={i} className="w-1 bg-blue-500 rounded-full animate-bounce shadow-[0_0_8px_rgba(59,130,246,0.5)]" style={{ animationDelay: `${d}s`, height: `${d * 100}%` }}></div>
-                    ))}
-                  </div>
-                  <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest animate-pulse">Scanning Frequencies...</p>
-                </div>
-              ) : sonicDNA ? (
-                <div className="space-y-6 animate-in fade-in duration-700 relative z-10">
-                  <p className="text-xs text-white/60 leading-relaxed border-l border-blue-500/30 pl-6"> "{sonicDNA.signature}" </p>
-                  <div className="flex flex-wrap gap-2">
-                    {sonicDNA.vibes.map(vibe => (
-                      <span key={vibe} className="px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-[10px] text-[8px] font-bold text-blue-400 uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all cursor-default">#{vibe}</span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </section>
-
             {/* Market Insights */}
             {marketStats && (
               <section className="glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.02] p-8 rounded-[10px] relative shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                 <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full"></div>
-                <h3 className="text-[9px] font-bold text-amber-500/60 uppercase tracking-[0.4em] mb-6 relative z-10">Market Ledger</h3>
+                <h3 className="text-[7px] font-bold text-amber-500/60 uppercase tracking-[0.4em] mb-6 relative z-10">Market Ledger</h3>
                 <div className="space-y-4 relative z-10">
                   <div className="flex justify-between items-center group/stat">
                     <span className="text-[8px] font-bold text-white/20 uppercase group-hover/stat:text-white/40 transition-colors">Floor</span>
@@ -454,7 +577,7 @@ const ArtistProfile: React.FC = () => {
             {/* Biography */}
             <section className="p-8 glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.01] rounded-[10px] group/bio">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em]">Origin Narrative</h3>
+                <h3 className="text-[7px] font-bold text-white/20 uppercase tracking-[0.4em]">Origin Narrative</h3>
                 {isOwnProfile && !isEditingBio && (
                   <button 
                     onClick={() => {
@@ -495,50 +618,55 @@ const ArtistProfile: React.FC = () => {
                 <p className="text-xs text-white/40 leading-relaxed">{artist.bio || "No biographical record in neural archive."}</p>
               )}
             </section>
-
-            {/* Similar Artists */}
-            {(relatedArtists.length > 0 || isRelatedLoading) && (
-              <section className="p-8 glass border border-blue-500/10 backdrop-blur-xl bg-white/[0.01] rounded-[10px]">
-                <div className="flex items-center gap-2 mb-6">
-                  <Cpu className="h-3 w-3 text-blue-500" />
-                  <h3 className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em]">Similar Artists</h3>
-                </div>
-                <div className="space-y-4">
-                  {isRelatedLoading ? (
-                    [1,2,3].map(i => <div key={i} className="h-12 bg-white/5 rounded-[10px] animate-pulse"></div>)
-                  ) : relatedArtists.map(related => (
-                    <div key={related.id} onClick={() => navigate(`/artist/${related.id}`)} className="flex items-center gap-4 p-2 -mx-2 hover:bg-white/5 rounded-[10px] cursor-pointer transition-colors group">
-                      <img src={related.avatarUrl} className="w-10 h-10 rounded-full object-cover group-hover:scale-105 transition-transform" alt={related.name} />
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <h4 className="text-xs font-bold text-white tracking-tight">{related.name}</h4>
-                          {related.verified && <CheckCircle className="text-blue-500 h-3 w-3" />}
-                        </div>
-                        <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{(related.followers || 0).toLocaleString()} Fans</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
 
           {/* Right: Content Feed */}
           <div className="lg:col-span-8">
             <div className="min-h-[500px]">
               {activeTab === 'tracks' && (
-                <div className="space-y-10 animate-in fade-in duration-500">
-                  {/* Popular Syncs Section */}
-                  {artistTracks.length > 3 && (
-                    <section>
-                      <div className="flex items-center gap-2 mb-5">
-                        <Flame className="h-3 w-3 text-amber-500" />
-                        <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-[0.4em]">Popular Syncs</h4>
+                <div className="space-y-12 animate-in fade-in duration-500">
+                  {/* Top Tracks Section */}
+                  {topTracks.length > 0 && (
+                    <section className="glass border border-blue-500/10 bg-white/[0.01] rounded-[10px] p-8">
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                          <h3 className="text-lg font-bold text-white uppercase tracking-tighter">Top Frequencies</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                          <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Live Stats</span>
+                        </div>
                       </div>
-                      <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-                        {artistTracks.slice(0, 4).map(t => (
-                          <div key={`popular-${t.id}`} className="min-w-[280px] sm:min-w-[320px]">
-                            <TrackCard track={t} variant="row" />
+                      
+                      <div className="space-y-2">
+                        {topTracks.map((track, idx) => (
+                          <div key={`top-${track.id}`} className="group flex items-center gap-4 p-3 rounded-[10px] hover:bg-white/5 transition-all border border-transparent hover:border-white/5">
+                            <span className="w-4 text-[10px] font-bold text-white/20 group-hover:text-blue-500 transition-colors">{idx + 1}</span>
+                            <div className="relative w-10 h-10 rounded-[6px] overflow-hidden flex-shrink-0">
+                              <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
+                              <button onClick={() => playAll([track])} className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Play className="h-3 w-3 text-white fill-white" />
+                              </button>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-bold text-white uppercase tracking-tight truncate">{track.title}</h4>
+                              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{track.genre}</p>
+                            </div>
+                            <div className="flex items-center gap-6">
+                              <div className="hidden md:flex flex-col items-end">
+                                <span className="text-[10px] font-bold text-white tracking-tighter">{(track.playCount || 0).toLocaleString()}</span>
+                                <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest">Streams</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                                  <Heart className="h-3 w-3" />
+                                </button>
+                                <button onClick={() => playAll([track])} className="p-2 text-white/20 hover:text-blue-500 transition-colors">
+                                  <Play className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -549,12 +677,15 @@ const ArtistProfile: React.FC = () => {
                   <section>
                     <div className="flex items-center gap-2 mb-6">
                       <List className="h-3 w-3 text-white/20" />
-                      <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-[0.4em]">All Frequencies</h4>
+                      <h4 className="text-[7px] font-bold text-white/40 uppercase tracking-[0.4em]">All Frequencies</h4>
                     </div>
                     <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
                       {artistTracks.map(t => (
                         <div key={t.id} className="min-w-[280px] sm:min-w-[320px]">
-                          <TrackCard track={t} />
+                          <TrackCard 
+                            track={t} 
+                            onMint={isOwnProfile ? (track) => setSelectedTrackForMint(track) : undefined}
+                          />
                         </div>
                       ))}
                     </div>
@@ -567,11 +698,14 @@ const ArtistProfile: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'nfts' && (
+              {activeTab === 'collection' && (
                 <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar animate-in slide-in-from-right-4 duration-500">
                   {artistNFTs.map(n => (
                     <div key={n.id} className="min-w-[280px] sm:min-w-[320px]">
-                      <NFTCard nft={n} />
+                      <NFTCard 
+                        nft={n} 
+                        onAction={isOwnProfile ? (nft) => setSelectedNftForListing(nft) : undefined}
+                      />
                     </div>
                   ))}
                   {artistNFTs.length === 0 && (
@@ -609,17 +743,426 @@ const ArtistProfile: React.FC = () => {
               )}
 
               {activeTab === 'management' && isOwnProfile && (
-                <RoyaltyDashboard artist={artist} />
+                <div className="space-y-12 animate-in fade-in duration-700">
+                  <RoyaltyDashboard artist={artist} />
+                  
+                  {/* Manage Metadata Section */}
+                  <div className="space-y-8">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-10 h-10 bg-purple-600/20 rounded-[10px] flex items-center justify-center">
+                        <Disc className="h-4 w-4 text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white uppercase tracking-tighter">Manage Metadata</h3>
+                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Configure tracks for NFT minting protocols</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      {artistTracks.map((track) => {
+                        const isEditing = editingTrackId === track.id;
+                        const currentMetadata = metadata[track.id] || {
+                          title: track.title,
+                          genre: track.genre,
+                          price: track.price || '1.0',
+                          isNFT: track.isNFT || false
+                        };
+
+                        return (
+                          <div 
+                            key={track.id}
+                            className={`glass border transition-all duration-300 rounded-[12px] overflow-hidden ${
+                              isEditing ? 'border-purple-500/30 bg-purple-500/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'
+                            }`}
+                          >
+                            <div className="p-6">
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-4 flex-1 min-w-0">
+                                  <img src={track.coverUrl} className="w-12 h-12 rounded-[8px] object-cover shadow-lg" alt="" />
+                                  <div className="min-w-0">
+                                    <h4 className="text-sm font-bold text-white truncate uppercase tracking-tight">{track.title}</h4>
+                                    <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{track.genre} • {track.isNFT ? 'NFT Protocol Active' : 'Standard Stream'}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                  {!isEditing ? (
+                                    <button 
+                                      onClick={() => handleEditMetadata(track)}
+                                      className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
+                                    >
+                                      Configure Metadata
+                                    </button>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <button 
+                                        onClick={() => setEditingTrackId(null)}
+                                        className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button 
+                                        onClick={() => handleSaveMetadata(track.id)}
+                                        disabled={isSavingMetadata === track.id}
+                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 flex items-center gap-2"
+                                      >
+                                        {isSavingMetadata === track.id ? (
+                                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                          <Check className="w-3 h-3" />
+                                        )}
+                                        Save Changes
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {isEditing && (
+                                <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-top-4 duration-300">
+                                  <div className="space-y-6">
+                                    <div className="space-y-2">
+                                      <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        Track Title
+                                      </label>
+                                      <input 
+                                        type="text"
+                                        value={currentMetadata.title}
+                                        onChange={(e) => handleMetadataChange(track.id, 'title', e.target.value)}
+                                        className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all"
+                                      />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        Genre
+                                      </label>
+                                      <select 
+                                        value={currentMetadata.genre}
+                                        onChange={(e) => handleMetadataChange(track.id, 'genre', e.target.value)}
+                                        className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all appearance-none"
+                                      >
+                                        {['Techno', 'House', 'Ambient', 'Phonk', 'Cyberpunk', 'Lo-Fi', 'Electronic', 'Pop'].map(g => (
+                                          <option key={g} value={g}>{g}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        Description
+                                      </label>
+                                      <textarea 
+                                        value={currentMetadata.description}
+                                        onChange={(e) => handleMetadataChange(track.id, 'description', e.target.value)}
+                                        rows={3}
+                                        placeholder="Describe the sonic journey..."
+                                        className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all resize-none"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-6">
+                                    <div className="space-y-2">
+                                      <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        IPFS Audio URL
+                                      </label>
+                                      <input 
+                                        type="text"
+                                        value={currentMetadata.audioIpfsUrl}
+                                        onChange={(e) => handleMetadataChange(track.id, 'audioIpfsUrl', e.target.value)}
+                                        placeholder="ipfs://..."
+                                        className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all"
+                                      />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        IPFS Cover URL
+                                      </label>
+                                      <input 
+                                        type="text"
+                                        value={currentMetadata.coverIpfsUrl}
+                                        onChange={(e) => handleMetadataChange(track.id, 'coverIpfsUrl', e.target.value)}
+                                        placeholder="ipfs://..."
+                                        className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all"
+                                      />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        NFT Price (TON)
+                                      </label>
+                                      <input 
+                                        type="number"
+                                        step="0.1"
+                                        value={currentMetadata.price}
+                                        onChange={(e) => handleMetadataChange(track.id, 'price', e.target.value)}
+                                        className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all"
+                                      />
+                                    </div>
+
+                                    <div className="p-4 bg-purple-600/5 border border-purple-500/20 rounded-[10px] flex items-center justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                          <Disc className="w-4 h-4 text-purple-400" />
+                                        </div>
+                                        <div>
+                                          <h5 className="text-[10px] font-bold text-white uppercase tracking-tight">NFT Option</h5>
+                                          <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Enable NFT minting for this track</p>
+                                        </div>
+                                      </div>
+                                      <button 
+                                        onClick={() => handleMetadataChange(track.id, 'isNFT', !currentMetadata.isNFT)}
+                                        className={`w-12 h-6 rounded-full transition-colors relative ${currentMetadata.isNFT ? 'bg-purple-500' : 'bg-white/10'}`}
+                                      >
+                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${currentMetadata.isNFT ? 'left-7' : 'left-1'}`} />
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Royalty Splits Section */}
+                                  <div className="md:col-span-2 space-y-4 pt-4 border-t border-white/5">
+                                    <div className="flex items-center justify-between">
+                                      <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        Royalty Splits (%)
+                                      </label>
+                                      <button 
+                                        onClick={() => handleAddRoyaltySplit(track.id)}
+                                        className="flex items-center gap-1 text-[8px] font-bold text-purple-400 uppercase tracking-widest hover:text-purple-300 transition-colors"
+                                      >
+                                        <Plus className="w-3 h-3" /> Add Recipient
+                                      </button>
+                                    </div>
+                                    
+                                    <div className="space-y-3">
+                                      {currentMetadata.royaltySplits?.map((split: any, index: number) => (
+                                        <div key={index} className="grid grid-cols-12 gap-3 items-center">
+                                          <div className="col-span-5">
+                                            <input 
+                                              type="text"
+                                              placeholder="Wallet Address"
+                                              value={split.address}
+                                              onChange={(e) => handleRoyaltySplitChange(track.id, index, 'address', e.target.value)}
+                                              className="w-full bg-black/40 border border-white/10 rounded-[8px] p-2.5 text-[10px] text-white outline-none focus:border-purple-500/50 transition-all"
+                                            />
+                                          </div>
+                                          <div className="col-span-3">
+                                            <input 
+                                              type="text"
+                                              placeholder="Label (e.g. Producer)"
+                                              value={split.label}
+                                              onChange={(e) => handleRoyaltySplitChange(track.id, index, 'label', e.target.value)}
+                                              className="w-full bg-black/40 border border-white/10 rounded-[8px] p-2.5 text-[10px] text-white outline-none focus:border-purple-500/50 transition-all"
+                                            />
+                                          </div>
+                                          <div className="col-span-3 relative">
+                                            <input 
+                                              type="number"
+                                              placeholder="%"
+                                              value={split.percentage}
+                                              onChange={(e) => handleRoyaltySplitChange(track.id, index, 'percentage', parseFloat(e.target.value))}
+                                              className="w-full bg-black/40 border border-white/10 rounded-[8px] p-2.5 pr-8 text-[10px] text-white outline-none focus:border-purple-500/50 transition-all"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/20">%</span>
+                                          </div>
+                                          <div className="col-span-1 flex justify-end">
+                                            <button 
+                                              onClick={() => handleRemoveRoyaltySplit(track.id, index)}
+                                              className="p-2 text-white/20 hover:text-red-400 transition-colors"
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Marketplace Management Section */}
+                  <div className="space-y-8">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-10 h-10 bg-amber-500/20 rounded-[10px] flex items-center justify-center">
+                        <Tag className="h-4 w-4 text-amber-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white uppercase tracking-tighter">Marketplace Management</h3>
+                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Configure sale and auction protocols for your collection</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      {artistNFTs.map((nft) => {
+                        const isEditing = editingListingId === nft.id;
+                        const currentListing = listingData[nft.id] || {
+                          price: nft.price || '1.0',
+                          listingType: nft.listingType || 'fixed',
+                          auctionEndTime: nft.auctionEndTime ? new Date(nft.auctionEndTime).toISOString().split('T')[0] : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                        };
+
+                        return (
+                          <div 
+                            key={nft.id}
+                            className={`glass border transition-all duration-300 rounded-[12px] overflow-hidden ${
+                              isEditing ? 'border-amber-500/30 bg-amber-500/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'
+                            }`}
+                          >
+                            <div className="p-6">
+                              <div className="flex items-center justify-between gap-6">
+                                <div 
+                                  className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer group/item"
+                                  onClick={() => navigate(`/nft/${nft.id}`)}
+                                >
+                                  <img src={nft.imageUrl} className="w-12 h-12 rounded-[8px] object-cover shadow-lg group-hover/item:scale-105 transition-transform" alt="" />
+                                  <div className="min-w-0">
+                                    <h4 className="text-sm font-bold text-white truncate uppercase tracking-tight group-hover/item:text-amber-400 transition-colors">{nft.title}</h4>
+                                    <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
+                                      {nft.listingType === 'auction' ? 'Active Auction' : nft.listingType === 'fixed' ? 'Fixed Price' : 'Not Listed'} • {nft.price} TON
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                  {!isEditing ? (
+                                    <button 
+                                      onClick={() => handleEditListing(nft)}
+                                      className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
+                                    >
+                                      Manage Listing
+                                    </button>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <button 
+                                        onClick={() => setEditingListingId(null)}
+                                        className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button 
+                                        onClick={() => handleSaveListing(nft.id)}
+                                        disabled={isSavingListing === nft.id}
+                                        className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2"
+                                      >
+                                        {isSavingListing === nft.id ? (
+                                          <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                        ) : (
+                                          <Check className="w-3 h-3" />
+                                        )}
+                                        Update Listing
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {isEditing && (
+                                <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-top-4 duration-300">
+                                  <div className="space-y-6">
+                                    <div className="space-y-2">
+                                      <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        Listing Type
+                                      </label>
+                                      <div className="flex gap-2">
+                                        <button 
+                                          onClick={() => handleListingChange(nft.id, 'listingType', 'fixed')}
+                                          className={`flex-1 py-3 rounded-[8px] border text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentListing.listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500 text-blue-500' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
+                                        >
+                                          <Tag className="w-3 h-3" /> Fixed Price
+                                        </button>
+                                        <button 
+                                          onClick={() => handleListingChange(nft.id, 'listingType', 'auction')}
+                                          className={`flex-1 py-3 rounded-[8px] border text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentListing.listingType === 'auction' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
+                                        >
+                                          <Gavel className="w-3 h-3" /> Auction
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                        {currentListing.listingType === 'auction' ? 'Starting Bid (TON)' : 'Sale Price (TON)'}
+                                      </label>
+                                      <div className="relative">
+                                        <img src={TON_LOGO} className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" alt="" />
+                                        <input 
+                                          type="number"
+                                          step="0.1"
+                                          value={currentListing.price}
+                                          onChange={(e) => handleListingChange(nft.id, 'price', e.target.value)}
+                                          className="w-full bg-black/40 border border-white/10 rounded-[8px] py-3 pl-10 pr-4 text-xs text-white outline-none focus:border-amber-500/50 transition-all"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-6">
+                                    {currentListing.listingType === 'auction' && (
+                                      <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+                                        <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                                          Auction End Date
+                                        </label>
+                                        <input 
+                                          type="date"
+                                          value={currentListing.auctionEndTime}
+                                          onChange={(e) => handleListingChange(nft.id, 'auctionEndTime', e.target.value)}
+                                          className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-amber-500/50 transition-all"
+                                        />
+                                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-2">Protocol will finalize at 00:00 UTC on selected date</p>
+                                      </div>
+                                    )}
+
+                                    <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-[10px] flex gap-3">
+                                      <Info className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                                      <p className="text-[9px] text-white/60 leading-relaxed uppercase tracking-widest">
+                                        Listing this asset will make it visible in the global marketplace. A 2.5% protocol fee applies to all successful transfers.
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {artistNFTs.length === 0 && (
+                        <div className="py-20 text-center bg-white/5 border border-white/10 rounded-[12px]">
+                          <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em]">No minted protocols available for listing.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
       <div className="h-32"></div>
-      {showMintModal && <MintModal onClose={() => setShowMintModal(false)} />}
       {showVerifyModal && artist && <VerifyArtistModal onClose={() => setShowVerifyModal(false)} artistName={artist.name} />}
-      {showUploadModal && <TrackUploadModal onClose={() => setShowUploadModal(false)} />}
       {showEditProfileModal && <EditArtistProfileModal artist={artist} onClose={() => setShowEditProfileModal(false)} />}
+      {isUploadModalOpen && <UploadTrackModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />}
+      
+      {selectedTrackForMint && (
+        <MintModal 
+          track={selectedTrackForMint} 
+          onClose={() => setSelectedTrackForMint(null)} 
+        />
+      )}
+
+      {selectedNftForListing && (
+        <SellNFTModal 
+          nft={selectedNftForListing} 
+          onClose={() => setSelectedNftForListing(null)} 
+        />
+      )}
     </div>
   );
 };

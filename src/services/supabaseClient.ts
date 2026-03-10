@@ -1,22 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const envUrl = import.meta.env.VITE_SUPABASE_URL || 'https://zhnasgdvxolfisaqillk.supabase.co';
+const envKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpobmFzZ2R2eG9sZmlzYXFpbGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1ODgxMzcsImV4cCI6MjA4NzE2NDEzN30.JwTlbS1qGyOvKhWomahEaARPtu-rVXL3Bkc-1beM9b8';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase URL or Anon Key is missing. Please check your .env file.');
-}
+const supabaseUrl = envUrl.startsWith('http') ? envUrl : `https://${envUrl}`;
+const supabaseKey = envKey;
 
-const isValidUrl = (url: string | undefined) => {
-  if (!url) return false;
-  try {
-    return new URL(url).protocol.startsWith('http');
-  } catch (e) {
-    return false;
-  }
-};
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-const finalUrl = isValidUrl(supabaseUrl) ? supabaseUrl : 'https://placeholder.supabase.co';
-const finalKey = supabaseAnonKey || 'placeholder';
-
-export const supabase = createClient(finalUrl, finalKey);
+export default supabase

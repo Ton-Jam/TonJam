@@ -21,6 +21,11 @@ export interface Track {
   releaseDate?: string;
   ipfsUrl?: string; // Decentralized metadata/audio link
   cid?: string; // Content Identifier
+  description?: string;
+  audioIpfsUrl?: string;
+  coverIpfsUrl?: string;
+  royaltySplits?: RoyaltySplit[];
+  lyrics?: string;
 }
 
 export interface NFTTrait {
@@ -168,6 +173,7 @@ export interface Playlist {
   isPrivate?: boolean;
   isCollaborative?: boolean;
   tags?: string[];
+  updatedAt?: string;
 }
 
 export interface UserProfile {
@@ -192,6 +198,7 @@ export interface UserProfile {
   followedArtists?: string[];
   followedUserIds?: string[];
   friends?: string[];
+  favoriteGenres?: string[];
   transactions?: Transaction[];
   socials?: {
     x?: string;

@@ -26,19 +26,19 @@ import {
 } from 'lucide-react';
 
 import PostCard from '@/components/PostCard';
-import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS, MOCK_USERS, APP_LOGO } from '@/constants';
+import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS, MOCK_USERS, APP_LOGO, GENRES } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
+import NFTVaultSection from '@/components/NFTVaultSection';
 import PlaylistCard from '@/components/PlaylistCard';
 import SocialFeed from '@/components/SocialFeed';
 import UserCard from '@/components/UserCard';
-import MintModal from '@/components/MintModal';
 import SellNFTModal from '@/components/SellNFTModal';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { NFTItem, UserProfile } from '@/types';
 import { useTonAddress } from '@tonconnect/ui-react';
-import { getArtistSonicDNA } from '@/services/geminiService';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -65,10 +65,7 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [localUser, setLocalUser] = useState<UserProfile>(userProfile);
   const [activeTab, setActiveTab] = useState<'inventory' | 'releases' | 'sequences' | 'activity' | 'network' | 'staking' | 'feed'>('inventory');
-  const [showMintModal, setShowMintModal] = useState(false);
   const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
-  const [isDNASyncing, setIsDNASyncing] = useState(false);
-  const [sonicDNA, setSonicDNA] = useState<{ signature: string; vibes: string[] } | null>(null);
   const [newPostContent, setNewPostContent] = useState('');
 
   /* Check for Spotify verification */
@@ -88,6 +85,8 @@ const Profile: React.FC = () => {
     return saved ? parseFloat(saved) : 1250;
   });
   const [pendingRewards, setPendingRewards] = useState(4.2);
+  const [recentLimit, setRecentLimit] = useState(5);
+  const recentSentinelRef = useInfiniteScroll(() => setRecentLimit(prev => prev + 5));
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -197,33 +196,6 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleSyncDNA = async () => {
-    setIsDNASyncing(true);
-    addNotification("Analyzing sonic frequencies...", "info");
-    try {
-      /* Use user's tracks or fallback to mock tracks if none */
-      const tracksToAnalyze = allTracks.filter(t => t.artistId === localUser.id);
-      const analysisTracks = tracksToAnalyze.length > 0 ? tracksToAnalyze : MOCK_TRACKS.slice(0, 5);
-      const dna = await getArtistSonicDNA({
-        id: localUser.id,
-        name: localUser.name,
-        bio: localUser.bio,
-        avatarUrl: localUser.avatar,
-        verified: localUser.isVerifiedArtist,
-        followers: localUser.followers,
-        monthlyListeners: 0,
-        bannerUrl: localUser.bannerUrl
-      }, analysisTracks);
-      setSonicDNA(dna);
-      addNotification("Neural DNA sync complete", "success");
-    } catch (e) {
-      console.error(e);
-      addNotification("DNA Sync failed. Retrying with cached protocols.", "warning");
-    } finally {
-      setIsDNASyncing(false);
-    }
-  };
-
   const handleNFTAction = (nft: NFTItem) => {
     setSelectedNftForListing(nft);
   };
@@ -263,7 +235,7 @@ const Profile: React.FC = () => {
     <div className="flex items-center justify-between mb-8 px-4 md:px-0">
       <div className="flex items-center gap-4">
         <div className="w-1 h-5 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
-        <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.4em]">
+        <h3 className="text-[9px] font-bold text-white uppercase tracking-[0.4em]">
           {title}
         </h3>
       </div>
@@ -420,16 +392,7 @@ const Profile: React.FC = () => {
 
       {/* Featured Collectibles Section */}
       {ownedNfts.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 md:px-12 mb-12">
-          <SectionHeader title="Featured Collectibles" onAction={() => navigate('/explore/nfts?title=Featured Collectibles&filter=owned')} actionLabel="View Vault" />
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-            {ownedNfts.slice(0, 5).map(nft => (
-              <div key={nft.id} className="flex-shrink-0 w-48 md:w-56">
-                <NFTCard nft={nft} onAction={handleNFTAction} />
-              </div>
-            ))}
-          </div>
-        </div>
+        <NFTVaultSection nfts={ownedNfts} />
       )}
 
       {/* Main Dashboard Layout */}
@@ -437,50 +400,17 @@ const Profile: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Left Sidebar */}
           <div className="lg:col-span-4 space-y-8">
-            <div className="grid grid-cols-2 gap-6">
-              <StatBlock label="Network Value" value={localUser.earnings} subValue="TON" icon="gem" trend="+12.4%" />
-              <StatBlock label="Reward Credits" value="1,450" subValue="TJ" icon="coins" trend="+5.2%" />
-            </div>
-            
-            <div className="relative group overflow-hidden bg-[#0a0a0a] border border-white/5 p-8 rounded-[16px] shadow-2xl">
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><Dna className="h-12 w-12 text-blue-500" /></div>
-              <div className="absolute -left-20 -top-20 w-48 h-48 bg-blue-600/10 blur-[100px] rounded-full"></div>
-              
-              <div className="flex items-center gap-3 mb-8 relative z-10">
-                <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-                <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.5em]">Neural_Signature</h3>
+            <div className="relative group overflow-hidden bg-[#0a0a0a] border border-white/5 p-6 rounded-[16px] shadow-2xl">
+              <div className="flex justify-between items-center mb-6 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+                  <h3 className="text-[8px] font-bold text-white uppercase tracking-[0.5em]">Network_Stats</h3>
+                </div>
               </div>
-              
-              {isDNASyncing ? (
-                <div className="py-10 flex flex-col items-center gap-6 relative z-10">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse"></div>
-                    <img src={APP_LOGO} className="w-10 h-10 object-contain animate-[spin_4s_linear_infinite] relative z-10" alt="Loading..." />
-                  </div>
-                  <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.3em] animate-pulse">Resonating frequencies...</p>
-                </div>
-              ) : (
-                <div className="space-y-8 relative z-10">
-                  <div className="relative">
-                    <div className="absolute -left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-600 to-transparent opacity-30"></div>
-                    <p className="text-[11px] text-white/60 leading-relaxed font-medium italic">
-                      "{sonicDNA?.signature || "Primary resonance: Deep House & Synthwave. Collector profile indicates a preference for high-bitrate genesis protocols and atmospheric textures."}"
-                    </p>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {(sonicDNA?.vibes || ['Atmospheric', 'Synth-Heavy', 'Collector', 'Curator']).map(tag => (
-                      <span key={tag} className="px-3 py-1.5 bg-white/5 border border-white/5 rounded-full text-[8px] font-bold text-blue-400 uppercase tracking-widest hover:border-blue-500/30 transition-all cursor-default">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                  
-                  <button onClick={handleSyncDNA} className="w-full py-4 bg-white/5 border border-white/5 rounded-[12px] text-[9px] font-bold text-white/40 uppercase tracking-[0.3em] hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all shadow-xl active:scale-95">
-                    RE_SYNC_DNA
-                  </button>
-                </div>
-              )}
+              <div className="grid grid-cols-2 gap-4">
+                <StatBlock label="Network Value" value={localUser.earnings} subValue="TON" icon="gem" trend="+12.4%" />
+                <StatBlock label="Reward Credits" value="1,450" subValue="TJ" icon="coins" trend="+5.2%" />
+              </div>
             </div>
 
             <div className="relative group overflow-hidden bg-[#0a0a0a] border border-white/5 p-8 rounded-[16px] shadow-2xl">
@@ -493,6 +423,34 @@ const Profile: React.FC = () => {
                 <div className="space-y-6">
                   <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-[12px] p-5 text-xs text-white outline-none h-40 leading-relaxed bg-white/5 border border-white/10 focus:border-blue-500/50 transition-all resize-none" placeholder="Identify your frequency..." />
                   
+                  <div className="space-y-4">
+                    <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em]">Favorite_Vibes</p>
+                    <div className="flex flex-wrap gap-2">
+                      {GENRES.map(genre => {
+                        const isSelected = localUser.favoriteGenres?.includes(genre.name);
+                        return (
+                          <button
+                            key={genre.id}
+                            onClick={() => {
+                              const current = localUser.favoriteGenres || [];
+                              const updated = isSelected 
+                                ? current.filter(g => g !== genre.name)
+                                : [...current, genre.name];
+                              setLocalUser({...localUser, favoriteGenres: updated});
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                              isSelected 
+                                ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
+                                : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            {genre.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <div className="space-y-4">
                     <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.4em]">Social_Relays</p>
                     <div className="grid grid-cols-1 gap-3">
@@ -608,7 +566,7 @@ const Profile: React.FC = () => {
             {activeTab === 'releases' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <section>
-                  <SectionHeader title="Authored Protocols" actionLabel={userProfile.isVerifiedArtist ? "Mint New" : undefined} onAction={userProfile.isVerifiedArtist ? () => setShowMintModal(true) : undefined} />
+                  <SectionHeader title="Authored Protocols" />
                   <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
                     {allTracks.filter(t => t.artistId === localUser.id).map(track => (
                       <div key={track.id} className="min-w-[280px] sm:min-w-[320px]">
@@ -676,8 +634,8 @@ const Profile: React.FC = () => {
                   <SectionHeader title="Sync Sequences" onAction={() => navigate('/explore/playlists?title=Sync Sequences&filter=my_playlists')} actionLabel="View All" />
                   <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
                     {playlists.map(pl => (
-                      <div key={pl.id} className="min-w-[280px] sm:min-w-[320px]">
-                        <PlaylistCard playlist={pl} onClick={() => navigate('/library')} />
+                      <div key={pl.id} className="flex-shrink-0 w-40 sm:w-48">
+                        <PlaylistCard playlist={pl} onClick={() => navigate(`/playlist/${pl.id}`)} />
                       </div>
                     ))}
                     <div onClick={() => navigate('/library')} className="min-w-[280px] sm:min-w-[320px] aspect-square rounded-[10px] flex flex-col items-center justify-center group cursor-pointer transition-all bg-white/[0.02]" >
@@ -940,7 +898,6 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Modals */}
-      {showMintModal && <MintModal onClose={() => setShowMintModal(false)} />}
       {selectedNftForListing && (
         <SellNFTModal nft={selectedNftForListing} onClose={() => setSelectedNftForListing(null)} />
       )}

@@ -5,9 +5,12 @@ import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
 import ArtistCard from '@/components/ArtistCard';
 import NFTCard from '@/components/NFTCard';
+import PlaylistListItem from '@/components/PlaylistListItem';
+import ArtistListItem from '@/components/ArtistListItem';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO, CURATED_PLAYLISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import PlaylistCard from '@/components/PlaylistCard';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 const ExploreList: React.FC = () => {
   const { type } = useParams<{ type: string }>();
@@ -25,14 +28,16 @@ const ExploreList: React.FC = () => {
     userProfile, 
     getTrendingTracks, 
     getTopNFTTracks,
+    getRecommendations,
     allTracks,
     allNFTs
   } = useAudio();
   const queryParams = new URLSearchParams(location.search);
   const title = queryParams.get('title') || 'Explore';
   const filter = queryParams.get('filter');
+  const initialSearch = queryParams.get('search') || '';
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -55,7 +60,7 @@ const ExploreList: React.FC = () => {
       } else if (filter === 'my_tracks') {
         initialData = userTracks;
       } else if (filter === 'recommended') {
-        initialData = MOCK_TRACKS.sort(() => 0.5 - Math.random()).slice(0, 20);
+        initialData = getRecommendations().recommendedTracks;
       } else {
         initialData = [...userTracks, ...MOCK_TRACKS];
       }
@@ -83,6 +88,8 @@ const ExploreList: React.FC = () => {
         initialData = MOCK_NFTS.slice(0, 10);
       } else if (filter === 'trending_nfts') {
          initialData = MOCK_NFTS.slice(0, 10);
+      } else if (filter === 'recommended') {
+         initialData = getRecommendations().recommendedNFTs;
       } else {
         initialData = [...userNFTs, ...MOCK_NFTS];
       }
@@ -101,7 +108,7 @@ const ExploreList: React.FC = () => {
       setItems(initialData);
       setLoading(false);
     }, 800);
-  }, [type, filter, userTracks, userNFTs, artists, recentlyPlayed, likedTrackIds, followedUserIds, userProfile, allPlaylists, allTracks, allNFTs]);
+  }, [type, filter, userTracks, userNFTs, artists, recentlyPlayed, likedTrackIds, followedUserIds, userProfile, allPlaylists, allTracks, allNFTs, getRecommendations]);
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -122,16 +129,7 @@ const ExploreList: React.FC = () => {
     }, 1000);
   };
 
-  /* Infinite scroll listener */
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 && !loading) {
-        loadMore();
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [loading]);
+  const sentinelRef = useInfiniteScroll(loadMore);
 
   return (
     <div className="animate-in fade-in duration-700 px-4 md:px-12 pb-32">
@@ -169,15 +167,17 @@ const ExploreList: React.FC = () => {
       </div>
 
       {/* Vertical Grid Content */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 pb-8">
+      <div className={`grid gap-4 pb-8 ${type === 'nfts' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1'}`}>
         {filteredItems.map((item, idx) => (
           <div key={`${item.id}-${idx}`} className="animate-in fade-in duration-500 slide-in-from-bottom-2">
-            {type === 'tracks' && <TrackCard track={item} />}
+            {type === 'tracks' && <TrackCard track={item} variant="row" />}
             {type === 'nfts' && <NFTCard nft={item} />}
-            {type === 'artists' && <ArtistCard artist={item} />}
-            {type === 'playlists' && <PlaylistCard playlist={item} onClick={() => navigate(`/playlist/${item.id}`)} />}
+            {type === 'artists' && <ArtistListItem artist={item} />}
+            {type === 'playlists' && <PlaylistListItem playlist={item} onClick={() => navigate(`/playlist/${item.id}`)} />}
           </div>
         ))}
+        {/* Sentinel for infinite scroll */}
+        <div ref={sentinelRef} className="h-10" />
       </div>
 
       {/* Subtle Loading State */}

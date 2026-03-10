@@ -1,276 +1,292 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Sparkles, Antenna } from 'lucide-react';
+import { 
+  Plus, 
+  Sparkles, 
+  Antenna, 
+  Music2, 
+  Disc, 
+  Users, 
+  History, 
+  Zap, 
+  ShieldCheck,
+  LayoutGrid,
+  List,
+  Search,
+  ArrowUpRight
+} from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
-import { MOCK_NFTS, MOCK_TRACKS, MOCK_ARTISTS, APP_LOGO } from '@/constants';
+import { MOCK_TRACKS, MOCK_ARTISTS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
-import PlaylistCard from '@/components/PlaylistCard';
-import UserCard from '@/components/UserCard';
-import ArtistCard from '@/components/ArtistCard';
-import UploadTrackModal from '@/components/UploadTrackModal';
-import { Upload } from 'lucide-react';
-
-const INITIAL_LIMIT = 10;
+import PlaylistListItem from '@/components/PlaylistListItem';
+import ArtistListItem from '@/components/ArtistListItem';
+import { motion, AnimatePresence } from 'motion/react';
 
 const Library: React.FC = () => {
   const navigate = useNavigate();
-  const { playAll, playlists, createNewPlaylist, deletePlaylist, updatePlaylist, createRecommendedPlaylist, recentlyPlayed, clearRecentlyPlayed, likedTrackIds, followedUserIds, setActivePlaylistId, userNFTs, allNFTs, userTracks, userProfile, artists, searchQuery, setIsCreatePlaylistModalOpen } = useAudio();
-  const [favTracksLimit, setFavTracksLimit] = useState(INITIAL_LIMIT);
-  const [recTracksLimit, setRecTracksLimit] = useState(INITIAL_LIMIT);
-  const [isUploadTrackModalOpen, setIsUploadTrackModalOpen] = useState(false);
-  const favSentinelRef = useRef<HTMLDivElement>(null);
-  const recSentinelRef = useRef<HTMLDivElement>(null);
+  const { 
+    playlists, 
+    createRecommendedPlaylist, 
+    recentlyPlayed, 
+    clearRecentlyPlayed, 
+    likedTrackIds, 
+    followedUserIds, 
+    userNFTs, 
+    allNFTs, 
+    userTracks, 
+    userProfile, 
+    artists, 
+    searchQuery, 
+    setIsCreatePlaylistModalOpen 
+  } = useAudio();
+
+  const [activeTab, setActiveTab] = useState<'collection' | 'playlists' | 'activity'>('collection');
 
   const myCollection = useMemo(() => {
-    // Filter NFTs owned by the user
     return allNFTs.filter(nft => 
       (nft.owner === userProfile.walletAddress) || 
       (nft.owner === userProfile.name) ||
-      // Include user uploaded NFTs that might not have owner set yet but are in userNFTs
       userNFTs.some(un => un.id === nft.id)
     );
   }, [allNFTs, userProfile, userNFTs]);
-
-  const filteredNFTs = useMemo(() => {
-    return myCollection.filter(n =>
-      n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.creator.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, myCollection]);
 
   const likedTracks = useMemo(() => {
     const allTracks = [...userTracks, ...MOCK_TRACKS];
     return allTracks.filter(t => likedTrackIds.includes(t.id));
   }, [likedTrackIds, userTracks]);
 
-  const filteredLikedTracks = useMemo(() => {
-    return likedTracks.filter(t =>
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.artist.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [likedTracks, searchQuery]);
-
   const followedArtists = useMemo(() => {
     return artists.filter(a => followedUserIds.includes(a.id));
   }, [followedUserIds, artists]);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setFavTracksLimit(prev => prev + 10);
-      }
-    });
-    if (favSentinelRef.current) observer.observe(favSentinelRef.current);
-    return () => observer.disconnect();
-  }, [filteredLikedTracks]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setRecTracksLimit(prev => prev + 10);
-      }
-    });
-    if (recSentinelRef.current) observer.observe(recSentinelRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const stats = [
+    { label: 'Protocols', value: likedTracks.length, icon: Music2 },
+    { label: 'Artifacts', value: myCollection.length, icon: Zap },
+    { label: 'Nodes', value: followedArtists.length, icon: Users },
+    { label: 'Syncs', value: playlists.length, icon: List },
+  ];
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32 px-4 w-full">
-      <header className="mb-6 pt-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold tracking-tighter uppercase text-white leading-none mb-2">My Library</h1>
-          <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.5em]">STORAGE PROTOCOL ACTIVE</p>
-        </div>
-        <button 
-          onClick={() => setIsCreatePlaylistModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full transition-all text-xs font-bold uppercase tracking-widest text-white/80 hover:text-white border border-white/5 group"
-        >
-          <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
-          <span>Create Playlist</span>
-        </button>
-      </header>
+    <div className="min-h-screen pb-40 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/5 blur-[100px] rounded-full" />
+      </div>
 
-      {/* Recently Played Section */}
-      {recentlyPlayed.length > 0 && (
-        <section className="mb-12 animate-in fade-in slide-in-from-left duration-700">
-          <div className="flex items-center justify-between mb-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-10">
+        {/* Header Section */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+          <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="w-1 h-4 electric-blue-bg rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
-              <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Recent Frequencies</h3>
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Secure Vault Access</span>
             </div>
-            <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/explore/tracks?title=Recent Frequencies&filter=recent')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
-              <button onClick={clearRecentlyPlayed} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-red-500/80 transition-colors" > PURGE HISTORY </button>
-            </div>
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-white leading-none">
+              Library
+            </h1>
           </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
-            {recentlyPlayed.map(track => (
-              <div key={`recent-${track.id}`} className="flex-shrink-0 w-40 sm:w-48">
-                <TrackCard track={track} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
-      {/* My Playlists Section */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My Playlists</h3>
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/explore/playlists?title=My Playlists&filter=my_playlists')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
-            <button onClick={() => setIsUploadTrackModalOpen(true)} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-400 transition-colors group">
-              <Upload className="h-3 w-3" /> UPLOAD TRACK
+          <div className="flex flex-wrap gap-3">
+            <button 
+              onClick={() => setIsCreatePlaylistModalOpen(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              New Sync
+            </button>
+            <button 
+              onClick={createRecommendedPlaylist}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 border border-blue-500/30 text-blue-500 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600/20 transition-all active:scale-95"
+            >
+              <Sparkles className="h-4 w-4" />
+              AI Generation
             </button>
           </div>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
-          {/* Create Playlist Card */}
-          <div onClick={() => setIsCreatePlaylistModalOpen(true)} className="flex-shrink-0 w-40 sm:w-48 aspect-square rounded-[5px] flex flex-col items-center justify-center group cursor-pointer hover:bg-white/5 transition-all border border-white/5" >
-            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors">
-              <Plus className="text-white/40 group-hover:text-blue-400 h-6 w-6" />
-            </div>
-            <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest group-hover:text-white transition-colors">Create Sync</span>
-          </div>
+        </header>
 
-          {/* AI Recommended Playlist Card */}
-          <div onClick={createRecommendedPlaylist} className="flex-shrink-0 w-40 sm:w-48 aspect-square rounded-[5px] flex flex-col items-center justify-center group cursor-pointer hover:bg-blue-500/10 transition-all relative overflow-hidden border border-white/5" >
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mb-4 group-hover:bg-blue-500/30 group-hover:text-blue-400 transition-colors relative z-10">
-              <Sparkles className="text-blue-400/60 group-hover:text-blue-400 h-6 w-6" />
-            </div>
-            <span className="text-[9px] font-bold text-blue-400/60 uppercase tracking-widest group-hover:text-blue-400 transition-colors relative z-10">AI Sync</span>
-            <div className="absolute top-2 right-2">
-              <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
-            </div>
-          </div>
-
-          {playlists.map(playlist => (
-            <div key={playlist.id} className="flex-shrink-0 w-40 sm:w-48">
-              <PlaylistCard playlist={playlist} onClick={() => navigate(`/playlist/${playlist.id}`)} />
-            </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          {stats.map((stat, idx) => (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              key={stat.label} 
+              className="p-6 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-xl group hover:bg-white/[0.08] transition-all"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <stat.icon className="h-5 w-5 text-white/20 group-hover:text-blue-500 transition-colors" />
+                <ArrowUpRight className="h-3 w-3 text-white/10 opacity-0 group-hover:opacity-100 transition-all" />
+              </div>
+              <p className="text-2xl font-black text-white tracking-tighter mb-1">{stat.value}</p>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{stat.label}</p>
+            </motion.div>
           ))}
         </div>
-      </section>
 
-      <UploadTrackModal 
-        isOpen={isUploadTrackModalOpen} 
-        onClose={() => setIsUploadTrackModalOpen(false)} 
-      />
-
-      {/* Followed Artists Section */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Followed Nodes</h3>
-          <button onClick={() => navigate('/explore/artists?title=Followed Nodes&filter=followed')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
-          {followedArtists.length > 0 ? (
-            followedArtists.map(artist => (
-              <div key={`followed-${artist.id}`} className="flex-shrink-0 w-40 sm:w-48">
-                <ArtistCard artist={artist} />
-              </div>
-            ))
-          ) : (
-            <div className="w-full py-12 text-center border border-white/5 rounded-[5px] bg-white/[0.02]">
-              <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">No nodes synchronized.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Favorite Tracks Section */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Favorite Tracks</h3>
-          <button onClick={() => navigate('/explore/tracks?title=Favorite Tracks&filter=favorites')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
-          {filteredLikedTracks.length > 0 ? (
-            <>
-              {filteredLikedTracks.slice(0, favTracksLimit).map(track => (
-                <div key={track.id} className="flex-shrink-0 w-40 sm:w-48">
-                  <TrackCard track={track} />
-                </div>
-              ))}
-              {favTracksLimit < filteredLikedTracks.length && (
-                <div ref={favSentinelRef} className="flex-shrink-0 w-20 flex justify-center items-center">
-                  <img src={APP_LOGO} className="w-6 h-6 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
-                </div>
+        {/* Navigation Tabs */}
+        <div className="flex gap-10 border-b border-white/5 mb-10 overflow-x-auto no-scrollbar">
+          {(['collection', 'playlists', 'activity'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-white' : 'text-white/20 hover:text-white/40'}`}
+            >
+              {tab}
+              {activeTab === tab && (
+                <motion.div layoutId="activeTabLib" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
               )}
-            </>
-          ) : (
-            <div className="w-full py-12 text-center border border-white/5 rounded-[5px] bg-white/[0.02]">
-              <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">No frequencies saved in vault.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* My Uploaded Tracks Section */}
-      {userProfile.isVerifiedArtist && userTracks.length > 0 && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My Forged Protocols</h3>
-            <button onClick={() => navigate('/explore/tracks?title=My Forged Protocols&filter=my_tracks')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
-          </div>
-          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
-            {userTracks.map(track => (
-              <div key={`upload-${track.id}`} className="flex-shrink-0 w-40 md:w-52">
-                <TrackCard track={track} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* My NFT Collection Section */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">My NFT Collection</h3>
-          <button onClick={() => navigate('/explore/nfts?title=My NFT Collection&filter=my_nfts')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
-          {filteredNFTs.length > 0 ? (
-            filteredNFTs.map(nft => (
-              <div key={nft.id} className="flex-shrink-0 w-40 sm:w-48">
-                <NFTCard nft={nft} />
-              </div>
-            ))
-          ) : (
-            <div className="w-full py-12 text-center border border-white/5 rounded-[5px] bg-white/[0.02]">
-              <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">No assets detected.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Recommended Frequencies Section */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Antenna className="text-blue-500 h-4 w-4" />
-            <h3 className="text-[9px] font-bold text-white/60 uppercase tracking-[0.5em]">Recommended Frequencies</h3>
-          </div>
-          <button onClick={() => navigate('/explore/tracks?title=Recommended Frequencies&filter=recommended')} className="text-[8px] font-bold text-white/30 uppercase tracking-widest hover:text-white transition-colors">VIEW ALL</button>
-        </div>
-        <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 mask-linear-fade">
-          {MOCK_TRACKS.slice(0, recTracksLimit).map(track => (
-            <div key={`rec-${track.id}`} className="flex-shrink-0 w-40 md:w-52">
-              <TrackCard track={track} />
-            </div>
+            </button>
           ))}
-          {recTracksLimit < MOCK_TRACKS.length && (
-            <div ref={recSentinelRef} className="flex-shrink-0 w-10 flex items-center justify-center">
-              <img src={APP_LOGO} className="w-6 h-6 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
-            </div>
-          )}
         </div>
-      </section>
 
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            {activeTab === 'collection' && (
+              <div className="space-y-16">
+                {/* NFT Artifacts */}
+                <section className="p-8 rounded-3xl bg-blue-500/[0.03] border border-blue-500/10 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="flex items-center justify-between mb-8 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <Zap className="h-4 w-4 text-blue-500" />
+                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Digital Artifacts</h3>
+                    </div>
+                    <button onClick={() => navigate('/explore/nfts?title=My Collection&filter=my_nfts')} className="text-[9px] font-bold text-white/20 hover:text-white transition-colors uppercase tracking-widest">View All</button>
+                  </div>
+                  {myCollection.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 relative z-10">
+                      {myCollection.slice(0, 10).map(nft => (
+                        <NFTCard key={nft.id} nft={nft} />
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyState icon={Zap} message="No artifacts detected in vault" />
+                  )}
+                </section>
+
+                {/* Liked Tracks */}
+                <section className="p-8 rounded-3xl bg-emerald-500/[0.03] border border-emerald-500/10 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="flex items-center justify-between mb-8 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <Music2 className="h-4 w-4 text-emerald-500" />
+                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Stored Frequencies</h3>
+                    </div>
+                    <button onClick={() => navigate('/explore/tracks?title=Favorite Tracks&filter=favorites')} className="text-[9px] font-bold text-white/20 hover:text-white transition-colors uppercase tracking-widest">View All</button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                    {likedTracks.slice(0, 10).map(track => (
+                      <TrackCard key={track.id} track={track} variant="row" />
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {activeTab === 'playlists' && (
+              <div className="space-y-8">
+                <section className="p-8 rounded-3xl bg-violet-600/[0.03] border border-violet-500/10 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="flex items-center justify-between mb-8 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <List className="h-4 w-4 text-violet-500" />
+                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Active Syncs</h3>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-3 relative z-10">
+                    {playlists.map(playlist => (
+                      <PlaylistListItem 
+                        key={playlist.id} 
+                        playlist={playlist} 
+                        onClick={() => navigate(`/playlist/${playlist.id}`)} 
+                      />
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {activeTab === 'activity' && (
+              <div className="space-y-16">
+                {/* Recently Played */}
+                <section>
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                      <History className="h-4 w-4 text-blue-500" />
+                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Recent Activity</h3>
+                    </div>
+                    <button onClick={clearRecentlyPlayed} className="text-[9px] font-bold text-red-500/50 hover:text-red-500 transition-colors uppercase tracking-widest">Purge History</button>
+                  </div>
+                  <div className="flex gap-6 overflow-x-auto no-scrollbar pb-4">
+                    {recentlyPlayed.map(track => (
+                      <div key={track.id} className="w-48 flex-shrink-0">
+                        <TrackCard track={track} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Followed Artists */}
+                <section className="p-8 rounded-3xl bg-orange-500/[0.03] border border-orange-500/10 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="flex items-center justify-between mb-8 relative z-10">
+                    <div className="flex items-center gap-3">
+                      <Users className="h-4 w-4 text-orange-500" />
+                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Synchronized Nodes</h3>
+                    </div>
+                    <button onClick={() => navigate('/explore/artists?title=Followed Nodes&filter=followed')} className="text-[9px] font-bold text-white/20 hover:text-white transition-colors uppercase tracking-widest">View All</button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                    {followedArtists.map(artist => (
+                      <ArtistListItem key={artist.id} artist={artist} />
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Security Footer */}
+        <footer className="mt-32 pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <ShieldCheck className="h-8 w-8 text-blue-500/20" />
+            <div>
+              <p className="text-[10px] font-bold text-white uppercase tracking-widest mb-1">Decentralized Vault v2.4</p>
+              <p className="text-[8px] text-white/20 uppercase tracking-widest">All assets secured by TON Blockchain Protocol</p>
+            </div>
+          </div>
+          <div className="flex gap-8">
+            <div className="text-right">
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Network Status</p>
+              <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Operational</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Last Sync</p>
+              <p className="text-[10px] font-bold text-white uppercase tracking-widest">Just Now</p>
+            </div>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 };
+
+const EmptyState = ({ icon: Icon, message }: { icon: any, message: string }) => (
+  <div className="py-24 text-center flex flex-col items-center justify-center bg-white/[0.02] border border-dashed border-white/10 rounded-3xl">
+    <Icon className="h-12 w-12 text-white/5 mb-4" />
+    <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">{message}</p>
+  </div>
+);
 
 export default Library;

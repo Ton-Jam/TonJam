@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Hammer, X, FileAudio, CloudUpload, Image, RefreshCw, Rocket, Check, Plus, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Hammer, X, FileAudio, CloudUpload, Image, Rocket, Check, Plus, Trash2 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { toNano } from '@ton/core';
-import { generateNFTLore } from '@/services/geminiService';
 import { NFTItem, Track } from '@/types';
 import { APP_LOGO } from '@/constants';
 
@@ -18,12 +17,12 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
   const userAddress = useTonAddress();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [lore, setLore] = useState('');
   const [mintData, setMintData] = useState({
     title: track?.title || '',
     description: '',
     royaltySplits: [{ address: userAddress || '', percentage: 100 }] as { address: string, percentage: number }[],
     supply: '100',
+    price: '5',
     audioFile: null as File | null,
     coverFile: null as File | null,
     audioPreview: track?.audioUrl || '',
@@ -96,26 +95,6 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
     const newExclusive = [...mintData.exclusiveContent];
     newExclusive.splice(index, 1);
     setMintData(prev => ({ ...prev, exclusiveContent: newExclusive }));
-  };
-
-  useEffect(() => {
-    if (step === 2 && !lore && mintData.title) {
-      handleGenerateLore();
-    }
-  }, [step]);
-
-  const handleGenerateLore = async () => {
-    setLoading(true);
-    try {
-      const generatedLore = await generateNFTLore(mintData.title, 'Electronic', 'A sonic journey through the TON ecosystem.');
-      setLore(generatedLore);
-      setMintData(prev => ({ ...prev, description: generatedLore }));
-    } catch (err) {
-      console.error("Lore generation failed:", err);
-      setLore("A legendary sonic artifact forged in the depths of the TON blockchain.");
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover') => {
@@ -211,13 +190,12 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
       setLoading(false);
     }
   };
-
-  return (
+    return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
-      <div className="relative glass border border-blue-500/10 w-full max-w-2xl rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+      <div className="relative glass border border-blue-500/10 w-full max-w-2xl rounded-[10px] p-6 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/10 blur-3xl rounded-full"></div>
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-600 rounded-[10px] flex items-center justify-center shadow-lg shadow-blue-600/20">
               <Hammer className="h-6 w-6 text-white" />
@@ -233,51 +211,51 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
         </div>
 
         {step === 1 && (
-          <div className="space-y-8 animate-in slide-in-from-right duration-300">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Artifact Title</label>
-                  <input type="text" value={mintData.title} onChange={(e) => setMintData({...mintData, title: e.target.value})} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white" placeholder="Enter track title..." />
+          <div className="space-y-4 animate-in slide-in-from-right duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[8px] font-bold text-white/40 uppercase tracking-widest ml-1">Artifact Title</label>
+                  <input type="text" value={mintData.title} onChange={(e) => setMintData({...mintData, title: e.target.value})} className="w-full bg-white/5 rounded-[8px] py-2 px-4 text-[10px] outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white" placeholder="Enter track title..." />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Sonic Data (Audio)</label>
+                <div className="space-y-1">
+                  <label className="text-[8px] font-bold text-white/40 uppercase tracking-widest ml-1">Sonic Data (Audio)</label>
                   <div className="relative group">
                     <input type="file" accept="audio/*" onChange={(e) => handleFileChange(e, 'audio')} className="hidden" id="audio-upload" />
-                    <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-32 bg-white/5 hover:bg-white/10 rounded-[10px] transition-all cursor-pointer" >
+                    <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-24 bg-white/5 hover:bg-white/10 rounded-[8px] transition-all cursor-pointer" >
                       {mintData.audioFile ? (
                         <div className="text-center">
-                          <FileAudio className="h-8 w-8 text-blue-500 mb-2 mx-auto" />
-                          <p className="text-[10px] font-bold text-white uppercase truncate px-4">{mintData.audioFile.name}</p>
+                          <FileAudio className="h-6 w-6 text-blue-500 mb-1 mx-auto" />
+                          <p className="text-[9px] font-bold text-white uppercase truncate px-4">{mintData.audioFile.name}</p>
                         </div>
                       ) : (
                         <>
-                          <CloudUpload className="h-8 w-8 text-white/20 mb-2" />
-                          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Upload Audio</p>
+                          <CloudUpload className="h-6 w-6 text-white/20 mb-1" />
+                          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Upload Audio</p>
                         </>
                       )}
                     </label>
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Visual Matrix (Cover Art)</label>
+              <div className="space-y-1">
+                <label className="text-[8px] font-bold text-white/40 uppercase tracking-widest ml-1">Visual Matrix (Cover Art)</label>
                 <div className="relative group h-full">
                   <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'cover')} className="hidden" id="cover-upload" />
-                  <label htmlFor="cover-upload" className="flex flex-col items-center justify-center w-full h-full min-h-[180px] bg-white/5 hover:bg-white/10 rounded-[10px] transition-all cursor-pointer overflow-hidden" >
+                  <label htmlFor="cover-upload" className="flex flex-col items-center justify-center w-full h-full min-h-[140px] bg-white/5 hover:bg-white/10 rounded-[8px] transition-all cursor-pointer overflow-hidden" >
                     {mintData.coverPreview ? (
                       <img src={mintData.coverPreview} className="w-full h-full object-cover" alt="Preview" />
                     ) : (
                       <>
-                        <Image className="h-8 w-8 text-white/20 mb-2" />
-                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Upload Cover</p>
+                        <Image className="h-6 w-6 text-white/20 mb-1" />
+                        <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Upload Cover</p>
                       </>
                     )}
                   </label>
                 </div>
               </div>
             </div>
-            <button onClick={() => setStep(2)} disabled={!mintData.title || (!mintData.audioFile && !track)} className="w-full py-4 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 hover:bg-blue-500 transition-all" > INITIALIZE_METADATA_SEQUENCE </button>
+            <button onClick={() => setStep(2)} disabled={!mintData.title || (!mintData.audioFile && !track)} className="w-full py-3 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[8px] font-bold text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all" > INITIALIZE_METADATA_SEQUENCE </button>
           </div>
         )}
 
@@ -287,9 +265,6 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">AI-Generated Artifact Lore</label>
-                  <button onClick={handleGenerateLore} disabled={loading} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors" >
-                    <img src={APP_LOGO} className={`h-3 w-3 mr-1 inline-block object-contain ${loading ? 'animate-[spin_3s_linear_infinite]' : ''}`} alt="Regenerate" /> Regenerate
-                  </button>
                 </div>
                 <div className="relative">
                   <textarea value={mintData.description} onChange={(e) => setMintData({...mintData, description: e.target.value})} rows={6} className="w-full bg-white/5 rounded-[10px] py-4 px-5 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white/80 leading-relaxed resize-none" />

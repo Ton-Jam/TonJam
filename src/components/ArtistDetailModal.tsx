@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { X, CheckCircle2, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause } from 'lucide-react';
+import { X, CheckCircle2, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause, TrendingUp, Zap } from 'lucide-react';
 import { Artist, Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
+import { MOCK_TRACKS } from '@/constants';
 
 interface ArtistDetailModalProps {
   artist: Artist;
@@ -11,12 +12,14 @@ interface ArtistDetailModalProps {
 
 const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }) => {
   const navigate = useNavigate();
-  const { followedUserIds, toggleFollowUser, allTracks, playTrack, currentTrack, isPlaying, togglePlay } = useAudio();
+  const { followedUserIds, toggleFollowUser, playTrack, currentTrack, isPlaying, togglePlay } = useAudio();
   const isFollowing = followedUserIds.includes(artist.id);
 
   const artistTracks = useMemo(() => {
-    return allTracks.filter(t => t.artistId === artist.id || t.artist === artist.name);
-  }, [allTracks, artist]);
+    return MOCK_TRACKS
+      .filter(t => t.artistId === artist.id || t.artist === artist.name)
+      .sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+  }, [artist]);
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -133,11 +136,17 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                 {artistTracks.slice(0, 5).map((track, index) => {
                   const isTrackActive = currentTrack?.id === track.id;
                   const isTrackPlaying = isTrackActive && isPlaying;
+                  const isTrending = (track.playCount || 0) > 5000;
+                  const jamEarnings = ((track.playCount || 0) * 0.001).toFixed(2);
                   
                   return (
                     <div 
                       key={track.id}
-                      className={`group flex items-center gap-4 p-3 rounded-lg transition-all cursor-pointer ${isTrackActive ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                      className={`group flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer relative ${
+                        isTrackActive 
+                          ? 'bg-blue-500/10 border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
+                          : 'hover:bg-white/5 border border-transparent'
+                      }`}
                       onClick={() => handlePlayTrack(track)}
                     >
                       <span className="w-4 text-center text-xs font-bold text-white/20 group-hover:text-white/60">
@@ -152,26 +161,38 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                         )}
                       </span>
                       
-                      <div className="relative w-10 h-10 rounded overflow-hidden shrink-0">
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 shadow-lg">
                         <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
                         <div className={`absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isTrackActive ? 'opacity-100' : ''}`}>
-                          {isTrackPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
+                          {isTrackPlaying ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white fill-white" />}
                         </div>
                       </div>
-
+ 
                       <div className="flex-1 min-w-0">
-                        <h4 className={`text-sm font-bold truncate ${isTrackActive ? 'text-blue-400' : 'text-white'}`}>
-                          {track.title}
-                        </h4>
-                        <div className="flex items-center gap-2 text-[10px] text-white/40 font-medium uppercase tracking-wider">
-                          <span>{track.genre}</span>
-                          <span>•</span>
-                          <span>{(track.playCount || 0).toLocaleString()} plays</span>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h4 className={`text-sm font-bold truncate ${isTrackActive ? 'text-blue-400' : 'text-white'}`}>
+                            {track.title}
+                          </h4>
+                          {isTrending && (
+                            <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[8px] font-black uppercase tracking-tighter">
+                              <TrendingUp className="w-2 h-2" /> Hot
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-[10px] text-white/40 font-medium uppercase tracking-wider">
+                          <span className="flex items-center gap-1">
+                            <Music className="w-2.5 h-2.5" /> {track.genre}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Zap className="w-2.5 h-2.5 text-blue-400" /> {jamEarnings} JAM
+                          </span>
+                          <span className="hidden sm:inline">{(track.playCount || 0).toLocaleString()} plays</span>
                         </div>
                       </div>
-
-                      <div className="text-xs font-mono text-white/40">
-                        {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
+ 
+                      <div className="text-xs font-mono text-white/40 flex flex-col items-end gap-1">
+                        <span>{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                        <span className="sm:hidden text-[9px] font-bold">{(track.playCount || 0).toLocaleString()}</span>
                       </div>
                     </div>
                   );

@@ -193,20 +193,23 @@ const FullAudioPlayer: React.FC = () => {
   };
 
   const handleShare = () => {
+    const shareUrl = `${window.location.origin}/#/track/${currentTrack.id}`;
+    const shareData = {
+      title: currentTrack.title,
+      text: `Check out ${currentTrack.title} by ${currentTrack.artist} on TonJam!`,
+      url: shareUrl,
+    };
+
     if (navigator.share) {
       navigator
-        .share({
-          title: currentTrack.title,
-          text: `Check out ${currentTrack.title} by ${currentTrack.artist} on TonJam!`,
-          url: window.location.href,
-        })
+        .share(shareData)
         .catch(console.error);
     } else {
       addNotification(
         "Sharing protocol initiated. Link copied to clipboard.",
         "success",
       );
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(shareUrl);
     }
   };
 
@@ -260,12 +263,22 @@ const FullAudioPlayer: React.FC = () => {
                 Live Jam
               </button>
             )}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={handleLikeToggle}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 ${isLiked ? "text-red-500" : "text-white/60 hover:text-white"}`}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all relative ${isLiked ? "text-red-500 bg-red-500/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]" : "text-white/40 hover:text-white hover:bg-white/5"}`}
             >
-              <Heart className={`h-6 w-6 ${isLiked ? "fill-current" : ""}`} />
-            </button>
+              <Heart className={`h-6 w-6 transition-all ${isLiked ? "fill-current scale-110" : ""}`} />
+              {isLiked && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [1, 2], opacity: [0.5, 0] }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 rounded-full border-2 border-red-500"
+                />
+              )}
+            </motion.button>
           </div>
         </header>
 
@@ -328,45 +341,59 @@ const FullAudioPlayer: React.FC = () => {
 
           <div className="w-full max-w-[420px] mb-12 space-y-8">
             {/* Row 1: Utility Icons */}
-            <div className="flex items-center justify-center gap-8">
-              <button
+            <div className="flex items-center justify-center gap-6">
+              <motion.button
+                whileHover={{ scale: 1.1, y: -2 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={handleAddToPlaylist}
-                className="text-xl text-white/20 hover:text-white transition-all p-2"
+                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group"
                 title="Add to Playlist"
               >
-                <PlusCircle className="h-6 w-6" />
-              </button>
-              <button
+                <PlusCircle className="h-6 w-6 text-white/40 group-hover:text-blue-400 transition-colors" />
+                <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/60">Sync</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.1, y: -2 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => {
                   setFullPlayerOpen(false);
                   navigate(`/nft/${currentTrack.id}`);
                 }}
-                className="text-xl text-white/20 hover:text-white transition-all p-2"
+                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group"
                 title="Mint NFT"
               >
-                <Gem className="h-6 w-6" />
-              </button>
-              <button
+                <Gem className="h-6 w-6 text-white/40 group-hover:text-purple-400 transition-colors" />
+                <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/60">Mint</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.1, y: -2 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={handleShare}
-                className="text-xl text-white/20 hover:text-white transition-all p-2"
+                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group"
                 title="Share"
               >
-                <Share2 className="h-6 w-6" />
-              </button>
+                <Share2 className="h-6 w-6 text-white/40 group-hover:text-emerald-400 transition-colors" />
+                <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/60">Share</span>
+              </motion.button>
+
               <div className="relative">
-                <div
-                  className={`text-xl transition-all p-2 cursor-pointer ${showVolume ? "text-blue-400" : "text-white/20 hover:text-white"}`}
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all cursor-pointer ${showVolume ? "bg-blue-500/10 border border-blue-500/20" : "bg-white/[0.03] border border-white/5 hover:bg-white/[0.08]"}`}
                   onClick={() => setShowVolume(!showVolume)}
                   title="Volume"
                 >
                   {isMuted || volume === 0 ? (
                     <VolumeX className="h-6 w-6 text-red-500/60" />
                   ) : volume < 0.5 ? (
-                    <Volume1 className="h-6 w-6" />
+                    <Volume1 className={`h-6 w-6 ${showVolume ? "text-blue-400" : "text-white/40"}`} />
                   ) : (
-                    <Volume2 className="h-6 w-6" />
+                    <Volume2 className={`h-6 w-6 ${showVolume ? "text-blue-400" : "text-white/40"}`} />
                   )}
-                </div>
+                  <span className={`text-[8px] font-bold uppercase tracking-widest ${showVolume ? "text-blue-400" : "text-white/20"}`}>Vol</span>
+                </motion.div>
                 {showVolume && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-[#111] p-5 rounded-[10px] shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
                     <div
@@ -426,8 +453,22 @@ const FullAudioPlayer: React.FC = () => {
                 <motion.button
                   whileHover={{ scale: 1.2, rotate: 15 }}
                   whileTap={{ scale: 0.8, rotate: -15 }}
+                  animate={{ 
+                    boxShadow: isPlaying ? [
+                      "0 0 20px rgba(245, 158, 11, 0.4)",
+                      "0 0 40px rgba(245, 158, 11, 0.6)",
+                      "0 0 20px rgba(245, 158, 11, 0.4)"
+                    ] : "0 0 20px rgba(245, 158, 11, 0.2)"
+                  }}
+                  transition={{ 
+                    boxShadow: { 
+                      duration: 2, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    } 
+                  }}
                   onClick={handleJam}
-                  className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-xl shadow-orange-500/40 border-2 border-white/20 z-10 group"
+                  className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-xl border-2 border-white/20 z-10 group"
                   title="JAM (Boost Track)"
                 >
                   <img src={TJ_COIN_ICON} className="w-6 h-6 group-hover:animate-bounce" alt="JAM" />
@@ -599,7 +640,7 @@ const FullAudioPlayer: React.FC = () => {
               {String(currentTrack.duration % 60).padStart(2, "0")}
             </span>
           </div>
-          <div className="relative w-full h-[2px] bg-white/5 rounded-full overflow-hidden group cursor-pointer">
+          <div className="relative w-full h-[3px] bg-white/5 rounded-full overflow-hidden group cursor-pointer">
             <input
               type="range"
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -607,9 +648,11 @@ const FullAudioPlayer: React.FC = () => {
               onChange={(e) => seek(Number(e.target.value))}
             />
             <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.5)]"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.6)] transition-all duration-300"
               style={{ width: `${progress}%` }}
-            ></div>
+            >
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
           </div>
         </div>
       </div>

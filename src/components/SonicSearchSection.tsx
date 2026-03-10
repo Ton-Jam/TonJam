@@ -1,0 +1,72 @@
+import React, { useState } from 'react';
+import { Search, Loader2, Disc } from 'lucide-react';
+import { useAudio } from '@/context/AudioContext';
+import { semanticSearchTracks } from '@/services/geminiService';
+import { Track } from '@/types';
+
+const SonicSearchSection: React.FC = () => {
+  const { allTracks, playTrack } = useAudio();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<Track[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+    setIsLoading(true);
+    try {
+      const matchedTracks = await semanticSearchTracks(query, allTracks);
+      setResults(matchedTracks.slice(0, 5));
+    } catch (error) {
+      console.error("Search failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <section className="mt-16 p-8 bg-[#0a0a0a] border-t border-white/10">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
+          <h2 className="text-2xl font-bold text-white uppercase tracking-tighter">Sonic AI Search</h2>
+        </div>
+        
+        <div className="flex gap-4 mb-8">
+          <input 
+            type="text" 
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search for vibes, genres, or moods..."
+            className="flex-1 bg-black border border-white/10 rounded-[10px] p-4 text-sm text-white outline-none focus:border-blue-500/50 transition-all"
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          />
+          <button 
+            onClick={handleSearch}
+            disabled={isLoading}
+            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2"
+          >
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            Search
+          </button>
+        </div>
+
+        {results.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {results.map(track => (
+              <div key={track.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-[10px] hover:bg-white/10 transition-all cursor-pointer" onClick={() => playTrack(track)}>
+                <img src={track.coverUrl} className="w-12 h-12 rounded-[8px] object-cover" alt="" />
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-white uppercase tracking-tight">{track.title}</h4>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{track.artist}</p>
+                </div>
+                <Disc className="h-4 w-4 text-blue-400" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
+export default SonicSearchSection;

@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search } from 'lucide-react';
+import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
@@ -10,11 +10,12 @@ import GenreCard from '@/components/GenreCard';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import SectionHeader from '@/components/SectionHeader';
 import { useAudio } from '@/context/AudioContext';
+import { motion, AnimatePresence } from 'motion/react';
 
-const HomeSection = ({ title, icon: Icon, link, subtitle, children }: { title: string, icon: React.ElementType, link?: string, subtitle?: string, children: React.ReactNode }) => {
+const HomeSection = ({ title, icon: Icon, link, children }: { title: string, icon: React.ElementType, link?: string, children: React.ReactNode }) => {
   return (
     <section className="space-y-6">
-      <SectionHeader title={title} subtitle={subtitle} viewAllLink={link} />
+      <SectionHeader title={title} viewAllLink={link} />
       <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
         {children}
       </div>
@@ -51,28 +52,106 @@ const FEATURED_POSTS: CarouselItem[] = [
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { playTrack, playAll, artists, userProfile, recentlyPlayed, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery, setSearchQuery } = useAudio();
+  const { playTrack, playAll, artists, userProfile, recentlyPlayed, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery, setSearchQuery, generateDiscoverWeekly, getRecommendations } = useAudio();
   
-  const trendingTracks = useMemo(() => getTrendingTracks(), [getTrendingTracks]);
-  const topNFTTracks = useMemo(() => getTopNFTTracks(), [getTopNFTTracks]);
+  useEffect(() => {
+    generateDiscoverWeekly();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+
+  const trendingTracks = useMemo(() => {
+    let tracks = getTrendingTracks();
+    if (selectedGenre) {
+      tracks = tracks.filter(t => t.genre === selectedGenre);
+    }
+    return tracks;
+  }, [getTrendingTracks, selectedGenre]);
+
+  const topNFTTracks = useMemo(() => {
+    let tracks = getTopNFTTracks();
+    if (selectedGenre) {
+      tracks = tracks.filter(t => t.genre === selectedGenre);
+    }
+    return tracks;
+  }, [getTopNFTTracks, selectedGenre]);
   
-  // Data slices for different sections
-  const recommendedNFTs = MOCK_NFTS.slice(0, 5);
-  const newlyMintedNFTs = MOCK_NFTS.slice(2, 7);
-  const recommendedArtists = artists.slice(0, 5);
+  const { recommendedTracks, recommendedNFTs } = useMemo(() => {
+    const { recommendedTracks: tracks, recommendedNFTs: nfts } = getRecommendations();
+    
+    let filteredTracks = tracks;
+    let filteredNFTs = nfts;
+
+    if (selectedGenre) {
+      filteredTracks = tracks.filter(t => t.genre === selectedGenre);
+      
+      const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
+      filteredNFTs = nfts.filter(n => genreTrackIds.includes(n.trackId));
+    }
+
+    return {
+      recommendedTracks: filteredTracks,
+      recommendedNFTs: filteredNFTs.slice(0, 5)
+    };
+  }, [getRecommendations, selectedGenre]);
+
+  const newlyMintedNFTs = useMemo(() => {
+    let nfts = MOCK_NFTS;
+    if (selectedGenre) {
+      const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
+      nfts = nfts.filter(n => genreTrackIds.includes(n.trackId));
+    }
+    return nfts.slice(2, 7);
+  }, [selectedGenre]);
+
+  const recommendedArtists = useMemo(() => {
+    let recArtists = artists;
+    if (selectedGenre) {
+      recArtists = recArtists.filter(a => a.genre === selectedGenre);
+    }
+    return recArtists.slice(0, 5);
+  }, [artists, selectedGenre]);
 
   return (
     <div className="p-4 lg:p-6 space-y-16 w-full pb-32">
-      {/* Search Bar for Home Screen */}
-      <div className="max-w-2xl mx-auto w-full relative group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 group-focus-within:text-blue-500 transition-colors" />
-        <input 
-          type="text" 
-          placeholder="Search tracks, artists, NFTs..." 
-          className="w-full bg-white/5 border border-white/10 rounded-[12px] py-4 pl-12 pr-6 text-sm focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-white/20 shadow-2xl"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      {/* Filter Section */}
+      <div className="max-w-3xl mx-auto w-full relative z-20">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold uppercase tracking-tighter text-white">Discover</h2>
+        </div>
+
+        {/* Horizontal Genre Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
+          <button
+            onClick={() => setSelectedGenre(null)}
+            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start border ${
+              selectedGenre === null 
+                ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
+                : 'bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            All Vibes
+          </button>
+          {GENRES.map((genre) => {
+            const isSelected = selectedGenre === genre.name;
+            const Icon = genre.icon;
+            return (
+              <button
+                key={genre.id}
+                onClick={() => setSelectedGenre(genre.name)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start border ${
+                  isSelected 
+                    ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
+                    : 'bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <Icon className={`h-3 w-3 ${isSelected ? 'text-white' : 'text-white/40'}`} />
+                {genre.name}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Featured Sponsored Posts Carousel */}
@@ -100,16 +179,16 @@ const Home: React.FC = () => {
           <div className="flex flex-wrap gap-4 pt-4">
             <button 
               onClick={() => playAll(MOCK_TRACKS)}
-              className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-[5px] transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 group/btn"
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 group/btn text-xs"
             >
-              <Play className="h-5 w-5 fill-white group-hover/btn:scale-110 transition-transform" />
+              <Play className="h-4 w-4 fill-white group-hover/btn:scale-110 transition-transform" />
               Start Listening
             </button>
             <Link 
               to="/marketplace"
-              className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-widest rounded-[5px] border border-white/10 transition-all flex items-center gap-3"
+              className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-widest rounded-full border border-white/10 transition-all flex items-center gap-2 text-xs"
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className="h-4 w-4" />
               Explore NFTs
             </Link>
           </div>
@@ -118,7 +197,7 @@ const Home: React.FC = () => {
 
       {/* Recently Played */}
       {recentlyPlayed.length > 0 && (
-        <HomeSection title="Jump Back In" subtitle="Pick up where you left off" icon={Clock} link="/explore/tracks?title=Recently Played&filter=recent">
+        <HomeSection title="Jump Back In" icon={Clock} link="/explore/tracks?title=Recently Played&filter=recent">
           {recentlyPlayed.map(track => (
             <div key={`recent-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
               <TrackCard track={track} />
@@ -127,8 +206,19 @@ const Home: React.FC = () => {
         </HomeSection>
       )}
 
+      {/* Recommended Tracks */}
+      {recommendedTracks.length > 0 && (
+        <HomeSection title="Recommended for You" icon={Sparkles} link="/explore/tracks?title=Recommended for You&filter=recommended">
+          {recommendedTracks.map(track => (
+            <div key={`rec-track-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+              <TrackCard track={track} />
+            </div>
+          ))}
+        </HomeSection>
+      )}
+
       {/* Trending Tracks */}
-      <HomeSection title="Trending Signals" subtitle="The hottest tracks on the network" icon={Flame} link="/explore/tracks?title=Trending Signals&filter=trending">
+      <HomeSection title="Trending Signals" icon={Flame} link="/explore/tracks?title=Trending Signals&filter=trending">
         {trendingTracks.map(track => (
           <div key={`trend-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
             <TrackCard track={track} />
@@ -139,7 +229,7 @@ const Home: React.FC = () => {
       {/* Top Charts - List View */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-6">
-          <SectionHeader title="Global Top 10" subtitle="Most streamed across the TON ecosystem" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
+          <SectionHeader title="Global Top 10" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
           <div className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory no-scrollbar">
             {trendingTracks.slice(0, 10).map((track, idx) => (
               <div 
@@ -171,7 +261,7 @@ const Home: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <SectionHeader title="New Releases" subtitle="Fresh signals from the void" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
+          <SectionHeader title="New Releases" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
           <div className="space-y-4">
             {MOCK_TRACKS.slice(0, 5).map(track => (
               <div 
@@ -201,10 +291,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* Curated Playlists */}
-      <HomeSection title="Curated for You" subtitle="Hand-picked by TonJam editors" icon={Sparkles} link="/explore/playlists?title=Curated Playlists&filter=curated">
-        {CURATED_PLAYLISTS.map(playlist => (
-          <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-64 md:w-72 snap-start">
-            <PlaylistCard playlist={playlist} onClick={() => navigate(`/library`)} />
+      <HomeSection title="Curated for You" icon={Sparkles} link="/explore/playlists?title=Curated Playlists&filter=curated">
+        {allPlaylists.filter(p => p.creator === 'TonJam AI' || CURATED_PLAYLISTS.find(cp => cp.id === p.id)).map(playlist => (
+          <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+            <PlaylistCard playlist={playlist} onClick={() => navigate(`/playlist/${playlist.id}`)} />
           </div>
         ))}
       </HomeSection>
@@ -220,7 +310,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Top NFT Sales */}
-      <HomeSection title="NFT Alpha" subtitle="Highest valued music artifacts" icon={Activity} link="/explore/nfts?title=NFT Alpha&filter=top_nfts">
+      <HomeSection title="NFT Alpha" icon={Activity} link="/explore/nfts?title=NFT Alpha&filter=top_nfts">
         {topNFTTracks.map(track => (
           <div key={`nft-alpha-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
             <TrackCard track={track} />
@@ -229,7 +319,7 @@ const Home: React.FC = () => {
       </HomeSection>
 
       {/* Recommended Artists */}
-      <HomeSection title="Rising Stars" subtitle="Artists you should follow" icon={UserCheck} link="/explore/artists?title=Rising Stars&filter=rising">
+      <HomeSection title="Rising Stars" icon={UserCheck} link="/explore/artists?title=Rising Stars&filter=rising">
         {recommendedArtists.map(artist => (
           <div key={`artist-${artist.id}`} className="flex-shrink-0 w-48 sm:w-56 snap-start">
             <ArtistCard artist={artist} />
@@ -237,8 +327,19 @@ const Home: React.FC = () => {
         ))}
       </HomeSection>
 
+      {/* Recommended NFTs */}
+      {recommendedNFTs.length > 0 && (
+        <HomeSection title="Curated Collectibles" icon={Sparkles} link="/explore/nfts?title=Curated Collectibles&filter=recommended">
+          {recommendedNFTs.map(nft => (
+            <div key={`rec-nft-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+              <NFTCard nft={nft} />
+            </div>
+          ))}
+        </HomeSection>
+      )}
+
       {/* Marketplace Highlights */}
-      <HomeSection title="New in Marketplace" subtitle="Freshly minted music NFTs" icon={PlusCircle} link="/explore/nfts?title=New in Marketplace&filter=new_nfts">
+      <HomeSection title="New in Marketplace" icon={PlusCircle} link="/explore/nfts?title=New in Marketplace&filter=new_nfts">
         {newlyMintedNFTs.map(nft => (
           <div key={`minted-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
             <NFTCard nft={nft} />

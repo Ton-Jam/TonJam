@@ -7,10 +7,11 @@ import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
 
 interface PlaylistCardProps {
   playlist: Playlist;
+  variant?: 'default' | 'row';
   onClick?: () => void;
 }
 
-const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, onClick }) => {
+const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'default', onClick }) => {
   const { allTracks } = useAudio();
   const navigate = useNavigate();
 
@@ -25,12 +26,12 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, onClick }) => {
     .filter(Boolean)
     .slice(0, 4);
 
-  const renderCover = () => {
+  const renderCover = (sizeClass: string = "w-full h-full") => {
     if (playlist.coverUrl) {
       return (
         <img 
           src={playlist.coverUrl} 
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+          className={`${sizeClass} object-cover group-hover:scale-110 transition-transform duration-500`} 
           alt={playlist.title} 
         />
       );
@@ -38,7 +39,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, onClick }) => {
 
     if (playlistTracks.length === 0) {
       return (
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900/20 to-purple-900/20 group-hover:scale-110 transition-transform duration-500">
+        <div className={`${sizeClass} flex items-center justify-center bg-gradient-to-br from-blue-900/20 to-purple-900/20 group-hover:scale-110 transition-transform duration-500`}>
           <Music className="text-white/20 h-8 w-8" />
         </div>
       );
@@ -50,7 +51,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, onClick }) => {
       return (
         <img 
           src={track?.coverUrl} 
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+          className={`${sizeClass} object-cover group-hover:scale-110 transition-transform duration-500`} 
           alt={playlist.title} 
         />
       );
@@ -58,7 +59,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, onClick }) => {
 
     // 2x2 Grid for 4 or more tracks
     return (
-      <div className="w-full h-full grid grid-cols-2 group-hover:scale-110 transition-transform duration-500">
+      <div className={`${sizeClass} grid grid-cols-2 gap-0.5 group-hover:scale-105 transition-transform duration-700 bg-neutral-800`}>
         {playlistTracks.map((track, i) => (
           <img 
             key={i}
@@ -71,37 +72,74 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, onClick }) => {
     );
   };
 
+  if (variant === 'row') {
+    return (
+      <div 
+        onClick={onClick} 
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full"
+      >
+        <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+          {renderCover()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-white group-hover:text-blue-400 transition-colors">
+            {playlist.title}
+          </h4>
+          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate">
+            {playlist.creator}
+          </p>
+        </div>
+        <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest hidden sm:block">
+          {playlist.trackCount} Tracks
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div 
       onClick={onClick} 
-      className="group relative border border-white/5 rounded-[5px] p-3 transition-all cursor-pointer w-full flex flex-col hover:bg-white/5 hover:-translate-y-1"
+      className="group relative cursor-pointer"
     >
-      <div className="relative aspect-square mb-3 overflow-hidden rounded-[5px] bg-neutral-900">
+      {/* Image Container - 1:1 Aspect Ratio */}
+      <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
         {renderCover()}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-xl transform scale-50 group-hover:scale-100 transition-all">
-            <Play className="h-5 w-5 text-white fill-white ml-0.5" />
-          </div>
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+          <button 
+            onClick={handlePlay}
+            className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+          >
+            <Play className="h-3 w-3 text-white fill-white ml-0.5" />
+          </button>
         </div>
       </div>
-      <div className="flex flex-col gap-0.5 px-1">
-        <h3 className="font-bold truncate text-sm text-white uppercase tracking-tight leading-tight group-hover:text-blue-500 transition-colors">
+      
+      {/* Content Below Card */}
+      <div className="px-0.5">
+        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-white group-hover:text-blue-400 transition-colors">
           {playlist.title}
         </h3>
-        <p className="text-[10px] font-bold truncate uppercase tracking-widest text-white/40">
-          {playlist.trackCount} Tracks • <span 
-            className="hover:text-white hover:underline cursor-pointer inline-block"
-            onClick={(e) => {
-              e.stopPropagation();
-              const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
-              if (artist) {
-                navigate(`/artist/${artist.id}`);
-              } else if (playlist.creator === MOCK_USER.name) {
-                navigate('/profile');
-              }
-            }}
-          >{playlist.creator}</span>
+        <p 
+          className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block mt-0.5"
+          onClick={(e) => {
+            e.stopPropagation();
+            const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
+            if (artist) {
+              navigate(`/artist/${artist.id}`);
+            } else if (playlist.creator === MOCK_USER.name) {
+              navigate('/profile');
+            }
+          }}
+        >
+          {playlist.creator}
         </p>
+        
+        {/* Stats */}
+        <div className="flex items-center justify-between border-t border-white/5 pt-1.5 mt-1.5">
+          <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
+            {playlist.trackCount} Tracks
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, CheckCircle2, Eye } from 'lucide-react';
+import { Play, Pause, MoreVertical, CheckCircle2, Eye, Send } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import NFTQuickViewModal from './NFTQuickViewModal';
+import SendNFTModal from './SendNFTModal';
 
 interface NFTCardProps {
   nft: NFTItem;
+  variant?: 'default' | 'row';
   onAction?: (nft: NFTItem) => void;
 }
 
-const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
+const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying, setOptionsTrack } = useAudio();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
   const isOwner = nft.owner === MOCK_USER.walletAddress;
@@ -38,6 +41,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
     setIsQuickViewOpen(true);
   };
 
+  const handleSendClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsSendModalOpen(true);
+  };
+
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onAction) {
@@ -51,6 +59,34 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
     e.preventDefault();
     navigate(`/nft/${nft.id}`);
   };
+
+  if (variant === 'row') {
+    return (
+      <div 
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full"
+        onClick={handleCardClick}
+      >
+        <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+          <img src={nft.imageUrl} alt={nft.title} className="w-full h-full object-cover" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-white'}`}>{nft.title}</h4>
+          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate">
+            @{nft.creator}
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+           <div className="flex items-center gap-1">
+             <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+             <span className="text-xs font-bold text-white tracking-tighter">{nft.price}</span>
+           </div>
+           <button onClick={handleOptionsClick} className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+             <MoreVertical className="h-4 w-4" />
+           </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -74,6 +110,23 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
                 <span className="px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-[4px] text-[8px] font-bold uppercase tracking-widest text-white shadow-lg">
                   {nft.edition}
                 </span>
+                <div className="flex items-center gap-2">
+                  {isOwner && (
+                    <button 
+                      onClick={handleSendClick} 
+                      className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-blue-400 hover:bg-black/60 transition-all pointer-events-auto ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                      title="Send Asset"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  <button 
+                    onClick={handleOptionsClick} 
+                    className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/60 transition-all pointer-events-auto ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+                </div>
              </div>
   
              {/* Center Play Button (if associated track) */}
@@ -97,7 +150,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
         {/* Content Below Card */}
         <div className="px-0.5">
            <div className="flex justify-between items-start gap-1.5">
-              <h3 className={`text-xs font-bold uppercase tracking-tight truncate leading-tight flex-1 ${isActive ? 'text-blue-400' : 'text-white'}`}>
+              <h3 className={`text-[11px] font-bold uppercase tracking-tight truncate leading-tight flex-1 ${isActive ? 'text-blue-400' : 'text-white'}`}>
                 {nft.title}
               </h3>
               {nft.listingType === 'auction' && (
@@ -107,7 +160,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
   
            <div className="flex items-center gap-1 mt-0.5 mb-1.5">
               <p 
-                className="text-[9px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block"
+                className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block"
                 onClick={(e) => {
                   e.stopPropagation();
                   const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
@@ -148,6 +201,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, onAction }) => {
         nft={nft} 
         isOpen={isQuickViewOpen} 
         onClose={() => setIsQuickViewOpen(false)} 
+      />
+
+      <SendNFTModal
+        nft={nft}
+        isOpen={isSendModalOpen}
+        onClose={() => setIsSendModalOpen(false)}
       />
     </>
   );

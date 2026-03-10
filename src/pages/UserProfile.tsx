@@ -13,6 +13,7 @@ import {
 import { MOCK_USERS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
+import ArtistListItem from '@/components/ArtistListItem';
 import SocialFeed from '@/components/SocialFeed';
 import { useAudio } from '@/context/AudioContext';
 import { UserProfile as UserProfileType } from '@/types';
@@ -255,24 +256,11 @@ const UserProfile: React.FC = () => {
                 </div>
                 
                 {user.followedArtists && user.followedArtists.length > 0 ? (
-                  <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+                  <div className="flex flex-col gap-3">
                      {user.followedArtists.map(artistId => {
                         const artist = MOCK_ARTISTS.find(a => a.id === artistId);
                         if (!artist) return null;
-                        return (
-                          <div key={artist.id} className="min-w-[200px] sm:min-w-[240px]">
-                             <div 
-                                onClick={() => navigate(`/artist/${artist.id}`)}
-                                className="flex flex-col items-center text-center p-4 rounded-[10px] border border-white/5 hover:bg-white/5 transition-all cursor-pointer group"
-                              >
-                                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white/5 group-hover:border-blue-500/50 transition-all mb-3">
-                                  <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                </div>
-                                <h4 className="text-xs font-bold text-white uppercase tracking-tight group-hover:text-blue-500 transition-colors">{artist.name}</h4>
-                                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-1">{artist.followers.toLocaleString()} Fans</p>
-                              </div>
-                          </div>
-                        );
+                        return <ArtistListItem key={artist.id} artist={artist} />;
                      })}
                   </div>
                 ) : (

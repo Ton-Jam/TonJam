@@ -14,7 +14,8 @@ import {
   Code2, 
   Link2, 
   Radio, 
-  CheckCircle2 
+  CheckCircle2,
+  Hammer
 } from 'lucide-react';
 import {
   LineChart,
@@ -33,6 +34,7 @@ import {
   MOCK_USER,
   MOCK_ARTISTS,
   MOCK_TRACKS,
+  MOCK_NFTS,
   APP_LOGO,
   TJ_COIN_ICON,
   TON_LOGO,
@@ -40,11 +42,13 @@ import {
 import { useAudio } from "@/context/AudioContext";
 import { Track, Artist, NFTItem } from "@/types";
 import TrackCard from "@/components/TrackCard";
+import NFTCard from "@/components/NFTCard";
 import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
 import { ChartRevenue } from "@/components/ChartRevenue";
 
 import MintModal from "@/components/MintModal";
 import RoyaltyConfigModal from "@/components/RoyaltyConfigModal";
+import ProtocolForge from "@/components/ProtocolForge";
 
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -80,12 +84,12 @@ const ArtistDashboard: React.FC = () => {
     );
   }, [tracks, searchQuery]);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection">("overview");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab && ['overview', 'tracks', 'royalties', 'profile'].includes(tab)) {
+    if (tab && ['overview', 'tracks', 'royalties', 'profile', 'forge', 'collection'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [location.search]);
@@ -241,6 +245,8 @@ const ArtistDashboard: React.FC = () => {
           {[
             { id: "overview", label: "Overview", icon: <ChartLine className="h-4 w-4" /> },
             { id: "tracks", label: "Catalog", icon: <Music className="h-4 w-4" /> },
+            { id: "collection", label: "Collection", icon: <Gem className="h-4 w-4" /> },
+            { id: "forge", label: "Protocol Forge", icon: <Hammer className="h-4 w-4" /> },
             { id: "royalties", label: "Royalties", icon: <Coins className="h-4 w-4" /> },
             { id: "profile", label: "Profile Settings", icon: <UserPen className="h-4 w-4" /> },
           ].map((tab) => (
@@ -367,6 +373,31 @@ const ArtistDashboard: React.FC = () => {
               </div>{" "}
             </div>
           )}{" "}
+          {activeTab === "collection" && (
+            <div className="space-y-10 animate-in slide-in-from-right-4 duration-500">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Your NFT Collection</h2>
+                <button 
+                  onClick={() => setActiveTab('forge')}
+                  className="px-4 py-2 bg-blue-600/10 border border-blue-600/20 rounded-[8px] text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all"
+                >
+                  Forge New Protocol
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {MOCK_NFTS.filter(n => n.creator === artistData.name).map(nft => (
+                  <NFTCard key={nft.id} nft={nft} />
+                ))}
+                {MOCK_NFTS.filter(n => n.creator === artistData.name).length === 0 && (
+                  <div className="col-span-full py-32 text-center bg-white/5 border border-white/10 rounded-[20px]">
+                    <Gem className="h-12 w-12 text-white/10 mx-auto mb-4" />
+                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">No minted protocols in your collection.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {activeTab === "tracks" && (
             <div className="space-y-8">
               {" "}
@@ -445,6 +476,12 @@ const ArtistDashboard: React.FC = () => {
 {" "}
             </div>
           )}{" "}
+          {activeTab === "forge" && (
+            <div className="animate-in fade-in duration-500">
+              <ProtocolForge />
+            </div>
+          )}
+
           {activeTab === "royalties" && (
             <div className="space-y-10">
               {" "}
