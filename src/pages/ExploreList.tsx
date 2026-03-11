@@ -7,7 +7,7 @@ import ArtistCard from '@/components/ArtistCard';
 import NFTCard from '@/components/NFTCard';
 import PlaylistListItem from '@/components/PlaylistListItem';
 import ArtistListItem from '@/components/ArtistListItem';
-import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO, CURATED_PLAYLISTS } from '@/constants';
+import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO, CURATED_PLAYLISTS, MOCK_USERS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import PlaylistCard from '@/components/PlaylistCard';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
@@ -101,6 +101,8 @@ const ExploreList: React.FC = () => {
       } else {
         initialData = [...allPlaylists, ...CURATED_PLAYLISTS];
       }
+    } else if (type === 'users') {
+      initialData = MOCK_USERS;
     }
 
     /* Simulate API delay */
@@ -167,13 +169,14 @@ const ExploreList: React.FC = () => {
       </div>
 
       {/* Vertical Grid Content */}
-      <div className={`grid gap-4 pb-8 ${type === 'nfts' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1'}`}>
+      <div className={`grid gap-4 pb-8 ${type === 'nfts' || type === 'users' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1'}`}>
         {filteredItems.map((item, idx) => (
           <div key={`${item.id}-${idx}`} className="animate-in fade-in duration-500 slide-in-from-bottom-2">
             {type === 'tracks' && <TrackCard track={item} variant="row" />}
             {type === 'nfts' && <NFTCard nft={item} />}
             {type === 'artists' && <ArtistListItem artist={item} />}
             {type === 'playlists' && <PlaylistListItem playlist={item} onClick={() => navigate(`/playlist/${item.id}`)} />}
+            {type === 'users' && <UserCard user={item} />}
           </div>
         ))}
         {/* Sentinel for infinite scroll */}

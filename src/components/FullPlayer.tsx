@@ -222,9 +222,9 @@ const FullPlayer: React.FC = () => {
         await navigator.clipboard.writeText(shareUrl);
         addNotification('Link copied to clipboard!', 'success');
       }
-    } catch (err) {
-      console.error('Error sharing:', err);
-      if ((err as Error).name !== 'AbortError') {
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.error('Error sharing:', err);
         addNotification('Failed to share track.', 'error');
       }
     }
@@ -379,15 +379,28 @@ const FullPlayer: React.FC = () => {
             >
               <div className="min-w-0">
                 <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tighter uppercase truncate mb-2">{currentTrack.title}</h2>
-                <button 
-                  onClick={() => {
-                    setFullPlayerOpen(false);
-                    navigate(`/artist/${currentTrack.artistId}`);
-                  }}
-                  className="text-lg text-blue-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
-                >
-                  {currentTrack.artist}
-                </button>
+                <div className="flex items-center gap-3">
+                  {artistData && (
+                    <img 
+                      src={artistData.avatarUrl} 
+                      alt={artistData.name} 
+                      className="w-6 h-6 rounded-full object-cover cursor-pointer"
+                      onClick={() => {
+                        setFullPlayerOpen(false);
+                        navigate(`/artist/${currentTrack.artistId}`);
+                      }}
+                    />
+                  )}
+                  <button 
+                    onClick={() => {
+                      setFullPlayerOpen(false);
+                      navigate(`/artist/${currentTrack.artistId}`);
+                    }}
+                    className="text-lg text-blue-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
+                  >
+                    {currentTrack.artist}
+                  </button>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button 
@@ -559,11 +572,17 @@ const FullPlayer: React.FC = () => {
         <div className="mt-20 pt-20 border-t border-white/5">
           <h3 className="text-[12px] font-bold text-white/40 uppercase tracking-[0.4em] mb-8">Artist Dossier</h3>
           <div className="bg-[#0a192f] p-8 rounded-2xl border border-blue-500/10">
-            <div className="flex items-center gap-6 mb-8">
+            <div 
+              className="flex items-center gap-6 mb-8 cursor-pointer group/dossier"
+              onClick={() => {
+                setFullPlayerOpen(false);
+                navigate(`/artist/${currentTrack.artistId}`);
+              }}
+            >
               <div className="relative">
                 <img 
                   src={artistData?.avatarUrl || `https://picsum.photos/200/200?seed=${currentTrack.artist}`} 
-                  className="w-20 h-20 rounded-full object-cover border-2 border-blue-500/20" 
+                  className="w-20 h-20 rounded-full object-cover border-2 border-blue-500/20 group-hover/dossier:border-blue-500 transition-colors" 
                   alt="" 
                 />
                 <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#0a192f] rounded-full flex items-center justify-center border border-blue-500/20">
@@ -571,7 +590,7 @@ const FullPlayer: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h4 className="text-xl font-bold text-white uppercase tracking-tighter mb-1">{currentTrack.artist}</h4>
+                <h4 className="text-xl font-bold text-white uppercase tracking-tighter mb-1 group-hover/dossier:text-blue-400 transition-colors">{currentTrack.artist}</h4>
                 <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{artistData?.followers.toLocaleString() || '12.4K'} Followers</p>
               </div>
             </div>

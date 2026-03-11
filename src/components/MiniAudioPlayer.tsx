@@ -3,6 +3,7 @@ import { useAudio } from "@/context/AudioContext";
 import { useNavigate } from "react-router-dom";
 import { Play, Pause, MoreVertical, X, Music2 } from "lucide-react";
 import TrackOptionsModal from "./TrackOptionsModal";
+import { MOCK_ARTISTS } from "@/constants";
 
 interface MiniAudioPlayerProps {
   onOptionsClick?: () => void;
@@ -65,12 +66,22 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             <h4 className="text-[12px] font-bold truncate text-white uppercase tracking-tight leading-tight">
               {currentTrack.title}
             </h4>
-            <p
-              onClick={handleArtistClick}
-              className="text-[10px] text-white/40 truncate uppercase font-bold tracking-widest hover:text-blue-500 transition-colors inline-block leading-tight"
-            >
-              {currentTrack.artist}
-            </p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {MOCK_ARTISTS.find(a => a.id === currentTrack.artistId) && (
+                <img 
+                  src={MOCK_ARTISTS.find(a => a.id === currentTrack.artistId)?.avatarUrl} 
+                  alt={currentTrack.artist} 
+                  className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+                  onClick={handleArtistClick}
+                />
+              )}
+              <p
+                onClick={handleArtistClick}
+                className="text-[10px] text-white/40 truncate uppercase font-bold tracking-widest hover:text-blue-500 transition-colors inline-block leading-tight"
+              >
+                {currentTrack.artist}
+              </p>
+            </div>
           </div>
         </div>
         <div

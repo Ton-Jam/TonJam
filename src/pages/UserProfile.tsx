@@ -7,7 +7,8 @@ import {
   Disc, 
   Box, 
   ArrowLeft,
-  Gem
+  Gem,
+  Share2
 } from 'lucide-react';
 
 import { MOCK_USERS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '@/constants';
@@ -21,7 +22,7 @@ import { UserProfile as UserProfileType } from '@/types';
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { allTracks, allNFTs, userProfile, toggleFollowUser, followedUserIds } = useAudio();
+  const { allTracks, allNFTs, userProfile, toggleFollowUser, followedUserIds, addNotification } = useAudio();
   
   const [user, setUser] = useState<UserProfileType | null>(null);
   const [activeTab, setActiveTab] = useState<'inventory' | 'activity' | 'network'>('inventory');
@@ -76,12 +77,40 @@ const UserProfile: React.FC = () => {
       <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-black">
         <img src={user.bannerUrl || `https://picsum.photos/1200/400?random=${user.id}`} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-        <button 
-          onClick={() => navigate(-1)}
-          className="absolute top-6 left-6 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
-        >
-          <ArrowLeft size={18} />
-        </button>
+        
+        <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center">
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
+          >
+            <ArrowLeft size={18} />
+          </button>
+
+          <button 
+            onClick={async () => {
+              const shareData = {
+                title: `${user.name} on TonJam`,
+                text: `Check out ${user.name}'s profile on TonJam`,
+                url: window.location.href,
+              };
+              try {
+                if (navigator.share) {
+                  await navigator.share(shareData);
+                } else {
+                  await navigator.clipboard.writeText(window.location.href);
+                  addNotification('Profile link copied to clipboard', 'success');
+                }
+              } catch (err: any) {
+                if (err.name !== 'AbortError') {
+                  console.error('Error sharing:', err);
+                }
+              }
+            }}
+            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
+          >
+            <Share2 size={18} />
+          </button>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 md:-mt-32 relative z-10">

@@ -325,12 +325,22 @@ const FullAudioPlayer: React.FC = () => {
                 <h2 className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-white leading-none truncate px-4">
                   {currentTrack.title}
                 </h2>
-                <p
-                  onClick={handleArtistClick}
-                  className="text-blue-500 font-bold text-[14px] tracking-widest uppercase cursor-pointer hover:text-white transition-colors"
-                >
-                  {currentTrack.artist}
-                </p>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  {artistData && (
+                    <img 
+                      src={artistData.avatarUrl} 
+                      alt={artistData.name} 
+                      className="w-5 h-5 rounded-full object-cover cursor-pointer"
+                      onClick={handleArtistClick}
+                    />
+                  )}
+                  <p
+                    onClick={handleArtistClick}
+                    className="text-blue-500 font-bold text-[14px] tracking-widest uppercase cursor-pointer hover:text-white transition-colors"
+                  >
+                    {currentTrack.artist}
+                  </p>
+                </div>
               </motion.div>
             </AnimatePresence>
           </div>

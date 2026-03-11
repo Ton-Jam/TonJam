@@ -9,7 +9,7 @@ interface AddToPlaylistModalProps {
 }
 
 const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose }) => {
-  const { playlists, addTrackToPlaylist, addNotification } = useAudio();
+  const { playlists, addTrackToPlaylist, addNotification, setIsCreatePlaylistModalOpen } = useAudio();
 
   const handleAdd = (playlistId: string, playlistName: string) => {
     addTrackToPlaylist(playlistId, track);
@@ -22,33 +22,48 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
       <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={onClose}></div>
       
       <div className="relative w-full max-w-sm glass border border-white/10 bg-[#0a0a0a] rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-white uppercase tracking-widest">Add to Playlist</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white">
-            <X className="h-5 w-5" />
+        <div className="p-4 border-b border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-3 bg-blue-500 rounded-full"></div>
+            <h2 className="text-[10px] font-bold text-white uppercase tracking-widest">Add to Playlist</h2>
+          </div>
+          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-2 space-y-1 max-h-[60vh] overflow-y-auto">
+        <div className="p-2 space-y-1 max-h-[50vh] overflow-y-auto custom-scrollbar">
           {playlists.map(playlist => (
             <button 
               key={playlist.id} 
               onClick={() => handleAdd(playlist.id, playlist.title)}
-              className="w-full flex items-center gap-4 p-4 rounded-[10px] hover:bg-white/5 transition-all text-left group"
+              className="w-full flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 transition-all text-left group"
             >
-              <div className="w-10 h-10 rounded-[5px] bg-white/5 flex items-center justify-center overflow-hidden">
+              <div className="w-8 h-8 rounded-[4px] bg-white/5 flex items-center justify-center overflow-hidden border border-white/5">
                 {playlist.coverUrl ? (
                   <img src={playlist.coverUrl} className="w-full h-full object-cover" alt="" />
                 ) : (
-                  <Music className="h-5 w-5 text-white/20" />
+                  <Music className="h-4 w-4 text-white/20" />
                 )}
               </div>
-              <div>
-                <span className="text-xs font-bold text-white uppercase tracking-tight block">{playlist.title}</span>
-                <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{playlist.trackIds?.length || 0} tracks</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-[11px] font-bold text-white uppercase tracking-tight block truncate">{playlist.title}</span>
+                <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">{playlist.trackIds?.length || 0} tracks</span>
               </div>
             </button>
           ))}
+        </div>
+
+        <div className="p-3 border-t border-white/5">
+          <button 
+            onClick={() => {
+              onClose();
+              setIsCreatePlaylistModalOpen(true);
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest"
+          >
+            <Plus className="h-3 w-3" /> Create New Playlist
+          </button>
         </div>
       </div>
     </div>

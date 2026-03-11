@@ -12,7 +12,6 @@ import {
   Sparkles, 
   TrendingUp, 
   Target,
-  ChevronRight,
   Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';

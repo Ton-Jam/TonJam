@@ -233,11 +233,11 @@ const NFTDetail: React.FC = () => {
         await navigator.clipboard.writeText(shareUrl);
         addNotification('Link copied to clipboard!', 'success');
       }
-    } catch (err) {
+    } catch (err: any) {
       // Don't log or show an error if the user just cancelled the share dialog
-      const isCancel = (err as Error).name === 'AbortError' || 
-                      (err as Error).message?.toLowerCase().includes('canceled') ||
-                      (err as Error).message?.toLowerCase().includes('aborted');
+      const isCancel = err.name === 'AbortError' || 
+                      err.message?.toLowerCase().includes('canceled') ||
+                      err.message?.toLowerCase().includes('aborted');
       
       if (!isCancel) {
         console.error('Error sharing:', err);

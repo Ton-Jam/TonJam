@@ -7,6 +7,7 @@ import TrackCard from '@/components/TrackCard';
 import PostModal from '@/components/PostModal';
 import SocialFeed from '@/components/SocialFeed';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
+import TweetCard from '@/components/kokonutui/tweet-card';
 import { useAudio } from '@/context/AudioContext';
 import { Post, Track } from '@/types';
 
@@ -291,7 +292,29 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Main Feed */}
-            <div className="bg-transparent">
+            <div className="bg-transparent space-y-8">
+              <div className="flex justify-center w-full">
+                <TweetCard 
+                  authorName="Neon Voyager"
+                  authorHandle="neonvoyager"
+                  authorImage="https://picsum.photos/100/100?random=21"
+                  content={[
+                    "Just dropped my new Genesis NFT track on @TonJam! 🎵",
+                    "The energy in the Live Node was insane tonight.",
+                    "Grab it before it sells out!"
+                  ]}
+                  isVerified={true}
+                  timestamp="2 hours ago"
+                  reply={{
+                    authorName: "Byte Beat",
+                    authorHandle: "bytebeat",
+                    authorImage: "https://picsum.photos/100/100?random=22",
+                    content: "Already minted mine! 🔥",
+                    isVerified: true,
+                    timestamp: "1 hour ago"
+                  }}
+                />
+              </div>
               <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={viewMode} />
             </div>
           </main>

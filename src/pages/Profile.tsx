@@ -22,7 +22,9 @@ import {
   ArrowUp, 
   TrendingUp,
   Satellite,
-  Users
+  Users,
+  ArrowLeft,
+  Share2
 } from 'lucide-react';
 
 import PostCard from '@/components/PostCard';
@@ -254,6 +256,41 @@ const Profile: React.FC = () => {
       <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-black">
         <img src={localUser.bannerUrl} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+        
+        <div className="absolute top-6 left-6 right-6 z-50 flex justify-between items-center">
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
+          >
+            <ArrowLeft size={18} />
+          </button>
+
+          <button 
+            onClick={async () => {
+              const shareData = {
+                title: `${localUser.name} on TonJam`,
+                text: `Check out ${localUser.name}'s profile on TonJam`,
+                url: window.location.href,
+              };
+              try {
+                if (navigator.share) {
+                  await navigator.share(shareData);
+                } else {
+                  await navigator.clipboard.writeText(window.location.href);
+                  addNotification('Profile link copied to clipboard', 'success');
+                }
+              } catch (err: any) {
+                if (err.name !== 'AbortError') {
+                  console.error('Error sharing:', err);
+                }
+              }
+            }}
+            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
+          >
+            <Share2 size={18} />
+          </button>
+        </div>
+
         {isEditing && (
           <button onClick={() => bannerInputRef.current?.click()} className="absolute inset-0 flex items-center justify-center backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity z-20">
             <div className="bg-white/10 p-4 rounded-[10px]"><Camera className="text-white h-5 w-5" /></div>
@@ -438,13 +475,19 @@ const Profile: React.FC = () => {
                                 : [...current, genre.name];
                               setLocalUser({...localUser, favoriteGenres: updated});
                             }}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                            className={`relative px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border overflow-hidden group ${
                               isSelected 
-                                ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
-                                : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white'
+                                ? 'text-white border-transparent' 
+                                : 'bg-white/5 text-white/40 border-white/10 hover:text-white'
                             }`}
                           >
-                            {genre.name}
+                            {isSelected && (
+                              <div className={`absolute inset-0 bg-gradient-to-r ${genre.color} opacity-80`}></div>
+                            )}
+                            {!isSelected && (
+                              <div className={`absolute inset-0 bg-gradient-to-r ${genre.color} opacity-0 group-hover:opacity-20 transition-opacity`}></div>
+                            )}
+                            <span className="relative z-10">{genre.name}</span>
                           </button>
                         );
                       })}

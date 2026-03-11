@@ -25,7 +25,7 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
   return (
     <div 
       onClick={handleCardClick}
-      className="group flex items-center gap-4 p-3 rounded-[10px] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all cursor-pointer w-full"
+      className="group flex items-center gap-4 p-3 rounded-[10px] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
     >
       <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 shadow-lg border border-white/5">
         <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />

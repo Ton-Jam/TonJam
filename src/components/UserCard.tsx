@@ -44,7 +44,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     return (
       <div 
         onClick={handleClick}
-        className="flex items-center gap-3 p-3 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all cursor-pointer group"
+        className="flex items-center gap-3 p-3 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
       >
         <div className="relative w-10 h-10 rounded-[5px] overflow-hidden">
           <img src={avatarUrl} alt={user.name} className="w-full h-full object-cover" />
@@ -72,7 +72,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     return (
       <div 
         onClick={handleClick}
-        className="flex items-center justify-between p-4 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all cursor-pointer group"
+        className="flex items-center justify-between p-4 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
       >
         <div className="flex items-center gap-4">
           <div className="relative w-12 h-12 rounded-[5px] overflow-hidden">
@@ -107,7 +107,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   return (
     <div 
       onClick={handleClick}
-      className="flex flex-col items-center text-center p-6 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all cursor-pointer group"
+      className="flex flex-col items-center text-center p-6 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
     >
       <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-[5px] overflow-hidden border-2 border-white/5 group-hover:border-blue-500/50 transition-all mb-4">
         <img src={avatarUrl} alt={user.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />

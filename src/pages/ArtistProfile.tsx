@@ -24,7 +24,10 @@ import {
   Coins,
   Tag,
   Gavel,
-  Trash2
+  Trash2,
+  Image as ImageIcon,
+  ArrowLeft,
+  Share2
 } from 'lucide-react';
 
 import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, TON_LOGO } from '@/constants';
@@ -250,7 +253,7 @@ const ArtistProfile: React.FC = () => {
   };
 
   const isOwnProfile = useMemo(() => id === userProfile.id, [id, userProfile.id]);
-  const artist = useMemo(() => artists.find(a => a.id === id), [id, artists]);
+  const artist = useMemo(() => artists.find(a => a.id === id) || MOCK_ARTISTS.find(a => a.id === id), [id, artists]);
   const artistTracks = useMemo(() => MOCK_TRACKS.filter(t => t.artistId === id), [id]);
   const artistNFTs = useMemo(() => MOCK_NFTS.filter(n => n.creator === artist?.name), [artist]);
   const artistPosts = useMemo(() => MOCK_POSTS.filter(p => p.userName === artist?.name), [artist]);
@@ -298,7 +301,15 @@ const ArtistProfile: React.FC = () => {
     addNotification(`Metadata for "${metadata.title}" synchronized with Forge protocol.`, "success");
   };
 
-  if (!artist) return null;
+  if (!artist) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white">
+        <Disc className="h-12 w-12 text-white/10 mb-4 animate-spin-slow" />
+        <p className="text-white/40 font-bold uppercase tracking-widest text-xs">Artist Not Found</p>
+        <button onClick={() => navigate(-1)} className="mt-6 text-blue-500 font-bold text-[10px] uppercase tracking-widest">Return to Network</button>
+      </div>
+    );
+  }
 
   const handleFollow = () => {
     if (id) {
@@ -354,15 +365,56 @@ const ArtistProfile: React.FC = () => {
     <div className="animate-in fade-in duration-1000 pb-32 min-h-screen font-sans">
       {/* 1. COMPACT CINEMATIC BANNER */}
       <div className="relative h-[30vh] md:h-[35vh] overflow-hidden group/banner">
-        <img src={customBanner || artist.bannerUrl || `https://picsum.photos/1200/400?seed=${artist.id}`} className="w-full h-full object-cover grayscale-[0.5] brightness-[0.3] transition-transform duration-[30s] group-hover/banner:scale-110" alt="" />
+        <div 
+          className="absolute inset-0 bg-cover bg-center grayscale-[0.5] brightness-[0.3] transition-transform duration-[30s] group-hover/banner:scale-110"
+          style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || 'https://picsum.photos/1200/400?seed=' + artist.id})` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-        {/* Banner Upload Trigger */}
-        <div className="absolute top-6 right-6 z-40 opacity-0 group-hover/banner:opacity-100 transition-opacity">
-          <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 glass rounded-[10px] text-[8px] font-bold uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2" >
-            <Camera className="h-3 w-3" /> UPDATE_PROTOCOL
+        
+        {/* Navigation & Share */}
+        <div className="absolute top-6 left-6 right-6 z-50 flex justify-between items-center">
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
+          >
+            <ArrowLeft size={18} />
           </button>
-          <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept="image/*" className="hidden" />
+          
+          <button 
+            onClick={async () => {
+              const shareData = {
+                title: `${artist.name} on TonJam`,
+                text: `Check out ${artist.name}'s profile on TonJam`,
+                url: window.location.href,
+              };
+              try {
+                if (navigator.share) {
+                  await navigator.share(shareData);
+                } else {
+                  await navigator.clipboard.writeText(window.location.href);
+                  addNotification('Profile link copied to clipboard', 'success');
+                }
+              } catch (err: any) {
+                if (err.name !== 'AbortError') {
+                  console.error('Error sharing:', err);
+                }
+              }
+            }}
+            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
+          >
+            <Share2 size={18} />
+          </button>
         </div>
+
+        {/* Banner Upload Trigger */}
+        {isOwnProfile && (
+          <div className="absolute top-6 right-6 z-40 opacity-0 group-hover/banner:opacity-100 transition-opacity">
+            <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 glass rounded-[10px] text-[8px] font-bold uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2" >
+              <Camera className="h-3 w-3" /> UPDATE_PROTOCOL
+            </button>
+            <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept="image/*" className="hidden" />
+          </div>
+        )}
       </div>
 
       {/* 2. INTEGRATED IDENTITY & ACTION HUB */}
@@ -510,6 +562,52 @@ const ArtistProfile: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Top Tracks Section */}
+      {topTracks.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6 mt-16 animate-in fade-in slide-in-from-bottom duration-1000 delay-500">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 electric-blue-bg rounded-full shadow-[0_0_12px_rgba(59,130,246,0.8)]"></div>
+              <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Top Frequencies</h2>
+            </div>
+            <button onClick={() => playAll(topTracks)} className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.3em] hover:text-white transition-colors flex items-center gap-2 group">
+              PLAY_ALL <Play className="h-3 w-3 fill-current group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+            {topTracks.map((track, idx) => (
+              <div 
+                key={`top-${track.id}`} 
+                className="group flex items-center gap-4 p-3 rounded-[12px] hover:bg-white/5 transition-all cursor-pointer border border-transparent hover:border-white/5"
+                onClick={() => playAll([track])}
+              >
+                <div className="w-6 text-[10px] font-bold text-white/20 group-hover:text-blue-500 transition-colors text-center">
+                  {(idx + 1).toString().padStart(2, '0')}
+                </div>
+                <div className="relative w-12 h-12 rounded-[8px] overflow-hidden flex-shrink-0 shadow-lg">
+                  <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Play className="h-4 w-4 text-white fill-current" />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-tight truncate group-hover:text-blue-400 transition-colors">{track.title}</h3>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">{track.genre}</span>
+                    <div className="w-1 h-1 bg-white/10 rounded-full"></div>
+                    <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">{(track.playCount || 0).toLocaleString()} STREAMS</span>
+                  </div>
+                </div>
+                <div className="text-[10px] font-mono text-white/20 group-hover:text-white/40 transition-colors">
+                  {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
                 </div>
               </div>
             ))}
@@ -984,6 +1082,45 @@ const ArtistProfile: React.FC = () => {
                           </div>
                         );
                       })}
+                    </div>
+                  </div>
+
+                  {/* Profile Customization Section */}
+                  <div className="space-y-8">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-10 h-10 bg-pink-500/20 rounded-[10px] flex items-center justify-center">
+                        <ImageIcon className="h-4 w-4 text-pink-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white uppercase tracking-tighter">Profile Customization</h3>
+                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Update your visual identity on the network</p>
+                      </div>
+                    </div>
+
+                    <div className="glass border border-white/5 bg-white/[0.01] rounded-[12px] p-6">
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                            Profile Banner
+                          </label>
+                          <div className="relative w-full h-48 rounded-[10px] overflow-hidden group border border-white/10 bg-white/5">
+                            <div 
+                              className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-40 transition-opacity"
+                              style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || 'https://picsum.photos/1200/400?seed=' + artist.id})` }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-[8px] text-[9px] font-bold text-white uppercase tracking-widest hover:bg-white/20 transition-all flex items-center gap-2"
+                              >
+                                <Upload className="h-3 w-3" /> Upload New Banner
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-[8px] text-white/30">Recommended size: 1500x500px. Max 5MB.</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
 

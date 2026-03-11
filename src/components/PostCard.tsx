@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Check, MoreHorizontal, Play, Pause, Plus, Heart, MessageCircle, Repeat2, Share, Smile, Send, MessageSquareOff, X } from 'lucide-react';
+import { Check, MoreHorizontal, Play, Pause, Plus, Heart, MessageCircle, Repeat2, Share, Smile, Send, MessageSquareOff, X, VerifiedIcon } from 'lucide-react';
 import { Post, Comment } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import PostOptionsModal from '@/components/PostOptionsModal';
 import { MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { AnimatePresence, motion } from 'motion/react';
+import { cn } from '@/lib/utils';
 
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>(post.commentList || []);
   const [commentText, setCommentText] = useState('');
+  const [activeReactionCommentId, setActiveReactionCommentId] = useState<string | null>(null);
 
   const REACTION_EMOJIS = ['🔥', '💎', '🚀', '🎧', '⚡'];
 
@@ -139,69 +141,93 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   };
 
   return (
-    <div className="bg-transparent border-b border-white/5 hover:bg-white/[0.02] py-6 px-4 transition-all group relative">
-      <div className="flex gap-4">
-        {/* Author Avatar */}
-        <div 
-          className="flex-shrink-0 cursor-pointer outline-none" 
-          onClick={handleProfileClick}
-          onKeyDown={(e) => handleKeyDown(e, () => handleProfileClick(e as any))}
-          role="button"
-          tabIndex={0}
-          aria-label={`View ${post.userName}'s profile`}
-        >
-          <div className="relative">
-            <img src={post.userAvatar} alt="" className="w-12 h-12 rounded-full object-cover border border-[#050505]" />
-            {post.isVerified && (
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center border border-[#050505]" aria-label="Verified user">
-                <Check className="h-2 w-2 text-white" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start mb-2">
-            <div 
-              className="cursor-pointer outline-none" 
-              onClick={handleProfileClick}
-              onKeyDown={(e) => handleKeyDown(e, () => handleProfileClick(e as any))}
-              role="button"
-              tabIndex={0}
-              aria-label={`View ${post.userName}'s profile`}
-            >
-              <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold text-white uppercase tracking-tight hover:text-blue-400 hover:underline transition-colors inline-block">{post.userName}</h4>
-                <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{post.timestamp}</span>
-              </div>
-              <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{userHandle}</p>
+    <div
+      className={cn(
+        "relative isolate w-full overflow-hidden rounded-2xl p-1.5 mb-4 group",
+        "bg-white/5 dark:bg-black/90",
+        "bg-linear-to-br from-black/5 to-black/[0.02] dark:from-white/5 dark:to-white/[0.02]",
+        "backdrop-blur-xl backdrop-saturate-[180%]",
+        "border border-black/10 dark:border-white/10",
+        "shadow-[0_8px_16px_rgb(0_0_0_/_0.15)] dark:shadow-[0_8px_16px_rgb(0_0_0_/_0.25)]",
+        "translate-z-0 will-change-transform"
+      )}
+    >
+      <div
+        className={cn(
+          "relative w-full rounded-xl p-5",
+          "bg-linear-to-br from-black/[0.05] to-transparent dark:from-white/[0.08] dark:to-transparent",
+          "backdrop-blur-md backdrop-saturate-150",
+          "border border-black/[0.05] dark:border-white/[0.08]",
+          "text-black/90 dark:text-white",
+          "shadow-xs",
+          "translate-z-0 will-change-transform",
+          "before:pointer-events-none before:absolute before:inset-0 before:bg-linear-to-br before:from-black/[0.02] before:to-black/[0.01] before:opacity-0 before:transition-opacity dark:before:from-white/[0.03] dark:before:to-white/[0.01]",
+          "hover:before:opacity-100"
+        )}
+      >
+        <div className="flex gap-4">
+          {/* Author Avatar */}
+          <div 
+            className="flex-shrink-0 cursor-pointer outline-none" 
+            onClick={handleProfileClick}
+            onKeyDown={(e) => handleKeyDown(e, () => handleProfileClick(e as any))}
+            role="button"
+            tabIndex={0}
+            aria-label={`View ${post.userName}'s profile`}
+          >
+            <div className="h-10 w-10 overflow-hidden rounded-full">
+              <img src={post.userAvatar} alt="" className="h-full w-full object-cover" />
             </div>
-            <div className="flex items-center gap-3">
-              {!isOwnPost && (
-                <button 
-                  onClick={handleFollow} 
-                  className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${isFollowing ? 'bg-white/10 text-white' : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20'}`}
-                  aria-label={isFollowing ? `Unfollow ${post.userName}` : `Follow ${post.userName}`}
-                >
-                  {isFollowing ? 'Following' : 'Follow'}
-                </button>
-              )}
-              <button 
-                onClick={() => setShowOptions(true)} 
-                className="text-white/20 hover:text-white transition-colors p-1"
-                aria-label="Post options"
-                aria-haspopup="true"
+          </div>
+
+          {/* Content Area */}
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start mb-2">
+              <div 
+                className="cursor-pointer outline-none flex flex-col" 
+                onClick={handleProfileClick}
+                onKeyDown={(e) => handleKeyDown(e, () => handleProfileClick(e as any))}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${post.userName}'s profile`}
               >
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
+                <div className="flex items-center gap-1">
+                  <span className="font-semibold text-black hover:underline dark:text-white/90">{post.userName}</span>
+                  {post.isVerified && (
+                    <VerifiedIcon className="h-4 w-4 text-blue-400" />
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-black text-sm dark:text-white/60">{userHandle}</span>
+                  <span className="text-black text-sm dark:text-white/60">·</span>
+                  <span className="text-black text-sm dark:text-white/60">{post.timestamp}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {!isOwnPost && (
+                  <button 
+                    onClick={handleFollow} 
+                    className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${isFollowing ? 'bg-white/10 text-white' : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20'}`}
+                    aria-label={isFollowing ? `Unfollow ${post.userName}` : `Follow ${post.userName}`}
+                  >
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                )}
+                <button 
+                  onClick={() => setShowOptions(true)} 
+                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-black hover:bg-black/5 hover:text-black dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-white"
+                  aria-label="Post options"
+                  aria-haspopup="true"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Post Text */}
-          <p className="text-white/80 text-sm leading-relaxed mb-4 whitespace-pre-wrap">
-            {post.content}
-          </p>
+            {/* Post Text */}
+            <p className="text-base text-black dark:text-white/90 mb-4 whitespace-pre-wrap">
+              {post.content}
+            </p>
 
           {/* Media Content */}
           {post.imageUrl && (
@@ -441,50 +467,62 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                         
                         {/* Reactions */}
                         <div className="flex items-center gap-2 mt-2">
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-1.5">
                             {Object.entries(comment.reactions || {}).map(([emoji, count]) => {
                               const isActive = comment.userReactions?.includes(emoji);
                               return (
                                 <button 
                                   key={emoji} 
                                   onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                  className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] transition-all ${isActive ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-white/40 hover:text-blue-400 border border-transparent'}`}
+                                  className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] transition-all ${isActive ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-white/60 hover:text-white border border-white/5 hover:bg-white/10'}`}
                                   aria-label={`${isActive ? 'Remove' : 'Add'} ${emoji} reaction`}
                                 >
-                                  <span>{emoji}</span>
+                                  <span className="text-xs">{emoji}</span>
                                   <span className="font-bold">{count}</span>
                                 </button>
                               );
                             })}
                           </div>
                           
-                          <div className="relative group/picker opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                          <div className="relative">
                             <button 
-                              className="w-6 h-6 flex items-center justify-center rounded-full text-white/10 hover:text-blue-500 transition-all hover:bg-white/5"
+                              onClick={() => setActiveReactionCommentId(activeReactionCommentId === comment.id ? null : comment.id)}
+                              className={`w-6 h-6 flex items-center justify-center rounded-full transition-all hover:bg-white/10 ${activeReactionCommentId === comment.id ? 'text-blue-500 bg-white/10 opacity-100' : 'text-white/20 hover:text-blue-500 opacity-0 group-hover/comment:opacity-100'}`}
                               aria-label="Add reaction to comment"
                               aria-haspopup="true"
                             >
-                              <Smile className="h-3 w-3" />
+                              <Smile className="h-3.5 w-3.5" />
                             </button>
-                            <div 
-                              className="absolute bottom-full left-0 mb-1 hidden group-hover/picker:flex items-center gap-1 bg-[#1a1a1a] border border-white/10 p-1 rounded-full shadow-xl z-20 backdrop-blur-xl"
-                              role="menu"
-                            >
-                              {REACTION_EMOJIS.map(emoji => {
-                                const isActive = comment.userReactions?.includes(emoji);
-                                return (
-                                  <button 
-                                    key={emoji} 
-                                    onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                    className={`w-6 h-6 flex items-center justify-center rounded-full transition-all text-xs hover:scale-110 ${isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white/80'}`}
-                                    aria-label={`React with ${emoji}`}
-                                    role="menuitem"
-                                  >
-                                    {emoji}
-                                  </button>
-                                );
-                              })}
-                            </div>
+                            <AnimatePresence>
+                              {activeReactionCommentId === comment.id && (
+                                <motion.div 
+                                  initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                                  transition={{ duration: 0.15 }}
+                                  className="absolute bottom-full left-0 mb-2 flex items-center gap-1 bg-[#1a1a1a] border border-white/10 p-1.5 rounded-full shadow-2xl z-20 backdrop-blur-xl"
+                                  role="menu"
+                                >
+                                  {REACTION_EMOJIS.map(emoji => {
+                                    const isActive = comment.userReactions?.includes(emoji);
+                                    return (
+                                      <button 
+                                        key={emoji} 
+                                        onClick={() => {
+                                          handleCommentReaction(comment.id, emoji);
+                                          setActiveReactionCommentId(null);
+                                        }} 
+                                        className={`w-8 h-8 flex items-center justify-center rounded-full transition-all text-sm hover:scale-110 ${isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white/80'}`}
+                                        aria-label={`React with ${emoji}`}
+                                        role="menuitem"
+                                      >
+                                        {emoji}
+                                      </button>
+                                    );
+                                  })}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         </div>
                       </div>
@@ -539,6 +577,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 };

@@ -244,30 +244,57 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const topGenres = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
     const topArtists = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
     
+    // Social signals: tracks mentioned in posts or from followed artists
+    const socialSignalTrackIds = new Set<string>();
+    posts.forEach(post => {
+      if (post.trackId) socialSignalTrackIds.add(post.trackId);
+    });
+    
+    const followedArtistIds = new Set(followedUserIds);
+
+    const getTrackScore = (track: Track) => {
+      let score = 0;
+      
+      // Genre match
+      if (topGenres.includes(track.genre)) {
+        score += 5 - Math.min(topGenres.indexOf(track.genre), 4);
+      }
+      
+      // Artist match
+      if (topArtists.includes(track.artistId || track.artist)) {
+        score += 8 - Math.min(topArtists.indexOf(track.artistId || track.artist), 7);
+      }
+      
+      // Followed artist signal
+      if (followedArtistIds.has(track.artistId || '')) {
+        score += 10;
+      }
+      
+      // Social signal
+      if (socialSignalTrackIds.has(track.id)) {
+        score += 4;
+      }
+
+      // Up-and-coming signal (new tracks with some traction)
+      const isNew = parseInt(track.id) > 10; // Simple heuristic for "new"
+      if (isNew && (track.playCount || 0) > 100 && (track.playCount || 0) < 5000) {
+        score += 6;
+      }
+
+      // Trending signal
+      if ((track.playCount || 0) > 10000) {
+        score += 3;
+      }
+      
+      return score;
+    };
+
     const recommendedTracks = allTracks.filter(track => {
       if (historyIds.has(track.id) || likedIds.has(track.id) || nftTrackIds.has(track.id)) {
         return false;
       }
-      
-      let score = 0;
-      if (topGenres.includes(track.genre)) {
-        score += 5 - Math.min(topGenres.indexOf(track.genre), 4);
-      }
-      if (topArtists.includes(track.artistId || track.artist)) {
-        score += 5 - Math.min(topArtists.indexOf(track.artistId || track.artist), 4);
-      }
-      
-      return score > 0;
-    }).sort((a, b) => {
-      let scoreA = 0;
-      let scoreB = 0;
-      if (topGenres.includes(a.genre)) scoreA += 5 - Math.min(topGenres.indexOf(a.genre), 4);
-      if (topArtists.includes(a.artistId || a.artist)) scoreA += 5 - Math.min(topArtists.indexOf(a.artistId || a.artist), 4);
-      if (topGenres.includes(b.genre)) scoreB += 5 - Math.min(topGenres.indexOf(b.genre), 4);
-      if (topArtists.includes(b.artistId || b.artist)) scoreB += 5 - Math.min(topArtists.indexOf(b.artistId || b.artist), 4);
-      
-      return scoreB - scoreA;
-    }).slice(0, 10);
+      return getTrackScore(track) > 5;
+    }).sort((a, b) => getTrackScore(b) - getTrackScore(a)).slice(0, 15);
 
     if (recommendedTracks.length < 10) {
       const trending = getTrendingTracks().filter(t => 
@@ -276,51 +303,27 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         !likedIds.has(t.id) && 
         !nftTrackIds.has(t.id)
       );
-      recommendedTracks.push(...trending.slice(0, 10 - recommendedTracks.length));
+      recommendedTracks.push(...trending.slice(0, 15 - recommendedTracks.length));
     }
 
     const recommendedNFTs = allNFTs.filter(nft => {
       if (userNFTs.find(un => un.id === nft.id)) {
         return false;
       }
-
+      
       const track = allTracks.find(t => t.id === nft.trackId);
       if (!track) return false;
 
       let score = 0;
-      if (topGenres.includes(track.genre)) {
-        score += 5 - Math.min(topGenres.indexOf(track.genre), 4);
-      }
-      if (topArtists.includes(track.artistId || track.artist)) {
-        score += 5 - Math.min(topArtists.indexOf(track.artistId || track.artist), 4);
-      }
+      if (topGenres.includes(track.genre)) score += 5;
+      if (topArtists.includes(track.artistId || track.artist)) score += 5;
+      if (followedArtistIds.has(track.artistId || '')) score += 8;
       
-      return score > 0;
-    }).sort((a, b) => {
-      const trackA = allTracks.find(t => t.id === a.trackId);
-      const trackB = allTracks.find(t => t.id === b.trackId);
-      let scoreA = 0;
-      let scoreB = 0;
-      if (trackA) {
-        if (topGenres.includes(trackA.genre)) scoreA += 5 - Math.min(topGenres.indexOf(trackA.genre), 4);
-        if (topArtists.includes(trackA.artistId || trackA.artist)) scoreA += 5 - Math.min(topArtists.indexOf(trackA.artistId || trackA.artist), 4);
-      }
-      if (trackB) {
-        if (topGenres.includes(trackB.genre)) scoreB += 5 - Math.min(topGenres.indexOf(trackB.genre), 4);
-        if (topArtists.includes(trackB.artistId || trackB.artist)) scoreB += 5 - Math.min(topArtists.indexOf(trackB.artistId || trackB.artist), 4);
-      }
-      return scoreB - scoreA;
-    }).slice(0, 10);
-
-    if (recommendedNFTs.length < 10) {
-      const topNFTTracks = getTopNFTTracks();
-      const topNFTs = allNFTs.filter(nft => topNFTTracks.find(t => t.id === nft.trackId));
-      const additionalNFTs = topNFTs.filter(nft => 
-        !recommendedNFTs.find(rn => rn.id === nft.id) &&
-        !userNFTs.find(un => un.id === nft.id)
-      );
-      recommendedNFTs.push(...additionalNFTs.slice(0, 10 - recommendedNFTs.length));
-    }
+      // Trending NFT signal
+      if (parseFloat(nft.price) > 50) score += 3;
+      
+      return score > 5;
+    }).sort((a, b) => parseFloat(b.price) - parseFloat(a.price)).slice(0, 10);
 
     return { recommendedTracks, recommendedNFTs };
   };
@@ -1433,7 +1436,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   };
 
                   if (navigator.share) {
-                    navigator.share(shareData).catch(console.error);
+                    navigator.share(shareData).catch((err) => {
+                      if (err.name !== 'AbortError') {
+                        console.error('Error sharing:', err);
+                      }
+                    });
                   } else {
                     navigator.clipboard.writeText(shareUrl);
                     addNotification("Link copied to clipboard", "success");

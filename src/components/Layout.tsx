@@ -51,6 +51,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isHome = location.pathname === '/';
   const isExplore = location.pathname.startsWith('/explore');
   const isDiscover = location.pathname === '/discover';
+  const isArtistProfile = location.pathname.startsWith('/artist/');
+  const isUserProfile = location.pathname.startsWith('/user/') || location.pathname === '/profile';
 
   const getSearchPlaceholder = () => {
     const path = location.pathname;
@@ -59,9 +61,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (path.startsWith('/library')) return 'Search Your Frequencies...';
     if (path.startsWith('/profile')) return 'Search Releases & Activity...';
     if (path.startsWith('/artist-dashboard')) return 'Search Your Catalog & Stats...';
-    if (path.startsWith('/discover')) return 'Search Artists, Genres, Playlists, Vibes...';
+    if (path.startsWith('/discover')) return 'Search Artists, Users, Playlists, Vibes...';
     if (path.startsWith('/wallet')) return 'Search Transactions...';
-    return 'Search tracks, artists, playlists, NFTs...';
+    return 'Search tracks, artists, users, NFTs...';
   };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -89,7 +91,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isExplore && (
+      {!isExplore && !isArtistProfile && !isUserProfile && (
         <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/5 px-4 md:px-6 py-3 flex items-center justify-between lg:left-64 transition-colors duration-300">
           <div className="flex items-center gap-4 flex-1">
             {!isHome && (

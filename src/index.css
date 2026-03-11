@@ -59,6 +59,21 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     outline: 2px solid oklch(0.5 0.2 260);
     outline-offset: 2px;
   }
+
+  /* Subtle animations for interactive elements */
+  button, a, [role="button"] {
+    @apply transition-all duration-300 active:scale-[0.98];
+  }
+
+  /* Card hover effects */
+  .glass, .card, [class*="card"] {
+    @apply transition-all duration-300;
+  }
+  
+  .glass:hover, .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glass-shadow-lg);
+  }
 }
 
 :root {

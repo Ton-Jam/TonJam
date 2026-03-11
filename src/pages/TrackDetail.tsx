@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, 
   Play, 
   Pause, 
   Zap, 
@@ -79,13 +78,23 @@ const TrackDetail: React.FC = () => {
       <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-6">
         {/* Header Navigation */}
         <div className="flex items-center justify-between mb-8">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 hover:text-white transition-all group"
+          <div 
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => navigate(`/artist/${track.artistId}`)}
           >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" /> 
-            Back to Discovery
-          </button>
+            <div className="relative">
+              <img src={artist?.avatarUrl || `https://picsum.photos/100/100?seed=${track.artistId}`} className="w-10 h-10 rounded-full object-cover border border-white/10" alt="" />
+              {track.artistVerified && (
+                <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-full p-0.5 border-2 border-black">
+                  <CheckCircle2 className="h-2.5 w-2.5 text-white" />
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="text-blue-500 font-bold text-[11px] uppercase tracking-[0.2em] group-hover:text-blue-400 transition-colors">{track.artist}</p>
+              <p className="text-[9px] text-white/30 uppercase font-medium tracking-widest">Verified Node</p>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => {
@@ -95,7 +104,11 @@ const TrackDetail: React.FC = () => {
                   url: window.location.href
                 };
                 if (navigator.share) {
-                  navigator.share(shareData).catch(console.error);
+                  navigator.share(shareData).catch((err) => {
+                    if (err.name !== 'AbortError') {
+                      console.error('Error sharing:', err);
+                    }
+                  });
                 } else {
                   navigator.clipboard.writeText(window.location.href);
                   addNotification('Track link copied to neural buffer', 'success');
@@ -189,26 +202,6 @@ const TrackDetail: React.FC = () => {
           {/* Right Column: Metadata & Content */}
           <div className="lg:col-span-7 space-y-10">
             <header>
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-3 mb-4 group cursor-pointer" 
-                onClick={() => navigate(`/artist/${track.artistId}`)}
-              >
-                <div className="relative">
-                  <img src={artist?.avatarUrl || `https://picsum.photos/100/100?seed=${track.artistId}`} className="w-10 h-10 rounded-full object-cover border border-white/10" alt="" />
-                  {track.artistVerified && (
-                    <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-full p-0.5 border-2 border-black">
-                      <CheckCircle2 className="h-2.5 w-2.5 text-white" />
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className="text-blue-500 font-bold text-[11px] uppercase tracking-[0.2em] group-hover:text-blue-400 transition-colors">{track.artist}</p>
-                  <p className="text-[9px] text-white/30 uppercase font-medium tracking-widest">Verified Node</p>
-                </div>
-              </motion.div>
-              
               <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-white leading-[0.9] mb-6">
                 {track.title}
               </h1>

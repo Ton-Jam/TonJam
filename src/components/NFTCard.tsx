@@ -71,9 +71,30 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
         </div>
         <div className="flex-1 min-w-0">
           <h4 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-white'}`}>{nft.title}</h4>
-          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate">
-            @{nft.creator}
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            {MOCK_ARTISTS.find(a => a.name === nft.creator) && (
+              <img 
+                src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl} 
+                alt={nft.creator} 
+                className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                  if (artist) navigate(`/artist/${artist.id}`);
+                }}
+              />
+            )}
+            <p 
+              className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block"
+              onClick={(e) => {
+                e.stopPropagation();
+                const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                if (artist) navigate(`/artist/${artist.id}`);
+              }}
+            >
+              @{nft.creator}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-4">
            <div className="flex items-center gap-1">
@@ -92,7 +113,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
     <>
       <div
         onClick={handleCardClick}
-        className="group relative cursor-pointer"
+        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1"
       >
         {/* Image Container - 1:1 Aspect Ratio */}
         <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
@@ -158,7 +179,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
               )}
            </div>
   
-           <div className="flex items-center gap-1 mt-0.5 mb-1.5">
+           <div className="flex items-center gap-1.5 mt-0.5 mb-1.5">
+              {MOCK_ARTISTS.find(a => a.name === nft.creator) && (
+                <img 
+                  src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl} 
+                  alt={nft.creator} 
+                  className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                    if (artist) navigate(`/artist/${artist.id}`);
+                  }}
+                />
+              )}
               <p 
                 className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block"
                 onClick={(e) => {

@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, X, History, Satellite, Bolt, ChevronRight, Filter, SlidersHorizontal, Music, User, Gem, Play, Disc, Sparkles, Globe, Mic, TrendingUp, RotateCcw } from 'lucide-react';
+import ActionSearchBar from '@/components/kokonutui/action-search-bar';
+import { motion, AnimatePresence } from 'motion/react';
+import { Search, X, Music, User, Gem, RotateCcw, Satellite, ChevronRight } from 'lucide-react';
 
-import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, APP_LOGO, GENRES, CURATED_PLAYLISTS } from '@/constants';
+import { MOCK_TRACKS, MOCK_NFTS, GENRES, MOCK_USERS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
-import ArtistCard from '@/components/ArtistCard';
 import NFTCard from '@/components/NFTCard';
-import GenreCard from '@/components/GenreCard';
-import SectionHeader from '@/components/SectionHeader';
-import PlaylistCard from '@/components/PlaylistCard';
 import PlaylistListItem from '@/components/PlaylistListItem';
 import ArtistListItem from '@/components/ArtistListItem';
 import { Track } from '@/types';
@@ -24,7 +22,7 @@ const TRACK_SORT_OPTIONS = ['Newest', 'Popularity', 'Most Liked'];
 const Discover: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, artists, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery: search, setSearchQuery: setSearch, generateDiscoverWeekly, isDiscoverFiltersOpen: showFilters, setIsDiscoverFiltersOpen: setShowFilters } = useAudio();
+  const { playTrack, addNotification, artists, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery: search, setSearchQuery: setSearch, generateDiscoverWeekly, isDiscoverFiltersOpen: showFilters, setIsDiscoverFiltersOpen: setShowFilters } = useAudio();
   
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get('search') || '';
@@ -34,7 +32,7 @@ const Discover: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists' | 'All'>('All');
+  const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists' | 'Users' | 'All'>('All');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('Newest');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -104,6 +102,12 @@ const Discover: React.FC = () => {
       }
     });
 
+    MOCK_USERS.forEach(u => {
+      if (u.name.toLowerCase().includes(lowerSearch) || u.handle.toLowerCase().includes(lowerSearch)) {
+        newSuggestions.push({ id: u.id, title: u.name, type: 'User', subtitle: u.handle });
+      }
+    });
+
     setSuggestions(newSuggestions.slice(0, 5));
   }, [search, artists]);
 
@@ -140,6 +144,7 @@ const Discover: React.FC = () => {
     if (item.type === 'Track') setActiveFilter('Tracks');
     if (item.type === 'Artist') setActiveFilter('Artists');
     if (item.type === 'NFT') setActiveFilter('NFTs');
+    if (item.type === 'User') setActiveFilter('Users');
   };
 
   const filteredResults = useMemo(() => {
@@ -183,9 +188,69 @@ const Discover: React.FC = () => {
       if (search) {
         results = results.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
       }
+    } else if (activeFilter === 'Users') {
+      results = MOCK_USERS;
+      if (search) {
+        results = results.filter(u =>
+          u.name.toLowerCase().includes(search.toLowerCase()) ||
+          u.handle.toLowerCase().includes(search.toLowerCase())
+        );
+      }
     }
     return results;
   }, [search, activeFilter, selectedGenre, sortBy, artists, allPlaylists]);
+
+  const searchActions = useMemo(() => {
+    const actions: any[] = [];
+    if (!search) return [];
+
+    // Tracks
+    MOCK_TRACKS.filter(t => t.title.toLowerCase().includes(search.toLowerCase())).slice(0, 5).forEach(t => {
+      actions.push({
+        id: `track-${t.id}`,
+        label: t.title,
+        icon: <Music className="h-4 w-4 text-blue-500" />,
+        description: t.artist,
+        end: "Track",
+        onClick: () => {
+          playTrack(t);
+          addToRecentSearches(search);
+        }
+      });
+    });
+
+    // Artists
+    artists.filter(a => a.name.toLowerCase().includes(search.toLowerCase())).slice(0, 3).forEach(a => {
+      actions.push({
+        id: `artist-${a.id}`,
+        label: a.name,
+        icon: <User className="h-4 w-4 text-purple-500" />,
+        description: "Artist",
+        end: "Artist",
+        onClick: () => {
+          navigate(`/artist/${a.id}`);
+          addToRecentSearches(search);
+        }
+      });
+    });
+
+    // NFTs
+    MOCK_NFTS.filter(n => n.title.toLowerCase().includes(search.toLowerCase())).slice(0, 3).forEach(n => {
+      actions.push({
+        id: `nft-${n.id}`,
+        label: n.title,
+        icon: <Gem className="h-4 w-4 text-amber-500" />,
+        description: n.creator,
+        end: "NFT",
+        onClick: () => {
+          navigate(`/nft/${n.id}`);
+          addToRecentSearches(search);
+        }
+      });
+    });
+
+    return actions;
+  }, [search, artists, playTrack, navigate]);
 
   const visibleResults = useMemo(() => {
     return filteredResults.slice(0, displayLimit);
@@ -229,276 +294,48 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="p-4 lg:p-6 space-y-8 w-full pb-32">
-      {/* Hero Search Section */}
-      <div className="relative z-10 max-w-2xl mx-auto" ref={searchContainerRef}>
-        <div className="relative flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 h-4 w-4" />
-            <input 
-              type="text" 
-              value={search} 
-              onFocus={() => setIsSearchFocused(true)} 
-              onChange={(e) => { setSearch(e.target.value); setDisplayLimit(INITIAL_LIMIT); }} 
-              onKeyDown={(e) => { if (e.key === 'Enter') { addToRecentSearches(search); setIsSearchFocused(false); } }} 
-              placeholder="Search..." 
-              className={`w-full bg-white/5 border border-white/10 rounded-[8px] py-3 pl-10 pr-10 text-sm outline-none transition-all placeholder:text-white/10 text-white backdrop-blur-xl ${isSearchFocused ? 'bg-white/10 border-blue-500/50 ring-2 ring-blue-500/10' : ''}`} 
-            />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
-              {search && (
-                <button onClick={clearInput} className="text-white/20 hover:text-white transition-colors">
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-              <button 
-                onClick={() => setShowFilters(!showFilters)}
-                className={`transition-all ${showFilters ? 'text-blue-500' : 'text-white/20 hover:text-white'}`}
-              >
-                <Filter className="h-4 w-4" />
-              </button>
+    <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-16 w-full pb-32">
+      {/* Search Section */}
+      <div className="sticky top-0 z-50 w-full bg-black/80 backdrop-blur-xl py-4 border-b border-white/5" ref={searchContainerRef}>
+        <div className="flex flex-col items-center justify-center">
+          <div className="w-full max-w-3xl relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-10 group-focus-within:opacity-30 transition duration-1000 group-focus-within:duration-200"></div>
+            <div className="relative">
+              <ActionSearchBar 
+                actions={searchActions}
+                onQueryChange={(q) => setSearch(q)}
+                placeholder="Search tracks, artists, or NFTs..."
+              />
             </div>
           </div>
         </div>
-        
-        {/* Filter Pills */}
-        <div className="flex gap-2 mt-4 overflow-x-auto no-scrollbar">
-          {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists'].map(filter => (
-            <button 
-              key={filter} 
-              onClick={() => setActiveFilter(filter as any)}
-              className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/5 text-white/40 border-white/5 hover:text-white'}`}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
       </div>
-
-            {/* Advanced Filters Drawer (Simulated) */}
-            {showFilters && (
-              <div className="absolute top-full left-0 right-0 mt-3 z-40 bg-[#0A0A0A] border border-white/10 rounded-[10px] p-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Sort By</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {TRACK_SORT_OPTIONS.map(option => (
-                        <button 
-                          key={option} 
-                          onClick={() => setSortBy(option)}
-                          className={`px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${sortBy === option ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/40 hover:text-white'}`}
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">BPM Range</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="h-1 flex-1 bg-white/5 rounded-full relative">
-                        <div className="absolute left-1/4 right-1/4 top-0 bottom-0 bg-blue-500 rounded-full"></div>
-                        <div className="absolute left-1/4 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-blue-500"></div>
-                        <div className="absolute right-1/4 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-blue-500"></div>
-                      </div>
-                      <span className="text-[10px] font-mono text-white/40">80-140</span>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Vibe</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {['Chill', 'Energetic', 'Dark', 'Euphoric'].map(vibe => (
-                        <button key={vibe} className="px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest bg-white/5 text-white/40 hover:text-white transition-all">
-                          {vibe}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Suggestions Overlay */}
-            {isSearchFocused && (search.length > 1 || recentSearches.length > 0 || search.length === 0) && (
-              <div className="absolute top-full left-0 right-0 mt-3 z-50 bg-[#0A0A0A] border border-white/10 rounded-[10px] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="p-4">
-                  {search.length > 1 && suggestions.length > 0 ? (
-                     <>
-                       <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-2 px-2">Suggestions</h3>
-                       <div className="space-y-1">
-                         {suggestions.map((item) => (
-                           <div key={`${item.type}-${item.id}`} onClick={() => handleSuggestionClick(item)} className="flex items-center justify-between group p-3 hover:bg-white/5 rounded-[10px] cursor-pointer transition-all">
-                             <div className="flex items-center gap-3">
-                               {item.type === 'Track' && <Music className="h-4 w-4 text-blue-500" />}
-                               {item.type === 'Artist' && <User className="h-4 w-4 text-purple-500" />}
-                               {item.type === 'NFT' && <Gem className="h-4 w-4 text-amber-500" />}
-                               <div>
-                                 <p className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors">{item.title}</p>
-                                 <p className="text-[10px] text-white/40 uppercase tracking-wider">{item.type} • {item.subtitle}</p>
-                               </div>
-                             </div>
-                           </div>
-                         ))}
-                       </div>
-                     </>
-                  ) : search.length === 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-2">
-                      <div>
-                        <div className="flex items-center justify-between mb-4 px-2">
-                          <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Recent Searches</h3>
-                          {recentSearches.length > 0 && (
-                            <button onClick={clearRecentSearches} className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-widest">Clear All</button>
-                          )}
-                        </div>
-                        {recentSearches.length > 0 ? (
-                          <div className="space-y-1">
-                            {recentSearches.map((term, idx) => (
-                              <div key={idx} onClick={() => handleRecentSearchClick(term)} className="flex items-center justify-between group p-3 hover:bg-white/5 rounded-[10px] cursor-pointer transition-all">
-                                <div className="flex items-center gap-3">
-                                  <History className="h-4 w-4 text-white/20 group-hover:text-blue-500 transition-colors" />
-                                  <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors">{term}</span>
-                                </div>
-                                <button onClick={(e) => removeRecentSearch(e, term)} className="opacity-0 group-hover:opacity-100 p-1 text-white/20 hover:text-red-500 transition-all">
-                                  <X className="h-3 w-3" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="px-2 py-4 text-[10px] text-white/10 uppercase tracking-widest italic">No recent history</p>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-4 px-2">Trending Searches</h3>
-                        <div className="space-y-1">
-                          {['Synthwave', 'Neon Voyager', 'TON Top 50', 'Cyberpunk'].map((term, idx) => (
-                            <div key={idx} onClick={() => handleRecentSearchClick(term)} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-[10px] cursor-pointer transition-all group">
-                              <TrendingUp className="h-4 w-4 text-blue-500/40 group-hover:text-blue-500 transition-colors" />
-                              <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors">{term}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            )}
-
-      {/* Discovery Hub */}
-      {!search && !selectedGenre && (
-        <>
-          {/* Curated Playlists */}
-          <section>
-            <SectionHeader title="Curated Playlists" viewAllLink="/explore/playlists?title=Curated Playlists&filter=curated" />
-            <div className="flex flex-col gap-3">
-              {allPlaylists.filter(p => p.creator === 'TonJam AI' || CURATED_PLAYLISTS.find(cp => cp.id === p.id)).map(playlist => (
-                <PlaylistListItem 
-                  key={playlist.id} 
-                  playlist={playlist} 
-                  onClick={() => navigate(`/playlist/${playlist.id}`)} 
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Trending Tracks */}
-          <section>
-            <SectionHeader title="Trending Now" subtitle="Most streamed tracks on TON" viewAllLink="/explore/tracks?title=Trending Now&filter=trending" />
-            <div className="flex flex-col gap-4">
-              {trendingTracks.map(track => (
-                <div key={track.id}>
-                  <TrackCard track={track} variant="row" />
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Genre Exploration Grid */}
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <SectionHeader title="Explore Genres" className="mb-0" />
-              <button 
-                onClick={handleSurpriseMe}
-                className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold text-white uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
-              >
-                <RotateCcw className="h-3 w-3" />
-                Surprise Me
-              </button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {GENRES.map(genre => (
-                <GenreCard 
-                  key={genre.id} 
-                  genre={genre} 
-                  onClick={() => handleGenreToggle(genre.name)}
-                  isSelected={selectedGenre === genre.name}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Top NFT Sales */}
-          <section>
-            <SectionHeader title="Top NFT Sales" subtitle="Highest valued music artifacts" viewAllLink="/explore/nfts?title=Top NFT Sales&filter=top_nfts" />
-            <div className="flex flex-col gap-4">
-              {topNFTTracks.map(track => (
-                <div key={track.id}>
-                  <TrackCard track={track} variant="row" />
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Decentralized Library Info */}
-          <section className="glass border border-blue-500/10 bg-white/[0.02] p-8 rounded-[10px] relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-10"><Globe className="h-16 w-16 text-blue-500" /></div>
-            <div className="relative z-10 max-w-2xl">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Globe className="h-4 w-4 text-blue-400" />
-                </div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-widest">Decentralized Storage Active</h3>
-              </div>
-              <p className="text-xs text-white/40 leading-relaxed mb-6">
-                TonJam indexes music NFTs directly from the TON blockchain. All audio files and metadata are stored on decentralized protocols like IPFS and Arweave, ensuring your music remains censorship-resistant and permanently accessible.
-              </p>
-              <div className="flex gap-4">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-[8px] font-bold text-white/60 uppercase tracking-widest">IPFS Node Connected</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                  <span className="text-[8px] font-bold text-white/60 uppercase tracking-widest">TON Indexer Syncing</span>
-                </div>
-              </div>
-            </div>
-          </section>
-        </>
-      )}
 
       {/* Search Results / Filtered View */}
       {(search || selectedGenre) && (
-        <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <button onClick={clearInput} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
-                <X className="h-4 w-4" />
+        <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
+            <div className="flex items-center gap-6">
+              <button onClick={clearInput} className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-95">
+                <RotateCcw className="h-5 w-5" />
               </button>
               <div>
-                <h2 className="text-2xl font-bold text-white uppercase tracking-tighter">
+                <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-2">
                   {search ? `Results for "${search}"` : `Genre: ${selectedGenre}`}
                 </h2>
-                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{filteredResults.length} Signals Detected</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{filteredResults.length} Signals Detected</p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists'].map(filter => (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
+              {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users'].map(filter => (
                 <button 
                   key={filter} 
                   onClick={() => setActiveFilter(filter as any)} 
-                  className={`px-4 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${activeFilter === filter ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/40 hover:text-white'}`}
+                  className={`px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]' : 'bg-white/5 text-white/40 border-white/5 hover:text-white'}`}
                 >
                   {filter}
                 </button>
@@ -544,6 +381,16 @@ const Discover: React.FC = () => {
                 viewAllLink={`/explore/playlists?title=Search Results: Playlists&search=${search}`}
                 isEmpty={!allPlaylists.some(p => p.title.toLowerCase().includes(search.toLowerCase()))}
               />
+
+              {/* Users Section */}
+              <SearchCategorySection 
+                title="Users" 
+                items={MOCK_USERS.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                renderItem={(item) => <UserCard user={item} />}
+                viewAllLink={`/explore/users?title=Search Results: Users&search=${search}`}
+                grid
+                isEmpty={!MOCK_USERS.some(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase()))}
+              />
             </div>
           ) : (
             <>
@@ -555,6 +402,7 @@ const Discover: React.FC = () => {
                       {activeFilter === 'Artists' && <ArtistListItem artist={item as any} />}
                       {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
                       {activeFilter === 'Playlists' && <PlaylistListItem playlist={item as any} onClick={() => navigate(`/playlist/${item.id}`)} />}
+                      {activeFilter === 'Users' && <UserCard user={item as any} />}
                     </div>
                   ))}
                   {visibleResults.length < filteredResults.length && (

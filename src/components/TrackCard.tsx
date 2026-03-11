@@ -75,11 +75,11 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
         await navigator.clipboard.writeText(shareUrl);
         addNotification('Link copied to clipboard!', 'success');
       }
-    } catch (err) {
+    } catch (err: any) {
       // Don't log or show an error if the user just cancelled the share dialog
-      const isCancel = (err as Error).name === 'AbortError' || 
-                      (err as Error).message?.toLowerCase().includes('canceled') ||
-                      (err as Error).message?.toLowerCase().includes('aborted');
+      const isCancel = err.name === 'AbortError' || 
+                      err.message?.toLowerCase().includes('canceled') ||
+                      err.message?.toLowerCase().includes('aborted');
       
       if (!isCancel) {
         console.error('Error sharing:', err);
@@ -137,16 +137,29 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
         </div>
         <div className="flex-1 min-w-0">
           <h4 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-white'}`}>{track.title}</h4>
-          <p 
-            className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block outline-none"
-            onClick={handleArtistClick}
-            onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
-            role="button"
-            tabIndex={0}
-            aria-label={`View artist: ${track.artist}`}
-          >
-            {track.artist}
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            {artist && (
+              <img 
+                src={artist.avatarUrl} 
+                alt={artist.name} 
+                className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+                onClick={handleArtistClick}
+                onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
+                role="button"
+                tabIndex={0}
+              />
+            )}
+            <p 
+              className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block outline-none"
+              onClick={handleArtistClick}
+              onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
+              role="button"
+              tabIndex={0}
+              aria-label={`View artist: ${track.artist}`}
+            >
+              {track.artist}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-4">
            {onMint && !track.isNFT && (
@@ -176,7 +189,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
 
   return (
     <div 
-      className="group relative cursor-pointer outline-none"
+      className="group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1"
       onClick={handleCardClick}
       onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
       role="button"
@@ -250,7 +263,18 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
         <h3 className={`text-[11px] font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-400' : 'text-white'}`}>
           {track.title}
         </h3>
-        <div className="flex items-center gap-1 mt-0.5 mb-1.5">
+        <div className="flex items-center gap-1.5 mt-0.5 mb-1.5">
+          {artist && (
+            <img 
+              src={artist.avatarUrl} 
+              alt={artist.name} 
+              className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+              onClick={handleArtistClick}
+              onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
+              role="button"
+              tabIndex={0}
+            />
+          )}
           <p 
             className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block outline-none"
             onClick={handleArtistClick}
