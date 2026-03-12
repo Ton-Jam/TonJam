@@ -63,8 +63,17 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onClick={handleCardClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            navigate(`/nft/${nft.id}`);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={`View NFT ${nft.title}`}
       >
         <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
           <img src={nft.imageUrl} alt={nft.title} className="w-full h-full object-cover" />
@@ -76,21 +85,43 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
               <img 
                 src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl} 
                 alt={nft.creator} 
-                className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+                className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 onClick={(e) => {
                   e.stopPropagation();
                   const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
                   if (artist) navigate(`/artist/${artist.id}`);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                    if (artist) navigate(`/artist/${artist.id}`);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${nft.creator}'s profile`}
               />
             )}
             <p 
-              className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block"
+              className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
               onClick={(e) => {
                 e.stopPropagation();
                 const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
                 if (artist) navigate(`/artist/${artist.id}`);
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                  if (artist) navigate(`/artist/${artist.id}`);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`View ${nft.creator}'s profile`}
             >
               @{nft.creator}
             </p>
@@ -101,7 +132,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
              <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
              <span className="text-xs font-bold text-white tracking-tighter">{nft.price}</span>
            </div>
-           <button onClick={handleOptionsClick} className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+           <button onClick={handleOptionsClick} className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="NFT Options">
              <MoreVertical className="h-4 w-4" />
            </button>
         </div>
@@ -113,10 +144,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
     <>
       <div
         onClick={handleCardClick}
-        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1"
+        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[10px]"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            navigate(`/nft/${nft.id}`);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={`View NFT ${nft.title}`}
       >
         {/* Image Container - 1:1 Aspect Ratio */}
-        <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
+        <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-1">
           <img
             src={nft.imageUrl}
             loading="lazy"
@@ -135,15 +175,17 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
                   {isOwner && (
                     <button 
                       onClick={handleSendClick} 
-                      className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-blue-400 hover:bg-black/60 transition-all pointer-events-auto ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                      className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-blue-400 hover:bg-black/60 transition-all pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                       title="Send Asset"
+                      aria-label="Send NFT"
                     >
                       <Send className="h-3.5 w-3.5" />
                     </button>
                   )}
                   <button 
                     onClick={handleOptionsClick} 
-                    className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/60 transition-all pointer-events-auto ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                    className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/60 transition-all pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                    aria-label="NFT Options"
                   >
                     <MoreVertical className="h-4 w-4" />
                   </button>
@@ -155,7 +197,8 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
                 <div className={`transition-all duration-300 transform ${isActive || isPlaying ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}>
                    <button 
                      onClick={handlePlayClick} 
-                     className="w-10 h-10 rounded-full bg-blue-600/90 backdrop-blur-md flex items-center justify-center shadow-xl shadow-blue-600/40 pointer-events-auto hover:bg-blue-500 transition-colors"
+                     className="w-10 h-10 rounded-full bg-blue-600/90 backdrop-blur-md flex items-center justify-center shadow-xl shadow-blue-600/40 pointer-events-auto hover:bg-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                     aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
                    >
                      {isActive && isPlaying ? (
                        <Pause className="h-4 w-4 text-white fill-white" />
@@ -184,16 +227,27 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
                 <img 
                   src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl} 
                   alt={nft.creator} 
-                  className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+                  className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   onClick={(e) => {
                     e.stopPropagation();
                     const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
                     if (artist) navigate(`/artist/${artist.id}`);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                      if (artist) navigate(`/artist/${artist.id}`);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View ${nft.creator}'s profile`}
                 />
               )}
               <p 
-                className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block"
+                className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
@@ -201,6 +255,17 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
                     navigate(`/artist/${artist.id}`);
                   }
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                    if (artist) navigate(`/artist/${artist.id}`);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${nft.creator}'s profile`}
               >
                 @{nft.creator}
               </p>
@@ -218,11 +283,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
               
               <button 
                 onClick={handleActionClick} 
-                className={`px-3 py-1.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg
+                className={`px-3 py-1.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                   ${isOwner 
                     ? 'bg-white/10 text-white hover:bg-white/20' 
                     : 'bg-blue-600 text-white hover:bg-blue-500 shadow-blue-600/20'}
                 `}
+                aria-label={isOwner ? (nft.listingType ? 'Manage NFT' : 'List NFT') : nft.listingType === 'auction' ? 'Bid on NFT' : 'Buy NFT'}
               >
                 {isOwner ? (nft.listingType ? 'Manage' : 'List') : nft.listingType === 'auction' ? 'Bid' : 'Buy'}
               </button>

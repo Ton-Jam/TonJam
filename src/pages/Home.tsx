@@ -123,7 +123,7 @@ const Home: React.FC = () => {
           <div className="flex items-center gap-8">
             <button 
               onClick={() => setActiveTab('overview')}
-              className={`text-xl font-bold uppercase tracking-tighter transition-all relative ${activeTab === 'overview' ? 'text-white' : 'text-white/20 hover:text-white/40'}`}
+              className={`text-xl font-bold uppercase tracking-tighter transition-all relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${activeTab === 'overview' ? 'text-white' : 'text-white/20 hover:text-white/40'}`}
             >
               Overview
               {activeTab === 'overview' && (
@@ -132,7 +132,7 @@ const Home: React.FC = () => {
             </button>
             <button 
               onClick={() => setActiveTab('discovery')}
-              className={`text-xl font-bold uppercase tracking-tighter transition-all relative flex items-center gap-2 ${activeTab === 'discovery' ? 'text-white' : 'text-white/20 hover:text-white/40'}`}
+              className={`text-xl font-bold uppercase tracking-tighter transition-all relative flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${activeTab === 'discovery' ? 'text-white' : 'text-white/20 hover:text-white/40'}`}
             >
               Discovery
               <Sparkles className={`h-4 w-4 ${activeTab === 'discovery' ? 'text-blue-400' : 'text-white/20'}`} />
@@ -147,7 +147,7 @@ const Home: React.FC = () => {
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
             <button
               onClick={() => setSelectedGenre(null)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start border ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                 selectedGenre === null 
                   ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
                   : 'bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white'
@@ -162,7 +162,7 @@ const Home: React.FC = () => {
                 <button
                   key={genre.id}
                   onClick={() => setSelectedGenre(genre.name)}
-                  className={`relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start border overflow-hidden group ${
+                  className={`relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start border overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                     isSelected 
                       ? 'text-white border-transparent' 
                       : 'bg-white/5 text-white/60 border-white/10 hover:text-white'

@@ -243,7 +243,8 @@ const FullPlayer: React.FC = () => {
       <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-[#060c1a]/90 backdrop-blur-md border-b border-white/5">
         <button 
           onClick={() => setFullPlayerOpen(false)}
-          className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition-all"
+          className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          aria-label="Close full player"
         >
           <ChevronDown className="h-6 w-6" />
         </button>
@@ -252,28 +253,34 @@ const FullPlayer: React.FC = () => {
           <div className="flex gap-1 bg-white/5 p-1 rounded-full">
             <button 
               onClick={() => setActiveView('player')}
-              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'player' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
+              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeView === 'player' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
               title="Player"
+              aria-label="Switch to Player view"
             >
               <Music2 className="h-4 w-4" />
             </button>
             <button 
               onClick={() => setActiveView('lyrics')}
-              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'lyrics' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
+              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeView === 'lyrics' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
               title="Lyrics"
+              aria-label="Switch to Lyrics view"
             >
               <Mic2 className="h-4 w-4" />
             </button>
             <button 
               onClick={() => setActiveView('comments')}
-              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all ${activeView === 'comments' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
+              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeView === 'comments' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-white/40 hover:text-white'}`}
               title="Feed"
+              aria-label="Switch to Feed view"
             >
               <MessageSquare className="h-4 w-4" />
             </button>
           </div>
         </div>
-        <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition-all">
+        <button 
+          className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          aria-label="More options"
+        >
           <MoreHorizontal className="h-5 w-5" />
         </button>
       </div>
@@ -384,11 +391,21 @@ const FullPlayer: React.FC = () => {
                     <img 
                       src={artistData.avatarUrl} 
                       alt={artistData.name} 
-                      className="w-6 h-6 rounded-full object-cover cursor-pointer"
+                      className="w-6 h-6 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       onClick={() => {
                         setFullPlayerOpen(false);
                         navigate(`/artist/${currentTrack.artistId}`);
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setFullPlayerOpen(false);
+                          navigate(`/artist/${currentTrack.artistId}`);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View ${artistData.name}'s profile`}
                     />
                   )}
                   <button 
@@ -396,7 +413,8 @@ const FullPlayer: React.FC = () => {
                       setFullPlayerOpen(false);
                       navigate(`/artist/${currentTrack.artistId}`);
                     }}
-                    className="text-lg text-blue-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
+                    className="text-lg text-blue-500 font-bold uppercase tracking-widest hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                    aria-label={`View ${currentTrack.artist}'s profile`}
                   >
                     {currentTrack.artist}
                   </button>
@@ -405,7 +423,8 @@ const FullPlayer: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => toggleLikeTrack(currentTrack.id)}
-                  className={`p-3 rounded-full transition-all ${isLiked ? 'text-red-500 bg-red-500/10' : 'text-white/20 hover:text-white bg-white/5'}`}
+                  className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isLiked ? 'text-red-500 bg-red-500/10' : 'text-white/20 hover:text-white bg-white/5'}`}
+                  aria-label={isLiked ? "Unlike track" : "Like track"}
                 >
                   <Heart className={`h-6 w-6 ${isLiked ? 'fill-current' : ''}`} />
                 </button>
@@ -439,21 +458,24 @@ const FullPlayer: React.FC = () => {
           <div className="w-full flex items-center justify-center gap-8 mb-12">
             <button 
               onClick={toggleShuffle}
-              className={`p-3 rounded-full transition-all ${isShuffle ? 'text-blue-400' : 'text-white/20 hover:text-white'}`}
+              className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isShuffle ? 'text-blue-400' : 'text-white/20 hover:text-white'}`}
+              aria-label={isShuffle ? "Disable shuffle" : "Enable shuffle"}
             >
               <Shuffle className="h-5 w-5" />
             </button>
             
             <button 
               onClick={prevTrack}
-              className="p-2 text-white/60 hover:text-white transition-all active:scale-90"
+              className="p-2 text-white/60 hover:text-white transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
+              aria-label="Previous track"
             >
               <SkipBack className="h-8 w-8 fill-current" />
             </button>
             
             <button 
               onClick={togglePlay}
-              className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-blue-600/40 text-white"
+              className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-blue-600/40 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
                 <Pause className="h-10 w-10 fill-current" />
@@ -464,14 +486,16 @@ const FullPlayer: React.FC = () => {
             
             <button 
               onClick={nextTrack}
-              className="p-2 text-white/60 hover:text-white transition-all active:scale-90"
+              className="p-2 text-white/60 hover:text-white transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
+              aria-label="Next track"
             >
               <SkipForward className="h-8 w-8 fill-current" />
             </button>
             
             <button 
               onClick={toggleRepeat}
-              className={`p-3 rounded-full transition-all ${isRepeat ? 'text-blue-400' : 'text-white/20 hover:text-white'}`}
+              className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isRepeat ? 'text-blue-400' : 'text-white/20 hover:text-white'}`}
+              aria-label={isRepeat ? "Disable repeat" : "Enable repeat"}
             >
               <Repeat className="h-5 w-5" />
             </button>
@@ -479,19 +503,19 @@ const FullPlayer: React.FC = () => {
 
           {/* Secondary Actions */}
           <div className="w-full grid grid-cols-4 gap-4 mb-12">
-            <button className="flex flex-col items-center gap-2 group">
+            <button className="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Add to playlist">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white/40 group-hover:text-white transition-all">
                 <PlusCircle className="h-5 w-5" />
               </div>
               <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/40">Add</span>
             </button>
-            <button className="flex flex-col items-center gap-2 group">
+            <button className="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Mint NFT">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white/40 group-hover:text-amber-500 transition-all">
                 <Gem className="h-5 w-5" />
               </div>
               <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white/40">Mint</span>
             </button>
-            <button onClick={handleShare} className="flex flex-col items-center gap-2 group">
+            <button onClick={handleShare} className="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Share track">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white/40 group-hover:text-white transition-all">
                 <Share2 className="h-5 w-5" />
               </div>
@@ -499,7 +523,9 @@ const FullPlayer: React.FC = () => {
             </button>
             <button 
               onClick={() => setShowQueue(!showQueue)}
-              className={`flex flex-col items-center gap-2 group ${showQueue ? 'text-blue-500' : ''}`}
+              className={`flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${showQueue ? 'text-blue-500' : ''}`}
+              aria-label="Toggle queue"
+              aria-expanded={showQueue}
             >
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${showQueue ? 'text-blue-500' : 'text-white/40 group-hover:text-white'}`}>
                 <ListMusic className="h-5 w-5" />
@@ -510,7 +536,7 @@ const FullPlayer: React.FC = () => {
 
           {/* Volume Control */}
           <div className="w-full max-w-sm flex items-center gap-4 px-4 py-3 bg-white/5 rounded-2xl">
-            <button onClick={toggleMute} className="text-white/40 hover:text-white transition-colors">
+            <button onClick={toggleMute} className="text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full" aria-label={isMuted || volume === 0 ? "Unmute" : "Mute"}>
               {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </button>
             <div className="flex-1 relative h-1 bg-white/10 rounded-full overflow-hidden">
@@ -543,7 +569,8 @@ const FullPlayer: React.FC = () => {
               <button 
                 key={track.id}
                 onClick={() => playTrack(track)}
-                className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 transition-all group"
+                className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                aria-label={`Play ${track.title} by ${track.artist}`}
               >
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                   <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
@@ -573,11 +600,21 @@ const FullPlayer: React.FC = () => {
           <h3 className="text-[12px] font-bold text-white/40 uppercase tracking-[0.4em] mb-8">Artist Dossier</h3>
           <div className="bg-[#0a192f] p-8 rounded-2xl border border-blue-500/10">
             <div 
-              className="flex items-center gap-6 mb-8 cursor-pointer group/dossier"
+              className="flex items-center gap-6 mb-8 cursor-pointer group/dossier focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
               onClick={() => {
                 setFullPlayerOpen(false);
                 navigate(`/artist/${currentTrack.artistId}`);
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setFullPlayerOpen(false);
+                  navigate(`/artist/${currentTrack.artistId}`);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`View ${currentTrack.artist}'s profile`}
             >
               <div className="relative">
                 <img 
@@ -602,7 +639,7 @@ const FullPlayer: React.FC = () => {
                 setFullPlayerOpen(false);
                 navigate(`/artist/${currentTrack.artistId}`);
               }}
-              className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border border-white/10"
+              className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               View Full Profile
             </button>

@@ -41,7 +41,8 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
         {/* Close Button */}
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white/60 hover:text-white transition-colors"
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white/60 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          aria-label="Close Quick View"
         >
           <X className="h-4 w-4" />
         </button>
@@ -82,7 +83,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                   <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500"></div>
                   <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
                     Created by <span 
-                      className="text-white hover:text-blue-400 hover:underline cursor-pointer inline-block"
+                      className="text-white hover:text-blue-400 hover:underline cursor-pointer inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
@@ -94,6 +95,23 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                           onClose();
                         }
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                          if (artist) {
+                            navigate(`/artist/${artist.id}`);
+                            onClose();
+                          } else if (nft.creator === MOCK_USER.name) {
+                            navigate('/profile');
+                            onClose();
+                          }
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View ${nft.creator}'s profile`}
                     >{nft.creator}</span>
                   </span>
                 </div>
@@ -134,7 +152,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
 
                 <button 
                   onClick={handleViewFullDetails}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   View Full Details <ExternalLink className="h-3 w-3" />
                 </button>

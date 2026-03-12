@@ -100,7 +100,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
               {step === 1 ? 'Configure Playlist Parameters' : 'Sequence Established'}
             </p>
           </div>
-          <button onClick={resetAndClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+          <button onClick={resetAndClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close Create Playlist Modal">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -114,8 +114,17 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                   {/* Cover Upload - Compact */}
                   <div className="w-full sm:w-28 flex-shrink-0">
                     <div 
-                      className="aspect-square sm:aspect-square rounded-[12px] border border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-2 group hover:border-blue-500/50 transition-all cursor-pointer relative overflow-hidden"
+                      className="aspect-square sm:aspect-square rounded-[12px] border border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-2 group hover:border-blue-500/50 transition-all cursor-pointer relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       onClick={() => fileInputRef.current?.click()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          fileInputRef.current?.click();
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Upload Playlist Cover"
                     >
                       {formData.coverUrl ? (
                         <img src={formData.coverUrl} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
@@ -148,10 +157,11 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                         type="text" 
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3 text-sm text-white outline-none focus:border-blue-500/50 transition-all placeholder:text-white/20"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-white/20"
                         placeholder="e.g. Late Night Vibes"
                         autoFocus
                         required
+                        aria-label="Playlist Name"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -162,8 +172,9 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                         type="text" 
                         value={formData.tags}
                         onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3 text-sm text-white outline-none focus:border-blue-500/50 transition-all placeholder:text-white/20"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-white/20"
                         placeholder="chill, workout..."
+                        aria-label="Playlist Tags"
                       />
                     </div>
                   </div>
@@ -175,8 +186,9 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                   <textarea 
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3 text-sm text-white outline-none focus:border-blue-500/50 transition-all placeholder:text-white/20 resize-none h-20"
+                    className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-white/20 resize-none h-20"
                     placeholder="Describe the vibe..."
+                    aria-label="Playlist Description"
                   />
                 </div>
 
@@ -216,14 +228,14 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                 <button 
                   type="button" 
                   onClick={resetAndClose}
-                  className="flex-1 py-3.5 bg-white/5 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all"
+                  className="flex-1 py-3.5 bg-white/5 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={isCreating}
-                  className="flex-[1.5] py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-[1.5] py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   {isCreating ? (
                     <>
@@ -258,7 +270,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
               </div>
               <button 
                 onClick={resetAndClose}
-                className="mt-4 w-full sm:w-auto px-10 py-3.5 bg-white text-black rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all"
+                className="mt-4 w-full sm:w-auto px-10 py-3.5 bg-white text-black rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Continue
               </button>

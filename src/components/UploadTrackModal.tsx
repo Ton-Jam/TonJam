@@ -88,7 +88,7 @@ const UploadTrackModal: React.FC<UploadTrackModalProps> = ({ isOpen, onClose }) 
               {step === 1 ? 'Upload Audio Artifact' : 'Sequence Established'}
             </p>
           </div>
-          <button onClick={resetAndClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+          <button onClick={resetAndClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close Upload Modal">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -99,8 +99,17 @@ const UploadTrackModal: React.FC<UploadTrackModalProps> = ({ isOpen, onClose }) 
               <div className="flex flex-col gap-6">
                 <div className="flex gap-4">
                   <div 
-                    className="w-24 h-24 rounded-[10px] border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-2 cursor-pointer hover:border-blue-500/50 transition-all"
+                    className="w-24 h-24 rounded-[10px] border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-2 cursor-pointer hover:border-blue-500/50 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        fileInputRef.current?.click();
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Upload Cover Art"
                   >
                     {formData.coverUrl ? (
                       <img src={formData.coverUrl} className="w-full h-full object-cover rounded-[8px]" alt="Cover" />
@@ -111,14 +120,23 @@ const UploadTrackModal: React.FC<UploadTrackModalProps> = ({ isOpen, onClose }) 
                   <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'image')} accept="image/*" className="hidden" />
                   
                   <div className="flex-1 space-y-3">
-                    <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus:border-blue-500/50" placeholder="Track Title" required />
-                    <input type="text" value={formData.artist} onChange={(e) => setFormData({...formData, artist: e.target.value})} className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus:border-blue-500/50" placeholder="Artist Name" />
+                    <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500" placeholder="Track Title" required aria-label="Track Title" />
+                    <input type="text" value={formData.artist} onChange={(e) => setFormData({...formData, artist: e.target.value})} className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500" placeholder="Artist Name" aria-label="Artist Name" />
                   </div>
                 </div>
 
                 <div 
-                  className="w-full py-8 border-2 border-dashed border-white/10 bg-white/[0.02] rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 transition-all"
+                  className="w-full py-8 border-2 border-dashed border-white/10 bg-white/[0.02] rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   onClick={() => document.getElementById('audio-upload')?.click()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      document.getElementById('audio-upload')?.click();
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Upload Audio File"
                 >
                   <FileAudio className={`h-8 w-8 mb-2 ${formData.audioUrl ? 'text-blue-500' : 'text-white/20'}`} />
                   <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest">
@@ -131,7 +149,7 @@ const UploadTrackModal: React.FC<UploadTrackModalProps> = ({ isOpen, onClose }) 
               <button 
                 type="submit"
                 disabled={isUploading}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {isUploading ? (
                   <>
@@ -157,7 +175,7 @@ const UploadTrackModal: React.FC<UploadTrackModalProps> = ({ isOpen, onClose }) 
               <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] max-w-xs leading-relaxed">
                 "{formData.title}" is now part of your collection.
               </p>
-              <button onClick={resetAndClose} className="mt-4 px-8 py-3 bg-white text-black rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all">
+              <button onClick={resetAndClose} className="mt-4 px-8 py-3 bg-white text-black rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
                 Continue
               </button>
             </div>

@@ -27,7 +27,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
             <div className="w-1 h-3 bg-blue-500 rounded-full"></div>
             <h2 className="text-[10px] font-bold text-white uppercase tracking-widest">Add to Playlist</h2>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Close Add to Playlist Modal">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -37,7 +37,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
             <button 
               key={playlist.id} 
               onClick={() => handleAdd(playlist.id, playlist.title)}
-              className="w-full flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 transition-all text-left group"
+              className="w-full flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               <div className="w-8 h-8 rounded-[4px] bg-white/5 flex items-center justify-center overflow-hidden border border-white/5">
                 {playlist.coverUrl ? (
@@ -60,7 +60,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
               onClose();
               setIsCreatePlaylistModalOpen(true);
             }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <Plus className="h-3 w-3" /> Create New Playlist
           </button>

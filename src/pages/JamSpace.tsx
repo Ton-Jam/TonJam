@@ -7,7 +7,6 @@ import TrackCard from '@/components/TrackCard';
 import PostModal from '@/components/PostModal';
 import SocialFeed from '@/components/SocialFeed';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
-import TweetCard from '@/components/kokonutui/tweet-card';
 import { useAudio } from '@/context/AudioContext';
 import { Post, Track } from '@/types';
 
@@ -241,7 +240,7 @@ const JamSpace: React.FC = () => {
             <div className="sticky top-[92px] z-30 backdrop-blur-2xl py-4 w-full space-y-6 bg-black/40 px-4">
               <div className="flex gap-3 overflow-x-auto no-scrollbar">
                 {['All', 'Following', 'Trending'].map(tab => (
-                  <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-8 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-white border-blue-500 shadow-xl shadow-blue-500/20' : 'bg-white/5 text-white/40 border-white/5 hover:text-white hover:bg-white/10' }`} >
+                  <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-white border-blue-500 shadow-xl shadow-blue-500/20' : 'bg-white/5 text-white/40 border-white/5 hover:text-white hover:bg-white/10' }`} >
                     {tab}
                   </button>
                 ))}
@@ -254,7 +253,7 @@ const JamSpace: React.FC = () => {
                     <button 
                       key={type} 
                       onClick={() => setFilterType(type as any)}
-                      className={`px-4 py-2 rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-white/10 text-white border-white/20 shadow-lg' : 'text-white/30 border-transparent hover:text-white'}`}
+                      className={`px-3 py-1.5 rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-white/10 text-white border-white/20 shadow-lg' : 'text-white/30 border-transparent hover:text-white'}`}
                     >
                       {type}
                     </button>
@@ -293,28 +292,6 @@ const JamSpace: React.FC = () => {
 
             {/* Main Feed */}
             <div className="bg-transparent space-y-8">
-              <div className="flex justify-center w-full">
-                <TweetCard 
-                  authorName="Neon Voyager"
-                  authorHandle="neonvoyager"
-                  authorImage="https://picsum.photos/100/100?random=21"
-                  content={[
-                    "Just dropped my new Genesis NFT track on @TonJam! 🎵",
-                    "The energy in the Live Node was insane tonight.",
-                    "Grab it before it sells out!"
-                  ]}
-                  isVerified={true}
-                  timestamp="2 hours ago"
-                  reply={{
-                    authorName: "Byte Beat",
-                    authorHandle: "bytebeat",
-                    authorImage: "https://picsum.photos/100/100?random=22",
-                    content: "Already minted mine! 🔥",
-                    isVerified: true,
-                    timestamp: "1 hour ago"
-                  }}
-                />
-              </div>
               <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={viewMode} />
             </div>
           </main>
@@ -376,8 +353,8 @@ const JamSpace: React.FC = () => {
 
       {/* Mobile FAB */}
       <button onClick={() => setIsPostModalOpen(true)} className="lg:hidden fixed bottom-28 right-6 w-16 h-16 flex items-center justify-center z-50 hover:scale-110 active:scale-90 transition-all group bg-transparent" >
-        <div className="absolute inset-0 bg-blue-600/40 blur-2xl rounded-full"></div>
-        <div className="w-full h-full bg-blue-600 rounded-[10px] flex items-center justify-center shadow-2xl shadow-blue-600/40 relative z-10 p-3">
+        <div className="absolute inset-0 bg-zinc-600/40 blur-2xl rounded-full"></div>
+        <div className="w-full h-full bg-zinc-800 rounded-[10px] flex items-center justify-center shadow-2xl shadow-zinc-800/40 relative z-10 p-3">
           <img src={APP_LOGO} className="w-full h-full object-contain" alt="Add Post" />
         </div>
       </button>

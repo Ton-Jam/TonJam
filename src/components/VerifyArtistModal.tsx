@@ -71,7 +71,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
               <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Identity Protocol</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-white/40 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full" aria-label="Close Verify Modal">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -97,7 +97,8 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                     value={formData.bio}
                     onChange={handleInputChange}
                     placeholder="Tell your story..."
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all min-h-[100px] resize-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all min-h-[100px] resize-none"
+                    aria-label="Artist Bio"
                   />
                 </div>
 
@@ -110,7 +111,8 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                     name="genre"
                     value={formData.genre}
                     onChange={handleInputChange}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all appearance-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
+                    aria-label="Sonic Genre"
                   >
                     {GENRES.map(g => (
                       <option key={g} value={g} className="bg-neutral-900">{g}</option>
@@ -132,7 +134,8 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                         value={formData.twitter}
                         onChange={handleInputChange}
                         placeholder="X (Twitter) URL"
-                        className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-white/10"
+                        className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-white/10 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md px-2"
+                        aria-label="X (Twitter) URL"
                       />
                     </div>
                     <div className="flex items-center gap-3 p-1 bg-white/5 rounded-2xl border border-white/5 focus-within:border-blue-500/30 transition-all">
@@ -145,7 +148,8 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                         value={formData.instagram}
                         onChange={handleInputChange}
                         placeholder="Instagram URL"
-                        className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-white/10"
+                        className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-white/10 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md px-2"
+                        aria-label="Instagram URL"
                       />
                     </div>
                     <div className="flex items-center gap-3 p-1 bg-white/5 rounded-2xl border border-white/5 focus-within:border-blue-500/30 transition-all">
@@ -158,7 +162,8 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                         value={formData.website}
                         onChange={handleInputChange}
                         placeholder="Official Website URL"
-                        className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-white/10"
+                        className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-white/10 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md px-2"
+                        aria-label="Official Website URL"
                       />
                     </div>
                   </div>
@@ -167,7 +172,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
 
               <button 
                 onClick={() => setStep(2)}
-                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20"
+                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Submit for Verification
               </button>
@@ -197,14 +202,14 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
               <button 
                 onClick={handleVerify}
                 disabled={isVerifying}
-                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 disabled:opacity-50"
+                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {isVerifying ? 'Verifying Identity...' : 'Confirm & Verify (0.1 TON)'}
               </button>
               <button 
                 onClick={() => setStep(1)}
                 disabled={isVerifying}
-                className="w-full py-3 text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white transition-colors"
+                className="w-full py-3 text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Back to Edit
               </button>
@@ -227,13 +232,13 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={onClose}
-                  className="w-full py-5 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95"
+                  className="w-full py-5 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Return to Profile
                 </button>
                 <a 
                   href="#" 
-                  className="flex items-center justify-center gap-2 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-white transition-colors"
+                  className="flex items-center justify-center gap-2 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm px-2 py-1"
                 >
                   View Transaction <ExternalLink className="h-3 w-3" />
                 </a>

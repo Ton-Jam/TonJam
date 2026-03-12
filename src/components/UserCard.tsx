@@ -44,7 +44,16 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     return (
       <div 
         onClick={handleClick}
-        className="flex items-center gap-3 p-3 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
+        className="flex items-center gap-3 p-3 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as any);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={`View profile of ${user.name}`}
       >
         <div className="relative w-10 h-10 rounded-[5px] overflow-hidden">
           <img src={avatarUrl} alt={user.name} className="w-full h-full object-cover" />
@@ -59,7 +68,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         {!isOwnProfile && (
           <button 
             onClick={handleFollow}
-            className={`follow-btn w-8 h-8 rounded-full flex items-center justify-center transition-all ${isFollowing ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'}`}
+            className={`follow-btn w-8 h-8 rounded-full flex items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'}`}
+            aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
           >
             {isFollowing ? <UserCheck className="h-3 w-3" /> : <UserPlus className="h-3 w-3" />}
           </button>
@@ -72,7 +82,16 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     return (
       <div 
         onClick={handleClick}
-        className="flex items-center justify-between p-4 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
+        className="flex items-center justify-between p-4 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as any);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={`View profile of ${user.name}`}
       >
         <div className="flex items-center gap-4">
           <div className="relative w-12 h-12 rounded-[5px] overflow-hidden">
@@ -94,7 +113,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
           {!isOwnProfile && (
             <button 
               onClick={handleFollow}
-              className={`follow-btn px-4 py-1.5 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all ${isFollowing ? 'bg-blue-500/20 text-blue-400' : 'bg-white text-black shadow-lg shadow-white/5'}`}
+              className={`follow-btn px-4 py-1.5 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-blue-500/20 text-blue-400' : 'bg-white text-black shadow-lg shadow-white/5'}`}
+              aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
             >
               {isFollowing ? 'Synced' : 'Follow'}
             </button>
@@ -107,7 +127,16 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   return (
     <div 
       onClick={handleClick}
-      className="flex flex-col items-center text-center p-6 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
+      className="flex flex-col items-center text-center p-6 rounded-[5px] border border-white/5 hover:bg-white/5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick(e as any);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`View profile of ${user.name}`}
     >
       <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-[5px] overflow-hidden border-2 border-white/5 group-hover:border-blue-500/50 transition-all mb-4">
         <img src={avatarUrl} alt={user.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -128,7 +157,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         {!isOwnProfile && (
           <button 
             onClick={handleFollow}
-            className={`follow-btn px-4 py-1.5 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all ${isFollowing ? 'bg-blue-500/20 text-blue-400' : 'bg-white text-black shadow-lg shadow-white/5'}`}
+            className={`follow-btn px-4 py-1.5 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-blue-500/20 text-blue-400' : 'bg-white text-black shadow-lg shadow-white/5'}`}
+            aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
           >
             {isFollowing ? 'Synced' : 'Follow'}
           </button>

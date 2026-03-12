@@ -3,7 +3,7 @@ import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home as HomeIcon, 
   Search, 
-  Music2, 
+  Send, 
   Library, 
   ShoppingBag, 
   User, 
@@ -130,14 +130,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {isDiscover && (
               <div className="flex-1 flex justify-end lg:justify-start">
-                <button 
-                  onClick={() => setIsDiscoverFiltersOpen(!isDiscoverFiltersOpen)}
-                  className={`p-2 rounded-full transition-all border ${isDiscoverFiltersOpen ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:text-white'}`}
-                  aria-label="Toggle filters"
-                  aria-expanded={isDiscoverFiltersOpen}
-                >
-                  <Filter className="h-5 w-5" />
-                </button>
               </div>
             )}
 
@@ -159,13 +151,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     />
                   </div>
                 ) : (
-                  <button 
-                    onClick={() => setIsSearchOpen(true)} 
-                    className="p-2 rounded-full hover:bg-white/5 text-white/60 hover:text-white transition-all"
-                    aria-label="Open search"
-                  >
-                    <Search className="h-5 w-5" />
-                  </button>
+                  location.pathname.startsWith('/marketplace') ? (
+                    <button 
+                      onClick={() => tonConnectUI.openModal()}
+                      className="p-2 rounded-full hover:bg-white/5 text-blue-500 hover:text-blue-400 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      aria-label="Connect Wallet"
+                    >
+                      <Wallet className="h-5 w-5" />
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setIsSearchOpen(true)} 
+                      className="p-2 rounded-full hover:bg-white/5 text-white/60 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      aria-label="Open search"
+                    >
+                      <Search className="h-5 w-5" />
+                    </button>
+                  )
                 )}
               </div>
             )}
@@ -174,20 +176,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex items-center gap-3 sm:gap-4 ml-4">
             {isHome && (
               <>
-                <Link to="/tasks" className="flex items-center justify-center hover:opacity-80 transition-opacity" aria-label="Tasks">
+                <Link to="/tasks" className="flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full" aria-label="Tasks">
                   <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-8 h-8 object-contain drop-shadow-md" />
                 </Link>
 
                 <button 
                   onClick={() => tonConnectUI.openModal()}
-                  className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all border border-white/10"
+                  className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Connect Wallet"
                 >
                   <Wallet className="h-5 w-5 text-blue-500" />
                 </button>
                 
                 {user ? (
-                  <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-white/10 hover:border-white/30 transition-all flex items-center justify-center bg-white/5" aria-label="View Profile">
+                  <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-white/10 hover:border-white/30 transition-all flex items-center justify-center bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="View Profile">
                     {user.user_metadata?.avatar_url ? (
                       <img src={user.user_metadata.avatar_url} alt={`${user.user_metadata.full_name || 'User'} avatar`} className="w-full h-full object-cover" />
                     ) : (
@@ -197,7 +199,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 ) : (
                   <button 
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all"
+                    className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     aria-label="Sign In"
                   >
                     <User className="h-5 w-5" />
@@ -212,9 +214,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-black border-r border-white/5 flex-col p-6 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
         <div className="flex items-center justify-between mb-10">
-          <Link to="/" className="flex items-center gap-3" aria-label="TonJam Home">
+          <Link to="/" className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="TonJam Home">
             <img src={APP_LOGO} alt="" className="w-10 h-10 object-contain" aria-hidden="true" />
-            <span className="font-bold text-lg tracking-tight text-white uppercase italic">TonJam</span>
+            <span className="font-bold text-lg tracking-tight text-white uppercase italic">Discover</span>
           </Link>
           <ModeToggle />
         </div>
@@ -222,7 +224,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <nav className="flex-1 space-y-2" aria-label="Main Navigation">
           <NavItem to="/" icon={HomeIcon} label="Home" />
           <NavItem to="/discover" icon={Search} label="Search" />
-          <NavItem to="/jamspace" icon={Music2} label="JamSpace" />
+          <NavItem to="/jamspace" icon={Send} label="JamSpace" />
           <NavItem to="/library" icon={Library} label="Library" />
           <NavItem to="/marketplace" icon={ShoppingBag} label="NFT Market" />
           
@@ -242,7 +244,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {user && (
               <button 
                 onClick={() => signOut()}
-                className="w-full flex items-center gap-4 px-5 py-3 rounded-[5px] text-white/40 hover:text-red-500 hover:bg-red-500/5 transition-all group mt-2"
+                className="w-full flex items-center gap-4 px-5 py-3 rounded-[5px] text-white/40 hover:text-red-500 hover:bg-red-500/5 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 aria-label="Sign Out"
               >
                 <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -255,14 +257,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="pt-6 space-y-3">
               <button 
                 onClick={() => setIsUploadModalOpen(true)}
-                className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
+                className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 aria-label="Upload new track"
               >
                 <Upload className="h-5 w-5" />
                 <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Upload Track</span>
               </button>
               <button 
-                className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-white/5 text-white/60 font-bold hover:bg-white/10 transition-all border border-white/5"
+                className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-white/5 text-white/60 font-bold hover:bg-white/10 transition-all border border-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 aria-label="Mint new NFT"
               >
                 <PlusCircle className="h-5 w-5" />
@@ -306,7 +308,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-lg border-t border-white/5 h-20 px-2 flex justify-around items-center shadow-2xl" aria-label="Mobile Navigation">
         <MobileNavItem to="/" icon={HomeIcon} label="Home" />
         <MobileNavItem to="/discover" icon={Search} label="Search" />
-        <MobileNavItem to="/jamspace" icon={Music2} label="JamSpace" />
+        <MobileNavItem to="/jamspace" icon={Send} label="JamSpace" />
         <MobileNavItem to="/library" icon={Library} label="Library" />
         <MobileNavItem to="/marketplace" icon={ShoppingBag} label="NFT Market" />
       </nav>
@@ -318,7 +320,7 @@ const NavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon; labe
   <NavLink 
     to={to} 
     className={({ isActive }) => `
-      flex items-center gap-4 px-5 py-3.5 rounded-[5px] transition-all
+      flex items-center gap-4 px-5 py-3.5 rounded-[5px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
       ${isActive ? 'bg-blue-600/10 text-blue-500 font-bold' : 'text-white/40 hover:text-white hover:bg-white/5'}
     `}
   >
@@ -331,7 +333,7 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon
   <NavLink 
     to={to} 
     className={({ isActive }) => `
-      flex-1 flex flex-col items-center justify-center transition-all gap-1.5 h-full
+      flex-1 flex flex-col items-center justify-center transition-all gap-1.5 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm
       ${isActive ? 'text-blue-500' : 'text-white/40'}
     `}
   >

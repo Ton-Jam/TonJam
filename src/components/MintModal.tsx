@@ -205,7 +205,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
               <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Mint your sonic artifacts on TON</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+          <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close modal">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -216,13 +216,13 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
               <div className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-[8px] font-bold text-white/40 uppercase tracking-widest ml-1">Artifact Title</label>
-                  <input type="text" value={mintData.title} onChange={(e) => setMintData({...mintData, title: e.target.value})} className="w-full bg-white/5 rounded-[8px] py-2 px-4 text-[10px] outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white" placeholder="Enter track title..." />
+                  <input type="text" id="artifact-title" value={mintData.title} onChange={(e) => setMintData({...mintData, title: e.target.value})} className="w-full bg-white/5 rounded-[8px] py-2 px-4 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white" placeholder="Enter track title..." />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[8px] font-bold text-white/40 uppercase tracking-widest ml-1">Sonic Data (Audio)</label>
                   <div className="relative group">
                     <input type="file" accept="audio/*" onChange={(e) => handleFileChange(e, 'audio')} className="hidden" id="audio-upload" />
-                    <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-24 bg-white/5 hover:bg-white/10 rounded-[8px] transition-all cursor-pointer" >
+                    <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-24 bg-white/5 hover:bg-white/10 rounded-[8px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Audio">
                       {mintData.audioFile ? (
                         <div className="text-center">
                           <FileAudio className="h-6 w-6 text-blue-500 mb-1 mx-auto" />
@@ -242,7 +242,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                 <label className="text-[8px] font-bold text-white/40 uppercase tracking-widest ml-1">Visual Matrix (Cover Art)</label>
                 <div className="relative group h-full">
                   <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'cover')} className="hidden" id="cover-upload" />
-                  <label htmlFor="cover-upload" className="flex flex-col items-center justify-center w-full h-full min-h-[140px] bg-white/5 hover:bg-white/10 rounded-[8px] transition-all cursor-pointer overflow-hidden" >
+                  <label htmlFor="cover-upload" className="flex flex-col items-center justify-center w-full h-full min-h-[140px] bg-white/5 hover:bg-white/10 rounded-[8px] transition-all cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('cover-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Cover Art">
                     {mintData.coverPreview ? (
                       <img src={mintData.coverPreview} className="w-full h-full object-cover" alt="Preview" />
                     ) : (
@@ -255,7 +255,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                 </div>
               </div>
             </div>
-            <button onClick={() => setStep(2)} disabled={!mintData.title || (!mintData.audioFile && !track)} className="w-full py-3 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[8px] font-bold text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all" > INITIALIZE_METADATA_SEQUENCE </button>
+            <button onClick={() => setStep(2)} disabled={!mintData.title || (!mintData.audioFile && !track)} className="w-full py-3 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[8px] font-bold text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > INITIALIZE_METADATA_SEQUENCE </button>
           </div>
         )}
 
@@ -267,7 +267,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">AI-Generated Artifact Lore</label>
                 </div>
                 <div className="relative">
-                  <textarea value={mintData.description} onChange={(e) => setMintData({...mintData, description: e.target.value})} rows={6} className="w-full bg-white/5 rounded-[10px] py-4 px-5 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white/80 leading-relaxed resize-none" />
+                  <textarea id="artifact-lore" value={mintData.description} onChange={(e) => setMintData({...mintData, description: e.target.value})} rows={6} className="w-full bg-white/5 rounded-[10px] py-4 px-5 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white/80 leading-relaxed resize-none" aria-label="AI-Generated Artifact Lore" />
                   {loading && (
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-[10px] flex items-center justify-center">
                       <div className="flex flex-col items-center gap-3">
@@ -281,12 +281,12 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Mint Price (TON)</label>
-                  <input type="number" value={mintData.price} onChange={(e) => setMintData({...mintData, price: e.target.value})} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white" />
+                  <input type="number" id="mint-price" value={mintData.price} onChange={(e) => setMintData({...mintData, price: e.target.value})} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white" aria-label="Mint Price (TON)" />
                 </div>
                 <div className="space-y-4 col-span-3">
                   <div className="flex justify-between items-center">
                     <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Royalty Splits (%)</label>
-                    <button onClick={handleAddRoyaltySplit} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-1">
+                    <button onClick={handleAddRoyaltySplit} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Add Royalty Recipient">
                       <Plus className="h-3 w-3" /> Add Recipient
                     </button>
                   </div>
@@ -298,16 +298,18 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                           placeholder="Wallet Address" 
                           value={split.address}
                           onChange={(e) => handleUpdateRoyaltySplit(index, 'address', e.target.value)}
-                          className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white"
+                          className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white"
+                          aria-label={`Royalty recipient address ${index + 1}`}
                         />
                         <input 
                           type="number" 
                           placeholder="%" 
                           value={split.percentage}
                           onChange={(e) => handleUpdateRoyaltySplit(index, 'percentage', e.target.value)}
-                          className="w-20 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white"
+                          className="w-20 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white"
+                          aria-label={`Royalty recipient percentage ${index + 1}`}
                         />
-                        <button onClick={() => handleRemoveRoyaltySplit(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                        <button onClick={() => handleRemoveRoyaltySplit(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label={`Remove royalty recipient ${index + 1}`}>
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -319,14 +321,14 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Supply</label>
-                  <input type="number" value={mintData.supply} onChange={(e) => setMintData({...mintData, supply: e.target.value})} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white" />
+                  <input type="number" id="mint-supply" value={mintData.supply} onChange={(e) => setMintData({...mintData, supply: e.target.value})} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white" aria-label="Supply" />
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Custom Properties (Traits)</label>
-                  <button onClick={handleAddTrait} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-1">
+                  <button onClick={handleAddTrait} className="text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Add Trait">
                     <Plus className="h-3 w-3" /> Add Trait
                   </button>
                 </div>
@@ -338,16 +340,18 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                         placeholder="Type (e.g. Genre)" 
                         value={trait.trait_type}
                         onChange={(e) => handleUpdateTrait(index, 'trait_type', e.target.value)}
-                        className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white"
+                        className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white"
+                        aria-label={`Trait type ${index + 1}`}
                       />
                       <input 
                         type="text" 
                         placeholder="Value (e.g. Electronic)" 
                         value={trait.value}
                         onChange={(e) => handleUpdateTrait(index, 'value', e.target.value)}
-                        className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white"
+                        className="flex-1 bg-white/5 rounded-[10px] py-2 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white"
+                        aria-label={`Trait value ${index + 1}`}
                       />
-                      <button onClick={() => handleRemoveTrait(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                      <button onClick={() => handleRemoveTrait(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label={`Remove trait ${index + 1}`}>
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -361,7 +365,7 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Exclusive Holder Content (Perks)</label>
-                  <button onClick={handleAddExclusive} className="text-[9px] font-bold text-purple-500 uppercase tracking-widest hover:text-purple-400 transition-colors flex items-center gap-1">
+                  <button onClick={handleAddExclusive} className="text-[9px] font-bold text-purple-500 uppercase tracking-widest hover:text-purple-400 transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Add Perk">
                     <Plus className="h-3 w-3" /> Add Perk
                   </button>
                 </div>
@@ -374,13 +378,15 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                           placeholder="Perk Title (e.g. BTS Video)" 
                           value={item.title}
                           onChange={(e) => handleUpdateExclusive(index, 'title', e.target.value)}
-                          className="w-full bg-black/20 rounded-[5px] py-1.5 px-3 text-[10px] outline-none focus:ring-1 focus:ring-purple-500/50 transition-all text-white"
+                          className="w-full bg-black/20 rounded-[5px] py-1.5 px-3 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white"
+                          aria-label={`Perk title ${index + 1}`}
                         />
                         <div className="flex gap-2">
                           <select 
                             value={item.type}
                             onChange={(e) => handleUpdateExclusive(index, 'type', e.target.value)}
-                            className="bg-black/20 rounded-[5px] py-1.5 px-2 text-[9px] outline-none text-white/60"
+                            className="bg-black/20 rounded-[5px] py-1.5 px-2 text-[9px] outline-none text-white/60 focus-visible:ring-2 focus-visible:ring-blue-500"
+                            aria-label={`Perk type ${index + 1}`}
                           >
                             <option value="video">Video</option>
                             <option value="track">Audio</option>
@@ -392,11 +398,12 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
                             placeholder="URL (IPFS or CDN)" 
                             value={item.url}
                             onChange={(e) => handleUpdateExclusive(index, 'url', e.target.value)}
-                            className="flex-1 bg-black/20 rounded-[5px] py-1.5 px-3 text-[9px] outline-none focus:ring-1 focus:ring-purple-500/50 transition-all text-white"
+                            className="flex-1 bg-black/20 rounded-[5px] py-1.5 px-3 text-[9px] outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-white"
+                            aria-label={`Perk URL ${index + 1}`}
                           />
                         </div>
                       </div>
-                      <button onClick={() => handleRemoveExclusive(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                      <button onClick={() => handleRemoveExclusive(index)} className="p-2 text-white/20 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label={`Remove perk ${index + 1}`}>
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -408,8 +415,8 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
               </div>
             </div>
             <div className="flex gap-4">
-              <button onClick={() => setStep(1)} className="flex-1 py-4 bg-white/5 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all" > BACK </button>
-              <button onClick={() => setStep(3)} className="flex-[2] py-4 bg-blue-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 hover:bg-blue-500 transition-all" > REVIEW_PROTOCOL_DEPLOYMENT </button>
+              <button onClick={() => setStep(1)} className="flex-1 py-4 bg-white/5 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > BACK </button>
+              <button onClick={() => setStep(3)} className="flex-[2] py-4 bg-blue-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > REVIEW_PROTOCOL_DEPLOYMENT </button>
             </div>
           </div>
         )}
@@ -452,8 +459,8 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
               </div>
             </div>
             <div className="flex gap-4">
-              <button onClick={() => setStep(2)} className="flex-1 py-4 bg-white/5 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all" > BACK </button>
-              <button onClick={handleMint} disabled={loading} className="flex-[2] py-4 bg-green-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-green-600/20 hover:bg-green-500 transition-all flex items-center justify-center gap-3" >
+              <button onClick={() => setStep(2)} className="flex-1 py-4 bg-white/5 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > BACK </button>
+              <button onClick={handleMint} disabled={loading} className="flex-[2] py-4 bg-green-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-green-600/20 hover:bg-green-500 transition-all flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" >
                 {loading ? (
                   <>
                     <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80 mr-2 inline-block" alt="Loading..." /> DEPLOYING_PROTOCOL...
@@ -476,8 +483,8 @@ const MintModal: React.FC<MintModalProps> = ({ onClose, track }) => {
             <h2 className="text-3xl font-bold text-white uppercase tracking-tighter mb-4">Protocol Deployed</h2>
             <p className="text-white/60 text-sm max-w-sm mx-auto mb-10 leading-relaxed"> Your sonic artifact has been successfully minted and registered on the TON blockchain. </p>
             <div className="flex flex-col gap-4">
-              <button onClick={onClose} className="w-full py-4 bg-blue-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 hover:bg-blue-500 transition-all" > VIEW_IN_COLLECTION </button>
-              <button onClick={() => { setStep(1); setMintData({ title: '', description: '', price: '5', royalty: '10', supply: '100', audioFile: null, coverFile: null, audioPreview: '', coverPreview: '' }); }} className="w-full py-4 bg-white/5 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all" > MINT_ANOTHER_ARTIFACT </button>
+              <button onClick={onClose} className="w-full py-4 bg-blue-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > VIEW_IN_COLLECTION </button>
+              <button onClick={() => { setStep(1); setMintData({ title: '', description: '', price: '5', royalty: '10', supply: '100', audioFile: null, coverFile: null, audioPreview: '', coverPreview: '' }); }} className="w-full py-4 bg-white/5 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > MINT_ANOTHER_ARTIFACT </button>
             </div>
           </div>
         )}

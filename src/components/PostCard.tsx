@@ -140,6 +140,38 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     }
   };
 
+  const renderContentWithHashtags = (text: string) => {
+    if (!text) return null;
+    const parts = text.split(/(#[a-zA-Z0-9_]+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('#')) {
+        return (
+          <span
+            key={i}
+            role="link"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/discover?search=${encodeURIComponent(part)}`);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate(`/discover?search=${encodeURIComponent(part)}`);
+              }
+            }}
+            className="text-blue-500 hover:text-blue-400 hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+            aria-label={`Search for hashtag ${part}`}
+          >
+            {part}
+          </span>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
   return (
     <div
       className={cn(
@@ -168,7 +200,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         <div className="flex gap-4">
           {/* Author Avatar */}
           <div 
-            className="flex-shrink-0 cursor-pointer outline-none" 
+            className="flex-shrink-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full" 
             onClick={handleProfileClick}
             onKeyDown={(e) => handleKeyDown(e, () => handleProfileClick(e as any))}
             role="button"
@@ -184,7 +216,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start mb-2">
               <div 
-                className="cursor-pointer outline-none flex flex-col" 
+                className="cursor-pointer outline-none flex flex-col focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" 
                 onClick={handleProfileClick}
                 onKeyDown={(e) => handleKeyDown(e, () => handleProfileClick(e as any))}
                 role="button"
@@ -207,7 +239,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 {!isOwnPost && (
                   <button 
                     onClick={handleFollow} 
-                    className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${isFollowing ? 'bg-white/10 text-white' : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20'}`}
+                    className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-white/10 text-white' : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20'}`}
                     aria-label={isFollowing ? `Unfollow ${post.userName}` : `Follow ${post.userName}`}
                   >
                     {isFollowing ? 'Following' : 'Follow'}
@@ -215,7 +247,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 )}
                 <button 
                   onClick={() => setShowOptions(true)} 
-                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-black hover:bg-black/5 hover:text-black dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-white"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-black hover:bg-black/5 hover:text-black dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Post options"
                   aria-haspopup="true"
                 >
@@ -226,13 +258,13 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
             {/* Post Text */}
             <p className="text-base text-black dark:text-white/90 mb-4 whitespace-pre-wrap">
-              {post.content}
+              {renderContentWithHashtags(post.content)}
             </p>
 
           {/* Media Content */}
           {post.imageUrl && (
             <div 
-              className="rounded-[10px] overflow-hidden mb-4 bg-white/5 cursor-zoom-in outline-none" 
+              className="rounded-[10px] overflow-hidden mb-4 bg-white/5 cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
               onClick={() => setExpandedImage(post.imageUrl)}
               onKeyDown={(e) => handleKeyDown(e, () => setExpandedImage(post.imageUrl))}
               role="button"
@@ -248,7 +280,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               <video src={post.video} className="w-full h-full object-cover" aria-label="Post video" />
               <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                 <button 
-                  className="w-16 h-16 rounded-full bg-blue-600/80 flex items-center justify-center text-white text-xl hover:bg-blue-500 transition-all"
+                  className="w-16 h-16 rounded-full bg-blue-600/80 flex items-center justify-center text-white text-xl hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Play video"
                 >
                   <Play className="h-8 w-8 ml-1 fill-current" />
@@ -259,7 +291,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
           {track && (
             <div 
-              className="bg-white/5 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/track cursor-pointer hover:bg-white/10 transition-all outline-none" 
+              className="bg-white/5 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/track cursor-pointer hover:bg-white/10 transition-all outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
               onClick={handlePlayTrack}
               onKeyDown={(e) => handleKeyDown(e, () => handlePlayTrack(e as any))}
               role="button"
@@ -286,7 +318,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                   <p className="text-[10px] font-bold text-white uppercase">{(track.streams || track.playCount || 0).toLocaleString()}</p>
                 </div>
                 <button 
-                  className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Add track to library"
                 >
                   <Plus className="h-4 w-4" />
@@ -297,7 +329,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
           {nft && (
             <div 
-              className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/nft cursor-pointer hover:from-blue-600/20 hover:to-purple-600/20 transition-all outline-none" 
+              className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/nft cursor-pointer hover:from-blue-600/20 hover:to-purple-600/20 transition-all outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
               onClick={() => navigate(`/nft/${nft.id}`)}
               onKeyDown={(e) => handleKeyDown(e, () => navigate(`/nft/${nft.id}`))}
               role="button"
@@ -334,14 +366,14 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             <div className="flex items-center gap-6">
               <button 
                 onClick={handleLike} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all ${isLiked ? 'text-red-500' : 'text-white/40 hover:text-white'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${isLiked ? 'text-red-500' : 'text-white/40 hover:text-white'}`}
                 aria-label={isLiked ? "Unlike post" : "Like post"}
               >
                 <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} /> <span>{likesCount}</span>
               </button>
               <button 
                 onClick={() => setShowComments(!showComments)} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all ${showComments ? 'text-blue-500' : 'text-white/40 hover:text-white'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${showComments ? 'text-blue-500' : 'text-white/40 hover:text-white'}`}
                 aria-label={showComments ? "Hide comments" : "Show comments"}
                 aria-expanded={showComments}
               >
@@ -349,50 +381,12 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               </button>
               <button 
                 onClick={handleRepost} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all ${isReposted ? 'text-green-500' : 'text-white/40 hover:text-white'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${isReposted ? 'text-green-500' : 'text-white/40 hover:text-white'}`}
                 aria-label={isReposted ? "Remove repost" : "Repost post"}
               >
                 <Repeat2 className="h-4 w-4" /> <span>{repostsCount}</span>
               </button>
-              
-              {/* Reaction Picker */}
-              <div className="relative">
-                <button 
-                  onClick={() => setShowReactions(!showReactions)}
-                  className="flex items-center gap-2 text-[10px] font-bold text-white/40 hover:text-blue-400 uppercase tracking-widest transition-all"
-                  aria-label="Add reaction"
-                  aria-expanded={showReactions}
-                  aria-haspopup="true"
-                >
-                  <Smile className="h-4 w-4" />
-                </button>
-                {showReactions && (
-                  <div 
-                    className="absolute bottom-full left-0 mb-2 flex items-center gap-1 bg-[#1a1a1a] border border-white/10 p-1.5 rounded-full shadow-2xl z-[100] backdrop-blur-xl animate-in fade-in zoom-in duration-200"
-                    role="menu"
-                    aria-label="Reaction emojis"
-                  >
-                    {REACTION_EMOJIS.map(emoji => (
-                      <button 
-                        key={emoji} 
-                        onClick={() => handleReaction(emoji)} 
-                        className="w-8 h-8 flex items-center justify-center rounded-full transition-all text-sm hover:scale-110 hover:bg-white/10 text-white/80"
-                        aria-label={`React with ${emoji}`}
-                        role="menuitem"
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
-            <button 
-              className="text-white/40 hover:text-white transition-all"
-              aria-label="Share post"
-            >
-              <Share className="h-4 w-4" />
-            </button>
           </div>
         </div>
       </div>
@@ -420,7 +414,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 />
                 <button
                   type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center bg-blue-600 rounded-[8px] text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center bg-blue-600 rounded-[8px] text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Send comment"
                 >
                   <Send className="h-3 w-3" />
@@ -442,7 +436,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                   >
                     <img 
                       src={comment.userAvatar} 
-                      className="w-8 h-8 rounded-full flex-shrink-0 object-cover shadow-md cursor-pointer outline-none" 
+                      className="w-8 h-8 rounded-full flex-shrink-0 object-cover shadow-md cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
                       alt={`${comment.userName}'s avatar`} 
                       onClick={(e) => handleCommentProfileClick(e, comment.userId)}
                       onKeyDown={(e) => handleKeyDown(e, () => handleCommentProfileClick(e as any, comment.userId))}
@@ -453,7 +447,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                       <div className="bg-white/5 rounded-[10px] p-3 relative group-hover/comment:bg-white/[0.07] transition-colors border border-white/5">
                         <div className="flex items-center justify-between mb-1">
                           <h5 
-                            className="text-[10px] font-bold text-white uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block outline-none"
+                            className="text-[10px] font-bold text-white uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                             onClick={(e) => handleCommentProfileClick(e, comment.userId)}
                             onKeyDown={(e) => handleKeyDown(e, () => handleCommentProfileClick(e as any, comment.userId))}
                             role="button"
@@ -463,7 +457,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                           </h5>
                           <span className="text-[8px] text-white/20 font-bold uppercase tracking-widest">{comment.timestamp}</span>
                         </div>
-                        <p className="text-[11px] text-white/70 leading-relaxed">{comment.content}</p>
+                        <p className="text-[11px] text-white/70 leading-relaxed">{renderContentWithHashtags(comment.content)}</p>
                         
                         {/* Reactions */}
                         <div className="flex items-center gap-2 mt-2">
@@ -474,7 +468,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                                 <button 
                                   key={emoji} 
                                   onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                  className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] transition-all ${isActive ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-white/60 hover:text-white border border-white/5 hover:bg-white/10'}`}
+                                  className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-white/60 hover:text-white border border-white/5 hover:bg-white/10'}`}
                                   aria-label={`${isActive ? 'Remove' : 'Add'} ${emoji} reaction`}
                                 >
                                   <span className="text-xs">{emoji}</span>
@@ -487,7 +481,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                           <div className="relative">
                             <button 
                               onClick={() => setActiveReactionCommentId(activeReactionCommentId === comment.id ? null : comment.id)}
-                              className={`w-6 h-6 flex items-center justify-center rounded-full transition-all hover:bg-white/10 ${activeReactionCommentId === comment.id ? 'text-blue-500 bg-white/10 opacity-100' : 'text-white/20 hover:text-blue-500 opacity-0 group-hover/comment:opacity-100'}`}
+                              className={`w-6 h-6 flex items-center justify-center rounded-full transition-all hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeReactionCommentId === comment.id ? 'text-blue-500 bg-white/10 opacity-100' : 'text-white/20 hover:text-blue-500 opacity-0 group-hover/comment:opacity-100'}`}
                               aria-label="Add reaction to comment"
                               aria-haspopup="true"
                             >
@@ -512,7 +506,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                                           handleCommentReaction(comment.id, emoji);
                                           setActiveReactionCommentId(null);
                                         }} 
-                                        className={`w-8 h-8 flex items-center justify-center rounded-full transition-all text-sm hover:scale-110 ${isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white/80'}`}
+                                        className={`w-8 h-8 flex items-center justify-center rounded-full transition-all text-sm hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white/80'}`}
                                         aria-label={`React with ${emoji}`}
                                         role="menuitem"
                                       >
@@ -568,7 +562,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               onClick={(e) => e.stopPropagation()} 
             />
             <button
-              className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-2"
+              className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
               onClick={() => setExpandedImage(null)}
               aria-label="Close preview"
             >

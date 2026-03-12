@@ -42,8 +42,17 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
   return (
     <>
       <div
-        className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-[#0a192f] border-t border-white/5 px-4 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-[#112240] transition-all lg:left-64"
+        className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-[#0a192f] border-t border-white/5 px-4 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-[#112240] transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onClick={() => setFullPlayerOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setFullPlayerOpen(true);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={`Open full player for ${currentTrack.title}`}
       >
         <div className="flex items-center gap-3 w-[65%] cursor-pointer">
           <div className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-900">
@@ -71,13 +80,31 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 <img 
                   src={MOCK_ARTISTS.find(a => a.id === currentTrack.artistId)?.avatarUrl} 
                   alt={currentTrack.artist} 
-                  className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+                  className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   onClick={handleArtistClick}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleArtistClick(e as any);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View ${currentTrack.artist}'s profile`}
                 />
               )}
               <p
                 onClick={handleArtistClick}
-                className="text-[10px] text-white/40 truncate uppercase font-bold tracking-widest hover:text-blue-500 transition-colors inline-block leading-tight"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleArtistClick(e as any);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                className="text-[10px] text-white/40 truncate uppercase font-bold tracking-widest hover:text-blue-500 transition-colors inline-block leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                aria-label={`View ${currentTrack.artist}'s profile`}
               >
                 {currentTrack.artist}
               </p>
@@ -90,7 +117,8 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
         >
           <button
             onClick={togglePlay}
-            className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-600/20"
+            className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
               <Pause className="h-5 w-5 text-white fill-white" />
@@ -100,13 +128,15 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           </button>
           <button
             onClick={handleOptionsClick}
-            className="w-10 h-10 flex items-center justify-center text-white/40 hover:text-white transition-all hover:bg-white/5 rounded-full"
+            className="w-10 h-10 flex items-center justify-center text-white/40 hover:text-white transition-all hover:bg-white/5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label="Track options"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
           <button
             onClick={closePlayer}
-            className="hidden sm:flex w-10 h-10 rounded-full bg-white/5 items-center justify-center hover:bg-white/10 text-white/40 hover:text-white transition-all ml-1"
+            className="hidden sm:flex w-10 h-10 rounded-full bg-white/5 items-center justify-center hover:bg-white/10 text-white/40 hover:text-white transition-all ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label="Close player"
           >
             <X className="h-4 w-4" />
           </button>

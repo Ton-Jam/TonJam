@@ -102,7 +102,8 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-all"
+              className="p-2 rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label="Close Royalty Config Modal"
             >
               <X className="h-4 w-4" />
             </button>
@@ -129,7 +130,8 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                 </div>
                 <button 
                   onClick={() => handleAddSplit('streaming')}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[6px] transition-all group"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[6px] transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  aria-label="Add Streaming Recipient"
                 >
                   <Plus className="h-3 w-3 text-white/40 group-hover:text-white" />
                   <span className="text-[9px] font-bold text-white/40 group-hover:text-white uppercase tracking-widest">Add Recipient</span>
@@ -148,7 +150,8 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                           value={split.label}
                           onChange={(e) => handleUpdateSplit('streaming', index, { label: e.target.value })}
                           placeholder="e.g. Producer"
-                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all"
+                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 pl-10 pr-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                          aria-label={`Streaming Split Label ${index + 1}`}
                         />
                       </div>
                     </div>
@@ -161,7 +164,8 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                           value={split.address}
                           onChange={(e) => handleUpdateSplit('streaming', index, { address: e.target.value })}
                           placeholder="UQ..."
-                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all font-mono"
+                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 pl-10 pr-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all font-mono"
+                          aria-label={`Streaming Split Wallet Address ${index + 1}`}
                         />
                       </div>
                     </div>
@@ -175,14 +179,16 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                           max="100"
                           value={split.percentage * 100}
                           onChange={(e) => handleUpdateSplit('streaming', index, { percentage: parseFloat(e.target.value) / 100 })}
-                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 px-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all"
+                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 px-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                          aria-label={`Streaming Split Percentage ${index + 1}`}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-white/20">%</span>
                       </div>
                     </div>
                     <button 
                       onClick={() => handleRemoveSplit('streaming', index)}
-                      className="p-2.5 rounded-[6px] bg-red-500/5 hover:bg-red-500/10 text-red-500/40 hover:text-red-500 transition-all border border-red-500/10"
+                      className="p-2.5 rounded-[6px] bg-red-500/5 hover:bg-red-500/10 text-red-500/40 hover:text-red-500 transition-all border border-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      aria-label={`Remove Streaming Split ${index + 1}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -202,7 +208,8 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                 </div>
                 <button 
                   onClick={() => handleAddSplit('nft')}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[6px] transition-all group"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[6px] transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  aria-label="Add NFT Recipient"
                 >
                   <Plus className="h-3 w-3 text-white/40 group-hover:text-white" />
                   <span className="text-[9px] font-bold text-white/40 group-hover:text-white uppercase tracking-widest">Add Recipient</span>
@@ -221,7 +228,8 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                           value={split.label}
                           onChange={(e) => handleUpdateSplit('nft', index, { label: e.target.value })}
                           placeholder="e.g. Manager"
-                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all"
+                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 pl-10 pr-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                          aria-label={`NFT Split Label ${index + 1}`}
                         />
                       </div>
                     </div>
@@ -234,7 +242,8 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                           value={split.address}
                           onChange={(e) => handleUpdateSplit('nft', index, { address: e.target.value })}
                           placeholder="UQ..."
-                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all font-mono"
+                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 pl-10 pr-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all font-mono"
+                          aria-label={`NFT Split Wallet Address ${index + 1}`}
                         />
                       </div>
                     </div>
@@ -248,14 +257,16 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                           max="100"
                           value={split.percentage * 100}
                           onChange={(e) => handleUpdateSplit('nft', index, { percentage: parseFloat(e.target.value) / 100 })}
-                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 px-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all"
+                          className="w-full bg-white/5 border border-white/10 rounded-[6px] py-2 px-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                          aria-label={`NFT Split Percentage ${index + 1}`}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-white/20">%</span>
                       </div>
                     </div>
                     <button 
                       onClick={() => handleRemoveSplit('nft', index)}
-                      className="p-2.5 rounded-[6px] bg-red-500/5 hover:bg-red-500/10 text-red-500/40 hover:text-red-500 transition-all border border-red-500/10"
+                      className="p-2.5 rounded-[6px] bg-red-500/5 hover:bg-red-500/10 text-red-500/40 hover:text-red-500 transition-all border border-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      aria-label={`Remove NFT Split ${index + 1}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -285,13 +296,13 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
             <div className="flex items-center gap-4">
               <button 
                 onClick={onClose}
-                className="px-6 py-3 text-[10px] font-bold text-white/40 uppercase tracking-widest hover:text-white transition-colors"
+                className="px-6 py-3 text-[10px] font-bold text-white/40 uppercase tracking-widest hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSave}
-                className="flex items-center gap-3 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[6px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20"
+                className="flex items-center gap-3 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[6px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 <Save className="h-3 w-3" />
                 Commit Changes

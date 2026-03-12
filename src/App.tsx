@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import Layout from '@/components/Layout';
+import ScrollToTop from '@/components/ScrollToTop';
 import Home from '@/pages/Home';
 import Discover from '@/pages/Discover';
 import JamSpace from '@/pages/JamSpace';
@@ -47,6 +48,7 @@ const App: React.FC = () => {
           <AudioProvider>
             <Toaster theme="dark" position="top-right" />
             <Router>
+              <ScrollToTop />
               <Layout>
                 <Routes>
                   <Route path="/" element={<Home />} />

@@ -62,32 +62,32 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
           </div>
         </div>
         <div className="p-2 space-y-1">
-          <button onClick={() => handleAction('queue')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-white/5 transition-all text-left group">
+          <button onClick={() => handleAction('queue')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-white/5 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
             <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 group-hover:text-cyan-300 transition-colors">
               <ListMusic className="h-4 w-4" />
             </div>
             <span className="text-[10px] font-bold text-white/80 group-hover:text-white uppercase tracking-widest transition-colors">Add to Queue</span>
           </button>
-          <button onClick={() => handleAction('playlist')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-white/5 transition-all text-left group">
+          <button onClick={() => handleAction('playlist')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-white/5 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
             <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 group-hover:text-cyan-300 transition-colors">
               <Plus className="h-4 w-4" />
             </div>
             <span className="text-[10px] font-bold text-white/80 group-hover:text-white uppercase tracking-widest transition-colors">Add to Playlist</span>
           </button>
-          <button onClick={() => handleAction('tip')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-white/5 transition-all text-left group">
+          <button onClick={() => handleAction('tip')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-white/5 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
             <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/20 group-hover:text-emerald-300 transition-colors">
               <Coins className="h-4 w-4" />
             </div>
             <span className="text-[10px] font-bold text-white/80 group-hover:text-white uppercase tracking-widest transition-colors">Tip Producer</span>
           </button>
-          <button onClick={() => handleAction('share')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-white/5 transition-all text-left group">
+          <button onClick={() => handleAction('share')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-white/5 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
             <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500/20 group-hover:text-purple-300 transition-colors">
               <Share2 className="h-4 w-4" />
             </div>
             <span className="text-[10px] font-bold text-white/80 group-hover:text-white uppercase tracking-widest transition-colors">Share Track</span>
           </button>
           {onRemove && (
-            <button onClick={() => { onRemove(); onClose(); }} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-red-500/10 transition-all text-left group">
+            <button onClick={() => { onRemove(); onClose(); }} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-red-500/10 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500">
               <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 group-hover:bg-red-500/20 group-hover:text-red-300 transition-colors">
                 <Trash2 className="h-4 w-4" />
               </div>
@@ -95,7 +95,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
             </button>
           )}
         </div>
-        <button onClick={onClose} className="w-full p-4 text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] hover:text-white hover:bg-white/5 transition-colors border-t border-white/5">
+        <button onClick={onClose} className="w-full p-4 text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] hover:text-white hover:bg-white/5 transition-colors border-t border-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
           Cancel
         </button>
       </div>

@@ -297,7 +297,7 @@ const Discover: React.FC = () => {
     <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-16 w-full pb-32">
       {/* Search Section */}
       <div className="sticky top-0 z-50 w-full bg-black/80 backdrop-blur-xl py-4 border-b border-white/5" ref={searchContainerRef}>
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-4">
           <div className="w-full max-w-3xl relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-10 group-focus-within:opacity-30 transition duration-1000 group-focus-within:duration-200"></div>
             <div className="relative">
@@ -308,8 +308,53 @@ const Discover: React.FC = () => {
               />
             </div>
           </div>
+          
+          {/* Horizontal Filter Buttons */}
+          <div className="w-full max-w-3xl flex overflow-x-auto no-scrollbar gap-2 pb-2">
+            {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users'].map(filter => (
+              <button 
+                key={filter} 
+                onClick={() => setActiveFilter(filter as any)} 
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/10 text-white/60 border-white/10 hover:bg-white/20'}`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* Recommendations Section (Visible when no search) */}
+      {!search && !selectedGenre && (
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-12 animate-in fade-in duration-700"
+        >
+          <SearchCategorySection 
+            title="Trending Tracks" 
+            items={trendingTracks.slice(0, 5)}
+            renderItem={(item) => <TrackCard track={item} />}
+            viewAllLink="/explore/tracks?title=Trending Tracks"
+            grid
+          />
+
+          <SearchCategorySection 
+            title="Top Artists" 
+            items={artists.slice(0, 5)}
+            renderItem={(item) => <ArtistListItem artist={item} />}
+            viewAllLink="/explore/artists?title=Top Artists"
+          />
+
+          <SearchCategorySection 
+            title="Featured NFTs" 
+            items={MOCK_NFTS.slice(0, 5)}
+            renderItem={(item) => <NFTCard nft={item} />}
+            viewAllLink="/explore/nfts?title=Featured NFTs"
+            grid
+          />
+        </motion.section>
+      )}
 
       {/* Search Results / Filtered View */}
       {(search || selectedGenre) && (
@@ -329,18 +374,6 @@ const Discover: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
-              {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users'].map(filter => (
-                <button 
-                  key={filter} 
-                  onClick={() => setActiveFilter(filter as any)} 
-                  className={`px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]' : 'bg-white/5 text-white/40 border-white/5 hover:text-white'}`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
           </div>
           
           {activeFilter === 'All' ? (
@@ -348,9 +381,10 @@ const Discover: React.FC = () => {
               {/* Tracks Section */}
               <SearchCategorySection 
                 title="Tracks" 
-                items={MOCK_TRACKS.filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
-                renderItem={(item) => <TrackCard track={item} variant="row" />}
+                items={MOCK_TRACKS.filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase())).slice(0, 10)}
+                renderItem={(item) => <TrackCard track={item} />}
                 viewAllLink={`/explore/tracks?title=Search Results: Tracks&search=${search}`}
+                grid
                 isEmpty={!MOCK_TRACKS.some(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase()))}
               />
 

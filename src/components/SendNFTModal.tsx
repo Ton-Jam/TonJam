@@ -60,7 +60,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
             </div>
             <h2 className="text-sm font-bold text-white uppercase tracking-[0.2em]">Transfer Protocol</h2>
           </div>
-          <button onClick={onClose} className="text-white/20 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-white/20 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Close Send Modal">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -84,15 +84,16 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-white/20 uppercase tracking-widest ml-1">Recipient Wallet Address</label>
+                  <label htmlFor="recipient-address" className="text-[10px] font-bold text-white/20 uppercase tracking-widest ml-1">Recipient Wallet Address</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20" />
                     <input 
+                      id="recipient-address"
                       type="text" 
                       value={recipient}
                       onChange={(e) => setRecipient(e.target.value)}
                       placeholder="EQD... or username"
-                      className="w-full bg-white/5 border border-white/10 rounded-[12px] py-4 pl-12 pr-4 text-xs text-white outline-none focus:border-blue-500/50 transition-all"
+                      className="w-full bg-white/5 border border-white/10 rounded-[12px] py-4 pl-12 pr-4 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
                     />
                   </div>
                 </div>
@@ -107,7 +108,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 <button 
                   onClick={handleSend}
                   disabled={!recipient}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[12px] font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[12px] font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Review Transfer <ArrowRight className="h-4 w-4" />
                 </button>
@@ -134,13 +135,13 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 <div className="flex gap-4">
                   <button 
                     onClick={() => setStep('input')}
-                    className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white/60 rounded-[12px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+                    className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white/60 rounded-[12px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
                     Back
                   </button>
                   <button 
                     onClick={confirmSend}
-                    className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 transition-all"
+                    className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
                     Confirm & Send
                   </button>
@@ -184,7 +185,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 </div>
                 <button 
                   onClick={onClose}
-                  className="mt-4 px-10 py-3 bg-white/5 hover:bg-white/10 text-white rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] transition-all"
+                  className="mt-4 px-10 py-3 bg-white/5 hover:bg-white/10 text-white rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Close Vault
                 </button>

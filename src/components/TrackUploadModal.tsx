@@ -87,7 +87,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
               {step === 3 && 'Frequency synchronized with network'}
             </p>
           </div>
-          <button onClick={resetAndClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+          <button onClick={resetAndClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close modal">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -98,7 +98,12 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Left: Upload Area */}
                 <div className="space-y-6">
-                  <div className="aspect-square rounded-[10px] border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-6 group hover:border-blue-500/50 transition-all cursor-pointer">
+                  <div 
+                    className="aspect-square rounded-[10px] border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-6 group hover:border-blue-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Select Audio File"
+                  >
                     <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <Music className="h-8 w-8 text-blue-500" />
                     </div>
@@ -106,7 +111,12 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                     <p className="text-[8px] text-white/20 uppercase tracking-widest mt-2">MP3, WAV, FLAC (Max 50MB)</p>
                   </div>
                   
-                  <div className="aspect-video rounded-[10px] border border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-4 group hover:border-blue-500/50 transition-all cursor-pointer">
+                  <div 
+                    className="aspect-video rounded-[10px] border border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-4 group hover:border-blue-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Add Cover Art"
+                  >
                     <ImageIcon className="h-6 w-6 text-white/20 mb-2 group-hover:text-blue-500 transition-colors" />
                     <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Add Cover Art</p>
                   </div>
@@ -118,20 +128,23 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                     <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Track Title</label>
                     <input 
                       type="text" 
+                      id="track-title"
                       value={formData.title}
                       onChange={(e) => setFormData({...formData, title: e.target.value})}
-                      className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus:border-blue-500/50 transition-all"
+                      className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
                       placeholder="Enter title..."
                       required
+                      aria-required="true"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Genre</label>
                     <select 
+                      id="track-genre"
                       value={formData.genre}
                       onChange={(e) => setFormData({...formData, genre: e.target.value})}
-                      className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus:border-blue-500/50 transition-all appearance-none"
+                      className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
                     >
                       <option value="Electronic">Electronic</option>
                       <option value="Techno">Techno</option>
@@ -147,14 +160,14 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                       <button 
                         type="button"
                         onClick={() => setFormData({...formData, isNFT: false})}
-                        className={`flex-1 py-3 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all ${!formData.isNFT ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/40'}`}
+                        className={`flex-1 py-3 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${!formData.isNFT ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/40'}`}
                       >
                         Streaming
                       </button>
                       <button 
                         type="button"
                         onClick={() => setFormData({...formData, isNFT: true})}
-                        className={`flex-1 py-3 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all ${formData.isNFT ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40'}`}
+                        className={`flex-1 py-3 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${formData.isNFT ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40'}`}
                       >
                         NFT Asset
                       </button>
@@ -166,10 +179,11 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                       <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Mint Price (TON)</label>
                       <input 
                         type="number" 
+                        id="mint-price"
                         step="0.1"
                         value={formData.price}
                         onChange={(e) => setFormData({...formData, price: e.target.value})}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus:border-blue-500/50 transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
                       />
                     </div>
                   )}
@@ -180,13 +194,13 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 <button 
                   type="button" 
                   onClick={resetAndClose}
-                  className="flex-1 py-4 bg-white/5 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all"
+                  className="flex-1 py-4 bg-white/5 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Next Step
                 </button>
@@ -233,14 +247,14 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 <button 
                   onClick={() => setStep(1)}
                   disabled={isUploading}
-                  className="flex-1 py-4 bg-white/5 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-50"
+                  className="flex-1 py-4 bg-white/5 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Back
                 </button>
                 <button 
                   onClick={handleUpload}
                   disabled={isUploading}
-                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   {isUploading ? (
                     <>
@@ -269,7 +283,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
               </p>
               <button 
                 onClick={resetAndClose}
-                className="mt-8 px-10 py-4 bg-white text-black rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all"
+                className="mt-8 px-10 py-4 bg-white text-black rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Return to Library
               </button>

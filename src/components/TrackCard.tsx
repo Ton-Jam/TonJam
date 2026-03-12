@@ -107,7 +107,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onClick={handleCardClick}
         onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
         role="button"
@@ -115,7 +115,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
         aria-label={`View track: ${track.title} by ${track.artist}`}
       >
         <div 
-          className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0 cursor-pointer" 
+          className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
           onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
           onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handlePlay(e as any)); }}
           role="button"
@@ -142,7 +142,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
               <img 
                 src={artist.avatarUrl} 
                 alt={artist.name} 
-                className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+                className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 onClick={handleArtistClick}
                 onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
                 role="button"
@@ -150,7 +150,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
               />
             )}
             <p 
-              className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block outline-none"
+              className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate hover:text-white hover:underline cursor-pointer inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
               onClick={handleArtistClick}
               onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
               role="button"
@@ -165,7 +165,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
            {onMint && !track.isNFT && (
              <button 
                onClick={handleMint}
-               className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+               className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                aria-label={`Mint NFT for ${track.title}`}
              >
                Mint NFT
@@ -176,7 +176,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
            </span>
            <button 
              onClick={handleOptions} 
-             className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+             className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
              aria-label="Track options"
              aria-haspopup="true"
            >
@@ -189,7 +189,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
 
   return (
     <div 
-      className="group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1"
+      className="group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[10px]"
       onClick={handleCardClick}
       onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
       role="button"
@@ -223,7 +223,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
              </div>
              <button 
                onClick={handleOptions} 
-               className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/60 transition-all pointer-events-auto ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+               className={`p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/60 transition-all pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                aria-label="Track options"
                aria-haspopup="true"
              >
@@ -236,7 +236,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
               <div className={`transition-all duration-300 transform ${isActive ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}>
                  {isActive && isPlaying ? (
                     <button 
-                      className="flex items-end justify-center gap-0.5 w-7 h-7 rounded-full bg-blue-600/90 backdrop-blur-md shadow-xl p-1.5 pointer-events-auto cursor-pointer"
+                      className="flex items-end justify-center gap-0.5 w-7 h-7 rounded-full bg-blue-600/90 backdrop-blur-md shadow-xl p-1.5 pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       onClick={handlePlay}
                       aria-label={`Pause ${track.title}`}
                     >
@@ -246,7 +246,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                     </button>
                  ) : (
                     <button 
-                      className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-colors pointer-events-auto cursor-pointer"
+                      className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-colors pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       onClick={handlePlay}
                       aria-label={`Play ${track.title}`}
                     >
@@ -268,7 +268,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
             <img 
               src={artist.avatarUrl} 
               alt={artist.name} 
-              className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer"
+              className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               onClick={handleArtistClick}
               onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
               role="button"
@@ -276,7 +276,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
             />
           )}
           <p 
-            className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block outline-none"
+            className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
             onClick={handleArtistClick}
             onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
             role="button"
@@ -290,10 +290,24 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
         
         {/* Stats */}
         <div className="flex items-center justify-between border-t border-white/5 pt-1.5">
-          {onMint && !track.isNFT ? (
+          {track.isNFT ? (
+            <div className="flex items-center justify-between w-full gap-2">
+               <div className="flex items-center gap-1">
+                 <img src={TJ_COIN_ICON} className="w-3 h-3" alt="TON" />
+                 <span className="text-[10px] font-bold text-white tracking-tighter">{track.price || '0'}</span>
+               </div>
+               <button 
+                onClick={handleCardClick}
+                className="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                aria-label={`Buy NFT ${track.title}`}
+              >
+                Buy
+              </button>
+            </div>
+          ) : onMint ? (
             <button 
               onClick={handleMint}
-              className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+              className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label={`Mint NFT for ${track.title}`}
             >
               Mint NFT

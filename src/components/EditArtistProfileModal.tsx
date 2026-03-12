@@ -68,7 +68,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
               <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Update your identity on the TON network</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+          <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close Edit Profile Modal">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -90,7 +90,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                   <button 
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-[8px] text-[9px] font-bold text-white uppercase tracking-widest hover:bg-white/20 transition-all flex items-center gap-2"
+                    className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-[8px] text-[9px] font-bold text-white uppercase tracking-widest hover:bg-white/20 transition-all flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
                     <Upload className="h-3 w-3" /> Upload New Banner
                   </button>
@@ -108,11 +108,11 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
 
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Artist Name</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:border-purple-500/50 transition-all text-white" />
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-white" aria-label="Artist Name" />
             </div>
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Origin Narrative (Bio)</label>
-              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus:border-purple-500/50 transition-all text-white resize-none" placeholder="Describe your sonic journey..." />
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-white/5 rounded-[10px] py-3 px-5 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-white resize-none" placeholder="Describe your sonic journey..." aria-label="Origin Narrative (Bio)" />
             </div>
             <div className="space-y-4">
               <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] mb-4">Social Relay Links</h3>
@@ -121,35 +121,35 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                   <label className="text-[8px] font-bold text-white/20 uppercase tracking-widest ml-1">X (Twitter)</label>
                   <div className="relative">
                     <Twitter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 h-3 w-3" />
-                    <input type="text" value={socials.x} onChange={(e) => setSocials({ ...socials, x: e.target.value })} className="w-full bg-white/5 rounded-[10px] py-3 pl-10 pr-5 text-[10px] outline-none focus:border-blue-400/50 transition-all text-white" placeholder="https://x.com/..." />
+                    <input type="text" value={socials.x} onChange={(e) => setSocials({ ...socials, x: e.target.value })} className="w-full bg-white/5 rounded-[10px] py-3 pl-10 pr-5 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-white" placeholder="https://x.com/..." aria-label="X (Twitter) Link" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[8px] font-bold text-white/20 uppercase tracking-widest ml-1">Telegram</label>
                   <div className="relative">
                     <Send className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 h-3 w-3" />
-                    <input type="text" value={socials.telegram} onChange={(e) => setSocials({ ...socials, telegram: e.target.value })} className="w-full bg-white/5 rounded-[10px] py-3 pl-10 pr-5 text-[10px] outline-none focus:border-blue-400/50 transition-all text-white" placeholder="https://t.me/..." />
+                    <input type="text" value={socials.telegram} onChange={(e) => setSocials({ ...socials, telegram: e.target.value })} className="w-full bg-white/5 rounded-[10px] py-3 pl-10 pr-5 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-white" placeholder="https://t.me/..." aria-label="Telegram Link" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[8px] font-bold text-white/20 uppercase tracking-widest ml-1">Spotify</label>
                   <div className="relative">
                     <Music className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 h-3 w-3" />
-                    <input type="text" value={socials.spotify} onChange={(e) => setSocials({ ...socials, spotify: e.target.value })} className="w-full bg-white/5 rounded-[10px] py-3 pl-10 pr-5 text-[10px] outline-none focus:border-green-400/50 transition-all text-white" placeholder="https://spotify.com/..." />
+                    <input type="text" value={socials.spotify} onChange={(e) => setSocials({ ...socials, spotify: e.target.value })} className="w-full bg-white/5 rounded-[10px] py-3 pl-10 pr-5 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-green-400 transition-all text-white" placeholder="https://spotify.com/..." aria-label="Spotify Link" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[8px] font-bold text-white/20 uppercase tracking-widest ml-1">Website</label>
                   <div className="relative">
                     <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 h-3 w-3" />
-                    <input type="text" value={socials.website} onChange={(e) => setSocials({ ...socials, website: e.target.value })} className="w-full bg-white/5 rounded-[10px] py-3 pl-10 pr-5 text-[10px] outline-none focus:border-blue-400/50 transition-all text-white" placeholder="https://..." />
+                    <input type="text" value={socials.website} onChange={(e) => setSocials({ ...socials, website: e.target.value })} className="w-full bg-white/5 rounded-[10px] py-3 pl-10 pr-5 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-white" placeholder="https://..." aria-label="Website Link" />
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div className="pt-4">
-            <button type="submit" className="w-full py-4 bg-purple-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-purple-600/20 hover:bg-purple-500 active:scale-[0.98] transition-all" > SAVE_IDENTITY_CHANGES </button>
+            <button type="submit" className="w-full py-4 bg-purple-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-purple-600/20 hover:bg-purple-500 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500" > SAVE_IDENTITY_CHANGES </button>
           </div>
         </form>
       </div>
