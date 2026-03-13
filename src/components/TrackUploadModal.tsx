@@ -72,22 +72,22 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={resetAndClose}></div>
+      <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={resetAndClose}></div>
       
-      <div className="relative w-full max-w-xl glass border border-white/10 bg-[#0a0a0a] rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-xl glass border border-border bg-[#0a0a0a] rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Header */}
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+        <div className="p-6 border-b border-border/50 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tighter uppercase">
+            <h2 className="text-xl font-bold text-foreground tracking-tighter uppercase">
               {step === 3 ? 'Upload Complete' : 'Forge New Frequency'}
             </h2>
-            <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
               {step === 1 && 'Step 1: Audio & Metadata'}
               {step === 2 && 'Step 2: Review & Broadcast'}
               {step === 3 && 'Frequency synchronized with network'}
             </p>
           </div>
-          <button onClick={resetAndClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close modal">
+          <button onClick={resetAndClose} className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close modal">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -99,7 +99,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 {/* Left: Upload Area */}
                 <div className="space-y-6">
                   <div 
-                    className="aspect-square rounded-[10px] border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-6 group hover:border-blue-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="aspect-square rounded-[10px] border border-dashed border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-6 group hover:border-blue-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     role="button"
                     tabIndex={0}
                     aria-label="Select Audio File"
@@ -107,31 +107,31 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                     <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <Music className="h-8 w-8 text-blue-500" />
                     </div>
-                    <p className="text-[10px] font-bold text-white uppercase tracking-widest text-center">Select Audio File</p>
-                    <p className="text-[8px] text-white/20 uppercase tracking-widest mt-2">MP3, WAV, FLAC (Max 50MB)</p>
+                    <p className="text-[10px] font-bold text-foreground uppercase tracking-widest text-center">Select Audio File</p>
+                    <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">MP3, WAV, FLAC (Max 50MB)</p>
                   </div>
                   
                   <div 
-                    className="aspect-video rounded-[10px] border border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-4 group hover:border-blue-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="aspect-video rounded-[10px] border border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-4 group hover:border-blue-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     role="button"
                     tabIndex={0}
                     aria-label="Add Cover Art"
                   >
-                    <ImageIcon className="h-6 w-6 text-white/20 mb-2 group-hover:text-blue-500 transition-colors" />
-                    <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Add Cover Art</p>
+                    <ImageIcon className="h-6 w-6 text-muted-foreground/50 mb-2 group-hover:text-blue-500 transition-colors" />
+                    <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Add Cover Art</p>
                   </div>
                 </div>
 
                 {/* Right: Metadata */}
                 <div className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Track Title</label>
+                    <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Track Title</label>
                     <input 
                       type="text" 
                       id="track-title"
                       value={formData.title}
                       onChange={(e) => setFormData({...formData, title: e.target.value})}
-                      className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-3 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
                       placeholder="Enter title..."
                       required
                       aria-required="true"
@@ -139,12 +139,12 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Genre</label>
+                    <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Genre</label>
                     <select 
                       id="track-genre"
                       value={formData.genre}
                       onChange={(e) => setFormData({...formData, genre: e.target.value})}
-                      className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-3 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
                     >
                       <option value="Electronic">Electronic</option>
                       <option value="Techno">Techno</option>
@@ -155,19 +155,19 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Release Type</label>
+                    <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Release Type</label>
                     <div className="flex gap-2">
                       <button 
                         type="button"
                         onClick={() => setFormData({...formData, isNFT: false})}
-                        className={`flex-1 py-3 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${!formData.isNFT ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/40'}`}
+                        className={`flex-1 py-3 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${!formData.isNFT ? 'bg-blue-600 text-foreground' : 'bg-muted/50 text-muted-foreground'}`}
                       >
                         Streaming
                       </button>
                       <button 
                         type="button"
                         onClick={() => setFormData({...formData, isNFT: true})}
-                        className={`flex-1 py-3 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${formData.isNFT ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40'}`}
+                        className={`flex-1 py-3 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${formData.isNFT ? 'bg-amber-500 text-background' : 'bg-muted/50 text-muted-foreground'}`}
                       >
                         NFT Asset
                       </button>
@@ -176,14 +176,14 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
 
                   {formData.isNFT && (
                     <div className="space-y-2 animate-in slide-in-from-top-2">
-                      <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Mint Price (TON)</label>
+                      <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Mint Price (TON)</label>
                       <input 
                         type="number" 
                         id="mint-price"
                         step="0.1"
                         value={formData.price}
                         onChange={(e) => setFormData({...formData, price: e.target.value})}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-[5px] p-3 text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                        className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-3 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
                       />
                     </div>
                   )}
@@ -194,13 +194,13 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 <button 
                   type="button" 
                   onClick={resetAndClose}
-                  className="flex-1 py-4 bg-white/5 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-1 py-4 bg-muted/50 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Next Step
                 </button>
@@ -210,35 +210,35 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
 
           {step === 2 && (
             <div className="space-y-8">
-              <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[10px] space-y-6">
+              <div className="p-6 bg-foreground/[0.02] border border-border/50 rounded-[10px] space-y-6">
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-[5px] bg-neutral-900 overflow-hidden border border-white/10">
+                  <div className="w-24 h-24 rounded-[5px] bg-neutral-900 overflow-hidden border border-border">
                     <img src={`https://picsum.photos/400/400?seed=${formData.title}`} className="w-full h-full object-cover" alt="" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white uppercase tracking-tight">{formData.title || 'Untitled Frequency'}</h3>
+                    <h3 className="text-xl font-bold text-foreground uppercase tracking-tight">{formData.title || 'Untitled Frequency'}</h3>
                     <p className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.3em] mt-1">{formData.genre}</p>
                     <div className="flex items-center gap-4 mt-4">
                       <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Audio Ready</span>
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Audio Ready</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Metadata Valid</span>
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Metadata Valid</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-black/40 rounded-[5px] border border-white/5">
-                    <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Release Type</p>
-                    <p className="text-xs font-bold text-white uppercase">{formData.isNFT ? 'NFT Asset' : 'Standard Streaming'}</p>
+                  <div className="p-4 bg-background/40 rounded-[5px] border border-border/50">
+                    <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Release Type</p>
+                    <p className="text-xs font-bold text-foreground uppercase">{formData.isNFT ? 'NFT Asset' : 'Standard Streaming'}</p>
                   </div>
-                  <div className="p-4 bg-black/40 rounded-[5px] border border-white/5">
-                    <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Network Fee</p>
-                    <p className="text-xs font-bold text-white uppercase">~0.02 TON</p>
+                  <div className="p-4 bg-background/40 rounded-[5px] border border-border/50">
+                    <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Network Fee</p>
+                    <p className="text-xs font-bold text-foreground uppercase">~0.02 TON</p>
                   </div>
                 </div>
               </div>
@@ -247,14 +247,14 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 <button 
                   onClick={() => setStep(1)}
                   disabled={isUploading}
-                  className="flex-1 py-4 bg-white/5 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-1 py-4 bg-muted/50 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Back
                 </button>
                 <button 
                   onClick={handleUpload}
                   disabled={isUploading}
-                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   {isUploading ? (
                     <>
@@ -277,13 +277,13 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
               <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mb-4 animate-in zoom-in duration-500">
                 <CheckCircle2 className="h-10 w-10" />
               </div>
-              <h3 className="text-2xl font-bold text-white tracking-tighter uppercase">Broadcast Successful</h3>
-              <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] max-w-xs leading-relaxed">
+              <h3 className="text-2xl font-bold text-foreground tracking-tighter uppercase">Broadcast Successful</h3>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] max-w-xs leading-relaxed">
                 Your frequency has been synchronized with the TON network and is now available for streaming.
               </p>
               <button 
                 onClick={resetAndClose}
-                className="mt-8 px-10 py-4 bg-white text-black rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="mt-8 px-10 py-4 bg-foreground text-background rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Return to Library
               </button>

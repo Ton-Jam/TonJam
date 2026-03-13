@@ -15,7 +15,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ title, viewAllLink, onAct
   return (
     <div className={`flex items-end justify-between mb-6 ${className}`}>
       <div className="space-y-1">
-        <h2 className="text-lg font-bold uppercase tracking-tighter text-white leading-none">{title}</h2>
+        <h2 className="text-lg font-bold uppercase tracking-tighter text-foreground leading-none">{title}</h2>
       </div>
       {viewAllLink && (
         <Link 

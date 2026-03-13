@@ -111,9 +111,9 @@ const Marketplace: React.FC = () => {
   };
 
   return (
-    <div className="animate-in fade-in duration-700 pb-40 w-full min-h-screen bg-black">
+    <div className="animate-in fade-in duration-700 pb-40 w-full min-h-screen bg-background">
       {/* 1. COMPACT MARKET TICKER - Adjusted for Global Header */}
-      <div className="sticky top-[56px] z-[38] bg-black/90 backdrop-blur-xl border-b border-white/5 py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap">
+      <div className="sticky top-[64px] z-[38] bg-background/90 backdrop-blur-xl border-b border-border/50 py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap">
         <div className="flex gap-20 animate-[marquee_40s_linear_infinite]">
           {[
             { label: 'TON/USD', val: '$5.42', up: true },
@@ -127,7 +127,7 @@ const Marketplace: React.FC = () => {
           ].map((stat, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="text-[7px] font-bold uppercase text-blue-500/50 tracking-[0.2em]">{stat.label}</span>
-              <span className="text-[9px] font-bold text-white tracking-tighter font-mono bg-white/5 px-1.5 py-0.5 rounded-[4px]">{stat.val}</span>
+              <span className="text-[9px] font-bold text-foreground tracking-tighter font-mono bg-muted/50 px-1.5 py-0.5 rounded-[4px]">{stat.val}</span>
               <TrendingUp className={`h-2.5 w-2.5 ${stat.up ? 'text-emerald-500' : 'text-rose-500 rotate-180'}`} />
             </div>
           ))}
@@ -140,11 +140,11 @@ const Marketplace: React.FC = () => {
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]"></div>
-                <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.5em]">Live_Auction_Relay</h3>
+                <h3 className="text-[11px] font-bold text-foreground uppercase tracking-[0.5em]">Live_Auction_Relay</h3>
               </div>
               <div className="flex gap-2">
                 {topBiddedNfts.map((_, i) => (
-                  <div key={i} className="w-1 h-1 rounded-full bg-white/10"></div>
+                  <div key={i} className="w-1 h-1 rounded-full bg-muted"></div>
                 ))}
               </div>
             </div>
@@ -152,10 +152,10 @@ const Marketplace: React.FC = () => {
             <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-8 pb-4" >
               {topBiddedNfts.map((nft) => (
                 <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full lg:w-[calc(50%-16px)] snap-center cursor-pointer group" >
-                  <div className="relative aspect-[16/7] bg-[#0a0a0a] border border-white/5 rounded-[12px] overflow-hidden transition-all group-hover:border-white/20 shadow-2xl">
+                  <div className="relative aspect-[16/7] bg-[#0a0a0a] border border-border/50 rounded-[12px] overflow-hidden transition-all group-hover:border-border/80 shadow-2xl">
                     <img src={nft.imageUrl} className="w-full h-full object-cover grayscale-[0.4] group-hover:grayscale-0 transition-all duration-[10s] group-hover:scale-105" alt={nft.title} />
                     <div className="absolute inset-0 flex items-center justify-center p-5">
-                      <button className="px-6 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-[6px] text-[10px] font-bold uppercase tracking-widest text-white transition-all active:scale-95"> BID </button>
+                      <button className="px-6 py-2 bg-muted hover:bg-muted/80 backdrop-blur-md rounded-[6px] text-[10px] font-bold uppercase tracking-widest text-foreground transition-all active:scale-95"> BID </button>
                     </div>
                   </div>
                 </div>
@@ -165,17 +165,17 @@ const Marketplace: React.FC = () => {
         </section>
 
       {/* 3. REFINED CONTROLS - Compact Pill Filters */}
-      <div className="sticky top-[80px] z-[37] bg-black/95 backdrop-blur-2xl border-b border-white/5 py-3 w-full px-6 mb-8">
+      <div className="sticky top-[96px] z-[37] bg-background/95 backdrop-blur-2xl border-b border-border/50 py-3 w-full px-6 mb-8">
         <div className="max-w-[1600px] mx-auto flex flex-col gap-4">
           <div className="flex overflow-x-auto no-scrollbar gap-2 w-full">
             <div className="flex gap-2">
               {['All', ...Array.from(new Set(MOCK_TRACKS.map(t => t.genre)))].map(g => (
-                <button key={g} onClick={() => setGenreFilter(g)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${genreFilter === g ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'}`}>
+                <button key={g} onClick={() => setGenreFilter(g)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${genreFilter === g ? 'bg-blue-600 text-foreground border-blue-500' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'}`}>
                   {g}
                 </button>
               ))}
               {['All', ...MOCK_ARTISTS.map(a => a.name)].map(a => (
-                <button key={a} onClick={() => setArtistFilter(a)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${artistFilter === a ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'}`}>
+                <button key={a} onClick={() => setArtistFilter(a)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${artistFilter === a ? 'bg-blue-600 text-foreground border-blue-500' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'}`}>
                   {a}
                 </button>
               ))}
@@ -185,12 +185,12 @@ const Marketplace: React.FC = () => {
                   else if (p === '0-100') setPriceRange([0, 100]);
                   else if (p === '100-500') setPriceRange([100, 500]);
                   else if (p === '500+') setPriceRange([500, 10000]);
-                }} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${
+                }} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${
                   (p === 'All' && priceRange[0] === 0 && priceRange[1] === 1000) ||
                   (p === '0-100' && priceRange[0] === 0 && priceRange[1] === 100) ||
                   (p === '100-500' && priceRange[0] === 100 && priceRange[1] === 500) ||
                   (p === '500+' && priceRange[0] === 500)
-                  ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'
+                  ? 'bg-blue-600 text-foreground border-blue-500' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
                 }`}>
                   {p}
                 </button>
@@ -202,7 +202,7 @@ const Marketplace: React.FC = () => {
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab)} 
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10' }`} 
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-blue-500' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted' }`} 
               >
                 {tab}
                 {tab === 'My Bids' && userBids.length > 0 && (
@@ -219,8 +219,8 @@ const Marketplace: React.FC = () => {
         <div className="space-y-16">
           <section>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-white">Trending Track NFTs</h2>
-              <button onClick={() => navigate('/explore/nfts?filter=trending_tracks')} className="text-[10px] font-bold text-white/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-foreground">Trending Track NFTs</h2>
+              <button onClick={() => navigate('/explore/nfts?filter=trending_tracks')} className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                 VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -235,8 +235,8 @@ const Marketplace: React.FC = () => {
 
           <section>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-white">Recently Listed</h2>
-              <button onClick={() => navigate('/explore/nfts?filter=recent')} className="text-[10px] font-bold text-white/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-foreground">Recently Listed</h2>
+              <button onClick={() => navigate('/explore/nfts?filter=recent')} className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                 VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -251,8 +251,8 @@ const Marketplace: React.FC = () => {
 
           <section>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-white">Most Bidded NFTs</h2>
-              <button onClick={() => navigate('/explore/nfts?filter=most_bidded')} className="text-[10px] font-bold text-white/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-foreground">Most Bidded NFTs</h2>
+              <button onClick={() => navigate('/explore/nfts?filter=most_bidded')} className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                 VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -267,8 +267,8 @@ const Marketplace: React.FC = () => {
 
           <section>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-white">Recommended Tracks</h2>
-              <button onClick={() => navigate('/explore/tracks')} className="text-[10px] font-bold text-white/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-foreground">Recommended Tracks</h2>
+              <button onClick={() => navigate('/explore/tracks')} className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                 VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -283,8 +283,8 @@ const Marketplace: React.FC = () => {
 
           <section>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-white">Trending Creators</h2>
-              <button onClick={() => navigate('/explore/artists')} className="text-[10px] font-bold text-white/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-foreground">Trending Creators</h2>
+              <button onClick={() => navigate('/explore/artists')} className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                 VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -302,10 +302,10 @@ const Marketplace: React.FC = () => {
         <section className="mb-24">
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-5">
-              <div className="w-1.5 h-10 bg-white/10 rounded-full"></div>
-              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-white leading-none">Market Explorer</h2>
+              <div className="w-1.5 h-10 bg-muted rounded-full"></div>
+              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-foreground leading-none">Market Explorer</h2>
             </div>
-            <div className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">
+            <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">
               {filteredNfts.length} Protocols Found
             </div>
           </div>
@@ -324,13 +324,13 @@ const Marketplace: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="py-40 flex flex-col items-center justify-center rounded-[16px] text-center bg-[#050505] border border-white/5">
-              <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center mb-8">
-                <Satellite className="h-10 w-10 text-white/10 animate-pulse" />
+            <div className="py-40 flex flex-col items-center justify-center rounded-[16px] text-center bg-[#050505] border border-border/50">
+              <div className="w-24 h-24 rounded-full bg-foreground/[0.02] border border-border/50 flex items-center justify-center mb-8">
+                <Satellite className="h-10 w-10 text-muted-foreground/30 animate-pulse" />
               </div>
-              <h3 className="text-2xl font-bold uppercase tracking-tighter text-white/40">Signal Mismatch</h3>
-              <p className="text-[11px] font-bold text-white/10 uppercase tracking-[0.5em] mt-3 px-12 max-w-md mx-auto leading-loose">No matching signals detected in the market relay. Adjust your scanner parameters.</p>
-              <button onClick={() => { setActiveTab('Trending'); setSearchQuery(''); }} className="px-12 py-5 mt-12 bg-white/5 border border-white/10 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-95" > Reset Scanner </button>
+              <h3 className="text-2xl font-bold uppercase tracking-tighter text-muted-foreground">Signal Mismatch</h3>
+              <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.5em] mt-3 px-12 max-w-md mx-auto leading-loose">No matching signals detected in the market relay. Adjust your scanner parameters.</p>
+              <button onClick={() => { setActiveTab('Trending'); setSearchQuery(''); }} className="px-12 py-5 mt-12 bg-muted/50 border border-border rounded-[10px] text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-95" > Reset Scanner </button>
             </div>
           )}
         </section>
@@ -344,12 +344,12 @@ const Marketplace: React.FC = () => {
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
                 <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.6em]">Genesis Whitelist</span>
               </div>
-              <h4 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-white leading-none mb-6">THE NEURAL <br /> DROP</h4>
-              <p className="text-xs text-white/30 uppercase tracking-[0.4em] max-w-md leading-relaxed">Subscribe to the relay for exclusive mint protocols and early access to genesis artifacts.</p>
+              <h4 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-foreground leading-none mb-6">THE NEURAL <br /> DROP</h4>
+              <p className="text-xs text-foreground/30 uppercase tracking-[0.4em] max-w-md leading-relaxed">Subscribe to the relay for exclusive mint protocols and early access to genesis artifacts.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto relative z-10">
-              <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-black/60 border border-white/10 rounded-[10px] px-6 py-5 text-xs font-bold outline-none text-white focus:border-blue-500/50 transition-all placeholder:text-white/10" />
-              <button className="px-12 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/30 active:scale-95 transition-all">SYNC_NOW</button>
+              <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-background/60 border border-border rounded-[10px] px-6 py-5 text-xs font-bold outline-none text-foreground focus:border-blue-500/50 transition-all placeholder:text-muted-foreground/30" />
+              <button className="px-12 py-5 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[11px] uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/30 active:scale-95 transition-all">SYNC_NOW</button>
             </div>
           </div>
         </section>

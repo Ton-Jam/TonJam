@@ -27,22 +27,27 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
     return (
       <div 
         onClick={handleCardClick}
-        className="group flex flex-col items-center cursor-pointer text-center p-2 rounded-[8px] hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 w-[120px]"
+        className="group flex flex-col items-center cursor-pointer text-center p-2 rounded-[8px] hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 w-[120px]"
         role="button"
         tabIndex={0}
         aria-label={`View artist: ${artist.name}`}
       >
         <div className="relative w-16 h-16 mb-2">
-          <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full rounded-full object-cover" />
+          <img 
+            src={artist.avatarUrl} 
+            alt={artist.name} 
+            className="w-full h-full rounded-full object-cover" 
+            onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }}
+          />
         </div>
-        <h3 className="text-[10px] font-bold text-white tracking-tight truncate w-full mb-0.5">{artist.name}</h3>
-        <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-1">{artist.followers.toLocaleString()} Followers</p>
+        <h3 className="text-[10px] font-bold text-foreground tracking-tight truncate w-full mb-0.5">{artist.name}</h3>
+        <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{artist.followers.toLocaleString()} Followers</p>
         <button 
           onClick={handleFollowClick}
           className={`w-full py-1 rounded-[4px] flex items-center justify-center gap-1 transition-all text-[8px] font-bold uppercase tracking-widest
             ${isFollowing 
-              ? 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white' 
-              : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20'
+              ? 'bg-muted text-muted-foreground/80 hover:bg-muted/80 hover:text-foreground' 
+              : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-600/20'
             }
           `}
         >
@@ -56,7 +61,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
     return (
       <div 
         onClick={handleCardClick}
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -68,11 +73,16 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
         aria-label={`View artist: ${artist.name}`}
       >
         <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-          <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover" />
+          <img 
+            src={artist.avatarUrl} 
+            alt={artist.name} 
+            className="w-full h-full object-cover" 
+            onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }}
+          />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-white group-hover:text-blue-400 transition-colors">{artist.name}</h4>
-          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate">
+          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">{artist.name}</h4>
+          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">
             {artist.genre || 'Electronic'}
           </p>
         </div>
@@ -80,8 +90,8 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
           onClick={handleFollowClick}
           className={`px-3 py-1.5 rounded-full flex items-center justify-center gap-1.5 transition-all text-[8px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
             ${isFollowing 
-              ? 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white' 
-              : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20'
+              ? 'bg-muted text-muted-foreground/80 hover:bg-muted/80 hover:text-foreground' 
+              : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-600/20'
             }
           `}
           aria-label={isFollowing ? `Unfollow ${artist.name}` : `Follow ${artist.name}`}
@@ -95,7 +105,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
   return (
     <div 
       onClick={handleCardClick}
-      className="group flex flex-col items-center cursor-pointer text-center h-full w-full p-4 rounded-xl hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="group flex flex-col items-center cursor-pointer text-center h-full w-full p-4 rounded-xl hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -112,25 +122,26 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
             src={artist.avatarUrl} 
             alt={artist.name} 
             className="w-full h-full object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }}
           />
         </div>
         
         {artist.verified && (
-          <div className="absolute bottom-1 right-1 bg-black rounded-full p-0.5 z-10">
+          <div className="absolute bottom-1 right-1 bg-background rounded-full p-0.5 z-10">
             <CheckCircle2 className="w-4 h-4 text-blue-500 fill-blue-500/20" />
           </div>
         )}
       </div>
       
-      <h3 className="text-xs sm:text-sm md:text-base font-bold text-white tracking-tight mb-1 group-hover:text-blue-400 transition-colors truncate w-full max-w-full px-2">
+      <h3 className="text-xs sm:text-sm md:text-base font-bold text-foreground tracking-tight mb-1 group-hover:text-blue-400 transition-colors truncate w-full max-w-full px-2">
         {artist.name}
       </h3>
       
-      <p className="text-[8px] sm:text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">
+      <p className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
         {artist.genre || 'Electronic'}
       </p>
       
-      <p className="text-[7px] sm:text-[8px] font-bold text-white/20 uppercase tracking-widest mb-3">
+      <p className="text-[7px] sm:text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-3">
         {artist.followers.toLocaleString()} Followers
       </p>
       
@@ -138,8 +149,8 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
         onClick={handleFollowClick}
         className={`mt-auto px-3 sm:px-4 py-1.5 rounded-full flex items-center justify-center gap-1.5 transition-all text-[8px] sm:text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
           ${isFollowing 
-            ? 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white' 
-            : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20'
+            ? 'bg-muted text-muted-foreground/80 hover:bg-muted/80 hover:text-foreground' 
+            : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-600/20'
           }
         `}
         title={isFollowing ? "Unfollow" : "Follow"}

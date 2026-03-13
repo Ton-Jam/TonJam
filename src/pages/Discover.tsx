@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import ActionSearchBar from '@/components/kokonutui/action-search-bar';
+import DiscoverSearchBar from '@/components/DiscoverSearchBar';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, X, Music, User, Gem, RotateCcw, Satellite, ChevronRight } from 'lucide-react';
+import { Search, X, Music, User, Gem, RotateCcw, Satellite, ChevronRight, Sparkles } from 'lucide-react';
 
 import { MOCK_TRACKS, MOCK_NFTS, GENRES, MOCK_USERS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
@@ -294,168 +294,195 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-16 w-full pb-32">
+    <div className="w-full pb-32">
       {/* Search Section */}
-      <div className="sticky top-0 z-50 w-full bg-black/80 backdrop-blur-xl py-4 border-b border-white/5" ref={searchContainerRef}>
-        <div className="flex flex-col items-center justify-center gap-4">
-          <div className="w-full max-w-3xl relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-10 group-focus-within:opacity-30 transition duration-1000 group-focus-within:duration-200"></div>
-            <div className="relative">
-              <ActionSearchBar 
-                actions={searchActions}
-                onQueryChange={(q) => setSearch(q)}
-                placeholder="Search tracks, artists, or NFTs..."
-              />
-            </div>
-          </div>
-          
-          {/* Horizontal Filter Buttons */}
-          <div className="w-full max-w-3xl flex overflow-x-auto no-scrollbar gap-2 pb-2">
-            {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users'].map(filter => (
+      <div className="sticky top-[64px] z-50 w-full bg-background/95 backdrop-blur-xl border-b border-border/50" ref={searchContainerRef}>
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="w-full flex flex-col md:flex-row items-center gap-3">
+              <div className="flex-1 relative group w-full">
+                <div className="relative w-full">
+                  <DiscoverSearchBar 
+                    onSearch={(q) => setSearch(q)}
+                    placeholder="Search tracks, artists, or NFTs..."
+                    actions={searchActions}
+                    onVoiceSearch={toggleVoiceSearch}
+                    isListening={isListening}
+                  />
+                </div>
+              </div>
+              
               <button 
-                key={filter} 
-                onClick={() => setActiveFilter(filter as any)} 
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-500' : 'bg-white/10 text-white/60 border-white/10 hover:bg-white/20'}`}
+                onClick={handleSurpriseMe}
+                className="flex-shrink-0 px-3 py-1.5 bg-muted/50 border border-border rounded-full text-[8px] font-bold uppercase tracking-widest text-foreground hover:bg-muted hover:border-blue-500/50 transition-all flex items-center gap-1.5 group/surprise"
               >
-                {filter}
+                <Sparkles className="h-3 w-3 text-amber-500 group-hover/surprise:animate-spin" />
+                Surprise Me
               </button>
-            ))}
+            </div>
+            
+            {/* Horizontal Filter Buttons */}
+            <div className="w-full flex overflow-x-auto no-scrollbar gap-2 pb-2 justify-center">
+              {[
+                { id: 'All', icon: Sparkles },
+                { id: 'Tracks', icon: Music },
+                { id: 'Artists', icon: User },
+                { id: 'NFTs', icon: Gem },
+                { id: 'Playlists', icon: RotateCcw },
+                { id: 'Users', icon: Satellite }
+              ].map(filter => (
+                <button 
+                  key={filter.id} 
+                  onClick={() => setActiveFilter(filter.id as any)} 
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-1.5 border ${
+                    activeFilter === filter.id 
+                      ? 'bg-blue-600 text-foreground border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
+                      : 'bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted hover:text-foreground hover:border-border/80'
+                  }`}
+                >
+                  <filter.icon className={`h-3 w-3 ${activeFilter === filter.id ? 'text-foreground' : 'text-foreground/30'}`} />
+                  {filter.id}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Recommendations Section (Visible when no search) */}
-      {!search && !selectedGenre && (
-        <motion.section 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-12 animate-in fade-in duration-700"
-        >
-          <SearchCategorySection 
-            title="Trending Tracks" 
-            items={trendingTracks.slice(0, 5)}
-            renderItem={(item) => <TrackCard track={item} />}
-            viewAllLink="/explore/tracks?title=Trending Tracks"
-            grid
-          />
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 space-y-16 mt-12">
+        {/* Recommendations Section (Visible when no search) */}
+        {!search && !selectedGenre && (
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-12 animate-in fade-in duration-700"
+          >
+            <SearchCategorySection 
+              title="Trending Tracks" 
+              items={trendingTracks.slice(0, 5)}
+              renderItem={(item) => <TrackCard track={item} />}
+              viewAllLink="/explore/tracks?title=Trending Tracks"
+              grid
+            />
 
-          <SearchCategorySection 
-            title="Top Artists" 
-            items={artists.slice(0, 5)}
-            renderItem={(item) => <ArtistListItem artist={item} />}
-            viewAllLink="/explore/artists?title=Top Artists"
-          />
+            <SearchCategorySection 
+              title="Top Artists" 
+              items={artists.slice(0, 5)}
+              renderItem={(item) => <ArtistListItem artist={item} />}
+              viewAllLink="/explore/artists?title=Top Artists"
+            />
 
-          <SearchCategorySection 
-            title="Featured NFTs" 
-            items={MOCK_NFTS.slice(0, 5)}
-            renderItem={(item) => <NFTCard nft={item} />}
-            viewAllLink="/explore/nfts?title=Featured NFTs"
-            grid
-          />
-        </motion.section>
-      )}
+            <SearchCategorySection 
+              title="Featured NFTs" 
+              items={MOCK_NFTS.slice(0, 5)}
+              renderItem={(item) => <NFTCard nft={item} />}
+              viewAllLink="/explore/nfts?title=Featured NFTs"
+              grid
+            />
+          </motion.section>
+        )}
 
-      {/* Search Results / Filtered View */}
-      {(search || selectedGenre) && (
-        <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
-            <div className="flex items-center gap-6">
-              <button onClick={clearInput} className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-95">
-                <RotateCcw className="h-5 w-5" />
-              </button>
-              <div>
-                <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-2">
-                  {search ? `Results for "${search}"` : `Genre: ${selectedGenre}`}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{filteredResults.length} Signals Detected</p>
+        {/* Search Results / Filtered View */}
+        {(search || selectedGenre) && (
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-border/50">
+              <div className="flex items-center gap-6">
+                <button onClick={clearInput} className="w-12 h-12 rounded-xl bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-95">
+                  <RotateCcw className="h-5 w-5" />
+                </button>
+                <div>
+                  <h2 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none mb-2">
+                    {search ? `Results for "${search}"` : `Genre: ${selectedGenre}`}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">{filteredResults.length} Signals Detected</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          
-          {activeFilter === 'All' ? (
-            <div className="space-y-12">
-              {/* Tracks Section */}
-              <SearchCategorySection 
-                title="Tracks" 
-                items={MOCK_TRACKS.filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase())).slice(0, 10)}
-                renderItem={(item) => <TrackCard track={item} />}
-                viewAllLink={`/explore/tracks?title=Search Results: Tracks&search=${search}`}
-                grid
-                isEmpty={!MOCK_TRACKS.some(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase()))}
-              />
+            
+            {activeFilter === 'All' ? (
+              <div className="space-y-12">
+                {/* Tracks Section */}
+                <SearchCategorySection 
+                  title="Tracks" 
+                  items={MOCK_TRACKS.filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase())).slice(0, 10)}
+                  renderItem={(item) => <TrackCard track={item} />}
+                  viewAllLink={`/explore/tracks?title=Search Results: Tracks&search=${search}`}
+                  grid
+                  isEmpty={!MOCK_TRACKS.some(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase()))}
+                />
 
-              {/* Artists Section */}
-              <SearchCategorySection 
-                title="Artists" 
-                items={artists.filter(a => a.name.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
-                renderItem={(item) => <ArtistListItem artist={item} />}
-                viewAllLink={`/explore/artists?title=Search Results: Artists&search=${search}`}
-                isEmpty={!artists.some(a => a.name.toLowerCase().includes(search.toLowerCase()))}
-              />
+                {/* Artists Section */}
+                <SearchCategorySection 
+                  title="Artists" 
+                  items={artists.filter(a => a.name.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                  renderItem={(item) => <ArtistListItem artist={item} />}
+                  viewAllLink={`/explore/artists?title=Search Results: Artists&search=${search}`}
+                  isEmpty={!artists.some(a => a.name.toLowerCase().includes(search.toLowerCase()))}
+                />
 
-              {/* NFTs Section */}
-              <SearchCategorySection 
-                title="NFTs" 
-                items={MOCK_NFTS.filter(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.creator.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
-                renderItem={(item) => <NFTCard nft={item} />}
-                viewAllLink={`/explore/nfts?title=Search Results: NFTs&search=${search}`}
-                grid
-                isEmpty={!MOCK_NFTS.some(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.creator.toLowerCase().includes(search.toLowerCase()))}
-              />
+                {/* NFTs Section */}
+                <SearchCategorySection 
+                  title="NFTs" 
+                  items={MOCK_NFTS.filter(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.creator.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                  renderItem={(item) => <NFTCard nft={item} />}
+                  viewAllLink={`/explore/nfts?title=Search Results: NFTs&search=${search}`}
+                  grid
+                  isEmpty={!MOCK_NFTS.some(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.creator.toLowerCase().includes(search.toLowerCase()))}
+                />
 
-              {/* Playlists Section */}
-              <SearchCategorySection 
-                title="Playlists" 
-                items={allPlaylists.filter(p => p.title.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
-                renderItem={(item) => <PlaylistListItem playlist={item} onClick={() => navigate(`/playlist/${item.id}`)} />}
-                viewAllLink={`/explore/playlists?title=Search Results: Playlists&search=${search}`}
-                isEmpty={!allPlaylists.some(p => p.title.toLowerCase().includes(search.toLowerCase()))}
-              />
+                {/* Playlists Section */}
+                <SearchCategorySection 
+                  title="Playlists" 
+                  items={allPlaylists.filter(p => p.title.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                  renderItem={(item) => <PlaylistListItem playlist={item} onClick={() => navigate(`/playlist/${item.id}`)} />}
+                  viewAllLink={`/explore/playlists?title=Search Results: Playlists&search=${search}`}
+                  isEmpty={!allPlaylists.some(p => p.title.toLowerCase().includes(search.toLowerCase()))}
+                />
 
-              {/* Users Section */}
-              <SearchCategorySection 
-                title="Users" 
-                items={MOCK_USERS.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
-                renderItem={(item) => <UserCard user={item} />}
-                viewAllLink={`/explore/users?title=Search Results: Users&search=${search}`}
-                grid
-                isEmpty={!MOCK_USERS.some(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase()))}
-              />
-            </div>
-          ) : (
-            <>
-              {visibleResults.length > 0 ? (
-                <div className={`grid gap-4 ${activeFilter === 'Tracks' || activeFilter === 'Artists' || activeFilter === 'Playlists' ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
-                  {visibleResults.map((item, idx) => (
-                    <div key={item.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
-                      {activeFilter === 'Tracks' && <TrackCard track={item as Track} variant="row" />}
-                      {activeFilter === 'Artists' && <ArtistListItem artist={item as any} />}
-                      {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
-                      {activeFilter === 'Playlists' && <PlaylistListItem playlist={item as any} onClick={() => navigate(`/playlist/${item.id}`)} />}
-                      {activeFilter === 'Users' && <UserCard user={item as any} />}
-                    </div>
-                  ))}
-                  {visibleResults.length < filteredResults.length && (
-                    <div ref={sentinelRef} className="col-span-full py-12 flex items-center justify-center">
-                      <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="py-24 text-center flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-[10px]">
-                  <Satellite className="h-12 w-12 text-white/5 mb-4 animate-pulse" />
-                  <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
-                  <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
-                </div>
-              )}
-            </>
-          )}
-        </section>
-      )}
+                {/* Users Section */}
+                <SearchCategorySection 
+                  title="Users" 
+                  items={MOCK_USERS.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                  renderItem={(item) => <UserCard user={item} />}
+                  viewAllLink={`/explore/users?title=Search Results: Users&search=${search}`}
+                  grid
+                  isEmpty={!MOCK_USERS.some(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase()))}
+                />
+              </div>
+            ) : (
+              <>
+                {visibleResults.length > 0 ? (
+                  <div className={`grid gap-4 ${activeFilter === 'Tracks' || activeFilter === 'Artists' || activeFilter === 'Playlists' ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
+                    {visibleResults.map((item, idx) => (
+                      <div key={item.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
+                        {activeFilter === 'Tracks' && <TrackCard track={item as Track} variant="row" />}
+                        {activeFilter === 'Artists' && <ArtistListItem artist={item as any} />}
+                        {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
+                        {activeFilter === 'Playlists' && <PlaylistListItem playlist={item as any} onClick={() => navigate(`/playlist/${item.id}`)} />}
+                        {activeFilter === 'Users' && <UserCard user={item as any} />}
+                      </div>
+                    ))}
+                    {visibleResults.length < filteredResults.length && (
+                      <div ref={sentinelRef} className="col-span-full py-12 flex items-center justify-center">
+                        <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="py-24 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-[10px]">
+                    <Satellite className="h-12 w-12 text-foreground/5 mb-4 animate-pulse" />
+                    <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
+                    <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+        )}
+      </div>
     </div>
   );
 };
@@ -482,7 +509,7 @@ const SearchCategorySection = ({
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">{title}</h3>
+        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{title}</h3>
         <button 
           onClick={() => navigate(viewAllLink)}
           className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-widest flex items-center gap-1"

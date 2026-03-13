@@ -8,6 +8,7 @@ export interface Track {
   audioUrl: string;
   duration: number; // in seconds
   genre: string;
+  mood?: string;
   isNFT: boolean;
   artistVerified?: boolean;
   price?: string; 
@@ -97,6 +98,23 @@ export interface RoyaltySplit {
   label?: string; // e.g. "Producer", "Manager"
 }
 
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  venue: string;
+  location: string;
+  ticketUrl?: string;
+}
+
+export interface Collaboration {
+  id: string;
+  artistName: string;
+  trackTitle: string;
+  coverUrl: string;
+}
+
 export interface Artist {
   id: string;
   name: string;
@@ -125,6 +143,8 @@ export interface Artist {
     nftSales: string;
     total: string;
   };
+  events?: Event[];
+  collaborations?: Collaboration[];
 }
 
 export interface Comment {
@@ -200,6 +220,9 @@ export interface UserProfile {
   friends?: string[];
   favoriteGenres?: string[];
   transactions?: Transaction[];
+  createdPlaylistIds?: string[];
+  ownedNftIds?: string[];
+  listedNftIds?: string[];
   socials?: {
     x?: string;
     instagram?: string;

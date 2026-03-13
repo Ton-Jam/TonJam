@@ -74,43 +74,9 @@ const UserProfile: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-1000 pb-32">
       {/* Banner Section */}
-      <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-black">
+      <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-background">
         <img src={user.bannerUrl || `https://picsum.photos/1200/400?random=${user.id}`} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-        
-        <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center">
-          <button 
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
-          >
-            <ArrowLeft size={18} />
-          </button>
-
-          <button 
-            onClick={async () => {
-              const shareData = {
-                title: `${user.name} on TonJam`,
-                text: `Check out ${user.name}'s profile on TonJam`,
-                url: window.location.href,
-              };
-              try {
-                if (navigator.share) {
-                  await navigator.share(shareData);
-                } else {
-                  await navigator.clipboard.writeText(window.location.href);
-                  addNotification('Profile link copied to clipboard', 'success');
-                }
-              } catch (err: any) {
-                if (err.name !== 'AbortError') {
-                  console.error('Error sharing:', err);
-                }
-              }
-            }}
-            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/10 text-white hover:bg-white/10 transition-colors"
-          >
-            <Share2 size={18} />
-          </button>
-        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 md:-mt-32 relative z-10">
@@ -118,11 +84,11 @@ const UserProfile: React.FC = () => {
           
           {/* Avatar & Basic Info */}
           <div className="flex-shrink-0 relative group">
-            <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-black bg-zinc-900 shadow-2xl relative z-10">
+            <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background bg-muted shadow-2xl relative z-10">
               <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
             </div>
             {user.isVerifiedArtist && (
-              <div className="absolute -bottom-2 -right-2 bg-blue-500 text-white p-2 rounded-xl border-4 border-black z-20 shadow-lg" title="Verified Artist">
+              <div className="absolute -bottom-2 -right-2 bg-blue-500 text-foreground p-2 rounded-xl border-4 border-black z-20 shadow-lg" title="Verified Artist">
                 <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
               </div>
             )}
@@ -132,12 +98,12 @@ const UserProfile: React.FC = () => {
           <div className="flex-1 pt-4 md:pt-36 w-full">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-white mb-2 uppercase">{user.name}</h1>
-                <div className="flex items-center gap-4 text-sm font-bold text-white/40 uppercase tracking-widest">
+                <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground mb-2 uppercase">{user.name}</h1>
+                <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground uppercase tracking-widest">
                   <span>{user.handle}</span>
                   {user.walletAddress && (
                     <>
-                      <span className="w-1 h-1 bg-white/20 rounded-full"></span>
+                      <span className="w-1 h-1 bg-muted/80 rounded-full"></span>
                       <span className="text-blue-500">{user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}</span>
                     </>
                   )}
@@ -149,8 +115,8 @@ const UserProfile: React.FC = () => {
                   onClick={handleFollow}
                   className={`px-8 py-4 rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${
                     isFollowing 
-                      ? 'bg-white/10 text-white hover:bg-white/20' 
-                      : 'bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]'
+                      ? 'bg-muted text-foreground hover:bg-muted/80' 
+                      : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]'
                   }`}
                 >
                   {isFollowing ? 'Following' : 'Follow'}
@@ -159,31 +125,31 @@ const UserProfile: React.FC = () => {
             </div>
 
             {user.bio && (
-              <p className="mt-6 text-sm text-white/60 max-w-2xl leading-relaxed font-medium">
+              <p className="mt-6 text-sm text-muted-foreground/80 max-w-2xl leading-relaxed font-medium">
                 {user.bio}
               </p>
             )}
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-8 mt-8 pt-8 border-t border-white/5">
+            <div className="flex flex-wrap gap-8 mt-8 pt-8 border-t border-border/50">
               <div>
-                <div className="text-2xl font-black text-white">{user.followers.toLocaleString()}</div>
-                <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Followers</div>
+                <div className="text-2xl font-black text-foreground">{user.followers.toLocaleString()}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Followers</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-white">{user.following.toLocaleString()}</div>
-                <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Following</div>
+                <div className="text-2xl font-black text-foreground">{user.following.toLocaleString()}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Following</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-white">{ownedNfts.length}</div>
-                <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Assets</div>
+                <div className="text-2xl font-black text-foreground">{ownedNfts.length}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Assets</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-8 mt-12 border-b border-white/5 overflow-x-auto no-scrollbar">
+        <div className="flex gap-8 mt-12 border-b border-border/50 overflow-x-auto no-scrollbar">
           {[
             { id: 'inventory', label: 'Inventory', icon: Box },
             { id: 'activity', label: 'Activity', icon: Layers },
@@ -193,7 +159,7 @@ const UserProfile: React.FC = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors whitespace-nowrap relative ${
-                activeTab === tab.id ? 'text-blue-500' : 'text-white/40 hover:text-white/80'
+                activeTab === tab.id ? 'text-blue-500' : 'text-muted-foreground hover:text-muted-foreground/90'
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -212,7 +178,7 @@ const UserProfile: React.FC = () => {
               {/* Owned NFTs */}
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.5em] flex items-center gap-3">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-3">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                     Digital Assets
                   </h3>
@@ -227,11 +193,11 @@ const UserProfile: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="glass p-12 rounded-[10px] border border-white/5 text-center flex flex-col items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                      <Gem className="w-8 h-8 text-white/20" />
+                  <div className="glass p-12 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                      <Gem className="w-8 h-8 text-muted-foreground/50" />
                     </div>
-                    <p className="text-sm font-bold text-white/40 uppercase tracking-widest">No assets acquired yet</p>
+                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No assets acquired yet</p>
                   </div>
                 )}
               </div>
@@ -240,7 +206,7 @@ const UserProfile: React.FC = () => {
               {uploadedTracks.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.5em] flex items-center gap-3">
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-3">
                       <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                       Uploaded Tracks
                     </h3>
@@ -263,11 +229,11 @@ const UserProfile: React.FC = () => {
               {userPosts.length > 0 ? (
                 <SocialFeed initialPosts={userPosts} />
               ) : (
-                <div className="glass p-12 rounded-[10px] border border-white/5 text-center flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                    <Layers className="w-8 h-8 text-white/20" />
+                <div className="glass p-12 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                    <Layers className="w-8 h-8 text-muted-foreground/50" />
                   </div>
-                  <p className="text-sm font-bold text-white/40 uppercase tracking-widest">No recent activity</p>
+                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No recent activity</p>
                 </div>
               )}
             </div>
@@ -278,7 +244,7 @@ const UserProfile: React.FC = () => {
               {/* Followed Artists */}
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.5em] flex items-center gap-3">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-3">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                     Followed Artists
                   </h3>
@@ -293,8 +259,8 @@ const UserProfile: React.FC = () => {
                      })}
                   </div>
                 ) : (
-                  <div className="glass p-8 rounded-[10px] border border-white/5 text-center">
-                    <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Not following any artists</p>
+                  <div className="glass p-8 rounded-[10px] border border-border/50 text-center">
+                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Not following any artists</p>
                   </div>
                 )}
               </div>
@@ -302,16 +268,16 @@ const UserProfile: React.FC = () => {
               {/* Friends / Network */}
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.5em] flex items-center gap-3">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-3">
                     <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                     Network Connections
                   </h3>
                 </div>
-                 <div className="glass p-12 rounded-[10px] border border-white/5 text-center flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                    <Users className="w-8 h-8 text-white/20" />
+                 <div className="glass p-12 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                    <Users className="w-8 h-8 text-muted-foreground/50" />
                   </div>
-                  <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Network data encrypted</p>
+                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Network data encrypted</p>
                 </div>
               </div>
             </div>

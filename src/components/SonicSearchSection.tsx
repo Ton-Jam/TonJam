@@ -24,11 +24,11 @@ const SonicSearchSection: React.FC = () => {
   };
 
   return (
-    <section className="mt-16 p-8 bg-[#0a0a0a] border-t border-white/10">
+    <section className="mt-16 p-8 bg-[#0a0a0a] border-t border-border">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
-          <h2 className="text-2xl font-bold text-white uppercase tracking-tighter">Sonic AI Search</h2>
+          <h2 className="text-2xl font-bold text-foreground uppercase tracking-tighter">Sonic AI Search</h2>
         </div>
         
         <div className="flex gap-4 mb-8">
@@ -37,13 +37,13 @@ const SonicSearchSection: React.FC = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for vibes, genres, or moods..."
-            className="flex-1 bg-black border border-white/10 rounded-[10px] p-4 text-sm text-white outline-none focus:border-blue-500/50 transition-all"
+            className="flex-1 bg-background border border-border rounded-[10px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all"
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
           <button 
             onClick={handleSearch}
             disabled={isLoading}
-            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2"
+            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2"
           >
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             Search
@@ -53,11 +53,11 @@ const SonicSearchSection: React.FC = () => {
         {results.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {results.map(track => (
-              <div key={track.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-[10px] hover:bg-white/10 transition-all cursor-pointer" onClick={() => playTrack(track)}>
+              <div key={track.id} className="flex items-center gap-4 p-4 bg-muted/50 rounded-[10px] hover:bg-muted transition-all cursor-pointer" onClick={() => playTrack(track)}>
                 <img src={track.coverUrl} className="w-12 h-12 rounded-[8px] object-cover" alt="" />
                 <div className="flex-1">
-                  <h4 className="text-sm font-bold text-white uppercase tracking-tight">{track.title}</h4>
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{track.artist}</p>
+                  <h4 className="text-sm font-bold text-foreground uppercase tracking-tight">{track.title}</h4>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{track.artist}</p>
                 </div>
                 <Disc className="h-4 w-4 text-blue-400" />
               </div>

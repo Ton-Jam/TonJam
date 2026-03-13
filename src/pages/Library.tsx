@@ -61,10 +61,10 @@ const Library: React.FC = () => {
   }, [followedUserIds, artists]);
 
   const stats = [
-    { label: 'Protocols', value: likedTracks.length, icon: Music2 },
+    { label: 'NFTs', value: likedTracks.length, icon: Music2 },
     { label: 'Artifacts', value: myCollection.length, icon: Zap },
-    { label: 'Nodes', value: followedArtists.length, icon: Users },
-    { label: 'Syncs', value: playlists.length, icon: List },
+    { label: 'Artists', value: followedArtists.length, icon: Users },
+    { label: 'Playlists', value: playlists.length, icon: List },
   ];
 
   return (
@@ -83,7 +83,7 @@ const Library: React.FC = () => {
               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
               <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Secure Vault Access</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-white leading-none">
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-foreground leading-none">
               Library
             </h1>
           </div>
@@ -91,10 +91,10 @@ const Library: React.FC = () => {
           <div className="flex flex-wrap gap-3">
             <button 
               onClick={() => setIsCreatePlaylistModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-all active:scale-95"
             >
               <Plus className="h-4 w-4" />
-              New Sync
+              New Playlist
             </button>
             <button 
               onClick={createRecommendedPlaylist}
@@ -114,25 +114,25 @@ const Library: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               key={stat.label} 
-              className="p-6 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-xl group hover:bg-white/[0.08] transition-all"
+              className="p-6 rounded-2xl bg-muted/50 border border-border/50 backdrop-blur-xl group hover:bg-foreground/[0.08] transition-all"
             >
               <div className="flex items-center justify-between mb-4">
-                <stat.icon className="h-5 w-5 text-white/20 group-hover:text-blue-500 transition-colors" />
-                <ArrowUpRight className="h-3 w-3 text-white/10 opacity-0 group-hover:opacity-100 transition-all" />
+                <stat.icon className="h-5 w-5 text-muted-foreground/50 group-hover:text-blue-500 transition-colors" />
+                <ArrowUpRight className="h-3 w-3 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-all" />
               </div>
-              <p className="text-2xl font-black text-white tracking-tighter mb-1">{stat.value}</p>
-              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{stat.label}</p>
+              <p className="text-2xl font-black text-foreground tracking-tighter mb-1">{stat.value}</p>
+              <p className="text-[9px] font-bold text-foreground/30 uppercase tracking-widest">{stat.label}</p>
             </motion.div>
           ))}
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-10 border-b border-white/5 mb-10 overflow-x-auto no-scrollbar">
+        <div className="flex gap-10 border-b border-border/50 mb-10 overflow-x-auto no-scrollbar">
           {(['collection', 'playlists', 'activity'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-white' : 'text-white/20 hover:text-white/40'}`}
+              className={`pb-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
             >
               {tab}
               {activeTab === tab && (
@@ -159,9 +159,9 @@ const Library: React.FC = () => {
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
                       <Zap className="h-4 w-4 text-blue-500" />
-                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Digital Artifacts</h3>
+                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Digital Artifacts</h3>
                     </div>
-                    <button onClick={() => navigate('/explore/nfts?title=My Collection&filter=my_nfts')} className="text-[9px] font-bold text-white/20 hover:text-white transition-colors uppercase tracking-widest">View All</button>
+                    <button onClick={() => navigate('/explore/nfts?title=My Collection&filter=my_nfts')} className="text-[9px] font-bold text-muted-foreground/50 hover:text-foreground transition-colors uppercase tracking-widest">View All</button>
                   </div>
                   {myCollection.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 relative z-10">
@@ -180,9 +180,9 @@ const Library: React.FC = () => {
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
                       <Music2 className="h-4 w-4 text-emerald-500" />
-                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Stored Frequencies</h3>
+                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Stored Frequencies</h3>
                     </div>
-                    <button onClick={() => navigate('/explore/tracks?title=Favorite Tracks&filter=favorites')} className="text-[9px] font-bold text-white/20 hover:text-white transition-colors uppercase tracking-widest">View All</button>
+                    <button onClick={() => navigate('/explore/tracks?title=Favorite Tracks&filter=favorites')} className="text-[9px] font-bold text-muted-foreground/50 hover:text-foreground transition-colors uppercase tracking-widest">View All</button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                     {likedTracks.slice(0, 10).map(track => (
@@ -200,7 +200,7 @@ const Library: React.FC = () => {
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
                       <List className="h-4 w-4 text-violet-500" />
-                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Active Syncs</h3>
+                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Active Playlists</h3>
                     </div>
                   </div>
                   <div className="flex flex-col gap-3 relative z-10">
@@ -223,7 +223,7 @@ const Library: React.FC = () => {
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-3">
                       <History className="h-4 w-4 text-blue-500" />
-                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Recent Activity</h3>
+                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Recent Activity</h3>
                     </div>
                     <button onClick={clearRecentlyPlayed} className="text-[9px] font-bold text-red-500/50 hover:text-red-500 transition-colors uppercase tracking-widest">Purge History</button>
                   </div>
@@ -242,9 +242,9 @@ const Library: React.FC = () => {
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
                       <Users className="h-4 w-4 text-orange-500" />
-                      <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">Synchronized Nodes</h3>
+                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Followed Artists</h3>
                     </div>
-                    <button onClick={() => navigate('/explore/artists?title=Followed Nodes&filter=followed')} className="text-[9px] font-bold text-white/20 hover:text-white transition-colors uppercase tracking-widest">View All</button>
+                    <button onClick={() => navigate('/explore/artists?title=Followed Artists&filter=followed')} className="text-[9px] font-bold text-muted-foreground/50 hover:text-foreground transition-colors uppercase tracking-widest">View All</button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                     {followedArtists.map(artist => (
@@ -258,22 +258,22 @@ const Library: React.FC = () => {
         </AnimatePresence>
 
         {/* Security Footer */}
-        <footer className="mt-32 pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+        <footer className="mt-32 pt-10 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <ShieldCheck className="h-8 w-8 text-blue-500/20" />
             <div>
-              <p className="text-[10px] font-bold text-white uppercase tracking-widest mb-1">Decentralized Vault v2.4</p>
-              <p className="text-[8px] text-white/20 uppercase tracking-widest">All assets secured by TON Blockchain Protocol</p>
+              <p className="text-[10px] font-bold text-foreground uppercase tracking-widest mb-1">Decentralized Vault v2.4</p>
+              <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest">All assets secured by TON Blockchain NFTs</p>
             </div>
           </div>
           <div className="flex gap-8">
             <div className="text-right">
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Network Status</p>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Network Status</p>
               <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Operational</p>
             </div>
             <div className="text-right">
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Last Sync</p>
-              <p className="text-[10px] font-bold text-white uppercase tracking-widest">Just Now</p>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Last Update</p>
+              <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">Just Now</p>
             </div>
           </div>
         </footer>
@@ -283,9 +283,9 @@ const Library: React.FC = () => {
 };
 
 const EmptyState = ({ icon: Icon, message }: { icon: any, message: string }) => (
-  <div className="py-24 text-center flex flex-col items-center justify-center bg-white/[0.02] border border-dashed border-white/10 rounded-3xl">
-    <Icon className="h-12 w-12 text-white/5 mb-4" />
-    <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">{message}</p>
+  <div className="py-24 text-center flex flex-col items-center justify-center bg-foreground/[0.02] border border-dashed border-border rounded-3xl">
+    <Icon className="h-12 w-12 text-foreground/5 mb-4" />
+    <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">{message}</p>
   </div>
 );
 

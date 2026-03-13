@@ -61,10 +61,10 @@ export default function TweetCard({
       <div
         className={cn(
           "relative isolate w-full min-w-[400px] max-w-xl overflow-hidden rounded-2xl p-1.5 md:min-w-[500px]",
-          "bg-white/5 dark:bg-black/90",
+          "bg-muted/50 dark:bg-background/90",
           "bg-linear-to-br from-black/5 to-black/[0.02] dark:from-white/5 dark:to-white/[0.02]",
           "backdrop-blur-xl backdrop-saturate-[180%]",
-          "border border-black/10 dark:border-white/10",
+          "border border-black/10 dark:border-border",
           "shadow-[0_8px_16px_rgb(0_0_0_/_0.15)] dark:shadow-[0_8px_16px_rgb(0_0_0_/_0.25)]",
           "translate-z-0 will-change-transform"
         )}
@@ -75,7 +75,7 @@ export default function TweetCard({
             "bg-linear-to-br from-black/[0.05] to-transparent dark:from-white/[0.08] dark:to-transparent",
             "backdrop-blur-md backdrop-saturate-150",
             "border border-black/[0.05] dark:border-white/[0.08]",
-            "text-black/90 dark:text-white",
+            "text-background/90 dark:text-foreground",
             "shadow-xs",
             "translate-z-0 will-change-transform",
             "before:pointer-events-none before:absolute before:inset-0 before:bg-linear-to-br before:from-black/[0.02] before:to-black/[0.01] before:opacity-0 before:transition-opacity dark:before:from-white/[0.03] dark:before:to-white/[0.01]",
@@ -97,19 +97,19 @@ export default function TweetCard({
               <div className="flex items-start justify-between">
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1">
-                    <span className="cursor-pointer font-semibold text-black hover:underline dark:text-white/90">
+                    <span className="cursor-pointer font-semibold text-background hover:underline dark:text-foreground/90">
                       {authorName}
                     </span>
                     {isVerified && (
                       <VerifiedIcon className="h-4 w-4 text-blue-400" />
                     )}
                   </div>
-                  <span className="text-black text-sm dark:text-white/60">
+                  <span className="text-background text-sm dark:text-muted-foreground/80">
                     @{authorHandle}
                   </span>
                 </div>
                 <button
-                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-black hover:bg-black/5 hover:text-black dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-white"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-background hover:bg-background/5 hover:text-background dark:text-muted-foreground/90 dark:hover:bg-muted/50 dark:hover:text-foreground"
                   type="button"
                 >
                   <svg
@@ -134,13 +134,13 @@ export default function TweetCard({
           <div className="mt-2">
             {content.map((item, index) => (
               <p
-                className="text-base text-black dark:text-white/90"
+                className="text-base text-background dark:text-foreground/90"
                 key={index}
               >
                 {item}
               </p>
             ))}
-            <span className="mt-2 block text-black text-sm dark:text-white/50">
+            <span className="mt-2 block text-background text-sm dark:text-foreground/50">
               {timestamp}
             </span>
           </div>
@@ -159,23 +159,23 @@ export default function TweetCard({
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-1">
-                    <span className="cursor-pointer font-semibold text-black hover:underline dark:text-white/90">
+                    <span className="cursor-pointer font-semibold text-background hover:underline dark:text-foreground/90">
                       {reply.authorName}
                     </span>
                     {reply.isVerified && (
                       <VerifiedIcon className="h-4 w-4 text-blue-400" />
                     )}
-                    <span className="text-black text-sm dark:text-white/60">
+                    <span className="text-background text-sm dark:text-muted-foreground/80">
                       @{reply.authorHandle}
                     </span>
-                    <span className="text-black text-sm dark:text-white/60">
+                    <span className="text-background text-sm dark:text-muted-foreground/80">
                       ·
                     </span>
-                    <span className="text-black text-sm dark:text-white/60">
+                    <span className="text-background text-sm dark:text-muted-foreground/80">
                       {reply.timestamp}
                     </span>
                   </div>
-                  <p className="mt-1 text-black text-sm dark:text-white/80">
+                  <p className="mt-1 text-background text-sm dark:text-muted-foreground/90">
                     {reply.content}
                   </p>
                 </div>

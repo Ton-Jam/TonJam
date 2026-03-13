@@ -43,10 +43,10 @@ const chartConfig = {
 
 export function ChartRevenue() {
   return (
-    <Card className="border-blue-500/10 bg-white/[0.02] text-white">
+    <Card className="border-blue-500/10 bg-foreground/[0.02] text-foreground">
       <CardHeader>
-        <CardTitle className="text-white">Revenue Breakdown</CardTitle>
-        <CardDescription className="text-white/40">Monthly revenue from Streaming vs NFT Sales</CardDescription>
+        <CardTitle className="text-foreground">Revenue Breakdown</CardTitle>
+        <CardDescription className="text-muted-foreground">Monthly revenue from Streaming vs NFT Sales</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
@@ -61,10 +61,10 @@ export function ChartRevenue() {
               stroke="rgba(255,255,255,0.4)"
             />
             <ChartTooltip 
-                content={<ChartTooltipContent hideLabel className="bg-[#0a0a0a] border-white/10 text-white" />} 
+                content={<ChartTooltipContent hideLabel className="bg-[#0a0a0a] border-border text-foreground" />} 
                 cursor={{fill: 'rgba(255,255,255,0.05)'}}
             />
-            <ChartLegend content={<ChartLegendContent className="text-white/60" />} />
+            <ChartLegend content={<ChartLegendContent className="text-muted-foreground/80" />} />
             <Bar
               dataKey="streaming"
               stackId="a"

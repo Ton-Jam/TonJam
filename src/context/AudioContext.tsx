@@ -1316,11 +1316,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       {trackToAddToPlaylist && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setTrackToAddToPlaylist(null)}></div>
-          <div className="relative bg-[#0a0a0a] border border-white/5 w-full max-w-sm rounded-[5px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={() => setTrackToAddToPlaylist(null)}></div>
+          <div className="relative bg-[#0a0a0a] border border-border/50 w-full max-w-sm rounded-[5px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-xl font-bold uppercase tracking-tighter">Add to Playlist</h3>
-              <button onClick={() => setTrackToAddToPlaylist(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+              <button onClick={() => setTrackToAddToPlaylist(null)} className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
                 <i className="fas fa-times"></i>
               </button>
             </div>
@@ -1345,34 +1345,34 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     setTrackToAddToPlaylist(null);
                   }
                 }} className="flex gap-2">
-                  <input name="playlistName" type="text" placeholder="Playlist Name" className="flex-1 bg-black/50 rounded-[5px] px-3 py-2 text-xs text-white outline-none focus:border-blue-500 border border-transparent transition-all" autoFocus />
-                  <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all">Create</button>
+                  <input name="playlistName" type="text" placeholder="Playlist Name" className="flex-1 bg-background/50 rounded-[5px] px-3 py-2 text-xs text-foreground outline-none focus:border-blue-500 border border-transparent transition-all" autoFocus />
+                  <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all">Create</button>
                 </form>
               </div>
-              <div className="h-px bg-white/5 my-4"></div>
+              <div className="h-px bg-muted/50 my-4"></div>
               {playlists.length > 0 ? (
                 playlists.map(pl => (
-                  <button key={pl.id} onClick={() => { addTrackToPlaylist(pl.id, trackToAddToPlaylist); setTrackToAddToPlaylist(null); }} className="w-full flex items-center gap-4 p-4 rounded-[5px] bg-white/5 hover:bg-white/10 transition-all text-left group">
+                  <button key={pl.id} onClick={() => { addTrackToPlaylist(pl.id, trackToAddToPlaylist); setTrackToAddToPlaylist(null); }} className="w-full flex items-center gap-4 p-4 rounded-[5px] bg-muted/50 hover:bg-muted transition-all text-left group">
                     <div className="w-10 h-10 rounded-[5px] bg-[#111] overflow-hidden flex-shrink-0">
                       {pl.coverUrl ? (
                         <img src={pl.coverUrl} className="w-full h-full object-cover" alt="" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/20">
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
                           <i className="fas fa-music text-xs"></i>
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold uppercase truncate group-hover:text-blue-400 transition-colors">{pl.title}</p>
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{pl.trackCount} Tracks</p>
+                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">{pl.trackCount} Tracks</p>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <i className="fas fa-plus text-[10px] text-white/60"></i>
+                    <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <i className="fas fa-plus text-[10px] text-muted-foreground/80"></i>
                     </div>
                   </button>
                 ))
               ) : (
-                <p className="text-center py-8 text-[10px] font-bold text-white/20 uppercase tracking-widest">No playlists found</p>
+                <p className="text-center py-8 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">No playlists found</p>
               )}
             </div>
           </div>
@@ -1382,16 +1382,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {/* Classic Track Option Screen */}
       {optionsTrack && (
         <div className="fixed inset-0 z-[400] flex items-end sm:items-center justify-center p-0 sm:p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setOptionsTrack(null)}></div>
-          <div className="relative bg-[#111] border-t sm:border border-white/10 w-full max-w-md rounded-t-[20px] sm:rounded-[5px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-4 duration-300">
+          <div className="absolute inset-0 bg-background/90 backdrop-blur-md" onClick={() => setOptionsTrack(null)}></div>
+          <div className="relative bg-[#111] border-t sm:border border-border w-full max-w-md rounded-t-[20px] sm:rounded-[5px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-4 duration-300">
             {/* Header */}
-            <div className="p-6 border-b border-white/5 flex items-center gap-4 bg-[#111]">
+            <div className="p-6 border-b border-border/50 flex items-center gap-4 bg-[#111]">
               <img src={optionsTrack.coverUrl} className="w-16 h-16 rounded-[5px] object-cover shadow-lg" alt="" />
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-bold uppercase tracking-tight truncate text-white">{optionsTrack.title}</h3>
-                <p className="text-xs font-bold text-white/40 uppercase tracking-widest truncate">{optionsTrack.artist}</p>
+                <h3 className="text-lg font-bold uppercase tracking-tight truncate text-foreground">{optionsTrack.title}</h3>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest truncate">{optionsTrack.artist}</p>
               </div>
-              <button onClick={() => setOptionsTrack(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+              <button onClick={() => setOptionsTrack(null)} className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
                 <i className="fas fa-times"></i>
               </button>
             </div>
@@ -1413,7 +1413,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 label="Add to Playlist" 
                 onClick={() => { setTrackToAddToPlaylist(optionsTrack); setOptionsTrack(null); }} 
               />
-              <div className="h-px bg-white/5 my-2 mx-4"></div>
+              <div className="h-px bg-muted/50 my-2 mx-4"></div>
               <OptionItem 
                 icon="fas fa-heart" 
                 label={likedTrackIds.includes(optionsTrack.id) ? "Remove from Liked" : "Add to Liked"} 
@@ -1462,7 +1462,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             <div className="p-4 sm:hidden">
               <button 
                 onClick={() => setOptionsTrack(null)}
-                className="w-full py-4 bg-white/5 rounded-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-white/60"
+                className="w-full py-4 bg-muted/50 rounded-[5px] text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80"
               >
                 Cancel
               </button>
@@ -1477,9 +1477,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 const OptionItem = ({ icon, label, onClick, highlight }: { icon: string; label: string; onClick: () => void; highlight?: boolean }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center gap-4 px-6 py-4 rounded-[5px] transition-all hover:bg-white/5 group text-left ${highlight ? 'text-blue-500' : 'text-white/60 hover:text-white'}`}
+    className={`w-full flex items-center gap-4 px-6 py-4 rounded-[5px] transition-all hover:bg-muted/50 group text-left ${highlight ? 'text-blue-500' : 'text-muted-foreground/80 hover:text-foreground'}`}
   >
-    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${highlight ? 'bg-blue-500/10' : 'bg-white/5 group-hover:bg-white/10'}`}>
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${highlight ? 'bg-blue-500/10' : 'bg-muted/50 group-hover:bg-muted'}`}>
       <i className={`${icon} text-xs`}></i>
     </div>
     <span className="text-[11px] font-bold uppercase tracking-[0.1em]">{label}</span>

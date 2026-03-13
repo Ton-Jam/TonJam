@@ -21,26 +21,23 @@ const LoadingScreen: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[200] bg-[#050505] flex flex-col items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-blue-500/5 blur-[120px] pointer-events-none animate-pulse"></div>
-
-      <div className="relative z-10 flex flex-col items-center w-full max-w-xs px-8">
+    <div className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center overflow-hidden">
+      <div className="relative z-10 flex flex-col items-center">
         <div className="mb-12 relative">
-          <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full animate-pulse"></div>
           <img
             src={APP_LOGO}
             alt="TonJam"
-            className="w-24 h-24 md:w-32 md:h-32 object-contain animate-[spin_8s_linear_infinite] drop-shadow-[0_0_30px_rgba(59,130,246,0.3)]"
+            className="w-26 h-26 md:w-34 md:h-34 object-contain animate-[spin_8s_linear_infinite]"
           />
         </div>
+      </div>
 
-        {/* Progress Bar Container */}
-        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden relative">
-          <div
-            className="absolute top-0 left-0 h-full bg-blue-500 shadow-[0_0_10px_#3b82f6] transition-all duration-200 ease-out"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
+      {/* Progress Bar Container at the bottom */}
+      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-neutral-800 overflow-hidden">
+        <div
+          className="h-full bg-neutral-500 transition-all duration-200 ease-out"
+          style={{ width: `${progress}%` }}
+        ></div>
       </div>
     </div>
   );

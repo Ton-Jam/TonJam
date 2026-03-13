@@ -32,9 +32,11 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
       [track.id]: {
         title: track.title,
         genre: track.genre,
-        description: '', // Default empty
+        description: track.description || '',
         price: track.price || '1.0',
-        isNFT: track.isNFT || false
+        isNFT: track.isNFT || false,
+        bpm: track.bpm || '',
+        key: track.key || ''
       }
     }));
   };
@@ -65,8 +67,8 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
           <Disc className="h-4 w-4 text-purple-400" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white uppercase tracking-tighter">Forge Metadata Manager</h3>
-          <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Configure tracks for NFT minting protocols</p>
+          <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter">Forge Metadata Manager</h3>
+          <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Configure tracks for NFT minting protocols</p>
         </div>
       </div>
 
@@ -76,9 +78,11 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
           const currentMetadata = metadata[track.id] || {
             title: track.title,
             genre: track.genre,
-            description: '',
+            description: track.description || '',
             price: track.price || '1.0',
-            isNFT: track.isNFT || false
+            isNFT: track.isNFT || false,
+            bpm: track.bpm || '',
+            key: track.key || ''
           };
 
           return (
@@ -86,7 +90,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
               key={track.id}
               layout
               className={`glass border transition-all duration-300 rounded-[12px] overflow-hidden ${
-                isEditing ? 'border-purple-500/30 bg-purple-500/5' : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03]'
+                isEditing ? 'border-purple-500/30 bg-purple-500/5' : 'border-border/50 bg-foreground/[0.01] hover:bg-foreground/[0.03]'
               }`}
             >
               <div className="p-6">
@@ -94,8 +98,8 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <img src={track.coverUrl} className="w-12 h-12 rounded-[8px] object-cover shadow-lg" alt="" />
                     <div className="min-w-0">
-                      <h4 className="text-sm font-bold text-white truncate uppercase tracking-tight">{track.title}</h4>
-                      <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{track.genre} • {track.isNFT ? 'NFT Protocol Active' : 'Standard Stream'}</p>
+                      <h4 className="text-sm font-bold text-foreground truncate uppercase tracking-tight">{track.title}</h4>
+                      <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{track.genre} • {track.isNFT ? 'NFT Protocol Active' : 'Standard Stream'}</p>
                     </div>
                   </div>
 
@@ -103,7 +107,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                     {!isEditing ? (
                       <button 
                         onClick={() => handleEdit(track)}
-                        className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
+                        className="px-4 py-2 bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
                       >
                         Configure Metadata
                       </button>
@@ -111,17 +115,17 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                       <div className="flex items-center gap-2">
                         <button 
                           onClick={() => setEditingTrackId(null)}
-                          className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
+                          className="px-4 py-2 bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
                         >
                           Cancel
                         </button>
                         <button 
                           onClick={() => handleSave(track.id)}
                           disabled={isSaving === track.id}
-                          className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 flex items-center gap-2"
+                          className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 flex items-center gap-2"
                         >
                           {isSaving === track.id ? (
-                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
                           ) : (
                             <Save className="w-3 h-3" />
                           )}
@@ -143,25 +147,25 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                       <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-6">
                           <div className="space-y-2">
-                            <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                            <label className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                               <Music className="w-3 h-3" /> Track Title
                             </label>
                             <input 
                               type="text"
                               value={currentMetadata.title}
                               onChange={(e) => handleChange(track.id, 'title', e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all"
+                              className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all"
                             />
                           </div>
 
                           <div className="space-y-2">
-                            <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                            <label className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                               <Tag className="w-3 h-3" /> Genre
                             </label>
                             <select 
                               value={currentMetadata.genre}
                               onChange={(e) => handleChange(track.id, 'genre', e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all appearance-none"
+                              className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all appearance-none"
                             >
                               {['Techno', 'House', 'Ambient', 'Phonk', 'Cyberpunk', 'Lo-Fi'].map(g => (
                                 <option key={g} value={g}>{g}</option>
@@ -170,7 +174,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                           </div>
 
                           <div className="space-y-2">
-                            <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                            <label className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                               <Coins className="w-3 h-3" /> NFT Price (TON)
                             </label>
                             <input 
@@ -178,20 +182,48 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                               step="0.1"
                               value={currentMetadata.price}
                               onChange={(e) => handleChange(track.id, 'price', e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all"
+                              className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all"
                             />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <label className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                                <Music className="w-3 h-3" /> BPM
+                              </label>
+                              <input 
+                                type="number"
+                                step="1"
+                                value={currentMetadata.bpm}
+                                onChange={(e) => handleChange(track.id, 'bpm', e.target.value)}
+                                className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                placeholder="e.g. 128"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                                <Music className="w-3 h-3" /> Musical Key
+                              </label>
+                              <input 
+                                type="text"
+                                value={currentMetadata.key}
+                                onChange={(e) => handleChange(track.id, 'key', e.target.value)}
+                                className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                placeholder="e.g. Am"
+                              />
+                            </div>
                           </div>
                         </div>
 
                         <div className="space-y-6">
                           <div className="space-y-2">
-                            <label className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                            <label className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                               <FileText className="w-3 h-3" /> NFT Description
                             </label>
                             <textarea 
                               value={currentMetadata.description}
                               onChange={(e) => handleChange(track.id, 'description', e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-[8px] p-3 text-xs text-white outline-none focus:border-purple-500/50 transition-all min-h-[100px] resize-none"
+                              className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all min-h-[100px] resize-none"
                               placeholder="Describe the unique qualities of this NFT asset..."
                             />
                           </div>
@@ -202,8 +234,8 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                                 <Sparkles className="w-4 h-4 text-purple-400" />
                               </div>
                               <div>
-                                <h5 className="text-[10px] font-bold text-white uppercase tracking-tight">NFT Protocol</h5>
-                                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Enable for Forge Minting</p>
+                                <h5 className="text-[10px] font-bold text-foreground uppercase tracking-tight">NFT Protocol</h5>
+                                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Enable for Forge Minting</p>
                               </div>
                             </div>
                             <button 

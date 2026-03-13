@@ -43,14 +43,14 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+        className="absolute inset-0 bg-background/80 backdrop-blur-xl"
       />
       
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+        className="relative w-full max-w-md bg-[#0a0a0a] border border-border rounded-3xl overflow-hidden shadow-2xl"
       >
         <div className="p-8">
           <div className="flex items-center justify-between mb-8">
@@ -58,10 +58,10 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
               <div className="p-2 rounded-xl bg-blue-600/10 text-blue-500">
                 <Wallet className="w-5 h-5" />
               </div>
-              <h2 className="text-xl font-black uppercase tracking-tight text-white">Forge Protocol</h2>
+              <h2 className="text-xl font-black uppercase tracking-tight text-foreground">Forge Protocol</h2>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-              <X className="w-5 h-5 text-white/40" />
+            <button onClick={onClose} className="p-2 hover:bg-muted/50 rounded-full transition-colors">
+              <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
 
@@ -76,8 +76,8 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Pay with TON</label>
-                    <span className="text-[10px] font-bold text-white/20">Balance: 12.5 TON</span>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pay with TON</label>
+                    <span className="text-[10px] font-bold text-muted-foreground/50">Balance: 12.5 TON</span>
                   </div>
                   <div className="relative">
                     <input 
@@ -85,24 +85,24 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                       value={tonAmount}
                       onChange={(e) => setTonAmount(e.target.value)}
                       placeholder="0.00"
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-2xl p-5 text-2xl font-black text-white outline-none focus:border-blue-500/50 transition-all"
+                      className="w-full bg-foreground/[0.02] border border-border rounded-2xl p-5 text-2xl font-black text-foreground outline-none focus:border-blue-500/50 transition-all"
                     />
                     <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2">
                       <img src={TON_LOGO} className="w-6 h-6 object-contain" alt="" />
-                      <span className="text-sm font-black text-white">TON</span>
+                      <span className="text-sm font-black text-foreground">TON</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-                    <ArrowRight className="w-5 h-5 text-white/20 rotate-90" />
+                  <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
+                    <ArrowRight className="w-5 h-5 text-muted-foreground/50 rotate-90" />
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Receive JAM</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Receive JAM</label>
                     <span className="text-[10px] font-bold text-blue-500">Rate: 1 TON = 100 JAM</span>
                   </div>
                   <div className="relative">
@@ -116,11 +116,11 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                   </div>
                 </div>
 
-                <div className="p-4 bg-white/5 rounded-2xl flex items-center gap-4">
+                <div className="p-4 bg-muted/50 rounded-2xl flex items-center gap-4">
                   <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
                     <Info className="w-4 h-4" />
                   </div>
-                  <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest leading-relaxed">
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">
                     Transaction includes a 0.5% network fee. JAM will be credited to your neural wallet instantly.
                   </p>
                 </div>
@@ -128,10 +128,10 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                 <button 
                   onClick={handleBuy}
                   disabled={isProcessing || !tonAmount || parseFloat(tonAmount) <= 0}
-                  className="w-full py-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="w-full py-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-foreground text-sm font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {isProcessing ? (
-                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-5 h-5 border border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
                       <Zap className="w-5 h-5" />
@@ -152,14 +152,14 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                   <CheckCircle2 className="w-12 h-12 text-green-500 relative z-10" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Protocol Success</h3>
-                  <p className="text-sm font-medium text-white/40">
-                    You have successfully forged <span className="text-white font-black">{jamAmount.toLocaleString()} JAM</span>.
+                  <h3 className="text-2xl font-black text-foreground uppercase tracking-tighter">Protocol Success</h3>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    You have successfully forged <span className="text-foreground font-black">{jamAmount.toLocaleString()} JAM</span>.
                   </p>
                 </div>
                 <button 
                   onClick={onClose}
-                  className="w-full py-4 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-neutral-200 transition-all"
+                  className="w-full py-4 rounded-xl bg-foreground text-background text-xs font-black uppercase tracking-widest hover:bg-neutral-200 transition-all"
                 >
                   Return to Center
                 </button>

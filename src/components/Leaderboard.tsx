@@ -37,13 +37,13 @@ const Leaderboard: React.FC = () => {
     if (rank === 1) return <Trophy className="w-5 h-5 text-amber-400" />;
     if (rank === 2) return <Medal className="w-5 h-5 text-slate-400" />;
     if (rank === 3) return <Medal className="w-5 h-5 text-amber-700" />;
-    return <span className="text-[10px] font-black text-white/20">#{rank}</span>;
+    return <span className="text-[10px] font-black text-muted-foreground/50">#{rank}</span>;
   };
 
   const getChangeIcon = (change: 'up' | 'down' | 'stable') => {
     if (change === 'up') return <ArrowUp className="w-3 h-3 text-green-500" />;
     if (change === 'down') return <ArrowDown className="w-3 h-3 text-red-500" />;
-    return <Minus className="w-3 h-3 text-white/20" />;
+    return <Minus className="w-3 h-3 text-muted-foreground/50" />;
   };
 
   return (
@@ -54,19 +54,19 @@ const Leaderboard: React.FC = () => {
             <Users className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black uppercase tracking-tight text-white">Hall of Fame</h2>
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">The highest JAM earners in the ecosystem</p>
+            <h2 className="text-xl font-black uppercase tracking-tight text-foreground">Hall of Fame</h2>
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">The highest JAM earners in the ecosystem</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/40">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border text-[9px] font-black uppercase tracking-widest text-muted-foreground">
           <TrendingUp className="w-3 h-3" />
           Updated 2m ago
         </div>
       </div>
 
-      <div className="bg-white/[0.02] border border-white/5 rounded-3xl overflow-hidden">
+      <div className="bg-foreground/[0.02] border border-border/50 rounded-3xl overflow-hidden">
         {/* Table Header */}
-        <div className="grid grid-cols-[60px_1fr_120px_120px] px-8 py-4 bg-white/5 border-b border-white/5 text-[9px] font-black uppercase tracking-widest text-white/20">
+        <div className="grid grid-cols-[60px_1fr_120px_120px] px-8 py-4 bg-muted/50 border-b border-border/50 text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
           <span>Rank</span>
           <span>Architect</span>
           <span className="text-right">Earnings</span>
@@ -81,24 +81,24 @@ const Leaderboard: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="grid grid-cols-[60px_1fr_120px_120px] px-8 py-5 items-center hover:bg-white/[0.03] transition-colors group"
+              className="grid grid-cols-[60px_1fr_120px_120px] px-8 py-5 items-center hover:bg-foreground/[0.03] transition-colors group"
             >
               <div className="flex items-center justify-center">
                 {getRankIcon(entry.rank)}
               </div>
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <img src={entry.avatar} className="w-10 h-10 rounded-full object-cover border border-white/10" alt="" />
+                  <img src={entry.avatar} className="w-10 h-10 rounded-full object-cover border border-border" alt="" />
                   {entry.isPartner && (
                     <div className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-blue-600 border-2 border-black flex items-center justify-center">
-                      <Sparkles className="w-2 h-2 text-white" />
+                      <Sparkles className="w-2 h-2 text-foreground" />
                     </div>
                   )}
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-white tracking-tight group-hover:text-blue-400 transition-colors uppercase">{entry.name}</h4>
+                  <h4 className="text-sm font-black text-foreground tracking-tight group-hover:text-blue-400 transition-colors uppercase">{entry.name}</h4>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
+                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                       {entry.isPartner ? 'Verified Partner' : 'Sonic Architect'}
                     </span>
                   </div>
@@ -107,15 +107,15 @@ const Leaderboard: React.FC = () => {
               <div className="text-right">
                 <div className="flex items-center justify-end gap-1.5">
                   <img src={TJ_COIN_ICON} className="w-3 h-3 object-contain" alt="" />
-                  <span className="text-sm font-black text-white tracking-tighter">
+                  <span className="text-sm font-black text-foreground tracking-tighter">
                     {entry.earnings.toLocaleString()}
                   </span>
                 </div>
-                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-0.5">JAM</p>
+                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-0.5">JAM</p>
               </div>
               <div className="flex items-center justify-end gap-2">
                 {getChangeIcon(entry.change)}
-                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">
+                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                   {entry.change === 'stable' ? 'Stable' : entry.change === 'up' ? 'Rising' : 'Falling'}
                 </span>
               </div>

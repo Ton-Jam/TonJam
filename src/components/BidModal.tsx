@@ -56,27 +56,27 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
-      <div className="relative glass w-full max-w-sm rounded-[10px] border border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" onClick={onClose}></div>
+      <div className="relative glass w-full max-w-sm rounded-[10px] border border-border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 blur-3xl rounded-full"></div>
         <div className="p-8 relative z-10">
           <header className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-xl font-bold uppercase tracking-tighter text-white">Neural Auction</h2>
+              <h2 className="text-xl font-bold uppercase tracking-tighter text-foreground">Neural Auction</h2>
               <p className="text-[7px] font-bold text-amber-500 uppercase tracking-[0.4em] mt-1">Live Bidding Relay</p>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40">
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground">
               <X className="h-4 w-4" />
             </button>
           </header>
           <div className="mb-8">
-            <div className="flex justify-between text-[8px] font-bold text-white/30 uppercase tracking-widest mb-3 px-2">
+            <div className="flex justify-between text-[8px] font-bold text-foreground/30 uppercase tracking-widest mb-3 px-2">
               <span>Current Highest</span>
               <span>Min Next Bid</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/5 border border-white/5 p-4 rounded-[10px] text-center">
-                <p className="text-lg font-bold text-white">{currentBid} <span className="text-[8px] text-blue-500">TON</span></p>
+              <div className="bg-muted/50 border border-border/50 p-4 rounded-[10px] text-center">
+                <p className="text-lg font-bold text-foreground">{currentBid} <span className="text-[8px] text-blue-500">TON</span></p>
               </div>
               <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-[10px] text-center">
                 <p className="text-lg font-bold text-amber-500">{minBid} <span className="text-[8px]">TON</span></p>
@@ -84,7 +84,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
             </div>
           </div>
           <div className="space-y-4 mb-8">
-            <label className="text-[8px] font-bold text-white/30 uppercase tracking-widest px-2">Your Bid Amount</label>
+            <label className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest px-2">Your Bid Amount</label>
             <div className="relative">
               <img src={TON_LOGO} className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6" alt="" />
               <input
@@ -92,14 +92,14 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
                 step="0.1"
-                className="w-full bg-black/50 border border-white/10 py-5 pl-14 pr-6 rounded-[10px] text-2xl font-bold text-white outline-none focus:border-amber-500/50 transition-all"
+                className="w-full bg-background/50 border border-border py-5 pl-14 pr-6 rounded-[10px] text-2xl font-bold text-foreground outline-none focus:border-amber-500/50 transition-all"
               />
             </div>
           </div>
           <button
             onClick={handlePlaceBid}
             disabled={isProcessing}
-            className="w-full py-5 bg-amber-500 hover:bg-amber-400 rounded-[10px] text-[10px] font-bold uppercase tracking-widest text-black shadow-xl shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-full py-5 bg-amber-500 hover:bg-amber-400 rounded-[10px] text-[10px] font-bold uppercase tracking-widest text-background shadow-xl shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
             {isProcessing ? <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> : <Gavel className="h-4 w-4" />}
             {isProcessing ? 'BROADCASTING...' : 'PLACE BID NOW'}
           </button>

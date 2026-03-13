@@ -38,7 +38,7 @@ const PostDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#050505] pt-24 px-6 flex flex-col items-center justify-center">
         <img src={APP_LOGO} className="w-12 h-12 object-contain animate-[spin_3s_linear_infinite] opacity-50 mb-4" alt="Loading..." />
-        <p className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px]">Synchronizing Signal...</p>
+        <p className="text-muted-foreground font-bold uppercase tracking-[0.3em] text-[10px]">Synchronizing Signal...</p>
       </div>
     );
   }
@@ -134,7 +134,7 @@ const PostDetail: React.FC = () => {
 
       <div className="max-w-3xl mx-auto relative z-10">
         {/* Back Button */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-8 group">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group">
           <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" />
           <span className="text-[10px] font-bold uppercase tracking-widest">Return to Feed</span>
         </button>
@@ -147,7 +147,7 @@ const PostDetail: React.FC = () => {
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/5 blur-[120px] rounded-full pointer-events-none"></div>
 
           <div className="absolute top-8 right-8 z-10">
-            <button onClick={() => setShowOptions(true)} className="w-10 h-10 flex items-center justify-center text-white/20 hover:text-blue-400 transition-all rounded-full hover:bg-white/5">
+            <button onClick={() => setShowOptions(true)} className="w-10 h-10 flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 transition-all rounded-full hover:bg-muted/50">
               <MoreVertical className="h-5 w-5" />
             </button>
           </div>
@@ -157,26 +157,26 @@ const PostDetail: React.FC = () => {
             <div className="relative flex-shrink-0 cursor-pointer group/avatar" onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : navigate(`/user/${post.userId}`)}>
               <img src={post.userAvatar} className="w-16 h-16 rounded-full group-hover/avatar:-blue-500 transition-all object-cover shadow-2xl" alt={post.userName} />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full -black flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.6)]">
-                <Zap className="h-3 w-3 text-white fill-current" />
+                <Zap className="h-3 w-3 text-foreground fill-current" />
               </div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-1">
                 <h4 
-                  className="font-bold text-lg text-white uppercase tracking-tight truncate cursor-pointer hover:text-blue-400 hover:underline inline-block"
+                  className="font-bold text-lg text-foreground uppercase tracking-tight truncate cursor-pointer hover:text-blue-400 hover:underline inline-block"
                   onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : navigate(`/user/${post.userId}`)}
                 > 
                   {post.userName} 
                 </h4>
                 {artist?.verified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
                 {!isMe && (
-                  <button onClick={() => toggleFollowUser(post.userId)} className={`text-[9px] font-bold uppercase tracking-widest transition-all px-3 py-1 rounded-full ${isFollowing ? 'text-blue-500 -blue-500/20 bg-blue-500/5' : 'text-white/40 hover:text-blue-400 hover:-blue-400/20 bg-white/5'}`}>
+                  <button onClick={() => toggleFollowUser(post.userId)} className={`text-[9px] font-bold uppercase tracking-widest transition-all px-3 py-1 rounded-full ${isFollowing ? 'text-blue-500 -blue-500/20 bg-blue-500/5' : 'text-muted-foreground hover:text-blue-400 hover:-blue-400/20 bg-muted/50'}`}>
                     {isFollowing ? 'Following' : 'Follow'}
                   </button>
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-bold"> {post.timestamp} </span>
+                <span className="text-[10px] text-foreground/30 uppercase tracking-[0.3em] font-bold"> {post.timestamp} </span>
                 <div className="w-1 h-1 rounded-full bg-blue-500/20"></div>
                 <span className="text-[8px] text-blue-500/40 uppercase font-bold tracking-widest">Neural Sync Active</span>
               </div>
@@ -184,7 +184,7 @@ const PostDetail: React.FC = () => {
           </div>
 
           {/* Content */}
-          <p className="text-white/90 leading-relaxed mb-10 text-lg font-medium -l -blue-500/20 pl-8">
+          <p className="text-foreground/90 leading-relaxed mb-10 text-lg font-medium -l -blue-500/20 pl-8">
             {post.content}
           </p>
 
@@ -199,7 +199,7 @@ const PostDetail: React.FC = () => {
           )}
 
           {track && (
-            <div className="mb-10 p-6 rounded-[10px] glass border border-blue-500/10 bg-white/[0.02] relative group/track overflow-hidden">
+            <div className="mb-10 p-6 rounded-[10px] glass border border-blue-500/10 bg-foreground/[0.02] relative group/track overflow-hidden">
               <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover/track:opacity-100 transition-opacity"></div>
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -214,11 +214,11 @@ const PostDetail: React.FC = () => {
                         <img src={TON_LOGO} className="w-6 h-6" alt="TON" />
                       </div>
                       <div>
-                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Current Price</p>
-                        <p className="text-xl font-bold text-white uppercase tracking-tighter">{track.price || '15.0'} TON</p>
+                        <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Current Price</p>
+                        <p className="text-xl font-bold text-foreground uppercase tracking-tighter">{track.price || '15.0'} TON</p>
                       </div>
                     </div>
-                    <button onClick={() => addNotification('Neural transaction initiated...', 'info')} className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
+                    <button onClick={() => addNotification('Neural transaction initiated...', 'info')} className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-500 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
                       Buy NFT Now
                     </button>
                   </div>
@@ -235,7 +235,7 @@ const PostDetail: React.FC = () => {
                   <img src={nft.imageUrl} className="w-full h-full object-cover" alt={nft.title} />
                   <div className="absolute top-2 right-2">
                     <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                      <Zap className="h-3 w-3 text-white fill-current" />
+                      <Zap className="h-3 w-3 text-foreground fill-current" />
                     </div>
                   </div>
                 </div>
@@ -243,20 +243,20 @@ const PostDetail: React.FC = () => {
                   <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
                     <span className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em]">Sonic Artifact Acquired</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white uppercase tracking-tighter mb-2">{nft.title}</h3>
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-6">Creator: {nft.creator}</p>
+                  <h3 className="text-2xl font-bold text-foreground uppercase tracking-tighter mb-2">{nft.title}</h3>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-6">Creator: {nft.creator}</p>
                   
                   <div className="flex items-center justify-center md:justify-start gap-6">
                     <div>
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Valuation</p>
+                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Valuation</p>
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-white tracking-tighter">{nft.price}</span>
+                        <span className="text-2xl font-bold text-foreground tracking-tighter">{nft.price}</span>
                         <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">TON</span>
                       </div>
                     </div>
-                    <div className="w-px h-10 bg-white/10"></div>
+                    <div className="w-px h-10 bg-muted"></div>
                     <div>
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Rarity</p>
+                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Rarity</p>
                       <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Legendary</p>
                     </div>
                   </div>
@@ -267,7 +267,7 @@ const PostDetail: React.FC = () => {
 
           {/* Interaction Bar */}
           <div className="flex items-center gap-12 pt-8 -t mb-12">
-            <button onClick={handleLike} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 group/like ${liked ? 'text-red-500' : 'text-white/20 hover:text-red-400'}`}>
+            <button onClick={handleLike} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 group/like ${liked ? 'text-red-500' : 'text-muted-foreground/50 hover:text-red-400'}`}>
               <div className="relative">
                 {liked && <div className="absolute inset-0 bg-red-500/40 blur-md rounded-full animate-ping"></div>}
                 <Heart className={`h-5 w-5 relative z-10 group-hover/like:scale-110 transition-transform ${liked ? 'fill-current' : ''}`} />
@@ -278,12 +278,12 @@ const PostDetail: React.FC = () => {
               <MessageCircle className="h-5 w-5" />
               <span className="text-xs font-bold uppercase tracking-widest">{comments.length}</span>
             </div>
-            <button onClick={handleRepost} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 ${reposted ? 'text-green-500' : 'text-white/20 hover:text-green-400'}`}>
+            <button onClick={handleRepost} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 ${reposted ? 'text-green-500' : 'text-muted-foreground/50 hover:text-green-400'}`}>
               <Repeat2 className="h-5 w-5" />
               <span className="text-xs font-bold uppercase tracking-widest">{repostsCount}</span>
             </button>
             <div className="flex-1 flex justify-end">
-              <button onClick={handleShare} className="w-12 h-12 flex items-center justify-center text-white/10 hover:text-blue-500 transition-all active:scale-90 rounded-full hover:bg-white/5">
+              <button onClick={handleShare} className="w-12 h-12 flex items-center justify-center text-muted-foreground/30 hover:text-blue-500 transition-all active:scale-90 rounded-full hover:bg-muted/50">
                 <Share2 className="h-5 w-5" />
               </button>
             </div>
@@ -291,7 +291,7 @@ const PostDetail: React.FC = () => {
 
           {/* Comments Section */}
           <div className="space-y-10">
-            <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] mb-8">Neural Responses</h3>
+            <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em] mb-8">Neural Responses</h3>
             <form onSubmit={handleAddComment} className="flex gap-6 mb-12">
               <img 
                 src={MOCK_USER.avatar} 
@@ -300,8 +300,8 @@ const PostDetail: React.FC = () => {
                 onClick={() => navigate('/profile')}
               />
               <div className="flex-1 relative">
-                <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit your response..." className="w-full bg-white/5 rounded-[10px] py-3 px-6 text-sm outline-none focus:-blue-500/50 transition-all text-white shadow-inner" />
-                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-blue-600 rounded-[10px] text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">
+                <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit your response..." className="w-full bg-muted/50 rounded-[10px] py-3 px-6 text-sm outline-none focus:-blue-500/50 transition-all text-foreground shadow-inner" />
+                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-blue-600 rounded-[10px] text-foreground hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">
                   <Send className="h-3 w-3" />
                 </button>
               </div>
@@ -320,14 +320,14 @@ const PostDetail: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h5 
-                          className="text-[11px] font-bold text-white uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block"
+                          className="text-[11px] font-bold text-foreground uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block"
                           onClick={(e) => handleCommentProfileClick(e, comment.userId)}
                         >
                           {comment.userName}
                         </h5>
-                        <span className="text-[9px] text-white/20 font-bold uppercase tracking-widest">{comment.timestamp}</span>
+                        <span className="text-[9px] text-muted-foreground/50 font-bold uppercase tracking-widest">{comment.timestamp}</span>
                       </div>
-                      <p className="text-[13px] text-white/70 leading-relaxed mb-4">{comment.content}</p>
+                      <p className="text-[13px] text-foreground/70 leading-relaxed mb-4">{comment.content}</p>
                       <div className="flex items-center gap-3">
                         {/* Existing Reactions */}
                         <div className="flex flex-wrap gap-2">
@@ -337,7 +337,7 @@ const PostDetail: React.FC = () => {
                               <button 
                                 key={emoji} 
                                 onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                className={`flex items-center gap-2 rounded-full px-3 py-1 text-[10px] transition-all ${isActive ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-white/40 hover:text-blue-400'}`}
+                                className={`flex items-center gap-2 rounded-full px-3 py-1 text-[10px] transition-all ${isActive ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-muted/50 text-muted-foreground hover:text-blue-400'}`}
                               >
                                 <span>{emoji}</span>
                                 <span className="font-bold">{count}</span>
@@ -347,17 +347,17 @@ const PostDetail: React.FC = () => {
                         </div>
                         {/* Reaction Picker Trigger */}
                         <div className="relative group/picker">
-                          <button className="w-8 h-8 flex items-center justify-center rounded-full text-white/10 hover:text-blue-500 transition-all hover:bg-white/5">
+                          <button className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-blue-500 transition-all hover:bg-muted/50">
                             <Smile className="h-4 w-4" />
                           </button>
-                          <div className="absolute bottom-full left-0 mb-2 hidden group-hover/picker:flex items-center gap-1 bg-[#1a1a1a] border border-white/10 p-1.5 rounded-full shadow-xl z-20 backdrop-blur-xl">
+                          <div className="absolute bottom-full left-0 mb-2 hidden group-hover/picker:flex items-center gap-1 bg-[#1a1a1a] border border-border p-1.5 rounded-full shadow-xl z-20 backdrop-blur-xl">
                             {REACTION_EMOJIS.map(emoji => {
                               const isActive = comment.userReactions?.includes(emoji);
                               return (
                                 <button 
                                   key={emoji} 
                                   onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                  className={`w-8 h-8 flex items-center justify-center rounded-full transition-all text-sm hover:scale-110 ${isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white/80'}`}
+                                  className={`w-8 h-8 flex items-center justify-center rounded-full transition-all text-sm hover:scale-110 ${isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-muted text-muted-foreground/90'}`}
                                 >
                                   {emoji}
                                 </button>
@@ -372,8 +372,8 @@ const PostDetail: React.FC = () => {
               </AnimatePresence>
               {comments.length === 0 && (
                 <div className="text-center py-12 -dashed rounded-[10px]">
-                  <MessageSquareOff className="h-8 w-8 text-white/5 mx-auto mb-4" />
-                  <p className="text-[10px] font-bold text-white/10 uppercase tracking-[0.4em]">No neural signals detected</p>
+                  <MessageSquareOff className="h-8 w-8 text-foreground/5 mx-auto mb-4" />
+                  <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No neural signals detected</p>
                 </div>
               )}
             </div>

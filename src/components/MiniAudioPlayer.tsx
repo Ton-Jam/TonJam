@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAudio } from "@/context/AudioContext";
 import { useNavigate } from "react-router-dom";
-import { Play, Pause, MoreVertical, X, Music2 } from "lucide-react";
+import { Play, Pause, MoreVertical, X, Music2, SkipBack, SkipForward } from "lucide-react";
 import TrackOptionsModal from "./TrackOptionsModal";
 import { MOCK_ARTISTS } from "@/constants";
 
@@ -17,6 +17,8 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     currentTrack,
     isPlaying,
     togglePlay,
+    nextTrack,
+    prevTrack,
     progress,
     closePlayer,
     setFullPlayerOpen,
@@ -42,7 +44,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
   return (
     <>
       <div
-        className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-[#0a192f] border-t border-white/5 px-4 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-[#112240] transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-[#0a192f] border-t border-border/50 px-4 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-[#112240] transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onClick={() => setFullPlayerOpen(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -62,7 +64,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               alt=""
             />
             {isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <div className="absolute inset-0 flex items-center justify-center bg-background/20">
                 <div className="flex gap-0.5 items-end h-3">
                   <div className="w-0.5 bg-blue-400 animate-[bounce_0.6s_infinite_0.1s]"></div>
                   <div className="w-0.5 bg-blue-400 animate-[bounce_0.6s_infinite_0.2s]"></div>
@@ -72,7 +74,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             )}
           </div>
           <div className="min-w-0">
-            <h4 className="text-[12px] font-bold truncate text-white uppercase tracking-tight leading-tight">
+            <h4 className="text-[12px] font-bold truncate text-foreground uppercase tracking-tight leading-tight">
               {currentTrack.title}
             </h4>
             <div className="flex items-center gap-1.5 mt-0.5">
@@ -103,7 +105,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 }}
                 role="button"
                 tabIndex={0}
-                className="text-[10px] text-white/40 truncate uppercase font-bold tracking-widest hover:text-blue-500 transition-colors inline-block leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                className="text-[10px] text-muted-foreground truncate uppercase font-bold tracking-widest hover:text-blue-500 transition-colors inline-block leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                 aria-label={`View ${currentTrack.artist}'s profile`}
               >
                 {currentTrack.artist}
@@ -121,27 +123,27 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <Pause className="h-5 w-5 text-white fill-white" />
+              <Pause className="h-5 w-5 text-foreground fill-white" />
             ) : (
-              <Play className="h-5 w-5 text-white fill-white ml-0.5" />
+              <Play className="h-5 w-5 text-foreground fill-white ml-0.5" />
             )}
           </button>
           <button
             onClick={handleOptionsClick}
-            className="w-10 h-10 flex items-center justify-center text-white/40 hover:text-white transition-all hover:bg-white/5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all hover:bg-muted/50 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Track options"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
           <button
             onClick={closePlayer}
-            className="hidden sm:flex w-10 h-10 rounded-full bg-white/5 items-center justify-center hover:bg-white/10 text-white/40 hover:text-white transition-all ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="hidden sm:flex w-10 h-10 rounded-full bg-muted/50 items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-all ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Close player"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5 overflow-hidden pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-muted/50 overflow-hidden pointer-events-none">
           <div
             className="h-full bg-blue-600 transition-all duration-300"
             style={{ width: `${progress}%` }}

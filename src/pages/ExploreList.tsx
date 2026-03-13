@@ -136,32 +136,32 @@ const ExploreList: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 px-4 md:px-12 pb-32">
       {/* Sticky Header with Explicit Back Navigation */}
-      <div className="sticky top-0 left-0 right-0 z-[60] bg-black/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-12 md:px-12 pt-3 pb-3 -b mb-4">
+      <div className="sticky top-0 left-0 right-0 z-[60] bg-background/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-12 md:px-12 pt-3 pb-3 -b mb-4">
         <div className="flex flex-col gap-2">
           {/* Top Row: Back Button & Search Bar */}
           <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-blue-500 hover:bg-white/10 hover:text-white transition-all active:scale-95 flex-shrink-0 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-blue-500 hover:bg-muted hover:text-foreground transition-all active:scale-95 flex-shrink-0 cursor-pointer"
               aria-label="Go back"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 h-3 w-3" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 h-3 w-3" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={`Search in ${type}...`}
-                className="w-full bg-white/5 py-2 pl-10 pr-6 text-xs outline-none focus:-blue-500/30 transition-all placeholder:text-white/10 rounded-[8px] text-white"
+                className="w-full bg-muted/50 py-2 pl-10 pr-6 text-xs outline-none focus:-blue-500/30 transition-all placeholder:text-muted-foreground/30 rounded-full text-foreground"
               />
             </div>
           </div>
           {/* Bottom Row: Section Title */}
           <div className="px-1">
-            <h1 className="text-xl md:text-3xl font-bold tracking-tighter uppercase text-white leading-none">
+            <h1 className="text-xl md:text-3xl font-bold tracking-tighter uppercase text-foreground leading-none">
               {title}
             </h1>
           </div>
@@ -193,8 +193,8 @@ const ExploreList: React.FC = () => {
       {/* Empty State */}
       {!loading && filteredItems.length === 0 && (
         <div className="py-48 text-center flex flex-col items-center">
-          <Satellite className="h-16 w-16 text-white/5 mb-8" />
-          <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.4em]">Zero signals detected</p>
+          <Satellite className="h-16 w-16 text-foreground/5 mb-8" />
+          <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">Zero signals detected</p>
           <button
             type="button"
             onClick={() => setSearch('')}

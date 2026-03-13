@@ -434,7 +434,15 @@ export const MOCK_ARTISTS: Artist[] = [
       streamingSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.05, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.10, label: 'Main Artist' }]
     },
-    earnings: { streaming: '12.4', nftSales: '45.2', total: '57.6' }
+    earnings: { streaming: '12.4', nftSales: '45.2', total: '57.6' },
+    events: [
+      { id: 'e1', title: 'Neon Nights Live', date: '2024-05-20', time: '20:00', venue: 'The Digital Dome', location: 'London, UK', ticketUrl: 'https://example.com/tickets' },
+      { id: 'e2', title: 'Cyber Drift Tour', date: '2024-06-15', time: '21:30', venue: 'Synth City Arena', location: 'Tokyo, JP' }
+    ],
+    collaborations: [
+      { id: 'c1', artistName: 'Byte Beat', trackTitle: 'Digital Pulse', coverUrl: 'https://picsum.photos/200/200?random=50' },
+      { id: 'c2', artistName: 'Luna Ray', trackTitle: 'Starlight Drift', coverUrl: 'https://picsum.photos/200/200?random=51' }
+    ]
   },
   { 
     id: 'a2', 
@@ -452,7 +460,15 @@ export const MOCK_ARTISTS: Artist[] = [
       streamingSplits: [{ address: 'EQB_Byte_Beat_Wallet_Address_7777', percentage: 0.04, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQB_Byte_Beat_Wallet_Address_7777', percentage: 0.08, label: 'Main Artist' }]
     },
-    earnings: { streaming: '5.2', nftSales: '12.8', total: '18.0' }
+    earnings: { streaming: '5.2', nftSales: '12.8', total: '18.0' },
+    events: [
+      { id: 'e3', title: 'Byte Beat Live Stream', date: '2024-05-25', time: '18:00', venue: 'Twitch / TonJam Live', location: 'Virtual' },
+      { id: 'e4', title: 'Decentralized Beats Festival', date: '2024-07-10', time: '14:00', venue: 'Blockchain Park', location: 'Berlin, DE' }
+    ],
+    collaborations: [
+      { id: 'c3', artistName: 'Neon Voyager', trackTitle: 'Digital Pulse', coverUrl: 'https://picsum.photos/200/200?random=50' },
+      { id: 'c4', artistName: 'City Ghost', trackTitle: 'Urban Echo', coverUrl: 'https://picsum.photos/200/200?random=52' }
+    ]
   },
   { 
     id: 'a3', 

@@ -210,12 +210,6 @@ function ActionSearchBar({
     <div className="mx-auto w-full max-w-xl">
       <div className="relative flex flex-col items-center justify-start">
         <div className="sticky top-0 z-10 w-full max-w-sm bg-background pt-4 pb-1">
-          <label
-            className="mb-1 block font-bold text-blue-500 text-[10px] uppercase tracking-[0.2em]"
-            htmlFor="search"
-          >
-            Jam Torch
-          </label>
           <div className="relative">
             <Input
               aria-activedescendant={
@@ -271,7 +265,7 @@ function ActionSearchBar({
               <motion.div
                 animate="show"
                 aria-label="Search results"
-                className="mt-1 w-full overflow-hidden rounded-md border bg-white shadow-xs dark:border-gray-800 dark:bg-black"
+                className="mt-1 w-full overflow-hidden rounded-md border bg-foreground shadow-xs dark:border-gray-800 dark:bg-background"
                 exit="exit"
                 initial="hidden"
                 role="listbox"

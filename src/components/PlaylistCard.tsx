@@ -40,7 +40,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
     if (playlistTracks.length === 0) {
       return (
         <div className={`${sizeClass} flex items-center justify-center bg-gradient-to-br from-blue-900/20 to-purple-900/20 group-hover:scale-110 transition-transform duration-500`}>
-          <Music className="text-white/20 h-8 w-8" />
+          <Music className="text-muted-foreground/50 h-8 w-8" />
         </div>
       );
     }
@@ -76,20 +76,20 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
     return (
       <div 
         onClick={onClick} 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-white/5 transition-all cursor-pointer w-full"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full"
       >
         <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
           {renderCover()}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-white group-hover:text-blue-400 transition-colors">
+          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
             {playlist.title}
           </h4>
-          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate">
+          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">
             {playlist.creator}
           </p>
         </div>
-        <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest hidden sm:block">
+        <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hidden sm:block">
           {playlist.trackCount} Tracks
         </span>
       </div>
@@ -104,23 +104,23 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
         {renderCover()}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+        <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center">
           <button 
             onClick={handlePlay}
-            className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+            className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-border/80 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
           >
-            <Play className="h-3 w-3 text-white fill-white ml-0.5" />
+            <Play className="h-3 w-3 text-foreground fill-white ml-0.5" />
           </button>
         </div>
       </div>
       
       {/* Content Below Card */}
       <div className="px-0.5">
-        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-white group-hover:text-blue-400 transition-colors">
+        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
           {playlist.title}
         </h3>
         <p 
-          className="text-[8px] font-bold uppercase tracking-widest text-white/40 truncate hover:text-white hover:underline cursor-pointer inline-block mt-0.5"
+          className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-0.5"
           onClick={(e) => {
             e.stopPropagation();
             const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
@@ -135,8 +135,8 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         </p>
         
         {/* Stats */}
-        <div className="flex items-center justify-between border-t border-white/5 pt-1.5 mt-1.5">
-          <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
+        <div className="flex items-center justify-between border-t border-border/50 pt-1.5 mt-1.5">
+          <span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
             {playlist.trackCount} Tracks
           </span>
         </div>

@@ -46,7 +46,11 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
           text: content || "Check out this signal on TonJam!",
           url: window.location.href,
         })
-        .catch((error) => console.log("Error sharing", error));
+        .catch((error) => {
+          if (error.name !== 'AbortError') {
+            console.error('Error sharing:', error);
+          }
+        });
     } else {
       addNotification("Web Share API not supported on this browser.", "info");
     }
@@ -63,21 +67,21 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
       aria-labelledby="modal-title"
     >
       <div
-        className="absolute inset-0 bg-black/90 backdrop-blur-md"
+        className="absolute inset-0 bg-background/90 backdrop-blur-md"
         onClick={onClose}
       ></div>
       <div className="relative w-full max-w-sm glass border border-blue-500/10 bg-[#0A0A0A] rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-blue-500/30 transition-all">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-        <header className="flex justify-between items-center p-3 border-b border-white/5">
+        <header className="flex justify-between items-center p-3 border-b border-border/50">
           <div className="flex items-center gap-2">
             <img src={APP_LOGO} className="w-4 h-4 object-contain" alt="" aria-hidden="true" />
-            <h2 id="modal-title" className="text-[9px] font-bold uppercase tracking-[0.2em] text-white">
+            <h2 id="modal-title" className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground">
               New Signal
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="w-6 h-6 rounded-[6px] bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="w-6 h-6 rounded-[6px] bg-muted/50 flex items-center justify-center text-foreground/30 hover:text-foreground hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Close modal"
           >
             <X className="h-3 w-3" />
@@ -88,7 +92,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             <div className="flex-shrink-0">
               <img
                 src={MOCK_USER.avatar}
-                className="w-8 h-8 rounded-full object-cover border border-white/10"
+                className="w-8 h-8 rounded-full object-cover border border-border"
                 alt="Your avatar"
               />
             </div>
@@ -98,20 +102,20 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Describe the vibe..."
-                className="w-full bg-transparent border-none outline-none resize-none text-white text-sm placeholder:text-white/20 min-h-[80px] font-medium tracking-tight leading-relaxed no-scrollbar focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md p-1"
+                className="w-full bg-transparent border-none outline-none resize-none text-foreground text-sm placeholder:text-muted-foreground/50 min-h-[80px] font-medium tracking-tight leading-relaxed no-scrollbar focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md p-1"
                 aria-label="Post content"
               ></textarea>
 
               {selectedTrack && (
-                <div className="relative rounded-[10px] bg-white/5 border border-white/10 p-2 flex items-center gap-3 group/track hover:bg-white/10 transition-colors">
+                <div className="relative rounded-[10px] bg-muted/50 border border-border p-2 flex items-center gap-3 group/track hover:bg-muted transition-colors">
                   <img src={selectedTrack.coverUrl} className="w-10 h-10 rounded-[6px] object-cover shadow-lg" alt="" aria-hidden="true" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold text-white uppercase truncate tracking-wide">{selectedTrack.title}</p>
-                    <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate mt-0.5">{selectedTrack.artist}</p>
+                    <p className="text-[10px] font-bold text-foreground uppercase truncate tracking-wide">{selectedTrack.title}</p>
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate mt-0.5">{selectedTrack.artist}</p>
                   </div>
                   <button 
                     onClick={() => setSelectedTrackId(null)} 
-                    className="w-7 h-7 rounded-full bg-black/20 flex items-center justify-center text-white/40 hover:text-white hover:bg-red-500/20 transition-all opacity-0 group-hover/track:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="w-7 h-7 rounded-full bg-background/20 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-red-500/20 transition-all opacity-0 group-hover/track:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     aria-label="Remove track"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -120,7 +124,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               )}
 
               {mediaUrl && (
-                <div className="relative rounded-[10px] overflow-hidden group/media border border-white/10">
+                <div className="relative rounded-[10px] overflow-hidden group/media border border-border">
                   {mediaUrl.startsWith("data:video") ? (
                     <video
                       src={mediaUrl}
@@ -137,7 +141,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
                   )}
                   <button
                     onClick={() => setMediaUrl(null)}
-                    className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-red-500/80 transition-all opacity-0 group-hover/media:opacity-100 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="absolute top-2 right-2 w-7 h-7 bg-background/60 backdrop-blur-md rounded-full flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-red-500/80 transition-all opacity-0 group-hover/media:opacity-100 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     aria-label="Remove media"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -150,15 +154,15 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
 
         {showTrackPicker && (
           <div 
-            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-[#0A0A0A] z-20 overflow-y-auto no-scrollbar border-t border-white/5 p-3 animate-in slide-in-from-bottom-4 duration-300"
+            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-[#0A0A0A] z-20 overflow-y-auto no-scrollbar border-t border-border/50 p-3 animate-in slide-in-from-bottom-4 duration-300"
             role="region"
             aria-label="Track picker"
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[8px] font-bold text-white/40 uppercase tracking-[0.3em]">Select Track to Share</h3>
+              <h3 className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.3em]">Select Track to Share</h3>
               <button 
                 onClick={() => setShowTrackPicker(false)} 
-                className="text-white/40 hover:text-white p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                className="text-muted-foreground hover:text-foreground p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                 aria-label="Close track picker"
               >
                 <X className="h-3 w-3" />
@@ -169,14 +173,14 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
                 <button 
                   key={track.id} 
                   onClick={() => { setSelectedTrackId(track.id); setShowTrackPicker(false); }}
-                  className={`w-full flex items-center gap-2.5 p-2 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-white/5 border border-transparent hover:bg-white/10'}`}
+                  className={`w-full flex items-center gap-2.5 p-2 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-muted/50 border border-transparent hover:bg-muted'}`}
                   aria-label={`Select ${track.title} by ${track.artist}`}
                   aria-pressed={selectedTrackId === track.id}
                 >
                   <img src={track.coverUrl} className="w-7 h-7 rounded-[4px] object-cover" alt="" aria-hidden="true" />
                   <div className="flex-1 text-left min-w-0">
-                    <p className="text-[9px] font-bold text-white uppercase truncate">{track.title}</p>
-                    <p className="text-[7px] font-bold text-white/40 uppercase tracking-widest truncate">{track.artist}</p>
+                    <p className="text-[9px] font-bold text-foreground uppercase truncate">{track.title}</p>
+                    <p className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
                   </div>
                   {selectedTrackId === track.id && <Check className="h-3 w-3 text-blue-500" aria-hidden="true" />}
                 </button>
@@ -185,7 +189,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
           </div>
         )}
 
-        <footer className="flex items-center justify-between p-3 bg-white/[0.02] border-t border-white/5">
+        <footer className="flex items-center justify-between p-3 bg-foreground/[0.02] border-t border-border/50">
           <div className="flex gap-0.5">
             <input
               type="file"
@@ -197,14 +201,14 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-8 h-8 rounded-[8px] flex items-center justify-center text-white/20 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="w-8 h-8 rounded-[8px] flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Upload Media"
             >
               <Image className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
             </button>
             <button
               onClick={() => setShowTrackPicker(!showTrackPicker)}
-              className={`w-8 h-8 rounded-[8px] flex items-center justify-center transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${showTrackPicker ? 'text-blue-400 bg-blue-500/10' : 'text-white/20 hover:text-blue-400 hover:bg-blue-500/10'}`}
+              className={`w-8 h-8 rounded-[8px] flex items-center justify-center transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${showTrackPicker ? 'text-blue-400 bg-blue-500/10' : 'text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10'}`}
               aria-label="Attach Track"
               aria-expanded={showTrackPicker}
             >
@@ -212,7 +216,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             </button>
             <button
               onClick={handleSocialShare}
-              className="w-8 h-8 rounded-[8px] flex items-center justify-center text-white/20 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="w-8 h-8 rounded-[8px] flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Share externally"
             >
               <Share2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
@@ -229,14 +233,14 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2" aria-label={`Character count: ${content.length} of ${maxLength}`}>
-              <div className="w-10 h-1 bg-white/5 rounded-full overflow-hidden" aria-hidden="true">
+              <div className="w-10 h-1 bg-muted/50 rounded-full overflow-hidden" aria-hidden="true">
                 <div
                   className={`h-full transition-all duration-300 ${progress > 90 ? "bg-red-500" : "bg-blue-500"}`}
                   style={{ width: `${Math.min(progress, 100)}%` }}
                 ></div>
               </div>
               <span
-                className={`text-[7px] font-bold uppercase tracking-widest tabular-nums ${content.length > maxLength ? "text-red-500" : "text-white/20"}`}
+                className={`text-[7px] font-bold uppercase tracking-widest tabular-nums ${content.length > maxLength ? "text-red-500" : "text-muted-foreground/50"}`}
               >
                 {content.length}
               </span>
@@ -246,7 +250,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               disabled={
                 (!content.trim() && !mediaUrl && !selectedTrackId) || content.length > maxLength
               }
-              className="bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/10 w-10 h-10 rounded-[8px] flex items-center justify-center text-white transition-all shadow-lg shadow-blue-600/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="bg-blue-600 hover:bg-blue-500 disabled:bg-muted/50 disabled:text-muted-foreground/30 w-10 h-10 rounded-[8px] flex items-center justify-center text-foreground transition-all shadow-lg shadow-blue-600/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Post Signal"
             >
               <Send className="h-4 w-4" />

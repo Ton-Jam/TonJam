@@ -17,6 +17,8 @@ const PlaylistDetail: React.FC = () => {
   const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [filterGenre, setFilterGenre] = useState<string>('All');
+  const [filterMood, setFilterMood] = useState<string>('All');
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const playlist = useMemo(() => {
@@ -31,10 +33,16 @@ const PlaylistDetail: React.FC = () => {
     const uniqueTracks = Array.from(new Map(tracks.map(item => [item.id, item])).values());
     
     // Map over trackIds to preserve the exact order of the playlist
-    return playlist.trackIds
+    const playlistTracks = playlist.trackIds
       .map(id => uniqueTracks.find(track => track.id === id))
       .filter((track): track is NonNullable<typeof track> => track !== undefined);
-  }, [playlist, allTracks]);
+      
+    return playlistTracks.filter(track => {
+      const genreMatch = filterGenre === 'All' || track.genre === filterGenre;
+      const moodMatch = filterMood === 'All' || track.mood === filterMood;
+      return genreMatch && moodMatch;
+    });
+  }, [playlist, allTracks, filterGenre, filterMood]);
 
   const handlePlayAll = () => {
     if (playlistTracks.length > 0) {
@@ -165,7 +173,7 @@ const PlaylistDetail: React.FC = () => {
 
   if (!playlist) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-foreground">
         <h2 className="text-2xl font-bold mb-4">Playlist not found</h2>
         <button onClick={() => navigate('/')} className="px-6 py-2 bg-blue-600 rounded-full hover:bg-blue-700 transition-colors">
           Go Home
@@ -182,10 +190,10 @@ const PlaylistDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black pb-32 pt-20 px-4 md:px-8">
+    <div className="min-h-screen bg-background pb-32 pt-20 px-4 md:px-8">
       <div className="flex flex-col md:flex-row gap-8 mb-12 items-center md:items-end">
         {/* Cover Image / Collage */}
-        <div className="relative group w-48 h-48 md:w-56 md:h-56 flex-shrink-0 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-neutral-900 border border-white/10 mx-auto md:mx-0">
+        <div className="relative group w-48 h-48 md:w-56 md:h-56 flex-shrink-0 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-neutral-900 border border-border mx-auto md:mx-0">
           {playlist.coverUrl ? (
             <img src={playlist.coverUrl} alt={playlist.title} className="w-full h-full object-cover" />
           ) : (
@@ -195,7 +203,7 @@ const PlaylistDetail: React.FC = () => {
                   {img ? (
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <Music2 className="h-8 w-8 text-white/10" />
+                    <Music2 className="h-8 w-8 text-muted-foreground/30" />
                   )}
                 </div>
               ))}
@@ -204,11 +212,11 @@ const PlaylistDetail: React.FC = () => {
           
           {/* Upload Overlay */}
           <div 
-            className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm" 
+            className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm" 
             onClick={() => fileInputRef.current?.click()}
           >
-            <Camera className="h-8 w-8 text-white mb-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300" />
-            <span className="text-[10px] font-bold text-white uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">Change Cover</span>
+            <Camera className="h-8 w-8 text-foreground mb-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300" />
+            <span className="text-[10px] font-bold text-foreground uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">Change Cover</span>
           </div>
           <input 
             type="file" 
@@ -226,22 +234,22 @@ const PlaylistDetail: React.FC = () => {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-2xl md:text-4xl font-bold text-white focus:outline-none focus:border-blue-500 text-center md:text-left"
+                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-2xl md:text-4xl font-bold text-foreground focus:outline-none focus:border-blue-500 text-center md:text-left"
                 placeholder="Playlist Title"
                 autoFocus
               />
               <textarea
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-sm text-white/80 focus:outline-none focus:border-blue-500 resize-none text-center md:text-left"
+                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-sm text-muted-foreground/90 focus:outline-none focus:border-blue-500 resize-none text-center md:text-left"
                 placeholder="Add a description..."
                 rows={3}
               />
               <div className="flex gap-2 justify-center md:justify-start">
-                <button onClick={saveEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
+                <button onClick={saveEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-500 text-foreground rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
                   <Check className="h-3 w-3" /> Save
                 </button>
-                <button onClick={cancelEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
+                <button onClick={cancelEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
                   <X className="h-3 w-3" /> Cancel
                 </button>
               </div>
@@ -249,15 +257,15 @@ const PlaylistDetail: React.FC = () => {
           ) : (
             <>
               <div className="group flex items-start justify-center md:justify-start gap-3 mb-2">
-                <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">{playlist.title}</h1>
-                <button onClick={startEditing} className="mt-2 text-white/40 hover:text-white transition-all" title="Edit Playlist">
+                <h1 className="text-3xl md:text-5xl font-bold text-foreground tracking-tight">{playlist.title}</h1>
+                <button onClick={startEditing} className="mt-2 text-muted-foreground hover:text-foreground transition-all" title="Edit Playlist">
                   <Pencil className="h-4 w-4" />
                 </button>
               </div>
               {playlist.description && (
-                <p className="text-white/60 text-sm mb-4 max-w-2xl mx-auto md:mx-0">{playlist.description}</p>
+                <p className="text-muted-foreground/80 text-sm mb-4 max-w-2xl mx-auto md:mx-0">{playlist.description}</p>
               )}
-              <div className="flex items-center justify-center md:justify-start gap-3 text-white/60 text-xs font-medium mb-6">
+              <div className="flex items-center justify-center md:justify-start gap-3 text-muted-foreground/80 text-xs font-medium mb-6">
                 <span>{playlist.creator}</span>
                 <span>•</span>
                 <span>{playlistTracks.length} tracks</span>
@@ -266,13 +274,13 @@ const PlaylistDetail: React.FC = () => {
           )}
           
           <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-            <button onClick={handlePlayAll} className="flex items-center gap-1.5 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
+            <button onClick={handlePlayAll} className="flex items-center gap-1.5 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
               <Play className="h-3 w-3 fill-current" /> Play All
             </button>
-            <button onClick={handleShuffle} className="flex items-center gap-1.5 px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
+            <button onClick={handleShuffle} className="flex items-center gap-1.5 px-5 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
               <Shuffle className="h-3 w-3" /> Shuffle
             </button>
-            <button onClick={startEditing} className="flex items-center gap-1.5 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Edit Playlist">
+            <button onClick={startEditing} className="flex items-center gap-1.5 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Edit Playlist">
               <Pencil className="h-3 w-3" /> Edit
             </button>
             <button onClick={handleDeletePlaylist} className="flex items-center gap-1.5 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Delete Playlist">
@@ -288,7 +296,7 @@ const PlaylistDetail: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <button 
               onClick={toggleSelectAll}
-              className="flex items-center gap-1.5 text-[8px] font-bold uppercase tracking-widest text-white/80 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-[8px] font-bold uppercase tracking-widest text-muted-foreground/90 hover:text-foreground transition-colors"
             >
               {selectedTrackIds.length === playlistTracks.length ? (
                 <CheckSquare className="h-3 w-3 text-blue-500" />
@@ -302,7 +310,7 @@ const PlaylistDetail: React.FC = () => {
             </span>
             <button 
               onClick={() => { setIsSelectionMode(false); setSelectedTrackIds([]); }}
-              className="ml-1 text-[8px] text-white/40 hover:text-white uppercase font-bold tracking-widest"
+              className="ml-1 text-[8px] text-muted-foreground hover:text-foreground uppercase font-bold tracking-widest"
             >
               Cancel
             </button>
@@ -317,11 +325,33 @@ const PlaylistDetail: React.FC = () => {
         </div>
       )}
 
+      {/* Filter Bar */}
+      {!isSelectionMode && (
+        <div className="flex items-center gap-4 mb-6">
+          <select 
+            value={filterGenre} 
+            onChange={(e) => setFilterGenre(e.target.value)}
+            className="bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground uppercase tracking-widest focus:outline-none focus:border-blue-500"
+          >
+            <option value="All">All Genres</option>
+            {Array.from(new Set(playlistTracks.map(t => t.genre))).map(g => <option key={g} value={g}>{g}</option>)}
+          </select>
+          <select 
+            value={filterMood} 
+            onChange={(e) => setFilterMood(e.target.value)}
+            className="bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground uppercase tracking-widest focus:outline-none focus:border-blue-500"
+          >
+            <option value="All">All Moods</option>
+            {Array.from(new Set(playlistTracks.map(t => t.mood || 'Unknown'))).map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </div>
+      )}
+
       <div className="flex flex-col gap-2 pb-8">
         {playlistTracks.map((track, index) => (
           <div 
             key={track.id} 
-            className={`w-full flex items-center gap-2 group rounded-[10px] pr-2 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/30' : 'hover:bg-white/5 border-transparent'}`}
+            className={`w-full flex items-center gap-2 group rounded-[10px] pr-2 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/30' : 'hover:bg-muted/50 border-transparent'}`}
             onClick={() => handleTrackClick(track.id)}
             onMouseDown={() => handleTouchStart(track.id)}
             onMouseUp={handleTouchEnd}
@@ -334,10 +364,10 @@ const PlaylistDetail: React.FC = () => {
                 selectedTrackIds.includes(track.id) ? (
                   <CheckSquare className="h-3 w-3 text-blue-500" />
                 ) : (
-                  <Square className="h-3 w-3 text-white/20" />
+                  <Square className="h-3 w-3 text-muted-foreground/50" />
                 )
               ) : (
-                <span className="text-white/40 font-mono text-xs">{index + 1}</span>
+                <span className="text-muted-foreground font-mono text-xs">{index + 1}</span>
               )}
             </div>
             
@@ -350,7 +380,7 @@ const PlaylistDetail: React.FC = () => {
                 <button 
                   onClick={(e) => { e.stopPropagation(); handleMoveTrack(e, track.id, 'up'); }} 
                   disabled={index === 0}
-                  className="w-6 h-6 rounded flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white/40 transition-all"
+                  className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground transition-all"
                   title="Move Up"
                 >
                   <ChevronUp className="h-4 w-4" />
@@ -358,47 +388,47 @@ const PlaylistDetail: React.FC = () => {
                 <button 
                   onClick={(e) => { e.stopPropagation(); handleMoveTrack(e, track.id, 'down'); }} 
                   disabled={index === playlistTracks.length - 1}
-                  className="w-6 h-6 rounded flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white/40 transition-all"
+                  className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground transition-all"
                   title="Move Down"
                 >
                   <ChevronDown className="h-4 w-4" />
                 </button>
               </div>
               
-              <button onClick={(e) => { e.stopPropagation(); handleRemoveTrack(e, track.id); }} className="w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-red-500 hover:bg-red-500/10 transition-all" title="Remove from playlist">
+              <button onClick={(e) => { e.stopPropagation(); handleRemoveTrack(e, track.id); }} className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all" title="Remove from playlist">
                 <MinusCircle className="h-4 w-4" />
               </button>
             </div>
           </div>
         ))}
         {playlistTracks.length === 0 && (
-          <div className="text-white/40 italic p-4">No tracks in this playlist yet.</div>
+          <div className="text-muted-foreground italic p-4">No tracks in this playlist yet.</div>
         )}
       </div>
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowConfirmModal(false)}></div>
-          <div className="relative bg-[#0a0a0a] border border-white/10 w-full max-w-sm rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={() => setShowConfirmModal(false)}></div>
+          <div className="relative bg-[#0a0a0a] border border-border w-full max-w-sm rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
                 <AlertTriangle className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-tighter">Remove Tracks?</h3>
-              <p className="text-white/60 text-sm mb-8">
-                Are you sure you want to remove <span className="text-white font-bold">{selectedTrackIds.length}</span> selected tracks from this playlist? This action cannot be undone.
+              <h3 className="text-xl font-bold text-foreground mb-2 uppercase tracking-tighter">Remove Tracks?</h3>
+              <p className="text-muted-foreground/80 text-sm mb-8">
+                Are you sure you want to remove <span className="text-foreground font-bold">{selectedTrackIds.length}</span> selected tracks from this playlist? This action cannot be undone.
               </p>
               <div className="flex flex-col w-full gap-3">
                 <button 
                   onClick={handleBulkRemove}
-                  className="w-full py-3 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold text-xs uppercase tracking-widest transition-all"
+                  className="w-full py-3 bg-red-600 hover:bg-red-500 text-foreground rounded-full font-bold text-xs uppercase tracking-widest transition-all"
                 >
                   Yes, Remove Tracks
                 </button>
                 <button 
                   onClick={() => setShowConfirmModal(false)}
-                  className="w-full py-3 bg-white/5 hover:bg-white/10 text-white rounded-full font-bold text-xs uppercase tracking-widest transition-all"
+                  className="w-full py-3 bg-muted/50 hover:bg-muted text-foreground rounded-full font-bold text-xs uppercase tracking-widest transition-all"
                 >
                   Cancel
                 </button>

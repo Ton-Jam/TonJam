@@ -44,7 +44,7 @@ type TaskTab = 'all' | 'daily' | 'achievements' | 'milestones' | 'staking' | 'le
 const TaskCard: React.FC<{ 
   task: Task; 
   onClaim: (id: string) => void;
-  onToggle: (id: string) => void;
+  onToggle: (id: string, progress: number) => void;
 }> = ({ task, onClaim, onToggle }) => {
   const [isClaiming, setIsClaiming] = useState(false);
 
@@ -66,8 +66,21 @@ const TaskCard: React.FC<{
     });
   };
 
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (task.completed) return;
+    const newProgress = Math.min(task.total, task.progress + 1);
+    onToggle(task.id, newProgress);
+  };
+
+  const handleComplete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (task.completed) return;
+    onToggle(task.id, task.total);
+  };
+
   const rarityColors = {
-    common: 'text-white/40',
+    common: 'text-muted-foreground',
     rare: 'text-blue-400',
     epic: 'text-purple-400',
     legendary: 'text-amber-400'
@@ -82,10 +95,10 @@ const TaskCard: React.FC<{
       animate={{ opacity: 1, scale: 1 }}
       className={`relative group rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col h-full ${
         task.claimed 
-          ? 'bg-neutral-900/40 border-white/5 opacity-50' 
+          ? 'bg-neutral-900/40 border-border/50 opacity-50' 
           : task.completed
             ? 'bg-green-500/5 border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.05)]'
-            : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/[0.07]'
+            : 'bg-muted/50 border-border hover:border-border/80 hover:bg-foreground/[0.07]'
       }`}
     >
       {/* Rarity & Priority Indicators */}
@@ -119,10 +132,10 @@ const TaskCard: React.FC<{
               {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Zap className="w-6 h-6" />}
             </div>
             <div>
-              <h3 className={`text-sm font-bold uppercase tracking-tight transition-all ${task.completed ? 'text-green-500/80' : 'text-white'}`}>
+              <h3 className={`text-sm font-bold uppercase tracking-tight transition-all ${task.completed ? 'text-green-500/80' : 'text-foreground'}`}>
                 {task.title}
               </h3>
-              <p className="text-[10px] font-medium text-white/40 leading-relaxed mt-0.5">
+              <p className="text-[10px] font-medium text-muted-foreground leading-relaxed mt-0.5">
                 {task.description}
               </p>
             </div>
@@ -132,11 +145,11 @@ const TaskCard: React.FC<{
         {/* Progress Bar */}
         {!task.completed && (
           <div className="mt-auto pt-4">
-            <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-white/30 mb-1.5">
+            <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-foreground/30 mb-1.5">
               <span>Progress</span>
               <span>{task.progress} / {task.total}</span>
             </div>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
@@ -147,12 +160,12 @@ const TaskCard: React.FC<{
         )}
 
         {/* Reward Section */}
-        <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+        <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Reward</span>
+            <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Reward</span>
             <div className="flex items-center gap-1.5">
               <img src={TJ_COIN_ICON} className="w-4 h-4 object-contain" alt="" referrerPolicy="no-referrer" />
-              <span className="text-sm font-black text-white">{task.reward}</span>
+              <span className="text-sm font-black text-foreground">{task.reward}</span>
               <span className="text-[10px] font-bold text-blue-500/60">+{task.points} XP</span>
             </div>
           </div>
@@ -162,7 +175,7 @@ const TaskCard: React.FC<{
               <button 
                 onClick={handleClaim}
                 disabled={isClaiming}
-                className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 text-background text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-2"
               >
                 {isClaiming ? (
                   <>
@@ -181,12 +194,20 @@ const TaskCard: React.FC<{
                 <CheckCircle2 className="w-3 h-3" /> Claimed
               </div>
             ) : (
-              <button 
-                onClick={() => onToggle(task.id)}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all"
-              >
-                <Info className="w-4 h-4" />
-              </button>
+              <>
+                <button 
+                  onClick={handleIncrement}
+                  className="px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
+                >
+                  +1 Progress
+                </button>
+                <button 
+                  onClick={handleComplete}
+                  className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
+                >
+                  Complete
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -252,9 +273,28 @@ const Tasks: React.FC = () => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, claimed: true } : t));
   };
 
-  const handleToggle = (id: string) => {
-    // In a real app, this would be triggered by actual user actions
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed, progress: !t.completed ? t.total : 0 } : t));
+  const handleToggle = (id: string, progress: number) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const newProgress = Math.min(t.total, progress);
+        const isNowCompleted = newProgress >= t.total;
+        if (isNowCompleted && !t.completed) {
+            addNotification(`Task "${t.title}" completed!`, "success");
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ['#3b82f6', '#10b981', '#f59e0b']
+            });
+        }
+        return { 
+          ...t, 
+          progress: newProgress,
+          completed: isNowCompleted
+        };
+      }
+      return t;
+    }));
   };
 
   const handleStake = (amount: number) => {
@@ -300,8 +340,8 @@ const Tasks: React.FC = () => {
             </div>
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500">Protocol Center</span>
           </div>
-          <h1 className="text-5xl font-black uppercase tracking-tighter text-white leading-none">Neural Tasks</h1>
-          <p className="text-sm font-medium text-white/30 max-w-md">
+          <h1 className="text-5xl font-black uppercase tracking-tighter text-foreground leading-none">Neural Tasks</h1>
+          <p className="text-sm font-medium text-foreground/30 max-w-md">
             Execute network protocols to strengthen the ecosystem and earn TJ rewards.
           </p>
         </motion.div>
@@ -310,24 +350,24 @@ const Tasks: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white/5 border border-white/10 rounded-2xl p-6 min-w-[280px] relative overflow-hidden group"
+          className="bg-muted/50 border border-border rounded-2xl p-6 min-w-[280px] relative overflow-hidden group"
         >
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <TrendingUp className="w-12 h-12" />
           </div>
           <div className="space-y-4 relative z-10">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Daily Progress</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Daily Progress</span>
               <span className="text-xs font-black text-blue-500">{stats.dailyPercent}%</span>
             </div>
-            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-muted/50 rounded-full overflow-hidden">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${stats.dailyPercent}%` }}
                 className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
               />
             </div>
-            <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
               {tasks.filter(t => t.type === 'daily' && t.completed).length} of {tasks.filter(t => t.type === 'daily').length} protocols completed
             </p>
           </div>
@@ -352,7 +392,7 @@ const Tasks: React.FC = () => {
             <p className="text-[10px] font-black uppercase tracking-widest text-blue-500/60 mb-1">Total Earned</p>
             <div className="flex items-center gap-2">
               <img src={TJ_COIN_ICON} className="w-6 h-6 object-contain" alt="" referrerPolicy="no-referrer" />
-              <p className="text-3xl font-black text-white tracking-tighter">{userBalance.toLocaleString()} TJ</p>
+              <p className="text-3xl font-black text-foreground tracking-tighter">{userBalance.toLocaleString()} TJ</p>
             </div>
           </div>
         </motion.div>
@@ -369,15 +409,15 @@ const Tasks: React.FC = () => {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-purple-500/60 mb-1">Current Level</p>
-              <p className="text-3xl font-black text-white tracking-tighter">LVL {stats.currentLevel}</p>
+              <p className="text-3xl font-black text-foreground tracking-tighter">LVL {stats.currentLevel}</p>
             </div>
           </div>
           <div className="space-y-2 w-full">
-            <div className="flex items-center justify-between text-[9px] font-bold text-white/40 uppercase tracking-widest">
+            <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
               <span>Next: LVL {stats.currentLevel + 1}</span>
               <span>{stats.xpToNext} XP needed</span>
             </div>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden">
               <div className="h-full bg-purple-500 rounded-full transition-all duration-500" style={{ width: `${stats.xpPercent}%` }} />
             </div>
           </div>
@@ -395,8 +435,8 @@ const Tasks: React.FC = () => {
           <div className="flex-1">
             <p className="text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-1">Next Reward</p>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-2xl font-black text-white tracking-tighter">{stats.xpToNext} XP</p>
-              <span className="text-[10px] font-bold text-white/40">75%</span>
+              <p className="text-2xl font-black text-foreground tracking-tighter">{stats.xpToNext} XP</p>
+              <span className="text-[10px] font-bold text-muted-foreground">75%</span>
             </div>
             <div className="h-1.5 w-full bg-amber-500/10 rounded-full overflow-hidden">
               <div className="h-full w-[75%] bg-amber-500 rounded-full" />
@@ -407,16 +447,16 @@ const Tasks: React.FC = () => {
 
       {/* Task Filters & List */}
       <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-white/5 pb-6">
-          <div className="flex items-center gap-2 p-1 bg-white/5 rounded-xl self-start overflow-x-auto no-scrollbar max-w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-border/50 pb-6">
+          <div className="flex items-center gap-2 p-1 bg-muted/50 rounded-xl self-start overflow-x-auto no-scrollbar max-w-full">
             {(['all', 'daily', 'achievements', 'milestones', 'staking', 'leaderboard'] as TaskTab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                   activeTab === tab 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
-                    : 'text-white/40 hover:text-white hover:bg-white/5'
+                    ? 'bg-blue-600 text-foreground shadow-lg shadow-blue-600/20' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
                 {tab}
@@ -424,7 +464,7 @@ const Tasks: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-4 text-[10px] font-bold text-white/20 uppercase tracking-widest">
+          <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
             <div className="flex items-center gap-2">
               <Clock className="w-3 h-3" />
               <span>Resets in 14h 22m</span>
@@ -470,12 +510,12 @@ const Tasks: React.FC = () => {
                 ))
               ) : (
                 <div className="col-span-full py-20 flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-white/10">
+                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground/30">
                     <Lock className="w-8 h-8" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-white uppercase tracking-widest">No protocols found</p>
-                    <p className="text-[10px] font-medium text-white/20 uppercase tracking-widest">Check back later for new network tasks</p>
+                    <p className="text-sm font-bold text-foreground uppercase tracking-widest">No protocols found</p>
+                    <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Check back later for new network tasks</p>
                   </div>
                 </div>
               )}
@@ -506,15 +546,15 @@ const Tasks: React.FC = () => {
         </div>
         
         <div className="relative z-10 space-y-4 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-white">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/80 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-foreground">
             <Sparkles className="w-3 h-3" /> Limited Time Event
           </div>
-          <h2 className="text-3xl font-black uppercase tracking-tighter text-white">Genesis Launch Season</h2>
-          <p className="text-sm font-medium text-white/80 max-w-md">
+          <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground">Genesis Launch Season</h2>
+          <p className="text-sm font-medium text-muted-foreground/90 max-w-md">
             Complete special seasonal tasks to earn exclusive NFT badges and multiplier bonuses for your TJ earnings.
           </p>
         </div>
-        <button className="relative z-10 px-8 py-4 rounded-xl bg-white text-blue-600 text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-xl shadow-black/20">
+        <button className="relative z-10 px-8 py-4 rounded-xl bg-foreground text-blue-600 text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-xl shadow-black/20">
           View Event Tasks
         </button>
       </motion.div>

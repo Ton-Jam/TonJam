@@ -25,14 +25,14 @@ const DiscoveryFeed: React.FC = () => {
               <Sparkles className="h-5 w-5 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white uppercase tracking-tight">Personalized Signals</h2>
-              <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">Based on your neural patterns</p>
+              <h2 className="text-xl font-bold text-foreground uppercase tracking-tight">Personalized Signals</h2>
+              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">Based on your neural patterns</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <button 
               onClick={() => playAll(recommendedTracks)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-full text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
             >
               <Play className="h-3 w-3 fill-current" /> Play Mix
             </button>
@@ -60,8 +60,8 @@ const DiscoveryFeed: React.FC = () => {
               <Zap className="h-5 w-5 text-amber-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white uppercase tracking-tight">Emerging Artifacts</h2>
-              <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">Trending NFTs in your sector</p>
+              <h2 className="text-xl font-bold text-foreground uppercase tracking-tight">Emerging Artifacts</h2>
+              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">Trending NFTs in your sector</p>
             </div>
           </div>
           <button 
@@ -87,28 +87,28 @@ const DiscoveryFeed: React.FC = () => {
 
       {/* Discovery Insights / Social Signals */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass border border-blue-500/10 bg-white/[0.02] p-6 rounded-[10px] relative overflow-hidden group hover:border-blue-500/30 transition-all">
+        <div className="glass border border-blue-500/10 bg-foreground/[0.02] p-6 rounded-[10px] relative overflow-hidden group hover:border-blue-500/30 transition-all">
           <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
             <TrendingUp className="h-16 w-16 text-blue-500" />
           </div>
-          <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-2">Sonic Velocity</h3>
-          <p className="text-[10px] text-white/40 leading-relaxed mb-4">
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-2">Sonic Velocity</h3>
+          <p className="text-[10px] text-muted-foreground leading-relaxed mb-4">
             We've detected a 42% increase in engagement for artists you follow. New frequencies are being forged in your preferred genres.
           </p>
           <div className="flex items-center gap-2">
-            <div className="h-1 flex-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1 flex-1 bg-muted/50 rounded-full overflow-hidden">
               <div className="h-full bg-blue-500 w-[42%]"></div>
             </div>
             <span className="text-[9px] font-mono text-blue-400">+42%</span>
           </div>
         </div>
 
-        <div className="glass border border-purple-500/10 bg-white/[0.02] p-6 rounded-[10px] relative overflow-hidden group hover:border-purple-500/30 transition-all">
+        <div className="glass border border-purple-500/10 bg-foreground/[0.02] p-6 rounded-[10px] relative overflow-hidden group hover:border-purple-500/30 transition-all">
           <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
             <Gem className="h-16 w-16 text-purple-500" />
           </div>
-          <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-2">Artifact Scarcity</h3>
-          <p className="text-[10px] text-white/40 leading-relaxed mb-4">
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-2">Artifact Scarcity</h3>
+          <p className="text-[10px] text-muted-foreground leading-relaxed mb-4">
             3 NFTs from your recommended artists are nearing floor price liquidation. Market signals suggest high acquisition potential.
           </p>
           <button 

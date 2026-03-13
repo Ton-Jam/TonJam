@@ -154,29 +154,29 @@ export function ChartAreaInteractive() {
   })
 
   return (
-    <Card className="pt-0 border-blue-500/10 bg-white/[0.02] text-white">
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b border-white/5 py-5 sm:flex-row">
+    <Card className="pt-0 border-blue-500/10 bg-foreground/[0.02] text-foreground">
+      <CardHeader className="flex items-center gap-2 space-y-0 border-b border-border/50 py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
-          <CardTitle className="text-white">Area Chart - Interactive</CardTitle>
-          <CardDescription className="text-white/40">
+          <CardTitle className="text-foreground">Area Chart - Interactive</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Showing total visitors for the last 3 months
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
-            className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex border-white/10 text-white"
+            className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex border-border text-foreground"
             aria-label="Select a value"
           >
             <SelectValue placeholder="Last 3 months" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl bg-[#0a0a0a] border-white/10 text-white">
-            <SelectItem value="90d" className="rounded-lg focus:bg-white/10 focus:text-white">
+          <SelectContent className="rounded-xl bg-[#0a0a0a] border-border text-foreground">
+            <SelectItem value="90d" className="rounded-lg focus:bg-muted focus:text-foreground">
               Last 3 months
             </SelectItem>
-            <SelectItem value="30d" className="rounded-lg focus:bg-white/10 focus:text-white">
+            <SelectItem value="30d" className="rounded-lg focus:bg-muted focus:text-foreground">
               Last 30 days
             </SelectItem>
-            <SelectItem value="7d" className="rounded-lg focus:bg-white/10 focus:text-white">
+            <SelectItem value="7d" className="rounded-lg focus:bg-muted focus:text-foreground">
               Last 7 days
             </SelectItem>
           </SelectContent>
@@ -241,7 +241,7 @@ export function ChartAreaInteractive() {
                     })
                   }}
                   indicator="dot"
-                  className="bg-[#0a0a0a] border-white/10 text-white"
+                  className="bg-[#0a0a0a] border-border text-foreground"
                 />
               }
             />
@@ -259,7 +259,7 @@ export function ChartAreaInteractive() {
               stroke="var(--color-desktop)"
               stackId="a"
             />
-            <ChartLegend content={<ChartLegendContent className="text-white/60" />} />
+            <ChartLegend content={<ChartLegendContent className="text-muted-foreground/80" />} />
           </AreaChart>
         </ChartContainer>
       </CardContent>

@@ -65,13 +65,13 @@ const Notifications: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img src={APP_LOGO} className="w-5 h-5 opacity-40" alt="" />
-              <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.5em]">Neural Relay logs</span>
+              <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">Neural Relay logs</span>
             </div>
-            <h1 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase text-white leading-none">Notifications</h1>
+            <h1 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase text-foreground leading-none">Notifications</h1>
           </div>
           <div className="flex gap-4">
-            <button onClick={markAllRead} className="text-[10px] font-bold uppercase text-blue-500 tracking-widest hover:text-white transition-colors">Mark all read</button>
-            <button onClick={clearAll} className="text-[10px] font-bold uppercase text-white/20 tracking-widest hover:text-red-500 transition-colors">Purge logs</button>
+            <button onClick={markAllRead} className="text-[10px] font-bold uppercase text-blue-500 tracking-widest hover:text-foreground transition-colors">Mark all read</button>
+            <button onClick={clearAll} className="text-[10px] font-bold uppercase text-muted-foreground/50 tracking-widest hover:text-red-500 transition-colors">Purge logs</button>
           </div>
         </div>
       </header>
@@ -83,7 +83,7 @@ const Notifications: React.FC = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-blue-600 -blue-500 text-white shadow-lg' : 'bg-white/5 text-white/30 hover:text-white'}`}>
+              className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-blue-600 -blue-500 text-foreground shadow-lg' : 'bg-muted/50 text-foreground/30 hover:text-foreground'}`}>
               {tab}
             </button>
           ))}
@@ -94,7 +94,7 @@ const Notifications: React.FC = () => {
       <main className="px-6 md:px-12 max-w-4xl mx-auto space-y-2">
         {filtered.length > 0 ? (
           filtered.map(item => (
-            <div key={item.id} className={`group flex items-center gap-6 p-6 rounded-[10px] transition-all cursor-pointer ${item.isRead ? 'bg-white/[0.02] hover:bg-white/5' : 'bg-blue-500/[0.03] -blue-500/20 shadow-[0_0_20px_rgba(37,99,235,0.05)]'}`}>
+            <div key={item.id} className={`group flex items-center gap-6 p-6 rounded-[10px] transition-all cursor-pointer ${item.isRead ? 'bg-foreground/[0.02] hover:bg-muted/50' : 'bg-blue-500/[0.03] -blue-500/20 shadow-[0_0_20px_rgba(37,99,235,0.05)]'}`}>
               {/* Icon Container - Backdrop removed */}
               <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center relative">
                 {renderIcon(item)}
@@ -105,15 +105,15 @@ const Notifications: React.FC = () => {
               {/* Text Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40">{item.title}</h4>
-                  <span className="text-[9px] font-bold text-white/20 uppercase tracking-tighter">{item.time}</span>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.title}</h4>
+                  <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-tighter">{item.time}</span>
                 </div>
-                <p className={`text-sm font-medium tracking-tight ${item.isRead ? 'text-white/60' : 'text-white'}`}>
+                <p className={`text-sm font-medium tracking-tight ${item.isRead ? 'text-muted-foreground/80' : 'text-foreground'}`}>
                   {item.message}
                 </p>
               </div>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="w-10 h-10 rounded-full text-white/20 hover:text-white transition-all bg-transparent flex items-center justify-center">
+                <button className="w-10 h-10 rounded-full text-muted-foreground/50 hover:text-foreground transition-all bg-transparent flex items-center justify-center">
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
@@ -121,8 +121,8 @@ const Notifications: React.FC = () => {
           ))
         ) : (
           <div className="py-32 flex flex-col items-center text-center">
-            <Satellite className="h-16 w-16 text-white/5 mb-8 animate-pulse" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.6em] text-white/10">Neural void detected. No active signals.</p>
+            <Satellite className="h-16 w-16 text-foreground/5 mb-8 animate-pulse" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.6em] text-muted-foreground/30">Neural void detected. No active signals.</p>
           </div>
         )}
       </main>

@@ -18,7 +18,7 @@ const NFTVaultSection: React.FC<NFTVaultSectionProps> = ({ nfts }) => {
 
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-12 mb-12">
-      <h2 className="text-2xl font-bold text-white uppercase tracking-tighter mb-8">My Sonic Vault</h2>
+      <h2 className="text-2xl font-bold text-foreground uppercase tracking-tighter mb-8">My Sonic Vault</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {nfts.map(nft => (
           <NFTCard 
