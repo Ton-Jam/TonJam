@@ -249,7 +249,7 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Sticky Filters */}
-            <div className="sticky top-[64px] z-30 backdrop-blur-2xl py-4 w-full space-y-6 bg-background/40 px-4">
+            <div className="sticky top-[var(--header-height,64px)] z-30 backdrop-blur-2xl py-4 w-full space-y-6 bg-background/40 px-4 transition-all duration-300">
               <div className="flex gap-3 overflow-x-auto no-scrollbar">
                 {['All', 'Following', 'Trending'].map(tab => (
                   <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-neutral-500/50 shadow-xl shadow-blue-500/20' : 'bg-muted/50 text-muted-foreground border-border/50 hover:text-foreground hover:bg-muted' }`} >

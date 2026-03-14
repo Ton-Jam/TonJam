@@ -296,7 +296,7 @@ const Discover: React.FC = () => {
   return (
     <div className="w-full pb-32">
       {/* Search Section */}
-      <div className="sticky top-[64px] z-50 w-full bg-background/95 backdrop-blur-xl border-b border-border/50" ref={searchContainerRef}>
+      <div className="sticky top-[var(--header-height,64px)] z-50 w-full bg-background/95 backdrop-blur-xl transition-all duration-300" ref={searchContainerRef}>
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="w-full flex flex-col md:flex-row items-center gap-3">
@@ -314,7 +314,7 @@ const Discover: React.FC = () => {
               
               <button 
                 onClick={handleSurpriseMe}
-                className="flex-shrink-0 px-3 py-1.5 bg-muted/50 border border-border rounded-full text-[8px] font-bold uppercase tracking-widest text-foreground hover:bg-muted hover:border-neutral-500/50 transition-all flex items-center gap-1.5 group/surprise"
+                className="flex-shrink-0 px-3 py-1 bg-muted/50 border border-border rounded-full text-[8px] font-bold uppercase tracking-widest text-foreground hover:bg-muted hover:border-neutral-500/50 transition-all flex items-center gap-1.5 group/surprise"
               >
                 <Sparkles className="h-3 w-3 text-amber-500 group-hover/surprise:animate-spin" />
                 Surprise Me
@@ -326,7 +326,7 @@ const Discover: React.FC = () => {
               <select 
                 value={activeFilter} 
                 onChange={(e) => setActiveFilter(e.target.value as any)}
-                className="bg-muted/50 text-foreground border border-border rounded-[8px] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-primary/50 transition-all min-w-[200px]"
+                className="bg-muted/50 text-foreground border border-border rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-primary/50 transition-all min-w-[160px]"
               >
                 <option value="All">All Categories</option>
                 <option value="Tracks">Tracks</option>
@@ -376,7 +376,7 @@ const Discover: React.FC = () => {
         {/* Search Results / Filtered View */}
         {(search || selectedGenre) && (
           <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-border/50">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8">
               <div className="flex items-center gap-6">
                 <button onClick={clearInput} className="w-12 h-12 rounded-xl bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-95">
                   <RotateCcw className="h-5 w-5" />

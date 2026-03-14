@@ -657,7 +657,7 @@ const ArtistProfile: React.FC = () => {
       )}
 
       {/* Sticky Tab Navigation */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl py-6 mt-12 mb-8 w-full px-6 border-b border-border/50">
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-6 mt-12 mb-8 w-full px-6 border-b border-border/50 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex bg-muted/50 p-1 rounded-[12px] border border-border">
             {['tracks', 'collection'].map(tab => (

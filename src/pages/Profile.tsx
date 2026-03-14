@@ -416,7 +416,7 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="sticky top-[64px] z-40 bg-background/80 backdrop-blur-2xl border-b border-border/50 py-6 mb-12 w-full px-6 md:px-12">
+      <div className="sticky top-[var(--header-height,64px)] z-40 bg-background/80 backdrop-blur-2xl border-b border-border/50 py-6 mb-12 w-full px-6 md:px-12 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto no-scrollbar">
           {[
             { id: 'overview', label: 'Overview', icon: User },

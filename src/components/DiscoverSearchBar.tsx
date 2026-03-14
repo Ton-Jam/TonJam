@@ -50,7 +50,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
       <div className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 overflow-hidden ${isFocused ? 'border-neutral-500/50 bg-foreground/[0.08]' : 'border-border group-hover:border-border/80'}`}>
         
         {/* Input Area */}
-        <div className="relative flex items-center px-4 py-1 z-10">
+        <div className="relative flex items-center px-4 py-0.5 z-10">
           <div className="pr-2">
             <Search className={`h-4 w-4 transition-colors duration-300 ${isFocused ? 'text-blue-500' : 'text-foreground/30'}`} />
           </div>
@@ -66,7 +66,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder={placeholder}
-            className="flex-1 bg-transparent border-none outline-none py-2 text-sm font-medium text-foreground placeholder:text-muted-foreground/50 tracking-tight"
+            className="flex-1 bg-transparent border-none outline-none py-1.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/50 tracking-tight"
           />
 
           <div className="flex items-center gap-1">

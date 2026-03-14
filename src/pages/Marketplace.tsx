@@ -113,7 +113,7 @@ const Marketplace: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 pb-40 w-full min-h-screen bg-background">
       {/* 1. COMPACT MARKET TICKER - Adjusted for Global Header */}
-      <div className="sticky top-[64px] z-[38] bg-background/90 backdrop-blur-xl py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap">
+      <div className="sticky top-[var(--header-height,64px)] z-[38] bg-background/90 backdrop-blur-xl py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap transition-all duration-300">
         <div className="flex gap-20 animate-[marquee_40s_linear_infinite]">
           {[
             { label: 'TON/USD', val: '$5.42', up: true },
@@ -165,7 +165,7 @@ const Marketplace: React.FC = () => {
         </section>
 
       {/* 3. REFINED CONTROLS - Clean Dropdown Filters */}
-      <div className="sticky top-[96px] z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-6 mb-8">
+      <div className="sticky top-[calc(var(--header-height,64px)+32px)] z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-6 mb-8 transition-all duration-300">
         <div className="max-w-[1600px] mx-auto flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-4 w-full">
             <select 

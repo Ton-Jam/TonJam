@@ -77,7 +77,7 @@ const Notifications: React.FC = () => {
       </header>
 
       {/* Tabs - Converted to Pill Buttons */}
-      <nav className="px-6 md:px-12 mb-12 -b sticky top-0 backdrop-blur-xl z-30">
+      <nav className="px-6 md:px-12 mb-12 -b sticky top-[var(--header-height,64px)] backdrop-blur-xl z-30 transition-all duration-300">
         <div className="max-w-4xl mx-auto flex gap-4 py-4 overflow-x-auto no-scrollbar">
           {['All', 'Social', 'Syncs', 'Rewards', 'System'].map(tab => (
             <button
