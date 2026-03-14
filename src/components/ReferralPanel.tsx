@@ -34,7 +34,7 @@ const ReferralPanel: React.FC = () => {
       <div className="glass border border-border/50 bg-foreground/[0.01] rounded-2xl p-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex-1 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-2">
               <Users className="w-3 h-3" />
               <span>Invite & Earn</span>
             </div>

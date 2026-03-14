@@ -20,7 +20,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ title, viewAllLink, onAct
       {viewAllLink && (
         <Link 
           to={viewAllLink} 
-          className="flex items-center gap-1 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors group"
+          className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors group"
         >
           View All
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
@@ -29,7 +29,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ title, viewAllLink, onAct
       {onAction && actionLabel && (
         <button 
           onClick={onAction}
-          className="flex items-center gap-1 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors group"
+          className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors group"
         >
           {actionLabel}
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />

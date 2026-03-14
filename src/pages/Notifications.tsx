@@ -44,7 +44,7 @@ const Notifications: React.FC = () => {
     if (item.img) return <img src={item.img} className="w-8 h-8 object-contain" alt="" />;
     
     const iconProps = {
-      className: `h-6 w-6 ${item.type === 'Syncs' ? 'text-amber-500' : item.type === 'Rewards' ? 'text-yellow-500' : 'text-blue-500'}`
+      className: `h-6 w-6 ${item.type === 'Syncs' ? 'text-amber-500' : item.type === 'Rewards' ? 'text-yellow-500' : 'text-primary'}`
     };
 
     switch (item.icon) {
@@ -70,8 +70,8 @@ const Notifications: React.FC = () => {
             <h1 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase text-foreground leading-none">Notifications</h1>
           </div>
           <div className="flex gap-4">
-            <button onClick={markAllRead} className="text-[10px] font-bold uppercase text-blue-500 tracking-widest hover:text-foreground transition-colors">Mark all read</button>
-            <button onClick={clearAll} className="text-[10px] font-bold uppercase text-muted-foreground/50 tracking-widest hover:text-red-500 transition-colors">Purge logs</button>
+            <button onClick={markAllRead} className="text-[10px] font-bold uppercase text-primary tracking-widest hover:text-foreground transition-colors">Mark all read</button>
+            <button onClick={clearAll} className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest hover:text-destructive transition-colors">Purge logs</button>
           </div>
         </div>
       </header>
@@ -83,7 +83,8 @@ const Notifications: React.FC = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-blue-600 -blue-500 text-foreground shadow-lg' : 'bg-muted/50 text-foreground/30 hover:text-foreground'}`}>
+              aria-selected={activeTab === tab}
+              className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}>
               {tab}
             </button>
           ))}
@@ -94,12 +95,12 @@ const Notifications: React.FC = () => {
       <main className="px-6 md:px-12 max-w-4xl mx-auto space-y-2">
         {filtered.length > 0 ? (
           filtered.map(item => (
-            <div key={item.id} className={`group flex items-center gap-6 p-6 rounded-[10px] transition-all cursor-pointer ${item.isRead ? 'bg-foreground/[0.02] hover:bg-muted/50' : 'bg-blue-500/[0.03] -blue-500/20 shadow-[0_0_20px_rgba(37,99,235,0.05)]'}`}>
-              {/* Icon Container - Backdrop removed */}
+            <div key={item.id} role="button" tabIndex={0} className={`group flex items-center gap-6 p-6 rounded-[10px] transition-all cursor-pointer ${item.isRead ? 'bg-foreground/[0.02] hover:bg-muted/50' : 'bg-primary/[0.05] border border-primary/20 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]'}`}>
+              {/* Icon Container */}
               <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center relative">
                 {renderIcon(item)}
                 {!item.isRead && (
-                  <div className="absolute top-2 right-2 w-3 h-3 bg-blue-500 rounded-full -black"></div>
+                  <div className="absolute top-2 right-2 w-3 h-3 bg-primary rounded-full"></div>
                 )}
               </div>
               {/* Text Content */}

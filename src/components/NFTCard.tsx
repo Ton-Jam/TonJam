@@ -168,7 +168,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
           <div className="absolute inset-0 bg-background/20 group-hover:bg-background/40 transition-colors duration-300">
              {/* Top Row */}
              <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
-                <span className="px-2 py-1 bg-background/60 backdrop-blur-md border border-blue-500/30 rounded-[4px] text-[8px] font-bold uppercase tracking-widest text-foreground shadow-lg">
+                <span className="px-2 py-1 bg-background/60 backdrop-blur-md border border-border rounded-[4px] text-[8px] font-bold uppercase tracking-widest text-foreground shadow-lg">
                   {nft.edition}
                 </span>
                 <div className="flex items-center gap-2">
@@ -197,13 +197,13 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
                 <div className={`transition-all duration-300 transform ${isActive || isPlaying ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100'}`}>
                    <button 
                      onClick={handlePlayClick} 
-                     className="w-10 h-10 rounded-full bg-blue-600/90 backdrop-blur-md flex items-center justify-center shadow-xl shadow-blue-600/40 pointer-events-auto hover:bg-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                     className="w-10 h-10 rounded-full bg-primary/90 backdrop-blur-md flex items-center justify-center shadow-xl shadow-primary/40 pointer-events-auto hover:bg-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                      aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
                    >
                      {isActive && isPlaying ? (
-                       <Pause className="h-4 w-4 text-foreground fill-white" />
+                       <Pause className="h-4 w-4 text-primary-foreground fill-primary-foreground" />
                      ) : (
-                       <Play className="h-4 w-4 text-foreground fill-white ml-0.5" />
+                       <Play className="h-4 w-4 text-primary-foreground fill-primary-foreground ml-0.5" />
                      )}
                    </button>
                 </div>
@@ -283,10 +283,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
               
               <button 
                 onClick={handleActionClick} 
-                className={`px-3 py-1.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+                className={`px-3 py-1.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
                   ${isOwner 
                     ? 'bg-muted text-foreground hover:bg-muted/80' 
-                    : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-blue-600/20'}
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20'}
                 `}
                 aria-label={isOwner ? (nft.listingType ? 'Manage NFT' : 'List NFT') : nft.listingType === 'auction' ? 'Bid on NFT' : 'Buy NFT'}
               >
