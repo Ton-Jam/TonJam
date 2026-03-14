@@ -118,7 +118,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       {...register('username')}
                       type="text"
                       placeholder="TON_VOYAGER"
-                      className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all placeholder:text-foreground/5"
+                      className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-foreground/5"
                     />
                     {errors.username && <p className="text-[9px] text-red-500 mt-1">{errors.username.message}</p>}
                   </div>
@@ -133,7 +133,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     {...register('email')}
                     type="email"
                     placeholder="SIGNAL@TONJAM.COM"
-                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all placeholder:text-foreground/5"
+                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-foreground/5"
                   />
                   {errors.email && <p className="text-[9px] text-red-500 mt-1">{errors.email.message}</p>}
                 </div>
@@ -154,7 +154,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     {...register('password')}
                     type="password"
                     placeholder="••••••••"
-                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all placeholder:text-foreground/5"
+                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-foreground/5"
                   />
                   {errors.password && <p className="text-[9px] text-red-500 mt-1">{errors.password.message}</p>}
                 </div>

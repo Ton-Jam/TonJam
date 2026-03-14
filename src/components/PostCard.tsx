@@ -330,7 +330,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
           {nft && (
             <div 
-              className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/nft cursor-pointer hover:from-blue-600/20 hover:to-purple-600/20 transition-all outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
+              className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-neutral-500/20 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/nft cursor-pointer hover:from-blue-600/20 hover:to-purple-600/20 transition-all outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
               onClick={() => navigate(`/nft/${nft.id}`)}
               onKeyDown={(e) => handleKeyDown(e, () => navigate(`/nft/${nft.id}`))}
               role="button"
@@ -472,7 +472,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                                 <button 
                                   key={emoji} 
                                   onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                  className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-muted/50 text-muted-foreground/80 hover:text-foreground border border-border/50 hover:bg-muted'}`}
+                                  className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground/80 hover:text-foreground border border-border/50 hover:bg-muted'}`}
                                   aria-label={`${isActive ? 'Remove' : 'Add'} ${emoji} reaction`}
                                 >
                                   <span className="text-xs">{emoji}</span>

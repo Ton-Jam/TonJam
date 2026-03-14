@@ -152,7 +152,7 @@ const JamSpace: React.FC = () => {
                   <h3 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.5em]">Live Jam Rooms</h3>
                   <span className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-1">Active Audio Relays</span>
                 </div>
-                <div className="flex items-center gap-2 px-2 py-1 bg-orange-500/10 rounded-full border border-orange-500/20">
+                <div className="flex items-center gap-2 px-2 py-1 bg-neutral-500/10 rounded-full border border-neutral-500/20">
                   <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
                   <span className="text-[7px] font-bold text-orange-500 uppercase tracking-widest">Live</span>
                 </div>
@@ -165,7 +165,7 @@ const JamSpace: React.FC = () => {
                   <button 
                     key={room.id}
                     onClick={() => activeJamRoom?.id === room.id ? leaveJamRoom() : joinJamRoom(room.id)}
-                    className={`w-full p-5 rounded-[8px] border transition-all text-left group relative overflow-hidden ${activeJamRoom?.id === room.id ? 'bg-orange-500 border-orange-400 shadow-xl shadow-orange-500/20' : 'bg-foreground/[0.02] border-border/50 hover:border-orange-500/30 hover:bg-muted/50'}`}
+                    className={`w-full p-5 rounded-[8px] border transition-all text-left group relative overflow-hidden ${activeJamRoom?.id === room.id ? 'bg-neutral-500 border-neutral-400 shadow-xl shadow-neutral-500/20' : 'bg-foreground/[0.02] border-border/50 hover:border-neutral-500/30 hover:bg-muted/50'}`}
                   >
                     <div className="flex items-center gap-5 relative z-10">
                       <div className={`w-12 h-12 rounded-[6px] flex items-center justify-center transition-all ${activeJamRoom?.id === room.id ? 'bg-muted/80 scale-105' : 'bg-muted/50 group-hover:bg-orange-500/20'}`}>
@@ -200,7 +200,7 @@ const JamSpace: React.FC = () => {
                   <button 
                     key={item.id} 
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`w-full flex items-center gap-5 px-5 py-4 rounded-[10px] transition-all group ${activeTab === item.id ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent'}`} 
+                    className={`w-full flex items-center gap-5 px-5 py-4 rounded-[10px] transition-all group ${activeTab === item.id ? 'bg-blue-600/10 text-blue-400 border border-neutral-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent'}`} 
                   >
                     <item.icon className={`h-4 w-4 ${activeTab === item.id ? 'text-blue-400' : 'text-muted-foreground/50 group-hover:text-foreground'}`} />
                     <span className="text-[11px] font-bold uppercase tracking-widest">{item.label}</span>
@@ -244,7 +244,7 @@ const JamSpace: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search live nodes and sessions..."
-                className="w-full bg-muted/50 border border-border rounded-xl py-4 pl-12 pr-4 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-blue-500/50 transition-all"
+                className="w-full bg-muted/50 border border-border rounded-xl py-4 pl-12 pr-4 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-neutral-500/50 transition-all"
               />
             </div>
 
@@ -252,7 +252,7 @@ const JamSpace: React.FC = () => {
             <div className="sticky top-[64px] z-30 backdrop-blur-2xl py-4 w-full space-y-6 bg-background/40 px-4">
               <div className="flex gap-3 overflow-x-auto no-scrollbar">
                 {['All', 'Following', 'Trending'].map(tab => (
-                  <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-blue-500 shadow-xl shadow-blue-500/20' : 'bg-muted/50 text-muted-foreground border-border/50 hover:text-foreground hover:bg-muted' }`} >
+                  <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-neutral-500/50 shadow-xl shadow-blue-500/20' : 'bg-muted/50 text-muted-foreground border-border/50 hover:text-foreground hover:bg-muted' }`} >
                     {tab}
                   </button>
                 ))}
@@ -323,7 +323,7 @@ const JamSpace: React.FC = () => {
                 {artists.slice(0, 8).map(artist => (
                   <div key={artist.id} className="relative group cursor-pointer flex-shrink-0 w-16" onClick={() => navigate(`/artist/${artist.id}`)} title={artist.name} >
                     <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full scale-0 group-hover:scale-125 transition-transform duration-500"></div>
-                    <img src={artist.avatarUrl} className="w-full aspect-square rounded-full transition-all relative z-10 grayscale group-hover:grayscale-0 object-cover border border-border/50 group-hover:border-blue-500/50" alt="" />
+                    <img src={artist.avatarUrl} className="w-full aspect-square rounded-full transition-all relative z-10 grayscale group-hover:grayscale-0 object-cover border border-border/50 group-hover:border-neutral-500/50" alt="" />
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full z-20 border-2 border-[#0a0a0a]"></div>
                   </div>
                 ))}
@@ -338,7 +338,7 @@ const JamSpace: React.FC = () => {
                   <UserCard key={artist.id} user={artist} variant="compact" />
                 ))}
               </div>
-              <button onClick={() => navigate('/explore/artists?title=Recommended Nodes&filter=recommended')} className="w-full mt-10 py-4 text-[9px] font-bold uppercase text-blue-500 tracking-[0.2em] hover:text-foreground hover:bg-blue-600/10 border border-blue-500/20 rounded-[8px] transition-all active:scale-95"> Discover More Nodes </button>
+              <button onClick={() => navigate('/explore/artists?title=Recommended Nodes&filter=recommended')} className="w-full mt-10 py-4 text-[9px] font-bold uppercase text-blue-500 tracking-[0.2em] hover:text-foreground hover:bg-blue-600/10 border border-neutral-500/20 rounded-[8px] transition-all active:scale-95"> Discover More Nodes </button>
             </section>
 
             {/* AI Curated Frequencies */}

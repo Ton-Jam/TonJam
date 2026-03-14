@@ -63,11 +63,11 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
               />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border border-amber-500/20">
+                    <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border border-neutral-500/20">
                       {nft.edition}
                     </span>
                     {nft.isAuction && (
-                      <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border border-purple-500/20">
+                      <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border border-neutral-500/20">
                         Auction
                       </span>
                     )}

@@ -204,7 +204,7 @@ const Profile: React.FC = () => {
   };
 
   const StatBlock = ({ label, value, icon, subValue, trend }: { label: string, value: string, icon?: string, subValue?: string, trend?: string }) => (
-    <div className="relative group overflow-hidden bg-[#0a0a0a] border border-border/50 p-6 rounded-[12px] transition-all hover:border-blue-500/30 shadow-2xl">
+    <div className="relative group overflow-hidden bg-[#0a0a0a] border border-border/50 p-6 rounded-[12px] transition-all hover:border-neutral-500/30 shadow-2xl">
       <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-blue-600/10 transition-colors"></div>
       
       <div className="flex justify-between items-start mb-6 relative z-10">
@@ -216,7 +216,7 @@ const Profile: React.FC = () => {
             </span>
           )}
         </div>
-        <div className="w-8 h-8 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center group-hover:border-blue-500/30 transition-all">
+        <div className="w-8 h-8 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center group-hover:border-neutral-500/30 transition-all">
           {icon === 'gem' && <Gem className="h-3.5 w-3.5 text-blue-500" />}
           {icon === 'coins' && <Coins className="h-3.5 w-3.5 text-amber-500" />}
           {icon === 'users' && <Users className="h-3.5 w-3.5 text-purple-500" />}
@@ -336,8 +336,8 @@ const Profile: React.FC = () => {
             <div className="w-full md:w-auto">
               {isEditing ? (
                 <div className="space-y-4 w-full max-w-lg">
-                  <input type="text" value={localUser.name} onChange={(e) => setLocalUser({...localUser, name: e.target.value})} className="bg-muted/50 border border-border rounded-[12px] px-6 py-4 text-3xl font-bold tracking-tighter outline-none text-foreground w-full focus:border-blue-500/50 transition-all" placeholder="Display Name" />
-                  <input type="text" value={localUser.handle} onChange={(e) => setLocalUser({...localUser, handle: e.target.value})} className="bg-muted/50 border border-border rounded-[12px] px-6 py-3 text-sm font-bold tracking-widest outline-none text-blue-500 w-full focus:border-blue-500/50 transition-all" placeholder="@handle" />
+                  <input type="text" value={localUser.name} onChange={(e) => setLocalUser({...localUser, name: e.target.value})} className="bg-muted/50 border border-border rounded-[12px] px-6 py-4 text-3xl font-bold tracking-tighter outline-none text-foreground w-full focus:border-neutral-500/50 transition-all" placeholder="Display Name" />
+                  <input type="text" value={localUser.handle} onChange={(e) => setLocalUser({...localUser, handle: e.target.value})} className="bg-muted/50 border border-border rounded-[12px] px-6 py-3 text-sm font-bold tracking-widest outline-none text-blue-500 w-full focus:border-neutral-500/50 transition-all" placeholder="@handle" />
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -347,17 +347,17 @@ const Profile: React.FC = () => {
                     </h1>
                   </div>
                   <div className="flex items-center justify-center md:justify-start gap-3">
-                    <span className="text-blue-500 font-bold text-xs md:text-sm uppercase tracking-[0.6em] bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                    <span className="text-blue-500 font-bold text-xs md:text-sm uppercase tracking-[0.6em] bg-blue-500/10 px-3 py-1 rounded-full border border-neutral-500/20">
                       {localUser.handle}
                     </span>
                     <div className="flex gap-3">
                       {localUser.socials?.x && (
-                        <a href={localUser.socials.x} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-blue-400 hover:border-blue-400/30 transition-all">
+                        <a href={localUser.socials.x} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-blue-400 hover:border-neutral-500/30 transition-all">
                           <Satellite className="h-3.5 w-3.5" />
                         </a>
                       )}
                       {localUser.socials?.telegram && (
-                        <a href={localUser.socials.telegram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-blue-300 hover:border-blue-300/30 transition-all">
+                        <a href={localUser.socials.telegram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-blue-300 hover:border-neutral-500/30 transition-all">
                           <Zap className="h-3.5 w-3.5" />
                         </a>
                       )}
@@ -385,7 +385,7 @@ const Profile: React.FC = () => {
                 </button>
               ) : (
                 <div className="flex gap-3">
-                  <button onClick={() => setIsEditing(false)} className="px-8 py-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-[12px] text-[10px] font-bold uppercase tracking-widest hover:bg-red-500/20 transition-all">Abort</button>
+                  <button onClick={() => setIsEditing(false)} className="px-8 py-4 bg-neutral-500/10 border border-neutral-500/20 text-neutral-500 rounded-[12px] text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-500/20 transition-all">Abort</button>
                   <button onClick={handleSave} className="px-10 py-4 bg-foreground text-background rounded-[12px] text-[10px] font-bold uppercase tracking-widest shadow-2xl active:scale-95 hover:bg-blue-500 hover:text-foreground transition-all">Commit_Changes</button>
                 </div>
               )}
@@ -428,7 +428,7 @@ const Profile: React.FC = () => {
             { id: 'network', label: 'Nodes', icon: Users },
             { id: 'staking', label: 'Staking', icon: Coins }
           ].filter(t => !t.hidden).map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`px-8 py-3 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-3 flex-shrink-0 border ${ activeTab === tab.id ? 'bg-blue-600 border-blue-500 text-foreground shadow-2xl shadow-blue-600/30' : 'bg-muted/50 border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border' }`} >
+            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`px-8 py-3 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-3 flex-shrink-0 border ${ activeTab === tab.id ? 'bg-blue-600 border-neutral-500/50 text-foreground shadow-2xl shadow-blue-600/30' : 'bg-muted/50 border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border' }`} >
               <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-foreground' : 'text-foreground/30'}`} /> {tab.label}
             </button>
           ))}
@@ -466,7 +466,7 @@ const Profile: React.FC = () => {
               
               {isEditing ? (
                 <div className="space-y-6">
-                  <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-[12px] p-5 text-xs text-foreground outline-none h-40 leading-relaxed bg-muted/50 border border-border focus:border-blue-500/50 transition-all resize-none" placeholder="Identify your frequency..." />
+                  <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-[12px] p-5 text-xs text-foreground outline-none h-40 leading-relaxed bg-muted/50 border border-border focus:border-neutral-500/50 transition-all resize-none" placeholder="Identify your frequency..." />
                   
                   <div className="space-y-4">
                     <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Favorite_Vibes</p>
@@ -512,7 +512,7 @@ const Profile: React.FC = () => {
                             placeholder={`${platform.toUpperCase()} URL`} 
                             value={(localUser.socials as any)?.[platform] || ''} 
                             onChange={(e) => handleSocialChange(platform, e.target.value)}
-                            className="w-full bg-muted/50 border border-border rounded-[10px] px-5 py-3 text-[10px] text-foreground outline-none focus:border-blue-500/50 transition-all"
+                            className="w-full bg-muted/50 border border-border rounded-[10px] px-5 py-3 text-[10px] text-foreground outline-none focus:border-neutral-500/50 transition-all"
                           />
                         </div>
                       ))}
@@ -590,7 +590,7 @@ const Profile: React.FC = () => {
                       );
                     }
                     return (
-                    <div key={item.id} className="glass border border-blue-500/10 p-6 rounded-[10px] flex items-center gap-6 group hover:bg-foreground/[0.02] transition-all mb-6">
+                    <div key={item.id} className="glass border border-neutral-500/20 p-6 rounded-[10px] flex items-center gap-6 group hover:bg-foreground/[0.02] transition-all mb-6">
                       <div className="w-16 h-16 rounded-[10px] overflow-hidden flex-shrink-0">
                         <img src={(item as any).coverUrl || (item as any).imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                       </div>
@@ -657,7 +657,7 @@ const Profile: React.FC = () => {
                     ))}
                   </div>
                 </section>
-                <section className="glass border border-blue-500/10 backdrop-blur-xl bg-foreground/[0.02] p-8 rounded-[10px] relative overflow-hidden group">
+                <section className="glass border border-neutral-500/20 backdrop-blur-xl bg-foreground/[0.02] p-8 rounded-[10px] relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><BarChart3 className="h-10 w-10 text-blue-500" /></div>
                   <div className="absolute -left-20 -bottom-20 w-40 h-40 bg-blue-600/10 blur-[80px] rounded-full"></div>
                   <SectionHeader title="Royalty Distribution Ledger" />
@@ -747,13 +747,13 @@ const Profile: React.FC = () => {
                 <SectionHeader title="Signal History" onAction={() => navigate('/jamspace')} />
                 
                 {/* Share Track Feature */}
-                <div className="glass border border-blue-500/10 bg-foreground/[0.02] p-6 rounded-[10px] mb-8">
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] p-6 rounded-[10px] mb-8">
                   <form onSubmit={handleSharePost}>
                     <textarea 
                       value={newPostContent}
                       onChange={(e) => setNewPostContent(e.target.value)}
                       placeholder={currentTrack ? `Share your thoughts on ${currentTrack.title}...` : "What's on your mind?"}
-                      className="w-full bg-muted/50 rounded-[10px] p-4 text-sm text-foreground outline-none focus:ring-1 ring-blue-500/50 transition-all resize-none h-24 mb-4"
+                      className="w-full bg-muted/50 rounded-[10px] p-4 text-sm text-foreground outline-none focus:ring-1 ring-neutral-500/50 transition-all resize-none h-24 mb-4"
                     />
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3">
@@ -880,7 +880,7 @@ const Profile: React.FC = () => {
 
                   <div className="relative z-10 p-6 bg-foreground/[0.02] border border-border/50 rounded-[12px] flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-blue-600/10 border border-blue-600/20 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-neutral-600/10 border border-neutral-600/20 flex items-center justify-center">
                         <BarChart3 className="h-5 w-5 text-blue-500" />
                       </div>
                       <div>
@@ -908,7 +908,7 @@ const Profile: React.FC = () => {
                           <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Available: {(walletBalance || 0).toLocaleString()} TJ</span>
                         </div>
                         <div className="relative group/input">
-                          <input type="number" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="0.00" className="w-full bg-muted/50 border border-border rounded-[12px] p-5 text-xl text-foreground font-mono outline-none focus:border-blue-500/50 transition-all" />
+                          <input type="number" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="0.00" className="w-full bg-muted/50 border border-border rounded-[12px] p-5 text-xl text-foreground font-mono outline-none focus:border-neutral-500/50 transition-all" />
                           <button onClick={() => setStakeAmount(walletBalance.toString())} className="absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-muted/50 hover:bg-muted border border-border rounded-[8px] text-[8px] font-bold text-blue-500 uppercase tracking-widest transition-all" > MAX </button>
                         </div>
                       </div>
@@ -932,7 +932,7 @@ const Profile: React.FC = () => {
                           <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Staked: {(stakedBalance || 0).toLocaleString()} TJ</span>
                         </div>
                         <div className="relative group/input">
-                          <input type="number" value={unstakeAmount} onChange={(e) => setUnstakeAmount(e.target.value)} placeholder="0.00" className="w-full bg-muted/50 border border-border rounded-[12px] p-5 text-xl text-foreground font-mono outline-none focus:border-blue-500/50 transition-all" />
+                          <input type="number" value={unstakeAmount} onChange={(e) => setUnstakeAmount(e.target.value)} placeholder="0.00" className="w-full bg-muted/50 border border-border rounded-[12px] p-5 text-xl text-foreground font-mono outline-none focus:border-neutral-500/50 transition-all" />
                           <button onClick={() => setUnstakeAmount(stakedBalance.toString())} className="absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-muted/50 hover:bg-muted border border-border rounded-[8px] text-[8px] font-bold text-blue-500 uppercase tracking-widest transition-all" > MAX </button>
                         </div>
                       </div>

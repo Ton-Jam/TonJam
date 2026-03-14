@@ -85,7 +85,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                       value={tonAmount}
                       onChange={(e) => setTonAmount(e.target.value)}
                       placeholder="0.00"
-                      className="w-full bg-foreground/[0.02] border border-border rounded-2xl p-5 text-2xl font-black text-foreground outline-none focus:border-blue-500/50 transition-all"
+                      className="w-full bg-foreground/[0.02] border border-border rounded-2xl p-5 text-2xl font-black text-foreground outline-none focus:border-neutral-500/50 transition-all"
                     />
                     <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2">
                       <img src={TON_LOGO} className="w-6 h-6 object-contain" alt="" />
@@ -106,7 +106,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                     <span className="text-[10px] font-bold text-blue-500">Rate: 1 TON = 100 JAM</span>
                   </div>
                   <div className="relative">
-                    <div className="w-full bg-blue-600/5 border border-blue-500/20 rounded-2xl p-5 text-2xl font-black text-blue-400">
+                    <div className="w-full bg-neutral-600/5 border border-neutral-500/20 rounded-2xl p-5 text-2xl font-black text-neutral-400">
                       {jamAmount.toLocaleString()}
                     </div>
                     <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2">

@@ -314,7 +314,7 @@ const Discover: React.FC = () => {
               
               <button 
                 onClick={handleSurpriseMe}
-                className="flex-shrink-0 px-3 py-1.5 bg-muted/50 border border-border rounded-full text-[8px] font-bold uppercase tracking-widest text-foreground hover:bg-muted hover:border-blue-500/50 transition-all flex items-center gap-1.5 group/surprise"
+                className="flex-shrink-0 px-3 py-1.5 bg-muted/50 border border-border rounded-full text-[8px] font-bold uppercase tracking-widest text-foreground hover:bg-muted hover:border-neutral-500/50 transition-all flex items-center gap-1.5 group/surprise"
               >
                 <Sparkles className="h-3 w-3 text-amber-500 group-hover/surprise:animate-spin" />
                 Surprise Me
@@ -336,7 +336,7 @@ const Discover: React.FC = () => {
                   onClick={() => setActiveFilter(filter.id as any)} 
                   className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-1.5 border ${
                     activeFilter === filter.id 
-                      ? 'bg-blue-600 text-foreground border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
+                      ? 'bg-blue-600 text-foreground border-neutral-500/50 shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
                       : 'bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted hover:text-foreground hover:border-border/80'
                   }`}
                 >

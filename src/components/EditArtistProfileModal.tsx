@@ -56,7 +56,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 backdrop-blur-md" onClick={onClose}></div>
-      <div className="relative glass border border-blue-500/10 w-full max-w-2xl rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+      <div className="relative glass border border-neutral-500/10 w-full max-w-2xl rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-600/10 blur-3xl rounded-full"></div>
         <div className="flex justify-between items-center mb-10">
           <div className="flex items-center gap-4">

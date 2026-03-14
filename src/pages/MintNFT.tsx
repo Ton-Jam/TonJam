@@ -210,7 +210,7 @@ const MintNFT: React.FC = () => {
           </button>
         </div>
 
-        <div className="relative glass border-y sm:border border-blue-500/10 w-full sm:rounded-[10px] p-6 sm:p-10 shadow-2xl flex flex-col overflow-hidden">
+        <div className="relative glass border-y sm:border border-neutral-500/10 w-full sm:rounded-[10px] p-6 sm:p-10 shadow-2xl flex flex-col overflow-hidden">
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-3xl rounded-full pointer-events-none"></div>
           
           <div className="flex items-center gap-4 mb-8 relative z-10">

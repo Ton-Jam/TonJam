@@ -60,7 +60,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
               onClose();
               setIsCreatePlaylistModalOpen(true);
             }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-blue-600/10 border border-neutral-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <Plus className="h-3 w-3" /> Create New Playlist
           </button>

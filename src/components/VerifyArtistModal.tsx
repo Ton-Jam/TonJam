@@ -124,7 +124,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                 <div className="space-y-4">
                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Social Protocols</div>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-blue-500/30 transition-all">
+                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
                       <div className="w-10 h-10 rounded-xl bg-background/40 flex items-center justify-center text-muted-foreground">
                         <Twitter className="h-4 w-4" />
                       </div>
@@ -138,7 +138,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                         aria-label="X (Twitter) URL"
                       />
                     </div>
-                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-blue-500/30 transition-all">
+                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
                       <div className="w-10 h-10 rounded-xl bg-background/40 flex items-center justify-center text-muted-foreground">
                         <Instagram className="h-4 w-4" />
                       </div>
@@ -152,7 +152,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                         aria-label="Instagram URL"
                       />
                     </div>
-                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-blue-500/30 transition-all">
+                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
                       <div className="w-10 h-10 rounded-xl bg-background/40 flex items-center justify-center text-muted-foreground">
                         <Globe className="h-4 w-4" />
                       </div>
@@ -192,7 +192,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                 </p>
               </div>
 
-              <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex gap-4 text-left">
+              <div className="p-4 bg-amber-500/5 border border-neutral-500/10 rounded-2xl flex gap-4 text-left">
                 <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0" />
                 <p className="text-[9px] text-muted-foreground leading-relaxed uppercase tracking-tight">
                   Verification is permanent and linked to your wallet address. Ensure you are using your primary artist wallet.

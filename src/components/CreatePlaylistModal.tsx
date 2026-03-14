@@ -114,7 +114,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                   {/* Cover Upload - Compact */}
                   <div className="w-full sm:w-28 flex-shrink-0">
                     <div 
-                      className="aspect-square sm:aspect-square rounded-[12px] border border-dashed border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-blue-500/50 transition-all cursor-pointer relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      className="aspect-square sm:aspect-square rounded-[12px] border border-dashed border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       onClick={() => fileInputRef.current?.click()}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {

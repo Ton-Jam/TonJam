@@ -78,7 +78,7 @@ const Staking: React.FC = () => {
           <p className="text-sm font-bold text-muted-foreground/50 uppercase tracking-[0.3em] mt-4">Lock your tokens to secure the network and earn rewards</p>
         </div>
         
-        <div className="flex items-center gap-4 bg-blue-500/10 p-4 rounded-2xl border border-blue-500/20">
+        <div className="flex items-center gap-4 bg-neutral-500/10 p-4 rounded-2xl border border-neutral-500/20">
           <TrendingUp className="h-5 w-5 text-blue-500" />
           <div>
             <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest mb-1">Current APR</p>
@@ -105,7 +105,7 @@ const Staking: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass p-8 rounded-2xl border border-blue-500/20 bg-blue-500/[0.02] relative overflow-hidden group">
+        <div className="glass p-8 rounded-2xl border border-neutral-500/20 bg-neutral-500/[0.02] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
             <Zap className="w-24 h-24 text-blue-500" />
           </div>
@@ -168,7 +168,7 @@ const Staking: React.FC = () => {
                 value={stakeAmount}
                 onChange={(e) => setStakeAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-background/50 border border-border rounded-2xl py-6 px-8 text-2xl font-black text-foreground outline-none focus:border-blue-500/50 transition-all"
+                className="w-full bg-background/50 border border-border rounded-2xl py-6 px-8 text-2xl font-black text-foreground outline-none focus:border-neutral-500/50 transition-all"
               />
               <button 
                 onClick={() => setStakeAmount(balance.toString())}
@@ -239,7 +239,7 @@ const Staking: React.FC = () => {
       </div>
 
       {/* Info Section */}
-      <div className="bg-gradient-to-br from-blue-600/20 to-black border border-blue-500/20 p-10 rounded-3xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-neutral-600/20 to-black border border-neutral-500/20 p-10 rounded-3xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
           <Sparkles className="w-full h-full text-blue-500" />
         </div>

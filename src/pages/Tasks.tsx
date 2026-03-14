@@ -97,7 +97,7 @@ const TaskCard: React.FC<{
         task.claimed 
           ? 'bg-neutral-900/40 border-border/50 opacity-50' 
           : task.completed
-            ? 'bg-green-500/5 border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.05)]'
+            ? 'bg-green-500/5 border-neutral-500/20 shadow-[0_0_20px_rgba(34,197,94,0.05)]'
             : 'bg-muted/50 border-border hover:border-border/80 hover:bg-foreground/[0.07]'
       }`}
     >
@@ -105,18 +105,18 @@ const TaskCard: React.FC<{
       <div className="absolute top-0 right-0 flex items-center gap-1 p-2">
         {task.priority && (
           <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-            task.priority === 'high' ? 'bg-red-500/20 text-red-400 border border-red-500/20' :
-            task.priority === 'medium' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20' :
-            'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+            task.priority === 'high' ? 'bg-red-500/20 text-red-400 border border-neutral-500/20' :
+            task.priority === 'medium' ? 'bg-amber-500/20 text-amber-400 border border-neutral-500/20' :
+            'bg-blue-500/20 text-blue-400 border border-neutral-500/20'
           }`}>
             {task.priority} Priority
           </div>
         )}
         {task.rarity && task.rarity !== 'common' && (
           <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-            task.rarity === 'rare' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20' :
-            task.rarity === 'epic' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' :
-            'bg-amber-500/20 text-amber-400 border border-amber-500/20'
+            task.rarity === 'rare' ? 'bg-blue-500/20 text-blue-400 border border-neutral-500/20' :
+            task.rarity === 'epic' ? 'bg-purple-500/20 text-purple-400 border border-neutral-500/20' :
+            'bg-amber-500/20 text-amber-400 border border-neutral-500/20'
           }`}>
             {task.rarity}
           </div>
@@ -380,7 +380,7 @@ const Tasks: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="min-w-[240px] flex-1 bg-blue-600/10 border border-blue-500/20 rounded-2xl p-6 flex items-center gap-6 group hover:bg-blue-600/20 transition-all relative overflow-hidden"
+          className="min-w-[240px] flex-1 bg-blue-600/10 border border-neutral-500/20 rounded-2xl p-6 flex items-center gap-6 group hover:bg-blue-600/20 transition-all relative overflow-hidden"
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity">
             <img src={TJ_COIN_ICON} className="w-full h-full object-contain rotate-12" alt="" referrerPolicy="no-referrer" />
@@ -401,7 +401,7 @@ const Tasks: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-purple-600/10 border border-purple-500/20 rounded-2xl p-6 flex flex-col justify-center gap-4 group hover:bg-purple-600/20 transition-all relative overflow-hidden"
+          className="bg-purple-600/10 border border-neutral-500/20 rounded-2xl p-6 flex flex-col justify-center gap-4 group hover:bg-purple-600/20 transition-all relative overflow-hidden"
         >
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform">
@@ -427,7 +427,7 @@ const Tasks: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-amber-600/10 border border-amber-500/20 rounded-2xl p-6 flex items-center gap-6 group hover:bg-amber-600/20 transition-all sm:col-span-2 lg:col-span-1"
+          className="bg-amber-600/10 border border-neutral-500/20 rounded-2xl p-6 flex items-center gap-6 group hover:bg-amber-600/20 transition-all sm:col-span-2 lg:col-span-1"
         >
           <div className="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
             <Gift className="w-7 h-7" />

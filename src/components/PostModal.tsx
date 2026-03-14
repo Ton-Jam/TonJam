@@ -70,7 +70,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
         className="absolute inset-0 bg-background/90 backdrop-blur-md"
         onClick={onClose}
       ></div>
-      <div className="relative w-full max-w-sm glass border border-blue-500/10 bg-[#0A0A0A] rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-blue-500/30 transition-all">
+      <div className="relative w-full max-w-sm glass border border-neutral-500/10 bg-[#0A0A0A] rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-neutral-500/30 transition-all">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
         <header className="flex justify-between items-center p-3 border-b border-border/50">
           <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
                 <button 
                   key={track.id} 
                   onClick={() => { setSelectedTrackId(track.id); setShowTrackPicker(false); }}
-                  className={`w-full flex items-center gap-2.5 p-2 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-blue-500/30' : 'bg-muted/50 border border-transparent hover:bg-muted'}`}
+                  className={`w-full flex items-center gap-2.5 p-2 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-neutral-500/30' : 'bg-muted/50 border border-transparent hover:bg-muted'}`}
                   aria-label={`Select ${track.title} by ${track.artist}`}
                   aria-pressed={selectedTrackId === track.id}
                 >

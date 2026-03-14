@@ -144,7 +144,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                       key={track.id}
                       className={`group flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer relative ${
                         isTrackActive 
-                          ? 'bg-blue-500/10 border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
+                          ? 'bg-blue-500/10 border border-neutral-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
                           : 'hover:bg-muted/50 border border-transparent'
                       }`}
                       onClick={() => handlePlayTrack(track)}

@@ -354,7 +354,7 @@ const ArtistProfile: React.FC = () => {
   };
 
   const StatBox = ({ label, value, sub, tooltip }: { label: string, value: string, sub?: string, tooltip?: string }) => (
-    <div className="flex flex-col glass border border-blue-500/10 backdrop-blur-md bg-foreground/[0.02] p-3 rounded-[10px] transition-all group relative">
+    <div className="flex flex-col glass border border-neutral-500/20 backdrop-blur-md bg-foreground/[0.02] p-3 rounded-[10px] transition-all group relative">
       <div className="flex items-center gap-1 mb-1">
         <span className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em] group-hover:text-blue-400/50 transition-colors">{label}</span>
         {tooltip && (
@@ -421,22 +421,22 @@ const ArtistProfile: React.FC = () => {
                     </a>
                   )}
                   {artist.socials.spotify && (
-                    <a href={artist.socials.spotify} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#1DB954] hover:border-[#1DB954]/50 transition-all group">
+                    <a href={artist.socials.spotify} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#1DB954] hover:border-neutral-500/20 transition-all group">
                       <Disc className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </a>
                   )}
                   {artist.socials.instagram && (
-                    <a href={artist.socials.instagram} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#E4405F] hover:border-[#E4405F]/50 transition-all group">
-                      <Instagram className="h-3 w-3 group-hover:scale-110 transition-transform" />
+                    <a href={artist.socials.instagram} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#E4405F] hover:border-neutral-500/20 transition-all group">
+                      <Disc className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </a>
                   )}
                   {artist.socials.website && (
-                    <a href={artist.socials.website} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:border-blue-400/50 transition-all group">
+                    <a href={artist.socials.website} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:border-neutral-500/20 transition-all group">
                       <Globe className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </a>
                   )}
                   {artist.socials.telegram && (
-                    <a href={artist.socials.telegram} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#0088cc] hover:border-[#0088cc]/50 transition-all group">
+                    <a href={artist.socials.telegram} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#0088cc] hover:border-neutral-500/20 transition-all group">
                       <Send className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </a>
                   )}
@@ -471,17 +471,17 @@ const ArtistProfile: React.FC = () => {
                 </button>
               )}
               {isOwnProfile && userProfile.isVerifiedArtist && (
-                <button onClick={() => navigate('/upload')} className="px-6 py-2.5 bg-green-600/10 text-green-400 border border-green-500/30 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-green-500/20 active:scale-95 transition-all flex items-center gap-2" >
+                <button onClick={() => navigate('/upload')} className="px-6 py-2.5 bg-green-600/10 text-green-400 border border-neutral-500/20 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-green-500/20 active:scale-95 transition-all flex items-center gap-2" >
                   <Upload className="h-3 w-3" /> UPLOAD_TRACK
                 </button>
               )}
               {isOwnProfile && userProfile.isVerifiedArtist && (
-                <button onClick={() => navigate('/artist-dashboard')} className="px-6 py-2.5 bg-blue-600/10 text-blue-400 border border-blue-500/30 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
+                <button onClick={() => navigate('/artist-dashboard')} className="px-6 py-2.5 bg-blue-600/10 text-blue-400 border border-neutral-500/20 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
                   <Plus className="h-3 w-3" /> ARTIST_DASHBOARD
                 </button>
               )}
               {artist.id === userProfile.id && !artist.verified && (
-                <button onClick={() => setShowVerifyModal(true)} className="px-6 py-2.5 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
+                <button onClick={() => setShowVerifyModal(true)} className="px-6 py-2.5 bg-blue-500/10 text-blue-400 border border-neutral-500/20 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
                   <ShieldCheck className="h-3 w-3" /> VERIFY_ARTIST
                 </button>
               )}
@@ -517,7 +517,7 @@ const ArtistProfile: React.FC = () => {
                   className={`px-6 py-2.5 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-bold uppercase tracking-widest shadow-lg active:scale-95
                     ${isTippingArtist 
                       ? 'bg-amber-500 text-background border-amber-500' 
-                      : 'bg-amber-500/10 text-amber-500 border border-amber-500/30 hover:bg-amber-500 hover:text-background shadow-amber-500/5'
+                      : 'bg-amber-500/10 text-amber-500 border border-neutral-500/20 hover:bg-amber-500 hover:text-background shadow-amber-500/5'
                     }
                   `}
                   title="Tip Artist"
@@ -580,7 +580,7 @@ const ArtistProfile: React.FC = () => {
             {trendingTracks.map((track, idx) => (
               <div key={`trending-${track.id}`} className="min-w-[280px] sm:min-w-[320px] group relative" >
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-[10px] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <div className="relative glass border border-blue-500/10 p-4 rounded-[10px] transition-all bg-[#0a0a0a]/40 flex items-center gap-4">
+                <div className="relative glass border border-neutral-500/20 p-4 rounded-[10px] transition-all bg-[#0a0a0a]/40 flex items-center gap-4">
                   <div className="relative w-16 h-16 flex-shrink-0 rounded-[10px] overflow-hidden shadow-lg">
                     <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                     <button onClick={() => playAll([track])} className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" >
@@ -692,7 +692,7 @@ const ArtistProfile: React.FC = () => {
           <div className="lg:col-span-4 space-y-6">
             {/* Market Insights */}
             {marketStats && (
-              <section className="glass border border-blue-500/10 backdrop-blur-xl bg-foreground/[0.02] p-8 rounded-[10px] relative shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+              <section className="glass border border-neutral-500/20 backdrop-blur-xl bg-foreground/[0.02] p-8 rounded-[10px] relative shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                 <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full"></div>
                 <h3 className="text-[7px] font-bold text-amber-500/60 uppercase tracking-[0.4em] mb-6 relative z-10">Market Ledger</h3>
                 <div className="space-y-4 relative z-10">
@@ -708,13 +708,13 @@ const ArtistProfile: React.FC = () => {
                     <span className="text-[8px] font-bold text-muted-foreground/50 uppercase group-hover/stat:text-muted-foreground transition-colors">Holders</span>
                     <span className="text-xs font-bold text-foreground group-hover:text-amber-500 transition-colors">{marketStats.holders}</span>
                   </div>
-                  <button onClick={() => navigate('/marketplace')} className="w-full py-3 bg-amber-500/10 border border-amber-500/30 rounded-[10px] text-[7px] font-bold text-amber-500 uppercase tracking-widest hover:bg-amber-500 hover:text-background transition-all mt-2 shadow-lg shadow-amber-500/5">Trade Assets</button>
+                  <button onClick={() => navigate('/marketplace')} className="w-full py-3 bg-amber-500/10 border border-neutral-500/20 rounded-[10px] text-[7px] font-bold text-amber-500 uppercase tracking-widest hover:bg-amber-500 hover:text-background transition-all mt-2 shadow-lg shadow-amber-500/5">Trade Assets</button>
                 </div>
               </section>
             )}
 
             {/* Biography */}
-            <section className="p-8 glass border border-blue-500/10 backdrop-blur-xl bg-foreground/[0.01] rounded-[10px] group/bio">
+            <section className="p-8 glass border border-neutral-500/20 backdrop-blur-xl bg-foreground/[0.01] rounded-[10px] group/bio">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Origin Narrative</h3>
                 {isOwnProfile && !isEditingBio && (
@@ -735,7 +735,7 @@ const ArtistProfile: React.FC = () => {
                   <textarea
                     value={editedBio}
                     onChange={(e) => setEditedBio(e.target.value)}
-                    className="w-full bg-muted/50 border border-border rounded-[10px] p-4 text-xs text-muted-foreground/90 leading-relaxed outline-none focus:border-blue-500/50 transition-all min-h-[120px] resize-none"
+                    className="w-full bg-muted/50 border border-border rounded-[10px] p-4 text-xs text-muted-foreground/90 leading-relaxed outline-none focus:border-neutral-500/50 transition-all min-h-[120px] resize-none"
                     placeholder="Enter artist biography..."
                   />
                   <div className="flex gap-2 justify-end">
@@ -766,7 +766,7 @@ const ArtistProfile: React.FC = () => {
                 <div className="space-y-12 animate-in fade-in duration-500">
                   {/* Top Tracks Section */}
                   {topTracks.length > 0 && (
-                    <section className="glass border border-blue-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
+                    <section className="glass border border-neutral-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
                       <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-3">
                           <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
@@ -884,7 +884,7 @@ const ArtistProfile: React.FC = () => {
                       ))}
                     </div>
                     {artistTracks.length === 0 && (
-                      <div className="py-24 text-center glass border border-blue-500/10 rounded-[10px]">
+                      <div className="py-24 text-center glass border border-neutral-500/10 rounded-[10px]">
                         <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No tracks broadcasted.</p>
                       </div>
                     )}
@@ -903,7 +903,7 @@ const ArtistProfile: React.FC = () => {
                     </div>
                   ))}
                   {artistNFTs.length === 0 && (
-                    <div className="w-full py-24 text-center glass border border-blue-500/10 rounded-[10px]">
+                    <div className="w-full py-24 text-center glass border border-neutral-500/10 rounded-[10px]">
                       <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No assets detected.</p>
                     </div>
                   )}
@@ -931,7 +931,7 @@ const ArtistProfile: React.FC = () => {
                             <textarea 
                               value={editedBio}
                               onChange={(e) => setEditedBio(e.target.value)}
-                              className="w-full bg-background/40 border border-border rounded-[10px] p-4 text-sm text-muted-foreground/90 outline-none focus:border-blue-500/50 transition-all resize-none min-h-[150px]"
+                              className="w-full bg-background/40 border border-border rounded-[10px] p-4 text-sm text-muted-foreground/90 outline-none focus:border-neutral-500/50 transition-all resize-none min-h-[150px]"
                               placeholder="Enter artist biography..."
                             />
                             <div className="flex justify-end gap-3">
@@ -1045,7 +1045,7 @@ const ArtistProfile: React.FC = () => {
                   )}
 
                   {/* Verification Block */}
-                  <div className={`p-10 rounded-[10px] border flex flex-col md:flex-row items-center justify-between gap-6 ${artist.verified ? 'bg-blue-600/5 border-blue-500/10' : 'bg-muted/50 border-border'}`}>
+                  <div className={`p-10 rounded-[10px] border flex flex-col md:flex-row items-center justify-between gap-6 ${artist.verified ? 'bg-neutral-600/5 border-neutral-500/10' : 'bg-muted/50 border-border'}`}>
                     <div className="flex items-center gap-5">
                       <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center shadow-lg ${artist.verified ? 'bg-blue-500' : 'bg-muted'}`}>
                         {artist.verified ? <ShieldCheck className="text-foreground h-6 w-6" /> : <Info className="text-muted-foreground h-6 w-6" />}
@@ -1092,7 +1092,7 @@ const ArtistProfile: React.FC = () => {
                           <div 
                             key={track.id}
                             className={`glass border transition-all duration-300 rounded-[12px] overflow-hidden ${
-                              isEditing ? 'border-purple-500/30 bg-purple-500/5' : 'border-border/50 bg-foreground/[0.01] hover:bg-foreground/[0.03]'
+                              isEditing ? 'border-neutral-500/30 bg-neutral-500/5' : 'border-border/50 bg-foreground/[0.01] hover:bg-foreground/[0.03]'
                             }`}
                           >
                             <div className="p-6">
@@ -1149,7 +1149,7 @@ const ArtistProfile: React.FC = () => {
                                         type="text"
                                         value={currentMetadata.title}
                                         onChange={(e) => handleMetadataChange(track.id, 'title', e.target.value)}
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                       />
                                     </div>
 
@@ -1160,7 +1160,7 @@ const ArtistProfile: React.FC = () => {
                                       <select 
                                         value={currentMetadata.genre}
                                         onChange={(e) => handleMetadataChange(track.id, 'genre', e.target.value)}
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all appearance-none"
+                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all appearance-none"
                                       >
                                         {['Techno', 'House', 'Ambient', 'Phonk', 'Cyberpunk', 'Lo-Fi', 'Electronic', 'Pop'].map(g => (
                                           <option key={g} value={g}>{g}</option>
@@ -1177,7 +1177,7 @@ const ArtistProfile: React.FC = () => {
                                         onChange={(e) => handleMetadataChange(track.id, 'description', e.target.value)}
                                         rows={3}
                                         placeholder="Describe the sonic journey..."
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all resize-none"
+                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all resize-none"
                                       />
                                     </div>
                                   </div>
@@ -1192,7 +1192,7 @@ const ArtistProfile: React.FC = () => {
                                         value={currentMetadata.audioIpfsUrl}
                                         onChange={(e) => handleMetadataChange(track.id, 'audioIpfsUrl', e.target.value)}
                                         placeholder="ipfs://..."
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                       />
                                     </div>
 
@@ -1205,7 +1205,7 @@ const ArtistProfile: React.FC = () => {
                                         value={currentMetadata.coverIpfsUrl}
                                         onChange={(e) => handleMetadataChange(track.id, 'coverIpfsUrl', e.target.value)}
                                         placeholder="ipfs://..."
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                       />
                                     </div>
 
@@ -1218,11 +1218,11 @@ const ArtistProfile: React.FC = () => {
                                         step="0.1"
                                         value={currentMetadata.price}
                                         onChange={(e) => handleMetadataChange(track.id, 'price', e.target.value)}
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                       />
                                     </div>
 
-                                    <div className="p-4 bg-purple-600/5 border border-purple-500/20 rounded-[10px] flex items-center justify-between">
+                                    <div className="p-4 bg-neutral-600/5 border border-neutral-500/20 rounded-[10px] flex items-center justify-between">
                                       <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
                                           <Disc className="w-4 h-4 text-purple-400" />
@@ -1264,7 +1264,7 @@ const ArtistProfile: React.FC = () => {
                                               placeholder="Wallet Address"
                                               value={split.address}
                                               onChange={(e) => handleRoyaltySplitChange(track.id, index, 'address', e.target.value)}
-                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 text-[10px] text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 text-[10px] text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                             />
                                           </div>
                                           <div className="col-span-3">
@@ -1273,7 +1273,7 @@ const ArtistProfile: React.FC = () => {
                                               placeholder="Label (e.g. Producer)"
                                               value={split.label}
                                               onChange={(e) => handleRoyaltySplitChange(track.id, index, 'label', e.target.value)}
-                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 text-[10px] text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 text-[10px] text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                             />
                                           </div>
                                           <div className="col-span-3 relative">
@@ -1282,7 +1282,7 @@ const ArtistProfile: React.FC = () => {
                                               placeholder="%"
                                               value={split.percentage}
                                               onChange={(e) => handleRoyaltySplitChange(track.id, index, 'percentage', parseFloat(e.target.value))}
-                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 pr-8 text-[10px] text-foreground outline-none focus:border-purple-500/50 transition-all"
+                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 pr-8 text-[10px] text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                             />
                                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">%</span>
                                           </div>
@@ -1432,7 +1432,7 @@ const ArtistProfile: React.FC = () => {
                                       <div className="flex gap-2">
                                         <button 
                                           onClick={() => handleListingChange(nft.id, 'listingType', 'fixed')}
-                                          className={`flex-1 py-3 rounded-[8px] border text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentListing.listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500 text-blue-500' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'}`}
+                                          className={`flex-1 py-3 rounded-[8px] border text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentListing.listingType === 'fixed' ? 'bg-neutral-600/10 border-neutral-500 text-neutral-500' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'}`}
                                         >
                                           <Tag className="w-3 h-3" /> Fixed Price
                                         </button>
@@ -1500,7 +1500,7 @@ const ArtistProfile: React.FC = () => {
                   </div>
 
                   {artist.events && artist.events.length > 0 && (
-                    <section className="glass border border-blue-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
+                    <section className="glass border border-neutral-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
                       <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter mb-6">Upcoming Events</h3>
                       <div className="space-y-4">
                         {artist.events.map(event => (
@@ -1519,7 +1519,7 @@ const ArtistProfile: React.FC = () => {
                   )}
 
                   {artist.collaborations && artist.collaborations.length > 0 && (
-                    <section className="glass border border-blue-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
+                    <section className="glass border border-neutral-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
                       <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter mb-6">Featured Collaborations</h3>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {artist.collaborations.map(collab => (

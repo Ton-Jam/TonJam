@@ -1326,7 +1326,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             </div>
             <div className="max-h-80 overflow-y-auto no-scrollbar space-y-3 mb-8">
               {/* Create New Option */}
-              <div className="p-4 rounded-[5px] bg-blue-600/10 border border-blue-500/20 transition-all">
+              <div className="p-4 rounded-[5px] bg-neutral-600/10 border border-neutral-500/20 transition-all">
                 <div className="flex items-center gap-4 mb-3">
                   <div className="w-10 h-10 rounded-[5px] bg-blue-500/20 flex items-center justify-center text-blue-400">
                     <i className="fas fa-plus"></i>
@@ -1345,7 +1345,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     setTrackToAddToPlaylist(null);
                   }
                 }} className="flex gap-2">
-                  <input name="playlistName" type="text" placeholder="Playlist Name" className="flex-1 bg-background/50 rounded-[5px] px-3 py-2 text-xs text-foreground outline-none focus:border-blue-500 border border-transparent transition-all" autoFocus />
+                  <input name="playlistName" type="text" placeholder="Playlist Name" className="flex-1 bg-background/50 rounded-[5px] px-3 py-2 text-xs text-foreground outline-none focus:border-neutral-500 border border-transparent transition-all" autoFocus />
                   <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all">Create</button>
                 </form>
               </div>

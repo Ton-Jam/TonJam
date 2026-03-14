@@ -187,7 +187,7 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                     </div>
                     <button 
                       onClick={() => handleRemoveSplit('streaming', index)}
-                      className="p-2.5 rounded-[6px] bg-red-500/5 hover:bg-red-500/10 text-red-500/40 hover:text-red-500 transition-all border border-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      className="p-2.5 rounded-[6px] bg-neutral-500/5 hover:bg-neutral-500/10 text-neutral-500/40 hover:text-neutral-500 transition-all border border-neutral-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
                       aria-label={`Remove Streaming Split ${index + 1}`}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -265,7 +265,7 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
                     </div>
                     <button 
                       onClick={() => handleRemoveSplit('nft', index)}
-                      className="p-2.5 rounded-[6px] bg-red-500/5 hover:bg-red-500/10 text-red-500/40 hover:text-red-500 transition-all border border-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      className="p-2.5 rounded-[6px] bg-neutral-500/5 hover:bg-neutral-500/10 text-neutral-500/40 hover:text-neutral-500 transition-all border border-neutral-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
                       aria-label={`Remove NFT Split ${index + 1}`}
                     >
                       <Trash2 className="h-4 w-4" />

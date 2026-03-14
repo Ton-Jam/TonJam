@@ -99,7 +99,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Header */}
       {!isExplore && !isPlayer && (
-        <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-4 md:px-6 h-16 flex items-center justify-between lg:left-64 transition-colors duration-300">
+        <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-4 md:px-6 h-16 flex items-center justify-between lg:left-64 transition-colors duration-300 border-b-0">
           <div className="flex items-center gap-4 flex-1">
             {!isHome && (
               <button 
@@ -210,14 +210,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                 <button 
                   onClick={() => tonConnectUI.openModal()}
-                  className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-all border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label="Connect Wallet"
                 >
                   <Wallet className="h-5 w-5 text-primary" />
                 </button>
                 
                 {user ? (
-                  <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-border hover:border-border/80 transition-all flex items-center justify-center bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
+                  <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border-0 hover:opacity-80 transition-all flex items-center justify-center bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
                     {user.user_metadata?.avatar_url ? (
                       <img src={user.user_metadata.avatar_url} alt={`${user.user_metadata.full_name || 'User'} avatar`} className="w-full h-full object-cover" />
                     ) : (
@@ -241,7 +241,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sidebar - Desktop */}
       {!isPlayer && (
-        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r-0 border-blue-500 flex-col p-6 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
+        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r-0 flex-col p-6 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
           <div className="flex items-center justify-between mb-10">
             <Link to="/" className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm" aria-label="TonJam Home">
               <img src={APP_LOGO} alt="" className="w-10 h-10 object-contain" aria-hidden="true" />
@@ -295,7 +295,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Link>
                 <Link 
                   to="/mint"
-                  className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 border-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label="Mint new NFT"
                 >
                   <PlusCircle className="h-5 w-5" />
@@ -305,7 +305,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
 
             {/* TJ Coin Price Widget */}
-            <div className="mt-8 p-4 rounded-[5px] bg-muted/50 border-0 border-blue-500 flex items-center justify-between" role="complementary" aria-label="Token Price Info">
+            <div className="mt-8 p-4 rounded-[5px] bg-muted/50 border-0 flex items-center justify-between" role="complementary" aria-label="Token Price Info">
               <div className="flex items-center gap-3">
                 <img src={TJ_COIN_ICON} alt="JAM Token" className="w-6 h-6 object-contain" />
                 <div>
@@ -337,7 +337,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Mobile Navigation */}
       {!isPlayer && (
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 border-blue-500 h-20 px-2 flex justify-around items-center shadow-2xl" aria-label="Mobile Navigation">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-20 px-2 flex justify-around items-center shadow-2xl" aria-label="Mobile Navigation">
           <MobileNavItem to="/" icon={HomeIcon} label="Home" />
           <MobileNavItem to="/discover" icon={Search} label="Search" />
           <MobileNavItem to="/jamspace" icon={Send} label="JamSpace" />
@@ -367,14 +367,14 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon
     to={to} 
     className={({ isActive }) => `
       flex-1 flex flex-col items-center justify-center transition-all gap-1.5 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm
-      ${isActive ? 'text-primary' : 'text-muted-foreground'}
+      ${isActive ? 'text-blue-500' : 'text-muted-foreground'}
     `}
   >
     {({ isActive }) => (
       <>
         <Icon className={`h-6 w-6 stroke-[2.5] transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
         <span className="text-[8px] font-bold uppercase tracking-widest">{label}</span>
-        <div className={`w-1 h-1 rounded-full bg-primary transition-all mt-0.5 ${isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}></div>
+        <div className={`w-1 h-1 rounded-full bg-blue-500 transition-all mt-0.5 ${isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}></div>
       </>
     )}
   </NavLink>

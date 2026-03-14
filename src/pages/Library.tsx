@@ -98,7 +98,7 @@ const Library: React.FC = () => {
             </button>
             <button 
               onClick={createRecommendedPlaylist}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 border border-blue-500/30 text-blue-500 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600/20 transition-all active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 border border-neutral-500/20 text-blue-500 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600/20 transition-all active:scale-95"
             >
               <Sparkles className="h-4 w-4" />
               AI Generation
@@ -154,7 +154,7 @@ const Library: React.FC = () => {
             {activeTab === 'collection' && (
               <div className="space-y-16">
                 {/* NFT Artifacts */}
-                <section className="p-8 rounded-3xl bg-blue-500/[0.03] border border-blue-500/10 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-blue-500/[0.03] border border-neutral-500/20 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -175,7 +175,7 @@ const Library: React.FC = () => {
                 </section>
 
                 {/* Liked Tracks */}
-                <section className="p-8 rounded-3xl bg-emerald-500/[0.03] border border-emerald-500/10 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-emerald-500/[0.03] border border-neutral-500/20 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -195,7 +195,7 @@ const Library: React.FC = () => {
 
             {activeTab === 'playlists' && (
               <div className="space-y-8">
-                <section className="p-8 rounded-3xl bg-violet-600/[0.03] border border-violet-500/10 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-violet-600/[0.03] border border-neutral-500/20 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -237,7 +237,7 @@ const Library: React.FC = () => {
                 </section>
 
                 {/* Followed Artists */}
-                <section className="p-8 rounded-3xl bg-orange-500/[0.03] border border-orange-500/10 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-orange-500/[0.03] border border-neutral-500/20 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">

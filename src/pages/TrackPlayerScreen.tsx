@@ -150,10 +150,10 @@ export default function TrackPlayerScreen() {
         </button>
 
         <div className="grid grid-cols-2 gap-3">
-          <button className="bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-white/5 transition-all">
+          <button className="bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-neutral-500/20 transition-all">
             Buy Edition
           </button>
-          <button className="bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-white/5 transition-all">
+          <button className="bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-neutral-500/20 transition-all">
             Share Track
           </button>
         </div>
@@ -169,7 +169,7 @@ export default function TrackPlayerScreen() {
         </div>
 
         <div className="space-y-6">
-          <div className="border-l-2 border-white/10 pl-4">
+          <div className="border-l-2 border-neutral-500/20 pl-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-5 h-5 rounded-full bg-blue-500/20" />
               <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">CryptoKrupy</span>
@@ -179,7 +179,7 @@ export default function TrackPlayerScreen() {
             </p>
           </div>
 
-          <div className="border-l-2 border-white/10 pl-4">
+          <div className="border-l-2 border-neutral-500/20 pl-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-5 h-5 rounded-full bg-purple-500/20" />
               <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">NeonRider</span>

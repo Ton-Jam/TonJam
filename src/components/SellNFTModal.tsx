@@ -70,7 +70,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
             <button 
               type="button"
               onClick={() => setListingType('fixed')}
-              className={`flex-1 p-4 rounded-[10px] border transition-all text-center space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'}`}
+              className={`flex-1 p-4 rounded-[10px] border transition-all text-center space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${listingType === 'fixed' ? 'bg-blue-600/10 border-neutral-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'}`}
               aria-pressed={listingType === 'fixed'}
             >
               <Tag className="h-5 w-5 mx-auto" />
@@ -138,7 +138,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
             )}
           </div>
 
-          <div className="p-3 bg-blue-500/5 border border-blue-500/10 rounded-[10px] flex gap-3">
+          <div className="p-3 bg-blue-500/5 border border-neutral-500/10 rounded-[10px] flex gap-3">
             <Info className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
             <p className="text-[9px] text-muted-foreground/80 leading-relaxed uppercase tracking-widest">
               TonJam takes a <span className="text-foreground">2.5%</span> marketplace fee. Artist royalties of <span className="text-foreground">{nft.royalty}%</span> will be deducted from the final sale.

@@ -240,7 +240,7 @@ const FullPlayer: React.FC = () => {
       ref={containerRef}
     >
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-[#060c1a]/90 backdrop-blur-md border-b border-border/50">
+      <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-[#060c1a]/90 backdrop-blur-md">
         <button 
           onClick={() => setFullPlayerOpen(false)}
           className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -249,7 +249,6 @@ const FullPlayer: React.FC = () => {
           <ChevronDown className="h-6 w-6" />
         </button>
         <div className="text-center">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.3em] mb-2">Now Playing</p>
           <div className="flex gap-1 bg-muted/50 p-1 rounded-full">
             <button 
               onClick={() => setActiveView('player')}
@@ -349,7 +348,7 @@ const FullPlayer: React.FC = () => {
                       <input 
                         type="text" 
                         placeholder="Broadcast your thoughts..." 
-                        className="w-full bg-muted/50 rounded-xl py-3 px-5 text-sm text-foreground outline-none border border-border/50 focus:border-blue-500/50 transition-all"
+                        className="w-full bg-muted/50 rounded-xl py-3 px-5 text-sm text-foreground outline-none border border-border/50 focus:border-neutral-500/50 transition-all"
                       />
                       <button className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-500 text-[10px] font-bold uppercase tracking-widest">Post</button>
                     </div>
@@ -630,7 +629,7 @@ const FullPlayer: React.FC = () => {
         {/* Artist Dossier */}
         <div className="mt-20 pt-20 border-t border-border/50">
           <h3 className="text-[12px] font-bold text-muted-foreground uppercase tracking-[0.4em] mb-8">Artist Dossier</h3>
-          <div className="bg-[#0a192f] p-8 rounded-2xl border border-blue-500/10">
+          <div className="bg-[#0a192f] p-8 rounded-2xl border border-neutral-500/10">
             <div 
               className="flex items-center gap-6 mb-8 cursor-pointer group/dossier focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
               onClick={() => {
@@ -651,10 +650,10 @@ const FullPlayer: React.FC = () => {
               <div className="relative">
                 <img 
                   src={artistData?.avatarUrl || `https://picsum.photos/200/200?seed=${currentTrack.artist}`} 
-                  className="w-20 h-20 rounded-full object-cover border border-blue-500/20 group-hover/dossier:border-blue-500 transition-colors" 
+                  className="w-20 h-20 rounded-full object-cover border border-neutral-500/20 group-hover/dossier:border-neutral-500 transition-colors" 
                   alt="" 
                 />
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#0a192f] rounded-full flex items-center justify-center border border-blue-500/20">
+                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#0a192f] rounded-full flex items-center justify-center border border-neutral-500/20">
                   <CheckCircle2 className="h-4 w-4 text-blue-500" />
                 </div>
               </div>

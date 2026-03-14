@@ -107,7 +107,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center">
           <button 
             onClick={handlePlay}
-            className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-border/80 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+            className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-border/80 flex items-center justify-center shadow-xl group-hover:bg-neutral-600 group-hover:border-neutral-500 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
           >
             <Play className="h-3 w-3 text-foreground fill-white ml-0.5" />
           </button>

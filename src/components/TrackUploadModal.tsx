@@ -99,7 +99,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 {/* Left: Upload Area */}
                 <div className="space-y-6">
                   <div 
-                    className="aspect-square rounded-[10px] border border-dashed border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-6 group hover:border-blue-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="aspect-square rounded-[10px] border border-dashed border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-6 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     role="button"
                     tabIndex={0}
                     aria-label="Select Audio File"
@@ -112,7 +112,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                   </div>
                   
                   <div 
-                    className="aspect-video rounded-[10px] border border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-4 group hover:border-blue-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="aspect-video rounded-[10px] border border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-4 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     role="button"
                     tabIndex={0}
                     aria-label="Add Cover Art"

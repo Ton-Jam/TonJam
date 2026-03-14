@@ -234,14 +234,14 @@ const PlaylistDetail: React.FC = () => {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-2xl md:text-4xl font-bold text-foreground focus:outline-none focus:border-blue-500 text-center md:text-left"
+                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-2xl md:text-4xl font-bold text-foreground focus:outline-none focus:border-neutral-500/50 text-center md:text-left"
                 placeholder="Playlist Title"
                 autoFocus
               />
               <textarea
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-sm text-muted-foreground/90 focus:outline-none focus:border-blue-500 resize-none text-center md:text-left"
+                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-sm text-muted-foreground/90 focus:outline-none focus:border-neutral-500/50 resize-none text-center md:text-left"
                 placeholder="Add a description..."
                 rows={3}
               />
@@ -292,7 +292,7 @@ const PlaylistDetail: React.FC = () => {
 
       {/* Selection Bar */}
       {isSelectionMode && playlistTracks.length > 0 && (
-        <div className="flex items-center justify-between mb-4 px-2 py-2 bg-blue-500/10 rounded-xl border border-blue-500/20 animate-in slide-in-from-top-2 duration-300">
+        <div className="flex items-center justify-between mb-4 px-2 py-2 bg-blue-500/10 rounded-xl border border-neutral-500/20 animate-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2.5">
             <button 
               onClick={toggleSelectAll}
@@ -331,7 +331,7 @@ const PlaylistDetail: React.FC = () => {
           <select 
             value={filterGenre} 
             onChange={(e) => setFilterGenre(e.target.value)}
-            className="bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground uppercase tracking-widest focus:outline-none focus:border-blue-500"
+            className="bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground uppercase tracking-widest focus:outline-none focus:border-neutral-500/50"
           >
             <option value="All">All Genres</option>
             {Array.from(new Set(playlistTracks.map(t => t.genre))).map(g => <option key={g} value={g}>{g}</option>)}
@@ -339,7 +339,7 @@ const PlaylistDetail: React.FC = () => {
           <select 
             value={filterMood} 
             onChange={(e) => setFilterMood(e.target.value)}
-            className="bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground uppercase tracking-widest focus:outline-none focus:border-blue-500"
+            className="bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground uppercase tracking-widest focus:outline-none focus:border-neutral-500/50"
           >
             <option value="All">All Moods</option>
             {Array.from(new Set(playlistTracks.map(t => t.mood || 'Unknown'))).map(m => <option key={m} value={m}>{m}</option>)}
@@ -351,7 +351,7 @@ const PlaylistDetail: React.FC = () => {
         {playlistTracks.map((track, index) => (
           <div 
             key={track.id} 
-            className={`w-full flex items-center gap-2 group rounded-[10px] pr-2 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/30' : 'hover:bg-muted/50 border-transparent'}`}
+            className={`w-full flex items-center gap-2 group rounded-[10px] pr-2 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-neutral-500/30' : 'hover:bg-muted/50 border-transparent'}`}
             onClick={() => handleTrackClick(track.id)}
             onMouseDown={() => handleTouchStart(track.id)}
             onMouseUp={handleTouchEnd}

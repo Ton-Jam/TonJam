@@ -21,7 +21,7 @@ const DiscoveryFeed: React.FC = () => {
       <section>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-neutral-500/20">
               <Sparkles className="h-5 w-5 text-blue-400" />
             </div>
             <div>
@@ -56,7 +56,7 @@ const DiscoveryFeed: React.FC = () => {
       <section>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-neutral-500/20">
               <Zap className="h-5 w-5 text-amber-400" />
             </div>
             <div>
@@ -87,7 +87,7 @@ const DiscoveryFeed: React.FC = () => {
 
       {/* Discovery Insights / Social Signals */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass border border-blue-500/10 bg-foreground/[0.02] p-6 rounded-[10px] relative overflow-hidden group hover:border-blue-500/30 transition-all">
+        <div className="glass border border-neutral-500/20 bg-foreground/[0.02] p-6 rounded-[10px] relative overflow-hidden group hover:border-neutral-500/40 transition-all">
           <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
             <TrendingUp className="h-16 w-16 text-blue-500" />
           </div>
@@ -103,7 +103,7 @@ const DiscoveryFeed: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass border border-purple-500/10 bg-foreground/[0.02] p-6 rounded-[10px] relative overflow-hidden group hover:border-purple-500/30 transition-all">
+        <div className="glass border border-neutral-500/20 bg-foreground/[0.02] p-6 rounded-[10px] relative overflow-hidden group hover:border-neutral-500/40 transition-all">
           <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
             <Gem className="h-16 w-16 text-purple-500" />
           </div>

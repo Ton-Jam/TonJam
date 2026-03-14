@@ -43,7 +43,7 @@ const chartConfig = {
 
 export function ChartRevenue() {
   return (
-    <Card className="border-blue-500/10 bg-foreground/[0.02] text-foreground">
+    <Card className="border-neutral-500/10 bg-foreground/[0.02] text-foreground">
       <CardHeader>
         <CardTitle className="text-foreground">Revenue Breakdown</CardTitle>
         <CardDescription className="text-muted-foreground">Monthly revenue from Streaming vs NFT Sales</CardDescription>

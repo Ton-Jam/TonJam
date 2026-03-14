@@ -170,12 +170,12 @@ const Marketplace: React.FC = () => {
           <div className="flex overflow-x-auto no-scrollbar gap-2 w-full">
             <div className="flex gap-2">
               {['All', ...Array.from(new Set(MOCK_TRACKS.map(t => t.genre)))].map(g => (
-                <button key={g} onClick={() => setGenreFilter(g)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${genreFilter === g ? 'bg-blue-600 text-foreground border-blue-500' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'}`}>
+                <button key={g} onClick={() => setGenreFilter(g)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${genreFilter === g ? 'bg-blue-600 text-foreground border-neutral-500/50' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'}`}>
                   {g}
                 </button>
               ))}
               {['All', ...MOCK_ARTISTS.map(a => a.name)].map(a => (
-                <button key={a} onClick={() => setArtistFilter(a)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${artistFilter === a ? 'bg-blue-600 text-foreground border-blue-500' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'}`}>
+                <button key={a} onClick={() => setArtistFilter(a)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${artistFilter === a ? 'bg-blue-600 text-foreground border-neutral-500/50' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'}`}>
                   {a}
                 </button>
               ))}
@@ -190,7 +190,7 @@ const Marketplace: React.FC = () => {
                   (p === '0-100' && priceRange[0] === 0 && priceRange[1] === 100) ||
                   (p === '100-500' && priceRange[0] === 100 && priceRange[1] === 500) ||
                   (p === '500+' && priceRange[0] === 500)
-                  ? 'bg-blue-600 text-foreground border-blue-500' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                  ? 'bg-blue-600 text-foreground border-neutral-500/50' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
                 }`}>
                   {p}
                 </button>
@@ -202,7 +202,7 @@ const Marketplace: React.FC = () => {
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab)} 
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-blue-500' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted' }`} 
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-neutral-500/20' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted' }`} 
               >
                 {tab}
                 {tab === 'My Bids' && userBids.length > 0 && (
@@ -337,7 +337,7 @@ const Marketplace: React.FC = () => {
 
         {/* 7. ALPHA DROP / SUBSCRIPTION */}
         <section className="pb-32">
-          <div className="bg-[#0a0a0a] border border-blue-500/20 p-12 md:p-16 rounded-[20px] flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden group">
+          <div className="bg-[#0a0a0a] border border-neutral-500/20 p-12 md:p-16 rounded-[20px] flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-12 opacity-[0.03] -rotate-12 group-hover:opacity-[0.06] transition-opacity"><Zap className="h-64 w-64 text-blue-500" /></div>
             <div className="text-center lg:text-left relative z-10">
               <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
@@ -348,7 +348,7 @@ const Marketplace: React.FC = () => {
               <p className="text-xs text-foreground/30 uppercase tracking-[0.4em] max-w-md leading-relaxed">Subscribe to the relay for exclusive mint protocols and early access to genesis artifacts.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto relative z-10">
-              <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-background/60 border border-border rounded-[10px] px-6 py-5 text-xs font-bold outline-none text-foreground focus:border-blue-500/50 transition-all placeholder:text-muted-foreground/30" />
+              <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-background/60 border border-border rounded-[10px] px-6 py-5 text-xs font-bold outline-none text-foreground focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/30" />
               <button className="px-12 py-5 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[11px] uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/30 active:scale-95 transition-all">SYNC_NOW</button>
             </div>
           </div>

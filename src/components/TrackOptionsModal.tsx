@@ -57,7 +57,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-[#020617]/80 backdrop-blur-md" onClick={onClose}></div>
-      <div className="relative bg-[#0a192f]/90 backdrop-blur-xl border border-blue-500/20 w-full max-w-sm rounded-[16px] overflow-hidden shadow-[0_0_50px_rgba(10,25,47,0.8)] animate-in zoom-in-95 duration-300">
+      <div className="relative bg-[#0a192f]/90 backdrop-blur-xl border border-neutral-500/20 w-full max-w-sm rounded-[16px] overflow-hidden shadow-[0_0_50px_rgba(10,25,47,0.8)] animate-in zoom-in-95 duration-300">
         <div className="p-6 border-b border-border/50 flex items-center gap-4 bg-foreground/[0.02]">
           <img src={track.coverUrl} className="w-16 h-16 rounded-[12px] object-cover shadow-lg border border-border" alt="" />
           <div>
@@ -66,25 +66,25 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
           </div>
         </div>
         <div className="p-2 space-y-1">
-          <button onClick={() => handleAction('queue')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+          <button onClick={() => handleAction('queue')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50">
             <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 group-hover:text-cyan-300 transition-colors">
               <ListMusic className="h-4 w-4" />
             </div>
             <span className="text-[10px] font-bold text-muted-foreground/90 group-hover:text-foreground uppercase tracking-widest transition-colors">Add to Queue</span>
           </button>
-          <button onClick={() => handleAction('playlist')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+          <button onClick={() => handleAction('playlist')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50">
             <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 group-hover:text-cyan-300 transition-colors">
               <Plus className="h-4 w-4" />
             </div>
             <span className="text-[10px] font-bold text-muted-foreground/90 group-hover:text-foreground uppercase tracking-widest transition-colors">Add to Playlist</span>
           </button>
-          <button onClick={() => handleAction('tip')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+          <button onClick={() => handleAction('tip')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50">
             <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/20 group-hover:text-emerald-300 transition-colors">
               <Coins className="h-4 w-4" />
             </div>
             <span className="text-[10px] font-bold text-muted-foreground/90 group-hover:text-foreground uppercase tracking-widest transition-colors">Tip Producer</span>
           </button>
-          <button onClick={() => handleAction('share')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+          <button onClick={() => handleAction('share')} className="w-full flex items-center gap-4 p-4 rounded-[12px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50">
             <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500/20 group-hover:text-purple-300 transition-colors">
               <Share2 className="h-4 w-4" />
             </div>
@@ -99,7 +99,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
             </button>
           )}
         </div>
-        <button onClick={onClose} className="w-full p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] hover:text-foreground hover:bg-muted/50 transition-colors border-t border-border/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+        <button onClick={onClose} className="w-full p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] hover:text-foreground hover:bg-muted/50 transition-colors border-t border-border/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50">
           Cancel
         </button>
       </div>

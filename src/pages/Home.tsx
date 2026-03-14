@@ -149,7 +149,7 @@ const Home: React.FC = () => {
               onClick={() => setSelectedGenre(null)}
               className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-semibold uppercase tracking-wider transition-all snap-start border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                 selectedGenre === null 
-                  ? 'bg-blue-600 text-foreground border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
+                  ? 'bg-blue-600 text-foreground border-neutral-500/50 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
                   : 'bg-muted/50 text-muted-foreground/80 border-border hover:bg-muted hover:text-foreground'
               }`}
             >
@@ -213,7 +213,7 @@ const Home: React.FC = () => {
               <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
               
               <div className="relative z-10 p-8 lg:p-20 max-w-3xl space-y-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-neutral-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em]">
                   <Zap className="h-3 w-3" />
                   Live on TON Blockchain
                 </div>
@@ -399,7 +399,7 @@ const Home: React.FC = () => {
 
             {/* Community & Artist CTA Section */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="glass border border-blue-500/10 bg-foreground/[0.02] p-10 rounded-[10px] space-y-6 relative overflow-hidden group">
+              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] p-10 rounded-[10px] space-y-6 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Radio className="h-32 w-32 text-blue-500" />
                 </div>
@@ -415,7 +415,7 @@ const Home: React.FC = () => {
                 </Link>
               </div>
               
-              <div className="glass border border-purple-500/10 bg-foreground/[0.02] p-10 rounded-[10px] space-y-6 relative overflow-hidden group">
+              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] p-10 rounded-[10px] space-y-6 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Disc className="h-32 w-32 text-purple-500" />
                 </div>

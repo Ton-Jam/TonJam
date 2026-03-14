@@ -138,7 +138,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       tabIndex={0}
       aria-label={`View profile of ${user.name}`}
     >
-      <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-[5px] overflow-hidden border border-border/50 group-hover:border-blue-500/50 transition-all mb-4">
+      <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-[5px] overflow-hidden border border-border/50 group-hover:border-neutral-500/50 transition-all mb-4">
         <img 
           src={avatarUrl} 
           alt={user.name} 

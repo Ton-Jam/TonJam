@@ -157,7 +157,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 className="py-12 flex flex-col items-center justify-center gap-6"
               >
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin"></div>
+                  <div className="w-20 h-20 rounded-full border-2 border-neutral-500/20 border-t-blue-500 animate-spin"></div>
                   <Loader2 className="absolute inset-0 m-auto h-8 w-8 text-blue-500 animate-pulse" />
                 </div>
                 <div className="text-center space-y-2">
@@ -174,7 +174,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 animate={{ opacity: 1, scale: 1 }}
                 className="py-12 flex flex-col items-center justify-center gap-6 text-center"
               >
-                <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30">
+                <div className="w-20 h-20 rounded-full bg-neutral-500/20 flex items-center justify-center border border-neutral-500/30">
                   <CheckCircle2 className="h-10 w-10 text-green-500" />
                 </div>
                 <div className="space-y-2">

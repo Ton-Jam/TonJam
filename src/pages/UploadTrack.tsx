@@ -247,7 +247,7 @@ const UploadTrack: React.FC = () => {
             </p>
           </div>
           {step === 1 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-neutral-500/20">
               <Sparkles className="h-3.5 w-3.5 text-blue-500" />
               <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">AI Analysis Enabled</span>
             </div>
@@ -269,7 +269,7 @@ const UploadTrack: React.FC = () => {
                     onDragOver={(e) => handleDragOver(e, 'cover')}
                     onDragLeave={() => handleDragLeave('cover')}
                     onDrop={(e) => handleDrop(e, 'cover')}
-                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-foreground/[0.02] flex flex-col items-center justify-center p-2 cursor-pointer transition-all group relative overflow-hidden ${coverFile ? 'border-blue-500/50' : 'border-border'} ${isDraggingCover ? 'border-blue-500 bg-blue-500/5 scale-[1.02]' : 'hover:border-blue-500/50'}`}
+                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-foreground/[0.02] flex flex-col items-center justify-center p-2 cursor-pointer transition-all group relative overflow-hidden ${coverFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingCover ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
                   >
                     {coverPreview ? (
                       <>
@@ -306,7 +306,7 @@ const UploadTrack: React.FC = () => {
                     onDragOver={(e) => handleDragOver(e, 'audio')}
                     onDragLeave={() => handleDragLeave('audio')}
                     onDrop={(e) => handleDrop(e, 'audio')}
-                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-foreground/[0.02] flex flex-col items-center justify-center p-6 cursor-pointer transition-all group relative ${audioFile ? 'border-blue-500/50' : 'border-border'} ${isDraggingAudio ? 'border-blue-500 bg-blue-500/5 scale-[1.02]' : 'hover:border-blue-500/50'}`}
+                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-foreground/[0.02] flex flex-col items-center justify-center p-6 cursor-pointer transition-all group relative ${audioFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingAudio ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
                   >
                     {audioFile ? (
                       <div className="flex flex-col items-center text-center gap-4">
@@ -337,7 +337,7 @@ const UploadTrack: React.FC = () => {
                   <input type="file" ref={audioInputRef} onChange={handleAudioChange} accept="audio/*" className="hidden" />
                   
                   {isAnalyzing && (
-                    <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-[10px] flex items-center gap-3 animate-pulse">
+                    <div className="p-4 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-3 animate-pulse">
                       <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
                       <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">AI Analyzing Frequency...</span>
                     </div>
@@ -369,7 +369,7 @@ const UploadTrack: React.FC = () => {
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors"
+                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     placeholder="PROTOCOL_NAME"
                   />
                 </div>
@@ -379,7 +379,7 @@ const UploadTrack: React.FC = () => {
                     type="text"
                     value={formData.artist}
                     onChange={(e) => setFormData({...formData, artist: e.target.value})}
-                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors"
+                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     placeholder="OPERATOR_ID"
                   />
                 </div>
@@ -388,7 +388,7 @@ const UploadTrack: React.FC = () => {
                   <select 
                     value={formData.genre}
                     onChange={(e) => setFormData({...formData, genre: e.target.value})}
-                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors appearance-none"
+                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors appearance-none"
                   >
                     <option value="Electronic">Electronic</option>
                     <option value="Hip-Hop">Hip-Hop</option>
@@ -405,7 +405,7 @@ const UploadTrack: React.FC = () => {
                       type="number"
                       value={formData.bpm}
                       onChange={(e) => setFormData({...formData, bpm: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors"
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                       placeholder="128"
                     />
                   </div>
@@ -415,7 +415,7 @@ const UploadTrack: React.FC = () => {
                       type="text"
                       value={formData.key}
                       onChange={(e) => setFormData({...formData, key: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors"
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                       placeholder="Am"
                     />
                   </div>
@@ -427,7 +427,7 @@ const UploadTrack: React.FC = () => {
                 <textarea 
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors h-32 resize-none"
+                  className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors h-32 resize-none"
                   placeholder="Enter track transmission details..."
                 />
               </div>
@@ -438,7 +438,7 @@ const UploadTrack: React.FC = () => {
                   id="isNFT"
                   checked={formData.isNFT}
                   onChange={(e) => setFormData({...formData, isNFT: e.target.checked})}
-                  className="w-4 h-4 rounded border-border bg-background text-blue-500 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-border bg-background text-blue-500 focus:ring-neutral-500/50"
                 />
                 <label htmlFor="isNFT" className="text-[10px] font-bold text-foreground uppercase tracking-widest cursor-pointer">
                   Mint as NFT Protocol
@@ -453,7 +453,7 @@ const UploadTrack: React.FC = () => {
                       type="text"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors"
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -462,7 +462,7 @@ const UploadTrack: React.FC = () => {
                       type="text"
                       value={formData.editions}
                       onChange={(e) => setFormData({...formData, editions: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors"
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -471,7 +471,7 @@ const UploadTrack: React.FC = () => {
                       type="text"
                       value={formData.royalty}
                       onChange={(e) => setFormData({...formData, royalty: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-colors"
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     />
                   </div>
                 </div>

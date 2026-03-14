@@ -187,7 +187,7 @@ const TrackDetail: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               {track.isNFT && (
-                <div className="absolute top-4 right-4 px-3 py-1.5 bg-blue-600/90 backdrop-blur-md rounded-full flex items-center gap-2 border border-blue-400/30">
+                <div className="absolute top-4 right-4 px-3 py-1.5 bg-neutral-600/90 backdrop-blur-md rounded-full flex items-center gap-2 border border-neutral-400/30">
                   <Zap className="h-3 w-3 text-foreground fill-white" />
                   <span className="text-[9px] font-black uppercase tracking-widest text-foreground">NFT Protocol</span>
                 </div>
@@ -204,14 +204,14 @@ const TrackDetail: React.FC = () => {
               </button>
               <button 
                 onClick={() => toggleLikeTrack(track.id)}
-                className={`p-4 rounded-xl border transition-all active:scale-95 ${isLiked ? 'bg-pink-500/10 border-pink-500/50 text-pink-500' : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'}`}
+                className={`p-4 rounded-xl border transition-all active:scale-95 ${isLiked ? 'bg-neutral-500/10 border-neutral-500/50 text-neutral-500' : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'}`}
               >
                 <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
               </button>
               <div className="relative">
                 <button 
                   onClick={() => setIsTipping(!isTipping)}
-                  className={`p-4 rounded-xl border transition-all active:scale-95 ${isTipping ? 'bg-blue-600 border-blue-500 text-foreground' : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'}`}
+                  className={`p-4 rounded-xl border transition-all active:scale-95 ${isTipping ? 'bg-neutral-600 border-neutral-500 text-foreground' : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'}`}
                   aria-label="Tip artist"
                 >
                   <Coins className="h-5 w-5" />
@@ -266,7 +266,7 @@ const TrackDetail: React.FC = () => {
                     <ShoppingCart className="h-4 w-4" />
                     Buy NFT
                   </button>
-                  <button onClick={handleJam} className="py-3.5 bg-blue-600/10 border border-blue-500/30 text-blue-500 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600/20 transition-all flex items-center justify-center gap-2">
+                  <button onClick={handleJam} className="py-3.5 bg-neutral-600/10 border border-neutral-500/30 text-neutral-500 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-neutral-600/20 transition-all flex items-center justify-center gap-2">
                     <Zap className="h-4 w-4 fill-current" />
                     Jam Signal
                   </button>
@@ -459,7 +459,7 @@ const TrackDetail: React.FC = () => {
               <div className="mt-6">
                 <textarea 
                   placeholder="Write a review..." 
-                  className="w-full bg-muted/50 border border-border rounded-xl p-4 text-sm text-foreground placeholder-white/30 focus:outline-none focus:border-blue-500/50 transition-colors resize-none h-24"
+                  className="w-full bg-muted/50 border border-border rounded-xl p-4 text-sm text-foreground placeholder-white/30 focus:outline-none focus:border-neutral-500/50 transition-colors resize-none h-24"
                 ></textarea>
                 <button className="mt-3 px-6 py-2.5 bg-blue-600 text-foreground rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all">
                   Submit Review

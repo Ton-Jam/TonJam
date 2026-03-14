@@ -15,7 +15,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Earnings Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass border border-blue-500/10 p-8 rounded-[10px] bg-foreground/[0.02] relative overflow-hidden group">
+        <div className="glass border border-neutral-500/10 p-8 rounded-[10px] bg-foreground/[0.02] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
             <ChartLine className="h-10 w-10 text-blue-500" />
           </div>
@@ -27,7 +27,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
           <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">Based on {(config.streamingPercentage * 100).toFixed(1)}% share</p>
         </div>
 
-        <div className="glass border border-blue-500/10 p-8 rounded-[10px] bg-foreground/[0.02] relative overflow-hidden group">
+        <div className="glass border border-neutral-500/10 p-8 rounded-[10px] bg-foreground/[0.02] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
             <Gem className="h-10 w-10 text-amber-500" />
           </div>
@@ -39,7 +39,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
           <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">Based on {(config.nftSaleShare * 100).toFixed(1)}% share</p>
         </div>
 
-        <div className="glass border border-blue-500/10 p-8 rounded-[10px] bg-blue-600/5 relative overflow-hidden group">
+        <div className="glass border border-neutral-500/10 p-8 rounded-[10px] bg-blue-600/5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-6 opacity-10">
             <Wallet className="h-10 w-10 text-blue-400" />
           </div>
@@ -53,7 +53,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
       </div>
 
       {/* Royalty Configuration */}
-      <div className="glass border border-blue-500/10 p-10 rounded-[10px] bg-foreground/[0.01]">
+      <div className="glass border border-neutral-500/10 p-10 rounded-[10px] bg-foreground/[0.01]">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-10 h-10 bg-blue-600/20 rounded-[10px] flex items-center justify-center">
             <Settings className="h-4 w-4 text-blue-400" />

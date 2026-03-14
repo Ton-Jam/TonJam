@@ -65,7 +65,7 @@ const Wallet: React.FC = () => {
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-blue-600/20 to-black border border-blue-500/20 p-8 rounded-[5px] relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-blue-600/20 to-black border border-neutral-500/20 p-8 rounded-[5px] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
             <img src={TON_LOGO} className="w-32 h-32" alt="" />
           </div>
@@ -77,7 +77,7 @@ const Wallet: React.FC = () => {
           <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-6">Protocol: TON Mainnet</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-600/20 to-black border border-purple-500/20 p-8 rounded-[5px] relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-purple-600/20 to-black border border-neutral-500/20 p-8 rounded-[5px] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
             <Coins className="w-32 h-32 text-purple-500" />
           </div>
@@ -94,7 +94,7 @@ const Wallet: React.FC = () => {
           <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-6">Utility: In-App Currency</p>
         </div>
 
-        <div className={`border p-8 rounded-[5px] relative overflow-hidden group transition-all ${userProfile.isPremium ? 'bg-gradient-to-br from-amber-600/20 to-black border-amber-500/20' : 'bg-muted/50 border-border'}`}>
+        <div className={`border p-8 rounded-[5px] relative overflow-hidden group transition-all ${userProfile.isPremium ? 'bg-gradient-to-br from-amber-600/20 to-black border-neutral-500/20' : 'bg-muted/50 border-border'}`}>
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
             <ShieldCheck className={`w-32 h-32 ${userProfile.isPremium ? 'text-amber-500' : 'text-foreground'}`} />
           </div>
@@ -120,7 +120,7 @@ const Wallet: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {jamPackages.map(pkg => (
-            <div key={pkg.id} className={`relative p-8 rounded-[5px] border transition-all hover:scale-[1.02] cursor-pointer group ${pkg.popular ? 'bg-blue-600/5 border-blue-500/30' : 'bg-muted/50 border-border'}`}>
+            <div key={pkg.id} className={`relative p-8 rounded-[5px] border transition-all hover:scale-[1.02] cursor-pointer group ${pkg.popular ? 'bg-blue-600/5 border-neutral-500/30' : 'bg-muted/50 border-border'}`}>
               {pkg.popular && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-blue-600 text-[8px] font-bold uppercase tracking-widest rounded-full">Most Popular</div>
               )}
@@ -152,13 +152,13 @@ const Wallet: React.FC = () => {
 
       {/* Premium Upgrade Section */}
       {!userProfile.isPremium && (
-        <section className="relative rounded-[5px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black border border-amber-500/20 p-8 lg:p-16">
+        <section className="relative rounded-[5px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black border border-neutral-500/20 p-8 lg:p-16">
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
             <Zap className="w-full h-full text-amber-500" />
           </div>
           
           <div className="relative z-10 max-w-2xl space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-neutral-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em]">
               <Sparkles className="h-3 w-3" />
               Premium Protocol
             </div>

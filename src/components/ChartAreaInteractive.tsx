@@ -154,7 +154,7 @@ export function ChartAreaInteractive() {
   })
 
   return (
-    <Card className="pt-0 border-blue-500/10 bg-foreground/[0.02] text-foreground">
+    <Card className="pt-0 border-neutral-500/10 bg-foreground/[0.02] text-foreground">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b border-border/50 py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
           <CardTitle className="text-foreground">Area Chart - Interactive</CardTitle>

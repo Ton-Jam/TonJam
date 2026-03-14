@@ -49,7 +49,7 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
           className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[8px] font-bold uppercase tracking-widest border
             ${isFollowing 
               ? 'bg-muted/50 border-border text-muted-foreground/80 hover:bg-muted hover:text-foreground' 
-              : 'bg-blue-600 border-blue-500 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-600/20'
+              : 'bg-neutral-600 border-neutral-500 text-foreground hover:bg-neutral-500 shadow-lg shadow-neutral-600/20'
             }
           `}
         >

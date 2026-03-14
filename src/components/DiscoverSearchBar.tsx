@@ -47,7 +47,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
   return (
     <div className="w-full mx-auto relative group">
       {/* Main Container */}
-      <div className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 overflow-hidden ${isFocused ? 'border-blue-500/50 bg-foreground/[0.08]' : 'border-border group-hover:border-border/80'}`}>
+      <div className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 overflow-hidden ${isFocused ? 'border-neutral-500/50 bg-foreground/[0.08]' : 'border-border group-hover:border-border/80'}`}>
         
         {/* Input Area */}
         <div className="relative flex items-center px-4 py-1 z-10">

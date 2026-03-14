@@ -242,7 +242,7 @@ const ArtistDashboard: React.FC = () => {
     icon: string;
     trend?: string;
   }) => (
-    <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] p-6 transition-all group">
+    <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-6 transition-all group">
       {" "}
       <div className="flex justify-between items-start mb-4">
         {" "}
@@ -326,7 +326,7 @@ const ArtistDashboard: React.FC = () => {
             {" "}
             <button
               onClick={() => setIsUploading(true)}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20"
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-neutral-600/20"
             >
               {" "}
               <Plus className="h-4 w-4" /> Upload Track{" "}
@@ -362,7 +362,7 @@ const ArtistDashboard: React.FC = () => {
                 {tab.label}
               </span>{" "}
               {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-500/50 rounded-full"></div>
               )}{" "}
             </button>
           ))}{" "}
@@ -409,7 +409,7 @@ const ArtistDashboard: React.FC = () => {
               </div>{" "}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 {/* Performance Analytics */}
-                <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] p-8">
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-8">
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
                     Performance Analytics
                   </h3>
@@ -431,7 +431,7 @@ const ArtistDashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Sales */}
-                <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] p-8">
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-8">
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
                     Recent Sales (TON)
                   </h3>
@@ -454,12 +454,12 @@ const ArtistDashboard: React.FC = () => {
                 </div>
 
                 {/* Follower Growth - Replaced with Interactive Area Chart */}
-                <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] overflow-hidden">
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] overflow-hidden">
                   <ChartAreaInteractive />
                 </div>
 
                 {/* Top Tracks */}
-                <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[5px] p-8">
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[5px] p-8">
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
                     Top Tracks
                   </h3>
@@ -480,7 +480,7 @@ const ArtistDashboard: React.FC = () => {
                 <h2 className="text-xl font-bold text-foreground uppercase tracking-tighter">Your NFT Collection</h2>
                 <button 
                   onClick={() => setActiveTab('forge')}
-                  className="px-4 py-2 bg-blue-600/10 border border-blue-600/20 rounded-[8px] text-[9px] font-bold text-blue-500 uppercase tracking-widest hover:bg-blue-600 hover:text-foreground transition-all"
+                  className="px-4 py-2 bg-neutral-600/10 border border-neutral-600/20 rounded-[8px] text-[9px] font-bold text-neutral-500 uppercase tracking-widest hover:bg-neutral-600 hover:text-foreground transition-all"
                 >
                   Forge New Protocol
                 </button>
@@ -511,7 +511,7 @@ const ArtistDashboard: React.FC = () => {
                   {tracks.length} Tracks Total
                 </span>{" "}
               </div>{" "}
-              <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[5px] overflow-x-auto no-scrollbar">
+              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[5px] overflow-x-auto no-scrollbar">
                 <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
                     <tr className="border-b border-border/50 bg-foreground/[0.02]">
@@ -542,7 +542,7 @@ const ArtistDashboard: React.FC = () => {
                           {track.isNFT ? (
                             <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-[8px] font-bold uppercase rounded-[5px] border border-amber-500/20">Minted NFT</span>
                           ) : (
-                            <span className="px-2 py-1 bg-blue-500/10 text-blue-500 text-[8px] font-bold uppercase rounded-[5px] border border-blue-500/20">Ready to Mint</span>
+                            <span className="px-2 py-1 bg-neutral-500/10 text-neutral-500 text-[8px] font-bold uppercase rounded-[5px] border border-neutral-500/20">Ready to Mint</span>
                           )}
                         </td>
                         <td className="p-6 text-right">
@@ -589,7 +589,7 @@ const ArtistDashboard: React.FC = () => {
                 {" "}
                 <div className="lg:col-span-2 space-y-10">
                   {" "}
-                  <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-[10px] p-10 relative overflow-hidden shadow-2xl shadow-blue-600/20">
+                  <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-[10px] p-10 relative overflow-hidden shadow-2xl shadow-neutral-600/20">
                     {" "}
                     <div className="absolute top-0 right-0 p-10 opacity-10">
                       <Coins className="h-24 w-24" />
@@ -615,7 +615,7 @@ const ArtistDashboard: React.FC = () => {
                       </div>{" "}
                     </div>{" "}
                   </div>{" "}
-                    <div className="glass border border-blue-500/10 bg-[#0a0a2a]/40 -blue-500/20 rounded-[10px] p-8 relative overflow-hidden">
+                    <div className="glass border border-neutral-500/20 bg-[#0a0a2a]/40 border-neutral-500/20 rounded-[10px] p-8 relative overflow-hidden">
                     {" "}
                     <div className="absolute top-0 right-0 p-8 opacity-5">
                       <Radio className="h-16 w-16 text-blue-400" />
@@ -662,7 +662,7 @@ const ArtistDashboard: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <div className="glass border border-blue-500/10 bg-[#0a0a2a]/40 -blue-500/20 rounded-[10px] p-8 relative overflow-hidden">
+                  <div className="glass border border-neutral-500/20 bg-[#0a0a2a]/40 border-neutral-500/20 rounded-[10px] p-8 relative overflow-hidden">
                     {" "}
                     <div className="absolute top-0 right-0 p-8 opacity-5">
                       <Radio className="h-16 w-16 text-blue-400" />
@@ -714,11 +714,11 @@ const ArtistDashboard: React.FC = () => {
                     </div>{" "}
                   </div>{" "}
                   {/* Revenue Chart */}
-                  <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] overflow-hidden mb-10">
+                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] overflow-hidden mb-10">
                      <ChartRevenue />
                   </div>
 
-                  <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] p-8">
+                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-8">
                     {" "}
                     <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
                       Transaction Ledger (Auditable)
@@ -773,7 +773,7 @@ const ArtistDashboard: React.FC = () => {
                 </div>{" "}
                 <div className="space-y-6">
                   {" "}
-                  <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] p-8">
+                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-8">
                     {" "}
                     <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
                       Earnings Breakdown
@@ -814,7 +814,7 @@ const ArtistDashboard: React.FC = () => {
                       </div>{" "}
                     </div>{" "}
                   </div>{" "}
-                  <div className="p-8 bg-blue-600/10 -blue-500/20 rounded-[10px]">
+                  <div className="p-8 bg-blue-600/10 border-neutral-500/20 rounded-[10px]">
                     {" "}
                     <h4 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-4">
                       Smart Contract Status
@@ -840,7 +840,7 @@ const ArtistDashboard: React.FC = () => {
           {activeTab === "profile" && (
             <div className="max-w-2xl mx-auto">
               {" "}
-              <div className="glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] p-10">
+              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-10">
                 {" "}
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-10">
                   Identity Configuration
@@ -914,7 +914,7 @@ const ArtistDashboard: React.FC = () => {
             className="absolute inset-0 bg-background/90 backdrop-blur-xl"
             onClick={() => setIsWithdrawModalOpen(false)}
           ></div>
-          <div className="relative w-full max-w-md glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-md glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-bold text-foreground tracking-tighter uppercase mb-2">
               Confirm Withdrawal
             </h2>
@@ -963,7 +963,7 @@ const ArtistDashboard: React.FC = () => {
             className="absolute inset-0 bg-background/90 backdrop-blur-xl"
             onClick={() => setIsUploading(false)}
           ></div>{" "}
-          <div className="relative w-full max-w-4xl glass border border-blue-500/10 bg-foreground/[0.02] rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar">
+          <div className="relative w-full max-w-4xl glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar">
             {" "}
             <h2 className="text-2xl font-bold text-foreground tracking-tighter uppercase mb-2">
               Forge New Frequency
@@ -979,7 +979,7 @@ const ArtistDashboard: React.FC = () => {
                   </label>
                   <div 
                     onClick={() => !coverFile && coverInputRef.current?.click()}
-                    className={`w-full border-2 border-dashed border-border rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-foreground/[0.02] transition-all group ${coverFile ? 'h-auto p-4' : 'h-40'}`}
+                    className={`w-full border-2 border-dashed border-border rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500/50 hover:bg-foreground/[0.02] transition-all group ${coverFile ? 'h-auto p-4' : 'h-40'}`}
                   >
                     <input 
                       type="file" 
@@ -1016,7 +1016,7 @@ const ArtistDashboard: React.FC = () => {
                   </label>
                   <div 
                     onClick={() => !audioFile && audioInputRef.current?.click()}
-                    className={`w-full border-2 border-dashed border-border rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-foreground/[0.02] transition-all group ${audioFile ? 'h-auto p-4' : 'h-40'}`}
+                    className={`w-full border-2 border-dashed border-border rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500/50 hover:bg-foreground/[0.02] transition-all group ${audioFile ? 'h-auto p-4' : 'h-40'}`}
                   >
                     <input 
                       type="file" 
@@ -1053,7 +1053,7 @@ const ArtistDashboard: React.FC = () => {
               )}
 
               {isAnalyzing && (
-                <div className="p-6 bg-blue-500/10 border border-blue-500/20 rounded-[10px] flex items-center gap-4 animate-pulse">
+                <div className="p-6 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-4 animate-pulse">
                   <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
                   <div>
                     <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">Analyzing Frequency...</p>

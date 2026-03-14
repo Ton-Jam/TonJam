@@ -321,11 +321,11 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                       <div className="w-0.5 bg-foreground rounded-t-sm animate-[bounce_1s_infinite_400ms] h-full" aria-hidden="true"></div>
                     </button>
                  ) : (
-                    <button 
-                      className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-border/80 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500 transition-colors pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      onClick={handlePlay}
-                      aria-label={`Play ${track.title}`}
-                    >
+                  <button 
+                    className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-neutral-500/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-neutral-500/40 transition-colors pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
+                    onClick={handlePlay}
+                    aria-label={`Play ${track.title}`}
+                  >
                        <Play className="h-3 w-3 text-foreground fill-white ml-0.5" aria-hidden="true" />
                     </button>
                  )}
@@ -438,7 +438,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
               </div>
               <button 
                 onClick={handleMint}
-                className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 text-foreground text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 text-foreground text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
                 aria-label={`Mint NFT for ${track.title}`}
               >
                 Mint NFT

@@ -20,7 +20,7 @@ const TopChartNFTs: React.FC<TopChartNFTsProps> = ({ nfts, title }) => {
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           <h3 className="text-[11px] font-bold text-foreground uppercase tracking-[0.4em]">{title}</h3>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-blue-600/10 rounded-full border border-blue-600/20">
+        <div className="flex items-center gap-2 px-3 py-1 bg-neutral-600/10 rounded-full border border-neutral-600/20">
           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
           <span className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Live_Feed</span>
         </div>

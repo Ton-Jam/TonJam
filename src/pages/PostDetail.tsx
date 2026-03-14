@@ -142,7 +142,7 @@ const PostDetail: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass border border-blue-500/10 bg-[#080808] rounded-[10px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+          className="glass border border-neutral-500/10 bg-[#080808] rounded-[10px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
           {/* Subtle Background Glow */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/5 blur-[120px] rounded-full pointer-events-none"></div>
 
@@ -199,7 +199,7 @@ const PostDetail: React.FC = () => {
           )}
 
           {track && (
-            <div className="mb-10 p-6 rounded-[10px] glass border border-blue-500/10 bg-foreground/[0.02] relative group/track overflow-hidden">
+            <div className="mb-10 p-6 rounded-[10px] glass border border-neutral-500/10 bg-foreground/[0.02] relative group/track overflow-hidden">
               <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover/track:opacity-100 transition-opacity"></div>
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -228,7 +228,7 @@ const PostDetail: React.FC = () => {
           )}
 
           {nft && (
-            <div className="mb-10 p-8 rounded-[10px] glass border border-blue-500/10 bg-gradient-to-br from-blue-600/10 to-purple-600/10 relative group/nft overflow-hidden cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
+            <div className="mb-10 p-8 rounded-[10px] glass border border-neutral-500/10 bg-gradient-to-br from-blue-600/10 to-purple-600/10 relative group/nft overflow-hidden cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
               <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover/nft:opacity-100 transition-opacity"></div>
               <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
                 <div className="relative w-40 h-40 rounded-[10px] overflow-hidden shadow-2xl flex-shrink-0">
@@ -337,7 +337,7 @@ const PostDetail: React.FC = () => {
                               <button 
                                 key={emoji} 
                                 onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                className={`flex items-center gap-2 rounded-full px-3 py-1 text-[10px] transition-all ${isActive ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-muted/50 text-muted-foreground hover:text-blue-400'}`}
+                                className={`flex items-center gap-2 rounded-full px-3 py-1 text-[10px] transition-all ${isActive ? 'bg-neutral-500/20 text-neutral-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground hover:text-neutral-400'}`}
                               >
                                 <span>{emoji}</span>
                                 <span className="font-bold">{count}</span>
