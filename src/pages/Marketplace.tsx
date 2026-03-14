@@ -113,7 +113,7 @@ const Marketplace: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 pb-40 w-full min-h-screen bg-background">
       {/* 1. COMPACT MARKET TICKER - Adjusted for Global Header */}
-      <div className="sticky top-[64px] z-[38] bg-background/90 backdrop-blur-xl border-b border-border/50 py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap">
+      <div className="sticky top-[64px] z-[38] bg-background/90 backdrop-blur-xl py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap">
         <div className="flex gap-20 animate-[marquee_40s_linear_infinite]">
           {[
             { label: 'TON/USD', val: '$5.42', up: true },
@@ -164,38 +164,52 @@ const Marketplace: React.FC = () => {
           </div>
         </section>
 
-      {/* 3. REFINED CONTROLS - Compact Pill Filters */}
-      <div className="sticky top-[96px] z-[37] bg-background/95 backdrop-blur-2xl border-b border-border/50 py-3 w-full px-6 mb-8">
+      {/* 3. REFINED CONTROLS - Clean Dropdown Filters */}
+      <div className="sticky top-[96px] z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-6 mb-8">
         <div className="max-w-[1600px] mx-auto flex flex-col gap-4">
-          <div className="flex overflow-x-auto no-scrollbar gap-2 w-full">
-            <div className="flex gap-2">
-              {['All', ...Array.from(new Set(MOCK_TRACKS.map(t => t.genre)))].map(g => (
-                <button key={g} onClick={() => setGenreFilter(g)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${genreFilter === g ? 'bg-blue-600 text-foreground border-neutral-500/50' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'}`}>
-                  {g}
-                </button>
+          <div className="flex flex-wrap items-center gap-4 w-full">
+            <select 
+              value={genreFilter} 
+              onChange={(e) => setGenreFilter(e.target.value)}
+              className="bg-muted/50 text-foreground border border-border rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-primary/50 transition-all"
+            >
+              <option value="All">All Genres</option>
+              {Array.from(new Set(MOCK_TRACKS.map(t => t.genre))).map(g => (
+                <option key={g} value={g}>{g}</option>
               ))}
-              {['All', ...MOCK_ARTISTS.map(a => a.name)].map(a => (
-                <button key={a} onClick={() => setArtistFilter(a)} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${artistFilter === a ? 'bg-blue-600 text-foreground border-neutral-500/50' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'}`}>
-                  {a}
-                </button>
+            </select>
+
+            <select 
+              value={artistFilter} 
+              onChange={(e) => setArtistFilter(e.target.value)}
+              className="bg-muted/50 text-foreground border border-border rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-primary/50 transition-all"
+            >
+              <option value="All">All Artists</option>
+              {MOCK_ARTISTS.map(a => (
+                <option key={a.name} value={a.name}>{a.name}</option>
               ))}
-              {['All', '0-100', '100-500', '500+'].map(p => (
-                <button key={p} onClick={() => {
-                  if (p === 'All') setPriceRange([0, 1000]);
-                  else if (p === '0-100') setPriceRange([0, 100]);
-                  else if (p === '100-500') setPriceRange([100, 500]);
-                  else if (p === '500+') setPriceRange([500, 10000]);
-                }} className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${
-                  (p === 'All' && priceRange[0] === 0 && priceRange[1] === 1000) ||
-                  (p === '0-100' && priceRange[0] === 0 && priceRange[1] === 100) ||
-                  (p === '100-500' && priceRange[0] === 100 && priceRange[1] === 500) ||
-                  (p === '500+' && priceRange[0] === 500)
-                  ? 'bg-blue-600 text-foreground border-neutral-500/50' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
-                }`}>
-                  {p}
-                </button>
-              ))}
-            </div>
+            </select>
+
+            <select 
+              value={
+                priceRange[0] === 0 && priceRange[1] === 1000 ? 'All' :
+                priceRange[0] === 0 && priceRange[1] === 100 ? '0-100' :
+                priceRange[0] === 100 && priceRange[1] === 500 ? '100-500' : '500+'
+              } 
+              onChange={(e) => {
+                const p = e.target.value;
+                if (p === 'All') setPriceRange([0, 1000]);
+                else if (p === '0-100') setPriceRange([0, 100]);
+                else if (p === '100-500') setPriceRange([100, 500]);
+                else if (p === '500+') setPriceRange([500, 10000]);
+              }}
+              className="bg-muted/50 text-foreground border border-border rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-primary/50 transition-all"
+            >
+              <option value="All">All Prices</option>
+              <option value="0-100">0 - 100 TON</option>
+              <option value="100-500">100 - 500 TON</option>
+              <option value="500+">500+ TON</option>
+            </select>
           </div>
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             {TABS.map(tab => (
@@ -227,22 +241,6 @@ const Marketplace: React.FC = () => {
             <div className="flex overflow-x-auto no-scrollbar snap-x gap-6 pb-4">
               {allNFTs.slice(0, 8).map((nft) => (
                 <div key={nft.id} className="flex-shrink-0 w-[240px] snap-start">
-                  <NFTCard nft={nft} />
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[14px] font-bold tracking-tighter uppercase text-foreground">Recently Listed</h2>
-              <button onClick={() => navigate('/explore/nfts?filter=recent')} className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
-                VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-            <div className="flex overflow-x-auto no-scrollbar snap-x gap-6 pb-4">
-              {allNFTs.slice(5, 13).map((nft) => (
-                <div key={nft.id} className="flex-shrink-0 w-[200px] snap-start">
                   <NFTCard nft={nft} />
                 </div>
               ))}

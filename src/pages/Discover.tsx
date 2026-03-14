@@ -322,28 +322,19 @@ const Discover: React.FC = () => {
             </div>
             
             {/* Horizontal Filter Buttons */}
-            <div className="w-full flex overflow-x-auto no-scrollbar gap-2 pb-2 justify-center">
-              {[
-                { id: 'All', icon: Sparkles },
-                { id: 'Tracks', icon: Music },
-                { id: 'Artists', icon: User },
-                { id: 'NFTs', icon: Gem },
-                { id: 'Playlists', icon: RotateCcw },
-                { id: 'Users', icon: Satellite }
-              ].map(filter => (
-                <button 
-                  key={filter.id} 
-                  onClick={() => setActiveFilter(filter.id as any)} 
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-1.5 border ${
-                    activeFilter === filter.id 
-                      ? 'bg-blue-600 text-foreground border-neutral-500/50 shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
-                      : 'bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted hover:text-foreground hover:border-border/80'
-                  }`}
-                >
-                  <filter.icon className={`h-3 w-3 ${activeFilter === filter.id ? 'text-foreground' : 'text-foreground/30'}`} />
-                  {filter.id}
-                </button>
-              ))}
+            <div className="w-full flex justify-center pb-2">
+              <select 
+                value={activeFilter} 
+                onChange={(e) => setActiveFilter(e.target.value as any)}
+                className="bg-muted/50 text-foreground border border-border rounded-[8px] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-primary/50 transition-all min-w-[200px]"
+              >
+                <option value="All">All Categories</option>
+                <option value="Tracks">Tracks</option>
+                <option value="Artists">Artists</option>
+                <option value="NFTs">NFTs</option>
+                <option value="Playlists">Playlists</option>
+                <option value="Users">Users</option>
+              </select>
             </div>
           </div>
         </div>
