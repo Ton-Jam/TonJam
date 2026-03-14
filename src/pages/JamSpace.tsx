@@ -121,7 +121,7 @@ const JamSpace: React.FC = () => {
       </div>
 
       {/* Live Signal Ticker */}
-      <div className="bg-background border-b border-border py-2 px-4 overflow-hidden whitespace-nowrap relative z-50">
+      <div className="bg-background border-b border-blue-500/30 py-2 px-4 overflow-hidden whitespace-nowrap relative z-50">
         <div className="flex items-center gap-12 animate-marquee">
           {[1,2,3,4,5].map(i => (
             <div key={i} className="flex items-center gap-8">
@@ -145,14 +145,14 @@ const JamSpace: React.FC = () => {
           {/* Left Column: Navigation & Trending */}
           <aside className="hidden lg:block lg:col-span-3 space-y-10 sticky top-32 h-fit">
             {/* Live Jam Rooms - Hardware Style */}
-            <div className="bg-[#151619] border border-border/50 rounded-[12px] p-8 shadow-2xl relative overflow-hidden group">
+            <div className="bg-[#151619] border border-blue-500/30 rounded-[12px] p-8 shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-[0.03] rotate-12"><Radio className="h-24 w-24" /></div>
               <div className="flex items-center justify-between mb-10 relative z-10">
                 <div className="flex flex-col">
                   <h3 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.5em]">Live Jam Rooms</h3>
                   <span className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-1">Active Audio Relays</span>
                 </div>
-                <div className="flex items-center gap-2 px-2 py-1 bg-neutral-500/10 rounded-full border border-neutral-500/20">
+                <div className="flex items-center gap-2 px-2 py-1 bg-blue-500/10 rounded-full border border-blue-500/20">
                   <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
                   <span className="text-[7px] font-bold text-orange-500 uppercase tracking-widest">Live</span>
                 </div>
@@ -165,7 +165,7 @@ const JamSpace: React.FC = () => {
                   <button 
                     key={room.id}
                     onClick={() => activeJamRoom?.id === room.id ? leaveJamRoom() : joinJamRoom(room.id)}
-                    className={`w-full p-5 rounded-[8px] border transition-all text-left group relative overflow-hidden ${activeJamRoom?.id === room.id ? 'bg-neutral-500 border-neutral-400 shadow-xl shadow-neutral-500/20' : 'bg-foreground/[0.02] border-border/50 hover:border-neutral-500/30 hover:bg-muted/50'}`}
+                    className={`w-full p-5 rounded-[8px] border transition-all text-left group relative overflow-hidden ${activeJamRoom?.id === room.id ? 'bg-blue-600 border-blue-400 shadow-xl shadow-blue-500/20' : 'bg-foreground/[0.02] border-blue-500/30 hover:border-blue-500/50 hover:bg-muted/50'}`}
                   >
                     <div className="flex items-center gap-5 relative z-10">
                       <div className={`w-12 h-12 rounded-[6px] flex items-center justify-center transition-all ${activeJamRoom?.id === room.id ? 'bg-muted/80 scale-105' : 'bg-muted/50 group-hover:bg-orange-500/20'}`}>
@@ -189,7 +189,7 @@ const JamSpace: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-[#0a0a0a] border border-border/50 rounded-[12px] p-8">
+            <div className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
               <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em] mb-10">Navigation</h3>
               <nav className="space-y-3">
                 {[
@@ -200,7 +200,7 @@ const JamSpace: React.FC = () => {
                   <button 
                     key={item.id} 
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`w-full flex items-center gap-5 px-5 py-4 rounded-[10px] transition-all group ${activeTab === item.id ? 'bg-blue-600/10 text-blue-400 border border-neutral-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent'}`} 
+                    className={`w-full flex items-center gap-5 px-5 py-4 rounded-[10px] transition-all group ${activeTab === item.id ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent'}`} 
                   >
                     <item.icon className={`h-4 w-4 ${activeTab === item.id ? 'text-blue-400' : 'text-muted-foreground/50 group-hover:text-foreground'}`} />
                     <span className="text-[11px] font-bold uppercase tracking-widest">{item.label}</span>
@@ -209,7 +209,7 @@ const JamSpace: React.FC = () => {
               </nav>
             </div>
 
-            <div className="bg-[#0a0a0a] border border-border/50 rounded-[12px] p-8">
+            <div className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
               <div className="flex items-center justify-between mb-10">
                 <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">Trending Ledger</h3>
                 <TrendingUp className="h-3 w-3 text-muted-foreground/30" />
@@ -244,7 +244,7 @@ const JamSpace: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search live nodes and sessions..."
-                className="w-full bg-muted/50 border border-border rounded-xl py-4 pl-12 pr-4 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-neutral-500/50 transition-all"
+                className="w-full bg-muted/50 border border-blue-500/30 rounded-xl py-4 pl-12 pr-4 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
               />
             </div>
 
@@ -252,7 +252,7 @@ const JamSpace: React.FC = () => {
             <div className="sticky top-[var(--header-height,64px)] z-30 backdrop-blur-2xl py-4 w-full space-y-6 bg-background/40 px-4 transition-all duration-300">
               <div className="flex gap-3 overflow-x-auto no-scrollbar">
                 {['All', 'Following', 'Trending'].map(tab => (
-                  <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-neutral-500/50 shadow-xl shadow-blue-500/20' : 'bg-muted/50 text-muted-foreground border-border/50 hover:text-foreground hover:bg-muted' }`} >
+                  <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-blue-500/50 shadow-xl shadow-blue-500/20' : 'bg-muted/50 text-muted-foreground border-blue-500/30 hover:text-foreground hover:bg-muted' }`} >
                     {tab}
                   </button>
                 ))}
@@ -265,7 +265,7 @@ const JamSpace: React.FC = () => {
                     <button 
                       key={type} 
                       onClick={() => setFilterType(type as any)}
-                      className={`px-3 py-1.5 rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-muted text-foreground border-border/80 shadow-lg' : 'text-foreground/30 border-transparent hover:text-foreground'}`}
+                      className={`px-3 py-1.5 rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-muted text-foreground border-blue-500/50 shadow-lg' : 'text-foreground/30 border-transparent hover:text-foreground'}`}
                     >
                       {type}
                     </button>
@@ -275,7 +275,7 @@ const JamSpace: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => setSortOrder(prev => prev === 'Newest' ? 'Oldest' : 'Newest')}
-                    className="flex items-center gap-3 px-4 py-2 rounded-[8px] bg-muted/50 hover:bg-muted border border-border/50 hover:border-border transition-all group"
+                    className="flex items-center gap-3 px-4 py-2 rounded-[8px] bg-muted/50 hover:bg-muted border border-blue-500/30 hover:border-blue-500/50 transition-all group"
                   >
                     <span className="text-[9px] font-bold text-muted-foreground/80 uppercase tracking-widest group-hover:text-foreground">{sortOrder}</span>
                     <div className="flex flex-col -space-y-0.5">
@@ -284,7 +284,7 @@ const JamSpace: React.FC = () => {
                     </div>
                   </button>
 
-                  <div className="flex items-center bg-muted/50 rounded-[8px] p-1 border border-border/50">
+                  <div className="flex items-center bg-muted/50 rounded-[8px] p-1 border border-blue-500/30">
                     <button
                       onClick={() => setViewMode('list')}
                       className={`p-1.5 rounded-[6px] transition-all ${viewMode === 'list' ? 'bg-muted text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
@@ -311,7 +311,7 @@ const JamSpace: React.FC = () => {
           {/* Right Column: Recommendations & Live */}
           <aside className="hidden lg:block lg:col-span-3 space-y-12 sticky top-32 h-fit">
             {/* Live Now Nodes */}
-            <section className="bg-[#0a0a0a] border border-border/50 rounded-[12px] p-8">
+            <section className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex flex-col">
                   <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">Live Nodes</h3>
@@ -323,7 +323,7 @@ const JamSpace: React.FC = () => {
                 {artists.slice(0, 8).map(artist => (
                   <div key={artist.id} className="relative group cursor-pointer flex-shrink-0 w-16" onClick={() => navigate(`/artist/${artist.id}`)} title={artist.name} >
                     <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full scale-0 group-hover:scale-125 transition-transform duration-500"></div>
-                    <img src={artist.avatarUrl} className="w-full aspect-square rounded-full transition-all relative z-10 grayscale group-hover:grayscale-0 object-cover border border-border/50 group-hover:border-neutral-500/50" alt="" />
+                    <img src={artist.avatarUrl} className="w-full aspect-square rounded-full transition-all relative z-10 grayscale group-hover:grayscale-0 object-cover border border-blue-500/30 group-hover:border-blue-500/50" alt="" />
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full z-20 border-2 border-[#0a0a0a]"></div>
                   </div>
                 ))}
@@ -331,18 +331,18 @@ const JamSpace: React.FC = () => {
             </section>
 
             {/* Recommended Nodes */}
-            <section className="bg-[#0a0a0a] border border-border/50 rounded-[12px] p-8">
+            <section className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
               <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em] mb-10">Recommended Nodes</h3>
               <div className="space-y-6">
                 {artists.slice(0, 3).map(artist => (
                   <UserCard key={artist.id} user={artist} variant="compact" />
                 ))}
               </div>
-              <button onClick={() => navigate('/explore/artists?title=Recommended Nodes&filter=recommended')} className="w-full mt-10 py-4 text-[9px] font-bold uppercase text-blue-500 tracking-[0.2em] hover:text-foreground hover:bg-blue-600/10 border border-neutral-500/20 rounded-[8px] transition-all active:scale-95"> Discover More Nodes </button>
+              <button onClick={() => navigate('/explore/artists?title=Recommended Nodes&filter=recommended')} className="w-full mt-10 py-4 text-[9px] font-bold uppercase text-blue-500 tracking-[0.2em] hover:text-foreground hover:bg-blue-600/10 border border-blue-500/30 rounded-[8px] transition-all active:scale-95"> Discover More Nodes </button>
             </section>
 
             {/* AI Curated Frequencies */}
-            <section className="bg-[#0a0a0a] border border-border/50 rounded-[12px] p-8">
+            <section className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-3">
                   <Sparkles className="h-4 w-4 text-blue-500" />

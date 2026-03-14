@@ -92,8 +92,8 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
         
         // Gradient fill
         const gradient = ctx.createLinearGradient(0, canvas.height - h, 0, canvas.height);
-        gradient.addColorStop(0, '#60a5fa'); // blue-400
-        gradient.addColorStop(1, '#2563eb'); // blue-600
+        gradient.addColorStop(0, 'rgba(96, 165, 250, 0.8)'); // blue-400
+        gradient.addColorStop(1, 'rgba(37, 99, 235, 0.2)'); // blue-600
 
         ctx.fillStyle = gradient;
         ctx.beginPath();
@@ -118,7 +118,7 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-[60px] opacity-90 mix-blend-screen mt-4"
+      className="w-full h-[40px] opacity-60 mix-blend-screen mt-2"
     />
   );
 };
@@ -138,14 +138,14 @@ const LyricsView: React.FC<{ trackId: string }> = ({ trackId }) => {
   ];
 
   return (
-    <div className="w-full h-[400px] overflow-y-auto no-scrollbar py-10 px-4 space-y-8 text-center mask-image-gradient">
+    <div className="w-full h-[400px] overflow-y-auto no-scrollbar py-10 px-4 space-y-8 text-left mask-image-gradient">
       {lyrics.map((line, i) => (
         <motion.p 
           key={i}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1 }}
-          className={`text-2xl font-bold uppercase tracking-tighter leading-tight ${i === 1 ? 'text-blue-400 scale-110' : 'text-muted-foreground hover:text-foreground transition-colors'}`}
+          className={`text-2xl md:text-3xl font-bold tracking-tight leading-tight ${i === 1 ? 'text-foreground' : 'text-muted-foreground/50 hover:text-foreground transition-colors'}`}
         >
           {line.text}
         </motion.p>
@@ -236,59 +236,46 @@ const FullPlayer: React.FC = () => {
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="fixed inset-0 z-[60] bg-[#060c1a] overflow-y-auto no-scrollbar"
+      className="fixed inset-0 z-[60] bg-[#050505] overflow-y-auto no-scrollbar"
       ref={containerRef}
     >
-      {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-[#060c1a]/90 backdrop-blur-md">
-        <button 
-          onClick={() => setFullPlayerOpen(false)}
-          className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-          aria-label="Close full player"
-        >
-          <ChevronDown className="h-6 w-6" />
-        </button>
-        <div className="text-center">
-          <div className="flex gap-1 bg-muted/50 p-1 rounded-full">
-            <button 
-              onClick={() => setActiveView('player')}
-              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeView === 'player' ? 'bg-blue-600 text-foreground shadow-lg shadow-blue-600/20' : 'text-muted-foreground hover:text-foreground'}`}
-              title="Player"
-              aria-label="Switch to Player view"
-            >
-              <Music2 className="h-4 w-4" />
-            </button>
-            <button 
-              onClick={() => setActiveView('lyrics')}
-              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeView === 'lyrics' ? 'bg-blue-600 text-foreground shadow-lg shadow-blue-600/20' : 'text-muted-foreground hover:text-foreground'}`}
-              title="Lyrics"
-              aria-label="Switch to Lyrics view"
-            >
-              <Mic2 className="h-4 w-4" />
-            </button>
-            <button 
-              onClick={() => setActiveView('comments')}
-              className={`p-2 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeView === 'comments' ? 'bg-blue-600 text-foreground shadow-lg shadow-blue-600/20' : 'text-muted-foreground hover:text-foreground'}`}
-              title="Feed"
-              aria-label="Switch to Feed view"
-            >
-              <MessageSquare className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-        <button 
-          className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-          aria-label="More options"
-        >
-          <MoreHorizontal className="h-5 w-5" />
-        </button>
-      </div>
+      {/* Dynamic Blurred Background */}
+      <div 
+        className="absolute inset-0 z-0 opacity-40 blur-[100px] scale-150 pointer-events-none transition-all duration-1000"
+        style={{
+          backgroundImage: `url(${currentTrack.coverUrl})`,
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+        }}
+      />
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505] pointer-events-none" />
 
-      <div className="max-w-xl mx-auto px-8 pb-32">
-        {/* Main Player Section */}
-        <div className="flex flex-col items-center pt-8 mb-8">
-          {/* Content Switcher */}
-          <div className="w-full mb-8 min-h-[400px] flex flex-col items-center justify-center">
+      <div className="relative z-10 flex flex-col min-h-full">
+        {/* Header */}
+        <div className="sticky top-0 flex items-center justify-between p-6 pt-8">
+          <button 
+            onClick={() => setFullPlayerOpen(false)}
+            className="p-2 -ml-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
+            aria-label="Close full player"
+          >
+            <ChevronDown className="h-8 w-8" />
+          </button>
+          <div className="text-center flex flex-col items-center">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50">Now Playing from</span>
+            <span className="text-xs font-bold text-foreground tracking-tight mt-0.5">TonJam Network</span>
+          </div>
+          <button 
+            className="p-2 -mr-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
+            aria-label="More options"
+          >
+            <MoreHorizontal className="h-6 w-6" />
+          </button>
+        </div>
+
+        <div className="flex-1 flex flex-col px-6 pb-8 max-w-md mx-auto w-full">
+          
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col justify-center min-h-[400px]">
             <AnimatePresence mode="wait">
               {activeView === 'player' && (
                 <motion.div 
@@ -297,28 +284,41 @@ const FullPlayer: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full flex flex-col items-center"
+                  className="w-full flex flex-col"
                 >
-                  {/* Album Art with Track Transition */}
-                  <AnimatePresence mode="wait">
-                    <motion.div 
-                      key={currentTrack.id}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -50 }}
-                      transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                      className="w-full aspect-square rounded-2xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.6)] mb-8 relative group"
-                    >
-                      <img 
-                        src={currentTrack.coverUrl} 
-                        alt={currentTrack.title} 
-                        className={`w-full h-full object-cover transition-transform duration-[20s] ease-linear ${isPlaying ? 'scale-110' : 'scale-100'}`}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#060c1a] via-transparent to-transparent opacity-60"></div>
-                    </motion.div>
-                  </AnimatePresence>
+                  {/* Album Art */}
+                  <div className="w-full aspect-square rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 relative group">
+                    <img 
+                      src={currentTrack.coverUrl} 
+                      alt={currentTrack.title} 
+                      className={`w-full h-full object-cover transition-transform duration-[20s] ease-linear ${isPlaying ? 'scale-105' : 'scale-100'}`}
+                    />
+                  </div>
                   
-                  <AudioVisualizer isPlaying={isPlaying} />
+                  {/* Track Info & Like Button */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="min-w-0 flex-1 pr-4">
+                      <h2 className="text-2xl font-bold text-foreground tracking-tight truncate mb-1">
+                        {currentTrack.title}
+                      </h2>
+                      <button 
+                        onClick={() => {
+                          setFullPlayerOpen(false);
+                          navigate(`/artist/${currentTrack.artistId}`);
+                        }}
+                        className="text-base text-muted-foreground hover:text-foreground transition-colors truncate text-left w-full focus-visible:outline-none focus-visible:underline"
+                      >
+                        {currentTrack.artist}
+                      </button>
+                    </div>
+                    <button 
+                      onClick={() => toggleLikeTrack(currentTrack.id)}
+                      className={`p-2 -mr-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full ${isLiked ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
+                      aria-label={isLiked ? "Unlike track" : "Like track"}
+                    >
+                      <Heart className={`h-7 w-7 ${isLiked ? 'fill-current' : ''}`} />
+                    </button>
+                  </div>
                 </motion.div>
               )}
 
@@ -328,8 +328,15 @@ const FullPlayer: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="w-full"
+                  className="w-full flex-1 flex flex-col"
                 >
+                  <div className="flex items-center gap-4 mb-6">
+                    <img src={currentTrack.coverUrl} className="w-16 h-16 rounded-md shadow-lg" alt="" />
+                    <div>
+                      <h3 className="font-bold text-lg leading-tight">{currentTrack.title}</h3>
+                      <p className="text-muted-foreground text-sm">{currentTrack.artist}</p>
+                    </div>
+                  </div>
                   <LyricsView trackId={currentTrack.id} />
                 </motion.div>
               )}
@@ -340,343 +347,231 @@ const FullPlayer: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="w-full h-[400px] overflow-y-auto no-scrollbar py-6 space-y-6"
+                  className="w-full flex-1 flex flex-col"
                 >
-                  <div className="flex gap-4 mb-8">
-                    <img src={userProfile.avatar} className="w-10 h-10 rounded-full" alt="" />
-                    <div className="flex-1 relative">
-                      <input 
-                        type="text" 
-                        placeholder="Broadcast your thoughts..." 
-                        className="w-full bg-muted/50 rounded-xl py-3 px-5 text-sm text-foreground outline-none border border-border/50 focus:border-neutral-500/50 transition-all"
-                      />
-                      <button className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-500 text-[10px] font-bold uppercase tracking-widest">Post</button>
+                  <div className="flex items-center gap-4 mb-6">
+                    <img src={currentTrack.coverUrl} className="w-16 h-16 rounded-md shadow-lg" alt="" />
+                    <div>
+                      <h3 className="font-bold text-lg leading-tight">{currentTrack.title}</h3>
+                      <p className="text-muted-foreground text-sm">{currentTrack.artist}</p>
                     </div>
                   </div>
-                  {[
-                    { id: 1, user: "Neon Voyager", avatar: "https://picsum.photos/100/100?random=21", text: "This track is absolutely mind-blowing! The bass is perfect.", time: "2h ago" },
-                    { id: 2, user: "Sarah Jenkins", avatar: "https://picsum.photos/100/100?random=32", text: "Love the atmospheric vibes here. Great work!", time: "5h ago" },
-                    { id: 3, user: "CryptoPioneer", avatar: "https://picsum.photos/100/100?random=50", text: "Added this immediately. A future classic.", time: "1d ago" },
-                  ].map(comment => (
-                    <div key={comment.id} className="flex gap-4 group">
-                      <img src={comment.avatar} className="w-10 h-10 rounded-full" alt="" />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold text-foreground uppercase tracking-tight">{comment.user}</span>
-                          <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{comment.time}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground/80 leading-relaxed">{comment.text}</p>
+                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-4">
+                    <div className="flex gap-3">
+                      <img src={userProfile.avatar} className="w-8 h-8 rounded-full" alt="" />
+                      <div className="flex-1 relative">
+                        <input 
+                          type="text" 
+                          placeholder="Add a comment..." 
+                          className="w-full bg-foreground/5 rounded-full py-2 px-4 text-sm text-foreground outline-none border border-transparent focus:border-foreground/20 transition-all"
+                        />
                       </div>
                     </div>
-                  ))}
+                    {[
+                      { id: 1, user: "Neon Voyager", avatar: "https://picsum.photos/100/100?random=21", text: "This track is absolutely mind-blowing! The bass is perfect.", time: "2h ago" },
+                      { id: 2, user: "Sarah Jenkins", avatar: "https://picsum.photos/100/100?random=32", text: "Love the atmospheric vibes here. Great work!", time: "5h ago" },
+                      { id: 3, user: "CryptoPioneer", avatar: "https://picsum.photos/100/100?random=50", text: "Added this immediately. A future classic.", time: "1d ago" },
+                    ].map(comment => (
+                      <div key={comment.id} className="flex gap-3 group">
+                        <img src={comment.avatar} className="w-8 h-8 rounded-full" alt="" />
+                        <div className="flex-1">
+                          <div className="flex items-baseline gap-2 mb-0.5">
+                            <span className="text-sm font-bold text-foreground">{comment.user}</span>
+                            <span className="text-[10px] text-muted-foreground">{comment.time}</span>
+                          </div>
+                          <p className="text-sm text-foreground/80">{comment.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Track Info with Transition */}
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={currentTrack.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="w-full flex items-center justify-between mb-8"
-            >
-              <div className="min-w-0">
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground tracking-tighter uppercase truncate mb-2">{currentTrack.title}</h2>
-                <div className="flex items-center gap-3">
-                  {artistData && (
-                    <img 
-                      src={artistData.avatarUrl} 
-                      alt={artistData.name} 
-                      className="w-6 h-6 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      onClick={() => {
-                        setFullPlayerOpen(false);
-                        navigate(`/artist/${currentTrack.artistId}`);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setFullPlayerOpen(false);
-                          navigate(`/artist/${currentTrack.artistId}`);
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`View ${artistData.name}'s profile`}
-                    />
-                  )}
-                  <button 
-                    onClick={() => {
-                      setFullPlayerOpen(false);
-                      navigate(`/artist/${currentTrack.artistId}`);
-                    }}
-                    className="text-lg text-blue-500 font-bold uppercase tracking-widest hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
-                    aria-label={`View ${currentTrack.artist}'s profile`}
-                  >
-                    {currentTrack.artist}
-                  </button>
-                </div>
+          {/* Player Controls (Always visible at bottom) */}
+          <div className="mt-auto pt-4">
+            {/* Progress Bar */}
+            <div className="w-full mb-6 group">
+              <div className="relative h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden mb-2">
+                <div 
+                  className="absolute top-0 left-0 h-full bg-foreground transition-all duration-100 group-hover:bg-blue-500"
+                  style={{ width: `${progress}%` }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={progress || 0}
+                  onChange={handleSeek}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
+
+            {/* Main Playback Controls */}
+            <div className="w-full flex items-center justify-between mb-6">
+              <button 
+                onClick={toggleShuffle}
+                className={`p-2 transition-all focus-visible:outline-none rounded-full ${isShuffle ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
+                aria-label={isShuffle ? "Disable shuffle" : "Enable shuffle"}
+              >
+                <Shuffle className="h-5 w-5" />
+              </button>
+              
+              <div className="flex items-center gap-6">
                 <button 
-                  onClick={() => toggleLikeTrack(currentTrack.id)}
-                  className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isLiked ? 'text-red-500 bg-red-500/10' : 'text-muted-foreground/50 hover:text-foreground bg-muted/50'}`}
-                  aria-label={isLiked ? "Unlike track" : "Like track"}
+                  onClick={prevTrack}
+                  className="p-2 text-foreground hover:text-foreground/80 transition-all active:scale-90 focus-visible:outline-none rounded-full"
+                  aria-label="Previous track"
                 >
-                  <Heart className={`h-6 w-6 ${isLiked ? 'fill-current' : ''}`} />
+                  <SkipBack className="h-8 w-8 fill-current" />
+                </button>
+                
+                <button 
+                  onClick={togglePlay}
+                  className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-background focus-visible:outline-none"
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? (
+                    <Pause className="h-8 w-8 fill-current" />
+                  ) : (
+                    <Play className="h-8 w-8 fill-current ml-1" />
+                  )}
+                </button>
+                
+                <button 
+                  onClick={nextTrack}
+                  className="p-2 text-foreground hover:text-foreground/80 transition-all active:scale-90 focus-visible:outline-none rounded-full"
+                  aria-label="Next track"
+                >
+                  <SkipForward className="h-8 w-8 fill-current" />
                 </button>
               </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Progress Bar */}
-          <div className="w-full mb-10 group">
-            <div className="relative h-1.5 w-full bg-muted rounded-full overflow-hidden mb-3">
-              <div 
-                className="absolute top-0 left-0 h-full bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.5)] transition-all duration-100"
-                style={{ width: `${progress}%` }}
-              />
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={progress || 0}
-                onChange={handleSeek}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-            </div>
-            <div className="flex justify-between text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="w-full flex items-center justify-center gap-8 mb-12">
-            <button 
-              onClick={toggleShuffle}
-              className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isShuffle ? 'text-blue-400' : 'text-muted-foreground/50 hover:text-foreground'}`}
-              aria-label={isShuffle ? "Disable shuffle" : "Enable shuffle"}
-            >
-              <Shuffle className="h-5 w-5" />
-            </button>
-            
-            <button 
-              onClick={prevTrack}
-              className="p-2 text-muted-foreground/80 hover:text-foreground transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
-              aria-label="Previous track"
-            >
-              <SkipBack className="h-8 w-8 fill-current" />
-            </button>
-            
-            <button 
-              onClick={togglePlay}
-              className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-blue-600/40 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              aria-label={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? (
-                <Pause className="h-10 w-10 fill-current" />
-              ) : (
-                <Play className="h-10 w-10 fill-current ml-1" />
-              )}
-            </button>
-            
-            <button 
-              onClick={nextTrack}
-              className="p-2 text-muted-foreground/80 hover:text-foreground transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
-              aria-label="Next track"
-            >
-              <SkipForward className="h-8 w-8 fill-current" />
-            </button>
-            
-            <button 
-              onClick={toggleRepeat}
-              className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isRepeat ? 'text-blue-400' : 'text-muted-foreground/50 hover:text-foreground'}`}
-              aria-label={isRepeat ? "Disable repeat" : "Enable repeat"}
-            >
-              <Repeat className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Secondary Actions */}
-          <div className="w-full grid grid-cols-4 gap-4 mb-12">
-            <button className="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Add to playlist">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-all">
-                <PlusCircle className="h-5 w-5" />
-              </div>
-              <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest group-hover:text-muted-foreground">Add</span>
-            </button>
-            <button className="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Mint NFT">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-muted-foreground group-hover:text-amber-500 transition-all">
-                <Gem className="h-5 w-5" />
-              </div>
-              <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest group-hover:text-muted-foreground">Mint</span>
-            </button>
-            <button onClick={handleShare} className="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Share track">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-all">
-                <Share2 className="h-5 w-5" />
-              </div>
-              <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest group-hover:text-muted-foreground">Share</span>
-            </button>
-            <button 
-              onClick={() => setShowQueue(!showQueue)}
-              className={`flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${showQueue ? 'text-blue-500' : ''}`}
-              aria-label="Toggle queue"
-              aria-expanded={showQueue}
-            >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${showQueue ? 'text-blue-500' : 'text-muted-foreground group-hover:text-foreground'}`}>
-                <ListMusic className="h-5 w-5" />
-              </div>
-              <span className={`text-[8px] font-bold uppercase tracking-widest ${showQueue ? 'text-blue-500' : 'text-muted-foreground/50 group-hover:text-muted-foreground'}`}>Queue</span>
-            </button>
-          </div>
-
-          {/* Volume Control */}
-          <div className="w-full max-w-sm flex items-center gap-4 px-4 py-3 bg-muted/50 rounded-2xl">
-            <button onClick={toggleMute} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full" aria-label={isMuted || volume === 0 ? "Unmute" : "Mute"}>
-              {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-            </button>
-            <div className="flex-1 relative h-1 bg-muted rounded-full overflow-hidden">
-              <div 
-                className="absolute top-0 left-0 h-full bg-muted/90 transition-all"
-                style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
-              />
-              <input 
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Up Next / Queue Section */}
-        <div className="space-y-8">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[12px] font-bold text-muted-foreground uppercase tracking-[0.4em]">Up Next</h3>
-            <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{queue.length} Tracks in Queue</span>
-          </div>
-
-          <div className="space-y-3">
-            {queue.slice(queue.findIndex(t => t.id === currentTrack.id) + 1, queue.findIndex(t => t.id === currentTrack.id) + 6).map((track, i) => (
+              
               <button 
-                key={track.id}
-                onClick={() => playTrack(track)}
-                className="w-full flex items-center gap-4 p-3 rounded-xl bg-foreground/[0.02] border border-border/50 hover:bg-foreground/[0.05] hover:border-border transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                aria-label={`Play ${track.title} by ${track.artist}`}
+                onClick={toggleRepeat}
+                className={`p-2 transition-all focus-visible:outline-none rounded-full ${isRepeat ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
+                aria-label={isRepeat ? "Disable repeat" : "Enable repeat"}
               >
-                <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                  <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
-                  <div className="absolute inset-0 bg-background/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="h-4 w-4 text-foreground fill-current" />
-                  </div>
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-xs font-bold text-foreground uppercase truncate mb-1">{track.title}</p>
-                  <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest truncate">{track.artist}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-mono text-muted-foreground/50">{track.duration ? formatTime(track.duration) : '3:45'}</p>
-                </div>
+                <Repeat className="h-5 w-5" />
               </button>
-            ))}
-            {queue.length <= 1 && (
-              <div className="py-12 text-center bg-foreground/[0.02] rounded-2xl border border-dashed border-border">
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Queue is empty</p>
+            </div>
+
+            {/* Secondary Actions / View Switcher */}
+            <div className="flex items-center justify-between pt-4">
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setActiveView(activeView === 'lyrics' ? 'player' : 'lyrics')}
+                  className={`p-2 rounded-full transition-all ${activeView === 'lyrics' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
+                  aria-label="Toggle Lyrics"
+                >
+                  <Mic2 className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={() => setActiveView(activeView === 'comments' ? 'player' : 'comments')}
+                  className={`p-2 rounded-full transition-all ${activeView === 'comments' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
+                  aria-label="Toggle Comments"
+                >
+                  <MessageSquare className="h-5 w-5" />
+                </button>
               </div>
+              
+              <div className="flex gap-4">
+                <button 
+                  className="p-2 text-foreground/50 hover:text-amber-500 transition-all rounded-full"
+                  aria-label="Mint NFT"
+                >
+                  <Gem className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={handleShare}
+                  className="p-2 text-foreground/50 hover:text-foreground transition-all rounded-full"
+                  aria-label="Share"
+                >
+                  <Share2 className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={() => setShowQueue(!showQueue)}
+                  className={`p-2 rounded-full transition-all ${showQueue ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
+                  aria-label="Queue"
+                >
+                  <ListMusic className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Visualizer (Subtle at the bottom) */}
+            {activeView === 'player' && (
+              <AudioVisualizer isPlaying={isPlaying} />
             )}
           </div>
         </div>
-
-        {/* Recommendations Section */}
-        <div className="mt-12 space-y-8">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[12px] font-bold text-muted-foreground uppercase tracking-[0.4em]">Recommended for you</h3>
-          </div>
-
-          <div className="space-y-3">
-            {/* Mock recommendations */}
-            {[
-              { id: 'rec1', title: 'Cyber Pulse', artist: 'Neon Voyager', coverUrl: 'https://picsum.photos/100/100?random=1' },
-              { id: 'rec2', title: 'Digital Soul', artist: 'Byte Beat', coverUrl: 'https://picsum.photos/100/100?random=2' },
-              { id: 'rec3', title: 'Neural Drift', artist: 'Synth Summer', coverUrl: 'https://picsum.photos/100/100?random=3' },
-            ].map((track) => (
-              <div 
-                key={track.id}
-                className="w-full flex items-center gap-4 p-3 rounded-xl bg-foreground/[0.02] border border-border/50 hover:bg-foreground/[0.05] hover:border-border transition-all group"
-              >
-                <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                  <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-xs font-bold text-foreground uppercase truncate mb-1">{track.title}</p>
-                  <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest truncate">{track.artist}</p>
-                </div>
-                <button className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
-                  <PlusCircle className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Artist Dossier */}
-        <div className="mt-20 pt-20 border-t border-border/50">
-          <h3 className="text-[12px] font-bold text-muted-foreground uppercase tracking-[0.4em] mb-8">Artist Dossier</h3>
-          <div className="bg-[#0a192f] p-8 rounded-2xl border border-neutral-500/10">
-            <div 
-              className="flex items-center gap-6 mb-8 cursor-pointer group/dossier focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
-              onClick={() => {
-                setFullPlayerOpen(false);
-                navigate(`/artist/${currentTrack.artistId}`);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setFullPlayerOpen(false);
-                  navigate(`/artist/${currentTrack.artistId}`);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label={`View ${currentTrack.artist}'s profile`}
-            >
-              <div className="relative">
-                <img 
-                  src={artistData?.avatarUrl || `https://picsum.photos/200/200?seed=${currentTrack.artist}`} 
-                  className="w-20 h-20 rounded-full object-cover border border-neutral-500/20 group-hover/dossier:border-neutral-500 transition-colors" 
-                  alt="" 
-                />
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#0a192f] rounded-full flex items-center justify-center border border-neutral-500/20">
-                  <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                </div>
-              </div>
-              <div>
-                <h4 className="text-xl font-bold text-foreground uppercase tracking-tighter mb-1 group-hover/dossier:text-blue-400 transition-colors">{currentTrack.artist}</h4>
-                <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{artistData?.followers.toLocaleString() || '12.4K'} Followers</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground/80 leading-relaxed italic mb-8">
-              "{artistData?.bio || "Digital pioneer forging new sonic landscapes in the TON ecosystem. Exploring the boundaries between rhythm and decentralized protocols."}"
-            </p>
-            <button 
-              onClick={() => {
-                setFullPlayerOpen(false);
-                navigate(`/artist/${currentTrack.artistId}`);
-              }}
-              className="w-full py-4 bg-muted/50 hover:bg-muted text-foreground rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-            >
-              View Full Profile
-            </button>
-          </div>
-        </div>
       </div>
+
+      {/* Queue Overlay */}
+      <AnimatePresence>
+        {showQueue && (
+          <motion.div 
+            initial={{ opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="absolute inset-0 z-50 bg-[#060c1a]/95 backdrop-blur-3xl flex flex-col"
+          >
+            <div className="sticky top-0 flex items-center justify-between p-6 bg-[#060c1a]/80 backdrop-blur-md z-10">
+              <h3 className="text-lg font-bold uppercase tracking-widest">Play Queue</h3>
+              <button 
+                onClick={() => setShowQueue(false)}
+                className="p-2 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-all"
+              >
+                <ChevronDown className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-2">
+              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Now Playing</h4>
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 mb-6">
+                <img src={currentTrack.coverUrl} className="w-12 h-12 rounded-md" alt="" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-blue-400 truncate">{currentTrack.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{currentTrack.artist}</p>
+                </div>
+                <AudioVisualizer isPlaying={isPlaying} />
+              </div>
+
+              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Next Up</h4>
+              {queue.map((track, index) => (
+                <div 
+                  key={`${track.id}-${index}`} 
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer group"
+                  onClick={() => {
+                    playTrack(track);
+                    setShowQueue(false);
+                  }}
+                >
+                  <img src={track.coverUrl} className="w-12 h-12 rounded-md opacity-70 group-hover:opacity-100 transition-opacity" alt="" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground truncate">{track.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
+                  </div>
+                  <button className="p-2 opacity-0 group-hover:opacity-100 transition-opacity text-foreground">
+                    <Play className="h-4 w-4 fill-current" />
+                  </button>
+                </div>
+              ))}
+              {queue.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Queue is empty</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

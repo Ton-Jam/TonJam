@@ -171,7 +171,7 @@ const Marketplace: React.FC = () => {
             <select 
               value={genreFilter} 
               onChange={(e) => setGenreFilter(e.target.value)}
-              className="bg-muted/50 text-foreground border border-border rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-primary/50 transition-all"
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
             >
               <option value="All">All Genres</option>
               {Array.from(new Set(MOCK_TRACKS.map(t => t.genre))).map(g => (
@@ -182,7 +182,7 @@ const Marketplace: React.FC = () => {
             <select 
               value={artistFilter} 
               onChange={(e) => setArtistFilter(e.target.value)}
-              className="bg-muted/50 text-foreground border border-border rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-primary/50 transition-all"
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
             >
               <option value="All">All Artists</option>
               {MOCK_ARTISTS.map(a => (
@@ -203,7 +203,7 @@ const Marketplace: React.FC = () => {
                 else if (p === '100-500') setPriceRange([100, 500]);
                 else if (p === '500+') setPriceRange([500, 10000]);
               }}
-              className="bg-muted/50 text-foreground border border-border rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-primary/50 transition-all"
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
             >
               <option value="All">All Prices</option>
               <option value="0-100">0 - 100 TON</option>

@@ -312,29 +312,29 @@ const Discover: React.FC = () => {
                 </div>
               </div>
               
-              <button 
-                onClick={handleSurpriseMe}
-                className="flex-shrink-0 px-3 py-1 bg-muted/50 border border-border rounded-full text-[8px] font-bold uppercase tracking-widest text-foreground hover:bg-muted hover:border-neutral-500/50 transition-all flex items-center gap-1.5 group/surprise"
-              >
-                <Sparkles className="h-3 w-3 text-amber-500 group-hover/surprise:animate-spin" />
-                Surprise Me
-              </button>
-            </div>
-            
-            {/* Horizontal Filter Buttons */}
-            <div className="w-full flex justify-center pb-2">
-              <select 
-                value={activeFilter} 
-                onChange={(e) => setActiveFilter(e.target.value as any)}
-                className="bg-muted/50 text-foreground border border-border rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-primary/50 transition-all min-w-[160px]"
-              >
-                <option value="All">All Categories</option>
-                <option value="Tracks">Tracks</option>
-                <option value="Artists">Artists</option>
-                <option value="NFTs">NFTs</option>
-                <option value="Playlists">Playlists</option>
-                <option value="Users">Users</option>
-              </select>
+              <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                <button 
+                  onClick={handleSurpriseMe}
+                  className="flex-shrink-0 px-4 py-1.5 bg-muted/50 border border-blue-500/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-blue-500/10 hover:border-blue-500/60 transition-all flex items-center gap-1.5 group/surprise"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-amber-500 group-hover/surprise:animate-spin" />
+                  Surprise Me
+                </button>
+                
+                <select 
+                  value={activeFilter} 
+                  onChange={(e) => setActiveFilter(e.target.value as any)}
+                  className="flex-shrink-0 bg-muted/50 text-foreground border border-blue-500/30 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all min-w-[140px] appearance-none cursor-pointer"
+                  style={{ backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
+                >
+                  <option value="All">All Categories</option>
+                  <option value="Tracks">Tracks</option>
+                  <option value="Artists">Artists</option>
+                  <option value="NFTs">NFTs</option>
+                  <option value="Playlists">Playlists</option>
+                  <option value="Users">Users</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -382,7 +382,7 @@ const Discover: React.FC = () => {
                   <RotateCcw className="h-5 w-5" />
                 </button>
                 <div>
-                  <h2 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none mb-2">
+                  <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none mb-2">
                     {search ? `Results for "${search}"` : `Genre: ${selectedGenre}`}
                   </h2>
                   <div className="flex items-center gap-2">

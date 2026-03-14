@@ -144,7 +144,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <input 
                   type="text" 
                   placeholder={getSearchPlaceholder()} 
-                  className="w-full bg-muted/50 border border-border rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground/70"
+                  className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/70"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchOpen(true)}
@@ -168,7 +168,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <input 
                       type="text" 
                       placeholder="Search..." 
-                      className="w-full bg-muted/50 border border-border rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground"
+                      className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleSearch}
