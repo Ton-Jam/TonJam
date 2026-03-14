@@ -179,10 +179,11 @@ const FullPlayer: React.FC = () => {
     isMuted,
     toggleMute,
     userProfile,
-    addNotification
+    addNotification,
+    allTracks
   } = useAudio();
 
-  const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments'>('player');
+  const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'playlist'>('player');
   const [showQueue, setShowQueue] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -297,19 +298,28 @@ const FullPlayer: React.FC = () => {
                   
                   {/* Track Info & Like Button */}
                   <div className="flex items-center justify-between mb-6">
-                    <div className="min-w-0 flex-1 pr-4">
-                      <h2 className="text-2xl font-bold text-foreground tracking-tight truncate mb-1">
-                        {currentTrack.title}
-                      </h2>
-                      <button 
-                        onClick={() => {
-                          setFullPlayerOpen(false);
-                          navigate(`/artist/${currentTrack.artistId}`);
-                        }}
-                        className="text-base text-muted-foreground hover:text-foreground transition-colors truncate text-left w-full focus-visible:outline-none focus-visible:underline"
-                      >
-                        {currentTrack.artist}
-                      </button>
+                    <div className="min-w-0 flex-1 pr-4 flex items-center gap-3">
+                      {artistData && (
+                        <img 
+                          src={artistData.avatarUrl} 
+                          alt={currentTrack.artist} 
+                          className="w-10 h-10 rounded-full object-cover border-2 border-background shadow-md"
+                        />
+                      )}
+                      <div className="min-w-0">
+                        <h2 className="text-2xl font-bold text-foreground tracking-tight truncate mb-0.5">
+                          {currentTrack.title}
+                        </h2>
+                        <button 
+                          onClick={() => {
+                            setFullPlayerOpen(false);
+                            navigate(`/artist/${currentTrack.artistId}`);
+                          }}
+                          className="text-base text-muted-foreground hover:text-foreground transition-colors truncate text-left w-full focus-visible:outline-none focus-visible:underline"
+                        >
+                          {currentTrack.artist}
+                        </button>
+                      </div>
                     </div>
                     <button 
                       onClick={() => toggleLikeTrack(currentTrack.id)}
@@ -383,6 +393,59 @@ const FullPlayer: React.FC = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {activeView === 'artist' && (
+                <motion.div 
+                  key="artist"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="w-full flex-1 flex flex-col"
+                >
+                  <div className="flex flex-col items-center gap-4 mb-6">
+                    {artistData && (
+                      <img src={artistData.avatarUrl} className="w-32 h-32 rounded-full shadow-lg" alt={currentTrack.artist} />
+                    )}
+                    <h3 className="font-bold text-2xl">{currentTrack.artist}</h3>
+                    <p className="text-muted-foreground text-sm text-center">{artistData?.bio || "No biography available."}</p>
+                  </div>
+                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-4">
+                    <h4 className="font-bold text-foreground">Similar Tracks</h4>
+                    {allTracks.filter(t => t.artistId === currentTrack.artistId && t.id !== currentTrack.id).slice(0, 3).map(track => (
+                      <div key={track.id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 cursor-pointer" onClick={() => playTrack(track)}>
+                        <img src={track.coverUrl} className="w-12 h-12 rounded-md" alt="" />
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-foreground">{track.title}</p>
+                          <p className="text-xs text-muted-foreground">{track.artist}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {activeView === 'playlist' && (
+                <motion.div 
+                  key="playlist"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="w-full flex-1 flex flex-col"
+                >
+                  <h3 className="font-bold text-lg mb-6">Featured Playlists</h3>
+                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-4">
+                    {/* Placeholder for playlists */}
+                    <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                      <p className="font-bold text-blue-400">Featured: TonJam Top 50</p>
+                      <p className="text-xs text-muted-foreground">The best tracks on TonJam right now.</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-muted/50">
+                      <p className="font-bold text-foreground">Suggested: Chill Vibes</p>
+                      <p className="text-xs text-muted-foreground">Perfect for relaxing.</p>
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -471,6 +534,20 @@ const FullPlayer: React.FC = () => {
                   aria-label="Toggle Lyrics"
                 >
                   <Mic2 className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={() => setActiveView(activeView === 'artist' ? 'player' : 'artist')}
+                  className={`p-2 rounded-full transition-all ${activeView === 'artist' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
+                  aria-label="Toggle Artist Info"
+                >
+                  <Music2 className="h-5 w-5" />
+                </button>
+                <button 
+                  onClick={() => setActiveView(activeView === 'playlist' ? 'player' : 'playlist')}
+                  className={`p-2 rounded-full transition-all ${activeView === 'playlist' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
+                  aria-label="Toggle Playlists"
+                >
+                  <ListMusic className="h-5 w-5" />
                 </button>
                 <button 
                   onClick={() => setActiveView(activeView === 'comments' ? 'player' : 'comments')}

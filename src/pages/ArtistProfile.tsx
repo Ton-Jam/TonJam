@@ -340,8 +340,12 @@ const ArtistProfile: React.FC = () => {
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!file.type.startsWith('image/')) {
+        addNotification("Unsupported file format. Please upload a valid image file (e.g., JPG, PNG).", "error");
+        return;
+      }
       if (file.size > 5 * 1024 * 1024) {
-        addNotification("File too large. Max 5MB allowed.", "error");
+        addNotification("File is too large. Please upload an image smaller than 5MB.", "error");
         return;
       }
       const reader = new FileReader();
@@ -354,7 +358,7 @@ const ArtistProfile: React.FC = () => {
   };
 
   const StatBox = ({ label, value, sub, tooltip }: { label: string, value: string, sub?: string, tooltip?: string }) => (
-    <div className="flex flex-col glass border border-neutral-500/20 backdrop-blur-md bg-foreground/[0.02] p-3 rounded-[10px] transition-all group relative">
+    <div className="flex flex-col glass border border-blue-500/30 backdrop-blur-md bg-foreground/[0.02] p-3 rounded-[10px] transition-all group relative">
       <div className="flex items-center gap-1 mb-1">
         <span className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em] group-hover:text-blue-400/50 transition-colors">{label}</span>
         {tooltip && (
@@ -362,7 +366,7 @@ const ArtistProfile: React.FC = () => {
             <Info className="h-2 w-2 text-muted-foreground/50 hover:text-blue-400 cursor-help transition-colors" />
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-background/90 backdrop-blur-xl rounded-[10px] text-[8px] text-foreground/70 normal-case tracking-normal font-medium opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-50 text-center pointer-events-none">
               {tooltip}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-transparent border-t-white/10"></div>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-transparent border-t-blue-500/30"></div>
             </div>
           </div>
         )}
@@ -421,22 +425,22 @@ const ArtistProfile: React.FC = () => {
                     </a>
                   )}
                   {artist.socials.spotify && (
-                    <a href={artist.socials.spotify} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#1DB954] hover:border-neutral-500/20 transition-all group">
+                    <a href={artist.socials.spotify} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#1DB954] hover:border-blue-500/30 transition-all group">
                       <Disc className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </a>
                   )}
                   {artist.socials.instagram && (
-                    <a href={artist.socials.instagram} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#E4405F] hover:border-neutral-500/20 transition-all group">
+                    <a href={artist.socials.instagram} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#E4405F] hover:border-blue-500/30 transition-all group">
                       <Disc className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </a>
                   )}
                   {artist.socials.website && (
-                    <a href={artist.socials.website} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:border-neutral-500/20 transition-all group">
+                    <a href={artist.socials.website} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:border-blue-500/30 transition-all group">
                       <Globe className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </a>
                   )}
                   {artist.socials.telegram && (
-                    <a href={artist.socials.telegram} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#0088cc] hover:border-neutral-500/20 transition-all group">
+                    <a href={artist.socials.telegram} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-[10px] bg-muted/50 flex items-center justify-center text-muted-foreground/50 hover:text-[#0088cc] hover:border-blue-500/30 transition-all group">
                       <Send className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </a>
                   )}
@@ -466,58 +470,35 @@ const ArtistProfile: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               {isOwnProfile && (
-                <button onClick={() => setShowEditProfileModal(true)} className="px-6 py-2.5 bg-muted/50 text-foreground rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-muted active:scale-95 transition-all flex items-center gap-2" >
+                <button onClick={() => setShowEditProfileModal(true)} className="px-4 py-2 bg-muted/50 text-foreground rounded-full font-bold text-[8px] uppercase tracking-widest hover:bg-muted active:scale-95 transition-all flex items-center gap-2" >
                   <Edit className="h-3 w-3" /> EDIT_PROFILE
                 </button>
               )}
               {isOwnProfile && userProfile.isVerifiedArtist && (
-                <button onClick={() => navigate('/upload')} className="px-6 py-2.5 bg-green-600/10 text-green-400 border border-neutral-500/20 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-green-500/20 active:scale-95 transition-all flex items-center gap-2" >
+                <button onClick={() => navigate('/upload')} className="px-4 py-2 bg-green-600/10 text-green-400 border border-blue-500/30 rounded-full font-bold text-[8px] uppercase tracking-widest hover:bg-green-500/20 active:scale-95 transition-all flex items-center gap-2" >
                   <Upload className="h-3 w-3" /> UPLOAD_TRACK
                 </button>
               )}
               {isOwnProfile && userProfile.isVerifiedArtist && (
-                <button onClick={() => navigate('/artist-dashboard')} className="px-6 py-2.5 bg-blue-600/10 text-blue-400 border border-neutral-500/20 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
+                <button onClick={() => navigate('/artist-dashboard')} className="px-4 py-2 bg-blue-600/10 text-blue-400 border border-blue-500/30 rounded-full font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
                   <Plus className="h-3 w-3" /> ARTIST_DASHBOARD
                 </button>
               )}
               {artist.id === userProfile.id && !artist.verified && (
-                <button onClick={() => setShowVerifyModal(true)} className="px-6 py-2.5 bg-blue-500/10 text-blue-400 border border-neutral-500/20 rounded-[10px] font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
+                <button onClick={() => setShowVerifyModal(true)} className="px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-full font-bold text-[8px] uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
                   <ShieldCheck className="h-3 w-3" /> VERIFY_ARTIST
                 </button>
               )}
-              <button onClick={() => playAll(artistTracks)} className="px-6 py-2.5 electric-blue-bg text-foreground rounded-[10px] font-bold text-[8px] uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
+              <button onClick={() => playAll(artistTracks)} className="px-4 py-2 electric-blue-bg text-foreground rounded-full font-bold text-[8px] uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2" >
                 <Play className="h-3 w-3" /> SYNC_CATALOG
-              </button>
-              <button 
-                onClick={() => {
-                  const shareData = {
-                    title: artist.name,
-                    text: `Check out ${artist.name} on TonJam!`,
-                    url: window.location.href
-                  };
-                  if (navigator.share) {
-                    navigator.share(shareData).catch((err) => {
-                      if (err.name !== 'AbortError') {
-                        console.error('Error sharing:', err);
-                      }
-                    });
-                  } else {
-                    navigator.clipboard.writeText(window.location.href);
-                    addNotification('Artist link copied to neural buffer', 'success');
-                  }
-                }}
-                className="p-2.5 rounded-full bg-muted/50 border border-border/50 text-muted-foreground hover:text-foreground transition-all active:scale-95"
-                title="Share Profile"
-              >
-                <Share2 className="h-4 w-4" />
               </button>
               <div className="relative">
                 <button 
                   onClick={() => setIsTippingArtist(!isTippingArtist)}
-                  className={`px-6 py-2.5 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-bold uppercase tracking-widest shadow-lg active:scale-95
+                  className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-bold uppercase tracking-widest shadow-lg active:scale-95
                     ${isTippingArtist 
-                      ? 'bg-amber-500 text-background border-amber-500' 
-                      : 'bg-amber-500/10 text-amber-500 border border-neutral-500/20 hover:bg-amber-500 hover:text-background shadow-amber-500/5'
+                      ? 'bg-amber-500 text-background border-blue-500' 
+                      : 'bg-amber-500/10 text-amber-500 border border-blue-500/30 hover:bg-amber-500 hover:text-background shadow-amber-500/5'
                     }
                   `}
                   title="Tip Artist"
@@ -531,9 +512,9 @@ const ArtistProfile: React.FC = () => {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 p-2 bg-background/90 backdrop-blur-2xl border border-border rounded-2xl shadow-2xl z-50 flex flex-col gap-1 min-w-[140px]"
+                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 p-2 bg-background/90 backdrop-blur-2xl border border-blue-500/40 rounded-2xl shadow-2xl z-50 flex flex-col gap-1 min-w-[140px]"
                     >
-                      <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-3 py-2 border-b border-border/50 mb-1">Select Tip Amount</p>
+                      <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-3 py-2 border-b border-blue-500/30 mb-1">Select Tip Amount</p>
                       {[0.1, 0.5, 1, 5].map((amount) => (
                         <button
                           key={amount}
@@ -553,7 +534,7 @@ const ArtistProfile: React.FC = () => {
               </div>
               <button 
                 onClick={handleFollow} 
-                className={`px-6 py-2.5 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-bold uppercase tracking-widest
+                className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[9px] font-bold uppercase tracking-widest
                   ${isFollowing 
                     ? 'bg-muted text-muted-foreground/80 hover:bg-muted/80 hover:text-foreground' 
                     : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-600/20'
@@ -580,7 +561,7 @@ const ArtistProfile: React.FC = () => {
             {trendingTracks.map((track, idx) => (
               <div key={`trending-${track.id}`} className="min-w-[280px] sm:min-w-[320px] group relative" >
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-[10px] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <div className="relative glass border border-neutral-500/20 p-4 rounded-[10px] transition-all bg-[#0a0a0a]/40 flex items-center gap-4">
+                <div className="relative glass border border-blue-500/30 p-4 rounded-[10px] transition-all bg-[#0a0a0a]/40 flex items-center gap-4">
                   <div className="relative w-16 h-16 flex-shrink-0 rounded-[10px] overflow-hidden shadow-lg">
                     <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                     <button onClick={() => playAll([track])} className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" >
@@ -627,7 +608,7 @@ const ArtistProfile: React.FC = () => {
             {topTracks.map((track, idx) => (
               <div 
                 key={`top-${track.id}`} 
-                className="group flex items-center gap-4 p-3 rounded-[12px] hover:bg-muted/50 transition-all cursor-pointer border border-transparent hover:border-border/50"
+                className="group flex items-center gap-4 p-3 rounded-[12px] hover:bg-muted/50 transition-all cursor-pointer border border-transparent hover:border-blue-500/30"
                 onClick={() => playAll([track])}
               >
                 <div className="w-6 text-[10px] font-bold text-muted-foreground/50 group-hover:text-blue-500 transition-colors text-center">
@@ -657,9 +638,9 @@ const ArtistProfile: React.FC = () => {
       )}
 
       {/* Sticky Tab Navigation */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-6 mt-12 mb-8 w-full px-6 border-b border-border/50 transition-all duration-300">
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-6 mt-12 mb-8 w-full px-6 border-b border-blue-500/30 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex bg-muted/50 p-1 rounded-[12px] border border-border">
+          <div className="flex bg-muted/50 p-1 rounded-[12px] border border-blue-500/40">
             {['tracks', 'collection'].map(tab => (
               <button 
                 key={tab} 
@@ -692,7 +673,7 @@ const ArtistProfile: React.FC = () => {
           <div className="lg:col-span-4 space-y-6">
             {/* Market Insights */}
             {marketStats && (
-              <section className="glass border border-neutral-500/20 backdrop-blur-xl bg-foreground/[0.02] p-8 rounded-[10px] relative shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+              <section className="glass border border-blue-500/30 backdrop-blur-xl bg-foreground/[0.02] p-8 rounded-[10px] relative shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                 <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full"></div>
                 <h3 className="text-[7px] font-bold text-amber-500/60 uppercase tracking-[0.4em] mb-6 relative z-10">Market Ledger</h3>
                 <div className="space-y-4 relative z-10">
@@ -708,13 +689,13 @@ const ArtistProfile: React.FC = () => {
                     <span className="text-[8px] font-bold text-muted-foreground/50 uppercase group-hover/stat:text-muted-foreground transition-colors">Holders</span>
                     <span className="text-xs font-bold text-foreground group-hover:text-amber-500 transition-colors">{marketStats.holders}</span>
                   </div>
-                  <button onClick={() => navigate('/marketplace')} className="w-full py-3 bg-amber-500/10 border border-neutral-500/20 rounded-[10px] text-[7px] font-bold text-amber-500 uppercase tracking-widest hover:bg-amber-500 hover:text-background transition-all mt-2 shadow-lg shadow-amber-500/5">Trade Assets</button>
+                  <button onClick={() => navigate('/marketplace')} className="w-full py-3 bg-amber-500/10 border border-blue-500/30 rounded-[10px] text-[7px] font-bold text-amber-500 uppercase tracking-widest hover:bg-amber-500 hover:text-background transition-all mt-2 shadow-lg shadow-amber-500/5">Trade Assets</button>
                 </div>
               </section>
             )}
 
             {/* Biography */}
-            <section className="p-8 glass border border-neutral-500/20 backdrop-blur-xl bg-foreground/[0.01] rounded-[10px] group/bio">
+            <section className="p-8 glass border border-blue-500/30 backdrop-blur-xl bg-foreground/[0.01] rounded-[10px] group/bio">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Origin Narrative</h3>
                 {isOwnProfile && !isEditingBio && (
@@ -735,7 +716,7 @@ const ArtistProfile: React.FC = () => {
                   <textarea
                     value={editedBio}
                     onChange={(e) => setEditedBio(e.target.value)}
-                    className="w-full bg-muted/50 border border-border rounded-[10px] p-4 text-xs text-muted-foreground/90 leading-relaxed outline-none focus:border-neutral-500/50 transition-all min-h-[120px] resize-none"
+                    className="w-full bg-muted/50 border border-blue-500/40 rounded-[10px] p-4 text-xs text-muted-foreground/90 leading-relaxed outline-none focus:border-blue-500/50 transition-all min-h-[120px] resize-none"
                     placeholder="Enter artist biography..."
                   />
                   <div className="flex gap-2 justify-end">
@@ -766,7 +747,7 @@ const ArtistProfile: React.FC = () => {
                 <div className="space-y-12 animate-in fade-in duration-500">
                   {/* Top Tracks Section */}
                   {topTracks.length > 0 && (
-                    <section className="glass border border-neutral-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
+                    <section className="glass border border-blue-500/20 bg-foreground/[0.01] rounded-[10px] p-8">
                       <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-3">
                           <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
@@ -780,7 +761,7 @@ const ArtistProfile: React.FC = () => {
                       
                       <div className="space-y-2">
                         {topTracks.map((track, idx) => (
-                          <div key={`top-${track.id}`} className="group flex items-center gap-4 p-3 rounded-[10px] hover:bg-muted/50 transition-all border border-transparent hover:border-border/50">
+                          <div key={`top-${track.id}`} className="group flex items-center gap-4 p-3 rounded-[10px] hover:bg-muted/50 transition-all border border-transparent hover:border-blue-500/30">
                             <span className="w-4 text-[10px] font-bold text-muted-foreground/50 group-hover:text-blue-500 transition-colors">{idx + 1}</span>
                             <div className="relative w-10 h-10 rounded-[6px] overflow-hidden flex-shrink-0">
                               <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
@@ -821,9 +802,9 @@ const ArtistProfile: React.FC = () => {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {artist.events.map((event) => (
-                          <div key={event.id} className="glass border border-border/50 bg-foreground/[0.01] p-5 rounded-[12px] flex items-center justify-between group hover:border-amber-500/30 transition-all">
+                          <div key={event.id} className="glass border border-blue-500/30 bg-foreground/[0.01] p-5 rounded-[12px] flex items-center justify-between group hover:border-blue-500/40 transition-all">
                             <div className="flex items-center gap-5">
-                              <div className="flex flex-col items-center justify-center w-12 h-12 bg-amber-500/10 rounded-[10px] border border-amber-500/20">
+                              <div className="flex flex-col items-center justify-center w-12 h-12 bg-amber-500/10 rounded-[10px] border border-blue-500/30">
                                 <span className="text-[7px] font-bold text-amber-500 uppercase">{event.date.split('-')[1]}</span>
                                 <span className="text-lg font-bold text-foreground tracking-tighter">{event.date.split('-')[2]}</span>
                               </div>
@@ -884,7 +865,7 @@ const ArtistProfile: React.FC = () => {
                       ))}
                     </div>
                     {artistTracks.length === 0 && (
-                      <div className="py-24 text-center glass border border-neutral-500/10 rounded-[10px]">
+                      <div className="py-24 text-center glass border border-blue-500/20 rounded-[10px]">
                         <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No tracks broadcasted.</p>
                       </div>
                     )}
@@ -903,7 +884,7 @@ const ArtistProfile: React.FC = () => {
                     </div>
                   ))}
                   {artistNFTs.length === 0 && (
-                    <div className="w-full py-24 text-center glass border border-neutral-500/10 rounded-[10px]">
+                    <div className="w-full py-24 text-center glass border border-blue-500/20 rounded-[10px]">
                       <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No assets detected.</p>
                     </div>
                   )}
@@ -925,13 +906,13 @@ const ArtistProfile: React.FC = () => {
                         <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
                         <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">Biographical Record</h2>
                       </div>
-                      <div className="glass border border-border/50 bg-foreground/[0.01] p-8 rounded-[12px] relative group">
+                      <div className="glass border border-blue-500/30 bg-foreground/[0.01] p-8 rounded-[12px] relative group">
                         {isEditingBio ? (
                           <div className="space-y-4">
                             <textarea 
                               value={editedBio}
                               onChange={(e) => setEditedBio(e.target.value)}
-                              className="w-full bg-background/40 border border-border rounded-[10px] p-4 text-sm text-muted-foreground/90 outline-none focus:border-neutral-500/50 transition-all resize-none min-h-[150px]"
+                              className="w-full bg-background/40 border border-blue-500/40 rounded-[10px] p-4 text-sm text-muted-foreground/90 outline-none focus:border-blue-500/50 transition-all resize-none min-h-[150px]"
                               placeholder="Enter artist biography..."
                             />
                             <div className="flex justify-end gap-3">
@@ -965,16 +946,16 @@ const ArtistProfile: React.FC = () => {
                         <div className="w-1 h-4 bg-purple-500 rounded-full"></div>
                         <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">Network Stats</h2>
                       </div>
-                      <div className="glass border border-border/50 bg-foreground/[0.01] p-6 rounded-[12px] space-y-4">
-                        <div className="flex justify-between items-center py-2 border-b border-border/50">
+                      <div className="glass border border-blue-500/30 bg-foreground/[0.01] p-6 rounded-[12px] space-y-4">
+                        <div className="flex justify-between items-center py-2 border-b border-blue-500/30">
                           <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Genre</span>
                           <span className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">{artist.genre}</span>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-border/50">
+                        <div className="flex justify-between items-center py-2 border-b border-blue-500/30">
                           <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Joined</span>
                           <span className="text-[10px] font-bold text-foreground uppercase tracking-tighter">OCT 2023</span>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-border/50">
+                        <div className="flex justify-between items-center py-2 border-b border-blue-500/30">
                           <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Location</span>
                           <span className="text-[10px] font-bold text-foreground uppercase tracking-tighter">Digital Frontier</span>
                         </div>
@@ -998,9 +979,9 @@ const ArtistProfile: React.FC = () => {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {artist.events.map((event) => (
-                          <div key={event.id} className="glass border border-border/50 bg-foreground/[0.01] p-6 rounded-[12px] flex items-center justify-between group hover:border-amber-500/30 transition-all">
+                          <div key={event.id} className="glass border border-blue-500/30 bg-foreground/[0.01] p-6 rounded-[12px] flex items-center justify-between group hover:border-blue-500/40 transition-all">
                             <div className="flex items-center gap-6">
-                              <div className="flex flex-col items-center justify-center w-14 h-14 bg-amber-500/10 rounded-[10px] border border-amber-500/20">
+                              <div className="flex flex-col items-center justify-center w-14 h-14 bg-amber-500/10 rounded-[10px] border border-blue-500/30">
                                 <span className="text-[8px] font-bold text-amber-500 uppercase">{event.date.split('-')[1]}</span>
                                 <span className="text-xl font-bold text-foreground tracking-tighter">{event.date.split('-')[2]}</span>
                               </div>
@@ -1045,7 +1026,7 @@ const ArtistProfile: React.FC = () => {
                   )}
 
                   {/* Verification Block */}
-                  <div className={`p-10 rounded-[10px] border flex flex-col md:flex-row items-center justify-between gap-6 ${artist.verified ? 'bg-neutral-600/5 border-neutral-500/10' : 'bg-muted/50 border-border'}`}>
+                  <div className={`p-10 rounded-[10px] border flex flex-col md:flex-row items-center justify-between gap-6 ${artist.verified ? 'bg-neutral-600/5 border-blue-500/20' : 'bg-muted/50 border-blue-500/40'}`}>
                     <div className="flex items-center gap-5">
                       <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center shadow-lg ${artist.verified ? 'bg-blue-500' : 'bg-muted'}`}>
                         {artist.verified ? <ShieldCheck className="text-foreground h-6 w-6" /> : <Info className="text-muted-foreground h-6 w-6" />}
@@ -1092,7 +1073,7 @@ const ArtistProfile: React.FC = () => {
                           <div 
                             key={track.id}
                             className={`glass border transition-all duration-300 rounded-[12px] overflow-hidden ${
-                              isEditing ? 'border-neutral-500/30 bg-neutral-500/5' : 'border-border/50 bg-foreground/[0.01] hover:bg-foreground/[0.03]'
+                              isEditing ? 'border-neutral-500/30 bg-neutral-500/5' : 'border-blue-500/30 bg-foreground/[0.01] hover:bg-foreground/[0.03]'
                             }`}
                           >
                             <div className="p-6">
@@ -1149,7 +1130,7 @@ const ArtistProfile: React.FC = () => {
                                         type="text"
                                         value={currentMetadata.title}
                                         onChange={(e) => handleMetadataChange(track.id, 'title', e.target.value)}
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                        className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-blue-500/50 transition-all"
                                       />
                                     </div>
 
@@ -1160,7 +1141,7 @@ const ArtistProfile: React.FC = () => {
                                       <select 
                                         value={currentMetadata.genre}
                                         onChange={(e) => handleMetadataChange(track.id, 'genre', e.target.value)}
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all appearance-none"
+                                        className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-blue-500/50 transition-all appearance-none"
                                       >
                                         {['Techno', 'House', 'Ambient', 'Phonk', 'Cyberpunk', 'Lo-Fi', 'Electronic', 'Pop'].map(g => (
                                           <option key={g} value={g}>{g}</option>
@@ -1177,7 +1158,7 @@ const ArtistProfile: React.FC = () => {
                                         onChange={(e) => handleMetadataChange(track.id, 'description', e.target.value)}
                                         rows={3}
                                         placeholder="Describe the sonic journey..."
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all resize-none"
+                                        className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-blue-500/50 transition-all resize-none"
                                       />
                                     </div>
                                   </div>
@@ -1192,7 +1173,7 @@ const ArtistProfile: React.FC = () => {
                                         value={currentMetadata.audioIpfsUrl}
                                         onChange={(e) => handleMetadataChange(track.id, 'audioIpfsUrl', e.target.value)}
                                         placeholder="ipfs://..."
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                        className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-blue-500/50 transition-all"
                                       />
                                     </div>
 
@@ -1205,7 +1186,7 @@ const ArtistProfile: React.FC = () => {
                                         value={currentMetadata.coverIpfsUrl}
                                         onChange={(e) => handleMetadataChange(track.id, 'coverIpfsUrl', e.target.value)}
                                         placeholder="ipfs://..."
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                        className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-blue-500/50 transition-all"
                                       />
                                     </div>
 
@@ -1218,11 +1199,11 @@ const ArtistProfile: React.FC = () => {
                                         step="0.1"
                                         value={currentMetadata.price}
                                         onChange={(e) => handleMetadataChange(track.id, 'price', e.target.value)}
-                                        className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                        className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-blue-500/50 transition-all"
                                       />
                                     </div>
 
-                                    <div className="p-4 bg-neutral-600/5 border border-neutral-500/20 rounded-[10px] flex items-center justify-between">
+                                    <div className="p-4 bg-neutral-600/5 border border-blue-500/30 rounded-[10px] flex items-center justify-between">
                                       <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
                                           <Disc className="w-4 h-4 text-purple-400" />
@@ -1242,7 +1223,7 @@ const ArtistProfile: React.FC = () => {
                                   </div>
 
                                   {/* Royalty Splits Section */}
-                                  <div className="md:col-span-2 space-y-4 pt-4 border-t border-border/50">
+                                  <div className="md:col-span-2 space-y-4 pt-4 border-t border-blue-500/30">
                                     <div className="flex items-center justify-between">
                                       <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                                         Royalty Splits (%)
@@ -1264,7 +1245,7 @@ const ArtistProfile: React.FC = () => {
                                               placeholder="Wallet Address"
                                               value={split.address}
                                               onChange={(e) => handleRoyaltySplitChange(track.id, index, 'address', e.target.value)}
-                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 text-[10px] text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                              className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-2.5 text-[10px] text-foreground outline-none focus:border-blue-500/50 transition-all"
                                             />
                                           </div>
                                           <div className="col-span-3">
@@ -1273,7 +1254,7 @@ const ArtistProfile: React.FC = () => {
                                               placeholder="Label (e.g. Producer)"
                                               value={split.label}
                                               onChange={(e) => handleRoyaltySplitChange(track.id, index, 'label', e.target.value)}
-                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 text-[10px] text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                              className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-2.5 text-[10px] text-foreground outline-none focus:border-blue-500/50 transition-all"
                                             />
                                           </div>
                                           <div className="col-span-3 relative">
@@ -1282,7 +1263,7 @@ const ArtistProfile: React.FC = () => {
                                               placeholder="%"
                                               value={split.percentage}
                                               onChange={(e) => handleRoyaltySplitChange(track.id, index, 'percentage', parseFloat(e.target.value))}
-                                              className="w-full bg-background/40 border border-border rounded-[8px] p-2.5 pr-8 text-[10px] text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                              className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-2.5 pr-8 text-[10px] text-foreground outline-none focus:border-blue-500/50 transition-all"
                                             />
                                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">%</span>
                                           </div>
@@ -1319,13 +1300,13 @@ const ArtistProfile: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="glass border border-border/50 bg-foreground/[0.01] rounded-[12px] p-6">
+                    <div className="glass border border-blue-500/30 bg-foreground/[0.01] rounded-[12px] p-6">
                       <div className="space-y-6">
                         <div className="space-y-2">
                           <label className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                             Profile Banner
                           </label>
-                          <div className="relative w-full h-48 rounded-[10px] overflow-hidden group border border-border bg-muted/50">
+                          <div className="relative w-full h-48 rounded-[10px] overflow-hidden group border border-blue-500/40 bg-muted/50">
                             <div 
                               className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-40 transition-opacity"
                               style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || 'https://picsum.photos/1200/400?seed=' + artist.id})` }}
@@ -1334,7 +1315,7 @@ const ArtistProfile: React.FC = () => {
                               <button 
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="px-4 py-2 bg-muted backdrop-blur-md border border-border/80 rounded-[8px] text-[9px] font-bold text-foreground uppercase tracking-widest hover:bg-muted/80 transition-all flex items-center gap-2"
+                                className="px-4 py-2 bg-muted backdrop-blur-md border border-blue-500/40 rounded-[8px] text-[9px] font-bold text-foreground uppercase tracking-widest hover:bg-muted/80 transition-all flex items-center gap-2"
                               >
                                 <Upload className="h-3 w-3" /> Upload New Banner
                               </button>
@@ -1371,7 +1352,7 @@ const ArtistProfile: React.FC = () => {
                           <div 
                             key={nft.id}
                             className={`glass border transition-all duration-300 rounded-[12px] overflow-hidden ${
-                              isEditing ? 'border-amber-500/30 bg-amber-500/5' : 'border-border/50 bg-foreground/[0.01] hover:bg-foreground/[0.03]'
+                              isEditing ? 'border-blue-500/40 bg-amber-500/5' : 'border-blue-500/30 bg-foreground/[0.01] hover:bg-foreground/[0.03]'
                             }`}
                           >
                             <div className="p-6">
@@ -1432,13 +1413,13 @@ const ArtistProfile: React.FC = () => {
                                       <div className="flex gap-2">
                                         <button 
                                           onClick={() => handleListingChange(nft.id, 'listingType', 'fixed')}
-                                          className={`flex-1 py-3 rounded-[8px] border text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentListing.listingType === 'fixed' ? 'bg-neutral-600/10 border-neutral-500 text-neutral-500' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'}`}
+                                          className={`flex-1 py-3 rounded-[8px] border text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentListing.listingType === 'fixed' ? 'bg-neutral-600/10 border-neutral-500 text-neutral-500' : 'bg-muted/50 border-blue-500/40 text-muted-foreground hover:bg-muted'}`}
                                         >
                                           <Tag className="w-3 h-3" /> Fixed Price
                                         </button>
                                         <button 
                                           onClick={() => handleListingChange(nft.id, 'listingType', 'auction')}
-                                          className={`flex-1 py-3 rounded-[8px] border text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentListing.listingType === 'auction' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'}`}
+                                          className={`flex-1 py-3 rounded-[8px] border text-[9px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentListing.listingType === 'auction' ? 'bg-amber-500/10 border-blue-500 text-amber-500' : 'bg-muted/50 border-blue-500/40 text-muted-foreground hover:bg-muted'}`}
                                         >
                                           <Gavel className="w-3 h-3" /> Auction
                                         </button>
@@ -1456,7 +1437,7 @@ const ArtistProfile: React.FC = () => {
                                           step="0.1"
                                           value={currentListing.price}
                                           onChange={(e) => handleListingChange(nft.id, 'price', e.target.value)}
-                                          className="w-full bg-background/40 border border-border rounded-[8px] py-3 pl-10 pr-4 text-xs text-foreground outline-none focus:border-amber-500/50 transition-all"
+                                          className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] py-3 pl-10 pr-4 text-xs text-foreground outline-none focus:border-blue-500/50 transition-all"
                                         />
                                       </div>
                                     </div>
@@ -1472,13 +1453,13 @@ const ArtistProfile: React.FC = () => {
                                           type="date"
                                           value={currentListing.auctionEndTime}
                                           onChange={(e) => handleListingChange(nft.id, 'auctionEndTime', e.target.value)}
-                                          className="w-full bg-background/40 border border-border rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-amber-500/50 transition-all"
+                                          className="w-full bg-background/40 border border-blue-500/40 rounded-[8px] p-3 text-xs text-foreground outline-none focus:border-blue-500/50 transition-all"
                                         />
                                         <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-2">Protocol will finalize at 00:00 UTC on selected date</p>
                                       </div>
                                     )}
 
-                                    <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-[10px] flex gap-3">
+                                    <div className="p-4 bg-amber-500/5 border border-blue-500/30 rounded-[10px] flex gap-3">
                                       <Info className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
                                       <p className="text-[9px] text-muted-foreground/80 leading-relaxed uppercase tracking-widest">
                                         Listing this asset will make it visible in the global marketplace. A 2.5% protocol fee applies to all successful transfers.
@@ -1492,7 +1473,7 @@ const ArtistProfile: React.FC = () => {
                         );
                       })}
                       {artistNFTs.length === 0 && (
-                        <div className="py-20 text-center bg-muted/50 border border-border rounded-[12px]">
+                        <div className="py-20 text-center bg-muted/50 border border-blue-500/40 rounded-[12px]">
                           <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">No minted protocols available for listing.</p>
                         </div>
                       )}
@@ -1500,11 +1481,11 @@ const ArtistProfile: React.FC = () => {
                   </div>
 
                   {artist.events && artist.events.length > 0 && (
-                    <section className="glass border border-neutral-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
+                    <section className="glass border border-blue-500/20 bg-foreground/[0.01] rounded-[10px] p-8">
                       <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter mb-6">Upcoming Events</h3>
                       <div className="space-y-4">
                         {artist.events.map(event => (
-                          <div key={event.id} className="flex justify-between items-center p-4 rounded-[10px] bg-muted/50 border border-border">
+                          <div key={event.id} className="flex justify-between items-center p-4 rounded-[10px] bg-muted/50 border border-blue-500/40">
                             <div>
                               <h4 className="text-sm font-bold text-foreground">{event.title}</h4>
                               <p className="text-[10px] text-muted-foreground">{event.date} @ {event.time} • {event.venue}, {event.location}</p>
@@ -1519,11 +1500,11 @@ const ArtistProfile: React.FC = () => {
                   )}
 
                   {artist.collaborations && artist.collaborations.length > 0 && (
-                    <section className="glass border border-neutral-500/10 bg-foreground/[0.01] rounded-[10px] p-8">
+                    <section className="glass border border-blue-500/20 bg-foreground/[0.01] rounded-[10px] p-8">
                       <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter mb-6">Featured Collaborations</h3>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {artist.collaborations.map(collab => (
-                          <div key={collab.id} className="p-4 rounded-[10px] bg-muted/50 border border-border flex flex-col items-center text-center">
+                          <div key={collab.id} className="p-4 rounded-[10px] bg-muted/50 border border-blue-500/40 flex flex-col items-center text-center">
                             <img src={collab.coverUrl} alt={collab.trackTitle} className="w-16 h-16 rounded-[8px] mb-3 object-cover" />
                             <h4 className="text-xs font-bold text-foreground">{collab.trackTitle}</h4>
                             <p className="text-[10px] text-muted-foreground">with {collab.artistName}</p>

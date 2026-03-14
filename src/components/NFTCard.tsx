@@ -63,7 +63,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="group flex items-center gap-4 p-2 rounded-[12px] hover:bg-muted/50 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-foreground/[0.02]"
         onClick={handleCardClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -144,7 +144,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
     <>
       <div
         onClick={handleCardClick}
-        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[10px]"
+        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[12px] glass p-3 bg-foreground/[0.02]"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -168,7 +168,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
           <div className="absolute inset-0 bg-background/20 group-hover:bg-background/40 transition-colors duration-300">
              {/* Top Row */}
              <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
-                <span className="px-2 py-1 bg-background/60 backdrop-blur-md border border-border rounded-[4px] text-[8px] font-bold uppercase tracking-widest text-foreground shadow-lg">
+                <span className="px-2 py-1 bg-background/60 backdrop-blur-md border border-blue-500/30 rounded-[4px] text-[8px] font-bold uppercase tracking-widest text-foreground shadow-lg">
                   {nft.edition}
                 </span>
                 <div className="flex items-center gap-2">
@@ -275,7 +275,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
            </div>
   
            {/* Price and Action */}
-           <div className="flex items-center justify-between border-t border-border/50 pt-1.5">
+           <div className="flex items-center justify-between border-t border-blue-500/30 pt-2 mt-2">
               <div className="flex items-center gap-1">
                  <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
                  <span className="text-xs font-bold text-foreground tracking-tighter">{nft.price}</span>

@@ -22,6 +22,7 @@ import { TJ_COIN_ICON, TON_LOGO } from '@/constants';
 import StakingPanel from '@/components/StakingPanel';
 import Leaderboard from '@/components/Leaderboard';
 import BuyTJModal from '@/components/BuyTJModal';
+import ReferralPanel from '@/components/ReferralPanel';
 
 interface Task {
   id: string;
@@ -39,7 +40,7 @@ interface Task {
   priority?: 'high' | 'medium' | 'low';
 }
 
-type TaskTab = 'all' | 'daily' | 'achievements' | 'milestones' | 'staking' | 'leaderboard';
+type TaskTab = 'all' | 'daily' | 'achievements' | 'milestones' | 'staking' | 'leaderboard' | 'referrals';
 
 const TaskCard: React.FC<{ 
   task: Task; 
@@ -449,7 +450,7 @@ const Tasks: React.FC = () => {
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-border/50 pb-6">
           <div className="flex items-center gap-2 p-1 bg-muted/50 rounded-xl self-start overflow-x-auto no-scrollbar max-w-full">
-            {(['all', 'daily', 'achievements', 'milestones', 'staking', 'leaderboard'] as TaskTab[]).map((tab) => (
+            {(['all', 'daily', 'achievements', 'milestones', 'staking', 'leaderboard', 'referrals'] as TaskTab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -490,6 +491,15 @@ const Tasks: React.FC = () => {
               exit={{ opacity: 0, y: -20 }}
             >
               <Leaderboard />
+            </motion.div>
+          ) : activeTab === 'referrals' ? (
+            <motion.div 
+              key="referrals"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <ReferralPanel />
             </motion.div>
           ) : (
             <motion.div 

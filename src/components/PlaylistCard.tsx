@@ -76,7 +76,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
     return (
       <div 
         onClick={onClick} 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full"
+        className="group flex items-center gap-4 p-2 rounded-[12px] hover:bg-muted/50 transition-all cursor-pointer w-full glass border border-blue-500/30 bg-foreground/[0.02]"
       >
         <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
           {renderCover()}
@@ -99,7 +99,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   return (
     <div 
       onClick={onClick} 
-      className="group relative cursor-pointer"
+      className="group relative cursor-pointer glass border border-blue-500/30 p-3 rounded-[12px] bg-foreground/[0.02]"
     >
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
@@ -107,7 +107,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center">
           <button 
             onClick={handlePlay}
-            className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-border/80 flex items-center justify-center shadow-xl group-hover:bg-neutral-600 group-hover:border-neutral-500 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+            className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-blue-500/30 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500/40 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
           >
             <Play className="h-3 w-3 text-foreground fill-white ml-0.5" />
           </button>
@@ -135,7 +135,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         </p>
         
         {/* Stats */}
-        <div className="flex items-center justify-between border-t border-border/50 pt-1.5 mt-1.5">
+        <div className="flex items-center justify-between border-t border-blue-500/30 pt-2 mt-2">
           <span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
             {playlist.trackCount} Tracks
           </span>

@@ -158,7 +158,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="group flex items-center gap-4 p-2 rounded-[12px] hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-foreground/[0.02]"
         onClick={handleCardClick}
         onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
         role="button"
@@ -236,7 +236,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                <Coins className="h-4 w-4" />
              </button>
              {isTipping && (
-               <div className="absolute bottom-full right-0 mb-2 p-1 bg-background/90 backdrop-blur-xl border border-border rounded-lg shadow-2xl z-50 flex gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
+               <div className="absolute bottom-full right-0 mb-2 p-1 bg-background/90 backdrop-blur-xl border border-blue-500/30 rounded-lg shadow-2xl z-50 flex gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
                  {[0.1, 0.5, 1].map((amount) => (
                    <button
                      key={amount}
@@ -265,7 +265,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
 
   return (
     <div 
-      className="group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[10px]"
+      className="group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[12px] glass p-3 bg-foreground/[0.02]"
       onClick={handleCardClick}
       onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
       role="button"
@@ -322,7 +322,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                     </button>
                  ) : (
                   <button 
-                    className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-neutral-500/20 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-neutral-500/40 transition-colors pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
+                    className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-blue-500/30 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500/40 transition-colors pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
                     onClick={handlePlay}
                     aria-label={`Play ${track.title}`}
                   >
@@ -365,7 +365,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
         </div>
         
         {/* Stats */}
-        <div className="flex items-center justify-between border-t border-border/50 pt-1.5">
+        <div className="flex items-center justify-between border-t border-blue-500/30 pt-2 mt-2">
           {track.isNFT ? (
             <div className="flex items-center justify-between w-full gap-2">
                <div className="flex items-center gap-1">
@@ -382,7 +382,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                      <Coins className="h-3 w-3" />
                    </button>
                    {isTipping && (
-                     <div className="absolute bottom-full right-0 mb-2 p-1 bg-background/90 backdrop-blur-xl border border-border rounded-lg shadow-2xl z-50 flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                     <div className="absolute bottom-full right-0 mb-2 p-1 bg-background/90 backdrop-blur-xl border border-blue-500/30 rounded-lg shadow-2xl z-50 flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
                        {[0.1, 0.5, 1].map((amount) => (
                          <button
                            key={amount}
@@ -419,7 +419,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                   <Coins className="h-3 w-3" />
                 </button>
                 {isTipping && (
-                  <div className="absolute bottom-full left-0 mb-2 p-1 bg-background/90 backdrop-blur-xl border border-border rounded-lg shadow-2xl z-50 flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <div className="absolute bottom-full left-0 mb-2 p-1 bg-background/90 backdrop-blur-xl border border-blue-500/30 rounded-lg shadow-2xl z-50 flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
                     {[0.1, 0.5, 1].map((amount) => (
                       <button
                         key={amount}
@@ -470,7 +470,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                   <Coins className="h-3 w-3" />
                 </button>
                 {isTipping && (
-                  <div className="absolute bottom-full right-0 mb-2 p-1 bg-background/90 backdrop-blur-xl border border-border rounded-lg shadow-2xl z-50 flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <div className="absolute bottom-full right-0 mb-2 p-1 bg-background/90 backdrop-blur-xl border border-blue-500/30 rounded-lg shadow-2xl z-50 flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
                     {[0.1, 0.5, 1].map((amount) => (
                       <button
                         key={amount}
