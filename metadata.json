@@ -1,5 +1,9 @@
 {
-  "name": "My App",
-  "description": "A basic web application with a simplified layout and navigation.",
-  "requestFramePermissions": []
+  "name": "JamSpace",
+  "description": "A decentralized music and NFT marketplace on the TON blockchain.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
 }

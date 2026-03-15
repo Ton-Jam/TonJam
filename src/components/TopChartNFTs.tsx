@@ -12,7 +12,7 @@ const TopChartNFTs: React.FC<TopChartNFTsProps> = ({ nfts, title }) => {
   const top4 = [...nfts].slice(0, 4);
 
   return (
-    <div className="bg-[#0a0a0a] border border-border/50 rounded-[12px] p-8 space-y-10 shadow-2xl relative overflow-hidden group">
+    <div className="bg-[#0a0a0a] rounded-[10px] p-8 space-y-10 shadow-2xl relative overflow-hidden group">
       <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-blue-600/10 transition-colors"></div>
       
       <div className="flex items-center justify-between relative z-10">

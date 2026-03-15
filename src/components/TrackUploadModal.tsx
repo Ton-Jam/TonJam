@@ -74,9 +74,9 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={resetAndClose}></div>
       
-      <div className="relative w-full max-w-xl glass border border-border bg-[#0a0a0a] rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-xl glass border border-blue-500/40 bg-[#0a0a0a] rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Header */}
-        <div className="p-6 border-b border-border/50 flex items-center justify-between">
+        <div className="p-6 border-b border-blue-500/30 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-foreground tracking-tighter uppercase">
               {step === 3 ? 'Upload Complete' : 'Forge New Frequency'}
@@ -99,7 +99,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 {/* Left: Upload Area */}
                 <div className="space-y-6">
                   <div 
-                    className="aspect-square rounded-[10px] border border-dashed border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-6 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="aspect-square rounded-[10px] border border-dashed border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-6 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     role="button"
                     tabIndex={0}
                     aria-label="Select Audio File"
@@ -112,7 +112,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                   </div>
                   
                   <div 
-                    className="aspect-video rounded-[10px] border border-border bg-foreground/[0.02] flex flex-col items-center justify-center p-4 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="aspect-video rounded-[10px] border border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-4 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     role="button"
                     tabIndex={0}
                     aria-label="Add Cover Art"
@@ -144,7 +144,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                       id="track-genre"
                       value={formData.genre}
                       onChange={(e) => setFormData({...formData, genre: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-3 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
+                      className="w-full bg-foreground/[0.03] border border-blue-500/30 rounded-[5px] p-3 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
                     >
                       <option value="Electronic">Electronic</option>
                       <option value="Techno">Techno</option>
@@ -210,9 +210,9 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
 
           {step === 2 && (
             <div className="space-y-8">
-              <div className="p-6 bg-foreground/[0.02] border border-border/50 rounded-[10px] space-y-6">
+              <div className="p-6 bg-foreground/[0.02] border border-blue-500/30 rounded-[10px] space-y-6">
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-[5px] bg-neutral-900 overflow-hidden border border-border">
+                  <div className="w-24 h-24 rounded-[5px] bg-neutral-900 overflow-hidden border border-blue-500/40">
                     <img src={`https://picsum.photos/400/400?seed=${formData.title}`} className="w-full h-full object-cover" alt="" />
                   </div>
                   <div className="flex-1">
@@ -232,11 +232,11 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-background/40 rounded-[5px] border border-border/50">
+                  <div className="p-4 bg-background/40 rounded-[5px] border border-blue-500/30">
                     <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Release Type</p>
                     <p className="text-xs font-bold text-foreground uppercase">{formData.isNFT ? 'NFT Asset' : 'Standard Streaming'}</p>
                   </div>
-                  <div className="p-4 bg-background/40 rounded-[5px] border border-border/50">
+                  <div className="p-4 bg-background/40 rounded-[5px] border border-blue-500/30">
                     <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Network Fee</p>
                     <p className="text-xs font-bold text-foreground uppercase">~0.02 TON</p>
                   </div>

@@ -219,6 +219,8 @@ const TaskCard: React.FC<{
 
 const Tasks: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TaskTab>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [userBalance, setUserBalance] = useState(1240);
   const { addNotification } = useAudio();
@@ -263,12 +265,22 @@ const Tasks: React.FC = () => {
   }, [tasks]);
 
   const filteredTasks = useMemo(() => {
-    if (activeTab === 'all') return tasks;
-    if (activeTab === 'daily') return tasks.filter(t => t.type === 'daily');
-    if (activeTab === 'achievements') return tasks.filter(t => t.type === 'achievement');
-    if (activeTab === 'milestones') return tasks.filter(t => t.type === 'milestone');
-    return tasks;
-  }, [tasks, activeTab]);
+    let result = tasks;
+    
+    // Tab filter
+    if (activeTab === 'daily') result = result.filter(t => t.type === 'daily');
+    else if (activeTab === 'achievements') result = result.filter(t => t.type === 'achievement');
+    else if (activeTab === 'milestones') result = result.filter(t => t.type === 'milestone');
+    
+    // Status filter
+    if (statusFilter === 'pending') result = result.filter(t => !t.completed);
+    else if (statusFilter === 'completed') result = result.filter(t => t.completed);
+    
+    // Priority filter
+    if (priorityFilter !== 'all') result = result.filter(t => t.priority === priorityFilter);
+    
+    return result;
+  }, [tasks, activeTab, statusFilter, priorityFilter]);
 
   const handleClaim = (id: string) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, claimed: true } : t));
@@ -463,6 +475,28 @@ const Tasks: React.FC = () => {
                 {tab}
               </button>
             ))}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="bg-muted/50 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg text-muted-foreground hover:text-foreground focus:outline-none"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+            <select 
+              value={priorityFilter} 
+              onChange={(e) => setPriorityFilter(e.target.value as any)}
+              className="bg-muted/50 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg text-muted-foreground hover:text-foreground focus:outline-none"
+            >
+              <option value="all">All Priority</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
           </div>
 
           <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">

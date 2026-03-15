@@ -141,6 +141,15 @@ const JamSpace: React.FC = () => {
       </div>
 
       <div className="max-w-[1600px] mx-auto px-0 sm:px-4 md:px-12 mt-6 relative z-10">
+        <header className="flex items-center justify-between mb-8 px-4 sm:px-0">
+          <h1 className="text-2xl font-bold text-foreground uppercase tracking-widest">JamSpace</h1>
+          <div className="flex items-center gap-4">
+            <button className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all">
+              <Bell className="h-5 w-5" />
+            </button>
+            <img src={MOCK_USER.avatar} alt={MOCK_USER.name} className="w-10 h-10 rounded-full border border-blue-500/30" />
+          </div>
+        </header>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Left Column: Navigation & Trending */}
           <aside className="hidden lg:block lg:col-span-3 space-y-10 sticky top-32 h-fit">

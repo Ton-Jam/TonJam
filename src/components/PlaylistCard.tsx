@@ -76,7 +76,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
     return (
       <div 
         onClick={onClick} 
-        className="group flex items-center gap-4 p-2 rounded-[12px] hover:bg-muted/50 transition-all cursor-pointer w-full glass border border-blue-500/30 bg-foreground/[0.02]"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full glass bg-foreground/[0.02]"
       >
         <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
           {renderCover()}
@@ -99,7 +99,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   return (
     <div 
       onClick={onClick} 
-      className="group relative cursor-pointer glass border border-blue-500/30 p-3 rounded-[12px] bg-foreground/[0.02]"
+      className="group relative cursor-pointer glass p-3 rounded-[10px] bg-foreground/[0.02]"
     >
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
@@ -135,7 +135,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         </p>
         
         {/* Stats */}
-        <div className="flex items-center justify-between border-t border-blue-500/30 pt-2 mt-2">
+        <div className="flex items-center justify-between pt-2 mt-2">
           <span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
             {playlist.trackCount} Tracks
           </span>

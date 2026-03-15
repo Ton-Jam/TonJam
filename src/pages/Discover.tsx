@@ -175,13 +175,21 @@ const Discover: React.FC = () => {
       if (selectedGenre) {
         results = results.filter(a => a.genre?.toLowerCase() === selectedGenre.toLowerCase());
       }
+      if (sortBy === 'Popularity') {
+        results.sort((a, b) => (b.followers || 0) - (a.followers || 0));
+      }
     } else if (activeFilter === 'NFTs') {
-      results = MOCK_NFTS;
+      results = [...MOCK_NFTS];
       if (search) {
         results = results.filter(n =>
           n.title.toLowerCase().includes(search.toLowerCase()) ||
           n.creator.toLowerCase().includes(search.toLowerCase())
         );
+      }
+      if (sortBy === 'Price (High to Low)') {
+        results.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+      } else if (sortBy === 'Price (Low to High)') {
+        results.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
       }
     } else if (activeFilter === 'Playlists') {
       results = allPlaylists;
@@ -271,6 +279,40 @@ const Discover: React.FC = () => {
     setSelectedGenre(null);
   };
 
+  const FilterSortBar = ({ activeFilter, selectedGenre, sortBy, setSelectedGenre, setSortBy }: any) => {
+    const sortOptions: Record<string, string[]> = {
+      Tracks: ['Newest', 'Popularity', 'Most Liked'],
+      Artists: ['Newest', 'Popularity'],
+      NFTs: ['Newest', 'Price (High to Low)', 'Price (Low to High)'],
+    };
+
+    const currentSortOptions = sortOptions[activeFilter as keyof typeof sortOptions] || [];
+
+    return (
+      <div className="flex items-center gap-4 py-4">
+        {activeFilter !== 'NFTs' && activeFilter !== 'Playlists' && activeFilter !== 'Users' && (
+          <select
+            value={selectedGenre || ''}
+            onChange={(e) => setSelectedGenre(e.target.value || null)}
+            className="bg-muted/50 text-foreground border border-blue-500/30 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-blue-500/60 transition-all appearance-none cursor-pointer"
+          >
+            <option value="">All Genres</option>
+            {GENRES.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
+          </select>
+        )}
+        {currentSortOptions.length > 0 && (
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-muted/50 text-foreground border border-blue-500/30 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-blue-500/60 transition-all appearance-none cursor-pointer"
+          >
+            {currentSortOptions.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+        )}
+      </div>
+    );
+  };
+
   const toggleVoiceSearch = () => {
     setIsListening(!isListening);
     if (!isListening) {
@@ -340,7 +382,7 @@ const Discover: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 space-y-16 mt-12">
+      <div className="max-w-7xl mx-auto px-0 lg:px-8 space-y-16 mt-12">
         {/* Recommendations Section (Visible when no search) */}
         {!search && !selectedGenre && (
           <motion.section 
@@ -351,7 +393,7 @@ const Discover: React.FC = () => {
             <SearchCategorySection 
               title="Trending Tracks" 
               items={trendingTracks.slice(0, 5)}
-              renderItem={(item) => <TrackCard track={item} />}
+              renderItem={(item) => <TrackCard track={item} className="border border-blue-500/30" />}
               viewAllLink="/explore/tracks?title=Trending Tracks"
               grid
             />
@@ -383,7 +425,7 @@ const Discover: React.FC = () => {
                 </button>
                 <div>
                   <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none mb-2">
-                    {search ? `Results for "${search}"` : `Genre: ${selectedGenre}`}
+                    {search ? `Results for "${search}"` : activeFilter !== 'All' ? activeFilter : 'Discover'}
                   </h2>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
@@ -391,6 +433,9 @@ const Discover: React.FC = () => {
                   </div>
                 </div>
               </div>
+              {activeFilter !== 'All' && (
+                <FilterSortBar activeFilter={activeFilter} selectedGenre={selectedGenre} sortBy={sortBy} setSelectedGenre={setSelectedGenre} setSortBy={setSortBy} />
+              )}
             </div>
             
             {activeFilter === 'All' ? (
@@ -399,7 +444,7 @@ const Discover: React.FC = () => {
                 <SearchCategorySection 
                   title="Tracks" 
                   items={MOCK_TRACKS.filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase())).slice(0, 10)}
-                  renderItem={(item) => <TrackCard track={item} />}
+                  renderItem={(item) => <TrackCard track={item} className="border border-blue-500/30" />}
                   viewAllLink={`/explore/tracks?title=Search Results: Tracks&search=${search}`}
                   grid
                   isEmpty={!MOCK_TRACKS.some(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase()))}
@@ -449,7 +494,7 @@ const Discover: React.FC = () => {
                   <div className={`grid gap-4 ${activeFilter === 'Tracks' || activeFilter === 'Artists' || activeFilter === 'Playlists' ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
                     {visibleResults.map((item, idx) => (
                       <div key={item.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
-                        {activeFilter === 'Tracks' && <TrackCard track={item as Track} variant="row" />}
+                        {activeFilter === 'Tracks' && <TrackCard track={item as Track} variant="row" className="border border-blue-500/30" />}
                         {activeFilter === 'Artists' && <ArtistListItem artist={item as any} />}
                         {activeFilter === 'NFTs' && <NFTCard nft={item as any} />}
                         {activeFilter === 'Playlists' && <PlaylistListItem playlist={item as any} onClick={() => navigate(`/playlist/${item.id}`)} />}

@@ -75,15 +75,11 @@ const Library: React.FC = () => {
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/5 blur-[100px] rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-10">
+      <div className="relative z-10 max-w-7xl mx-auto px-0 md:px-8 pt-10">
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 bg-gradient-to-b from-blue-900/20 to-background p-8 rounded-3xl">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Secure Vault Access</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-foreground leading-none">
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-white leading-none">
               Library
             </h1>
           </div>
@@ -91,14 +87,14 @@ const Library: React.FC = () => {
           <div className="flex flex-wrap gap-3">
             <button 
               onClick={() => setIsCreatePlaylistModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-all active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95"
             >
               <Plus className="h-4 w-4" />
               New Playlist
             </button>
             <button 
               onClick={createRecommendedPlaylist}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 border border-neutral-500/20 text-blue-500 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600/20 transition-all active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 bg-neutral-800 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-neutral-700 transition-all active:scale-95"
             >
               <Sparkles className="h-4 w-4" />
               AI Generation
@@ -114,7 +110,7 @@ const Library: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               key={stat.label} 
-              className="p-6 rounded-2xl bg-muted/50 border border-border/50 backdrop-blur-xl group hover:bg-foreground/[0.08] transition-all"
+              className="p-6 rounded-2xl bg-muted/50 border border-blue-500/30 backdrop-blur-xl group hover:bg-foreground/[0.08] transition-all"
             >
               <div className="flex items-center justify-between mb-4">
                 <stat.icon className="h-5 w-5 text-muted-foreground/50 group-hover:text-blue-500 transition-colors" />
@@ -154,7 +150,7 @@ const Library: React.FC = () => {
             {activeTab === 'collection' && (
               <div className="space-y-16">
                 {/* NFT Artifacts */}
-                <section className="p-8 rounded-3xl bg-blue-500/[0.03] border border-neutral-500/20 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-blue-500/[0.03] border border-blue-500/30 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -175,7 +171,7 @@ const Library: React.FC = () => {
                 </section>
 
                 {/* Liked Tracks */}
-                <section className="p-8 rounded-3xl bg-emerald-500/[0.03] border border-neutral-500/20 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-emerald-500/[0.03] border border-blue-500/30 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -195,7 +191,7 @@ const Library: React.FC = () => {
 
             {activeTab === 'playlists' && (
               <div className="space-y-8">
-                <section className="p-8 rounded-3xl bg-violet-600/[0.03] border border-neutral-500/20 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-violet-600/[0.03] border border-blue-500/30 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -237,7 +233,7 @@ const Library: React.FC = () => {
                 </section>
 
                 {/* Followed Artists */}
-                <section className="p-8 rounded-3xl bg-orange-500/[0.03] border border-neutral-500/20 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-orange-500/[0.03] border border-blue-500/30 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -283,7 +279,7 @@ const Library: React.FC = () => {
 };
 
 const EmptyState = ({ icon: Icon, message }: { icon: any, message: string }) => (
-  <div className="py-24 text-center flex flex-col items-center justify-center bg-foreground/[0.02] border border-dashed border-border rounded-3xl">
+  <div className="py-24 text-center flex flex-col items-center justify-center bg-foreground/[0.02] border border-dashed border-blue-500/30 rounded-3xl">
     <Icon className="h-12 w-12 text-foreground/5 mb-4" />
     <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">{message}</p>
   </div>

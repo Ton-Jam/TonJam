@@ -253,7 +253,7 @@ const FullPlayer: React.FC = () => {
 
       <div className="relative z-10 flex flex-col min-h-full">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-6 pt-8">
+        <div className="relative top-0 flex items-center justify-between p-6 pt-8">
           <button 
             onClick={() => setFullPlayerOpen(false)}
             className="p-2 -ml-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"

@@ -23,9 +23,7 @@ import {
   TrendingUp,
   Satellite,
   Users,
-  User,
-  ArrowLeft,
-  Share2
+  User
 } from 'lucide-react';
 
 import PostCard from '@/components/PostCard';
@@ -253,45 +251,11 @@ const Profile: React.FC = () => {
 
   return (
     <div className="animate-in fade-in duration-1000 pb-32">
-      {/* Banner Section */}
+        {/* Banner Section */}
       <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-background">
         <img src={localUser.bannerUrl} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
         
-        <div className="absolute top-6 left-6 right-6 z-50 flex justify-between items-center">
-          <button 
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-background/50 backdrop-blur-md flex items-center justify-center border border-border text-foreground hover:bg-muted transition-colors"
-          >
-            <ArrowLeft size={18} />
-          </button>
-
-          <button 
-            onClick={async () => {
-              const shareData = {
-                title: `${localUser.name} on TonJam`,
-                text: `Check out ${localUser.name}'s profile on TonJam`,
-                url: window.location.href,
-              };
-              try {
-                if (navigator.share) {
-                  await navigator.share(shareData);
-                } else {
-                  await navigator.clipboard.writeText(window.location.href);
-                  addNotification('Profile link copied to clipboard', 'success');
-                }
-              } catch (err: any) {
-                if (err.name !== 'AbortError') {
-                  console.error('Error sharing:', err);
-                }
-              }
-            }}
-            className="w-10 h-10 rounded-full bg-background/50 backdrop-blur-md flex items-center justify-center border border-border text-foreground hover:bg-muted transition-colors"
-          >
-            <Share2 size={18} />
-          </button>
-        </div>
-
         {isEditing && (
           <button onClick={() => bannerInputRef.current?.click()} className="absolute inset-0 flex items-center justify-center backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity z-20">
             <div className="bg-muted p-4 rounded-[10px]"><Camera className="text-foreground h-5 w-5" /></div>

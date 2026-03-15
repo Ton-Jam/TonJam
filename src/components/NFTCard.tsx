@@ -63,7 +63,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-2 rounded-[12px] hover:bg-muted/50 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-foreground/[0.02]"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-foreground/[0.02]"
         onClick={handleCardClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -75,7 +75,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
         tabIndex={0}
         aria-label={`View NFT ${nft.title}`}
       >
-        <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+        <div className="relative w-12 h-12 rounded-[3px] overflow-hidden flex-shrink-0">
           <img src={nft.imageUrl} alt={nft.title} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
@@ -144,7 +144,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
     <>
       <div
         onClick={handleCardClick}
-        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[12px] glass p-3 bg-foreground/[0.02]"
+        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[8px] glass p-3 bg-foreground/[0.02]"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -156,7 +156,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
         aria-label={`View NFT ${nft.title}`}
       >
         {/* Image Container - 1:1 Aspect Ratio */}
-        <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-1">
+        <div className="relative aspect-square rounded-[6px] overflow-hidden bg-neutral-900 shadow-lg mb-1">
           <img
             src={nft.imageUrl}
             loading="lazy"
@@ -275,7 +275,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
            </div>
   
            {/* Price and Action */}
-           <div className="flex items-center justify-between border-t border-blue-500/30 pt-2 mt-2">
+           <div className="flex items-center justify-between pt-2 mt-2">
               <div className="flex items-center gap-1">
                  <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
                  <span className="text-xs font-bold text-foreground tracking-tighter">{nft.price}</span>

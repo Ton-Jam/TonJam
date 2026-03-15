@@ -16,7 +16,7 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
   return (
     <div
       onClick={() => navigate(`/nft/${nft.id}`)}
-      className="flex items-center gap-5 p-4 rounded-[12px] hover:bg-foreground/[0.03] border border-transparent hover:border-border/50 transition-all cursor-pointer group w-full"
+      className="flex items-center gap-5 p-4 rounded-[10px] hover:bg-foreground/[0.03] transition-all cursor-pointer group w-full"
     >
       {/* Rank */}
       <div className="w-6 text-center flex-shrink-0">

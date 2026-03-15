@@ -33,6 +33,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import ArtistOnboarding from '@/pages/ArtistOnboarding';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
+import { motion, AnimatePresence } from 'motion/react';
 
 const App: React.FC = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
@@ -43,8 +44,6 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (isAppLoading) return <LoadingScreen />;
-
   return (
     <TonConnectUIProvider manifestUrl="https://ton-jam.vercel.app/tonconnect-manifest.json">
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -53,35 +52,48 @@ const App: React.FC = () => {
             <Toaster theme="dark" position="top-right" />
             <Router>
               <ScrollToTop />
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/discover" element={<Discover />} />
-                  <Route path="/jamspace" element={<JamSpace />} />
-                  <Route path="/marketplace" element={<Marketplace />} />
-                  <Route path="/nft/:id" element={<NFTDetail />} />
-                  <Route path="/explore/:type" element={<ExploreList />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/user/:id" element={<UserProfile />} />
-                  <Route path="/artist/:id" element={<ArtistProfile />} />
-                  <Route path="/artist-dashboard" element={<ArtistDashboard />} />
-                  <Route path="/artist-onboarding" element={<ArtistOnboarding />} />
-                  <Route path="/upload" element={<UploadTrack />} />
-                  <Route path="/mint" element={<MintNFT />} />
-                  <Route path="/library" element={<Library />} />
-                  <Route path="/wallet" element={<Wallet />} />
-                  <Route path="/staking" element={<Staking />} />
-                  <Route path="/playlist/:id" element={<PlaylistDetail />} />
-                  <Route path="/track/:id" element={<TrackDetail />} />
-                  <Route path="/player" element={<TrackPlayerScreen />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/tasks" element={<Tasks />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/post/:id" element={<PostDetail />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/about" element={<About />} />
-                </Routes>
-              </Layout>
+              <AnimatePresence>
+                {isAppLoading ? (
+                  <LoadingScreen key="loading" />
+                ) : (
+                  <motion.div
+                    key="app"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Layout>
+                      <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/discover" element={<Discover />} />
+                        <Route path="/jamspace" element={<JamSpace />} />
+                        <Route path="/marketplace" element={<Marketplace />} />
+                        <Route path="/nft/:id" element={<NFTDetail />} />
+                        <Route path="/explore/:type" element={<ExploreList />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/user/:id" element={<UserProfile />} />
+                        <Route path="/artist/:id" element={<ArtistProfile />} />
+                        <Route path="/artist-dashboard" element={<ArtistDashboard />} />
+                        <Route path="/artist-onboarding" element={<ArtistOnboarding />} />
+                        <Route path="/upload" element={<UploadTrack />} />
+                        <Route path="/mint" element={<MintNFT />} />
+                        <Route path="/library" element={<Library />} />
+                        <Route path="/wallet" element={<Wallet />} />
+                        <Route path="/staking" element={<Staking />} />
+                        <Route path="/playlist/:id" element={<PlaylistDetail />} />
+                        <Route path="/track/:id" element={<TrackDetail />} />
+                        <Route path="/player" element={<TrackPlayerScreen />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/tasks" element={<Tasks />} />
+                        <Route path="/notifications" element={<Notifications />} />
+                        <Route path="/post/:id" element={<PostDetail />} />
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/about" element={<About />} />
+                      </Routes>
+                    </Layout>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Router>
           </AudioProvider>
         </AuthProvider>

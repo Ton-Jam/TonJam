@@ -105,7 +105,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
   return (
     <div 
       onClick={handleCardClick}
-      className="group flex flex-col items-center cursor-pointer text-center h-full w-full p-4 rounded-xl hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="group flex flex-col items-center cursor-pointer text-center h-full w-full p-4 rounded-lg hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();

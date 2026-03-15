@@ -27,6 +27,7 @@ import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTonConnectUI } from '@tonconnect/ui-react';
+import { motion, AnimatePresence } from 'motion/react';
 import MiniAudioPlayer from './MiniAudioPlayer';
 import FullPlayer from './FullPlayer';
 // import TrackUploadModal from './TrackUploadModal';
@@ -47,6 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   
@@ -120,23 +122,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {!isExplore && !isPlayer && (
         <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-4 md:px-6 h-16 flex items-center justify-between lg:left-64 transition-transform duration-300 border-b-0 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
           <div className="flex items-center gap-4 flex-1">
-            {!isHome && (
+            {isHome ? (
               <button 
-                onClick={() => navigate(-1)} 
-                className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
-                aria-label="Go back"
+                onClick={() => setIsMobileSidebarOpen(true)}
+                className="lg:hidden p-1 rounded-full hover:bg-muted transition-all"
+                aria-label="Open sidebar"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <motion.img 
+                  layoutId="app-logo"
+                  src={APP_LOGO} 
+                  alt="TonJam Logo" 
+                  className="w-8 h-8 object-contain" 
+                />
               </button>
+            ) : (
+              <>
+                <button 
+                  onClick={() => navigate(-1)} 
+                  className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+                  aria-label="Go back"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <div className="flex items-center gap-3 lg:hidden">
+                  <span className="font-bold text-sm tracking-tight text-foreground uppercase truncate max-w-[100px]">{location.pathname.split('/')[1].replace('-', ' ')}</span>
+                </div>
+              </>
             )}
-            
-            <div className="flex items-center gap-3 lg:hidden">
-              {isHome ? (
-                <img src={APP_LOGO} alt="TonJam Logo" className="w-8 h-8 object-contain" />
-              ) : (
-                <span className="font-bold text-sm tracking-tight text-foreground uppercase truncate max-w-[100px]">{location.pathname.split('/')[1].replace('-', ' ')}</span>
-              )}
-            </div>
 
             {!isHome && !isDiscover && (
               <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`} ref={searchRef}>
@@ -261,88 +273,46 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Sidebar - Desktop */}
       {!isPlayer && (
         <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r-0 flex-col p-6 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
-          <div className="flex items-center justify-between mb-10">
-            <Link to="/" className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm" aria-label="TonJam Home">
-              <img src={APP_LOGO} alt="" className="w-10 h-10 object-contain" aria-hidden="true" />
-              <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">Discover</span>
-            </Link>
-            <ModeToggle />
-          </div>
-
-          <nav className="flex-1 space-y-2" aria-label="Main Navigation">
-            <NavItem to="/" icon={HomeIcon} label="Home" />
-            <NavItem to="/discover" icon={Search} label="Search" />
-            <NavItem to="/jamspace" icon={Send} label="JamSpace" />
-            <NavItem to="/library" icon={Library} label="Library" />
-            <NavItem to="/marketplace" icon={ShoppingBag} label="NFT Market" />
-            
-            <div className="pt-6 pb-2">
-              <p className="px-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Account</p>
-              {userProfile.isVerifiedArtist && (
-                <NavItem to={`/artist/${userProfile.id}`} icon={User} label="Artist Profile" />
-              )}
-              {userProfile.isVerifiedArtist && (
-                <NavItem to="/artist-dashboard" icon={LayoutDashboard} label="Artist Dashboard" />
-              )}
-              <NavItem to="/admin" icon={Shield} label="Admin Console" />
-              <NavItem to="/profile" icon={User} label="User Profile" />
-              <NavItem to="/wallet" icon={Wallet} label="Wallet" />
-              <NavItem to="/staking" icon={TrendingUp} label="Staking" />
-              <NavItem to="/about" icon={Shield} label="About Us" />
-              <NavItem to="/settings" icon={SettingsIcon} label="Settings" />
-              {user && (
-                <button 
-                  onClick={() => signOut()}
-                  className="w-full flex items-center gap-4 px-5 py-3 rounded-[5px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label="Sign Out"
-                >
-                  <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                  <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Sign Out</span>
-                </button>
-              )}
-            </div>
-
-            {userProfile.isVerifiedArtist && (
-              <div className="pt-6 space-y-3">
-                <Link 
-                  to="/upload"
-                  className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label="Upload new track"
-                >
-                  <Upload className="h-5 w-5" />
-                  <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Upload Track</span>
-                </Link>
-                <Link 
-                  to="/mint"
-                  className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label="Mint new NFT"
-                >
-                  <PlusCircle className="h-5 w-5" />
-                  <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
-                </Link>
-              </div>
-            )}
-
-            {/* TJ Coin Price Widget */}
-            <div className="mt-8 p-4 rounded-[5px] bg-muted/50 border-0 flex items-center justify-between" role="complementary" aria-label="Token Price Info">
-              <div className="flex items-center gap-3">
-                <img src={TJ_COIN_ICON} alt="JAM Token" className="w-6 h-6 object-contain" />
-                <div>
-                  <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">JAM Price</p>
-                  <p className="text-sm font-bold text-foreground tracking-tighter">${JAM_PRICE_USD.toFixed(3)}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-[9px] font-bold text-green-500 uppercase tracking-widest" aria-label="Price change">+2.4%</p>
-              </div>
-            </div>
-          </nav>
+          <SidebarContent user={user} userProfile={userProfile} signOut={signOut} />
         </aside>
       )}
 
+      {/* Sidebar - Mobile Drawer */}
+      <AnimatePresence>
+        {isMobileSidebarOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileSidebarOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
+            />
+            <motion.aside 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 bottom-0 w-[280px] bg-background z-[70] lg:hidden flex flex-col p-6 overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <Link to="/" onClick={() => setIsMobileSidebarOpen(false)} className="flex items-center gap-3">
+                  <img src={APP_LOGO} alt="" className="w-8 h-8 object-contain" />
+                  <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">JamSpace</span>
+                </Link>
+                <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 rounded-full hover:bg-muted">
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+              </div>
+              <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onNavigate={() => setIsMobileSidebarOpen(false)} />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Main Content Area */}
-      <main id="main-content" className={`pb-48 lg:pb-32 transition-all w-full ${isExplore || isPlayer ? 'pt-0' : 'pt-16 lg:pt-16'} ${isPlayer ? 'lg:ml-0' : 'lg:ml-64'} relative z-10`}>
-        <div className="w-full">
+      <main id="main-content" className={`pb-48 lg:pb-32 transition-all w-full ${isExplore || isPlayer ? 'pt-0' : 'pt-16 lg:pt-16'} ${isPlayer ? 'lg:ml-0' : 'lg:ml-64'} relative z-10 overflow-x-hidden`}>
+        <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>
       </main>
@@ -368,9 +338,102 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   );
 };
 
-const NavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon; label: string }) => (
+const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void }) => (
+  <>
+    <div className="flex items-center justify-between mb-10">
+      <Link to="/" onClick={onNavigate} className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm" aria-label="TonJam Home">
+        <motion.img 
+          layoutId="app-logo"
+          src={APP_LOGO} 
+          alt="" 
+          className="w-10 h-10 object-contain" 
+          aria-hidden="true" 
+        />
+        <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">Discover</span>
+      </Link>
+      <ModeToggle />
+    </div>
+
+    <nav className="flex-1 space-y-2" aria-label="Main Navigation">
+      <NavItem to="/" icon={HomeIcon} label="Home" onClick={onNavigate} />
+      <NavItem to="/discover" icon={Search} label="Search" onClick={onNavigate} />
+      <NavItem to="/jamspace" icon={Send} label="JamSpace" onClick={onNavigate} />
+      <NavItem to="/library" icon={Library} label="Library" onClick={onNavigate} />
+      <NavItem to="/marketplace" icon={ShoppingBag} label="NFT Market" onClick={onNavigate} />
+      
+      <div className="pt-6 pb-2">
+        <p className="px-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Account</p>
+        {userProfile.isVerifiedArtist && (
+          <NavItem to={`/artist/${userProfile.id}`} icon={User} label="Artist Profile" onClick={onNavigate} />
+        )}
+        {userProfile.isVerifiedArtist && (
+          <NavItem to="/artist-dashboard" icon={LayoutDashboard} label="Artist Dashboard" onClick={onNavigate} />
+        )}
+        <NavItem to="/admin" icon={Shield} label="Admin Console" onClick={onNavigate} />
+        <NavItem to="/profile" icon={User} label="User Profile" onClick={onNavigate} />
+        <NavItem to="/wallet" icon={Wallet} label="Wallet" onClick={onNavigate} />
+        <NavItem to="/staking" icon={TrendingUp} label="Staking" onClick={onNavigate} />
+        <NavItem to="/about" icon={Shield} label="About Us" onClick={onNavigate} />
+        <NavItem to="/settings" icon={SettingsIcon} label="Settings" onClick={onNavigate} />
+        {user && (
+          <button 
+            onClick={() => {
+              signOut();
+              onNavigate?.();
+            }}
+            className="w-full flex items-center gap-4 px-5 py-3 rounded-[5px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Sign Out"
+          >
+            <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Sign Out</span>
+          </button>
+        )}
+      </div>
+
+      {userProfile.isVerifiedArtist && (
+        <div className="pt-6 space-y-3">
+          <Link 
+            to="/upload"
+            onClick={onNavigate}
+            className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Upload new track"
+          >
+            <Upload className="h-5 w-5" />
+            <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Upload Track</span>
+          </Link>
+          <Link 
+            to="/mint"
+            onClick={onNavigate}
+            className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Mint new NFT"
+          >
+            <PlusCircle className="h-5 w-5" />
+            <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
+          </Link>
+        </div>
+      )}
+
+      {/* TJ Coin Price Widget */}
+      <div className="mt-8 p-4 rounded-[5px] bg-muted/50 border-0 flex items-center justify-between" role="complementary" aria-label="Token Price Info">
+        <div className="flex items-center gap-3">
+          <img src={TJ_COIN_ICON} alt="JAM Token" className="w-6 h-6 object-contain" />
+          <div>
+            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">JAM Price</p>
+            <p className="text-sm font-bold text-foreground tracking-tighter">${JAM_PRICE_USD.toFixed(3)}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-[9px] font-bold text-green-500 uppercase tracking-widest" aria-label="Price change">+2.4%</p>
+        </div>
+      </div>
+    </nav>
+  </>
+);
+
+const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: LucideIcon; label: string; onClick?: () => void }) => (
   <NavLink 
     to={to} 
+    onClick={onClick}
     className={({ isActive }) => `
       flex items-center gap-4 px-5 py-3.5 rounded-[5px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
       ${isActive ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}

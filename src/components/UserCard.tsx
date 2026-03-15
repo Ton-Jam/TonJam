@@ -44,7 +44,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     return (
       <div 
         onClick={handleClick}
-        className="flex items-center gap-3 p-3 rounded-[5px] border border-border/50 hover:bg-muted/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="flex items-center gap-3 p-3 rounded-[5px] border border-blue-500/30 hover:bg-muted/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -82,7 +82,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     return (
       <div 
         onClick={handleClick}
-        className="flex items-center justify-between p-4 rounded-[5px] border border-border/50 hover:bg-muted/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="flex items-center justify-between p-4 rounded-[5px] border border-blue-500/30 hover:bg-muted/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -127,7 +127,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   return (
     <div 
       onClick={handleClick}
-      className="flex flex-col items-center text-center p-6 rounded-[5px] border border-border/50 hover:bg-muted/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="flex flex-col items-center text-center p-6 rounded-[5px] border border-blue-500/30 hover:bg-muted/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -138,7 +138,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       tabIndex={0}
       aria-label={`View profile of ${user.name}`}
     >
-      <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-[5px] overflow-hidden border border-border/50 group-hover:border-neutral-500/50 transition-all mb-4">
+      <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-[5px] overflow-hidden border border-blue-500/30 group-hover:border-neutral-500/50 transition-all mb-4">
         <img 
           src={avatarUrl} 
           alt={user.name} 
@@ -154,7 +154,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         </div>
         <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">{genre || 'Electronic'}</p>
       </div>
-      <div className="mt-4 pt-4 border-t border-border/50 w-full flex items-center justify-between gap-2">
+      <div className="mt-4 pt-4 border-t border-blue-500/30 w-full flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Users className="h-3 w-3 text-muted-foreground/50" />
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{user.followers?.toLocaleString() || 0}</span>

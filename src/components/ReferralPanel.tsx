@@ -31,10 +31,10 @@ const ReferralPanel: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="glass border border-border/50 bg-foreground/[0.01] rounded-2xl p-8">
+      <div className="glass border border-blue-500/30 bg-foreground/[0.01] rounded-2xl p-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex-1 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-blue-500/40 text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-2">
               <Users className="w-3 h-3" />
               <span>Invite & Earn</span>
             </div>
@@ -46,7 +46,7 @@ const ReferralPanel: React.FC = () => {
             </p>
             
             <div className="flex items-center gap-2 mt-6">
-              <div className="flex-1 bg-background/50 border border-border rounded-xl p-3 flex items-center justify-between">
+              <div className="flex-1 bg-background/50 border border-blue-500/40 rounded-xl p-3 flex items-center justify-between">
                 <span className="text-xs font-mono text-muted-foreground truncate mr-4">{referralLink}</span>
                 <button 
                   onClick={handleCopy}
@@ -66,7 +66,7 @@ const ReferralPanel: React.FC = () => {
           </div>
           
           <div className="w-full md:w-auto flex flex-col gap-4">
-            <div className="bg-muted/30 border border-border/50 rounded-xl p-6 flex flex-col items-center justify-center min-w-[200px]">
+            <div className="bg-muted/30 border border-blue-500/30 rounded-xl p-6 flex flex-col items-center justify-center min-w-[200px]">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Friends Invited</span>
               <span className="text-4xl font-black text-foreground">{referredCount}</span>
             </div>
@@ -84,7 +84,7 @@ const ReferralPanel: React.FC = () => {
           { step: 2, title: 'Friends Join', desc: 'They sign up and connect their wallet' },
           { step: 3, title: 'Earn Rewards', desc: 'You both get 50 TJ when they complete a task' }
         ].map((item) => (
-          <div key={item.step} className="glass border border-border/50 bg-foreground/[0.01] rounded-xl p-6 relative overflow-hidden group">
+          <div key={item.step} className="glass border border-blue-500/30 bg-foreground/[0.01] rounded-xl p-6 relative overflow-hidden group">
             <div className="absolute -right-4 -top-4 text-8xl font-black text-muted/20 group-hover:text-muted/40 transition-colors z-0">
               {item.step}
             </div>

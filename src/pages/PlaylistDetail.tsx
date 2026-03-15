@@ -191,9 +191,9 @@ const PlaylistDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-32 pt-20 px-4 md:px-8">
-      <div className="flex flex-col md:flex-row gap-8 mb-12 items-center md:items-end">
+      <div className="flex flex-col md:flex-row gap-8 mb-12 items-center md:items-end bg-gradient-to-b from-blue-900/20 to-background p-8 rounded-3xl">
         {/* Cover Image / Collage */}
-        <div className="relative group w-48 h-48 md:w-56 md:h-56 flex-shrink-0 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-neutral-900 border border-border mx-auto md:mx-0">
+        <div className="relative group w-48 h-48 md:w-56 md:h-56 flex-shrink-0 rounded-lg overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-neutral-900 border border-white/10 mx-auto md:mx-0">
           {playlist.coverUrl ? (
             <img src={playlist.coverUrl} alt={playlist.title} className="w-full h-full object-cover" />
           ) : (
@@ -234,22 +234,22 @@ const PlaylistDetail: React.FC = () => {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-2xl md:text-4xl font-bold text-foreground focus:outline-none focus:border-neutral-500/50 text-center md:text-left"
+                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-2xl md:text-4xl font-bold text-foreground focus:outline-none focus:border-blue-500 text-center md:text-left"
                 placeholder="Playlist Title"
                 autoFocus
               />
               <textarea
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-sm text-muted-foreground/90 focus:outline-none focus:border-neutral-500/50 resize-none text-center md:text-left"
+                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-sm text-muted-foreground/90 focus:outline-none focus:border-blue-500 resize-none text-center md:text-left"
                 placeholder="Add a description..."
                 rows={3}
               />
               <div className="flex gap-2 justify-center md:justify-start">
-                <button onClick={saveEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-500 text-foreground rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
+                <button onClick={saveEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
                   <Check className="h-3 w-3" /> Save
                 </button>
-                <button onClick={cancelEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
+                <button onClick={cancelEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
                   <X className="h-3 w-3" /> Cancel
                 </button>
               </div>
@@ -257,16 +257,16 @@ const PlaylistDetail: React.FC = () => {
           ) : (
             <>
               <div className="group flex items-start justify-center md:justify-start gap-3 mb-2">
-                <h1 className="text-3xl md:text-5xl font-bold text-foreground tracking-tight">{playlist.title}</h1>
-                <button onClick={startEditing} className="mt-2 text-muted-foreground hover:text-foreground transition-all" title="Edit Playlist">
+                <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">{playlist.title}</h1>
+                <button onClick={startEditing} className="mt-2 text-neutral-400 hover:text-white transition-all" title="Edit Playlist">
                   <Pencil className="h-4 w-4" />
                 </button>
               </div>
               {playlist.description && (
-                <p className="text-muted-foreground/80 text-sm mb-4 max-w-2xl mx-auto md:mx-0">{playlist.description}</p>
+                <p className="text-neutral-300 text-sm mb-4 max-w-2xl mx-auto md:mx-0">{playlist.description}</p>
               )}
-              <div className="flex items-center justify-center md:justify-start gap-3 text-muted-foreground/80 text-xs font-medium mb-6">
-                <span>{playlist.creator}</span>
+              <div className="flex items-center justify-center md:justify-start gap-3 text-neutral-300 text-xs font-medium mb-6">
+                <span className="font-bold text-white">{playlist.creator}</span>
                 <span>•</span>
                 <span>{playlistTracks.length} tracks</span>
               </div>
@@ -274,17 +274,14 @@ const PlaylistDetail: React.FC = () => {
           )}
           
           <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-            <button onClick={handlePlayAll} className="flex items-center gap-1.5 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
-              <Play className="h-3 w-3 fill-current" /> Play All
+            <button onClick={handlePlayAll} className="flex items-center gap-1.5 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95 shadow-lg">
+              <Play className="h-4 w-4 fill-current" /> Play
             </button>
-            <button onClick={handleShuffle} className="flex items-center gap-1.5 px-5 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
-              <Shuffle className="h-3 w-3" /> Shuffle
+            <button onClick={handleShuffle} className="flex items-center gap-1.5 px-8 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
+              <Shuffle className="h-4 w-4" /> Shuffle
             </button>
-            <button onClick={startEditing} className="flex items-center gap-1.5 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Edit Playlist">
-              <Pencil className="h-3 w-3" /> Edit
-            </button>
-            <button onClick={handleDeletePlaylist} className="flex items-center gap-1.5 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full font-bold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Delete Playlist">
-              <Trash2 className="h-3 w-3" />
+            <button onClick={handleDeletePlaylist} className="flex items-center gap-1.5 px-4 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Delete Playlist">
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -331,7 +328,7 @@ const PlaylistDetail: React.FC = () => {
           <select 
             value={filterGenre} 
             onChange={(e) => setFilterGenre(e.target.value)}
-            className="bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground uppercase tracking-widest focus:outline-none focus:border-neutral-500/50"
+            className="bg-neutral-900 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white uppercase tracking-widest focus:outline-none focus:border-blue-500"
           >
             <option value="All">All Genres</option>
             {Array.from(new Set(playlistTracks.map(t => t.genre))).map(g => <option key={g} value={g}>{g}</option>)}
@@ -339,7 +336,7 @@ const PlaylistDetail: React.FC = () => {
           <select 
             value={filterMood} 
             onChange={(e) => setFilterMood(e.target.value)}
-            className="bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground uppercase tracking-widest focus:outline-none focus:border-neutral-500/50"
+            className="bg-neutral-900 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white uppercase tracking-widest focus:outline-none focus:border-blue-500"
           >
             <option value="All">All Moods</option>
             {Array.from(new Set(playlistTracks.map(t => t.mood || 'Unknown'))).map(m => <option key={m} value={m}>{m}</option>)}
@@ -347,11 +344,19 @@ const PlaylistDetail: React.FC = () => {
         </div>
       )}
 
+      {/* Track List Header */}
+      <div className="flex items-center gap-4 px-4 py-2 text-neutral-400 text-xs uppercase tracking-wider border-b border-white/10 mb-2">
+        <div className="w-10 text-center">#</div>
+        <div className="flex-1">Title</div>
+        <div className="w-24 text-right hidden sm:block">Duration</div>
+        <div className="w-16"></div>
+      </div>
+
       <div className="flex flex-col gap-2 pb-8">
         {playlistTracks.map((track, index) => (
           <div 
             key={track.id} 
-            className={`w-full flex items-center gap-2 group rounded-[10px] pr-2 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-neutral-500/30' : 'hover:bg-muted/50 border-transparent'}`}
+            className={`w-full flex items-center gap-2 group rounded-[10px] pr-2 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/30' : 'hover:bg-muted/50 border-blue-500/30'}`}
             onClick={() => handleTrackClick(track.id)}
             onMouseDown={() => handleTouchStart(track.id)}
             onMouseUp={handleTouchEnd}

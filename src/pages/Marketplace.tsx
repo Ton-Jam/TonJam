@@ -136,7 +136,7 @@ const Marketplace: React.FC = () => {
 
       {/* 2. LIVE BIDDING RELAY - ENHANCED */}
         <section className="mb-20 pt-10">
-          <div className="max-w-[1600px] mx-auto px-6">
+          <div className="max-w-[1600px] mx-auto px-0 md:px-6">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]"></div>
@@ -152,7 +152,7 @@ const Marketplace: React.FC = () => {
             <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-8 pb-4" >
               {topBiddedNfts.map((nft) => (
                 <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full lg:w-[calc(50%-16px)] snap-center cursor-pointer group" >
-                  <div className="relative aspect-[16/7] bg-[#0a0a0a] border border-border/50 rounded-[12px] overflow-hidden transition-all group-hover:border-border/80 shadow-2xl">
+                  <div className="relative aspect-[16/7] bg-[#0a0a0a] border border-blue-500/50 rounded-[12px] overflow-hidden transition-all group-hover:border-blue-500/80 shadow-2xl">
                     <img src={nft.imageUrl} className="w-full h-full object-cover grayscale-[0.4] group-hover:grayscale-0 transition-all duration-[10s] group-hover:scale-105" alt={nft.title} />
                     <div className="absolute inset-0 flex items-center justify-center p-5">
                       <button className="px-6 py-2 bg-muted hover:bg-muted/80 backdrop-blur-md rounded-[6px] text-[10px] font-bold uppercase tracking-widest text-foreground transition-all active:scale-95"> BID </button>
@@ -165,8 +165,8 @@ const Marketplace: React.FC = () => {
         </section>
 
       {/* 3. REFINED CONTROLS - Clean Dropdown Filters */}
-      <div className="sticky top-[calc(var(--header-height,64px)+32px)] z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-6 mb-8 transition-all duration-300">
-        <div className="max-w-[1600px] mx-auto flex flex-col gap-4">
+      <div className="sticky top-[calc(var(--header-height,64px)+32px)] z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-0 md:px-6 mb-8 transition-all duration-300">
+        <div className="max-w-[1600px] mx-auto flex flex-col gap-4 px-4 md:px-0">
           <div className="flex flex-wrap items-center gap-4 w-full">
             <select 
               value={genreFilter} 
@@ -228,7 +228,7 @@ const Marketplace: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6">
+      <div className="max-w-[1600px] mx-auto px-0 md:px-6">
         {/* 5. MARKET SECTIONS - BENTO STYLE */}
         <div className="space-y-16">
           <section>

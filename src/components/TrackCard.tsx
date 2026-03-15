@@ -12,9 +12,10 @@ interface TrackCardProps {
   variant?: 'default' | 'row'; // Added variant prop to support list views if needed, though default is now 1:1
   index?: number;
   onMint?: (track: Track) => void;
+  className?: string;
 }
 
-const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMint }) => {
+const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMint, className = '' }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack } = useAudio();
   const [isTipping, setIsTipping] = React.useState(false);
@@ -158,7 +159,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-2 rounded-[12px] hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-foreground/[0.02]"
+        className={`group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-foreground/[0.02] ${className}`}
         onClick={handleCardClick}
         onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
         role="button"
@@ -265,7 +266,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
 
   return (
     <div 
-      className="group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[12px] glass p-3 bg-foreground/[0.02]"
+      className={`group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[8px] glass p-3 bg-foreground/[0.02] ${className}`}
       onClick={handleCardClick}
       onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
       role="button"
@@ -273,7 +274,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
       aria-label={`View track: ${track.title} by ${track.artist}`}
     >
       {/* Image Container - 1:1 Aspect Ratio */}
-      <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
+      <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
         <img 
           src={track.coverUrl} 
           alt="" 
@@ -365,7 +366,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
         </div>
         
         {/* Stats */}
-        <div className="flex items-center justify-between border-t border-blue-500/30 pt-2 mt-2">
+        <div className="flex items-center justify-between pt-2 mt-2">
           {track.isNFT ? (
             <div className="flex items-center justify-between w-full gap-2">
                <div className="flex items-center gap-1">
