@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { GoogleGenAI, Type } from "@google/genai";
 
 const UploadTrack: React.FC = () => {
-  const { addUserTrack } = useAudio();
+  const { addUserTrack, userProfile } = useAudio();
   const navigate = useNavigate();
   
   const [isUploading, setIsUploading] = useState(false);
@@ -203,7 +203,7 @@ const UploadTrack: React.FC = () => {
         id: `track-${Date.now()}`,
         title: formData.title,
         artist: formData.artist || 'Unknown Artist',
-        artistId: 'user-artist',
+        artistId: userProfile.id || 'user-artist',
         coverUrl: coverPreview || 'https://picsum.photos/400/400?seed=default',
         audioUrl: URL.createObjectURL(audioFile),
         duration: 180,
@@ -217,6 +217,12 @@ const UploadTrack: React.FC = () => {
         releaseDate: new Date().toISOString().split('T')[0],
       };
       
+      if (formData.isNFT) {
+        setIsUploading(false);
+        navigate('/mint', { state: { track: newTrack } });
+        return;
+      }
+
       addUserTrack(newTrack);
       setIsUploading(false);
       setStep(2);

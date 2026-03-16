@@ -142,9 +142,9 @@ const JamSpace: React.FC = () => {
 
       <div className="max-w-[1600px] mx-auto px-0 sm:px-4 md:px-12 mt-6 relative z-10">
         <header className="flex items-center justify-between mb-8 px-4 sm:px-0">
-          <h1 className="text-2xl font-bold text-foreground uppercase tracking-widest">JamSpace</h1>
+          <h1 className="text-2xl font-bold text-blue-600 dark:text-foreground uppercase tracking-widest">JamSpace</h1>
           <div className="flex items-center gap-4">
-            <button className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all">
+            <button className="p-2 rounded-full hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground transition-all">
               <Bell className="h-5 w-5" />
             </button>
             <img src={MOCK_USER.avatar} alt={MOCK_USER.name} className="w-10 h-10 rounded-full border border-blue-500/30" />
@@ -209,9 +209,9 @@ const JamSpace: React.FC = () => {
                   <button 
                     key={item.id} 
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`w-full flex items-center gap-5 px-5 py-4 rounded-[10px] transition-all group ${activeTab === item.id ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent'}`} 
+                    className={`w-full flex items-center gap-5 px-5 py-4 rounded-[10px] transition-all group ${activeTab === item.id ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30' : 'text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground hover:bg-muted/50 border border-transparent'}`} 
                   >
-                    <item.icon className={`h-4 w-4 ${activeTab === item.id ? 'text-blue-400' : 'text-muted-foreground/50 group-hover:text-foreground'}`} />
+                    <item.icon className={`h-4 w-4 ${activeTab === item.id ? 'text-blue-400' : 'text-blue-500/40 dark:text-muted-foreground/50 group-hover:text-blue-600 dark:group-hover:text-foreground'}`} />
                     <span className="text-[11px] font-bold uppercase tracking-widest">{item.label}</span>
                   </button>
                 ))}
@@ -253,7 +253,7 @@ const JamSpace: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search live nodes and sessions..."
-                className="w-full bg-muted/50 border border-blue-500/30 rounded-xl py-4 pl-12 pr-4 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
+                className="w-full bg-muted/50 border border-blue-500/30 rounded-xl py-4 pl-12 pr-4 text-sm text-blue-600 dark:text-foreground placeholder:text-blue-500/30 dark:placeholder:text-foreground/30 focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
               />
             </div>
 
@@ -261,7 +261,7 @@ const JamSpace: React.FC = () => {
             <div className="sticky top-[var(--header-height,64px)] z-30 backdrop-blur-2xl py-4 w-full space-y-6 bg-background/40 px-4 transition-all duration-300">
               <div className="flex gap-3 overflow-x-auto no-scrollbar">
                 {['All', 'Following', 'Trending'].map(tab => (
-                  <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-blue-500/50 shadow-xl shadow-blue-500/20' : 'bg-muted/50 text-muted-foreground border-blue-500/30 hover:text-foreground hover:bg-muted' }`} >
+                  <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-blue-500/50 shadow-xl shadow-blue-500/20' : 'bg-muted/50 text-blue-500/70 dark:text-muted-foreground border-blue-500/30 hover:text-blue-600 dark:hover:text-foreground hover:bg-muted' }`} >
                     {tab}
                   </button>
                 ))}
@@ -274,7 +274,7 @@ const JamSpace: React.FC = () => {
                     <button 
                       key={type} 
                       onClick={() => setFilterType(type as any)}
-                      className={`px-3 py-1.5 rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-muted text-foreground border-blue-500/50 shadow-lg' : 'text-foreground/30 border-transparent hover:text-foreground'}`}
+                      className={`px-3 py-1.5 rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-muted text-blue-600 dark:text-foreground border-blue-500/50 shadow-lg' : 'text-blue-500/30 dark:text-foreground/30 border-transparent hover:text-blue-600 dark:hover:text-foreground'}`}
                     >
                       {type}
                     </button>
@@ -286,23 +286,23 @@ const JamSpace: React.FC = () => {
                     onClick={() => setSortOrder(prev => prev === 'Newest' ? 'Oldest' : 'Newest')}
                     className="flex items-center gap-3 px-4 py-2 rounded-[8px] bg-muted/50 hover:bg-muted border border-blue-500/30 hover:border-blue-500/50 transition-all group"
                   >
-                    <span className="text-[9px] font-bold text-muted-foreground/80 uppercase tracking-widest group-hover:text-foreground">{sortOrder}</span>
+                    <span className="text-[9px] font-bold text-blue-500/80 dark:text-muted-foreground/80 uppercase tracking-widest group-hover:text-blue-600 dark:group-hover:text-foreground">{sortOrder}</span>
                     <div className="flex flex-col -space-y-0.5">
-                      <div className={`w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-b-[4.5px] ${sortOrder === 'Oldest' ? 'border-b-blue-500' : 'border-b-white/20'}`}></div>
-                      <div className={`w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[4.5px] ${sortOrder === 'Newest' ? 'border-t-blue-500' : 'border-t-white/20'}`}></div>
+                      <div className={`w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-b-[4.5px] ${sortOrder === 'Oldest' ? 'border-b-blue-500' : 'border-b-blue-500/20 dark:border-b-white/20'}`}></div>
+                      <div className={`w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[4.5px] ${sortOrder === 'Newest' ? 'border-t-blue-500' : 'border-t-blue-500/20 dark:border-t-white/20'}`}></div>
                     </div>
                   </button>
 
                   <div className="flex items-center bg-muted/50 rounded-[8px] p-1 border border-blue-500/30">
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-1.5 rounded-[6px] transition-all ${viewMode === 'list' ? 'bg-muted text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                      className={`p-1.5 rounded-[6px] transition-all ${viewMode === 'list' ? 'bg-muted text-blue-600 dark:text-foreground shadow-sm' : 'text-blue-500/50 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                     >
                       <List className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-1.5 rounded-[6px] transition-all ${viewMode === 'grid' ? 'bg-muted text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                      className={`p-1.5 rounded-[6px] transition-all ${viewMode === 'grid' ? 'bg-muted text-blue-600 dark:text-foreground shadow-sm' : 'text-blue-500/50 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                     >
                       <LayoutGrid className="h-4 w-4" />
                     </button>
@@ -323,7 +323,7 @@ const JamSpace: React.FC = () => {
             <section className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex flex-col">
-                  <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">Live Nodes</h3>
+                  <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em]">Live Nodes</h3>
                   <span className="text-[7px] font-bold text-green-500 uppercase tracking-widest mt-1">Active Broadcasts</span>
                 </div>
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
@@ -341,13 +341,13 @@ const JamSpace: React.FC = () => {
 
             {/* Recommended Nodes */}
             <section className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
-              <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em] mb-10">Recommended Nodes</h3>
+              <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em] mb-10">Recommended Nodes</h3>
               <div className="space-y-6">
                 {artists.slice(0, 3).map(artist => (
                   <UserCard key={artist.id} user={artist} variant="compact" />
                 ))}
               </div>
-              <button onClick={() => navigate('/explore/artists?title=Recommended Nodes&filter=recommended')} className="w-full mt-10 py-4 text-[9px] font-bold uppercase text-blue-500 tracking-[0.2em] hover:text-foreground hover:bg-blue-600/10 border border-blue-500/30 rounded-[8px] transition-all active:scale-95"> Discover More Nodes </button>
+              <button onClick={() => navigate('/explore/artists?title=Recommended Nodes&filter=recommended')} className="w-full mt-10 py-4 text-[9px] font-bold uppercase text-blue-500 tracking-[0.2em] hover:text-blue-600 dark:hover:text-foreground hover:bg-blue-600/10 border border-blue-500/30 rounded-[8px] transition-all active:scale-95"> Discover More Nodes </button>
             </section>
 
             {/* AI Curated Frequencies */}
@@ -355,7 +355,7 @@ const JamSpace: React.FC = () => {
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-3">
                   <Sparkles className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">AI Frequencies</h3>
+                  <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em]">AI Frequencies</h3>
                 </div>
                 <div className="flex gap-0.5">
                   {[1,2,3].map(i => <div key={i} className="w-1 h-1 rounded-full bg-blue-500/20"></div>)}
@@ -366,7 +366,7 @@ const JamSpace: React.FC = () => {
                   <TrackCard key={track.id} track={track} variant="row" />
                 ))}
               </div>
-              <button onClick={() => navigate('/explore/tracks?title=AI Frequencies&filter=recommended')} className="w-full mt-8 py-3 text-[8px] font-bold uppercase text-muted-foreground/50 tracking-widest hover:text-foreground transition-colors"> View All </button>
+              <button onClick={() => navigate('/explore/tracks?title=AI Frequencies&filter=recommended')} className="w-full mt-8 py-3 text-[8px] font-bold uppercase text-blue-500/50 dark:text-muted-foreground/50 tracking-widest hover:text-blue-600 dark:hover:text-foreground transition-colors"> View All </button>
             </section>
           </aside>
         </div>

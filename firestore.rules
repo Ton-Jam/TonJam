@@ -1,0 +1,103 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: tracks
+    // Fields: id, title, artist, artistId, coverUrl, audioUrl, genre, isNFT, ...
+    //
+    // Collection: nfts
+    // Fields: id, trackId, title, owner, creator, artist, artistId, price, imageUrl, edition, ...
+    //
+    // Collection: users
+    // Fields: id, name, handle, avatar, walletAddress, ...
+    //
+    // Collection: transactions
+    // Fields: id, type, amount, recipientAddress, senderAddress, timestamp, status, ...
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "krusherkrupy@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidTrack(data) {
+      return data.id is string &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.artist is string &&
+             data.artistId is string &&
+             data.coverUrl is string &&
+             data.audioUrl is string &&
+             data.genre is string &&
+             data.isNFT is bool;
+    }
+
+    function isValidNFT(data) {
+      return data.id is string &&
+             data.trackId is string &&
+             data.title is string &&
+             data.owner is string &&
+             data.creator is string &&
+             data.price is string &&
+             data.imageUrl is string &&
+             data.edition is string;
+    }
+
+    function isValidUser(data) {
+      return data.id is string &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
+             data.handle is string && data.handle.size() > 0 && data.handle.size() < 30 &&
+             data.avatar is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /tracks/{trackId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidTrack(request.resource.data);
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.artistId || isAdmin()) && isValidTrack(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /nfts/{nftId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidNFT(request.resource.data);
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.artistId || request.auth.uid == resource.data.owner || isAdmin()) && isValidNFT(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if (isOwner(userId) || isAdmin()) && isValidUser(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.senderAddress || request.auth.uid == resource.data.recipientAddress || isAdmin());
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+  }
+}

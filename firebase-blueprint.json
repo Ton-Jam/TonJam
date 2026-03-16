@@ -1,0 +1,100 @@
+{
+  "entities": {
+    "Track": {
+      "title": "Track",
+      "description": "A music track artifact",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "artist": { "type": "string" },
+        "artistId": { "type": "string" },
+        "coverUrl": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "duration": { "type": "number" },
+        "genre": { "type": "string" },
+        "isNFT": { "type": "boolean" },
+        "price": { "type": "string" },
+        "bpm": { "type": "number" },
+        "key": { "type": "string" },
+        "playCount": { "type": "number" },
+        "likes": { "type": "number" },
+        "releaseDate": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "title", "artist", "artistId", "coverUrl", "audioUrl", "genre", "isNFT"]
+    },
+    "NFTItem": {
+      "title": "NFTItem",
+      "description": "A music NFT artifact",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "trackId": { "type": "string" },
+        "title": { "type": "string" },
+        "owner": { "type": "string" },
+        "creator": { "type": "string" },
+        "artist": { "type": "string" },
+        "artistId": { "type": "string" },
+        "price": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "edition": { "type": "string" },
+        "supply": { "type": "number" },
+        "minted": { "type": "number" },
+        "isAuction": { "type": "boolean" },
+        "description": { "type": "string" },
+        "listingType": { "type": "string" }
+      },
+      "required": ["id", "trackId", "title", "owner", "creator", "price", "imageUrl", "edition"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "handle": { "type": "string" },
+        "avatar": { "type": "string" },
+        "walletAddress": { "type": "string" },
+        "isVerifiedArtist": { "type": "boolean" },
+        "jamBalance": { "type": "string" },
+        "stakedJam": { "type": "string" }
+      },
+      "required": ["id", "name", "handle", "avatar"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "A blockchain transaction record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "amount": { "type": "string" },
+        "recipientAddress": { "type": "string" },
+        "senderAddress": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "type", "amount", "recipientAddress", "timestamp", "status"]
+    }
+  },
+  "firestore": {
+    "/tracks/{trackId}": {
+      "schema": "Track",
+      "description": "Global marketplace tracks"
+    },
+    "/nfts/{nftId}": {
+      "schema": "NFTItem",
+      "description": "Global marketplace NFTs"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Transaction history"
+    }
+  }
+}

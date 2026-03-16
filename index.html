@@ -78,13 +78,13 @@
         /* Light Mode Overrides */
         html.light body {
             background-color: #ffffff;
-            color: #0f172a;
+            color: #2563EB;
         }
 
         html.light .glass {
-            background: rgba(255, 255, 255, 0.85);
-            /* border: 1px solid rgba(192, 192, 192, 0.2); Removed border */
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
+            border-color: rgba(37, 99, 235, 0.1);
         }
 
         /* Modal Backdrops & Solid Backgrounds */
@@ -93,45 +93,74 @@
         html.light .bg-[#050505],
         html.light .bg-[#080808],
         html.light .bg-[#0A0A0A],
-        html.light .bg-[#0f0f0f] {
+        html.light .bg-[#0f0f0f],
+        html.light .bg-background,
+        html.light [class*="bg-background"] {
             background-color: #ffffff !important;
         }
 
         html.light .bg-black\/95,
         html.light .bg-black\/90,
         html.light .bg-black\/85,
-        html.light .bg-black\/80 {
-            background-color: rgba(255, 255, 255, 0.92) !important;
+        html.light .bg-black\/80,
+        html.light .bg-background\/80,
+        html.light .bg-background\/90,
+        html.light .bg-background\/95 {
+            background-color: rgba(255, 255, 255, 0.95) !important;
         }
 
         /* Subtle backgrounds for inputs and items */
         html.light .bg-white\/5,
-        html.light .bg-white\/10 {
-            background-color: rgba(15, 23, 42, 0.04) !important;
+        html.light .bg-white\/10,
+        html.light .bg-muted,
+        html.light .bg-muted\/50,
+        html.light .bg-muted\/30 {
+            background-color: rgba(37, 99, 235, 0.05) !important;
         }
 
         html.light aside,
         html.light header,
-        html.light nav {
+        html.light nav,
+        html.light section,
+        html.light .modal-content,
+        html.light [role="dialog"] {
             background-color: #ffffff !important;
-            border-color: rgba(15, 23, 42, 0.05) !important;
+            border-color: rgba(37, 99, 235, 0.1) !important;
         }
 
-        /* Text Overrides */
-        html.light .text-white { color: #0f172a !important; }
-        html.light .text-white\/80 { color: rgba(15, 23, 42, 0.8) !important; }
-        html.light .text-white\/60 { color: rgba(15, 23, 42, 0.6) !important; }
-        html.light .text-white\/50 { color: rgba(15, 23, 42, 0.5) !important; }
-        html.light .text-white\/40 { color: rgba(15, 23, 42, 0.4) !important; }
-        html.light .text-white\/30 { color: rgba(15, 23, 42, 0.3) !important; }
-        html.light .text-white\/20 { color: rgba(15, 23, 42, 0.2) !important; }
-        html.light .text-white\/10 { color: rgba(15, 23, 42, 0.1) !important; }
+        /* Text Overrides - Force Blue in Light Mode */
+        html.light .text-white,
+        html.light .text-foreground,
+        html.light .text-muted-foreground { 
+            color: #2563EB !important; 
+        }
+        
+        html.light .text-white\/80,
+        html.light .text-white\/60,
+        html.light .text-white\/50,
+        html.light .text-muted-foreground\/50,
+        html.light .text-muted-foreground\/70 { 
+            color: rgba(37, 99, 235, 0.7) !important; 
+        }
+
+        html.light .text-white\/40,
+        html.light .text-white\/30,
+        html.light .text-white\/20,
+        html.light .text-white\/10 { 
+            color: rgba(37, 99, 235, 0.4) !important; 
+        }
+
+        /* JAM Coin Icon Visibility */
+        html.light img[src*="TonjamCoin"] {
+            filter: drop-shadow(0 0 2px rgba(37, 99, 235, 0.5));
+        }
 
         /* Border Overrides */
         html.light .border-white\/5,
         html.light .border-white\/10,
-        html.light .border-white\/20 {
-            border-color: rgba(15, 23, 42, 0.08) !important;
+        html.light .border-white\/20,
+        html.light .border-border {
+            border-color: rgba(37, 99, 235, 0.15) !important;
         }
 
         html.light .shadow-2xl {

@@ -2,8 +2,72 @@ import React, { createContext, useContext, useState, useRef, useEffect, useMemo 
 import { toast } from 'sonner';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post } from '@/types';
-import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS } from '@/constants';
+import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
+import { db, auth } from '@/lib/firebase';
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  getDoc,
+  updateDoc,
+  getDocFromServer
+} from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
 
 interface Notification {
   id: string;
@@ -378,75 +442,116 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   }, [followedUserIds]);
 
-  const [userTracks, setUserTracks] = useState<Track[]>(() => {
-    const saved = localStorage.getItem('tonjam_user_tracks');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [userTracks, setUserTracks] = useState<Track[]>([]);
+  const [userNFTs, setUserNFTs] = useState<NFTItem[]>([]);
+  const [firebaseTracks, setFirebaseTracks] = useState<Track[]>([]);
+  const [firebaseNFTs, setFirebaseNFTs] = useState<NFTItem[]>([]);
 
-  const [userNFTs, setUserNFTs] = useState<NFTItem[]>(() => {
-    const saved = localStorage.getItem('tonjam_user_nfts');
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  // Sync with Firebase
   useEffect(() => {
-    localStorage.setItem('tonjam_user_tracks', JSON.stringify(userTracks));
-  }, [userTracks]);
-
-  useEffect(() => {
-    localStorage.setItem('tonjam_user_nfts', JSON.stringify(userNFTs));
-  }, [userNFTs]);
-
-  const allTracks = React.useMemo(() => {
-    return [...userTracks, ...MOCK_TRACKS];
-  }, [userTracks]);
-
-  const [allNFTs, setAllNFTs] = useState<NFTItem[]>(() => {
-    return [...userNFTs, ...MOCK_NFTS];
-  });
-
-  /* Keep allNFTs in sync with userNFTs additions */
-  useEffect(() => {
-    setAllNFTs(prev => {
-      const existingIds = new Set(prev.map(n => n.id));
-      const newUserNFTs = userNFTs.filter(n => !existingIds.has(n.id));
-      return [...newUserNFTs, ...prev];
+    const tracksQuery = query(collection(db, 'tracks'), orderBy('id', 'desc'));
+    const unsubscribeTracks = onSnapshot(tracksQuery, (snapshot) => {
+      const tracks = snapshot.docs.map(doc => doc.data() as Track);
+      setFirebaseTracks(tracks);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'tracks');
     });
-  }, [userNFTs]);
 
-  const updateNFT = (nftId: string, updates: Partial<NFTItem>, silent: boolean = false) => {
-    setAllNFTs(prev => prev.map(nft => nft.id === nftId ? { ...nft, ...updates } : nft));
-    /* Also update userNFTs if it's one of them */
-    setUserNFTs(prev => prev.map(nft => nft.id === nftId ? { ...nft, ...updates } : nft));
-    if (!silent) addNotification("Asset protocol updated", "success");
-  };
+    const nftsQuery = query(collection(db, 'nfts'), orderBy('id', 'desc'));
+    const unsubscribeNFTs = onSnapshot(nftsQuery, (snapshot) => {
+      const nfts = snapshot.docs.map(doc => doc.data() as NFTItem);
+      setFirebaseNFTs(nfts);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'nfts');
+    });
 
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      /* Only handle if not in an input/textarea */
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setVolume(volume + 0.05);
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setVolume(volume - 0.05);
+    // Test connection
+    const testConnection = async () => {
+      try {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('the client is offline')) {
+          console.error("Please check your Firebase configuration.");
+        }
       }
     };
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [volume]);
+    testConnection();
 
-  const addUserTrack = (track: Track) => {
-    setUserTracks(prev => [track, ...prev]);
-    addNotification(`Track "${track.title}" uploaded`, "success");
+    return () => {
+      unsubscribeTracks();
+      unsubscribeNFTs();
+    };
+  }, []);
+
+  // Auth Sync
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          setUserProfile(userDoc.data() as UserProfile);
+        } else {
+          const newProfile: UserProfile = {
+            ...MOCK_USER,
+            id: user.uid,
+            name: user.displayName || 'Anonymous',
+            avatar: user.photoURL || 'https://picsum.photos/seed/user/200/200',
+            walletAddress: '', // To be updated by user
+          };
+          await setDoc(doc(db, 'users', user.uid), newProfile);
+          setUserProfile(newProfile);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const allTracks = React.useMemo(() => {
+    const combined = [...firebaseTracks, ...MOCK_TRACKS];
+    // De-duplicate by ID
+    const unique = Array.from(new Map(combined.map(t => [t.id, t])).values());
+    return unique;
+  }, [firebaseTracks]);
+
+  const allNFTs = React.useMemo(() => {
+    const combined = [...firebaseNFTs, ...MOCK_NFTS];
+    // De-duplicate by ID
+    const unique = Array.from(new Map(combined.map(n => [n.id, n])).values());
+    return unique;
+  }, [firebaseNFTs]);
+
+  useEffect(() => {
+    if (userProfile.id) {
+      setUserTracks(firebaseTracks.filter(t => t.artistId === userProfile.id));
+      setUserNFTs(firebaseNFTs.filter(n => n.artistId === userProfile.id || n.owner === userProfile.walletAddress));
+    }
+  }, [firebaseTracks, firebaseNFTs, userProfile]);
+
+  const updateNFT = async (nftId: string, updates: Partial<NFTItem>, silent: boolean = false) => {
+    try {
+      await updateDoc(doc(db, 'nfts', nftId), updates);
+      if (!silent) addNotification("Asset protocol updated", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `nfts/${nftId}`);
+    }
   };
 
-  const addUserNFT = (nft: NFTItem, silent: boolean = false) => {
-    setUserNFTs(prev => {
-      if (prev.find(n => n.id === nft.id)) return prev;
-      return [nft, ...prev];
-    });
-    if (!silent) addNotification(`NFT "${nft.title}" minted`, "success");
+  const addUserTrack = async (track: Track) => {
+    try {
+      await setDoc(doc(db, 'tracks', track.id), track);
+      addNotification(`Track "${track.title}" uploaded`, "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `tracks/${track.id}`);
+    }
+  };
+
+  const addUserNFT = async (nft: NFTItem, silent: boolean = false) => {
+    try {
+      await setDoc(doc(db, 'nfts', nft.id), nft);
+      if (!silent) addNotification(`NFT "${nft.title}" minted`, "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `nfts/${nft.id}`);
+    }
   };
 
   useEffect(() => {
@@ -480,6 +585,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.removeItem('ton-connect-storage_http-bridge-framework');
     addNotification("App reset to initial state", "warning");
   };
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (userProfile.walletAddress) {
+        const balance = await tonService.getJettonBalance(userProfile.walletAddress, JAM_JETTON_MASTER);
+        setUserProfile(prev => ({ ...prev, jamBalance: balance }));
+      }
+    };
+
+    fetchBalance();
+    const interval = setInterval(fetchBalance, 30000); // Refresh every 30s
+    return () => clearInterval(interval);
+  }, [userProfile.walletAddress]);
 
   // Staking Reward Accumulation
   useEffect(() => {

@@ -188,7 +188,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-foreground'}`}>{track.title}</h4>
+          <h4 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-blue-600 dark:text-foreground'}`}>{track.title}</h4>
           <div className="flex items-center gap-1.5 mt-0.5">
             {artist && (
               <img 
@@ -202,7 +202,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
               />
             )}
             <p 
-              className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate hover:text-foreground hover:underline cursor-pointer inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+              className="text-[9px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate hover:text-blue-600 dark:hover:text-foreground hover:underline cursor-pointer inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
               onClick={handleArtistClick}
               onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
               role="button"
@@ -223,13 +223,13 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                Mint NFT
              </button>
            )}
-           <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hidden sm:block" aria-label="Duration">
+           <span className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest hidden sm:block" aria-label="Duration">
               {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
            </span>
            <div className="relative">
              <button 
                onClick={toggleTipMenu} 
-               className={`p-2 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+               className={`p-2 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground' : 'hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                aria-label="Tip artist"
                aria-haspopup="true"
                aria-expanded={isTipping}
@@ -242,7 +242,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                    <button
                      key={amount}
                      onClick={(e) => handleTip(e, amount)}
-                     className="px-2 py-1 hover:bg-muted rounded text-[9px] font-bold text-foreground whitespace-nowrap transition-colors flex items-center gap-1"
+                     className="px-2 py-1 hover:bg-muted rounded text-[9px] font-bold text-blue-600 dark:text-foreground whitespace-nowrap transition-colors flex items-center gap-1"
                    >
                      <img src={TJ_COIN_ICON} className="w-2.5 h-2.5" alt="" />
                      {amount}
@@ -253,7 +253,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
            </div>
            <button 
              onClick={handleOptions} 
-             className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+             className="p-2 rounded-full hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
              aria-label="Track options"
              aria-haspopup="true"
            >
@@ -337,7 +337,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
 
       {/* Content Below Card */}
       <div className="px-0.5">
-        <h3 className={`text-[11px] font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-400' : 'text-foreground'}`}>
+        <h3 className={`text-[11px] font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-400' : 'text-blue-600 dark:text-foreground'}`}>
           {track.title}
         </h3>
         <div className="flex items-center gap-1.5 mt-0.5 mb-1.5">
@@ -353,7 +353,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
             />
           )}
           <p 
-            className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+            className="text-[8px] font-bold uppercase tracking-widest text-blue-500/70 dark:text-muted-foreground truncate hover:text-blue-600 dark:hover:text-foreground hover:underline cursor-pointer inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
             onClick={handleArtistClick}
             onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
             role="button"
@@ -371,13 +371,13 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
             <div className="flex items-center justify-between w-full gap-2">
                <div className="flex items-center gap-1">
                  <img src={TJ_COIN_ICON} className="w-3 h-3" alt="TON" />
-                 <span className="text-[10px] font-bold text-foreground tracking-tighter">{track.price || '0'}</span>
+                 <span className="text-[10px] font-bold text-blue-600 dark:text-foreground tracking-tighter">{track.price || '0'}</span>
                </div>
                <div className="flex items-center gap-2">
                  <div className="relative">
                    <button 
                      onClick={toggleTipMenu}
-                     className={`p-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+                     className={`p-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground' : 'hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                      aria-label="Tip artist"
                    >
                      <Coins className="h-3 w-3" />
@@ -388,7 +388,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                          <button
                            key={amount}
                            onClick={(e) => handleTip(e, amount)}
-                           className="px-3 py-1.5 hover:bg-muted rounded text-[9px] font-bold text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-3"
+                           className="px-3 py-1.5 hover:bg-muted rounded text-[9px] font-bold text-blue-600 dark:text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-3"
                          >
                            <div className="flex items-center gap-1">
                              <img src={TJ_COIN_ICON} className="w-2.5 h-2.5" alt="" />
@@ -414,7 +414,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
               <div className="relative">
                 <button 
                   onClick={toggleTipMenu}
-                  className={`p-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+                  className={`p-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground' : 'hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                   aria-label="Tip artist"
                 >
                   <Coins className="h-3 w-3" />
@@ -425,7 +425,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                       <button
                         key={amount}
                         onClick={(e) => handleTip(e, amount)}
-                        className="px-3 py-1.5 hover:bg-muted rounded text-[9px] font-bold text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-3"
+                        className="px-3 py-1.5 hover:bg-muted rounded text-[9px] font-bold text-blue-600 dark:text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-3"
                       >
                         <div className="flex items-center gap-1">
                           <img src={TJ_COIN_ICON} className="w-2.5 h-2.5" alt="" />
@@ -448,8 +448,8 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
           ) : (
             <>
               <div className="flex items-center gap-1" aria-label={`${track.playCount || 0} streams`}>
-                <Headphones className="h-2.5 w-2.5 text-muted-foreground/50" aria-hidden="true" />
-                <span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
+                <Headphones className="h-2.5 w-2.5 text-blue-500/50 dark:text-muted-foreground/50" aria-hidden="true" />
+                <span className="text-[8px] font-bold text-blue-500/30 dark:text-foreground/30 uppercase tracking-widest">
                   {(track.playCount || 0).toLocaleString()}
                 </span>
                 {(track.playCount || 0) > 1000 && (
@@ -457,15 +457,15 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                 )}
               </div>
               <div className="flex items-center gap-1" aria-label="Duration">
-                <Clock className="h-2.5 w-2.5 text-muted-foreground/50" aria-hidden="true" />
-                <span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
+                <Clock className="h-2.5 w-2.5 text-blue-500/50 dark:text-muted-foreground/50" aria-hidden="true" />
+                <span className="text-[8px] font-bold text-blue-500/30 dark:text-foreground/30 uppercase tracking-widest">
                   {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
                 </span>
               </div>
               <div className="relative">
                 <button 
                   onClick={toggleTipMenu}
-                  className={`p-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground scale-110' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+                  className={`p-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground scale-110' : 'hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                   aria-label="Tip artist"
                 >
                   <Coins className="h-3 w-3" />
@@ -476,7 +476,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
                       <button
                         key={amount}
                         onClick={(e) => handleTip(e, amount)}
-                        className="px-3 py-1.5 hover:bg-muted rounded text-[9px] font-bold text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-3"
+                        className="px-3 py-1.5 hover:bg-muted rounded text-[9px] font-bold text-blue-600 dark:text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-3"
                       >
                         <div className="flex items-center gap-1">
                           <img src={TJ_COIN_ICON} className="w-2.5 h-2.5" alt="" />

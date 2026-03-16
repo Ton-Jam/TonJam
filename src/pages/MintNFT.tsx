@@ -9,6 +9,7 @@ import { toNano } from '@ton/core';
 import { NFTItem, Track, NFTTrait } from '@/types';
 import { APP_LOGO } from '@/constants';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { TrendingUp } from 'lucide-react';
 
 const mintSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -167,7 +168,7 @@ const MintNFT: React.FC = () => {
       if (track) {
         // Update existing track
         const updatedTrack = { ...track, isNFT: true, price: data.price };
-        addUserTrack(updatedTrack);
+        await addUserTrack(updatedTrack);
       } else {
         const newTrack: Track = {
           id: newNFT.trackId,
@@ -183,10 +184,10 @@ const MintNFT: React.FC = () => {
           genre: 'Electronic',
           isNFT: true
         };
-        addUserTrack(newTrack);
+        await addUserTrack(newTrack);
       }
       
-      addUserNFT(newNFT);
+      await addUserNFT(newNFT);
       addNotification("NFT Protocol successfully deployed to TON", "success");
       setStep(4);
     } catch (err) {
@@ -199,6 +200,28 @@ const MintNFT: React.FC = () => {
 
   return (
     <div className="w-full px-0 sm:px-6 lg:px-10 py-0 sm:py-8 animate-in fade-in duration-1000">
+      {/* COMPACT MARKET TICKER */}
+      <div className="sticky top-[var(--header-height,64px)] z-[38] bg-background/90 backdrop-blur-xl py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap transition-all duration-300 mb-8 rounded-[10px] border border-neutral-500/10">
+        <div className="flex gap-20 animate-[marquee_40s_linear_infinite]">
+          {[
+            { label: 'TON/USD', val: '$5.42', up: true },
+            { label: 'MARKET CAP', val: '24.2M TON', up: true },
+            { label: 'AVG FLOOR', val: '4.8 TON', up: false },
+            { label: 'NET VOLUME', val: '1.2M TON', up: true },
+            { label: 'ACTIVE BIDS', val: '1,242', up: true },
+            { label: 'NODES', val: '8,421', up: true },
+            { label: 'TON/USD', val: '$5.42', up: true },
+            { label: 'MARKET CAP', val: '24.2M TON', up: true },
+          ].map((stat, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="text-[7px] font-bold uppercase text-blue-500/50 tracking-[0.2em]">{stat.label}</span>
+              <span className="text-[9px] font-bold text-foreground tracking-tighter font-mono bg-muted/50 px-1.5 py-0.5 rounded-[4px]">{stat.val}</span>
+              <TrendingUp className={`h-2.5 w-2.5 ${stat.up ? 'text-emerald-500' : 'text-rose-500 rotate-180'}`} />
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="w-full">
         <div className="px-6 sm:px-0 py-6 sm:py-0 mb-2 sm:mb-8">
           <button 

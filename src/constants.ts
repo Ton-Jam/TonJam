@@ -7,6 +7,7 @@ export const TON_LOGO = "https://i.postimg.cc/jj7HksNw/ton-symbol.png";
 
 // Placeholder price for TJ Coin (JAM) in USD
 export const JAM_PRICE_USD = 0.052;
+export const JAM_JETTON_MASTER = "EQCxE6mNZ_9MvS_88888888888888888888888888888"; // Placeholder JAM Master Address
 
 export const MOCK_TRACKS: Track[] = [
   { 

@@ -418,7 +418,7 @@ const Profile: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <StatBlock label="Network Value" value={localUser.earnings} subValue="TON" icon="gem" trend="+12.4%" />
-                <StatBlock label="Reward Credits" value="1,450" subValue="TJ" icon="coins" trend="+5.2%" />
+                <StatBlock label="JAM Balance" value={parseFloat(userProfile.jamBalance || '0').toLocaleString()} subValue="JAM" icon="coins" trend="+5.2%" />
               </div>
             </div>
 

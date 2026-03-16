@@ -21,7 +21,10 @@ import {
   LogIn,
   PlusCircle as PlusCircleIcon,
   Filter,
-  Share2
+  Share2,
+  History,
+  X,
+  ArrowRight
 } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -50,7 +53,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    const saved = localStorage.getItem('recentSearches');
+    return saved ? JSON.parse(saved) : ['Lo-fi hip hop', 'Cyberpunk Beats', 'Phonk Vibes'];
+  });
+  const trendingTopics = ['TON Blockchain', 'NFT Drops', 'Jam Sessions', 'Web3 Music', 'Artist Dashboard'];
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const saveRecentSearch = (query: string) => {
+    if (!query.trim()) return;
+    const updated = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
+    setRecentSearches(updated);
+    localStorage.setItem('recentSearches', JSON.stringify(updated));
+  };
+
+  const removeRecentSearch = (query: string) => {
+    const updated = recentSearches.filter(s => s !== query);
+    setRecentSearches(updated);
+    localStorage.setItem('recentSearches', JSON.stringify(updated));
+  };
   
   const isHome = location.pathname === '/';
   const isExplore = location.pathname.startsWith('/explore');
@@ -73,9 +94,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
+      saveRecentSearch(searchQuery.trim());
       navigate(`/discover?search=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
     }
+  };
+
+  const handleSuggestionClick = (query: string) => {
+    setSearchQuery(query);
+    saveRecentSearch(query);
+    navigate(`/discover?search=${encodeURIComponent(query)}`);
+    setIsSearchOpen(false);
   };
 
   useEffect(() => {
@@ -163,6 +192,84 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onKeyDown={handleSearch}
                   aria-label="Search"
                 />
+
+                {/* Desktop Search Dropdown */}
+                <AnimatePresence>
+                  {isSearchOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-xl border border-blue-500/20 rounded-2xl shadow-2xl overflow-hidden z-50 p-4"
+                    >
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <div className="flex items-center gap-2 mb-3 px-2">
+                            <History className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Recent Searches</span>
+                          </div>
+                          <div className="space-y-1">
+                            {recentSearches.length > 0 ? (
+                              recentSearches.map((item) => (
+                                <div key={item} className="group flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                                  <button 
+                                    onClick={() => handleSuggestionClick(item)}
+                                    className="flex-1 text-left text-sm text-foreground/80 hover:text-foreground transition-colors"
+                                  >
+                                    {item}
+                                  </button>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button 
+                                      onClick={() => handleSuggestionClick(item)}
+                                      className="p-1.5 rounded-md hover:bg-primary/20 text-primary transition-colors"
+                                      title="Search"
+                                    >
+                                      <ArrowRight className="h-3 w-3" />
+                                    </button>
+                                    <button 
+                                      onClick={() => removeRecentSearch(item)}
+                                      className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive/70 hover:text-destructive transition-colors"
+                                      title="Remove"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="px-2 text-xs text-muted-foreground italic">No recent searches</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-3 px-2">
+                            <TrendingUp className="h-3 w-3 text-primary" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trending Now</span>
+                          </div>
+                          <div className="space-y-1">
+                            {trendingTopics.map((topic) => (
+                              <div key={topic} className="group flex items-center justify-between p-2 rounded-lg hover:bg-primary/5 transition-colors">
+                                <button 
+                                  onClick={() => handleSuggestionClick(topic)}
+                                  className="flex-1 text-left text-sm text-foreground/80 hover:text-primary transition-colors"
+                                >
+                                  {topic}
+                                </button>
+                                <button 
+                                  onClick={() => handleSuggestionClick(topic)}
+                                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-primary/10 text-primary transition-all"
+                                >
+                                  <TrendingUp className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
@@ -187,6 +294,64 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       autoFocus
                       aria-label="Search"
                     />
+
+                    {/* Mobile Search Dropdown */}
+                    <AnimatePresence>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute top-full left-0 right-0 mt-2 bg-background border border-blue-500/20 rounded-xl shadow-2xl overflow-hidden z-50 p-3 max-h-[60vh] overflow-y-auto"
+                      >
+                        <div className="space-y-6">
+                          <div>
+                            <div className="flex items-center gap-2 mb-2 px-1">
+                              <History className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Recent</span>
+                            </div>
+                            <div className="space-y-1">
+                              {recentSearches.map((item) => (
+                                <div key={item} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                                  <button 
+                                    onClick={() => handleSuggestionClick(item)}
+                                    className="flex-1 text-left text-xs text-foreground/90"
+                                  >
+                                    {item}
+                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <button onClick={() => handleSuggestionClick(item)} className="p-1 text-primary">
+                                      <ArrowRight className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button onClick={() => removeRecentSearch(item)} className="p-1 text-destructive/60">
+                                      <X className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="flex items-center gap-2 mb-2 px-1">
+                              <TrendingUp className="h-3 w-3 text-primary" />
+                              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Trending</span>
+                            </div>
+                            <div className="grid grid-cols-1 gap-1">
+                              {trendingTopics.map((topic) => (
+                                <button 
+                                  key={topic}
+                                  onClick={() => handleSuggestionClick(topic)}
+                                  className="flex items-center justify-between p-2 rounded-lg bg-primary/5 text-xs text-foreground/90 text-left"
+                                >
+                                  <span>{topic}</span>
+                                  <TrendingUp className="h-3 w-3 text-primary/60" />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </AnimatePresence>
                   </div>
                 ) : (
                   location.pathname.startsWith('/marketplace') ? (
@@ -212,6 +377,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 ml-4">
+            <Link to="/tasks" className="hidden sm:flex items-center gap-2 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full bg-blue-500/10 dark:bg-muted/30 px-3 py-1.5 border border-blue-500/20 dark:border-transparent" aria-label="Tasks">
+              <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-5 h-5 object-contain drop-shadow-md" />
+              <span className="text-xs font-black text-blue-600 dark:text-foreground tracking-tighter">{parseFloat(userProfile.jamBalance || '0').toLocaleString()}</span>
+            </Link>
+
             {(isArtistProfile || isUserProfile) && (
               <button 
                 onClick={async () => {
@@ -235,10 +405,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
             {isHome && (
               <>
-                <Link to="/tasks" className="flex items-center justify-center hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full" aria-label="Tasks">
-                  <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-8 h-8 object-contain drop-shadow-md" />
-                </Link>
-
                 <button 
                   onClick={() => tonConnectUI.openModal()}
                   className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -248,17 +414,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </button>
                 
                 {user ? (
-                  <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border-0 hover:opacity-80 transition-all flex items-center justify-center bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
+                  <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-blue-500/20 dark:border-0 hover:opacity-80 transition-all flex items-center justify-center bg-blue-500/10 dark:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
                     {user.user_metadata?.avatar_url ? (
                       <img src={user.user_metadata.avatar_url} alt={`${user.user_metadata.full_name || 'User'} avatar`} className="w-full h-full object-cover" />
                     ) : (
-                      <User className="w-4 h-4 text-muted-foreground" />
+                      <User className="w-4 h-4 text-blue-600 dark:text-muted-foreground" />
                     )}
                   </Link>
                 ) : (
                   <button 
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="p-2 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="p-2 rounded-full bg-blue-600 dark:bg-primary hover:bg-blue-500 dark:hover:bg-primary/90 text-foreground dark:text-primary-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Sign In"
                   >
                     <User className="h-5 w-5" />
@@ -414,16 +580,28 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       )}
 
       {/* TJ Coin Price Widget */}
-      <div className="mt-8 p-4 rounded-[5px] bg-muted/50 border-0 flex items-center justify-between" role="complementary" aria-label="Token Price Info">
-        <div className="flex items-center gap-3">
-          <img src={TJ_COIN_ICON} alt="JAM Token" className="w-6 h-6 object-contain" />
-          <div>
-            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">JAM Price</p>
-            <p className="text-sm font-bold text-foreground tracking-tighter">${JAM_PRICE_USD.toFixed(3)}</p>
+      <div className="mt-8 p-4 rounded-[5px] bg-muted/50 border-0 space-y-3" role="complementary" aria-label="Token Price Info">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src={TJ_COIN_ICON} alt="JAM Token" className="w-6 h-6 object-contain" />
+            <div>
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">JAM Price</p>
+              <p className="text-sm font-bold text-foreground tracking-tighter">${JAM_PRICE_USD.toFixed(3)}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-[9px] font-bold text-green-500 uppercase tracking-widest" aria-label="Price change">+2.4%</p>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-[9px] font-bold text-green-500 uppercase tracking-widest" aria-label="Price change">+2.4%</p>
+        
+        <div className="pt-3 border-t border-foreground/5 flex items-center justify-between">
+          <div>
+            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Your Balance</p>
+            <p className="text-sm font-bold text-blue-500 tracking-tighter">{parseFloat(userProfile.jamBalance || '0').toLocaleString()} JAM</p>
+          </div>
+          <Link to="/wallet" className="p-1.5 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors">
+            <PlusCircle className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </div>
     </nav>

@@ -18,6 +18,7 @@ const Marketplace: React.FC = () => {
   const [sortBy, setSortBy] = useState('Newest');
   const [genreFilter, setGenreFilter] = useState('All');
   const [artistFilter, setArtistFilter] = useState('All');
+  const [rarityFilter, setRarityFilter] = useState('All');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery } = useAudio();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -67,16 +68,17 @@ const Marketplace: React.FC = () => {
       const genre = track?.genre || 'Unknown';
       const matchesGenre = genreFilter === 'All' || genre === genreFilter;
       const matchesArtist = artistFilter === 'All' || nft.creator === artistFilter;
+      const matchesRarity = rarityFilter === 'All' || nft.edition === rarityFilter;
       const price = parseFloat(nft.price);
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
 
-      if (activeTab === 'Trending') return matchesSearch && matchesGenre && matchesArtist && matchesPrice;
-      if (activeTab === 'Genesis') return matchesSearch && nft.edition === 'Unique' && matchesGenre && matchesArtist && matchesPrice;
-      if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited' && matchesGenre && matchesArtist && matchesPrice;
-      if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction' && matchesGenre && matchesArtist && matchesPrice;
-      if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === userProfile.walletAddress) && matchesGenre && matchesArtist && matchesPrice;
-      if (activeTab === 'My NFTs') return matchesSearch && isMyNft && matchesGenre && matchesArtist && matchesPrice;
-      return matchesSearch && matchesGenre && matchesArtist && matchesPrice;
+      if (activeTab === 'Trending') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
+      if (activeTab === 'Genesis') return matchesSearch && nft.edition === 'Unique' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
+      if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
+      if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
+      if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === userProfile.walletAddress) && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
+      if (activeTab === 'My NFTs') return matchesSearch && isMyNft && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
+      return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
     });
 
     if (sortBy === 'Price: Low') list.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
@@ -191,6 +193,17 @@ const Marketplace: React.FC = () => {
             </select>
 
             <select 
+              value={rarityFilter} 
+              onChange={(e) => setRarityFilter(e.target.value)}
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
+            >
+              <option value="All">All Rarities</option>
+              <option value="Unique">Unique (1/1)</option>
+              <option value="Rare">Rare</option>
+              <option value="Limited">Limited</option>
+            </select>
+
+            <select 
               value={
                 priceRange[0] === 0 && priceRange[1] === 1000 ? 'All' :
                 priceRange[0] === 0 && priceRange[1] === 100 ? '0-100' :
@@ -209,6 +222,18 @@ const Marketplace: React.FC = () => {
               <option value="0-100">0 - 100 TON</option>
               <option value="100-500">100 - 500 TON</option>
               <option value="500+">500+ TON</option>
+            </select>
+
+            <div className="flex-1"></div>
+
+            <select 
+              value={sortBy} 
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
+            >
+              {SORT_OPTIONS.map(opt => (
+                <option key={opt} value={opt}>Sort: {opt}</option>
+              ))}
             </select>
           </div>
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">

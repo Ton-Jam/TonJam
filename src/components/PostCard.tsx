@@ -191,7 +191,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
           "bg-linear-to-br from-black/[0.05] to-transparent dark:from-white/[0.08] dark:to-transparent",
           "backdrop-blur-md backdrop-saturate-150",
           "border border-black/[0.05] dark:border-white/[0.08]",
-          "text-background/90 dark:text-foreground",
+          "text-blue-600/90 dark:text-foreground",
           "shadow-xs",
           "translate-z-0 will-change-transform",
           "before:pointer-events-none before:absolute before:inset-0 before:bg-linear-to-br before:from-black/[0.02] before:to-black/[0.01] before:opacity-0 before:transition-opacity dark:before:from-white/[0.03] dark:before:to-white/[0.01]",
@@ -225,15 +225,15 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 aria-label={`View ${post.userName}'s profile`}
               >
                 <div className="flex items-center gap-1">
-                  <span className="font-semibold text-background hover:underline dark:text-foreground/90">{post.userName}</span>
+                  <span className="font-semibold text-blue-600 hover:underline dark:text-foreground/90">{post.userName}</span>
                   {post.isVerified && (
                     <VerifiedIcon className="h-4 w-4 text-blue-400" />
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-background text-sm dark:text-muted-foreground/80">{userHandle}</span>
-                  <span className="text-background text-sm dark:text-muted-foreground/80">·</span>
-                  <span className="text-background text-sm dark:text-muted-foreground/80">{post.timestamp}</span>
+                  <span className="text-blue-500 text-sm dark:text-muted-foreground/80">{userHandle}</span>
+                  <span className="text-blue-500 text-sm dark:text-muted-foreground/80">·</span>
+                  <span className="text-blue-500 text-sm dark:text-muted-foreground/80">{post.timestamp}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -248,7 +248,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 )}
                 <button 
                   onClick={() => setShowOptions(true)} 
-                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-background hover:bg-background/5 hover:text-background dark:text-muted-foreground/90 dark:hover:bg-muted/50 dark:hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-blue-500 hover:bg-blue-500/5 hover:text-blue-600 dark:text-muted-foreground/90 dark:hover:bg-muted/50 dark:hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Post options"
                   aria-haspopup="true"
                 >
@@ -258,7 +258,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             </div>
 
             {/* Post Text */}
-            <p className="text-base text-background dark:text-foreground/90 mb-4 whitespace-pre-wrap">
+            <p className="text-base text-blue-700 dark:text-foreground/90 mb-4 whitespace-pre-wrap">
               {renderContentWithHashtags(post.content)}
             </p>
 
@@ -311,7 +311,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <h5 className="text-[10px] font-bold text-foreground uppercase truncate">{track.title}</h5>
-                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
+                <p className="text-[8px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
@@ -319,7 +319,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                   <p className="text-[10px] font-bold text-foreground uppercase">{(track.streams || track.playCount || 0).toLocaleString()}</p>
                 </div>
                 <button 
-                  className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Add track to library"
                 >
                   <Plus className="h-4 w-4" />
@@ -350,10 +350,10 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                   <span className="text-[7px] font-bold text-blue-400 uppercase tracking-[0.3em]">Sonic Artifact Acquired</span>
                 </div>
                 <h5 className="text-xs font-bold text-foreground uppercase truncate tracking-tight">{nft.title}</h5>
-                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">Creator: {nft.creator}</p>
+                <p className="text-[9px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate">Creator: {nft.creator}</p>
               </div>
               <div className="text-right">
-                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Valuation</p>
+                <p className="text-[8px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest mb-1">Valuation</p>
                 <div className="flex items-center gap-1.5 justify-end">
                   <span className="text-sm font-bold text-foreground tracking-tighter">{nft.price}</span>
                   <span className="text-[8px] font-bold text-blue-500">TON</span>
@@ -367,7 +367,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             <div className="flex items-center gap-6">
               <button 
                 onClick={handleLike} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${isLiked ? 'text-red-500' : 'text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                 aria-label={isLiked ? "Unlike post" : "Like post"}
               >
                 <motion.div whileTap={{ scale: 1.5 }}>
@@ -377,7 +377,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               </button>
               <button 
                 onClick={() => setShowComments(!showComments)} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm hover:scale-105 ${showComments ? 'text-blue-500' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm hover:scale-105 ${showComments ? 'text-blue-500' : 'text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                 aria-label={showComments ? "Hide comments" : "Show comments"}
                 aria-expanded={showComments}
               >
@@ -385,7 +385,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               </button>
               <button 
                 onClick={handleRepost} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm hover:scale-105 ${isReposted ? 'text-green-500' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm hover:scale-105 ${isReposted ? 'text-green-500' : 'text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
                 aria-label={isReposted ? "Remove repost" : "Repost post"}
               >
                 <Repeat2 className="h-4 w-4" /> <span>{repostsCount}</span>
@@ -413,7 +413,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-muted/50 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-1 focus:ring-blue-500/50 transition-all text-foreground placeholder:text-muted-foreground/50"
+                  className="w-full bg-muted/50 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-1 focus:ring-blue-500/50 transition-all text-blue-600 dark:text-foreground placeholder:text-blue-500/50 dark:placeholder:text-muted-foreground/50"
                   aria-label="Write a comment"
                 />
                 <button
@@ -451,7 +451,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                       <div className="bg-muted/50 rounded-[10px] p-3 relative group-hover/comment:bg-foreground/[0.07] transition-colors border border-border/50">
                         <div className="flex items-center justify-between mb-1">
                           <h5 
-                            className="text-[10px] font-bold text-foreground uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                            className="text-[10px] font-bold text-blue-600 dark:text-foreground uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                             onClick={(e) => handleCommentProfileClick(e, comment.userId)}
                             onKeyDown={(e) => handleKeyDown(e, () => handleCommentProfileClick(e as any, comment.userId))}
                             role="button"
@@ -459,9 +459,9 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                           >
                             {comment.userName}
                           </h5>
-                          <span className="text-[8px] text-muted-foreground/50 font-bold uppercase tracking-widest">{comment.timestamp}</span>
+                          <span className="text-[8px] text-blue-500/50 dark:text-muted-foreground/50 font-bold uppercase tracking-widest">{comment.timestamp}</span>
                         </div>
-                        <p className="text-[11px] text-foreground/70 leading-relaxed">{renderContentWithHashtags(comment.content)}</p>
+                        <p className="text-[11px] text-blue-600/70 dark:text-foreground/70 leading-relaxed">{renderContentWithHashtags(comment.content)}</p>
                         
                         {/* Reactions */}
                         <div className="flex items-center gap-2 mt-2">
