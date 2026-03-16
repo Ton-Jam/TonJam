@@ -42,7 +42,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-2xl bg-neutral-900 border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-2xl bg-white border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header / Banner */}
@@ -53,7 +53,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
               alt={artist.name} 
               className="w-full h-full object-cover opacity-60"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
           </div>
           
           <button 
@@ -64,7 +64,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
           </button>
 
           <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end gap-6">
-            <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-neutral-900 shadow-xl overflow-hidden shrink-0">
+            <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden shrink-0">
               <img 
                 src={artist.avatarUrl} 
                 alt={artist.name} 
@@ -73,7 +73,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
             </div>
             <div className="mb-2 flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-2xl sm:text-3xl font-bold text-foreground truncate">{artist.name}</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-black">{artist.name}</h2>
                 {artist.verified && <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/20" />}
               </div>
               <p className="text-sm text-muted-foreground/80 font-medium mb-3">
@@ -170,7 +170,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
  
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <h4 className={`text-sm font-bold truncate ${isTrackActive ? 'text-blue-400' : 'text-foreground'}`}>
+                          <h4 className={`text-sm font-bold truncate ${isTrackActive ? 'text-blue-400' : 'text-black'}`}>
                             {track.title}
                           </h4>
                           {isTrending && (
@@ -201,7 +201,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
             ) : (
               <div className="p-8 text-center border border-dashed border-border rounded-lg">
                 <Disc className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-xs font-bold text-foreground/30 uppercase tracking-widest">No tracks available</p>
+                <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest">No tracks available</p>
               </div>
             )}
           </div>

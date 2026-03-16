@@ -289,7 +289,7 @@ const Discover: React.FC = () => {
     const currentSortOptions = sortOptions[activeFilter as keyof typeof sortOptions] || [];
 
     return (
-      <div className="flex items-center gap-4 py-4">
+      <div className="flex items-center gap-4 py-4 filter-section">
         {activeFilter !== 'NFTs' && activeFilter !== 'Playlists' && activeFilter !== 'Users' && (
           <select
             value={selectedGenre || ''}

@@ -86,21 +86,21 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={resetAndClose}></div>
       
-      <div className="relative w-full max-w-md glass border-t sm:border border-border bg-[#0a0a0a] rounded-t-[20px] sm:rounded-[10px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-500 flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+      <div className="relative w-full max-w-md glass border-t sm:border border-border bg-white rounded-t-[20px] sm:rounded-[10px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-500 flex flex-col max-h-[95vh] sm:max-h-[90vh]">
         {/* Handle for mobile */}
         <div className="w-12 h-1 mx-auto my-3 rounded-full bg-muted sm:hidden" />
 
         {/* Header */}
         <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between flex-shrink-0">
           <div>
-            <h2 className="text-lg font-bold text-foreground tracking-tighter uppercase">
+            <h2 className="text-lg font-bold text-black tracking-tighter uppercase">
               {step === 2 ? 'Sync Complete' : 'Initialize New Sync'}
             </h2>
             <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
               {step === 1 ? 'Configure Playlist Parameters' : 'Sequence Established'}
             </p>
           </div>
-          <button onClick={resetAndClose} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close Create Playlist Modal">
+          <button onClick={resetAndClose} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close Create Playlist Modal">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -157,7 +157,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                         type="text" 
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-foreground/[0.03] border border-border/50 rounded-[8px] p-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50"
+                        className="w-full bg-foreground/[0.03] border border-border/50 rounded-[8px] p-3 text-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50"
                         placeholder="e.g. Late Night Vibes"
                         autoFocus
                         required
@@ -172,7 +172,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                         type="text" 
                         value={formData.tags}
                         onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                        className="w-full bg-foreground/[0.03] border border-border/50 rounded-[8px] p-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50"
+                        className="w-full bg-foreground/[0.03] border border-border/50 rounded-[8px] p-3 text-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50"
                         placeholder="chill, workout..."
                         aria-label="Playlist Tags"
                       />
@@ -186,7 +186,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                   <textarea 
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[8px] p-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50 resize-none h-20"
+                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[8px] p-3 text-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all placeholder:text-muted-foreground/50 resize-none h-20"
                     placeholder="Describe the vibe..."
                     aria-label="Playlist Description"
                   />
@@ -199,7 +199,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                       <div className={`p-2 rounded-full ${formData.isPrivate ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
                         {formData.isPrivate ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
                       </div>
-                      <p className="text-[9px] font-bold text-foreground uppercase tracking-wider">Private</p>
+                      <p className="text-[9px] font-bold text-black uppercase tracking-wider">Private</p>
                     </div>
                     <Switch 
                       checked={formData.isPrivate} 
@@ -213,7 +213,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                       <div className={`p-2 rounded-full ${formData.isCollaborative ? 'bg-blue-500/10 text-blue-500' : 'bg-muted/50 text-muted-foreground'}`}>
                         <Users className="h-3.5 w-3.5" />
                       </div>
-                      <p className="text-[9px] font-bold text-foreground uppercase tracking-wider">Collab</p>
+                      <p className="text-[9px] font-bold text-black uppercase tracking-wider">Collab</p>
                     </div>
                     <Switch 
                       checked={formData.isCollaborative} 
@@ -228,14 +228,14 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                 <button 
                   type="button" 
                   onClick={resetAndClose}
-                  className="flex-1 py-3.5 bg-muted/50 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-1 py-3.5 bg-muted/50 text-black rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={isCreating}
-                  className="flex-[1.5] py-3.5 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex-[1.5] py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   {isCreating ? (
                     <>
@@ -259,7 +259,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                 <CheckCircle2 className="h-8 w-8" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-foreground tracking-tighter uppercase">Playlist Created</h3>
+                <h3 className="text-xl font-bold text-black tracking-tighter uppercase">Playlist Created</h3>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] max-w-xs leading-relaxed">
                   "{formData.name}" has been added to your library.
                 </p>
@@ -270,7 +270,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
               </div>
               <button 
                 onClick={resetAndClose}
-                className="mt-4 w-full sm:w-auto px-10 py-3.5 bg-foreground text-background rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="mt-4 w-full sm:w-auto px-10 py-3.5 bg-black text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Continue
               </button>

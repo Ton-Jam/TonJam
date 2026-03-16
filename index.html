@@ -128,13 +128,93 @@
             border-color: rgba(37, 99, 235, 0.1) !important;
         }
 
-        /* Text Overrides - Force Blue in Light Mode */
-        html.light .text-white,
+        /* Text Overrides - Force Blue in Light Mode by default */
         html.light .text-foreground,
-        html.light .text-muted-foreground { 
+        html.light .text-muted-foreground,
+        html.light .text-white,
+        html.light .text-primary,
+        html.light [class*="text-"],
+        html.light [class*="text-"] * { 
             color: #2563EB !important; 
         }
+
+        /* Global Border Adjustment - Reducing by 2px from previous 5px */
+        .border, 
+        .border-t, 
+        .border-b, 
+        .border-l, 
+        .border-r,
+        .border-x,
+        .border-y,
+        [class^="border-"][class$="-1"],
+        [class^="border-"][class$="-2"],
+        [class^="border-"][class$="-4"],
+        [class^="border-"][class$="-8"] {
+            border-width: 3px !important;
+        }
         
+        /* Directional border overrides to ensure they stay directional but thick */
+        .border-t { border-top-width: 3px !important; }
+        .border-b { border-bottom-width: 3px !important; }
+        .border-l { border-left-width: 3px !important; }
+        .border-r { border-right-width: 3px !important; }
+        .border-x { border-left-width: 3px !important; border-right-width: 3px !important; }
+        .border-y { border-top-width: 3px !important; border-bottom-width: 3px !important; }
+        
+        /* Ensure we don't accidentally add borders where they were explicitly removed */
+        .border-0, .border-t-0, .border-b-0, .border-l-0, .border-r-0 {
+            border-width: 0 !important;
+        }
+
+        /* Ensure white text on blue backgrounds */
+        html.light .bg-blue-600,
+        html.light .bg-blue-500,
+        html.light .bg-blue-400,
+        html.light .bg-primary,
+        html.light .electric-blue-bg,
+        html.light [class*="bg-blue-600"],
+        html.light [class*="bg-blue-500"],
+        html.light [class*="bg-primary"],
+        html.light .bg-blue-600 *,
+        html.light .bg-blue-500 *,
+        html.light .bg-blue-400 *,
+        html.light .bg-primary *,
+        html.light .electric-blue-bg * {
+            color: #ffffff !important;
+        }
+
+        /* Specific Fix for Filter Sections (Selects and Inputs) */
+        html.light select,
+        html.light input,
+        html.light textarea,
+        html.light .filter-section *,
+        html.light [class*="filter"] * {
+            color: #2563EB !important;
+        }
+        
+        html.light select option {
+            background-color: #ffffff !important;
+            color: #2563EB !important;
+        }
+
+        /* Special case for icons that might use fill-current or stroke-current */
+        html.light .bg-blue-600 svg,
+        html.light .bg-blue-500 svg,
+        html.light .bg-blue-400 svg,
+        html.light .bg-primary svg,
+        html.light .electric-blue-bg svg {
+            color: #ffffff !important;
+            fill: transparent;
+        }
+        
+        html.light .bg-blue-600 .fill-current,
+        html.light .bg-blue-500 .fill-current,
+        html.light .bg-blue-400 .fill-current,
+        html.light .bg-primary .fill-current,
+        html.light .electric-blue-bg .fill-current {
+            fill: #ffffff !important;
+        }
+
         html.light .text-white\/80,
         html.light .text-white\/60,
         html.light .text-white\/50,

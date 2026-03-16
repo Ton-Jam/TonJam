@@ -9,6 +9,8 @@ const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [marketNotifications, setMarketNotifications] = useState(true);
+  const [newReleases, setNewReleases] = useState(true);
+  const [socialSignals, setSocialSignals] = useState(true);
   const [bidNotifications, setBidNotifications] = useState(true);
   const [saleNotifications, setSaleNotifications] = useState(true);
   const { theme, setTheme } = useTheme();
@@ -80,13 +82,39 @@ const Settings: React.FC = () => {
         <SettingItem 
           icon={Bell} 
           label="Marketplace Activity" 
-          description="General marketplace updates"
+          description="General marketplace updates and trends"
         >
           <button 
             onClick={() => setMarketNotifications(!marketNotifications)}
             className={`w-12 h-6 rounded-full transition-all relative ${marketNotifications ? 'bg-blue-600' : 'bg-muted'}`}
           >
             <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${marketNotifications ? 'left-7' : 'left-1'}`} />
+          </button>
+        </SettingItem>
+
+        <SettingItem 
+          icon={Bell} 
+          label="New Releases" 
+          description="Alerts for new drops and collections"
+        >
+          <button 
+            onClick={() => setNewReleases(!newReleases)}
+            className={`w-12 h-6 rounded-full transition-all relative ${newReleases ? 'bg-blue-600' : 'bg-muted'}`}
+          >
+            <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${newReleases ? 'left-7' : 'left-1'}`} />
+          </button>
+        </SettingItem>
+
+        <SettingItem 
+          icon={Bell} 
+          label="Social Signals" 
+          description="Notifications for follows and interactions"
+        >
+          <button 
+            onClick={() => setSocialSignals(!socialSignals)}
+            className={`w-12 h-6 rounded-full transition-all relative ${socialSignals ? 'bg-blue-600' : 'bg-muted'}`}
+          >
+            <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${socialSignals ? 'left-7' : 'left-1'}`} />
           </button>
         </SettingItem>
 

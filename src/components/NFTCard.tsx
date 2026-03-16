@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, CheckCircle2, Eye, Send } from 'lucide-react';
+import { Play, Pause, MoreVertical, CheckCircle2, Eye, Send, Star } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -15,12 +15,18 @@ interface NFTCardProps {
 
 const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction }) => {
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, setOptionsTrack } = useAudio();
+  const { playTrack, currentTrack, isPlaying, setOptionsTrack, userProfile, setAnthem } = useAudio();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
   const isOwner = nft.owner === MOCK_USER.walletAddress;
+  const isAnthem = userProfile.anthemId === nft.id;
+
+  const handleSetAnthem = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAnthem(isAnthem ? null : nft.id);
+  };
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -172,6 +178,16 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
                   {nft.edition}
                 </span>
                 <div className="flex items-center gap-2">
+                  {isOwner && (
+                    <button 
+                      onClick={handleSetAnthem} 
+                      className={`p-1.5 rounded-full bg-background/40 backdrop-blur-md transition-all pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isAnthem ? 'text-amber-400 opacity-100' : 'text-muted-foreground/90 opacity-0 group-hover:opacity-100 hover:text-amber-400'} ${isActive ? 'opacity-100' : ''}`}
+                      title={isAnthem ? "Remove Anthem" : "Set as Anthem"}
+                      aria-label={isAnthem ? "Remove Anthem" : "Set as Anthem"}
+                    >
+                      <Star className={`h-3.5 w-3.5 ${isAnthem ? 'fill-amber-400' : ''}`} />
+                    </button>
+                  )}
                   {isOwner && (
                     <button 
                       onClick={handleSendClick} 

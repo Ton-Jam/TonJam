@@ -143,6 +143,11 @@ const Profile: React.FC = () => {
     [localUser.walletAddress, userAddress, allNFTs]
   );
 
+  const anthemNft = useMemo(() => 
+    allNFTs.find(n => n.id === userProfile.anthemId),
+    [userProfile.anthemId, allNFTs]
+  );
+
   const userPosts = useMemo(() => {
     return posts.filter(p => p.userId === userProfile.id);
   }, [userProfile.id, posts]);
@@ -507,6 +512,51 @@ const Profile: React.FC = () => {
           <div className="lg:col-span-8 space-y-8">
             {activeTab === 'overview' && (
               <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* Anthem Highlight */}
+                {anthemNft && (
+                  <div className="relative group overflow-hidden bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-transparent border border-blue-500/30 p-8 rounded-[20px] shadow-2xl">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <Star className="h-16 w-16 text-blue-500 fill-blue-500" />
+                    </div>
+                    <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                      <div className="w-40 h-40 rounded-[12px] overflow-hidden shadow-2xl border-2 border-blue-500/50 flex-shrink-0">
+                        <img src={anthemNft.imageUrl} className="w-full h-full object-cover" alt={anthemNft.title} />
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                          <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-[8px] font-bold uppercase tracking-[0.3em] border border-blue-500/30">
+                            Profile Anthem
+                          </span>
+                          <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
+                        </div>
+                        <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-foreground mb-2 uppercase italic font-serif">
+                          {anthemNft.title}
+                        </h2>
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">
+                          by @{anthemNft.creator}
+                        </p>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                          <button 
+                            onClick={() => {
+                              const track = allTracks.find(t => t.id === anthemNft.trackId);
+                              if (track) playTrack(track);
+                            }}
+                            className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-3"
+                          >
+                            <Zap className="h-4 w-4" /> Play Anthem
+                          </button>
+                          <button 
+                            onClick={() => navigate(`/nft/${anthemNft.id}`)}
+                            className="px-8 py-3 bg-muted/50 hover:bg-muted text-foreground rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <SectionHeader title="Followed Artists" onAction={() => setActiveTab('network')} actionLabel="View All" />
                 <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
                   {localUser.followedArtists && localUser.followedArtists.length > 0 ? (

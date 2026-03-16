@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
-import { useTonConnectUI } from '@tonconnect/ui-react';
+import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post } from '@/types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
@@ -124,7 +124,8 @@ interface AudioContextType {
   generateDiscoverWeekly: () => void;
   createRecommendedPlaylist: () => void;
   clearRecentlyPlayed: () => void;
-  setUserProfile: (profile: UserProfile) => void;
+  setUserProfile: (profile: UserProfile | ((prev: UserProfile) => UserProfile)) => void;
+  setAnthem: (nftId: string | null) => Promise<void>;
   setGenesisContractAddress: (address: string | null) => void;
   userTracks: Track[];
   userNFTs: NFTItem[];
@@ -185,6 +186,7 @@ const STORAGE_KEYS = {
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tonConnectUI] = useTonConnectUI();
+  const tonAddress = useTonAddress();
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
     return saved ? JSON.parse(saved) : MOCK_USER;
@@ -554,6 +556,34 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const setAnthem = async (nftId: string | null) => {
+    try {
+      // Update local state
+      setUserProfile(prev => ({
+        ...prev,
+        anthemId: nftId || undefined
+      }));
+
+      // Update Firebase if user is logged in
+      if (auth.currentUser) {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, {
+          anthemId: nftId
+        });
+      }
+
+      if (nftId) {
+        const nft = allNFTs.find(n => n.id === nftId);
+        addNotification(`"${nft?.title || 'NFT'}" set as your profile anthem!`, 'success');
+      } else {
+        addNotification("Anthem removed from profile", "info");
+      }
+    } catch (error) {
+      console.error("Error setting anthem:", error);
+      addNotification("Failed to update anthem", "error");
+    }
+  };
+
   useEffect(() => {
     if (genesisContractAddress) {
       localStorage.setItem(STORAGE_KEYS.CONTRACT_ADDRESS, genesisContractAddress);
@@ -680,6 +710,24 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     else if (type === 'warning') toast.warning(message, { duration });
     else toast.info(message, { duration });
   };
+
+  useEffect(() => {
+    if (tonAddress && auth.currentUser && userProfile.walletAddress !== tonAddress) {
+      const updateWallet = async () => {
+        try {
+          const userRef = doc(db, 'users', auth.currentUser!.uid);
+          await updateDoc(userRef, {
+            walletAddress: tonAddress
+          });
+          setUserProfile(prev => ({ ...prev, walletAddress: tonAddress }));
+          addNotification("Wallet address synced with profile", "success");
+        } catch (error) {
+          console.error("Error syncing wallet address:", error);
+        }
+      };
+      updateWallet();
+    }
+  }, [tonAddress, auth.currentUser, userProfile.walletAddress]);
 
   const recordTransaction = (txData: Omit<Transaction, 'id' | 'timestamp' | 'status'>) => {
     const newTx: Transaction = {
@@ -1425,7 +1473,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       toggleLikeTrack, toggleFollowUser, closePlayer, setFullPlayerOpen, toggleShuffle, toggleRepeat,
       addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist,
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
-      generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setGenesisContractAddress, userTracks, userNFTs,
+      generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
       allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
       posts, createPost, deletePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,

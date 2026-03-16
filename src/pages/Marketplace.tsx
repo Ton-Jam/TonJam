@@ -154,7 +154,7 @@ const Marketplace: React.FC = () => {
             <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-8 pb-4" >
               {topBiddedNfts.map((nft) => (
                 <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full lg:w-[calc(50%-16px)] snap-center cursor-pointer group" >
-                  <div className="relative aspect-[16/7] bg-[#0a0a0a] border border-blue-500/50 rounded-[12px] overflow-hidden transition-all group-hover:border-blue-500/80 shadow-2xl">
+                  <div className="relative aspect-[16/7] bg-white border border-blue-500/50 rounded-[12px] overflow-hidden transition-all group-hover:border-blue-500/80 shadow-2xl">
                     <img src={nft.imageUrl} className="w-full h-full object-cover grayscale-[0.4] group-hover:grayscale-0 transition-all duration-[10s] group-hover:scale-105" alt={nft.title} />
                     <div className="absolute inset-0 flex items-center justify-center p-5">
                       <button className="px-6 py-2 bg-muted hover:bg-muted/80 backdrop-blur-md rounded-[6px] text-[10px] font-bold uppercase tracking-widest text-foreground transition-all active:scale-95"> BID </button>
@@ -167,7 +167,7 @@ const Marketplace: React.FC = () => {
         </section>
 
       {/* 3. REFINED CONTROLS - Clean Dropdown Filters */}
-      <div className="sticky top-[calc(var(--header-height,64px)+32px)] z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-0 md:px-6 mb-8 transition-all duration-300">
+      <div className="sticky top-[calc(var(--header-height,64px)+32px)] z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-0 md:px-6 mb-8 transition-all duration-300 filter-section">
         <div className="max-w-[1600px] mx-auto flex flex-col gap-4 px-4 md:px-0">
           <div className="flex flex-wrap items-center gap-4 w-full">
             <select 
@@ -347,7 +347,7 @@ const Marketplace: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="py-40 flex flex-col items-center justify-center rounded-[16px] text-center bg-[#050505] border border-border/50">
+            <div className="py-40 flex flex-col items-center justify-center rounded-[16px] text-center bg-white border border-border/50">
               <div className="w-24 h-24 rounded-full bg-foreground/[0.02] border border-border/50 flex items-center justify-center mb-8">
                 <Satellite className="h-10 w-10 text-muted-foreground/30 animate-pulse" />
               </div>
@@ -360,19 +360,19 @@ const Marketplace: React.FC = () => {
 
         {/* 7. ALPHA DROP / SUBSCRIPTION */}
         <section className="pb-32">
-          <div className="bg-[#0a0a0a] border border-neutral-500/20 p-12 md:p-16 rounded-[20px] flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden group">
+          <div className="bg-white border border-neutral-500/20 p-12 md:p-16 rounded-[20px] flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-12 opacity-[0.03] -rotate-12 group-hover:opacity-[0.06] transition-opacity"><Zap className="h-64 w-64 text-blue-500" /></div>
             <div className="text-center lg:text-left relative z-10">
               <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
                 <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.6em]">Genesis Whitelist</span>
               </div>
-              <h4 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-foreground leading-none mb-6">THE NEURAL <br /> DROP</h4>
-              <p className="text-xs text-foreground/30 uppercase tracking-[0.4em] max-w-md leading-relaxed">Subscribe to the relay for exclusive mint protocols and early access to genesis artifacts.</p>
+              <h4 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-black leading-none mb-6">THE NEURAL <br /> DROP</h4>
+              <p className="text-xs text-neutral-500 uppercase tracking-[0.4em] max-w-md leading-relaxed">Subscribe to the relay for exclusive mint protocols and early access to genesis artifacts.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto relative z-10">
-              <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-background/60 border border-border rounded-[10px] px-6 py-5 text-xs font-bold outline-none text-foreground focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/30" />
-              <button className="px-12 py-5 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[11px] uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/30 active:scale-95 transition-all">SYNC_NOW</button>
+              <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-background/60 border border-border rounded-[10px] px-6 py-5 text-xs font-bold outline-none text-black focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/30" />
+              <button className="px-12 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/30 active:scale-95 transition-all">SYNC_NOW</button>
             </div>
           </div>
         </section>

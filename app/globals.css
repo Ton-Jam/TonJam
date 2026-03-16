@@ -97,11 +97,23 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 /* Ensure white text on blue backgrounds in light mode */
 :root .bg-blue-600, 
 :root .bg-blue-500,
+:root .bg-blue-400,
 :root .bg-primary,
-:root .electric-blue-bg {
-  --foreground: oklch(1 0 0);
-  --muted-foreground: oklch(1 0 0 / 0.7);
-  color: var(--foreground);
+:root .electric-blue-bg,
+:root [class*="bg-blue-600"],
+:root [class*="bg-blue-500"],
+:root [class*="bg-primary"] {
+  --foreground: oklch(1 0 0) !important;
+  --muted-foreground: oklch(1 0 0 / 0.7) !important;
+  --primary-foreground: oklch(1 0 0) !important;
+  color: var(--foreground) !important;
+}
+
+/* Ensure blue text on white backgrounds in light mode */
+:root {
+  --foreground: oklch(0.45 0.15 250); /* Blue */
+  --muted-foreground: oklch(0.45 0.15 250 / 70%);
+  --primary: oklch(0.45 0.15 250);
 }
 
 .dark {

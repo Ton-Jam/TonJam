@@ -50,7 +50,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full max-w-md bg-[#0A0A0A] border border-border rounded-[20px] overflow-hidden shadow-2xl"
+        className="relative w-full max-w-md bg-white border border-border rounded-[20px] overflow-hidden shadow-2xl"
       >
         {/* Header */}
         <div className="p-6 border-b border-border/50 flex items-center justify-between">
@@ -58,7 +58,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
             <div className="w-8 h-8 rounded-[8px] bg-blue-600/20 flex items-center justify-center">
               <Send className="h-4 w-4 text-blue-500" />
             </div>
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-[0.2em]">Transfer Protocol</h2>
+            <h2 className="text-sm font-bold text-black uppercase tracking-[0.2em]">Transfer Protocol</h2>
           </div>
           <button onClick={onClose} className="text-muted-foreground/50 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Close Send Modal">
             <X className="h-5 w-5" />
@@ -78,7 +78,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-[12px] border border-border/50">
                   <img src={nft.imageUrl} className="w-16 h-16 rounded-[8px] object-cover" alt="" />
                   <div>
-                    <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">{nft.title}</h3>
+                    <h3 className="text-sm font-bold text-black uppercase tracking-tight">{nft.title}</h3>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{nft.edition}</p>
                   </div>
                 </div>
@@ -93,7 +93,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                       value={recipient}
                       onChange={(e) => setRecipient(e.target.value)}
                       placeholder="EQD... or username"
-                      className="w-full bg-muted/50 border border-border rounded-[12px] py-4 pl-12 pr-4 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                      className="w-full bg-muted/50 border border-border rounded-[12px] py-4 pl-12 pr-4 text-xs text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
                     />
                   </div>
                 </div>
@@ -108,7 +108,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 <button 
                   onClick={handleSend}
                   disabled={!recipient}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-[12px] font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[12px] font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Review Transfer <ArrowRight className="h-4 w-4" />
                 </button>
@@ -124,7 +124,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 className="space-y-8 text-center"
               >
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-foreground uppercase tracking-tighter">Confirm Transfer</h3>
+                  <h3 className="text-xl font-bold text-black uppercase tracking-tighter">Confirm Transfer</h3>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">You are sending {nft.title} to:</p>
                 </div>
 
@@ -141,7 +141,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                   </button>
                   <button 
                     onClick={confirmSend}
-                    className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[12px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
                     Confirm & Send
                   </button>
@@ -161,7 +161,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                   <Loader2 className="absolute inset-0 m-auto h-8 w-8 text-blue-500 animate-pulse" />
                 </div>
                 <div className="text-center space-y-2">
-                  <h3 className="text-sm font-bold text-foreground uppercase tracking-[0.3em]">Broadcasting Signal</h3>
+                  <h3 className="text-sm font-bold text-black uppercase tracking-[0.3em]">Broadcasting Signal</h3>
                   <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Awaiting TON network confirmation...</p>
                 </div>
               </motion.div>
@@ -178,14 +178,14 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                   <CheckCircle2 className="h-10 w-10 text-green-500" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-sm font-bold text-foreground uppercase tracking-[0.3em]">Transfer Complete</h3>
+                  <h3 className="text-sm font-bold text-black uppercase tracking-[0.3em]">Transfer Complete</h3>
                   <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-relaxed">
                     The asset has been successfully transferred to the new owner.
                   </p>
                 </div>
                 <button 
                   onClick={onClose}
-                  className="mt-4 px-10 py-3 bg-muted/50 hover:bg-muted text-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="mt-4 px-10 py-3 bg-muted/50 hover:bg-muted text-black rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Close Vault
                 </button>

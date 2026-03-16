@@ -94,7 +94,7 @@ const Library: React.FC = () => {
             </button>
             <button 
               onClick={createRecommendedPlaylist}
-              className="flex items-center gap-2 px-6 py-3 bg-neutral-800 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-neutral-700 transition-all active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest hover:bg-neutral-100 transition-all active:scale-95"
             >
               <Sparkles className="h-4 w-4" />
               AI Generation

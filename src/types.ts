@@ -223,6 +223,7 @@ export interface UserProfile {
   createdPlaylistIds?: string[];
   ownedNftIds?: string[];
   listedNftIds?: string[];
+  anthemId?: string;
   socials?: {
     x?: string;
     instagram?: string;

@@ -48,7 +48,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" onClick={onClose}></div>
       
-      <div className="relative w-full max-w-sm glass border border-border rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-sm bg-white border border-border rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/10 blur-3xl rounded-full"></div>
         <div className="p-6 border-b border-border/50 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3">
@@ -56,7 +56,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
               <Tag className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-foreground uppercase tracking-tight">List Asset</h2>
+              <h2 className="text-base font-bold text-black uppercase tracking-tight">List Asset</h2>
               <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Initiate Market Protocol</p>
             </div>
           </div>
@@ -99,7 +99,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
                   step="0.1"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="w-full bg-muted/50 border border-border rounded-[10px] py-3 pl-10 pr-4 text-foreground font-bold outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-sm"
+                  className="w-full bg-muted/50 border border-border rounded-[10px] py-3 pl-10 pr-4 text-black font-bold outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-sm"
                   placeholder="0.00"
                   required
                   aria-label={listingType === 'fixed' ? 'Listing Price' : 'Starting Bid'}
@@ -129,7 +129,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
                   max="30"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  className="w-full bg-muted/50 border border-border rounded-[10px] py-3 px-4 text-foreground font-bold outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-all text-sm"
+                  className="w-full bg-muted/50 border border-border rounded-[10px] py-3 px-4 text-black font-bold outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-all text-sm"
                   placeholder="Enter custom days..."
                   aria-label="Auction Duration in Days"
                 />
@@ -141,14 +141,14 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
           <div className="p-3 bg-blue-500/5 border border-neutral-500/10 rounded-[10px] flex gap-3">
             <Info className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
             <p className="text-[9px] text-muted-foreground/80 leading-relaxed uppercase tracking-widest">
-              TonJam takes a <span className="text-foreground">2.5%</span> marketplace fee. Artist royalties of <span className="text-foreground">{nft.royalty}%</span> will be deducted from the final sale.
+              TonJam takes a <span className="text-black">2.5%</span> marketplace fee. Artist royalties of <span className="text-black">{nft.royalty}%</span> will be deducted from the final sale.
             </p>
           </div>
 
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className={`w-full py-4 rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] text-foreground transition-all active:scale-95 shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+            className={`w-full py-4 rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] text-white transition-all active:scale-95 shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
               ${listingType === 'auction' ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20 text-background focus-visible:ring-amber-500' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/20'}
               ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
             `}

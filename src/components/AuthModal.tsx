@@ -80,13 +80,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-[#0A0A0A] border border-border rounded-[12px] overflow-hidden shadow-2xl"
+          className="relative w-full max-w-md bg-white border border-border rounded-[12px] overflow-hidden shadow-2xl"
         >
           {/* Hardware Header */}
           <div className="bg-foreground/[0.02] border-b border-border/50 p-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-              <h2 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">
+              <h2 className="text-[10px] font-bold text-black uppercase tracking-[0.4em]">
                 {isLogin ? 'Auth_Protocol: Login' : 'Auth_Protocol: Register'}
               </h2>
             </div>
@@ -100,7 +100,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
           <div className="p-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-foreground tracking-tighter uppercase mb-2">
+              <h1 className="text-3xl font-bold text-black tracking-tighter uppercase mb-2">
                 {isLogin ? 'Welcome Back' : 'Join the Network'}
               </h1>
               <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
@@ -118,7 +118,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       {...register('username')}
                       type="text"
                       placeholder="TON_VOYAGER"
-                      className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-foreground/5"
+                      className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
                     />
                     {errors.username && <p className="text-[9px] text-red-500 mt-1">{errors.username.message}</p>}
                   </div>
@@ -133,7 +133,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     {...register('email')}
                     type="email"
                     placeholder="SIGNAL@TONJAM.COM"
-                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-foreground/5"
+                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
                   />
                   {errors.email && <p className="text-[9px] text-red-500 mt-1">{errors.email.message}</p>}
                 </div>
@@ -154,7 +154,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     {...register('password')}
                     type="password"
                     placeholder="••••••••"
-                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-foreground/5"
+                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
                   />
                   {errors.password && <p className="text-[9px] text-red-500 mt-1">{errors.password.message}</p>}
                 </div>
@@ -163,7 +163,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-foreground rounded-[8px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-black rounded-[8px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -182,7 +182,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <div className="w-full border-t border-border/50"></div>
               </div>
               <div className="relative flex justify-center text-[8px] font-bold uppercase tracking-widest">
-                <span className="bg-[#0A0A0A] px-4 text-muted-foreground/50">Social Relay</span>
+                <span className="bg-white px-4 text-muted-foreground/50">Social Relay</span>
               </div>
             </div>
 
@@ -205,7 +205,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <div className="mt-10 text-center">
               <button
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors"
+                className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-black transition-colors"
               >
                 {isLogin ? (
                   <>Don't have a node? <span className="text-blue-500 ml-1">Initialize one</span></>
