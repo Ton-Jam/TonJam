@@ -224,12 +224,12 @@ const FullAudioPlayer: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-3xl animate-in slide-in-from-bottom duration-500 overflow-y-auto overflow-x-hidden">
+    <div className="fixed inset-0 z-[100] bg-white/95 backdrop-blur-3xl animate-in slide-in-from-bottom duration-500 overflow-y-auto overflow-x-hidden">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
         <img
           src={currentTrack.coverUrl}
-          className="w-full h-full object-cover blur-[150px] opacity-20 scale-150 transition-all duration-[3s]"
+          className="w-full h-full object-cover blur-[150px] opacity-10 scale-150 transition-all duration-[3s]"
           alt=""
         />
         <div className="absolute inset-0 "></div>
@@ -409,9 +409,9 @@ const FullAudioPlayer: React.FC = () => {
                   <span className={`text-[8px] font-bold uppercase tracking-widest ${showVolume ? "text-blue-400" : "text-muted-foreground/50"}`}>Vol</span>
                 </motion.div>
                 {showVolume && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-[#111] p-5 rounded-[10px] shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-white p-5 rounded-[10px] shadow-2xl border border-border/50 animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
                     <div
-                      className="h-32 w-2 bg-muted rounded-full relative cursor-pointer group/vslider"
+                      className="h-32 w-2 bg-neutral-100 rounded-full relative cursor-pointer group/vslider"
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const y = e.clientY - rect.top;

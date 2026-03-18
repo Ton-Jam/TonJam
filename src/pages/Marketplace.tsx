@@ -115,7 +115,7 @@ const Marketplace: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 pb-40 w-full min-h-screen bg-background">
       {/* 1. COMPACT MARKET TICKER - Adjusted for Global Header */}
-      <div className="sticky top-[var(--header-height,64px)] z-[38] bg-background/90 backdrop-blur-xl py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap transition-all duration-300">
+      <div className="z-[38] bg-background/90 backdrop-blur-xl py-2 px-6 flex items-center justify-center overflow-hidden whitespace-nowrap transition-all duration-300">
         <div className="flex gap-20 animate-[marquee_40s_linear_infinite]">
           {[
             { label: 'TON/USD', val: '$5.42', up: true },
@@ -137,7 +137,7 @@ const Marketplace: React.FC = () => {
       </div>
 
       {/* 2. LIVE BIDDING RELAY - ENHANCED */}
-        <section className="mb-20 pt-10">
+        <section className="mb-8 mt-6">
           <div className="max-w-[1600px] mx-auto px-0 md:px-6">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -157,7 +157,7 @@ const Marketplace: React.FC = () => {
                   <div className="relative aspect-[16/7] bg-white border border-blue-500/50 rounded-[12px] overflow-hidden transition-all group-hover:border-blue-500/80 shadow-2xl">
                     <img src={nft.imageUrl} className="w-full h-full object-cover grayscale-[0.4] group-hover:grayscale-0 transition-all duration-[10s] group-hover:scale-105" alt={nft.title} />
                     <div className="absolute inset-0 flex items-center justify-center p-5">
-                      <button className="px-6 py-2 bg-muted hover:bg-muted/80 backdrop-blur-md rounded-[6px] text-[10px] font-bold uppercase tracking-widest text-foreground transition-all active:scale-95"> BID </button>
+                      <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 backdrop-blur-md rounded-[6px] text-[10px] font-bold uppercase tracking-widest text-white transition-all active:scale-95"> BID </button>
                     </div>
                   </div>
                 </div>
@@ -167,13 +167,13 @@ const Marketplace: React.FC = () => {
         </section>
 
       {/* 3. REFINED CONTROLS - Clean Dropdown Filters */}
-      <div className="sticky top-[calc(var(--header-height,64px)+32px)] z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-0 md:px-6 mb-8 transition-all duration-300 filter-section">
+      <div className="z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-0 md:px-6 mb-8 transition-all duration-300 filter-section">
         <div className="max-w-[1600px] mx-auto flex flex-col gap-4 px-4 md:px-0">
           <div className="flex flex-wrap items-center gap-4 w-full">
             <select 
               value={genreFilter} 
               onChange={(e) => setGenreFilter(e.target.value)}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500 focus:bg-blue-600 focus:text-white transition-all"
             >
               <option value="All">All Genres</option>
               {Array.from(new Set(MOCK_TRACKS.map(t => t.genre))).map(g => (
@@ -184,7 +184,7 @@ const Marketplace: React.FC = () => {
             <select 
               value={artistFilter} 
               onChange={(e) => setArtistFilter(e.target.value)}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500 focus:bg-blue-600 focus:text-white transition-all"
             >
               <option value="All">All Artists</option>
               {MOCK_ARTISTS.map(a => (
@@ -195,7 +195,7 @@ const Marketplace: React.FC = () => {
             <select 
               value={rarityFilter} 
               onChange={(e) => setRarityFilter(e.target.value)}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500 focus:bg-blue-600 focus:text-white transition-all"
             >
               <option value="All">All Rarities</option>
               <option value="Unique">Unique (1/1)</option>
@@ -216,7 +216,7 @@ const Marketplace: React.FC = () => {
                 else if (p === '100-500') setPriceRange([100, 500]);
                 else if (p === '500+') setPriceRange([500, 10000]);
               }}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
+              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500 focus:bg-blue-600 focus:text-white transition-all"
             >
               <option value="All">All Prices</option>
               <option value="0-100">0 - 100 TON</option>
@@ -241,7 +241,7 @@ const Marketplace: React.FC = () => {
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab)} 
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-foreground border-neutral-500/20' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted' }`} 
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-white border-neutral-500/20' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted' }`} 
               >
                 {tab}
                 {tab === 'My Bids' && userBids.length > 0 && (

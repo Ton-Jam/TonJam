@@ -55,17 +55,33 @@ export const buyNFT = async (
   tonConnectUI: TonConnectUI,
   ownerAddress: string,
   price: string,
-  title: string
+  title: string,
+  royaltySplits: { address: string, percentage: number }[] = []
 ): Promise<boolean> => {
   try {
+    const priceInNanotons = parseFloat(price) * 1000000000;
+    const messages = [];
+
+    // 1. Calculate and add royalty messages
+    let totalRoyalty = 0;
+    for (const split of royaltySplits) {
+      const royaltyAmount = Math.floor(priceInNanotons * split.percentage);
+      totalRoyalty += royaltyAmount;
+      messages.push({
+        address: split.address,
+        amount: royaltyAmount.toString(),
+      });
+    }
+
+    // 2. Add owner message (price - total royalty)
+    messages.push({
+      address: ownerAddress,
+      amount: (priceInNanotons - totalRoyalty).toString(),
+    });
+
     const transaction = {
       validUntil: Math.floor(Date.now() / 1000) + 60,
-      messages: [
-        {
-          address: ownerAddress,
-          amount: (parseFloat(price) * 1000000000).toString(),
-        },
-      ],
+      messages: messages,
     };
 
     const result = await tonConnectUI.sendTransaction(transaction);

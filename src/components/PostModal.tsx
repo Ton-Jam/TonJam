@@ -70,7 +70,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
         className="absolute inset-0 bg-background/90 backdrop-blur-md"
         onClick={onClose}
       ></div>
-      <div className="relative w-full max-w-sm glass border border-neutral-500/10 bg-[#0A0A0A] rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-neutral-500/30 transition-all">
+      <div className="relative w-full max-w-sm glass border border-border bg-background rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-neutral-500/30 transition-all">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
         <header className="flex justify-between items-center p-3 border-b border-border/50">
           <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
 
         {showTrackPicker && (
           <div 
-            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-[#0A0A0A] z-20 overflow-y-auto no-scrollbar border-t border-border/50 p-3 animate-in slide-in-from-bottom-4 duration-300"
+            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-background z-20 overflow-y-auto no-scrollbar border-t border-border/50 p-3 animate-in slide-in-from-bottom-4 duration-300"
             role="region"
             aria-label="Track picker"
           >

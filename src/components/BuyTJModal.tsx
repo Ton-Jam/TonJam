@@ -50,7 +50,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-md bg-[#0a0a0a] border border-blue-500/40 rounded-3xl overflow-hidden shadow-2xl"
+        className="relative w-full max-w-md bg-background border border-blue-500/40 rounded-3xl overflow-hidden shadow-2xl"
       >
         <div className="p-8">
           <div className="flex items-center justify-between mb-8">

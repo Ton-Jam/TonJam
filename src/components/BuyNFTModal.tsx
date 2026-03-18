@@ -32,7 +32,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
     setIsProcessing(true);
     addNotification("Requesting wallet signature...", "info");
     try {
-      await buyNFT(tonConnectUI, nft.owner, nft.price, nft.title);
+      await buyNFT(tonConnectUI, nft.owner, nft.price, nft.title, nft.royaltySplits || []);
       
       const updatedNFT = {
         ...nft,

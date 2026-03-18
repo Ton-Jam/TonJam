@@ -561,7 +561,7 @@ const ArtistProfile: React.FC = () => {
             {trendingTracks.map((track, idx) => (
               <div key={`trending-${track.id}`} className="min-w-[280px] sm:min-w-[320px] group relative" >
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-[10px] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <div className="relative glass border border-blue-500/30 p-4 rounded-[10px] transition-all bg-[#0a0a0a]/40 flex items-center gap-4">
+                <div className="relative glass border border-border p-4 rounded-[10px] transition-all bg-background flex items-center gap-4">
                   <div className="relative w-16 h-16 flex-shrink-0 rounded-[10px] overflow-hidden shadow-lg">
                     <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                     <button onClick={() => playAll([track])} className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" >
@@ -638,6 +638,31 @@ const ArtistProfile: React.FC = () => {
       )}
 
       {/* Sticky Tab Navigation */}
+      {isOwnProfile && !artist.verified && (
+        <div className="max-w-7xl mx-auto px-6 mt-8">
+          <div className="bg-card p-8 rounded-[10px] flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-blue-500/10 rounded-full text-blue-500">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Verify Your Identity</h3>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                  Complete your verification to unlock artist features. Requirements:
+                </p>
+                <ul className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2 space-y-1">
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-green-500" /> Link your X (Twitter) account</li>
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-green-500" /> Connect your TON wallet</li>
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-green-500" /> Confirm minimum followers</li>
+                </ul>
+              </div>
+            </div>
+            <button onClick={() => setShowVerifyModal(true)} className="px-6 py-3 bg-blue-600 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95 shadow-lg shadow-blue-600/20">
+              Start Verification
+            </button>
+          </div>
+        </div>
+      )}
       <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-6 mt-12 mb-8 w-full px-6 border-b border-blue-500/30 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex bg-muted/50 p-1 rounded-[12px] border border-blue-500/40">
@@ -673,7 +698,7 @@ const ArtistProfile: React.FC = () => {
           <div className="lg:col-span-4 space-y-6">
             {/* Market Insights */}
             {marketStats && (
-              <section className="glass border border-blue-500/30 backdrop-blur-xl bg-foreground/[0.02] p-8 rounded-[10px] relative shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+              <section className="bg-card p-8 rounded-[10px] relative">
                 <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full"></div>
                 <h3 className="text-[7px] font-bold text-amber-500/60 uppercase tracking-[0.4em] mb-6 relative z-10">Market Ledger</h3>
                 <div className="space-y-4 relative z-10">
@@ -695,7 +720,7 @@ const ArtistProfile: React.FC = () => {
             )}
 
             {/* Biography */}
-            <section className="p-8 glass border border-blue-500/30 backdrop-blur-xl bg-foreground/[0.01] rounded-[10px] group/bio">
+            <section className="p-8 bg-card rounded-[10px] group/bio">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Origin Narrative</h3>
                 {isOwnProfile && !isEditingBio && (
@@ -802,7 +827,7 @@ const ArtistProfile: React.FC = () => {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {artist.events.map((event) => (
-                          <div key={event.id} className="glass border border-blue-500/30 bg-foreground/[0.01] p-5 rounded-[12px] flex items-center justify-between group hover:border-blue-500/40 transition-all">
+                          <div key={event.id} className="bg-card p-5 rounded-[12px] flex items-center justify-between group transition-all">
                             <div className="flex items-center gap-5">
                               <div className="flex flex-col items-center justify-center w-12 h-12 bg-amber-500/10 rounded-[10px] border border-blue-500/30">
                                 <span className="text-[7px] font-bold text-amber-500 uppercase">{event.date.split('-')[1]}</span>
@@ -865,7 +890,7 @@ const ArtistProfile: React.FC = () => {
                       ))}
                     </div>
                     {artistTracks.length === 0 && (
-                      <div className="py-24 text-center glass border border-blue-500/20 rounded-[10px]">
+                      <div className="py-24 text-center bg-card rounded-[10px]">
                         <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No tracks broadcasted.</p>
                       </div>
                     )}
@@ -884,7 +909,7 @@ const ArtistProfile: React.FC = () => {
                     </div>
                   ))}
                   {artistNFTs.length === 0 && (
-                    <div className="w-full py-24 text-center glass border border-blue-500/20 rounded-[10px]">
+                    <div className="w-full py-24 text-center bg-card rounded-[10px]">
                       <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No assets detected.</p>
                     </div>
                   )}
@@ -1481,7 +1506,7 @@ const ArtistProfile: React.FC = () => {
                   </div>
 
                   {artist.events && artist.events.length > 0 && (
-                    <section className="glass border border-blue-500/20 bg-foreground/[0.01] rounded-[10px] p-8">
+                    <section className="bg-card rounded-[10px] p-8">
                       <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter mb-6">Upcoming Events</h3>
                       <div className="space-y-4">
                         {artist.events.map(event => (
@@ -1500,7 +1525,7 @@ const ArtistProfile: React.FC = () => {
                   )}
 
                   {artist.collaborations && artist.collaborations.length > 0 && (
-                    <section className="glass border border-blue-500/20 bg-foreground/[0.01] rounded-[10px] p-8">
+                    <section className="bg-card rounded-[10px] p-8">
                       <h3 className="text-lg font-bold text-foreground uppercase tracking-tighter mb-6">Featured Collaborations</h3>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {artist.collaborations.map(collab => (

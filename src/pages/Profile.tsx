@@ -207,7 +207,7 @@ const Profile: React.FC = () => {
   };
 
   const StatBlock = ({ label, value, icon, subValue, trend }: { label: string, value: string, icon?: string, subValue?: string, trend?: string }) => (
-    <div className="relative group overflow-hidden bg-[#0a0a0a] border border-border/50 p-6 rounded-[12px] transition-all hover:border-neutral-500/30 shadow-2xl">
+    <div className="relative group overflow-hidden bg-background border border-border p-6 rounded-[12px] transition-all hover:border-neutral-500/30 shadow-2xl">
       <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-blue-600/10 transition-colors"></div>
       
       <div className="flex justify-between items-start mb-6 relative z-10">
@@ -414,7 +414,7 @@ const Profile: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Left Sidebar */}
           <div className="lg:col-span-4 space-y-8">
-            <div className="relative group overflow-hidden bg-[#0a0a0a] border border-border/50 p-6 rounded-[16px] shadow-2xl">
+            <div className="relative group overflow-hidden bg-background border border-border p-6 rounded-[16px] shadow-2xl">
               <div className="flex justify-between items-center mb-6 relative z-10">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
@@ -427,7 +427,7 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative group overflow-hidden bg-[#0a0a0a] border border-border/50 p-8 rounded-[16px] shadow-2xl">
+            <div className="relative group overflow-hidden bg-background border border-border p-8 rounded-[16px] shadow-2xl">
               <div className="flex items-center gap-3 mb-8 relative z-10">
                 <div className="w-1 h-4 bg-muted/80 rounded-full"></div>
                 <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">Origin_Narrative</h3>
@@ -847,7 +847,7 @@ const Profile: React.FC = () => {
 
             {activeTab === 'staking' && (
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
-                <div className="relative group overflow-hidden bg-[#0a0a0a] border border-border/50 p-10 rounded-[20px] shadow-2xl">
+                <div className="relative group overflow-hidden bg-background border border-border p-10 rounded-[20px] shadow-2xl">
                   <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity"><Coins className="h-32 w-32 text-blue-500" /></div>
                   <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-600/10 blur-[120px] rounded-full"></div>
                   
@@ -909,7 +909,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="bg-[#0a0a0a] border border-border/50 p-8 rounded-[16px] shadow-2xl">
+                  <div className="bg-background border border-border p-8 rounded-[16px] shadow-2xl">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
                       <h4 className="text-[10px] font-bold text-foreground uppercase tracking-[0.5em]">Initialize_Stake</h4>
@@ -927,13 +927,13 @@ const Profile: React.FC = () => {
                         </div>
                       </div>
                       
-                      <button onClick={handleStake} className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[12px] text-[10px] font-bold uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/20 active:scale-95 transition-all" > 
+                      <button onClick={handleStake} className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] text-[10px] font-bold uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/20 active:scale-95 transition-all" > 
                         Commit_Stake_Protocol 
                       </button>
                     </div>
                   </div>
 
-                  <div className="bg-[#0a0a0a] border border-border/50 p-8 rounded-[16px] shadow-2xl">
+                  <div className="bg-background border border-border p-8 rounded-[16px] shadow-2xl">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="w-1 h-4 bg-red-500 rounded-full"></div>
                       <h4 className="text-[10px] font-bold text-foreground uppercase tracking-[0.5em]">Withdraw_Stake</h4>
@@ -961,7 +961,7 @@ const Profile: React.FC = () => {
             )}
 
             {/* RECOMMENDATIONS SECTION */}
-            <section className="bg-[#0a0a0a] border border-border/50 p-10 rounded-[20px] shadow-2xl relative overflow-hidden mt-16">
+            <section className="bg-background border border-border p-10 rounded-[20px] shadow-2xl relative overflow-hidden mt-16">
               <div className="absolute top-0 right-0 p-10 opacity-5"><Satellite className="h-20 w-20 text-blue-500" /></div>
               <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-600/5 blur-[100px] rounded-full"></div>
               

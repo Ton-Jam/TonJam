@@ -65,7 +65,7 @@ const Staking: React.FC = () => {
   };
 
   return (
-    <div className="p-4 lg:p-8 space-y-12 animate-in fade-in duration-700 pb-32 max-w-7xl mx-auto">
+    <div className="px-4 pb-4 lg:px-8 lg:pb-8 space-y-12 animate-in fade-in duration-700 mb-32 max-w-7xl mx-auto">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -288,10 +288,10 @@ const Staking: React.FC = () => {
                 onChange={(e) => setFilterType(e.target.value)} 
                 className="bg-transparent text-foreground text-[9px] font-bold uppercase outline-none cursor-pointer pr-1"
               >
-                <option value="all" className="bg-[#050505]">All Actions</option>
-                <option value="stake" className="bg-[#050505]">Stakes</option>
-                <option value="unstake" className="bg-[#050505]">Unstakes</option>
-                <option value="claim_rewards" className="bg-[#050505]">Claims</option>
+                <option value="all" className="bg-background">All Actions</option>
+                <option value="stake" className="bg-background">Stakes</option>
+                <option value="unstake" className="bg-background">Unstakes</option>
+                <option value="claim_rewards" className="bg-background">Claims</option>
               </select>
             </div>
             
@@ -302,8 +302,8 @@ const Staking: React.FC = () => {
                 onChange={(e) => setSortOrder(e.target.value)} 
                 className="bg-transparent text-foreground text-[9px] font-bold uppercase outline-none cursor-pointer pr-1"
               >
-                <option value="newest" className="bg-[#050505]">Newest First</option>
-                <option value="oldest" className="bg-[#050505]">Oldest First</option>
+                <option value="newest" className="bg-background">Newest First</option>
+                <option value="oldest" className="bg-background">Oldest First</option>
               </select>
             </div>
           </div>

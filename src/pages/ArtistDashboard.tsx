@@ -54,6 +54,7 @@ import { ChartRevenue } from "@/components/ChartRevenue";
 
 import RoyaltyConfigModal from "@/components/RoyaltyConfigModal";
 import ProtocolForge from "@/components/ProtocolForge";
+import ArtistVerification from "@/components/ArtistVerification";
 
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ const ArtistDashboard: React.FC = () => {
     );
   }, [tracks, searchQuery]);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification">("overview");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -302,7 +303,7 @@ const ArtistDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="w-full px-0 sm:px-6 lg:px-10 py-0 sm:py-8">
+    <div className="w-full px-0 sm:px-6 lg:px-10 pb-0 sm:pb-8">
       {" "}
       <div className="w-full">
         {" "}
@@ -348,6 +349,7 @@ const ArtistDashboard: React.FC = () => {
             { id: "tracks", label: "Catalog", icon: <Music className="h-4 w-4" /> },
             { id: "collection", label: "Collection", icon: <Gem className="h-4 w-4" /> },
             { id: "forge", label: "Protocol Forge", icon: <Hammer className="h-4 w-4" /> },
+            { id: "verification", label: "Verification", icon: <CheckCircle2 className="h-4 w-4" /> },
             { id: "royalties", label: "Royalties", icon: <Coins className="h-4 w-4" /> },
             { id: "profile", label: "Profile Settings", icon: <UserPen className="h-4 w-4" /> },
           ].map((tab) => (
@@ -582,6 +584,12 @@ const ArtistDashboard: React.FC = () => {
             </div>
           )}
 
+          {activeTab === "verification" && (
+            <div className="animate-in fade-in duration-500">
+              <ArtistVerification artist={artistData} />
+            </div>
+          )}
+
           {activeTab === "royalties" && (
             <div className="space-y-10">
               {" "}
@@ -615,7 +623,7 @@ const ArtistDashboard: React.FC = () => {
                       </div>{" "}
                     </div>{" "}
                   </div>{" "}
-                    <div className="glass border border-neutral-500/20 bg-[#0a0a2a]/40 border-neutral-500/20 rounded-[10px] p-8 relative overflow-hidden">
+                    <div className="glass border border-border bg-white rounded-[10px] p-8 relative overflow-hidden">
                     {" "}
                     <div className="absolute top-0 right-0 p-8 opacity-5">
                       <Radio className="h-16 w-16 text-blue-400" />
@@ -662,7 +670,7 @@ const ArtistDashboard: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <div className="glass border border-neutral-500/20 bg-[#0a0a2a]/40 border-neutral-500/20 rounded-[10px] p-8 relative overflow-hidden">
+                  <div className="glass border border-border bg-white rounded-[10px] p-8 relative overflow-hidden">
                     {" "}
                     <div className="absolute top-0 right-0 p-8 opacity-5">
                       <Radio className="h-16 w-16 text-blue-400" />

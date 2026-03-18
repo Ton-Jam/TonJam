@@ -498,7 +498,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
                                   exit={{ opacity: 0, y: 5, scale: 0.95 }}
                                   transition={{ duration: 0.15 }}
-                                  className="absolute bottom-full left-0 mb-2 flex items-center gap-1 bg-[#1a1a1a] border border-border p-1.5 rounded-full shadow-2xl z-20 backdrop-blur-xl"
+                                  className="absolute bottom-full left-0 mb-2 flex items-center gap-1 bg-background border border-border p-1.5 rounded-full shadow-2xl z-20 backdrop-blur-xl"
                                   role="menu"
                                 >
                                   {REACTION_EMOJIS.map(emoji => {

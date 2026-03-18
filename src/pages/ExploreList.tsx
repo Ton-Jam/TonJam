@@ -136,18 +136,10 @@ const ExploreList: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 px-4 md:px-12 pb-32">
       {/* Sticky Header with Explicit Back Navigation */}
-      <div className="sticky top-0 left-0 right-0 z-[60] bg-background/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-12 md:px-12 pt-3 pb-3 -b mb-4">
+      <div className="sticky top-[var(--header-height,64px)] left-0 right-0 z-[60] bg-background/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-12 md:px-12 pt-3 pb-3 -b mb-4">
         <div className="flex flex-col gap-2">
-          {/* Top Row: Back Button & Search Bar */}
+          {/* Top Row: Search Bar */}
           <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-blue-500 hover:bg-muted hover:text-foreground transition-all active:scale-95 flex-shrink-0 cursor-pointer"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 h-3 w-3" />
               <input

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Switch } from '@/components/ui/switch';
 import { Settings as SettingsIcon, Bell, Shield, User, Wallet, Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -32,7 +33,7 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="p-6 lg:p-10 space-y-10 max-w-4xl mx-auto pb-32">
+    <div className="px-6 pb-6 lg:px-10 lg:pb-10 space-y-10 max-w-4xl mx-auto mb-32">
       <div className="space-y-2">
         <h1 className="text-4xl font-black uppercase tracking-tighter text-foreground">Settings</h1>
         <p className="text-sm font-bold text-muted-foreground/50 uppercase tracking-[0.3em]">Configure your neural interface</p>
@@ -71,12 +72,10 @@ const Settings: React.FC = () => {
           label="Signal Notifications" 
           description="Receive alerts for sales and drops"
         >
-          <button 
-            onClick={() => setNotifications(!notifications)}
-            className={`w-12 h-6 rounded-full transition-all relative ${notifications ? 'bg-blue-600' : 'bg-muted'}`}
-          >
-            <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${notifications ? 'left-7' : 'left-1'}`} />
-          </button>
+          <Switch 
+            checked={notifications} 
+            onCheckedChange={setNotifications} 
+          />
         </SettingItem>
 
         <SettingItem 
@@ -84,12 +83,10 @@ const Settings: React.FC = () => {
           label="Marketplace Activity" 
           description="General marketplace updates and trends"
         >
-          <button 
-            onClick={() => setMarketNotifications(!marketNotifications)}
-            className={`w-12 h-6 rounded-full transition-all relative ${marketNotifications ? 'bg-blue-600' : 'bg-muted'}`}
-          >
-            <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${marketNotifications ? 'left-7' : 'left-1'}`} />
-          </button>
+          <Switch 
+            checked={marketNotifications} 
+            onCheckedChange={setMarketNotifications} 
+          />
         </SettingItem>
 
         <SettingItem 
@@ -97,12 +94,10 @@ const Settings: React.FC = () => {
           label="New Releases" 
           description="Alerts for new drops and collections"
         >
-          <button 
-            onClick={() => setNewReleases(!newReleases)}
-            className={`w-12 h-6 rounded-full transition-all relative ${newReleases ? 'bg-blue-600' : 'bg-muted'}`}
-          >
-            <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${newReleases ? 'left-7' : 'left-1'}`} />
-          </button>
+          <Switch 
+            checked={newReleases} 
+            onCheckedChange={setNewReleases} 
+          />
         </SettingItem>
 
         <SettingItem 
@@ -110,12 +105,10 @@ const Settings: React.FC = () => {
           label="Social Signals" 
           description="Notifications for follows and interactions"
         >
-          <button 
-            onClick={() => setSocialSignals(!socialSignals)}
-            className={`w-12 h-6 rounded-full transition-all relative ${socialSignals ? 'bg-blue-600' : 'bg-muted'}`}
-          >
-            <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${socialSignals ? 'left-7' : 'left-1'}`} />
-          </button>
+          <Switch 
+            checked={socialSignals} 
+            onCheckedChange={setSocialSignals} 
+          />
         </SettingItem>
 
         <SettingItem 
@@ -123,12 +116,10 @@ const Settings: React.FC = () => {
           label="Bid Alerts" 
           description="Notify when you are outbid on an NFT"
         >
-          <button 
-            onClick={() => setBidNotifications(!bidNotifications)}
-            className={`w-12 h-6 rounded-full transition-all relative ${bidNotifications ? 'bg-blue-600' : 'bg-muted'}`}
-          >
-            <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${bidNotifications ? 'left-7' : 'left-1'}`} />
-          </button>
+          <Switch 
+            checked={bidNotifications} 
+            onCheckedChange={setBidNotifications} 
+          />
         </SettingItem>
 
         <SettingItem 
@@ -136,12 +127,10 @@ const Settings: React.FC = () => {
           label="Sale Confirmations" 
           description="Notify when your NFT is sold"
         >
-          <button 
-            onClick={() => setSaleNotifications(!saleNotifications)}
-            className={`w-12 h-6 rounded-full transition-all relative ${saleNotifications ? 'bg-blue-600' : 'bg-muted'}`}
-          >
-            <div className={`absolute top-1 w-4 h-4 rounded-full bg-foreground transition-all ${saleNotifications ? 'left-7' : 'left-1'}`} />
-          </button>
+          <Switch 
+            checked={saleNotifications} 
+            onCheckedChange={setSaleNotifications} 
+          />
         </SettingItem>
 
         <SettingItem 

@@ -338,7 +338,7 @@ const Discover: React.FC = () => {
   return (
     <div className="w-full pb-32">
       {/* Search Section */}
-      <div className="sticky top-[var(--header-height,64px)] z-50 w-full bg-background/95 backdrop-blur-xl transition-all duration-300" ref={searchContainerRef}>
+      <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-50 w-full bg-background/95 backdrop-blur-xl transition-all duration-300" ref={searchContainerRef}>
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="w-full flex flex-col md:flex-row items-center gap-3">

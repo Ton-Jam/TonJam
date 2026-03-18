@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 const HomeSection = ({ title, icon: Icon, link, children }: { title: string, icon: React.ElementType, link?: string, children: React.ReactNode }) => {
   return (
-    <section className="space-y-6">
+    <section className="space-y-3">
       <SectionHeader title={title} viewAllLink={link} />
       <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
         {children}
@@ -53,7 +53,7 @@ const FEATURED_POSTS: CarouselItem[] = [
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { playTrack, playAll, artists, userProfile, recentlyPlayed, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery, setSearchQuery, generateDiscoverWeekly, getRecommendations } = useAudio();
+  const { playTrack, playAll, artists, userProfile, recentlyPlayed, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery, setSearchQuery, generateDiscoverWeekly, getRecommendations, allNFTs } = useAudio();
   
   useEffect(() => {
     generateDiscoverWeekly();
@@ -70,6 +70,14 @@ const Home: React.FC = () => {
     }
     return tracks;
   }, [getTrendingTracks, selectedGenre]);
+
+  const trendingArtists = useMemo(() => {
+    return [...artists].sort((a, b) => parseFloat(b.earnings?.total || '0') - parseFloat(a.earnings?.total || '0')).slice(0, 3);
+  }, [artists]);
+
+  const trendingNFTs = useMemo(() => {
+    return [...allNFTs].sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0')).slice(0, 3);
+  }, [allNFTs]);
 
   const topNFTTracks = useMemo(() => {
     let tracks = getTopNFTTracks();
@@ -116,7 +124,7 @@ const Home: React.FC = () => {
   }, [artists, selectedGenre]);
 
   return (
-    <div className="max-w-7xl mx-auto px-0 py-4 lg:p-8 space-y-16 w-full pb-32">
+    <div className="max-w-7xl mx-auto px-0 pb-[14px] lg:px-[30px] lg:pb-[30px] space-y-8 w-full mb-32">
       {/* Filter Section */}
       <div className="max-w-3xl mx-auto w-full relative z-20">
         <div className="flex items-center justify-between mb-8 border-b border-blue-500/30 pb-4">
@@ -191,7 +199,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="space-y-16"
+            className="space-y-8"
           >
             <DiscoveryFeed />
           </motion.div>
@@ -202,17 +210,17 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="space-y-16"
+            className="space-y-8"
           >
             {/* Featured Sponsored Posts Carousel */}
             <AutoCarousel items={FEATURED_POSTS} />
 
             {/* Hero Section */}
-            <section className="relative rounded-[10px] overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-transparent z-0"></div>
+            <section className="relative rounded-[10px] overflow-hidden group border border-border">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-transparent z-0"></div>
               <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
               
-              <div className="relative z-10 p-8 lg:p-20 max-w-3xl space-y-8">
+              <div className="relative z-10 p-8 lg:p-20 max-w-3xl space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-neutral-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em]">
                   <Zap className="h-3 w-3" />
                   Live on TON Blockchain
@@ -241,6 +249,50 @@ const Home: React.FC = () => {
                     <ShoppingBag className="h-4 w-4" />
                     Explore NFTs
                   </Link>
+                </div>
+              </div>
+            </section>
+
+            {/* Trending Now Section */}
+            <section className="space-y-3">
+              <SectionHeader title="Trending Now" />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Top 5 Songs</h4>
+                  {trendingTracks.slice(0, 5).map((track, idx) => (
+                    <div key={`trend-track-${track.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => playTrack(track)}>
+                      <span className="text-lg font-black italic text-muted-foreground/30 w-6">{idx + 1}</span>
+                      <img src={track.coverUrl} className="w-12 h-12 rounded-[5px] object-cover" alt={track.title} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate text-foreground">{track.title}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Top 3 Artists</h4>
+                  {trendingArtists.map((artist) => (
+                    <div key={`trend-artist-${artist.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/artist/${artist.id}`)}>
+                      <img src={artist.avatarUrl} className="w-12 h-12 rounded-full object-cover" alt={artist.name} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate text-foreground">{artist.name}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{artist.genre}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Top 3 NFTs</h4>
+                  {trendingNFTs.map((nft) => (
+                    <div key={`trend-nft-${nft.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
+                      <img src={nft.imageUrl} className="w-12 h-12 rounded-[5px] object-cover" alt={nft.title} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate text-foreground">{nft.title}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.price} TON</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </section>
@@ -278,7 +330,7 @@ const Home: React.FC = () => {
 
             {/* Top Charts - List View */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-3">
                 <SectionHeader title="Global Top 10" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
                 <div className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory no-scrollbar">
                   {trendingTracks.slice(0, 10).map((track, idx) => (
@@ -310,9 +362,9 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-3">
                 <SectionHeader title="New Releases" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {MOCK_TRACKS.slice(0, 5).map(track => (
                     <div 
                       key={`new-${track.id}`} 
@@ -350,7 +402,7 @@ const Home: React.FC = () => {
             </HomeSection>
 
             {/* Genre Grid - Quick Access */}
-            <section className="space-y-6">
+            <section className="space-y-3">
               <SectionHeader title="Explore Genres" />
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {GENRES.map(genre => (
@@ -399,11 +451,11 @@ const Home: React.FC = () => {
 
             {/* Community & Artist CTA Section */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] p-10 rounded-[10px] space-y-6 relative overflow-hidden group">
+              <div className="glass border border-border bg-card/50 p-6 rounded-[10px] space-y-3 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Radio className="h-32 w-32 text-blue-500" />
                 </div>
-                <div className="w-12 h-12 rounded-[5px] bg-blue-600/20 flex items-center justify-center text-blue-500">
+                <div className="w-12 h-12 rounded-[5px] bg-blue-600/10 flex items-center justify-center text-blue-500">
                   <Music2 className="h-6 w-6" />
                 </div>
                 <h3 className="text-3xl font-bold uppercase tracking-tighter text-foreground">Join the JamSpace</h3>
@@ -415,11 +467,11 @@ const Home: React.FC = () => {
                 </Link>
               </div>
               
-              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] p-10 rounded-[10px] space-y-6 relative overflow-hidden group">
+              <div className="glass border border-border bg-card/50 p-6 rounded-[10px] space-y-3 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Disc className="h-32 w-32 text-purple-500" />
                 </div>
-                <div className="w-12 h-12 rounded-[5px] bg-purple-600/20 flex items-center justify-center text-purple-500">
+                <div className="w-12 h-12 rounded-[5px] bg-purple-600/10 flex items-center justify-center text-purple-500">
                   <TrendingUp className="h-6 w-6" />
                 </div>
                 <h3 className="text-3xl font-bold uppercase tracking-tighter text-foreground">

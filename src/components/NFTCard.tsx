@@ -69,7 +69,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-foreground/[0.02]"
+        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-card/50"
         onClick={handleCardClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -150,7 +150,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
     <>
       <div
         onClick={handleCardClick}
-        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[8px] glass p-3 bg-foreground/[0.02]"
+        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[8px] glass p-3 bg-card/50"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -302,7 +302,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
                 className={`px-3 py-1.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
                   ${isOwner 
                     ? 'bg-muted text-foreground hover:bg-muted/80' 
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20'}
+                    : 'bg-white text-blue-600 hover:bg-white/90 shadow-white/20'}
                 `}
                 aria-label={isOwner ? (nft.listingType ? 'Manage NFT' : 'List NFT') : nft.listingType === 'auction' ? 'Bid on NFT' : 'Buy NFT'}
               >

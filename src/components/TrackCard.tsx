@@ -159,7 +159,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
   if (variant === 'row') {
     return (
       <div 
-        className={`group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-foreground/[0.02] ${className}`}
+        className={`group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 glass bg-card/50 ${className}`}
         onClick={handleCardClick}
         onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
         role="button"
@@ -266,7 +266,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
 
   return (
     <div 
-      className={`group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[8px] glass p-3 bg-foreground/[0.02] ${className}`}
+      className={`group relative cursor-pointer outline-none transition-all duration-300 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-blue-500 rounded-[8px] glass p-3 bg-card/50 ${className}`}
       onClick={handleCardClick}
       onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
       role="button"

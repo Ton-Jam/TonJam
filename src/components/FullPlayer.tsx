@@ -237,7 +237,7 @@ const FullPlayer: React.FC = () => {
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="fixed inset-0 z-[60] bg-[#050505] overflow-y-auto no-scrollbar"
+      className="fixed inset-0 z-[60] bg-background overflow-y-auto no-scrollbar"
       ref={containerRef}
     >
       {/* Dynamic Blurred Background */}
@@ -598,9 +598,9 @@ const FullPlayer: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="absolute inset-0 z-50 bg-[#060c1a]/95 backdrop-blur-3xl flex flex-col"
+            className="absolute inset-0 z-50 bg-background/95 backdrop-blur-3xl flex flex-col"
           >
-            <div className="sticky top-0 flex items-center justify-between p-6 bg-[#060c1a]/80 backdrop-blur-md z-10">
+            <div className="sticky top-0 flex items-center justify-between p-6 bg-background/80 backdrop-blur-md z-10">
               <h3 className="text-lg font-bold uppercase tracking-widest">Play Queue</h3>
               <button 
                 onClick={() => setShowQueue(false)}

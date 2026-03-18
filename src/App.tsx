@@ -46,10 +46,10 @@ const App: React.FC = () => {
 
   return (
     <TonConnectUIProvider manifestUrl="https://ton-jam.vercel.app/tonconnect-manifest.json">
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <AuthProvider>
           <AudioProvider>
-            <Toaster theme="dark" position="top-right" />
+            <Toaster theme="light" position="top-right" />
             <Router>
               <ScrollToTop />
               <AnimatePresence>

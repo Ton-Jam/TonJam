@@ -190,7 +190,7 @@ const PlaylistDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32 pt-20 px-4 md:px-8">
+    <div className="min-h-screen bg-background pb-32 px-4 md:px-8">
       <div className="flex flex-col md:flex-row gap-8 mb-12 items-center md:items-end bg-gradient-to-b from-blue-900/20 to-background p-8 rounded-3xl">
         {/* Cover Image / Collage */}
         <div className="relative group w-48 h-48 md:w-56 md:h-56 flex-shrink-0 rounded-lg overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-neutral-900 border border-white/10 mx-auto md:mx-0">
@@ -415,7 +415,7 @@ const PlaylistDetail: React.FC = () => {
       {showConfirmModal && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={() => setShowConfirmModal(false)}></div>
-          <div className="relative bg-[#0a0a0a] border border-border w-full max-w-sm rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="relative bg-background border border-border w-full max-w-sm rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
                 <AlertTriangle className="h-8 w-8" />

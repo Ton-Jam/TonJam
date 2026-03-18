@@ -154,7 +154,7 @@ const JamSpace: React.FC = () => {
           {/* Left Column: Navigation & Trending */}
           <aside className="hidden lg:block lg:col-span-3 space-y-10 sticky top-32 h-fit">
             {/* Live Jam Rooms - Hardware Style */}
-            <div className="bg-[#151619] border border-blue-500/30 rounded-[12px] p-8 shadow-2xl relative overflow-hidden group">
+            <div className="bg-background border border-border rounded-[12px] p-8 shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-[0.03] rotate-12"><Radio className="h-24 w-24" /></div>
               <div className="flex items-center justify-between mb-10 relative z-10">
                 <div className="flex flex-col">
@@ -198,7 +198,7 @@ const JamSpace: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
+            <div className="bg-background border border-border rounded-[12px] p-8">
               <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em] mb-10">Navigation</h3>
               <nav className="space-y-3">
                 {[
@@ -218,7 +218,7 @@ const JamSpace: React.FC = () => {
               </nav>
             </div>
 
-            <div className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
+            <div className="bg-background border border-border rounded-[12px] p-8">
               <div className="flex items-center justify-between mb-10">
                 <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">Trending Ledger</h3>
                 <TrendingUp className="h-3 w-3 text-muted-foreground/30" />
@@ -320,7 +320,7 @@ const JamSpace: React.FC = () => {
           {/* Right Column: Recommendations & Live */}
           <aside className="hidden lg:block lg:col-span-3 space-y-12 sticky top-32 h-fit">
             {/* Live Now Nodes */}
-            <section className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
+            <section className="bg-background border border-border rounded-[12px] p-8">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex flex-col">
                   <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em]">Live Nodes</h3>
@@ -333,14 +333,14 @@ const JamSpace: React.FC = () => {
                   <div key={artist.id} className="relative group cursor-pointer flex-shrink-0 w-16" onClick={() => navigate(`/artist/${artist.id}`)} title={artist.name} >
                     <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full scale-0 group-hover:scale-125 transition-transform duration-500"></div>
                     <img src={artist.avatarUrl} className="w-full aspect-square rounded-full transition-all relative z-10 grayscale group-hover:grayscale-0 object-cover border border-blue-500/30 group-hover:border-blue-500/50" alt="" />
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full z-20 border-2 border-[#0a0a0a]"></div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full z-20 border-2 border-background"></div>
                   </div>
                 ))}
               </div>
             </section>
 
             {/* Recommended Nodes */}
-            <section className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
+            <section className="bg-background border border-border rounded-[12px] p-8">
               <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em] mb-10">Recommended Nodes</h3>
               <div className="space-y-6">
                 {artists.slice(0, 3).map(artist => (
@@ -351,7 +351,7 @@ const JamSpace: React.FC = () => {
             </section>
 
             {/* AI Curated Frequencies */}
-            <section className="bg-[#0a0a0a] border border-blue-500/30 rounded-[12px] p-8">
+            <section className="bg-background border border-border rounded-[12px] p-8">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-3">
                   <Sparkles className="h-4 w-4 text-blue-500" />

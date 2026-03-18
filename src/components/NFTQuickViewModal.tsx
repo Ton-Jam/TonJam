@@ -36,7 +36,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose}></div>
       
-      <div className="relative w-full max-w-2xl glass border border-border bg-[#0a0a0a] rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col md:flex-row max-h-[80vh] md:max-h-[600px] min-h-[400px]">
+      <div className="relative w-full max-w-2xl glass border border-border bg-background rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col md:flex-row max-h-[80vh] md:max-h-[600px] min-h-[400px]">
         
         {/* Close Button */}
         <button 
@@ -48,7 +48,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
         </button>
 
         {isLoading ? (
-          <div className="w-full h-full flex flex-col items-center justify-center absolute inset-0 z-10 bg-[#0a0a0a]">
+          <div className="w-full h-full flex flex-col items-center justify-center absolute inset-0 z-10 bg-background">
             <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest animate-pulse">Fetching Asset Data...</p>
           </div>

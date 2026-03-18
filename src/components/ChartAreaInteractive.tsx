@@ -169,7 +169,7 @@ export function ChartAreaInteractive() {
           >
             <SelectValue placeholder="Last 3 months" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl bg-[#0a0a0a] border-border text-foreground">
+          <SelectContent className="rounded-xl bg-background border-border text-foreground">
             <SelectItem value="90d" className="rounded-lg focus:bg-muted focus:text-foreground">
               Last 3 months
             </SelectItem>
@@ -241,7 +241,7 @@ export function ChartAreaInteractive() {
                     })
                   }}
                   indicator="dot"
-                  className="bg-[#0a0a0a] border-border text-foreground"
+                  className="bg-background border-border text-foreground"
                 />
               }
             />

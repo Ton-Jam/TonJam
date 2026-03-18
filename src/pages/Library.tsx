@@ -75,7 +75,7 @@ const Library: React.FC = () => {
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/5 blur-[100px] rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-0 md:px-8 pt-10">
+      <div className="relative z-10 max-w-7xl mx-auto px-0 md:px-8">
         {/* Header Section */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 bg-gradient-to-b from-blue-900/20 to-background p-8 rounded-3xl">
           <div className="space-y-2">

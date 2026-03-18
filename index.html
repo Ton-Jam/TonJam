@@ -37,19 +37,40 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
         
+        :root {
+            --background: 0 0% 0%;
+            --foreground: 0 0% 100%;
+            --popover: 0 0% 0%;
+            --popover-foreground: 0 0% 100%;
+            --accent: 0 0% 10%;
+            --accent-foreground: 0 0% 100%;
+            --muted: 0 0% 10%;
+            --muted-foreground: 0 0% 60%;
+            --border: 0 0% 20%;
+            --ring: 221 83% 53%;
+        }
+
+        html.light {
+            --background: 0 0% 100%;
+            --foreground: 221 83% 53%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 221 83% 53%;
+            --accent: 221 83% 90%;
+            --accent-foreground: 221 83% 53%;
+            --muted: 221 83% 95%;
+            --muted-foreground: 221 83% 40%;
+            --border: 221 83% 80%;
+            --ring: 221 83% 53%;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background: #000000; /* Pure black background */
-            color: #ffffff;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
             overflow-x: clip;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* Ensure all headings use Montserrat */
-        h1, h2, h3, h4, h5, h6, .font-bold, .font-semibold {
-            font-family: 'Montserrat', sans-serif !important;
         }
 
         /* Custom Scrollbar */
@@ -138,7 +159,13 @@
             color: #2563EB !important; 
         }
 
-        /* Global Border Adjustment - Reducing by 2px from previous 5px */
+        /* Dark Mode (Default) Overrides - Blue to Silver */
+        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) .text-blue-400 { color: #A6A6A6 !important; }
+        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) .text-blue-500 { color: #8F8F8F !important; }
+        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) .text-blue-600 { color: #787878 !important; }
+        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) .text-blue-700 { color: #616161 !important; }
+
+        /* Global Border Adjustment - Reducing by 2px from previous 3px */
         .border, 
         .border-t, 
         .border-b, 
@@ -150,16 +177,21 @@
         [class^="border-"][class$="-2"],
         [class^="border-"][class$="-4"],
         [class^="border-"][class$="-8"] {
-            border-width: 3px !important;
+            border-width: 1px !important;
+        }
+
+        /* Remove borders from section elements in dark theme (default) */
+        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) section {
+            border-width: 0 !important;
         }
         
         /* Directional border overrides to ensure they stay directional but thick */
-        .border-t { border-top-width: 3px !important; }
-        .border-b { border-bottom-width: 3px !important; }
-        .border-l { border-left-width: 3px !important; }
-        .border-r { border-right-width: 3px !important; }
-        .border-x { border-left-width: 3px !important; border-right-width: 3px !important; }
-        .border-y { border-top-width: 3px !important; border-bottom-width: 3px !important; }
+        .border-t { border-top-width: 1px !important; }
+        .border-b { border-bottom-width: 1px !important; }
+        .border-l { border-left-width: 1px !important; }
+        .border-r { border-right-width: 1px !important; }
+        .border-x { border-left-width: 1px !important; border-right-width: 1px !important; }
+        .border-y { border-top-width: 1px !important; border-bottom-width: 1px !important; }
         
         /* Ensure we don't accidentally add borders where they were explicitly removed */
         .border-0, .border-t-0, .border-b-0, .border-l-0, .border-r-0 {

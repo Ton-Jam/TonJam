@@ -56,7 +56,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-[#020617]/80 backdrop-blur-md" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={onClose}></div>
       <div className="relative bg-white border border-blue-500/30 w-full max-w-sm rounded-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         <div className="p-6 border-b border-blue-500/30 flex items-center gap-4 bg-neutral-100">
           <img src={track.coverUrl} className="w-16 h-16 rounded-md object-cover shadow-lg" alt="" />

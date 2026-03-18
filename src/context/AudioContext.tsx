@@ -46,7 +46,7 @@ interface FirestoreErrorInfo {
   }
 }
 
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, shouldThrow: boolean = true) {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -66,7 +66,9 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     path
   }
   console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  if (shouldThrow) {
+    throw new Error(JSON.stringify(errInfo));
+  }
 }
 
 interface Notification {
@@ -456,7 +458,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const tracks = snapshot.docs.map(doc => doc.data() as Track);
       setFirebaseTracks(tracks);
     }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'tracks');
+      handleFirestoreError(error, OperationType.LIST, 'tracks', false);
     });
 
     const nftsQuery = query(collection(db, 'nfts'), orderBy('id', 'desc'));
@@ -464,7 +466,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const nfts = snapshot.docs.map(doc => doc.data() as NFTItem);
       setFirebaseNFTs(nfts);
     }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'nfts');
+      handleFirestoreError(error, OperationType.LIST, 'nfts', false);
     });
 
     // Test connection

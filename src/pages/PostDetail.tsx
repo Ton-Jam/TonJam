@@ -125,11 +125,11 @@ const PostDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a2a] to-black pt-24 pb-32 px-4 md:px-12 relative overflow-x-hidden">
+    <div className="min-h-screen bg-background pb-32 px-4 md:px-12 relative overflow-x-hidden">
       {/* Immersive Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/5 blur-[150px] rounded-full translate-y-1/3 -translate-x-1/4"></div>
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/5 blur-[150px] rounded-full translate-y-1/3 -translate-x-1/4"></div>
       </div>
 
       <div className="max-w-3xl mx-auto relative z-10">
@@ -142,9 +142,9 @@ const PostDetail: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass border border-neutral-500/10 bg-[#080808] rounded-[10px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+          className="glass border border-border bg-card rounded-[10px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
           {/* Subtle Background Glow */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/5 blur-[120px] rounded-full pointer-events-none"></div>
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 
           <div className="absolute top-8 right-8 z-10">
             <button onClick={() => setShowOptions(true)} className="w-10 h-10 flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 transition-all rounded-full hover:bg-muted/50">
@@ -184,7 +184,7 @@ const PostDetail: React.FC = () => {
           </div>
 
           {/* Content */}
-          <p className="text-foreground/90 leading-relaxed mb-10 text-lg font-medium -l -blue-500/20 pl-8">
+          <p className="text-foreground/90 leading-relaxed mb-10 text-lg font-medium border-l border-blue-500/20 pl-8">
             {post.content}
           </p>
 
@@ -199,18 +199,18 @@ const PostDetail: React.FC = () => {
           )}
 
           {track && (
-            <div className="mb-10 p-6 rounded-[10px] glass border border-neutral-500/10 bg-foreground/[0.02] relative group/track overflow-hidden">
-              <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover/track:opacity-100 transition-opacity"></div>
+            <div className="mb-10 p-6 rounded-[10px] glass border border-border bg-muted/30 relative group/track overflow-hidden">
+              <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/track:opacity-100 transition-opacity"></div>
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[8px] font-bold text-blue-500 uppercase tracking-[0.3em]">Sonic Attachment Detected</span>
-                  <div className="px-2 py-0.5 bg-blue-500/10 -blue-500/20 rounded text-[7px] font-bold text-blue-400 uppercase tracking-widest">Alpha Signal</div>
+                  <div className="px-2 py-0.5 bg-blue-500/10 border-blue-500/20 rounded text-[7px] font-bold text-blue-500 uppercase tracking-widest">Alpha Signal</div>
                 </div>
                 <TrackCard track={track} variant="row" />
                 {track.isNFT && (
-                  <div className="mt-8 pt-8 -t flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="mt-8 pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-[10px] bg-blue-500/10 flex items-center justify-center -blue-500/20">
+                      <div className="w-12 h-12 rounded-[10px] bg-blue-500/10 flex items-center justify-center border-blue-500/20">
                         <img src={TON_LOGO} className="w-6 h-6" alt="TON" />
                       </div>
                       <div>
@@ -218,7 +218,7 @@ const PostDetail: React.FC = () => {
                         <p className="text-xl font-bold text-foreground uppercase tracking-tighter">{track.price || '15.0'} TON</p>
                       </div>
                     </div>
-                    <button onClick={() => addNotification('Neural transaction initiated...', 'info')} className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-500 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
+                    <button onClick={() => addNotification('Neural transaction initiated...', 'info')} className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
                       Buy NFT Now
                     </button>
                   </div>
@@ -228,20 +228,20 @@ const PostDetail: React.FC = () => {
           )}
 
           {nft && (
-            <div className="mb-10 p-8 rounded-[10px] glass border border-neutral-500/10 bg-gradient-to-br from-blue-600/10 to-purple-600/10 relative group/nft overflow-hidden cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
-              <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover/nft:opacity-100 transition-opacity"></div>
+            <div className="mb-10 p-8 rounded-[10px] glass border border-border bg-gradient-to-br from-blue-500/5 to-purple-500/5 relative group/nft overflow-hidden cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
+              <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/nft:opacity-100 transition-opacity"></div>
               <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
                 <div className="relative w-40 h-40 rounded-[10px] overflow-hidden shadow-2xl flex-shrink-0">
                   <img src={nft.imageUrl} className="w-full h-full object-cover" alt={nft.title} />
                   <div className="absolute top-2 right-2">
                     <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                      <Zap className="h-3 w-3 text-foreground fill-current" />
+                      <Zap className="h-3 w-3 text-white fill-current" />
                     </div>
                   </div>
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
-                    <span className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em]">Sonic Artifact Acquired</span>
+                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.4em]">Sonic Artifact Acquired</span>
                   </div>
                   <h3 className="text-2xl font-bold text-foreground uppercase tracking-tighter mb-2">{nft.title}</h3>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-6">Creator: {nft.creator}</p>
@@ -266,24 +266,24 @@ const PostDetail: React.FC = () => {
           )}
 
           {/* Interaction Bar */}
-          <div className="flex items-center gap-12 pt-8 -t mb-12">
-            <button onClick={handleLike} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 group/like ${liked ? 'text-red-500' : 'text-muted-foreground/50 hover:text-red-400'}`}>
+          <div className="flex items-center gap-12 pt-8 border-t border-border mb-12">
+            <button onClick={handleLike} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 group/like ${liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-400'}`}>
               <div className="relative">
                 {liked && <div className="absolute inset-0 bg-red-500/40 blur-md rounded-full animate-ping"></div>}
                 <Heart className={`h-5 w-5 relative z-10 group-hover/like:scale-110 transition-transform ${liked ? 'fill-current' : ''}`} />
               </div>
               <span className="text-xs font-bold uppercase tracking-widest">{likesCount}</span>
             </button>
-            <div className="flex items-center gap-4 text-blue-400">
+            <div className="flex items-center gap-4 text-blue-500">
               <MessageCircle className="h-5 w-5" />
               <span className="text-xs font-bold uppercase tracking-widest">{comments.length}</span>
             </div>
-            <button onClick={handleRepost} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 ${reposted ? 'text-green-500' : 'text-muted-foreground/50 hover:text-green-400'}`}>
+            <button onClick={handleRepost} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 ${reposted ? 'text-green-500' : 'text-muted-foreground hover:text-green-400'}`}>
               <Repeat2 className="h-5 w-5" />
               <span className="text-xs font-bold uppercase tracking-widest">{repostsCount}</span>
             </button>
             <div className="flex-1 flex justify-end">
-              <button onClick={handleShare} className="w-12 h-12 flex items-center justify-center text-muted-foreground/30 hover:text-blue-500 transition-all active:scale-90 rounded-full hover:bg-muted/50">
+              <button onClick={handleShare} className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-blue-500 transition-all active:scale-90 rounded-full hover:bg-muted/50">
                 <Share2 className="h-5 w-5" />
               </button>
             </div>
@@ -291,7 +291,7 @@ const PostDetail: React.FC = () => {
 
           {/* Comments Section */}
           <div className="space-y-10">
-            <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em] mb-8">Neural Responses</h3>
+            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.4em] mb-8">Neural Responses</h3>
             <form onSubmit={handleAddComment} className="flex gap-6 mb-12">
               <img 
                 src={MOCK_USER.avatar} 
@@ -300,8 +300,8 @@ const PostDetail: React.FC = () => {
                 onClick={() => navigate('/profile')}
               />
               <div className="flex-1 relative">
-                <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit your response..." className="w-full bg-muted/50 rounded-[10px] py-3 px-6 text-sm outline-none focus:-blue-500/50 transition-all text-foreground shadow-inner" />
-                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-blue-600 rounded-[10px] text-foreground hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">
+                <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit your response..." className="w-full bg-muted/50 border border-border rounded-[10px] py-3 px-6 text-sm outline-none focus:border-blue-500/50 transition-all text-foreground shadow-inner" />
+                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-blue-600 rounded-[10px] text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">
                   <Send className="h-3 w-3" />
                 </button>
               </div>

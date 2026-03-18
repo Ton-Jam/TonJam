@@ -74,7 +74,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={resetAndClose}></div>
       
-      <div className="relative w-full max-w-xl glass border border-blue-500/40 bg-[#0a0a0a] rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-xl glass border border-border bg-background rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Header */}
         <div className="p-6 border-b border-blue-500/30 flex items-center justify-between">
           <div>

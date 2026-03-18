@@ -61,7 +61,7 @@ export function ChartRevenue() {
               stroke="rgba(255,255,255,0.4)"
             />
             <ChartTooltip 
-                content={<ChartTooltipContent hideLabel className="bg-[#0a0a0a] border-border text-foreground" />} 
+                content={<ChartTooltipContent hideLabel className="bg-background border-border text-foreground" />} 
                 cursor={{fill: 'rgba(255,255,255,0.05)'}}
             />
             <ChartLegend content={<ChartLegendContent className="text-muted-foreground/80" />} />

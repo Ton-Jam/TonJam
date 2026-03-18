@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Loader2, CheckCircle2, FileAudio, ArrowLeft, Plus, Music, Info, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useAudio } from '@/context/AudioContext';
 import { Track } from '@/types';
 import { toast } from 'sonner';
@@ -184,29 +185,31 @@ const UploadTrack: React.FC = () => {
     setIsUploading(true);
     setUploadProgress(0);
 
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 95) {
-          clearInterval(interval);
-          return 95;
-        }
-        return prev + 5;
-      });
-    }, 100);
+    try {
+      // 1. Prepare FormData for real upload
+      const uploadData = new FormData();
+      uploadData.append('audio', audioFile);
+      uploadData.append('cover', coverFile);
 
-    // Simulate upload delay
-    setTimeout(() => {
-      clearInterval(interval);
-      setUploadProgress(100);
-      
+      // 2. Perform real upload to our server
+      const response = await axios.post('/api/upload', uploadData, {
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+          setUploadProgress(percentCompleted);
+        }
+      });
+
+      const { audioUrl, coverUrl } = response.data;
+
+      // 3. Create the track object with real URLs
       const newTrack: Track = {
         id: `track-${Date.now()}`,
         title: formData.title,
-        artist: formData.artist || 'Unknown Artist',
+        artist: formData.artist || userProfile.name || 'Unknown Artist',
         artistId: userProfile.id || 'user-artist',
-        coverUrl: coverPreview || 'https://picsum.photos/400/400?seed=default',
-        audioUrl: URL.createObjectURL(audioFile),
-        duration: 180,
+        coverUrl: coverUrl || 'https://picsum.photos/400/400?seed=default',
+        audioUrl: audioUrl,
+        duration: 180, // We could calculate this from the audio file if needed
         genre: formData.genre,
         bpm: parseInt(formData.bpm) || 0,
         key: formData.key,
@@ -223,11 +226,17 @@ const UploadTrack: React.FC = () => {
         return;
       }
 
-      addUserTrack(newTrack);
+      // 4. Persist to Firestore via context
+      await addUserTrack(newTrack);
+      
       setIsUploading(false);
       setStep(2);
       toast.success("Track successfully broadcasted to the network!");
-    }, 2000);
+    } catch (error: any) {
+      console.error("Upload failed:", error);
+      toast.error("Upload failed: " + (error.response?.data?.error || error.message));
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -242,10 +251,10 @@ const UploadTrack: React.FC = () => {
         </button>
       </div>
 
-      <div className="glass border-y sm:border border-border bg-[#0a0a0a] sm:rounded-[10px] overflow-hidden shadow-2xl">
+      <div className="glass border-y sm:border border-border bg-white sm:rounded-[10px] overflow-hidden shadow-2xl">
         <div className="p-6 sm:p-10 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tighter uppercase italic">
+            <h1 className="text-3xl sm:text-4xl font-bold text-black tracking-tighter uppercase italic">
               {step === 2 ? 'Upload Complete' : 'Forge New Protocol'}
             </h1>
             <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] mt-2">
@@ -275,7 +284,7 @@ const UploadTrack: React.FC = () => {
                     onDragOver={(e) => handleDragOver(e, 'cover')}
                     onDragLeave={() => handleDragLeave('cover')}
                     onDrop={(e) => handleDrop(e, 'cover')}
-                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-foreground/[0.02] flex flex-col items-center justify-center p-2 cursor-pointer transition-all group relative overflow-hidden ${coverFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingCover ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
+                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-muted/30 flex flex-col items-center justify-center p-2 cursor-pointer transition-all group relative overflow-hidden ${coverFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingCover ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
                   >
                     {coverPreview ? (
                       <>
@@ -312,7 +321,7 @@ const UploadTrack: React.FC = () => {
                     onDragOver={(e) => handleDragOver(e, 'audio')}
                     onDragLeave={() => handleDragLeave('audio')}
                     onDrop={(e) => handleDrop(e, 'audio')}
-                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-foreground/[0.02] flex flex-col items-center justify-center p-6 cursor-pointer transition-all group relative ${audioFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingAudio ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
+                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-muted/30 flex flex-col items-center justify-center p-6 cursor-pointer transition-all group relative ${audioFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingAudio ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
                   >
                     {audioFile ? (
                       <div className="flex flex-col items-center text-center gap-4">
@@ -375,7 +384,7 @@ const UploadTrack: React.FC = () => {
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                    className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     placeholder="PROTOCOL_NAME"
                   />
                 </div>
@@ -385,7 +394,7 @@ const UploadTrack: React.FC = () => {
                     type="text"
                     value={formData.artist}
                     onChange={(e) => setFormData({...formData, artist: e.target.value})}
-                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                    className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     placeholder="OPERATOR_ID"
                   />
                 </div>
@@ -394,7 +403,7 @@ const UploadTrack: React.FC = () => {
                   <select 
                     value={formData.genre}
                     onChange={(e) => setFormData({...formData, genre: e.target.value})}
-                    className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors appearance-none"
+                    className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors appearance-none"
                   >
                     <option value="Electronic">Electronic</option>
                     <option value="Hip-Hop">Hip-Hop</option>
@@ -411,7 +420,7 @@ const UploadTrack: React.FC = () => {
                       type="number"
                       value={formData.bpm}
                       onChange={(e) => setFormData({...formData, bpm: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                       placeholder="128"
                     />
                   </div>
@@ -421,7 +430,7 @@ const UploadTrack: React.FC = () => {
                       type="text"
                       value={formData.key}
                       onChange={(e) => setFormData({...formData, key: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                       placeholder="Am"
                     />
                   </div>
@@ -433,12 +442,12 @@ const UploadTrack: React.FC = () => {
                 <textarea 
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors h-32 resize-none"
+                  className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors h-32 resize-none"
                   placeholder="Enter track transmission details..."
                 />
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-foreground/[0.02] border border-border/50 rounded-[10px]">
+              <div className="flex items-center gap-3 p-4 bg-muted/30 border border-border/50 rounded-[10px]">
                 <input 
                   type="checkbox"
                   id="isNFT"
@@ -459,7 +468,7 @@ const UploadTrack: React.FC = () => {
                       type="text"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -468,7 +477,7 @@ const UploadTrack: React.FC = () => {
                       type="text"
                       value={formData.editions}
                       onChange={(e) => setFormData({...formData, editions: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -477,7 +486,7 @@ const UploadTrack: React.FC = () => {
                       type="text"
                       value={formData.royalty}
                       onChange={(e) => setFormData({...formData, royalty: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     />
                   </div>
                 </div>
@@ -486,7 +495,7 @@ const UploadTrack: React.FC = () => {
               <button 
                 type="submit"
                 disabled={isUploading || isAnalyzing}
-                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 {isUploading ? (
                   <>

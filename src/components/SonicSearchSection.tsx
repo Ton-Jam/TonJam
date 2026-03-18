@@ -24,7 +24,7 @@ const SonicSearchSection: React.FC = () => {
   };
 
   return (
-    <section className="mt-16 p-8 bg-[#0a0a0a] border-t border-border">
+    <section className="mt-16 p-8 bg-background border-t border-border">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
