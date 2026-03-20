@@ -88,7 +88,7 @@ const AdminDashboard: React.FC = () => {
             <div className="flex items-center gap-2 w-full md:w-auto">
               <div className="relative flex-1 md:w-48">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
-                <input type="text" placeholder="Search Hash/Address..." className="w-full bg-muted/50 border border-border rounded-[5px] py-1.5 pl-8 pr-3 text-[10px] outline-none text-foreground placeholder:text-muted-foreground/30" />
+                <input type="text" placeholder="Search Hash/Address..." className="w-full bg-muted/50 border border-border rounded-[5px] py-1.5 pl-8 pr-3 text-[10px] outline-none text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500" />
               </div>
               <button className="p-1.5 bg-muted/50 rounded-[5px] text-muted-foreground hover:text-foreground transition-all">
                 <Filter className="h-3.5 w-3.5" />

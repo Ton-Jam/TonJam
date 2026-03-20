@@ -66,7 +66,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder={placeholder}
-            className="flex-1 bg-transparent border-none outline-none py-1.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/50 tracking-tight"
+            className="flex-1 bg-transparent border-none outline-none py-1.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight"
           />
 
           <div className="flex items-center gap-1">

@@ -23,8 +23,9 @@ import StakingPanel from '@/components/StakingPanel';
 import Leaderboard from '@/components/Leaderboard';
 import BuyTJModal from '@/components/BuyTJModal';
 import ReferralPanel from '@/components/ReferralPanel';
+import TaskDetailModal from '@/components/TaskDetailModal';
 
-interface Task {
+export interface Task {
   id: string;
   title: string;
   description: string;
@@ -46,7 +47,8 @@ const TaskCard: React.FC<{
   task: Task; 
   onClaim: (id: string) => void;
   onToggle: (id: string, progress: number) => void;
-}> = ({ task, onClaim, onToggle }) => {
+  onClick: (task: Task) => void;
+}> = ({ task, onClaim, onToggle, onClick }) => {
   const [isClaiming, setIsClaiming] = useState(false);
 
   const handleClaim = async (e: React.MouseEvent) => {
@@ -92,32 +94,33 @@ const TaskCard: React.FC<{
   return (
     <motion.div 
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`relative group rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col h-full ${
+      onClick={() => onClick(task)}
+      className={`relative group rounded-2xl transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer ${
         task.claimed 
-          ? 'bg-neutral-900/40 border-border/50 opacity-50' 
+          ? 'bg-neutral-900/40 opacity-50' 
           : task.completed
-            ? 'bg-green-500/5 border-neutral-500/20 shadow-[0_0_20px_rgba(34,197,94,0.05)]'
-            : 'bg-muted/50 border-border hover:border-border/80 hover:bg-foreground/[0.07]'
+            ? 'bg-green-500/5 shadow-[0_0_20px_rgba(34,197,94,0.05)]'
+            : 'bg-muted/50 hover:bg-foreground/[0.07]'
       }`}
     >
       {/* Rarity & Priority Indicators */}
       <div className="absolute top-0 right-0 flex items-center gap-1 p-2">
         {task.priority && (
           <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-            task.priority === 'high' ? 'bg-red-500/20 text-red-400 border border-neutral-500/20' :
-            task.priority === 'medium' ? 'bg-amber-500/20 text-amber-400 border border-neutral-500/20' :
-            'bg-blue-500/20 text-blue-400 border border-neutral-500/20'
+            task.priority === 'high' ? 'bg-red-500/20 text-red-400' :
+            task.priority === 'medium' ? 'bg-amber-500/20 text-amber-400' :
+            'bg-blue-500/20 text-blue-400'
           }`}>
             {task.priority} Priority
           </div>
         )}
         {task.rarity && task.rarity !== 'common' && (
           <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-            task.rarity === 'rare' ? 'bg-blue-500/20 text-blue-400 border border-neutral-500/20' :
-            task.rarity === 'epic' ? 'bg-purple-500/20 text-purple-400 border border-neutral-500/20' :
-            'bg-amber-500/20 text-amber-400 border border-neutral-500/20'
+            task.rarity === 'rare' ? 'bg-blue-500/20 text-blue-400' :
+            task.rarity === 'epic' ? 'bg-purple-500/20 text-purple-400' :
+            'bg-amber-500/20 text-amber-400'
           }`}>
             {task.rarity}
           </div>
@@ -161,7 +164,7 @@ const TaskCard: React.FC<{
         )}
 
         {/* Reward Section */}
-        <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
+        <div className="mt-4 pt-4 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Reward</span>
             <div className="flex items-center gap-1.5">
@@ -222,8 +225,21 @@ const Tasks: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [showBuyModal, setShowBuyModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [userBalance, setUserBalance] = useState(1240);
   const { addNotification } = useAudio();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTask(null);
+  };
+
   const [tasks, setTasks] = useState<Task[]>([
     { id: '1', title: 'Daily Sync', description: 'Stream 5 tracks today', reward: '5 TJ', points: 50, completed: true, claimed: true, type: 'daily', progress: 5, total: 5, rarity: 'common', priority: 'medium' },
     { id: '2', title: 'Network Supporter', description: 'Follow 3 new artists', reward: '10 TJ', points: 100, completed: false, claimed: false, type: 'daily', progress: 1, total: 3, rarity: 'common', priority: 'low' },
@@ -363,7 +379,7 @@ const Tasks: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-muted/50 border border-border rounded-2xl p-6 min-w-[280px] relative overflow-hidden group"
+          className="bg-muted/50 rounded-2xl p-6 min-w-[280px] relative overflow-hidden group"
         >
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <TrendingUp className="w-12 h-12" />
@@ -393,7 +409,7 @@ const Tasks: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="min-w-[240px] flex-1 bg-blue-600/10 border border-neutral-500/20 rounded-2xl p-6 flex items-center gap-6 group hover:bg-blue-600/20 transition-all relative overflow-hidden"
+          className="min-w-[240px] flex-1 bg-blue-600/10 rounded-2xl p-6 flex items-center gap-6 group hover:bg-blue-600/20 transition-all relative overflow-hidden"
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity">
             <img src={TJ_COIN_ICON} className="w-full h-full object-contain rotate-12" alt="" referrerPolicy="no-referrer" />
@@ -414,7 +430,7 @@ const Tasks: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-purple-600/10 border border-neutral-500/20 rounded-2xl p-6 flex flex-col justify-center gap-4 group hover:bg-purple-600/20 transition-all relative overflow-hidden"
+          className="bg-purple-600/10 rounded-2xl p-6 flex flex-col justify-center gap-4 group hover:bg-purple-600/20 transition-all relative overflow-hidden"
         >
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform">
@@ -440,7 +456,7 @@ const Tasks: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-amber-600/10 border border-neutral-500/20 rounded-2xl p-6 flex items-center gap-6 group hover:bg-amber-600/20 transition-all sm:col-span-2 lg:col-span-1"
+          className="bg-amber-600/10 rounded-2xl p-6 flex items-center gap-6 group hover:bg-amber-600/20 transition-all sm:col-span-2 lg:col-span-1"
         >
           <div className="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
             <Gift className="w-7 h-7" />
@@ -460,7 +476,7 @@ const Tasks: React.FC = () => {
 
       {/* Task Filters & List */}
       <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-border/50 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6">
           <div className="flex items-center gap-2 p-1 bg-muted/50 rounded-xl self-start overflow-x-auto no-scrollbar max-w-full">
             {(['all', 'daily', 'achievements', 'milestones', 'staking', 'leaderboard', 'referrals'] as TaskTab[]).map((tab) => (
               <button
@@ -550,6 +566,7 @@ const Tasks: React.FC = () => {
                     task={task} 
                     onClaim={handleClaim}
                     onToggle={handleToggle}
+                    onClick={setSelectedTask}
                   />
                 ))
               ) : (
@@ -567,6 +584,15 @@ const Tasks: React.FC = () => {
           )}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {isModalOpen && selectedTask && (
+          <TaskDetailModal 
+            task={selectedTask}
+            onClose={handleCloseModal}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showBuyModal && (

@@ -27,6 +27,8 @@ export interface Track {
   coverIpfsUrl?: string;
   royaltySplits?: RoyaltySplit[];
   lyrics?: string;
+  recommendationReason?: string;
+  recommendationScore?: number;
 }
 
 export interface NFTTrait {
@@ -139,9 +141,9 @@ export interface Artist {
     nftSaleSplits: RoyaltySplit[];
   };
   earnings?: {
-    streaming: string;
-    nftSales: string;
-    total: string;
+    streaming: number;
+    nftSales: number;
+    total: number;
   };
   events?: Event[];
   collaborations?: Collaboration[];
@@ -206,17 +208,25 @@ export interface UserProfile {
   walletAddress?: string;
   followers: number;
   following: number;
-  earnings: string;
+  earnings: number;
   isVerifiedArtist?: boolean;
+  socials?: {
+    x?: string;
+    spotify?: string;
+    instagram?: string;
+    website?: string;
+    telegram?: string;
+  };
   isPremium?: boolean;
-  jamBalance?: string;
-  stakedJam?: string;
-  pendingJamRewards?: string;
+  jamBalance?: number;
+  stakedJam?: number;
+  pendingJamRewards?: number;
   lastStakingUpdate?: string;
-  streamingEarnings?: string;
-  nftEarnings?: string;
+  streamingEarnings?: number;
+  nftEarnings?: number;
   followedArtists?: string[];
   followedUserIds?: string[];
+  likedTrackIds?: string[];
   friends?: string[];
   favoriteGenres?: string[];
   transactions?: Transaction[];
@@ -236,9 +246,9 @@ export interface UserProfile {
 export interface Transaction {
   id: string;
   type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards';
-  amount: string; // Total amount in TON
-  platformFee: string; // Total platform fee (e.g., 10% for sales)
-  artistShare: string; // Amount sent to artist
+  amount: number; // Total amount in TON or JAM
+  platformFee: number; // Total platform fee
+  artistShare: number; // Amount sent to artist
   recipientAddress: string;
   senderAddress?: string;
   trackId?: string;

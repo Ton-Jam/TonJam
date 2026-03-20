@@ -74,7 +74,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   --accent-foreground: oklch(0.45 0.15 250);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.45 0.15 250 / 20%);
+  --border: transparent;
   --input: oklch(0.922 0 0);
   --ring: oklch(0.45 0.15 250);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -88,7 +88,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.45 0.15 250);
-  --sidebar-border: oklch(0.45 0.15 250 / 20%);
+  --sidebar-border: transparent;
   --sidebar-ring: oklch(0.45 0.15 250);
   --warning: oklch(0.84 0.16 84);
   --warning-foreground: oklch(0.28 0.07 46);
@@ -133,7 +133,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.5 0 0 / 10%);
+  --border: transparent;
   --input: oklch(1 0 0 / 5%);
   --ring: oklch(0.556 0.1 264);
   --chart-1: oklch(0.488 0.243 264.376);
@@ -147,7 +147,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.18 0 0 / 0.8);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.5 0 0 / 10%);
+  --sidebar-border: transparent;
   --sidebar-ring: oklch(0.439 0 0);
   --warning: oklch(0.41 0.11 46);
   --warning-foreground: oklch(0.99 0.02 95);

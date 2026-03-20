@@ -35,6 +35,7 @@ import PlaylistCard from '@/components/PlaylistCard';
 import SocialFeed from '@/components/SocialFeed';
 import UserCard from '@/components/UserCard';
 import SellNFTModal from '@/components/SellNFTModal';
+import UserArtistVerificationModal from '@/components/UserArtistVerificationModal';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { NFTItem, UserProfile } from '@/types';
@@ -64,6 +65,7 @@ const Profile: React.FC = () => {
   } = useAudio();
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [localUser, setLocalUser] = useState<UserProfile>(userProfile);
   const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'releases' | 'sequences' | 'activity' | 'network' | 'staking' | 'feed'>('overview');
   const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
@@ -148,9 +150,9 @@ const Profile: React.FC = () => {
     [userProfile.anthemId, allNFTs]
   );
 
-  const userPosts = useMemo(() => {
-    return posts.filter(p => p.userId === userProfile.id);
-  }, [userProfile.id, posts]);
+  const feedPosts = useMemo(() => {
+    return posts.filter(p => p.userId === userProfile.id || followedUserIds.includes(p.userId));
+  }, [userProfile.id, followedUserIds, posts]);
 
   const handleSharePost = (e: React.FormEvent) => {
     e.preventDefault();
@@ -325,6 +327,11 @@ const Profile: React.FC = () => {
                           <Satellite className="h-3.5 w-3.5" />
                         </a>
                       )}
+                      {localUser.socials?.spotify && (
+                        <a href={localUser.socials.spotify} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-[#1DB954] hover:border-neutral-500/30 transition-all">
+                          <Disc className="h-3.5 w-3.5" />
+                        </a>
+                      )}
                       {localUser.socials?.telegram && (
                         <a href={localUser.socials.telegram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-blue-300 hover:border-neutral-500/30 transition-all">
                           <Zap className="h-3.5 w-3.5" />
@@ -397,8 +404,8 @@ const Profile: React.FC = () => {
             { id: 'network', label: 'Nodes', icon: Users },
             { id: 'staking', label: 'Staking', icon: Coins }
           ].filter(t => !t.hidden).map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`px-8 py-3 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-3 flex-shrink-0 border ${ activeTab === tab.id ? 'bg-blue-600 border-neutral-500/50 text-foreground shadow-2xl shadow-blue-600/30' : 'bg-muted/50 border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border' }`} >
-              <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-foreground' : 'text-foreground/30'}`} /> {tab.label}
+            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`px-8 py-3 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-3 flex-shrink-0 border ${ activeTab === tab.id ? 'bg-blue-500 text-white border-blue-500 shadow-2xl shadow-blue-500/20' : 'bg-white dark:bg-muted/50 border-silver-300 dark:border-border/50 text-blue-500 dark:text-neutral-500 hover:text-blue-600 dark:hover:text-neutral-400 hover:bg-muted hover:border-border inactive-pill' }`} >
+              <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-white' : 'text-blue-500 dark:text-neutral-500'}`} /> {tab.label}
             </button>
           ))}
         </div>
@@ -454,8 +461,8 @@ const Profile: React.FC = () => {
                             }}
                             className={`relative px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border overflow-hidden group ${
                               isSelected 
-                                ? 'text-foreground border-transparent' 
-                                : 'bg-muted/50 text-muted-foreground border-border hover:text-foreground'
+                                ? 'bg-blue-500 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
+                                : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-transparent hover:text-blue-600 dark:hover:text-neutral-400 hover:bg-muted inactive-pill'
                             }`}
                           >
                             {isSelected && (
@@ -474,7 +481,7 @@ const Profile: React.FC = () => {
                   <div className="space-y-4">
                     <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Social_Relays</p>
                     <div className="grid grid-cols-1 gap-3">
-                      {['x', 'instagram', 'telegram'].map(platform => (
+                      {['x', 'instagram', 'telegram', 'spotify'].map(platform => (
                         <div key={platform} className="relative group/input">
                           <input 
                             type="text" 
@@ -502,7 +509,7 @@ const Profile: React.FC = () => {
             </div>
             
             {!isSpotifyVerified && (
-              <button onClick={() => navigate('/settings')} className="w-full py-5 bg-[#1DB954]/5 border border-[#1DB954]/20 rounded-[16px] text-[#1DB954] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#1DB954] hover:text-foreground transition-all flex items-center justify-center gap-4 shadow-2xl active:scale-95 group" >
+              <button onClick={() => setIsVerificationModalOpen(true)} className="w-full py-5 bg-[#1DB954]/5 border border-[#1DB954]/20 rounded-[16px] text-[#1DB954] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#1DB954] hover:text-foreground transition-all flex items-center justify-center gap-4 shadow-2xl active:scale-95 group" >
                 <Disc className="h-5 w-5 group-hover:animate-spin" /> Verify Artist Identity
               </button>
             )}
@@ -795,7 +802,7 @@ const Profile: React.FC = () => {
                   </form>
                 </div>
 
-                <SocialFeed posts={userPosts} onDeletePost={deletePost} emptyMessage="Signal void detected." />
+                <SocialFeed posts={feedPosts} onDeletePost={deletePost} emptyMessage="Signal void detected." />
               </section>
             )}
 
@@ -996,6 +1003,9 @@ const Profile: React.FC = () => {
       {/* Modals */}
       {selectedNftForListing && (
         <SellNFTModal nft={selectedNftForListing} onClose={() => setSelectedNftForListing(null)} />
+      )}
+      {isVerificationModalOpen && (
+        <UserArtistVerificationModal onClose={() => setIsVerificationModalOpen(false)} />
       )}
     </div>
   );

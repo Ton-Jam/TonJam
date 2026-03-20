@@ -45,6 +45,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
       audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
       duration: 180,
       genre: formData.genre,
+      description: formData.description,
       isNFT: formData.isNFT,
       price: formData.isNFT ? formData.price : undefined,
       playCount: 0,
@@ -135,6 +136,17 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                       placeholder="Enter title..."
                       required
                       aria-required="true"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Description</label>
+                    <textarea 
+                      id="track-description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-3 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all min-h-[100px]"
+                      placeholder="Tell us about your track..."
                     />
                   </div>
 

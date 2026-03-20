@@ -80,7 +80,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-white border border-border rounded-[12px] overflow-hidden shadow-2xl"
+          className="relative w-full max-w-md bg-background border border-border rounded-[12px] overflow-hidden shadow-2xl"
         >
           {/* Hardware Header */}
           <div className="bg-foreground/[0.02] border-b border-border/50 p-6 flex items-center justify-between">

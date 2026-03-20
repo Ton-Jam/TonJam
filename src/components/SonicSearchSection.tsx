@@ -37,7 +37,7 @@ const SonicSearchSection: React.FC = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for vibes, genres, or moods..."
-            className="flex-1 bg-background border border-border rounded-[10px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-all"
+            className="flex-1 bg-muted/50 border border-border rounded-[10px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
           <button 

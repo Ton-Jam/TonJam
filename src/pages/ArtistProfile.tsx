@@ -456,7 +456,20 @@ const ArtistProfile: React.FC = () => {
                 <h1 className="text-2xl md:text-4xl font-bold tracking-tighter uppercase text-foreground leading-none">
                   {artist.name}
                 </h1>
-                {artist.verified && <CheckCircle className="text-blue-500 h-6 w-6 md:h-8 md:w-8" />}
+                {artist.verified ? (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-blue-500/10 text-blue-500 rounded-full border border-blue-500/20">
+                    <CheckCircle className="h-3 w-3" />
+                    <span className="text-[8px] font-bold uppercase tracking-widest">Verified</span>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setShowVerifyModal(true)}
+                    className="flex items-center gap-1 px-2 py-1 bg-amber-500/10 text-amber-500 rounded-full border border-amber-500/20 hover:bg-amber-500/20 transition-all"
+                  >
+                    <ShieldAlert className="h-3 w-3" />
+                    <span className="text-[8px] font-bold uppercase tracking-widest">Verify Artist</span>
+                  </button>
+                )}
                 {artist.socials?.spotify && <Disc className="text-[#1DB954] h-6 w-6 md:h-8 md:w-8" />}
               </div>
               <p className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.4em] opacity-70"> @sonic_architect_{artist.id} </p>

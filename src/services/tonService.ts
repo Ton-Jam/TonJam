@@ -10,9 +10,9 @@ const TON_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC';
 export const getJettonBalance = async (
   walletAddress: string,
   jettonMasterAddress: string
-): Promise<string> => {
+): Promise<number> => {
   try {
-    if (!walletAddress || !jettonMasterAddress) return '0';
+    if (!walletAddress || !jettonMasterAddress) return 0;
 
     const client = new TonClient({
       endpoint: TON_ENDPOINT,
@@ -37,14 +37,14 @@ export const getJettonBalance = async (
     const jettonWalletAddress = response.stack.readAddress();
     const walletData = await client.runMethod(jettonWalletAddress, 'get_wallet_data');
     const balance = walletData.stack.readBigNumber();
-    return (Number(balance) / 10**9).toString(); 
+    return Number(balance) / 10**9; 
     */
 
     // Fallback to mock for the prototype if the above is too brittle for the environment
-    return (Math.random() * 1000).toFixed(2);
+    return Number((Math.random() * 1000).toFixed(2));
   } catch (error) {
     console.warn("Error fetching Jetton balance, using mock:", error);
-    return (Math.random() * 1000).toFixed(2);
+    return Number((Math.random() * 1000).toFixed(2));
   }
 };
 

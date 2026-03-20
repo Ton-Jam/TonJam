@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post } from '@/types';
@@ -14,7 +14,9 @@ import {
   orderBy, 
   getDoc,
   updateDoc,
-  getDocFromServer
+  getDocFromServer,
+  deleteDoc,
+  increment
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -98,6 +100,7 @@ interface AudioContextType {
   genesisContractAddress: string | null;
   volume: number;
   isMuted: boolean;
+  isLoading: boolean;
   playTrack: (track: Track) => Promise<void>;
   togglePlay: () => Promise<void>;
   nextTrack: () => void;
@@ -150,6 +153,7 @@ interface AudioContextType {
   posts: Post[];
   createPost: (post: Partial<Post>) => void;
   deletePost: (postId: string) => void;
+  updatePost: (postId: string, updates: Partial<Post>) => void;
   getTrendingTracks: () => Track[];
   getTopNFTTracks: () => Track[];
   getTracksByGenre: (genre: string) => Track[];
@@ -166,6 +170,20 @@ interface AudioContextType {
   isCreatePlaylistModalOpen: boolean;
   setIsCreatePlaylistModalOpen: (isOpen: boolean) => void;
   updateRoyaltyConfig: (artistId: string, config: Artist['royaltyConfig']) => void;
+  marketplaceFilters: {
+    genre: string;
+    artist: string;
+    rarity: string;
+    priceRange: [number, number];
+    sortBy: string;
+  };
+  setMarketplaceFilters: React.Dispatch<React.SetStateAction<{
+    genre: string;
+    artist: string;
+    rarity: string;
+    priceRange: [number, number];
+    sortBy: string;
+  }>>;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -226,6 +244,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [searchQuery, setSearchQuery] = useState('');
   const [isDiscoverFiltersOpen, setIsDiscoverFiltersOpen] = useState(false);
   const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
+  const [marketplaceFilters, setMarketplaceFilters] = useState<{
+    genre: string;
+    artist: string;
+    rarity: string;
+    priceRange: [number, number];
+    sortBy: string;
+  }>({
+    genre: 'All',
+    artist: 'All',
+    rarity: 'All',
+    priceRange: [0, 1000],
+    sortBy: 'Newest'
+  });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -241,6 +272,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const saved = localStorage.getItem(STORAGE_KEYS.MUTED);
     return saved === 'true';
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [playlists, setPlaylists] = useState<Playlist[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PLAYLISTS);
@@ -271,131 +304,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return [...CURATED_PLAYLISTS, ...playlists];
   }, [playlists]);
 
-  const getTrendingTracks = () => {
-    return [...allTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10);
-  };
-
-  const getTopNFTTracks = () => {
-    return allTracks.filter(t => t.isNFT).sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0')).slice(0, 10);
-  };
-
-  const getTracksByGenre = (genre: string) => {
-    return allTracks.filter(t => t.genre.toLowerCase() === genre.toLowerCase());
-  };
-
-  const getRecommendations = () => {
-    const historyIds = new Set(recentlyPlayed.map(t => t.id));
-    const likedIds = new Set(likedTrackIds);
-    const nftTrackIds = new Set(userNFTs.map(n => n.trackId));
-    
-    const preferredGenres = new Map<string, number>();
-    const preferredArtists = new Map<string, number>();
-    
-    if (userProfile.favoriteGenres) {
-      userProfile.favoriteGenres.forEach(genre => {
-        preferredGenres.set(genre, (preferredGenres.get(genre) || 0) + 5);
-      });
-    }
-
-    const analyzeTrack = (trackId: string, weight: number) => {
-      const track = allTracks.find(t => t.id === trackId);
-      if (track) {
-        preferredGenres.set(track.genre, (preferredGenres.get(track.genre) || 0) + weight);
-        preferredArtists.set(track.artistId || track.artist, (preferredArtists.get(track.artistId || track.artist) || 0) + weight);
-      }
-    };
-    
-    recentlyPlayed.forEach(t => analyzeTrack(t.id, 1));
-    likedTrackIds.forEach(id => analyzeTrack(id, 2));
-    userNFTs.forEach(n => analyzeTrack(n.trackId, 3));
-    
-    const topGenres = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
-    const topArtists = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
-    
-    // Social signals: tracks mentioned in posts or from followed artists
-    const socialSignalTrackIds = new Set<string>();
-    posts.forEach(post => {
-      if (post.trackId) socialSignalTrackIds.add(post.trackId);
-    });
-    
-    const followedArtistIds = new Set(followedUserIds);
-
-    const getTrackScore = (track: Track) => {
-      let score = 0;
-      
-      // Genre match
-      if (topGenres.includes(track.genre)) {
-        score += 5 - Math.min(topGenres.indexOf(track.genre), 4);
-      }
-      
-      // Artist match
-      if (topArtists.includes(track.artistId || track.artist)) {
-        score += 8 - Math.min(topArtists.indexOf(track.artistId || track.artist), 7);
-      }
-      
-      // Followed artist signal
-      if (followedArtistIds.has(track.artistId || '')) {
-        score += 10;
-      }
-      
-      // Social signal
-      if (socialSignalTrackIds.has(track.id)) {
-        score += 4;
-      }
-
-      // Up-and-coming signal (new tracks with some traction)
-      const isNew = parseInt(track.id) > 10; // Simple heuristic for "new"
-      if (isNew && (track.playCount || 0) > 100 && (track.playCount || 0) < 5000) {
-        score += 6;
-      }
-
-      // Trending signal
-      if ((track.playCount || 0) > 10000) {
-        score += 3;
-      }
-      
-      return score;
-    };
-
-    const recommendedTracks = allTracks.filter(track => {
-      if (historyIds.has(track.id) || likedIds.has(track.id) || nftTrackIds.has(track.id)) {
-        return false;
-      }
-      return getTrackScore(track) > 5;
-    }).sort((a, b) => getTrackScore(b) - getTrackScore(a)).slice(0, 15);
-
-    if (recommendedTracks.length < 10) {
-      const trending = getTrendingTracks().filter(t => 
-        !recommendedTracks.find(rt => rt.id === t.id) && 
-        !historyIds.has(t.id) && 
-        !likedIds.has(t.id) && 
-        !nftTrackIds.has(t.id)
-      );
-      recommendedTracks.push(...trending.slice(0, 15 - recommendedTracks.length));
-    }
-
-    const recommendedNFTs = allNFTs.filter(nft => {
-      if (userNFTs.find(un => un.id === nft.id)) {
-        return false;
-      }
-      
-      const track = allTracks.find(t => t.id === nft.trackId);
-      if (!track) return false;
-
-      let score = 0;
-      if (topGenres.includes(track.genre)) score += 5;
-      if (topArtists.includes(track.artistId || track.artist)) score += 5;
-      if (followedArtistIds.has(track.artistId || '')) score += 8;
-      
-      // Trending NFT signal
-      if (parseFloat(nft.price) > 50) score += 3;
-      
-      return score > 5;
-    }).sort((a, b) => parseFloat(b.price) - parseFloat(a.price)).slice(0, 10);
-
-    return { recommendedTracks, recommendedNFTs };
-  };
-
   useEffect(() => {
     localStorage.setItem('tonjam_posts', JSON.stringify(posts));
   }, [posts]);
@@ -416,9 +324,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         
         recordTransaction({
           type: 'stream',
-          amount: streamPrice.toString(),
-          platformFee: platformFee.toFixed(6),
-          artistShare: artistShare.toFixed(6),
+          amount: streamPrice,
+          platformFee: platformFee,
+          artistShare: artistShare,
           recipientAddress: artist?.walletAddress || 'EQ_ARTIST_FALLBACK_ADDRESS',
           senderAddress: userProfile.walletAddress,
           trackId: currentTrack.id,
@@ -450,6 +358,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [userNFTs, setUserNFTs] = useState<NFTItem[]>([]);
   const [firebaseTracks, setFirebaseTracks] = useState<Track[]>([]);
   const [firebaseNFTs, setFirebaseNFTs] = useState<NFTItem[]>([]);
+  const [firebasePlaylists, setFirebasePlaylists] = useState<Playlist[]>([]);
+  const [firebaseTransactions, setFirebaseTransactions] = useState<Transaction[]>([]);
+  const [firebasePosts, setFirebasePosts] = useState<Post[]>([]);
+  const [firebaseUsers, setFirebaseUsers] = useState<UserProfile[]>([]);
 
   // Sync with Firebase
   useEffect(() => {
@@ -469,6 +381,38 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       handleFirestoreError(error, OperationType.LIST, 'nfts', false);
     });
 
+    const playlistsQuery = query(collection(db, 'playlists'), orderBy('id', 'desc'));
+    const unsubscribePlaylists = onSnapshot(playlistsQuery, (snapshot) => {
+      const playlists = snapshot.docs.map(doc => doc.data() as Playlist);
+      setFirebasePlaylists(playlists);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'playlists', false);
+    });
+
+    const transactionsQuery = query(collection(db, 'transactions'), orderBy('timestamp', 'desc'));
+    const unsubscribeTransactions = onSnapshot(transactionsQuery, (snapshot) => {
+      const transactions = snapshot.docs.map(doc => doc.data() as Transaction);
+      setFirebaseTransactions(transactions);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'transactions', false);
+    });
+
+    const postsQuery = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
+    const unsubscribePosts = onSnapshot(postsQuery, (snapshot) => {
+      const posts = snapshot.docs.map(doc => doc.data() as Post);
+      setFirebasePosts(posts);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'posts', false);
+    });
+
+    const usersQuery = query(collection(db, 'users'));
+    const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
+      const users = snapshot.docs.map(doc => doc.data() as UserProfile);
+      setFirebaseUsers(users);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'users', false);
+    });
+
     // Test connection
     const testConnection = async () => {
       try {
@@ -484,14 +428,72 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => {
       unsubscribeTracks();
       unsubscribeNFTs();
+      unsubscribePlaylists();
+      unsubscribeTransactions();
+      unsubscribePosts();
+      unsubscribeUsers();
     };
   }, []);
 
+  // Update local state when firebase data changes
+  useEffect(() => {
+    if (firebasePlaylists.length > 0) {
+      setPlaylists(firebasePlaylists);
+    }
+  }, [firebasePlaylists]);
+
+  useEffect(() => {
+    if (firebaseTransactions.length > 0) {
+      setTransactions(firebaseTransactions);
+    }
+  }, [firebaseTransactions]);
+
+  useEffect(() => {
+    if (firebasePosts.length > 0) {
+      setPosts(firebasePosts);
+    }
+  }, [firebasePosts]);
+
+  useEffect(() => {
+    if (firebaseUsers.length > 0) {
+      // Sync artists with firebaseUsers who are verified artists
+      const firebaseArtists = firebaseUsers
+        .filter(u => u.isVerifiedArtist)
+        .map(u => ({
+          id: u.id,
+          name: u.name,
+          walletAddress: u.walletAddress,
+          avatarUrl: u.avatar,
+          followers: u.followers || 0,
+          verified: u.isVerifiedArtist || false,
+          isVerifiedArtist: u.isVerifiedArtist || false,
+          bio: u.bio,
+          bannerUrl: u.bannerUrl,
+          socials: u.socials,
+          royaltyConfig: (u as any).royaltyConfig,
+          earnings: {
+            streaming: Number((u as any).streamingEarnings || 0),
+            nftSales: Number((u as any).nftEarnings || 0),
+            total: Number((u as any).earnings || 0)
+          }
+        } as Artist));
+      
+      if (firebaseArtists.length > 0) {
+        setArtists(firebaseArtists);
+      }
+    }
+  }, [firebaseUsers]);
+
   // Auth Sync
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeUserDoc: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        // Initial fetch and setup listener for current user
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
         if (userDoc.exists()) {
           setUserProfile(userDoc.data() as UserProfile);
         } else {
@@ -500,14 +502,44 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             id: user.uid,
             name: user.displayName || 'Anonymous',
             avatar: user.photoURL || 'https://picsum.photos/seed/user/200/200',
-            walletAddress: '', // To be updated by user
+            walletAddress: '',
+            handle: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
+            followers: 0,
+            following: 0,
+            earnings: 0,
+            streamingEarnings: 0,
+            nftEarnings: 0,
+            jamBalance: 100, // Welcome bonus
+            stakedJam: 0,
+            pendingJamRewards: 0,
+            likedTrackIds: [],
+            followedUserIds: []
           };
-          await setDoc(doc(db, 'users', user.uid), newProfile);
+          await setDoc(userDocRef, newProfile);
           setUserProfile(newProfile);
         }
+
+        // Real-time listener for current user profile
+        unsubscribeUserDoc = onSnapshot(userDocRef, (snapshot) => {
+          if (snapshot.exists()) {
+            setUserProfile(snapshot.data() as UserProfile);
+          }
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${user.uid}`, false);
+        });
+      } else {
+        if (unsubscribeUserDoc) {
+          unsubscribeUserDoc();
+          unsubscribeUserDoc = null;
+        }
+        setUserProfile(MOCK_USER);
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeUserDoc) unsubscribeUserDoc();
+    };
   }, []);
 
   const allTracks = React.useMemo(() => {
@@ -524,6 +556,152 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return unique;
   }, [firebaseNFTs]);
 
+  const getTrendingTracks = useCallback(() => {
+    return [...allTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10);
+  }, [allTracks]);
+
+  const getTopNFTTracks = useCallback(() => {
+    return allTracks.filter(t => t.isNFT).sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0')).slice(0, 10);
+  }, [allTracks]);
+
+  const getTracksByGenre = useCallback((genre: string) => {
+    return allTracks.filter(t => t.genre.toLowerCase() === genre.toLowerCase());
+  }, [allTracks]);
+
+  const getRecommendations = useCallback(() => {
+    const historyIds = new Set(recentlyPlayed.map(t => t.id));
+    const likedIds = new Set(likedTrackIds);
+    const nftTrackIds = new Set(userNFTs.map(n => n.trackId));
+    
+    const preferredGenres = new Map<string, number>();
+    const preferredArtists = new Map<string, number>();
+    
+    if (userProfile.favoriteGenres) {
+      userProfile.favoriteGenres.forEach(genre => {
+        preferredGenres.set(genre, (preferredGenres.get(genre) || 0) + 5);
+      });
+    }
+
+    const analyzeTrack = (trackId: string, weight: number) => {
+      const track = allTracks.find(t => t.id === trackId);
+      if (track) {
+        preferredGenres.set(track.genre, (preferredGenres.get(track.genre) || 0) + weight);
+        preferredArtists.set(track.artistId || track.artist, (preferredArtists.get(track.artistId || track.artist) || 0) + weight);
+      }
+    };
+    
+    recentlyPlayed.forEach(t => analyzeTrack(t.id, 1));
+    likedTrackIds.forEach(id => analyzeTrack(id, 2));
+    userNFTs.forEach(n => analyzeTrack(n.trackId, 3));
+    
+    const sortedGenres = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]);
+    const sortedArtists = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]);
+    
+    const topGenres = sortedGenres.map(e => e[0]);
+    const topArtists = sortedArtists.map(e => e[0]);
+    
+    // Social signals: tracks mentioned in posts or from followed artists
+    const socialSignalTrackIds = new Set<string>();
+    posts.forEach(post => {
+      if (post.trackId) socialSignalTrackIds.add(post.trackId);
+    });
+    
+    const followedArtistIds = new Set(followedUserIds);
+
+    const getTrackRecommendation = (track: Track) => {
+      let score = 0;
+      let reason = "";
+      
+      // Artist match (highest priority)
+      if (topArtists.includes(track.artistId || track.artist)) {
+        const artistIndex = topArtists.indexOf(track.artistId || track.artist);
+        score += 15 - Math.min(artistIndex, 10);
+        reason = `Because you like ${track.artist}`;
+      }
+      
+      // Genre match
+      if (topGenres.includes(track.genre)) {
+        const genreIndex = topGenres.indexOf(track.genre);
+        const genreScore = 8 - Math.min(genreIndex, 5);
+        if (genreScore > score) {
+          score = genreScore;
+          reason = `Similar to your favorite ${track.genre} tracks`;
+        } else {
+          score += genreScore / 2;
+        }
+      }
+      
+      // Followed artist signal
+      if (followedArtistIds.has(track.artistId || '')) {
+        score += 12;
+        if (!reason) reason = `From an artist you follow`;
+      }
+      
+      // Social signal
+      if (socialSignalTrackIds.has(track.id)) {
+        score += 5;
+        if (!reason) reason = `Trending in your community`;
+      }
+
+      // Up-and-coming signal
+      const isNew = parseInt(track.id) > 10;
+      if (isNew && (track.playCount || 0) > 100 && (track.playCount || 0) < 5000) {
+        score += 7;
+        if (!reason) reason = `New discovery for you`;
+      }
+
+      // Trending signal
+      if ((track.playCount || 0) > 10000) {
+        score += 4;
+        if (!reason) reason = `Global hit you might like`;
+      }
+      
+      return { score, reason };
+    };
+
+    const recommendedTracks = allTracks
+      .filter(track => !historyIds.has(track.id) && !likedIds.has(track.id) && !nftTrackIds.has(track.id))
+      .map(track => {
+        const { score, reason } = getTrackRecommendation(track);
+        return { ...track, recommendationReason: reason, recommendationScore: score };
+      })
+      .filter(t => t.recommendationScore > 5)
+      .sort((a, b) => b.recommendationScore - a.recommendationScore)
+      .slice(0, 20);
+
+    // Fallback if not enough recommendations
+    if (recommendedTracks.length < 10) {
+      const trending = getTrendingTracks().filter(t => 
+        !recommendedTracks.find(rt => rt.id === t.id) && 
+        !historyIds.has(t.id) && 
+        !likedIds.has(t.id) && 
+        !nftTrackIds.has(t.id)
+      );
+      recommendedTracks.push(...trending.slice(0, 15 - recommendedTracks.length).map(t => ({
+        ...t,
+        recommendationReason: "Trending globally",
+        recommendationScore: 3
+      })));
+    }
+
+    const recommendedNFTs = allNFTs.filter(nft => {
+      if (userNFTs.find(un => un.id === nft.id)) return false;
+      
+      const track = allTracks.find(t => t.id === nft.trackId);
+      if (!track) return false;
+
+      let score = 0;
+      if (topGenres.includes(track.genre)) score += 5;
+      if (topArtists.includes(track.artistId || track.artist)) score += 5;
+      if (followedArtistIds.has(track.artistId || '')) score += 8;
+      if (parseFloat(nft.price) > 50) score += 3;
+      
+      return score > 5;
+    }).sort((a, b) => parseFloat(b.price) - parseFloat(a.price)).slice(0, 10);
+
+    return { recommendedTracks, recommendedNFTs };
+  }, [recentlyPlayed, likedTrackIds, userNFTs, userProfile.favoriteGenres, allTracks, allNFTs, posts, followedUserIds, getTrendingTracks]);
+
   useEffect(() => {
     if (userProfile.id) {
       setUserTracks(firebaseTracks.filter(t => t.artistId === userProfile.id));
@@ -532,33 +710,43 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [firebaseTracks, firebaseNFTs, userProfile]);
 
   const updateNFT = async (nftId: string, updates: Partial<NFTItem>, silent: boolean = false) => {
+    setIsLoading(true);
     try {
       await updateDoc(doc(db, 'nfts', nftId), updates);
       if (!silent) addNotification("Asset protocol updated", "success");
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `nfts/${nftId}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const addUserTrack = async (track: Track) => {
+    setIsLoading(true);
     try {
       await setDoc(doc(db, 'tracks', track.id), track);
       addNotification(`Track "${track.title}" uploaded`, "success");
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, `tracks/${track.id}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const addUserNFT = async (nft: NFTItem, silent: boolean = false) => {
+    setIsLoading(true);
     try {
       await setDoc(doc(db, 'nfts', nft.id), nft);
       if (!silent) addNotification(`NFT "${nft.title}" minted`, "success");
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, `nfts/${nft.id}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const setAnthem = async (nftId: string | null) => {
+    setIsLoading(true);
     try {
       // Update local state
       setUserProfile(prev => ({
@@ -583,6 +771,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (error) {
       console.error("Error setting anthem:", error);
       addNotification("Failed to update anthem", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -731,60 +921,59 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [tonAddress, auth.currentUser, userProfile.walletAddress]);
 
-  const recordTransaction = (txData: Omit<Transaction, 'id' | 'timestamp' | 'status'>) => {
+  const recordTransaction = async (txData: Omit<Transaction, 'id' | 'timestamp' | 'status'>) => {
+    setIsLoading(true);
+    const txId = `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newTx: Transaction = {
       ...txData,
-      id: `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: txId,
       timestamp: new Date().toISOString(),
       status: 'completed',
       txHash: `0x${Math.random().toString(16).substr(2, 40)}`
     };
     
-    setTransactions(prev => [newTx, ...prev]);
-    
-    // Update user/artist earnings based on transaction
-    if (txData.type === 'nft_sale' || txData.type === 'stream') {
-      const share = parseFloat(txData.artistShare);
+    try {
+      await setDoc(doc(db, 'transactions', txId), newTx);
+      setTransactions(prev => [newTx, ...prev]);
       
-      // If the recipient is the current user, update their profile earnings
-      if (txData.recipientAddress === userProfile.walletAddress) {
-        setUserProfile(prev => ({
-          ...prev,
-          earnings: (parseFloat(prev.earnings || '0') + share).toFixed(4),
-          streamingEarnings: txData.type === 'stream' 
-            ? (parseFloat(prev.streamingEarnings || '0') + share).toFixed(4)
-            : prev.streamingEarnings,
-          nftEarnings: txData.type === 'nft_sale'
-            ? (parseFloat(prev.nftEarnings || '0') + share).toFixed(4)
-            : prev.nftEarnings
-        }));
+      // Update user/artist earnings based on transaction
+      if (txData.type === 'nft_sale' || txData.type === 'stream') {
+        const share = Number(txData.artistShare);
+        const updateFields: any = {
+          earnings: increment(share)
+        };
+        
+        if (txData.type === 'stream') {
+          updateFields.streamingEarnings = increment(share);
+        } else if (txData.type === 'nft_sale') {
+          updateFields.nftEarnings = increment(share);
+        }
+        
+        // If the recipient is the current user, update their profile earnings
+        if (txData.recipientAddress === userProfile.walletAddress) {
+          await updateDoc(doc(db, 'users', userProfile.id), updateFields);
+        }
+        
+        // Update the artist's earnings in Firestore if they are a registered user
+        const artistId = txData.trackId 
+          ? allTracks.find(t => t.id === txData.trackId)?.artistId 
+          : txData.nftId 
+            ? allNFTs.find(n => n.id === txData.nftId)?.artistId 
+            : null;
+
+        if (artistId) {
+          await updateDoc(doc(db, 'users', artistId), updateFields);
+        }
       }
-      
-      // Update the artist's earnings in the artists list if they exist
-      if (txData.trackId || txData.nftId) {
-        setArtists(prev => prev.map(artist => {
-          if (artist.walletAddress === txData.recipientAddress || artist.id === (txData.trackId ? MOCK_TRACKS.find(t => t.id === txData.trackId)?.artistId : MOCK_NFTS.find(n => n.id === txData.nftId)?.artistId)) {
-            const currentStreaming = parseFloat(artist.earnings?.streaming || '0');
-            const currentNft = parseFloat(artist.earnings?.nftSales || '0');
-            const newStreaming = txData.type === 'stream' ? currentStreaming + share : currentStreaming;
-            const newNft = txData.type === 'nft_sale' ? currentNft + share : currentNft;
-            
-            return {
-              ...artist,
-              earnings: {
-                streaming: newStreaming.toFixed(4),
-                nftSales: newNft.toFixed(4),
-                total: (newStreaming + newNft).toFixed(4)
-              }
-            };
-          }
-          return artist;
-        }));
-      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `transactions/${txId}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const purchaseJAM = async (amount: string, jamAmount: string) => {
+    setIsLoading(true);
     try {
       if (!tonConnectUI.connected) {
         addNotification("Please connect your wallet first", "error");
@@ -796,27 +985,31 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (success) {
         recordTransaction({
           type: 'jam_purchase',
-          amount: amount,
-          platformFee: '0',
-          artistShare: '0',
+          amount: Number(amount),
+          platformFee: 0,
+          artistShare: 0,
           recipientAddress: 'PLATFORM_WALLET',
           senderAddress: userProfile.walletAddress,
           trackTitle: `Purchased ${jamAmount} JAM`
         });
         
-        setUserProfile(prev => ({
-          ...prev,
-          jamBalance: (parseFloat(prev.jamBalance || '0') + parseFloat(jamAmount)).toString()
-        }));
+        if (auth.currentUser) {
+          await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+            jamBalance: increment(Number(jamAmount))
+          });
+        }
         
         addNotification(`Successfully purchased ${jamAmount} JAM!`, 'success');
       }
     } catch (error) {
       addNotification("Transaction failed or cancelled", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const subscribePremium = async (amount: string) => {
+    setIsLoading(true);
     try {
       if (!tonConnectUI.connected) {
         addNotification("Please connect your wallet first", "error");
@@ -828,134 +1021,163 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (success) {
         recordTransaction({
           type: 'premium_subscription',
-          amount: amount,
-          platformFee: amount,
-          artistShare: '0',
+          amount: Number(amount),
+          platformFee: Number(amount),
+          artistShare: 0,
           recipientAddress: 'PLATFORM_WALLET',
           senderAddress: userProfile.walletAddress,
           trackTitle: 'Premium Subscription'
         });
         
-        setUserProfile(prev => ({
-          ...prev,
-          isPremium: true
-        }));
+        if (auth.currentUser) {
+          await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+            isPremium: true
+          });
+        }
         
         addNotification('Welcome to TonJam Premium!', 'success');
       }
     } catch (error) {
       addNotification("Transaction failed or cancelled", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const stakeJam = async (amount: string) => {
-    const currentBalance = parseFloat(userProfile.jamBalance || '0');
-    const stakeAmount = parseFloat(amount);
+    setIsLoading(true);
+    try {
+      const currentBalance = parseFloat(userProfile.jamBalance || '0');
+      const stakeAmount = parseFloat(amount);
 
-    if (stakeAmount <= 0) {
-      addNotification("Invalid stake amount", "error");
-      return;
+      if (stakeAmount <= 0) {
+        addNotification("Invalid stake amount", "error");
+        return;
+      }
+
+      if (currentBalance < stakeAmount) {
+        addNotification("Insufficient JAM balance", "error");
+        return;
+      }
+
+      // Simulate blockchain delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          jamBalance: increment(-stakeAmount),
+          stakedJam: increment(stakeAmount),
+          lastStakingUpdate: new Date().toISOString()
+        });
+      }
+
+      recordTransaction({
+        type: 'stake',
+        amount: 0, // Staking is internal to JAM
+        platformFee: 0,
+        artistShare: 0,
+        recipientAddress: 'STAKING_CONTRACT',
+        senderAddress: userProfile.walletAddress,
+        trackTitle: `Staked ${amount} JAM`
+      });
+
+      addNotification(`Successfully staked ${amount} JAM`, 'success');
+    } catch (error) {
+      addNotification("Staking failed", "error");
+    } finally {
+      setIsLoading(false);
     }
-
-    if (currentBalance < stakeAmount) {
-      addNotification("Insufficient JAM balance", "error");
-      return;
-    }
-
-    // Simulate blockchain delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    setUserProfile(prev => ({
-      ...prev,
-      jamBalance: (currentBalance - stakeAmount).toString(),
-      stakedJam: (parseFloat(prev.stakedJam || '0') + stakeAmount).toString(),
-      lastStakingUpdate: new Date().toISOString()
-    }));
-
-    recordTransaction({
-      type: 'stake',
-      amount: '0', // Staking is internal to JAM
-      platformFee: '0',
-      artistShare: '0',
-      recipientAddress: 'STAKING_CONTRACT',
-      senderAddress: userProfile.walletAddress,
-      trackTitle: `Staked ${amount} JAM`
-    });
-
-    addNotification(`Successfully staked ${amount} JAM`, 'success');
   };
 
   const unstakeJam = async (amount: string) => {
-    const currentStaked = parseFloat(userProfile.stakedJam || '0');
-    const unstakeAmount = parseFloat(amount);
+    setIsLoading(true);
+    try {
+      const currentStaked = parseFloat(userProfile.stakedJam || '0');
+      const unstakeAmount = parseFloat(amount);
 
-    if (unstakeAmount <= 0) {
-      addNotification("Invalid unstake amount", "error");
-      return;
+      if (unstakeAmount <= 0) {
+        addNotification("Invalid unstake amount", "error");
+        return;
+      }
+
+      if (currentStaked < unstakeAmount) {
+        addNotification("Insufficient staked JAM", "error");
+        return;
+      }
+
+      // Simulate blockchain delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          stakedJam: increment(-unstakeAmount),
+          jamBalance: increment(unstakeAmount),
+          lastStakingUpdate: new Date().toISOString()
+        });
+      }
+
+      recordTransaction({
+        type: 'unstake',
+        amount: 0,
+        platformFee: 0,
+        artistShare: 0,
+        recipientAddress: userProfile.walletAddress || 'USER_WALLET',
+        senderAddress: 'STAKING_CONTRACT',
+        trackTitle: `Unstaked ${amount} JAM`
+      });
+
+      addNotification(`Successfully unstaked ${amount} JAM`, 'success');
+    } catch (error) {
+      addNotification("Unstaking failed", "error");
+    } finally {
+      setIsLoading(false);
     }
-
-    if (currentStaked < unstakeAmount) {
-      addNotification("Insufficient staked JAM", "error");
-      return;
-    }
-
-    // Simulate blockchain delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    setUserProfile(prev => ({
-      ...prev,
-      stakedJam: (currentStaked - unstakeAmount).toString(),
-      jamBalance: (parseFloat(prev.jamBalance || '0') + unstakeAmount).toString(),
-      lastStakingUpdate: new Date().toISOString()
-    }));
-
-    recordTransaction({
-      type: 'unstake',
-      amount: '0',
-      platformFee: '0',
-      artistShare: '0',
-      recipientAddress: userProfile.walletAddress || 'USER_WALLET',
-      senderAddress: 'STAKING_CONTRACT',
-      trackTitle: `Unstaked ${amount} JAM`
-    });
-
-    addNotification(`Successfully unstaked ${amount} JAM`, 'success');
   };
 
   const claimJamRewards = async () => {
-    const pendingRewards = parseFloat(userProfile.pendingJamRewards || '0');
+    setIsLoading(true);
+    try {
+      const pendingRewards = parseFloat(userProfile.pendingJamRewards || '0');
 
-    if (pendingRewards <= 0) {
-      addNotification("No rewards to claim", "info");
-      return;
+      if (pendingRewards <= 0) {
+        addNotification("No rewards to claim", "info");
+        return;
+      }
+
+      // Simulate blockchain delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          pendingJamRewards: 0,
+          jamBalance: increment(pendingRewards),
+          lastStakingUpdate: new Date().toISOString()
+        });
+      }
+
+      recordTransaction({
+        type: 'claim_rewards',
+        amount: 0,
+        platformFee: 0,
+        artistShare: 0,
+        recipientAddress: userProfile.walletAddress || 'USER_WALLET',
+        senderAddress: 'STAKING_CONTRACT',
+        trackTitle: `Claimed ${pendingRewards.toFixed(4)} JAM rewards`
+      });
+
+      addNotification(`Successfully claimed ${pendingRewards.toFixed(4)} JAM rewards`, 'success');
+    } catch (error) {
+      addNotification("Claiming rewards failed", "error");
+    } finally {
+      setIsLoading(false);
     }
-
-    // Simulate blockchain delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    setUserProfile(prev => ({
-      ...prev,
-      pendingJamRewards: '0',
-      jamBalance: (parseFloat(prev.jamBalance || '0') + pendingRewards).toString(),
-      lastStakingUpdate: new Date().toISOString()
-    }));
-
-    recordTransaction({
-      type: 'claim_rewards',
-      amount: '0',
-      platformFee: '0',
-      artistShare: '0',
-      recipientAddress: userProfile.walletAddress || 'USER_WALLET',
-      senderAddress: 'STAKING_CONTRACT',
-      trackTitle: `Claimed ${pendingRewards.toFixed(4)} JAM rewards`
-    });
-
-    addNotification(`Successfully claimed ${pendingRewards.toFixed(4)} JAM rewards`, 'success');
   };
 
-  const createPost = (postData: Partial<Post>) => {
+  const createPost = async (postData: Partial<Post>) => {
+    setIsLoading(true);
+    const postId = `post-${Date.now()}`;
     const newPost: Post = {
-      id: `post-${Date.now()}`,
+      id: postId,
       userId: userProfile.id,
       userName: userProfile.name,
       userAvatar: userProfile.avatar,
@@ -964,51 +1186,87 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       likes: 0,
       comments: 0,
       reposts: 0,
-      timestamp: 'Just now',
+      timestamp: new Date().toISOString(),
       ...postData
     };
-    setPosts(prev => [newPost, ...prev]);
+    
+    try {
+      await setDoc(doc(db, 'posts', postId), newPost);
+      setPosts(prev => [newPost, ...prev]);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `posts/${postId}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deletePost = (postId: string) => {
-    setPosts(prev => prev.filter(p => p.id !== postId));
+  const deletePost = async (postId: string) => {
+    setIsLoading(true);
+    try {
+      if (postId.startsWith('post-')) {
+        await deleteDoc(doc(db, 'posts', postId));
+      }
+      setPosts(prev => prev.filter(p => p.id !== postId));
+      addNotification("Post deleted", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `posts/${postId}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updatePost = async (postId: string, updates: Partial<Post>) => {
+    try {
+      if (postId.startsWith('post-')) {
+        await updateDoc(doc(db, 'posts', postId), updates);
+      }
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, ...updates } : p));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `posts/${postId}`);
+    }
   };
 
   const jamTrack = async (trackId: string) => {
-    const jamCost = 1; // 1 JAM to boost
-    const currentBalance = parseFloat(userProfile.jamBalance || '0');
+    setIsLoading(true);
+    try {
+      const jamCost = 1; // 1 JAM to boost
+      const currentBalance = userProfile.jamBalance || 0;
 
-    if (currentBalance < jamCost) {
-      addNotification("Insufficient JAM balance to boost track", "error");
-      return;
-    }
-
-    // Simulate blockchain delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    setUserProfile(prev => ({
-      ...prev,
-      jamBalance: (currentBalance - jamCost).toString()
-    }));
-
-    setPosts(prev => prev.map(p => {
-      if (p.trackId === trackId) {
-        return { ...p, likes: p.likes + 10 }; // Jamming boosts likes significantly in the feed
+      if (currentBalance < jamCost) {
+        addNotification("Insufficient JAM balance to boost track", "error");
+        return;
       }
-      return p;
-    }));
 
-    addNotification("Track Jammed! Signal boosted across the network.", "success");
-    
-    recordTransaction({
-      type: 'jam_purchase',
-      amount: '0',
-      platformFee: '0',
-      artistShare: '0.9', // 90% goes to artist
-      recipientAddress: MOCK_TRACKS.find(t => t.id === trackId)?.artistId || 'ARTIST',
-      senderAddress: userProfile.walletAddress,
-      trackTitle: `Jammed Track: ${MOCK_TRACKS.find(t => t.id === trackId)?.title}`
-    });
+      // Simulate blockchain delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          jamBalance: increment(-jamCost)
+        });
+      }
+
+      setPosts(prev => prev.map(p => {
+        if (p.trackId === trackId) {
+          return { ...p, likes: p.likes + 10 }; // Jamming boosts likes significantly in the feed
+        }
+        return p;
+      }));
+
+      addNotification("Track Jammed! Signal boosted across the network.", "success");
+      
+      await recordTransaction({
+        type: 'jam_purchase',
+        amount: 0,
+        platformFee: 0,
+        artistShare: 0.9, // 90% goes to artist
+        recipientAddress: MOCK_TRACKS.find(t => t.id === trackId)?.artistId || 'ARTIST',
+        senderAddress: userProfile.walletAddress,
+        trackTitle: `Jammed Track: ${MOCK_TRACKS.find(t => t.id === trackId)?.title}`
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const joinJamRoom = (roomId: string) => {
@@ -1028,11 +1286,25 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addNotification("Disconnected from Jam Room", "info");
   };
 
-  const updateRoyaltyConfig = (artistId: string, config: Artist['royaltyConfig']) => {
-    setArtists(prev => prev.map(artist => 
-      artist.id === artistId ? { ...artist, royaltyConfig: config } : artist
-    ));
-    addNotification("Royalty protocol updated", "success");
+  const updateRoyaltyConfig = async (artistId: string, config: Artist['royaltyConfig']) => {
+    setIsLoading(true);
+    try {
+      setArtists(prev => prev.map(artist => 
+        artist.id === artistId ? { ...artist, royaltyConfig: config } : artist
+      ));
+
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', artistId), {
+          royaltyConfig: config
+        });
+      }
+
+      addNotification("Royalty protocol updated", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${artistId}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const playTrack = async (track: Track) => {
@@ -1101,6 +1373,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           });
         }
         setIsPlaying(true);
+        
+        // Record stream transaction
+        recordTransaction({
+          type: 'stream',
+          amount: 0.001,
+          platformFee: 0.0001,
+          artistShare: 0.0009,
+          recipientAddress: track.artistId || 'ARTIST',
+          senderAddress: userProfile.walletAddress,
+          trackId: track.id,
+          trackTitle: track.title
+        });
       } catch (err) {
         console.error("Audio initialization error:", err);
         addNotification("Failed to initialize audio protocol", "error");
@@ -1220,26 +1504,53 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const toggleLikeTrack = (trackId: string) => {
-    setLikedTrackIds(prev => {
-      const isLiked = prev.includes(trackId);
+  const toggleLikeTrack = async (trackId: string) => {
+    setIsLoading(true);
+    try {
+      const isLiked = likedTrackIds.includes(trackId);
+      const newLikedTrackIds = isLiked 
+        ? likedTrackIds.filter(id => id !== trackId)
+        : [...likedTrackIds, trackId];
+      
+      setLikedTrackIds(newLikedTrackIds);
+      
+      if (auth.currentUser) {
+        // Update user's liked tracks
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          likedTrackIds: newLikedTrackIds
+        });
+
+        // Update track's like count
+        await updateDoc(doc(db, 'tracks', trackId), {
+          likes: increment(isLiked ? -1 : 1)
+        });
+      }
+      
       if (isLiked) {
         addNotification("Track removed from favorites", "info");
-        return prev.filter(id => id !== trackId);
       } else {
         addNotification("Track added to favorites", "success");
-        return [...prev, trackId];
       }
-    });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `tracks/${trackId}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const [artists, setArtists] = useState<Artist[]>(MOCK_ARTISTS);
 
-  const toggleFollowUser = (userId: string) => {
-    setFollowedUserIds(prev => {
-      const isFollowing = prev.includes(userId);
+  const toggleFollowUser = async (userId: string) => {
+    setIsLoading(true);
+    try {
+      const isFollowing = followedUserIds.includes(userId);
+      const newFollowedUserIds = isFollowing
+        ? followedUserIds.filter(id => id !== userId)
+        : [...followedUserIds, userId];
       
-      // Update artist follower count
+      setFollowedUserIds(newFollowedUserIds);
+      
+      // Update artist follower count locally
       setArtists(currentArtists => 
         currentArtists.map(artist => {
           if (artist.id === userId) {
@@ -1252,26 +1563,39 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })
       );
 
-      // Update userProfile following count and followedUserIds
+      // Update userProfile following count and followedUserIds locally
       setUserProfile(prevProfile => ({
         ...prevProfile,
         following: isFollowing ? Math.max(0, prevProfile.following - 1) : prevProfile.following + 1,
-        followedUserIds: isFollowing 
-          ? (prevProfile.followedUserIds || []).filter(id => id !== userId)
-          : [...(prevProfile.followedUserIds || []), userId],
-        followedArtists: isFollowing
-          ? (prevProfile.followedArtists || []).filter(id => id !== userId)
-          : [...(prevProfile.followedArtists || []), userId]
+        followedUserIds: newFollowedUserIds,
+        followedArtists: newFollowedUserIds,
+        followingCount: newFollowedUserIds.length
       }));
+
+      // Update Firebase if user is logged in
+      if (auth.currentUser) {
+        // Update current user's following list
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          followedUserIds: newFollowedUserIds,
+          following: newFollowedUserIds.length
+        });
+
+        // Update target user's follower count
+        await updateDoc(doc(db, 'users', userId), {
+          followers: increment(isFollowing ? -1 : 1)
+        });
+      }
 
       if (isFollowing) {
         addNotification("Unfollowed user", "info");
-        return prev.filter(id => id !== userId);
       } else {
         addNotification("Followed user", "success");
-        return [...prev, userId];
       }
-    });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const closePlayer = async () => {
@@ -1290,134 +1614,195 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const toggleShuffle = () => setIsShuffle(!isShuffle);
   const toggleRepeat = () => setIsRepeat(!isRepeat);
 
-  const createNewPlaylist = (name: string, description?: string, initialTrack?: Track, coverUrl?: string, isPrivate?: boolean, isCollaborative?: boolean, tags?: string[]) => {
+  const createNewPlaylist = async (name: string, description?: string, initialTrack?: Track, coverUrl?: string, isPrivate?: boolean, isCollaborative?: boolean, tags?: string[]) => {
+    setIsLoading(true);
+    const playlistId = Date.now().toString();
     const newPlaylist: Playlist = {
-      id: Date.now().toString(),
+      id: playlistId,
       title: name,
       coverUrl: coverUrl || '', /* Leave empty for dynamic collage/placeholder */
       trackCount: initialTrack ? 1 : 0,
-      creator: 'You',
+      creator: userProfile.name,
       description,
       trackIds: initialTrack ? [initialTrack.id] : [],
       isPrivate,
       isCollaborative,
-      tags
+      tags,
+      updatedAt: new Date().toISOString()
     };
-    setPlaylists(prev => [newPlaylist, ...prev]);
-    if (initialTrack) {
-      addNotification(`Created "${name}" and added "${initialTrack.title}"`, 'success');
-    } else {
-      addNotification(`Created playlist "${name}"`, 'success');
+
+    try {
+      await setDoc(doc(db, 'playlists', playlistId), newPlaylist);
+      setPlaylists(prev => [newPlaylist, ...prev]);
+      if (initialTrack) {
+        addNotification(`Created "${name}" and added "${initialTrack.title}"`, 'success');
+      } else {
+        addNotification(`Created playlist "${name}"`, 'success');
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `playlists/${playlistId}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const deletePlaylist = (playlistId: string) => {
-    setPlaylists(prev => prev.filter(pl => pl.id !== playlistId));
-    addNotification("Playlist deleted", "info");
+  const deletePlaylist = async (playlistId: string) => {
+    setIsLoading(true);
+    try {
+      await deleteDoc(doc(db, 'playlists', playlistId));
+      setPlaylists(prev => prev.filter(pl => pl.id !== playlistId));
+      addNotification("Playlist deleted", "info");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `playlists/${playlistId}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const updatePlaylist = (playlistId: string, updates: Partial<Playlist>) => {
-    setPlaylists(prev => prev.map(pl => pl.id === playlistId ? { ...pl, ...updates } : pl));
-    addNotification("Playlist updated", "success");
+  const updatePlaylist = async (playlistId: string, updates: Partial<Playlist>) => {
+    setIsLoading(true);
+    try {
+      const updated = { ...updates, updatedAt: new Date().toISOString() };
+      await updateDoc(doc(db, 'playlists', playlistId), updated);
+      setPlaylists(prev => prev.map(pl => pl.id === playlistId ? { ...pl, ...updated } : pl));
+      addNotification("Playlist updated", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const generateDiscoverWeekly = () => {
-    // Check if Discover Weekly already exists and was updated this week
-    const existingIndex = playlists.findIndex(p => p.title === 'Discover Weekly');
-    const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    
-    if (existingIndex !== -1) {
-      const existing = playlists[existingIndex];
-      // If we have a timestamp and it's less than a week old, don't regenerate
-      if (existing.updatedAt && new Date(existing.updatedAt) > oneWeekAgo) {
+  const generateDiscoverWeekly = async () => {
+    setIsLoading(true);
+    try {
+      // Check if Discover Weekly already exists and was updated this week
+      const existingIndex = playlists.findIndex(p => p.title === 'Discover Weekly');
+      const now = new Date();
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      if (existingIndex !== -1) {
+        const existing = playlists[existingIndex];
+        // If we have a timestamp and it's less than a week old, don't regenerate
+        if (existing.updatedAt && new Date(existing.updatedAt) > oneWeekAgo) {
+          return;
+        }
+      }
+
+      // Analyze user data
+      const historyIds = new Set(recentlyPlayed.map(t => t.id));
+      const likedIds = new Set(likedTrackIds);
+      const nftTrackIds = new Set(userNFTs.map(n => n.trackId));
+      
+      // Find preferred genres and artists
+      const preferredGenres = new Map<string, number>();
+      const preferredArtists = new Map<string, number>();
+      
+      const analyzeTrack = (trackId: string, weight: number) => {
+        const track = allTracks.find(t => t.id === trackId);
+        if (track) {
+          preferredGenres.set(track.genre, (preferredGenres.get(track.genre) || 0) + weight);
+          preferredArtists.set(track.artistId || track.artist, (preferredArtists.get(track.artistId || track.artist) || 0) + weight);
+        }
+      };
+      
+      recentlyPlayed.forEach(t => analyzeTrack(t.id, 1));
+      likedTrackIds.forEach(id => analyzeTrack(id, 2));
+      userNFTs.forEach(n => analyzeTrack(n.trackId, 3));
+      
+      // Sort preferences
+      const topGenres = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+      const topArtists = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+      
+      // Generate recommendations
+      const recommendations = allTracks.filter(track => {
+        // Don't recommend tracks they already know well (liked or own NFT)
+        if (likedIds.has(track.id) || nftTrackIds.has(track.id)) return false;
+        
+        // Recommend based on genre or artist
+        const matchesGenre = topGenres.slice(0, 3).includes(track.genre);
+        const matchesArtist = topArtists.slice(0, 3).includes(track.artistId || track.artist);
+        
+        return matchesGenre || matchesArtist;
+      });
+      
+      // If we don't have enough recommendations, add some trending tracks
+      let finalTracks = recommendations.sort(() => 0.5 - Math.random()).slice(0, 10);
+      if (finalTracks.length < 10) {
+        const trending = getTrendingTracks().filter(t => !finalTracks.find(ft => ft.id === t.id));
+        finalTracks = [...finalTracks, ...trending].slice(0, 10);
+      }
+      
+      const playlistId = existingIndex !== -1 ? playlists[existingIndex].id : `dw-${Date.now()}`;
+      const newPlaylist: Playlist = {
+        id: playlistId,
+        title: 'Discover Weekly',
+        coverUrl: 'https://picsum.photos/seed/discover/400/400',
+        trackCount: finalTracks.length,
+        creator: 'TonJam AI',
+        description: "Your weekly dose of fresh music, personalized based on your listening history, likes, and NFT collection.",
+        trackIds: finalTracks.map(t => t.id),
+        updatedAt: now.toISOString()
+      };
+      
+      // Update Firebase if user is logged in
+      if (auth.currentUser) {
+        await setDoc(doc(db, 'playlists', playlistId), newPlaylist);
+      }
+      
+      setPlaylists(prev => {
+        if (existingIndex !== -1) {
+          const updated = [...prev];
+          updated[existingIndex] = newPlaylist;
+          return updated;
+        }
+        return [newPlaylist, ...prev];
+      });
+      
+      addNotification('Your Discover Weekly playlist has been updated!', 'success');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'playlists/discover-weekly');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createRecommendedPlaylist = async () => {
+    setIsLoading(true);
+    try {
+      const { recommendedTracks } = getRecommendations();
+      const tracksToUse = recommendedTracks.slice(0, 10);
+      
+      if (tracksToUse.length === 0) {
+        addNotification("Not enough data to generate recommendations yet", "info");
         return;
       }
-    }
 
-    // Analyze user data
-    const historyIds = new Set(recentlyPlayed.map(t => t.id));
-    const likedIds = new Set(likedTrackIds);
-    const nftTrackIds = new Set(userNFTs.map(n => n.trackId));
-    
-    // Find preferred genres and artists
-    const preferredGenres = new Map<string, number>();
-    const preferredArtists = new Map<string, number>();
-    
-    const analyzeTrack = (trackId: string, weight: number) => {
-      const track = allTracks.find(t => t.id === trackId);
-      if (track) {
-        preferredGenres.set(track.genre, (preferredGenres.get(track.genre) || 0) + weight);
-        preferredArtists.set(track.artistId || track.artist, (preferredArtists.get(track.artistId || track.artist) || 0) + weight);
-      }
-    };
-    
-    recentlyPlayed.forEach(t => analyzeTrack(t.id, 1));
-    likedTrackIds.forEach(id => analyzeTrack(id, 2));
-    userNFTs.forEach(n => analyzeTrack(n.trackId, 3));
-    
-    // Sort preferences
-    const topGenres = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
-    const topArtists = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
-    
-    // Generate recommendations
-    const recommendations = allTracks.filter(track => {
-      // Don't recommend tracks they already know well (liked or own NFT)
-      if (likedIds.has(track.id) || nftTrackIds.has(track.id)) return false;
-      
-      // Recommend based on genre or artist
-      const matchesGenre = topGenres.slice(0, 3).includes(track.genre);
-      const matchesArtist = topArtists.slice(0, 3).includes(track.artistId || track.artist);
-      
-      return matchesGenre || matchesArtist;
-    });
-    
-    // If we don't have enough recommendations, add some trending tracks
-    let finalTracks = recommendations.sort(() => 0.5 - Math.random()).slice(0, 10);
-    if (finalTracks.length < 10) {
-      const trending = getTrendingTracks().filter(t => !finalTracks.find(ft => ft.id === t.id));
-      finalTracks = [...finalTracks, ...trending].slice(0, 10);
-    }
-    
-    const newPlaylist: Playlist = {
-      id: existingIndex !== -1 ? playlists[existingIndex].id : `dw-${Date.now()}`,
-      title: 'Discover Weekly',
-      coverUrl: 'https://picsum.photos/seed/discover/400/400',
-      trackCount: finalTracks.length,
-      creator: 'TonJam AI',
-      description: "Your weekly dose of fresh music, personalized based on your listening history, likes, and NFT collection.",
-      trackIds: finalTracks.map(t => t.id),
-      updatedAt: now.toISOString()
-    };
-    
-    setPlaylists(prev => {
-      if (existingIndex !== -1) {
-        const updated = [...prev];
-        updated[existingIndex] = newPlaylist;
-        return updated;
-      }
-      return [newPlaylist, ...prev];
-    });
-    
-    addNotification('Your Discover Weekly playlist has been updated!', 'success');
-  };
+      const name = `AI Playlist ${playlists.length + 1}`;
+      const playlistId = Date.now().toString();
+      const newPlaylist: Playlist = {
+        id: playlistId,
+        title: name,
+        coverUrl: '', /* Leave empty for dynamic collage */
+        trackCount: tracksToUse.length,
+        creator: 'TonJam AI',
+        description: "AI playlist generated based on your listening history.",
+        trackIds: tracksToUse.map(t => t.id),
+        updatedAt: new Date().toISOString()
+      };
 
-  const createRecommendedPlaylist = () => {
-    /* Simulate recommendation logic by picking random tracks */
-    const shuffled = [...MOCK_TRACKS].sort(() => 0.5 - Math.random());
-    const recommendedTracks = shuffled.slice(0, 5);
-    const name = `AI Playlist ${playlists.length + 1}`;
-    const newPlaylist: Playlist = {
-      id: Date.now().toString(),
-      title: name,
-      coverUrl: '', /* Leave empty for dynamic collage */
-      trackCount: recommendedTracks.length,
-      creator: 'TonJam AI',
-      description: "AI playlist generated based on your listening history.",
-      trackIds: recommendedTracks.map(t => t.id)
-    };
-    setPlaylists(prev => [newPlaylist, ...prev]);
-    addNotification(`AI Playlist "${name}" created with ${recommendedTracks.length} tracks`, 'success');
+      // Update Firebase if user is logged in
+      if (auth.currentUser) {
+        await setDoc(doc(db, 'playlists', playlistId), newPlaylist);
+      }
+
+      setPlaylists(prev => [newPlaylist, ...prev]);
+      addNotification(`AI Playlist "${name}" created with ${tracksToUse.length} tracks`, 'success');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'playlists/ai-recommended');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /* Fix: Implemented clearRecentlyPlayed function to purge history */
@@ -1426,44 +1811,102 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addNotification("Playback history cleared", "info");
   };
 
-  const addTrackToPlaylist = (playlistId: string, track: Track) => {
-    setPlaylists(prev => prev.map(pl => {
-      if (pl.id === playlistId) {
-        if (pl.trackIds?.includes(track.id)) return pl;
-        const newIds = [...(pl.trackIds || []), track.id];
-        return { ...pl, trackIds: newIds, trackCount: newIds.length };
-      }
-      return pl;
-    }));
-    addNotification(`Added "${track.title}" to ${playlists.find(p => p.id === playlistId)?.title}`);
-  };
+  const addTrackToPlaylist = async (playlistId: string, track: Track) => {
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (!playlist) return;
 
-  const removeTrackFromPlaylist = (playlistId: string, trackId: string) => {
-    setPlaylists(prev => prev.map(pl => {
-      if (pl.id === playlistId) {
-        const newIds = (pl.trackIds || []).filter(id => id !== trackId);
-        return { ...pl, trackIds: newIds, trackCount: newIds.length };
-      }
-      return pl;
-    }));
-  };
+    if (playlist.trackIds?.includes(track.id)) {
+      addNotification(`"${track.title}" is already in this playlist`, "info");
+      return;
+    }
 
-  const reorderTrackInPlaylist = (playlistId: string, trackId: string, direction: 'up' | 'down') => {
-    setPlaylists(prev => prev.map(pl => {
-      if (pl.id === playlistId && pl.trackIds) {
-        const index = pl.trackIds.indexOf(trackId);
-        if (index === -1) return pl;
-        const newTrackIds = [...pl.trackIds];
-        const targetIndex = direction === 'up' ? index - 1 : index + 1;
-        if (targetIndex >= 0 && targetIndex < newTrackIds.length) {
-          const temp = newTrackIds[index];
-          newTrackIds[index] = newTrackIds[targetIndex];
-          newTrackIds[targetIndex] = temp;
-          return { ...pl, trackIds: newTrackIds };
+    setIsLoading(true);
+    const newIds = [...(playlist.trackIds || []), track.id];
+    const updates = { 
+      trackIds: newIds, 
+      trackCount: newIds.length,
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      await updateDoc(doc(db, 'playlists', playlistId), updates);
+      setPlaylists(prev => prev.map(pl => {
+        if (pl.id === playlistId) {
+          return { ...pl, ...updates };
         }
+        return pl;
+      }));
+      addNotification(`Added "${track.title}" to ${playlist.title}`);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeTrackFromPlaylist = async (playlistId: string, trackId: string) => {
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (!playlist) return;
+
+    setIsLoading(true);
+    const newIds = (playlist.trackIds || []).filter(id => id !== trackId);
+    const updates = { 
+      trackIds: newIds, 
+      trackCount: newIds.length,
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      await updateDoc(doc(db, 'playlists', playlistId), updates);
+      setPlaylists(prev => prev.map(pl => {
+        if (pl.id === playlistId) {
+          return { ...pl, ...updates };
+        }
+        return pl;
+      }));
+      addNotification("Track removed from playlist", "info");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const reorderTrackInPlaylist = async (playlistId: string, trackId: string, direction: 'up' | 'down') => {
+    const playlist = playlists.find(p => p.id === playlistId);
+    if (!playlist || !playlist.trackIds) return;
+
+    const index = playlist.trackIds.indexOf(trackId);
+    if (index === -1) return;
+
+    const newTrackIds = [...playlist.trackIds];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+    if (targetIndex >= 0 && targetIndex < newTrackIds.length) {
+      setIsLoading(true);
+      const temp = newTrackIds[index];
+      newTrackIds[index] = newTrackIds[targetIndex];
+      newTrackIds[targetIndex] = temp;
+
+      const updates = { 
+        trackIds: newTrackIds,
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        await updateDoc(doc(db, 'playlists', playlistId), updates);
+        setPlaylists(prev => prev.map(pl => {
+          if (pl.id === playlistId) {
+            return { ...pl, ...updates };
+          }
+          return pl;
+        }));
+      } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
+      } finally {
+        setIsLoading(false);
       }
-      return pl;
-    }));
+    }
   };
 
   return (
@@ -1477,11 +1920,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
       allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
-      posts, createPost, deletePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
+      posts, createPost, deletePost, updatePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
-      updateRoyaltyConfig
+      updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters,
+      isLoading
     }}>
       {children}
+      {isLoading && (
+        <div className="fixed top-4 right-4 z-[500] animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            Syncing...
+          </div>
+        </div>
+      )}
       {trackToAddToPlaylist && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={() => setTrackToAddToPlaylist(null)}></div>

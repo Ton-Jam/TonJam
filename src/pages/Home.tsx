@@ -24,32 +24,14 @@ const HomeSection = ({ title, icon: Icon, link, children }: { title: string, ico
   );
 };
 
-const FEATURED_POSTS: CarouselItem[] = [
-  {
-    id: 'sp1',
-    title: 'Neon Voyager Live',
-    subtitle: 'Exclusive Virtual Concert on TON',
-    imageUrl: 'https://picsum.photos/1200/400?random=101',
-    link: '/artist/a1',
-    cta: 'Get Tickets'
-  },
-  {
-    id: 'sp2',
-    title: 'Genesis NFT Drop',
-    subtitle: 'Echo Phase limited edition',
-    imageUrl: 'https://picsum.photos/1200/400?random=102',
-    link: '/marketplace',
-    cta: 'Mint Now'
-  },
-  {
-    id: 'sp3',
-    title: 'TonJam Weekly Top 10',
-    subtitle: 'Discover the hottest tracks',
-    imageUrl: 'https://picsum.photos/1200/400?random=103',
-    link: '/discover',
-    cta: 'Listen'
-  }
-];
+const FEATURED_TRACKS_CAROUSEL: CarouselItem[] = MOCK_TRACKS.slice(0, 3).map(track => ({
+  id: track.id,
+  title: track.title,
+  subtitle: track.artist,
+  imageUrl: track.coverUrl,
+  link: `/track/${track.id}`,
+  cta: 'Play'
+}));
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -63,6 +45,13 @@ const Home: React.FC = () => {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'discovery'>('overview');
 
+  const handleCtaClick = (item: CarouselItem) => {
+    const track = MOCK_TRACKS.find(t => t.id === item.id);
+    if (track) {
+      playTrack(track);
+    }
+  };
+
   const trendingTracks = useMemo(() => {
     let tracks = getTrendingTracks();
     if (selectedGenre) {
@@ -72,12 +61,21 @@ const Home: React.FC = () => {
   }, [getTrendingTracks, selectedGenre]);
 
   const trendingArtists = useMemo(() => {
-    return [...artists].sort((a, b) => parseFloat(b.earnings?.total || '0') - parseFloat(a.earnings?.total || '0')).slice(0, 3);
-  }, [artists]);
+    let filteredArtists = [...artists];
+    if (selectedGenre) {
+      filteredArtists = filteredArtists.filter(a => a.genre === selectedGenre);
+    }
+    return filteredArtists.sort((a, b) => Number(b.earnings?.total || 0) - Number(a.earnings?.total || 0)).slice(0, 3);
+  }, [artists, selectedGenre]);
 
   const trendingNFTs = useMemo(() => {
-    return [...allNFTs].sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0')).slice(0, 3);
-  }, [allNFTs]);
+    let filteredNFTs = [...allNFTs];
+    if (selectedGenre) {
+      const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
+      filteredNFTs = filteredNFTs.filter(n => genreTrackIds.includes(n.trackId));
+    }
+    return filteredNFTs.sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0')).slice(0, 3);
+  }, [allNFTs, selectedGenre]);
 
   const topNFTTracks = useMemo(() => {
     let tracks = getTopNFTTracks();
@@ -106,14 +104,27 @@ const Home: React.FC = () => {
     };
   }, [getRecommendations, selectedGenre]);
 
-  const newlyMintedNFTs = useMemo(() => {
-    let nfts = MOCK_NFTS;
+  const filteredRecentlyPlayed = useMemo(() => {
+    if (!selectedGenre) return recentlyPlayed;
+    return recentlyPlayed.filter(t => t.genre === selectedGenre);
+  }, [recentlyPlayed, selectedGenre]);
+
+  const newReleases = useMemo(() => {
+    let tracks = [...MOCK_TRACKS];
     if (selectedGenre) {
-      const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
-      nfts = nfts.filter(n => genreTrackIds.includes(n.trackId));
+      tracks = tracks.filter(t => t.genre === selectedGenre);
     }
-    return nfts.slice(2, 7);
+    // Sort by release date descending (mocking new releases)
+    return tracks.sort((a, b) => new Date(b.releaseDate || 0).getTime() - new Date(a.releaseDate || 0).getTime()).slice(0, 5);
   }, [selectedGenre]);
+
+  const curatedPlaylists = useMemo(() => {
+    const basePlaylists = allPlaylists.filter(p => p.creator === 'TonJam AI' || CURATED_PLAYLISTS.find(cp => cp.id === p.id));
+    if (!selectedGenre) return basePlaylists;
+    
+    const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
+    return basePlaylists.filter(p => p.trackIds?.some(id => genreTrackIds.includes(id)));
+  }, [allPlaylists, selectedGenre]);
 
   const recommendedArtists = useMemo(() => {
     let recArtists = artists;
@@ -123,15 +134,24 @@ const Home: React.FC = () => {
     return recArtists.slice(0, 5);
   }, [artists, selectedGenre]);
 
+  const newlyMintedNFTs = useMemo(() => {
+    let nfts = [...allNFTs];
+    if (selectedGenre) {
+      const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
+      nfts = nfts.filter(n => genreTrackIds.includes(n.trackId));
+    }
+    return nfts.slice(2, 7);
+  }, [allNFTs, selectedGenre]);
+
   return (
     <div className="max-w-7xl mx-auto px-0 pb-[14px] lg:px-[30px] lg:pb-[30px] space-y-8 w-full mb-32">
       {/* Filter Section */}
       <div className="max-w-3xl mx-auto w-full relative z-20">
-        <div className="flex items-center justify-between mb-8 border-b border-blue-500/30 pb-4">
+        <div className="flex items-center justify-between mb-8 pb-4">
           <div className="flex items-center gap-8">
             <button 
               onClick={() => setActiveTab('overview')}
-              className={`text-xl font-bold uppercase tracking-tighter transition-all relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${activeTab === 'overview' ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
+              className={`text-xl font-bold uppercase tracking-tighter transition-all relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${activeTab === 'overview' ? 'text-blue-500' : 'text-neutral-500 hover:text-neutral-400'}`}
             >
               Overview
               {activeTab === 'overview' && (
@@ -140,7 +160,7 @@ const Home: React.FC = () => {
             </button>
             <button 
               onClick={() => setActiveTab('discovery')}
-              className={`text-xl font-bold uppercase tracking-tighter transition-all relative flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${activeTab === 'discovery' ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
+              className={`text-xl font-bold uppercase tracking-tighter transition-all relative flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${activeTab === 'discovery' ? 'text-blue-500' : 'text-neutral-500 hover:text-neutral-400'}`}
             >
               Discovery
               <Sparkles className={`h-4 w-4 ${activeTab === 'discovery' ? 'text-blue-400' : 'text-muted-foreground/50'}`} />
@@ -155,10 +175,10 @@ const Home: React.FC = () => {
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
             <button
               onClick={() => setSelectedGenre(null)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-semibold uppercase tracking-wider transition-all snap-start border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-semibold uppercase tracking-wider transition-all snap-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border ${
                 selectedGenre === null 
-                  ? 'bg-blue-600 text-foreground border-neutral-500/50 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
-                  : 'bg-muted/50 text-muted-foreground/80 border-blue-500/30 hover:bg-muted hover:text-foreground'
+                  ? 'bg-blue-500 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
+                  : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-transparent hover:text-blue-600 dark:hover:text-neutral-400 hover:bg-muted/10 inactive-pill'
               }`}
             >
               All Vibes
@@ -170,10 +190,10 @@ const Home: React.FC = () => {
                 <button
                   key={genre.id}
                   onClick={() => setSelectedGenre(genre.name)}
-                  className={`relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-semibold uppercase tracking-wider transition-all snap-start border overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                  className={`relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-semibold uppercase tracking-wider transition-all snap-start overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border ${
                     isSelected 
-                      ? 'text-foreground border-blue-500' 
-                      : 'bg-muted/50 text-muted-foreground/80 border-blue-500/30 hover:text-foreground'
+                      ? 'bg-blue-500 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
+                      : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-transparent hover:text-blue-600 dark:hover:text-neutral-400 hover:bg-muted/10 inactive-pill'
                   }`}
                 >
                   {isSelected && (
@@ -182,7 +202,7 @@ const Home: React.FC = () => {
                   {!isSelected && (
                     <div className={`absolute inset-0 bg-gradient-to-r ${genre.color} opacity-0 group-hover:opacity-20 transition-opacity`}></div>
                   )}
-                  <Icon className={`relative z-10 h-3 w-3 ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-muted-foreground/90'}`} />
+                  <Icon className={`relative z-10 h-3 w-3 ${isSelected ? 'text-white' : 'text-blue-500 dark:text-neutral-500 group-hover:text-blue-600 dark:group-hover:text-neutral-400'}`} />
                   <span className="relative z-10">{genre.name}</span>
                 </button>
               );
@@ -213,10 +233,10 @@ const Home: React.FC = () => {
             className="space-y-8"
           >
             {/* Featured Sponsored Posts Carousel */}
-            <AutoCarousel items={FEATURED_POSTS} />
+            <AutoCarousel items={FEATURED_TRACKS_CAROUSEL} onCtaClick={handleCtaClick} />
 
             {/* Hero Section */}
-            <section className="relative rounded-[10px] overflow-hidden group border border-border">
+            <section className="relative rounded-[10px] overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-transparent z-0"></div>
               <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
               
@@ -244,7 +264,7 @@ const Home: React.FC = () => {
                   </button>
                   <Link 
                     to="/marketplace"
-                    className="px-6 py-2.5 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest rounded-full border border-border transition-all flex items-center gap-2 text-xs"
+                    className="px-6 py-2.5 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-2 text-xs"
                   >
                     <ShoppingBag className="h-4 w-4" />
                     Explore NFTs
@@ -260,9 +280,14 @@ const Home: React.FC = () => {
                 <div className="space-y-2">
                   <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Top 5 Songs</h4>
                   {trendingTracks.slice(0, 5).map((track, idx) => (
-                    <div key={`trend-track-${track.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => playTrack(track)}>
+                    <div key={`trend-track-${track.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/track/${track.id}`)}>
                       <span className="text-lg font-black italic text-muted-foreground/30 w-6">{idx + 1}</span>
-                      <img src={track.coverUrl} className="w-12 h-12 rounded-[5px] object-cover" alt={track.title} />
+                      <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+                        <img src={track.coverUrl} className="w-full h-full object-cover" alt={track.title} />
+                        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
+                          <Play className="h-4 w-4 text-foreground fill-white" />
+                        </div>
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate text-foreground">{track.title}</p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
@@ -298,9 +323,9 @@ const Home: React.FC = () => {
             </section>
 
             {/* Recently Played */}
-            {recentlyPlayed.length > 0 && (
+            {filteredRecentlyPlayed.length > 0 && (
               <HomeSection title="Jump Back In" icon={Clock} link="/explore/tracks?title=Recently Played&filter=recent">
-                {recentlyPlayed.map(track => (
+                {filteredRecentlyPlayed.map(track => (
                   <div key={`recent-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
                     <TrackCard track={track} />
                   </div>
@@ -336,14 +361,17 @@ const Home: React.FC = () => {
                   {trendingTracks.slice(0, 10).map((track, idx) => (
                     <div 
                       key={`chart-${track.id}`} 
-                      onClick={() => playTrack(track)}
+                      onClick={() => navigate(`/track/${track.id}`)}
                       className="flex items-center gap-4 group cursor-pointer p-2 rounded-[5px] hover:bg-muted/50 transition-all w-[85vw] sm:w-[300px] snap-start"
                     >
                       <span className="text-2xl font-black italic text-muted-foreground/30 group-hover:text-blue-500/40 transition-colors w-8 text-center">
                         {idx + 1}
                       </span>
-                      <div className="w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+                      <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
                         <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
+                          <Play className="h-4 w-4 text-foreground fill-white" />
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold uppercase tracking-tight text-foreground truncate group-hover:text-blue-400 transition-colors">{track.title}</h4>
@@ -365,15 +393,15 @@ const Home: React.FC = () => {
               <div className="space-y-3">
                 <SectionHeader title="New Releases" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
                 <div className="space-y-2">
-                  {MOCK_TRACKS.slice(0, 5).map(track => (
+                  {newReleases.map(track => (
                     <div 
                       key={`new-${track.id}`} 
-                      onClick={() => playTrack(track)}
+                      onClick={() => navigate(`/track/${track.id}`)}
                       className="flex items-center gap-4 group cursor-pointer"
                     >
                       <div className="relative w-16 h-16 rounded-[5px] overflow-hidden flex-shrink-0">
                         <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
                           <Play className="h-4 w-4 text-foreground fill-white" />
                         </div>
                       </div>
@@ -393,13 +421,15 @@ const Home: React.FC = () => {
             </section>
 
             {/* Curated Playlists */}
-            <HomeSection title="Curated for You" icon={Sparkles} link="/explore/playlists?title=Curated Playlists&filter=curated">
-              {allPlaylists.filter(p => p.creator === 'TonJam AI' || CURATED_PLAYLISTS.find(cp => cp.id === p.id)).map(playlist => (
-                <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-                  <PlaylistCard playlist={playlist} onClick={() => navigate(`/playlist/${playlist.id}`)} />
-                </div>
-              ))}
-            </HomeSection>
+            {curatedPlaylists.length > 0 && (
+              <HomeSection title="Curated for You" icon={Sparkles} link="/explore/playlists?title=Curated Playlists&filter=curated">
+                {curatedPlaylists.map(playlist => (
+                  <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+                    <PlaylistCard playlist={playlist} onClick={() => navigate(`/playlist/${playlist.id}`)} />
+                  </div>
+                ))}
+              </HomeSection>
+            )}
 
             {/* Genre Grid - Quick Access */}
             <section className="space-y-3">
@@ -451,7 +481,7 @@ const Home: React.FC = () => {
 
             {/* Community & Artist CTA Section */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="glass border border-border bg-card/50 p-6 rounded-[10px] space-y-3 relative overflow-hidden group">
+              <div className="glass bg-card/50 p-6 rounded-[10px] space-y-3 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Radio className="h-32 w-32 text-blue-500" />
                 </div>
@@ -467,7 +497,7 @@ const Home: React.FC = () => {
                 </Link>
               </div>
               
-              <div className="glass border border-border bg-card/50 p-6 rounded-[10px] space-y-3 relative overflow-hidden group">
+              <div className="glass bg-card/50 p-6 rounded-[10px] space-y-3 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Disc className="h-32 w-32 text-purple-500" />
                 </div>
@@ -495,7 +525,7 @@ const Home: React.FC = () => {
       </AnimatePresence>
 
       {/* Decentralized Footer Info */}
-      <section className="py-12 border-t border-border/50 flex flex-col items-center text-center space-y-4">
+      <section className="py-12 flex flex-col items-center text-center space-y-4">
         <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">
           <Globe className="h-3 w-3" />
           Secured by TON Blockchain

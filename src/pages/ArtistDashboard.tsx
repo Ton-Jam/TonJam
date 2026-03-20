@@ -87,7 +87,7 @@ const ArtistDashboard: React.FC = () => {
     );
   }, [tracks, searchQuery]);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification" | "transactions">("overview");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -243,7 +243,7 @@ const ArtistDashboard: React.FC = () => {
     icon: string;
     trend?: string;
   }) => (
-    <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-6 transition-all group">
+    <div className="glass bg-foreground/[0.02] rounded-[10px] p-6 transition-all group">
       {" "}
       <div className="flex justify-between items-start mb-4">
         {" "}
@@ -351,12 +351,13 @@ const ArtistDashboard: React.FC = () => {
             { id: "forge", label: "Protocol Forge", icon: <Hammer className="h-4 w-4" /> },
             { id: "verification", label: "Verification", icon: <CheckCircle2 className="h-4 w-4" /> },
             { id: "royalties", label: "Royalties", icon: <Coins className="h-4 w-4" /> },
+            { id: "transactions", label: "Transactions", icon: <Wallet className="h-4 w-4" /> },
             { id: "profile", label: "Profile Settings", icon: <UserPen className="h-4 w-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`pb-4 flex items-center gap-3 transition-all relative whitespace-nowrap ${activeTab === tab.id ? "text-blue-500" : "text-muted-foreground/50 hover:text-foreground"}`}
+              className={`pb-4 flex items-center gap-3 transition-all relative whitespace-nowrap ${activeTab === tab.id ? "text-blue-500" : "text-neutral-500 hover:text-neutral-400"}`}
             >
               {" "}
               {tab.icon}
@@ -456,12 +457,12 @@ const ArtistDashboard: React.FC = () => {
                 </div>
 
                 {/* Follower Growth - Replaced with Interactive Area Chart */}
-                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] overflow-hidden">
+                <div className="glass bg-foreground/[0.02] rounded-[10px] overflow-hidden">
                   <ChartAreaInteractive />
                 </div>
 
                 {/* Top Tracks */}
-                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[5px] p-8">
+                <div className="glass bg-foreground/[0.02] rounded-[5px] p-8">
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
                     Top Tracks
                   </h3>
@@ -482,7 +483,7 @@ const ArtistDashboard: React.FC = () => {
                 <h2 className="text-xl font-bold text-foreground uppercase tracking-tighter">Your NFT Collection</h2>
                 <button 
                   onClick={() => setActiveTab('forge')}
-                  className="px-4 py-2 bg-neutral-600/10 border border-neutral-600/20 rounded-[8px] text-[9px] font-bold text-neutral-500 uppercase tracking-widest hover:bg-neutral-600 hover:text-foreground transition-all"
+                  className="px-4 py-2 bg-neutral-600/10 rounded-[8px] text-[9px] font-bold text-neutral-500 uppercase tracking-widest hover:bg-neutral-600 hover:text-foreground transition-all"
                 >
                   Forge New Protocol
                 </button>
@@ -492,7 +493,7 @@ const ArtistDashboard: React.FC = () => {
                   <NFTCard key={nft.id} nft={nft} />
                 ))}
                 {MOCK_NFTS.filter(n => n.creator === artistData.name).length === 0 && (
-                  <div className="col-span-full py-32 text-center bg-muted/50 border border-border rounded-[20px]">
+                  <div className="col-span-full py-32 text-center bg-muted/50 rounded-[20px]">
                     <Gem className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
                     <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">No minted protocols in your collection.</p>
                   </div>
@@ -587,6 +588,42 @@ const ArtistDashboard: React.FC = () => {
           {activeTab === "verification" && (
             <div className="animate-in fade-in duration-500">
               <ArtistVerification artist={artistData} />
+            </div>
+          )}
+
+          {activeTab === "transactions" && (
+            <div className="space-y-8 animate-in fade-in duration-500">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">
+                  Transaction History
+                </h3>
+              </div>
+              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[5px] overflow-x-auto no-scrollbar">
+                <table className="w-full text-left border-collapse min-w-[600px]">
+                  <thead>
+                    <tr className="border-b border-border/50 bg-foreground/[0.02]">
+                      <th scope="col" className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Type</th>
+                      <th scope="col" className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Amount</th>
+                      <th scope="col" className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Timestamp</th>
+                      <th scope="col" className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.filter(tx => tx.recipientAddress === artistData.walletAddress || tx.senderAddress === artistData.walletAddress).map((tx) => (
+                      <tr key={tx.id} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
+                        <td scope="row" className="p-6 text-[10px] font-bold text-foreground uppercase tracking-widest">{tx.type.replace('_', ' ')}</td>
+                        <td className="p-6 text-[10px] font-mono text-foreground">{tx.amount} TON</td>
+                        <td className="p-6 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                          {new Date(tx.timestamp).toLocaleDateString()}
+                        </td>
+                        <td className="p-6">
+                          <span className="px-2 py-1 bg-green-500/10 text-green-500 text-[8px] font-bold uppercase rounded-[5px] border border-green-500/20">Completed</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 

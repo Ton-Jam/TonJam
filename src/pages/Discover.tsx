@@ -223,6 +223,7 @@ const Discover: React.FC = () => {
         onClick: () => {
           playTrack(t);
           addToRecentSearches(search);
+          navigate(`/track/${t.id}`);
         }
       });
     });
@@ -291,23 +292,48 @@ const Discover: React.FC = () => {
     return (
       <div className="flex items-center gap-4 py-4 filter-section">
         {activeFilter !== 'NFTs' && activeFilter !== 'Playlists' && activeFilter !== 'Users' && (
-          <select
-            value={selectedGenre || ''}
-            onChange={(e) => setSelectedGenre(e.target.value || null)}
-            className="bg-muted/50 text-foreground border border-blue-500/30 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-blue-500/60 transition-all appearance-none cursor-pointer"
-          >
-            <option value="">All Genres</option>
-            {GENRES.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
-          </select>
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+            <button
+              onClick={() => setSelectedGenre(null)}
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                selectedGenre === null 
+                  ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
+                  : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
+              }`}
+            >
+              All Genres
+            </button>
+            {GENRES.map(g => (
+              <button
+                key={g.id}
+                onClick={() => setSelectedGenre(g.name)}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                  selectedGenre === g.name 
+                    ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
+                    : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
+                }`}
+              >
+                {g.name}
+              </button>
+            ))}
+          </div>
         )}
         {currentSortOptions.length > 0 && (
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="bg-muted/50 text-foreground border border-blue-500/30 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-blue-500/60 transition-all appearance-none cursor-pointer"
-          >
-            {currentSortOptions.map(o => <option key={o} value={o}>{o}</option>)}
-          </select>
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+            {currentSortOptions.map(o => (
+              <button
+                key={o}
+                onClick={() => setSortBy(o)}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                  sortBy === o 
+                    ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
+                    : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
+                }`}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
         )}
       </div>
     );
@@ -357,25 +383,27 @@ const Discover: React.FC = () => {
               <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
                 <button 
                   onClick={handleSurpriseMe}
-                  className="flex-shrink-0 px-4 py-1.5 bg-muted/50 border border-blue-500/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-blue-500/10 hover:border-blue-500/60 transition-all flex items-center gap-1.5 group/surprise"
+                  className="flex-shrink-0 px-4 py-1.5 bg-white dark:bg-muted/50 border border-silver-300 dark:border-blue-500/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-blue-500 dark:text-foreground hover:bg-blue-500/10 hover:border-blue-500/60 transition-all flex items-center gap-1.5 group/surprise inactive-pill"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-amber-500 group-hover/surprise:animate-spin" />
                   Surprise Me
                 </button>
                 
-                <select 
-                  value={activeFilter} 
-                  onChange={(e) => setActiveFilter(e.target.value as any)}
-                  className="flex-shrink-0 bg-muted/50 text-foreground border border-blue-500/30 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all min-w-[140px] appearance-none cursor-pointer"
-                  style={{ backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
-                >
-                  <option value="All">All Categories</option>
-                  <option value="Tracks">Tracks</option>
-                  <option value="Artists">Artists</option>
-                  <option value="NFTs">NFTs</option>
-                  <option value="Playlists">Playlists</option>
-                  <option value="Users">Users</option>
-                </select>
+                <div className="flex items-center gap-2">
+                  {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users'].map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setActiveFilter(filter as any)}
+                      className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                        activeFilter === filter
+                          ? 'bg-blue-500 text-white border-blue-500 shadow-lg'
+                          : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
+                      }`}
+                    >
+                      {filter}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -487,6 +515,20 @@ const Discover: React.FC = () => {
                   grid
                   isEmpty={!MOCK_USERS.some(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase()))}
                 />
+                
+                {/* Empty State for "All" filter */}
+                {MOCK_TRACKS.every(t => !t.title.toLowerCase().includes(search.toLowerCase()) && !t.artist.toLowerCase().includes(search.toLowerCase())) &&
+                 artists.every(a => !a.name.toLowerCase().includes(search.toLowerCase())) &&
+                 MOCK_NFTS.every(n => !n.title.toLowerCase().includes(search.toLowerCase()) && !n.creator.toLowerCase().includes(search.toLowerCase())) &&
+                 allPlaylists.every(p => !p.title.toLowerCase().includes(search.toLowerCase())) &&
+                 MOCK_USERS.every(u => !u.name.toLowerCase().includes(search.toLowerCase()) && !u.handle.toLowerCase().includes(search.toLowerCase())) && (
+                  <div className="py-24 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-[10px]">
+                    <Satellite className="h-12 w-12 text-foreground/5 mb-4 animate-pulse" />
+                    <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
+                    <p className="text-muted-foreground/30 text-[10px] mt-2">Try broadening your search or clearing filters.</p>
+                    <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
+                  </div>
+                )}
               </div>
             ) : (
               <>
@@ -511,6 +553,7 @@ const Discover: React.FC = () => {
                   <div className="py-24 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-[10px]">
                     <Satellite className="h-12 w-12 text-foreground/5 mb-4 animate-pulse" />
                     <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
+                    <p className="text-muted-foreground/30 text-[10px] mt-2">Try broadening your search or clearing filters.</p>
                     <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
                   </div>
                 )}

@@ -58,8 +58,43 @@
         "avatar": { "type": "string" },
         "walletAddress": { "type": "string" },
         "isVerifiedArtist": { "type": "boolean" },
-        "jamBalance": { "type": "string" },
-        "stakedJam": { "type": "string" }
+        "jamBalance": { "type": "number" },
+        "stakedJam": { "type": "number" },
+        "pendingJamRewards": { "type": "number" },
+        "likedTrackIds": { "type": "array", "items": { "type": "string" } },
+        "followedUserIds": { "type": "array", "items": { "type": "string" } },
+        "followers": { "type": "number" },
+        "following": { "type": "number" },
+        "earnings": { "type": "number" },
+        "streamingEarnings": { "type": "number" },
+        "nftEarnings": { "type": "number" },
+        "royaltyConfig": {
+          "type": "object",
+          "properties": {
+            "streamingSplits": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "address": { "type": "string" },
+                  "percentage": { "type": "number" },
+                  "label": { "type": "string" }
+                }
+              }
+            },
+            "nftSaleSplits": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "address": { "type": "string" },
+                  "percentage": { "type": "number" },
+                  "label": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
       },
       "required": ["id", "name", "handle", "avatar"]
     },
@@ -77,6 +112,46 @@
         "status": { "type": "string" }
       },
       "required": ["id", "type", "amount", "recipientAddress", "timestamp", "status"]
+    },
+    "Playlist": {
+      "title": "Playlist",
+      "description": "A user-created playlist",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "coverUrl": { "type": "string" },
+        "trackCount": { "type": "number" },
+        "creator": { "type": "string" },
+        "description": { "type": "string" },
+        "trackIds": { "type": "array", "items": { "type": "string" } },
+        "isPrivate": { "type": "boolean" },
+        "isCollaborative": { "type": "boolean" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "title", "creator"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "A social media post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userHandle": { "type": "string" },
+        "userAvatar": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "trackId": { "type": "string" },
+        "nftId": { "type": "string" },
+        "likes": { "type": "number" },
+        "reposts": { "type": "number" },
+        "comments": { "type": "number" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "userId", "userName", "content", "timestamp"]
     }
   },
   "firestore": {
@@ -95,6 +170,14 @@
     "/transactions/{transactionId}": {
       "schema": "Transaction",
       "description": "Transaction history"
+    },
+    "/playlists/{playlistId}": {
+      "schema": "Playlist",
+      "description": "User playlists"
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "Social feed posts"
     }
   }
 }

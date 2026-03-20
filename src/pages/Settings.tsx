@@ -18,7 +18,7 @@ const Settings: React.FC = () => {
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const SettingItem = ({ icon: Icon, label, description, children }: any) => (
-    <div className="flex items-center justify-between p-6 bg-muted/50 border border-border rounded-2xl">
+    <div className="flex items-center justify-between p-6 bg-muted/50 rounded-2xl">
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-500">
           <Icon className="h-5 w-5" />
@@ -162,7 +162,7 @@ const Settings: React.FC = () => {
         </SettingItem>
       </div>
 
-      <div className="pt-10 border-t border-border/50">
+      <div className="pt-10">
         <button 
           onClick={() => signOut()}
           className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"

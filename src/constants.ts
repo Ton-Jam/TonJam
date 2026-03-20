@@ -266,10 +266,10 @@ export const MOCK_USER: UserProfile = {
   walletAddress: 'UQCc...8xZ2',
   followers: 1240,
   following: 562,
-  earnings: '124.5',
+  earnings: 124.5,
   isVerifiedArtist: true,
-  streamingEarnings: '45.2',
-  nftEarnings: '79.3',
+  streamingEarnings: 45.2,
+  nftEarnings: 79.3,
   followedArtists: ['a1', 'a2', 'a4'],
   followedUserIds: ['u2', 'u3'],
   friends: ['u2', 'u3'],
@@ -435,7 +435,7 @@ export const MOCK_ARTISTS: Artist[] = [
       streamingSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.05, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.10, label: 'Main Artist' }]
     },
-    earnings: { streaming: '12.4', nftSales: '45.2', total: '57.6' },
+    earnings: { streaming: 12.4, nftSales: 45.2, total: 57.6 },
     events: [
       { id: 'e1', title: 'Neon Nights Live', date: '2024-05-20', time: '20:00', venue: 'The Digital Dome', location: 'London, UK', ticketUrl: 'https://example.com/tickets' },
       { id: 'e2', title: 'Cyber Drift Tour', date: '2024-06-15', time: '21:30', venue: 'Synth City Arena', location: 'Tokyo, JP' }
@@ -461,7 +461,7 @@ export const MOCK_ARTISTS: Artist[] = [
       streamingSplits: [{ address: 'EQB_Byte_Beat_Wallet_Address_7777', percentage: 0.04, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQB_Byte_Beat_Wallet_Address_7777', percentage: 0.08, label: 'Main Artist' }]
     },
-    earnings: { streaming: '5.2', nftSales: '12.8', total: '18.0' },
+    earnings: { streaming: 5.2, nftSales: 12.8, total: 18.0 },
     events: [
       { id: 'e3', title: 'Byte Beat Live Stream', date: '2024-05-25', time: '18:00', venue: 'Twitch / TonJam Live', location: 'Virtual' },
       { id: 'e4', title: 'Decentralized Beats Festival', date: '2024-07-10', time: '14:00', venue: 'Blockchain Park', location: 'Berlin, DE' }
@@ -487,7 +487,7 @@ export const MOCK_ARTISTS: Artist[] = [
       streamingSplits: [{ address: 'EQE_Echo_Phase_Wallet_Address_8888', percentage: 0.03, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQE_Echo_Phase_Wallet_Address_8888', percentage: 0.05, label: 'Main Artist' }]
     },
-    earnings: { streaming: '2.1', nftSales: '8.5', total: '10.6' }
+    earnings: { streaming: 2.1, nftSales: 8.5, total: 10.6 }
   },
   { 
     id: 'a4', 
@@ -505,7 +505,7 @@ export const MOCK_ARTISTS: Artist[] = [
       streamingSplits: [{ address: 'EQL_Luna_Ray_Wallet_Address_9999', percentage: 0.06, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQL_Luna_Ray_Wallet_Address_9999', percentage: 0.12, label: 'Main Artist' }]
     },
-    earnings: { streaming: '18.5', nftSales: '32.1', total: '50.6' }
+    earnings: { streaming: 18.5, nftSales: 32.1, total: 50.6 }
   },
   { 
     id: 'a5', 
@@ -523,7 +523,7 @@ export const MOCK_ARTISTS: Artist[] = [
       streamingSplits: [{ address: 'EQC_City_Ghost_Wallet_Address_5555', percentage: 0.02, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQC_City_Ghost_Wallet_Address_5555', percentage: 0.04, label: 'Main Artist' }]
     },
-    earnings: { streaming: '1.2', nftSales: '4.3', total: '5.5' }
+    earnings: { streaming: 1.2, nftSales: 4.3, total: 5.5 }
   },
   { 
     id: 'a6', 
@@ -541,7 +541,7 @@ export const MOCK_ARTISTS: Artist[] = [
       streamingSplits: [{ address: 'EQP_Prism_Core_Wallet_Address_1111', percentage: 0.05, label: 'Main Artist' }],
       nftSaleSplits: [{ address: 'EQP_Prism_Core_Wallet_Address_1111', percentage: 0.10, label: 'Main Artist' }]
     },
-    earnings: { streaming: '8.4', nftSales: '22.1', total: '30.5' }
+    earnings: { streaming: 8.4, nftSales: 22.1, total: 30.5 }
   },
 ];
 
@@ -645,7 +645,7 @@ export const MOCK_USERS: UserProfile[] = [
     bio: 'Digital art enthusiast and music lover.',
     followers: 450,
     following: 120,
-    earnings: '0',
+    earnings: 0,
     followedArtists: ['a1', 'a5'],
     friends: ['u1']
   },
@@ -658,7 +658,7 @@ export const MOCK_USERS: UserProfile[] = [
     bio: 'Creating the future of sound.',
     followers: 890,
     following: 340,
-    earnings: '0',
+    earnings: 0,
     followedArtists: ['a2', 'a3', 'a6'],
     friends: ['u1']
   }

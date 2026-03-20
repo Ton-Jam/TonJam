@@ -8,9 +8,9 @@ import { MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
-const PostCard: React.FC<{ post: Post }> = ({ post }) => {
+const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ post, onDelete }) => {
   const navigate = useNavigate();
-  const { togglePlay, currentTrack, isPlaying, toggleFollowUser, followedUserIds, userProfile, addNotification, allNFTs } = useAudio();
+  const { togglePlay, currentTrack, isPlaying, toggleFollowUser, followedUserIds, userProfile, addNotification, allNFTs, updatePost } = useAudio();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
   const [isReposted, setIsReposted] = useState(post.isReposted || false);
@@ -28,40 +28,47 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     if (!commentText.trim()) return;
     const newComment: Comment = {
       id: Date.now().toString(),
-      userId: MOCK_USER.id,
-      userName: MOCK_USER.name,
-      userAvatar: MOCK_USER.avatar,
+      userId: userProfile.id,
+      userName: userProfile.name,
+      userAvatar: userProfile.avatar,
       content: commentText,
-      timestamp: 'Just now',
+      timestamp: new Date().toISOString(),
       likes: 0,
       reactions: {},
       userReactions: []
     };
-    setComments([newComment, ...comments]);
+    const newCommentsList = [newComment, ...comments];
+    setComments(newCommentsList);
     setCommentText('');
+    
+    updatePost(post.id, {
+      commentList: newCommentsList,
+      comments: newCommentsList.length
+    });
+    
     addNotification('Comment synchronized', 'success');
   };
 
   const handleCommentReaction = (commentId: string, emoji: string) => {
-    setComments(prev =>
-      prev.map(c => {
-        if (c.id === commentId) {
-          const newReactions = { ...(c.reactions || {}) };
-          const userReactions = c.userReactions || [];
-          const hasReacted = userReactions.includes(emoji);
+    const newCommentsList = comments.map(c => {
+      if (c.id === commentId) {
+        const newReactions = { ...(c.reactions || {}) };
+        const userReactions = c.userReactions || [];
+        const hasReacted = userReactions.includes(emoji);
 
-          if (hasReacted) {
-            newReactions[emoji] = Math.max(0, (newReactions[emoji] || 0) - 1);
-            if (newReactions[emoji] === 0) delete newReactions[emoji];
-            return { ...c, reactions: newReactions, userReactions: userReactions.filter(r => r !== emoji) };
-          } else {
-            newReactions[emoji] = (newReactions[emoji] || 0) + 1;
-            return { ...c, reactions: newReactions, userReactions: [...userReactions, emoji] };
-          }
+        if (hasReacted) {
+          newReactions[emoji] = Math.max(0, (newReactions[emoji] || 0) - 1);
+          if (newReactions[emoji] === 0) delete newReactions[emoji];
+          return { ...c, reactions: newReactions, userReactions: userReactions.filter(r => r !== emoji) };
+        } else {
+          newReactions[emoji] = (newReactions[emoji] || 0) + 1;
+          return { ...c, reactions: newReactions, userReactions: [...userReactions, emoji] };
         }
-        return c;
-      })
-    );
+      }
+      return c;
+    });
+    setComments(newCommentsList);
+    updatePost(post.id, { commentList: newCommentsList });
   };
   const [showReactions, setShowReactions] = useState(false);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
@@ -81,15 +88,33 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     return undefined;
   }, [post.nft, post.nftId, allNFTs]);
 
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(post.id);
+    }
+  };
+
   const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+    const newIsLiked = !isLiked;
+    const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
+    setIsLiked(newIsLiked);
+    setLikesCount(newLikesCount);
+    updatePost(post.id, {
+      isLiked: newIsLiked,
+      likes: newLikesCount
+    });
   };
 
   const handleRepost = () => {
-    setIsReposted(!isReposted);
-    setRepostsCount(prev => isReposted ? prev - 1 : prev + 1);
-    addNotification(isReposted ? "Repost removed" : "Signal reposted to your feed", "success");
+    const newIsReposted = !isReposted;
+    const newRepostsCount = newIsReposted ? repostsCount + 1 : repostsCount - 1;
+    setIsReposted(newIsReposted);
+    setRepostsCount(newRepostsCount);
+    updatePost(post.id, {
+      isReposted: newIsReposted,
+      reposts: newRepostsCount
+    });
+    addNotification(newIsReposted ? "Signal reposted to your feed" : "Repost removed", "success");
   };
 
   const handleReaction = (emoji: string) => {
@@ -540,7 +565,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       </AnimatePresence>
 
       {showOptions && (
-        <PostOptionsModal post={post} onClose={() => setShowOptions(false)} isOwner={isOwnPost} />
+        <PostOptionsModal post={post} onClose={() => setShowOptions(false)} isOwner={isOwnPost} onDelete={handleDelete} />
       )}
 
       {/* Image Lightbox Modal */}

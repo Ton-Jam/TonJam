@@ -215,6 +215,26 @@
             color: #ffffff !important;
         }
 
+        /* Navigation & Pill Overrides for Light Mode */
+        html.light .text-neutral-500,
+        html.light .text-neutral-400,
+        html.light .text-muted-foreground {
+            color: #8F8F8F !important; /* Silver 500 / Grey */
+        }
+
+        html.light .active-pill,
+        html.light .bg-blue-500.text-white {
+            background-color: #2563EB !important;
+            color: #ffffff !important;
+            border-color: #2563EB !important;
+        }
+
+        html.light .inactive-pill {
+            background-color: #ffffff !important;
+            color: #2563EB !important;
+            border-color: #BDBDBD !important; /* Silver 300 */
+        }
+
         /* Specific Fix for Filter Sections (Selects and Inputs) */
         html.light select,
         html.light input,

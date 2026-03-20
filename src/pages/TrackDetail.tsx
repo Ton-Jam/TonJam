@@ -129,7 +129,7 @@ const TrackDetail: React.FC = () => {
             onClick={() => navigate(`/artist/${track.artistId}`)}
           >
             <div className="relative">
-              <img src={artist?.avatarUrl || `https://picsum.photos/100/100?seed=${track.artistId}`} className="w-10 h-10 rounded-full object-cover border border-border" alt="" />
+              <img src={artist?.avatarUrl || `https://picsum.photos/100/100?seed=${track.artistId}`} className="w-10 h-10 rounded-full object-cover" alt="" />
               {track.artistVerified && (
                 <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-full p-0.5 border-2 border-black">
                   <CheckCircle2 className="h-2.5 w-2.5 text-foreground" />
@@ -197,21 +197,21 @@ const TrackDetail: React.FC = () => {
             <div className="flex gap-4">
               <button 
                 onClick={handlePlay} 
-                className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] active:scale-95 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-3"
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-foreground rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] active:scale-95 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-3"
               >
                 {isActive && isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
                 {isActive && isPlaying ? 'Pause Frequency' : 'Initialize Playback'}
               </button>
               <button 
                 onClick={() => toggleLikeTrack(track.id)}
-                className={`p-4 rounded-xl border transition-all active:scale-95 ${isLiked ? 'bg-neutral-500/10 border-neutral-500/50 text-neutral-500' : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'}`}
+                className={`p-4 rounded-xl transition-all active:scale-95 ${isLiked ? 'bg-neutral-500/10 text-neutral-500' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}
               >
                 <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
               </button>
               <div className="relative">
                 <button 
                   onClick={() => setIsTipping(!isTipping)}
-                  className={`p-4 rounded-xl border transition-all active:scale-95 ${isTipping ? 'bg-neutral-600 border-neutral-500 text-foreground' : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'}`}
+                  className={`p-4 rounded-xl transition-all active:scale-95 ${isTipping ? 'bg-neutral-600 text-foreground' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}
                   aria-label="Tip artist"
                 >
                   <Coins className="h-5 w-5" />
@@ -408,8 +408,8 @@ const TrackDetail: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <button className="px-6 py-2.5 bg-muted/50 border border-border rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-foreground hover:text-background transition-all">
-                  Follow Node
+                <button className="p-2.5 rounded-lg bg-muted/50 text-muted-foreground hover:bg-foreground hover:text-background transition-all">
+                  <Users className="h-4 w-4" />
                 </button>
               </div>
               <p className="text-sm text-foreground/50 leading-relaxed max-w-2xl mb-6">

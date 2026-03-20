@@ -7,9 +7,10 @@ interface PostOptionsModalProps {
   post: Post;
   onClose: () => void;
   isOwner?: boolean;
+  onDelete?: () => void;
 }
 
-const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOwner = false }) => {
+const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOwner = false, onDelete }) => {
   const { addNotification } = useAudio();
 
   const handleAction = (action: string) => {
@@ -28,7 +29,11 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOw
         addNotification("Signal flagged for moderation review", "warning");
         break;
       case 'delete':
-        addNotification("Signal purged from the TON network", "error");
+        if (onDelete) {
+          onDelete();
+        } else {
+          addNotification("Signal purged from the TON network", "error");
+        }
         break;
     }
     onClose();

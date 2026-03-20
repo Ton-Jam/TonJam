@@ -24,9 +24,10 @@ import {
   Share2,
   History,
   X,
-  ArrowRight
+  ArrowRight,
+  ChevronRight
 } from 'lucide-react';
-import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD } from '@/constants';
+import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTonConnectUI } from '@tonconnect/ui-react';
@@ -37,6 +38,23 @@ import FullPlayer from './FullPlayer';
 import { ModeToggle } from './ModeToggle';
 import CreatePlaylistModal from './CreatePlaylistModal';
 import AuthModal from './AuthModal';
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu"
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -45,7 +63,20 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentTrack, notifications, isFullPlayerOpen, userProfile, searchQuery, setSearchQuery, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen } = useAudio();
+  const { 
+    currentTrack, 
+    notifications, 
+    isFullPlayerOpen, 
+    userProfile, 
+    searchQuery, 
+    setSearchQuery, 
+    isCreatePlaylistModalOpen, 
+    setIsCreatePlaylistModalOpen, 
+    isDiscoverFiltersOpen, 
+    setIsDiscoverFiltersOpen,
+    marketplaceFilters,
+    setMarketplaceFilters
+  } = useAudio();
   const { user, signInWithGoogle, signOut } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -53,6 +84,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [activeFilterSubMenu, setActiveFilterSubMenu] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     const saved = localStorage.getItem('recentSearches');
     return saved ? JSON.parse(saved) : ['Lo-fi hip hop', 'Cyberpunk Beats', 'Phonk Vibes'];
@@ -74,6 +106,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
   
   const isHome = location.pathname === '/';
+  const isTasks = location.pathname === '/tasks';
+  const isMarketplace = location.pathname.startsWith('/marketplace');
+  const isJamspace = location.pathname.startsWith('/jamspace');
   const isExplore = location.pathname.startsWith('/explore');
   const isDiscover = location.pathname === '/discover';
   const isArtistProfile = location.pathname.startsWith('/artist/');
@@ -151,7 +186,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {!isPlayer && (
         <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-4 md:px-6 h-16 flex items-center justify-between lg:left-64 transition-transform duration-300 border-b-0 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
           <div className="flex items-center gap-4 flex-1">
-            {isHome ? (
+            {(isHome || isTasks) ? (
               <button 
                 onClick={() => setIsMobileSidebarOpen(true)}
                 className="lg:hidden p-1 rounded-full hover:bg-muted transition-all"
@@ -185,7 +220,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <input 
                   type="text" 
                   placeholder={getSearchPlaceholder()} 
-                  className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/70"
+                  className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchOpen(true)}
@@ -287,7 +322,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <input 
                       type="text" 
                       placeholder="Search..." 
-                      className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground"
+                      className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleSearch}
@@ -353,85 +388,259 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       </motion.div>
                     </AnimatePresence>
                   </div>
-                ) : (
-                  location.pathname.startsWith('/marketplace') ? (
-                    <button 
-                      onClick={() => tonConnectUI.openModal()}
-                      className="p-2 rounded-full hover:bg-muted text-primary hover:text-primary/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      aria-label="Connect Wallet"
-                    >
-                      <Wallet className="h-5 w-5" />
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={() => navigate('/notifications')} 
-                      className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      aria-label="Notifications"
-                    >
-                      <Bell className="h-5 w-5" />
-                    </button>
-                  )
-                )}
+                ) : null}
               </div>
             )}
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 ml-4">
-            <Link to="/tasks" className="hidden sm:flex items-center gap-2 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full bg-blue-500/10 dark:bg-muted/30 px-3 py-1.5 border border-blue-500/20 dark:border-transparent" aria-label="Tasks">
-              <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-5 h-5 object-contain drop-shadow-md" />
-              <span className="text-xs font-black text-blue-600 dark:text-foreground tracking-tighter">{parseFloat(userProfile.jamBalance || '0').toLocaleString()}</span>
-            </Link>
-
-            {(isArtistProfile || isUserProfile) && (
+            {/* Wallet */}
+            {isHome && (
               <button 
-                onClick={async () => {
-                  try {
-                    if (navigator.share) {
-                      await navigator.share({ url: window.location.href });
-                    } else {
-                      await navigator.clipboard.writeText(window.location.href);
-                    }
-                  } catch (err: any) {
-                    if (err.name !== 'AbortError') {
-                      console.error('Error sharing:', err);
-                    }
-                  }
-                }}
-                className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
-                aria-label="Share"
+                onClick={() => tonConnectUI.openModal()}
+                className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Connect Wallet"
               >
-                <Share2 className="h-5 w-5" />
+                <Wallet className="h-5 w-5 text-primary" />
               </button>
             )}
-            {isHome && (
-              <>
-                <button 
-                  onClick={() => tonConnectUI.openModal()}
-                  className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label="Connect Wallet"
-                >
-                  <Wallet className="h-5 w-5 text-primary" />
-                </button>
-                
-                {user ? (
-                  <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-blue-500/20 dark:border-0 hover:opacity-80 transition-all flex items-center justify-center bg-blue-500/10 dark:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
-                    {user.user_metadata?.avatar_url ? (
-                      <img src={user.user_metadata.avatar_url} alt={`${user.user_metadata.full_name || 'User'} avatar`} className="w-full h-full object-cover" />
-                    ) : (
-                      <User className="w-4 h-4 text-blue-600 dark:text-muted-foreground" />
-                    )}
-                  </Link>
-                ) : (
-                  <button 
-                    onClick={() => setIsAuthModalOpen(true)}
-                    className="p-2 rounded-full bg-blue-600 dark:bg-primary hover:bg-blue-500 dark:hover:bg-primary/90 text-foreground dark:text-primary-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    aria-label="Sign In"
-                  >
-                    <User className="h-5 w-5" />
-                  </button>
-                )}
-              </>
+
+            {/* TonJam Coin */}
+            {(isHome || isTasks) && (
+              <Link to="/tasks" className="flex items-center gap-1 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full bg-blue-500/10 dark:bg-muted/30 px-2 py-1 border border-blue-500/20 dark:border-transparent" aria-label="Tasks">
+                <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-8 h-8 object-contain" />
+                <span className="text-xs font-black text-blue-600 dark:text-foreground tracking-tighter">{parseFloat(userProfile.jamBalance || '0').toLocaleString()}</span>
+              </Link>
             )}
+
+            {/* Notification Icon & Marketplace Filters */}
+            {(isMarketplace || isJamspace) && (
+              <div className="flex items-center gap-2">
+                {isMarketplace && (
+                  <DropdownMenu onOpenChange={(open) => { if (!open) setActiveFilterSubMenu(null); }}>
+                    <DropdownMenuTrigger asChild>
+                      <button 
+                        className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        aria-label="Filters"
+                      >
+                        <Filter className="h-5 w-5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[280px] sm:w-72 bg-background border-border shadow-2xl p-0 overflow-hidden" align="end">
+                      <div className="flex flex-col max-h-[85vh]">
+                        <AnimatePresence mode="wait">
+                          {activeFilterSubMenu === null ? (
+                            <motion.div 
+                              key="main"
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex flex-col overflow-hidden"
+                            >
+                              <div className="overflow-y-auto no-scrollbar max-h-[calc(85vh-60px)]">
+                                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-5 py-4">Filters & Sort</DropdownMenuLabel>
+                                <DropdownMenuSeparator className="m-0" />
+                                
+                                <DropdownMenuItem 
+                                  className="flex items-center justify-between px-5 py-4 cursor-pointer focus:bg-muted transition-colors"
+                                  onSelect={(e) => { e.preventDefault(); setActiveFilterSubMenu('genre'); }}
+                                >
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[11px] font-bold uppercase tracking-widest">Genre</span>
+                                    <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.genre}</span>
+                                  </div>
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem 
+                                  className="flex items-center justify-between px-5 py-4 cursor-pointer focus:bg-muted transition-colors"
+                                  onSelect={(e) => { e.preventDefault(); setActiveFilterSubMenu('artist'); }}
+                                >
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[11px] font-bold uppercase tracking-widest">Artist</span>
+                                    <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.artist}</span>
+                                  </div>
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem 
+                                  className="flex items-center justify-between px-5 py-4 cursor-pointer focus:bg-muted transition-colors"
+                                  onSelect={(e) => { e.preventDefault(); setActiveFilterSubMenu('rarity'); }}
+                                >
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[11px] font-bold uppercase tracking-widest">Rarity</span>
+                                    <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.rarity}</span>
+                                  </div>
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem 
+                                  className="flex items-center justify-between px-5 py-4 cursor-pointer focus:bg-muted transition-colors"
+                                  onSelect={(e) => { e.preventDefault(); setActiveFilterSubMenu('price'); }}
+                                >
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[11px] font-bold uppercase tracking-widest">Price Range</span>
+                                    <span className="text-[10px] text-muted-foreground lowercase">
+                                      {marketplaceFilters.priceRange[0] === 0 && marketplaceFilters.priceRange[1] === 1000 ? 'all prices' : 
+                                       `${marketplaceFilters.priceRange[0]}-${marketplaceFilters.priceRange[1]} TON`}
+                                    </span>
+                                  </div>
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator className="m-0" />
+                                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-5 py-4">Sort By</DropdownMenuLabel>
+                                <DropdownMenuRadioGroup 
+                                  value={marketplaceFilters.sortBy} 
+                                  onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, sortBy: val }))}
+                                >
+                                  {['Newest', 'Oldest', 'Price: Low to High', 'Price: High to Low', 'Most Liked'].map(option => (
+                                    <DropdownMenuRadioItem 
+                                      key={option} 
+                                      value={option} 
+                                      className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer"
+                                      onSelect={(e) => e.preventDefault()}
+                                    >
+                                      {option}
+                                    </DropdownMenuRadioItem>
+                                  ))}
+                                </DropdownMenuRadioGroup>
+                              </div>
+
+                              <div className="p-4 border-t border-border bg-background sticky bottom-0 z-10 flex gap-2">
+                                <button 
+                                  onClick={() => setMarketplaceFilters({
+                                    genre: 'All',
+                                    artist: 'All',
+                                    rarity: 'All',
+                                    priceRange: [0, 1000],
+                                    sortBy: 'Newest'
+                                  })}
+                                  className="flex-1 py-3 text-[10px] font-bold uppercase tracking-widest border border-border rounded-lg hover:bg-muted transition-colors"
+                                >
+                                  Clear All
+                                </button>
+                                <DropdownMenuItem className="flex-1 p-0 focus:bg-transparent">
+                                  <button 
+                                    className="w-full py-3 text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+                                  >
+                                    Done
+                                  </button>
+                                </DropdownMenuItem>
+                              </div>
+                            </motion.div>
+                          ) : (
+                            <motion.div 
+                              key="sub"
+                              initial={{ opacity: 0, x: 10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: 10 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex flex-col overflow-hidden"
+                            >
+                              <button 
+                                onClick={() => setActiveFilterSubMenu(null)}
+                                className="flex items-center gap-2 px-5 py-4 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-muted transition-colors border-b border-border sticky top-0 bg-background z-10"
+                              >
+                                <ArrowLeft className="h-4 w-4" />
+                                Back to Menu
+                              </button>
+
+                              <div className="overflow-y-auto no-scrollbar max-h-[calc(85vh-120px)]">
+                                {activeFilterSubMenu === 'genre' && (
+                                  <DropdownMenuRadioGroup value={marketplaceFilters.genre} onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, genre: val }))}>
+                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Genres</DropdownMenuRadioItem>
+                                    {Array.from(new Set(MOCK_TRACKS.map(t => t.genre))).map(g => (
+                                      <DropdownMenuRadioItem key={g} value={g} className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>{g}</DropdownMenuRadioItem>
+                                    ))}
+                                  </DropdownMenuRadioGroup>
+                                )}
+
+                                {activeFilterSubMenu === 'artist' && (
+                                  <DropdownMenuRadioGroup value={marketplaceFilters.artist} onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, artist: val }))}>
+                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Artists</DropdownMenuRadioItem>
+                                    {MOCK_ARTISTS.map(a => (
+                                      <DropdownMenuRadioItem key={a.name} value={a.name} className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>{a.name}</DropdownMenuRadioItem>
+                                    ))}
+                                  </DropdownMenuRadioGroup>
+                                )}
+
+                                {activeFilterSubMenu === 'rarity' && (
+                                  <DropdownMenuRadioGroup value={marketplaceFilters.rarity} onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, rarity: val }))}>
+                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Rarities</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Unique" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>Unique (1/1)</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Rare" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>Rare</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Limited" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>Limited</DropdownMenuRadioItem>
+                                  </DropdownMenuRadioGroup>
+                                )}
+
+                                {activeFilterSubMenu === 'price' && (
+                                  <DropdownMenuRadioGroup 
+                                    value={
+                                      marketplaceFilters.priceRange[0] === 0 && marketplaceFilters.priceRange[1] === 1000 ? 'All' :
+                                      marketplaceFilters.priceRange[0] === 0 && marketplaceFilters.priceRange[1] === 100 ? '0-100' :
+                                      marketplaceFilters.priceRange[0] === 100 && marketplaceFilters.priceRange[1] === 500 ? '100-500' : '500+'
+                                    } 
+                                    onValueChange={(val) => {
+                                      if (val === 'All') setMarketplaceFilters(prev => ({ ...prev, priceRange: [0, 1000] }));
+                                      else if (val === '0-100') setMarketplaceFilters(prev => ({ ...prev, priceRange: [0, 100] }));
+                                      else if (val === '100-500') setMarketplaceFilters(prev => ({ ...prev, priceRange: [100, 500] }));
+                                      else if (val === '500+') setMarketplaceFilters(prev => ({ ...prev, priceRange: [500, 1000] }));
+                                    }}
+                                  >
+                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Prices</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="0-100" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>0 - 100 TON</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="100-500" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>100 - 500 TON</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="500+" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>500+ TON</DropdownMenuRadioItem>
+                                  </DropdownMenuRadioGroup>
+                                )}
+                              </div>
+
+                              <div className="p-4 border-t border-border bg-background sticky bottom-0 z-10">
+                                <DropdownMenuItem className="p-0 focus:bg-transparent">
+                                  <button 
+                                    className="w-full py-3 text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+                                  >
+                                    Apply & Done
+                                  </button>
+                                </DropdownMenuItem>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                <button 
+                  onClick={() => navigate('/notifications')} 
+                  className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+            
+            {/* User Avatar / Sign In */}
+            {!isMarketplace && (user ? (
+              <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-blue-500/20 dark:border-0 hover:opacity-80 transition-all flex items-center justify-center bg-blue-500/10 dark:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
+                {user.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} alt={`${user.user_metadata.full_name || 'User'} avatar`} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-4 h-4 text-blue-600 dark:text-muted-foreground" />
+                )}
+              </Link>
+            ) : (
+              <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                className="p-2 rounded-full bg-blue-600 dark:bg-primary hover:bg-blue-500 dark:hover:bg-primary/90 text-foreground dark:text-primary-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Sign In"
+              >
+                <User className="h-5 w-5" />
+              </button>
+            ))}
           </div>
         </header>
       )}
@@ -613,8 +822,8 @@ const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: LucideI
     to={to} 
     onClick={onClick}
     className={({ isActive }) => `
-      flex items-center gap-4 px-5 py-3.5 rounded-[5px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
-      ${isActive ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}
+      flex items-center gap-4 px-5 py-3.5 rounded-[5px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+      ${isActive ? 'bg-blue-500/10 text-blue-500 font-bold' : 'text-neutral-500 hover:text-neutral-400 hover:bg-neutral-500/10'}
     `}
   >
     <Icon className="h-6 w-6 stroke-[2.5]" />
@@ -626,8 +835,8 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon
   <NavLink 
     to={to} 
     className={({ isActive }) => `
-      flex-1 flex flex-col items-center justify-center transition-all gap-1.5 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm
-      ${isActive ? 'text-blue-500' : 'text-muted-foreground'}
+      flex-1 flex flex-col items-center justify-center transition-all gap-1.5 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm
+      ${isActive ? 'text-blue-500' : 'text-neutral-500 hover:text-neutral-400'}
     `}
   >
     {({ isActive }) => (

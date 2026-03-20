@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap } from 'lucide-react';
+import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap, Filter, Bell } from 'lucide-react';
 import { MOCK_NFTS, TON_LOGO, MOCK_USER, MOCK_ARTISTS, MOCK_TRACKS } from '@/constants';
 import NFTCard from '@/components/NFTCard';
 import ArtistCard from '@/components/ArtistCard';
@@ -8,6 +8,23 @@ import TopChartNFTs from '@/components/TopChartNFTs';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { motion } from 'motion/react';
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu"
 
 const TABS = ['Trending', 'Auctions', 'Genesis', 'Limited', 'My Bids', 'My NFTs'];
 const SORT_OPTIONS = ['Newest', 'Price: Low', 'Price: High', 'Rarity'];
@@ -15,12 +32,15 @@ const SORT_OPTIONS = ['Newest', 'Price: Low', 'Price: High', 'Rarity'];
 const Marketplace: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Trending');
-  const [sortBy, setSortBy] = useState('Newest');
-  const [genreFilter, setGenreFilter] = useState('All');
-  const [artistFilter, setArtistFilter] = useState('All');
-  const [rarityFilter, setRarityFilter] = useState('All');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery } = useAudio();
+  const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery, marketplaceFilters, setMarketplaceFilters } = useAudio();
+  const { genre: genreFilter, artist: artistFilter, rarity: rarityFilter, priceRange, sortBy } = marketplaceFilters;
+
+  const setGenreFilter = (genre: string) => setMarketplaceFilters(prev => ({ ...prev, genre }));
+  const setArtistFilter = (artist: string) => setMarketplaceFilters(prev => ({ ...prev, artist }));
+  const setRarityFilter = (rarity: string) => setMarketplaceFilters(prev => ({ ...prev, rarity }));
+  const setPriceRange = (range: [number, number]) => setMarketplaceFilters(prev => ({ ...prev, priceRange: range }));
+  const setSortBy = (sort: string) => setMarketplaceFilters(prev => ({ ...prev, sortBy: sort }));
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Premium TonJam Experience: World-Class Marketplace
@@ -166,89 +186,25 @@ const Marketplace: React.FC = () => {
           </div>
         </section>
 
-      {/* 3. REFINED CONTROLS - Clean Dropdown Filters */}
-      <div className="z-[37] bg-background/95 backdrop-blur-2xl py-3 w-full px-0 md:px-6 mb-8 transition-all duration-300 filter-section">
-        <div className="max-w-[1600px] mx-auto flex flex-col gap-4 px-4 md:px-0">
-          <div className="flex flex-wrap items-center gap-4 w-full">
-            <select 
-              value={genreFilter} 
-              onChange={(e) => setGenreFilter(e.target.value)}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500 focus:bg-blue-600 focus:text-white transition-all"
-            >
-              <option value="All">All Genres</option>
-              {Array.from(new Set(MOCK_TRACKS.map(t => t.genre))).map(g => (
-                <option key={g} value={g}>{g}</option>
+      {/* 3. REFINED CONTROLS - Clean Tab Filters */}
+      <div className="z-[37] bg-background/95 backdrop-blur-2xl py-6 w-full px-0 md:px-6 mb-8 transition-all duration-300 filter-section">
+        <div className="max-w-[1600px] mx-auto flex flex-col gap-6 px-4 md:px-0">
+          {/* Tab Filters */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 flex-1">
+              {TABS.map(tab => (
+                <button 
+                  key={tab} 
+                  onClick={() => setActiveTab(tab)} 
+                  className={`flex-shrink-0 px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-500 text-white border-blue-500 shadow-xl shadow-blue-500/20' : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-border hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill' }`} 
+                >
+                  {tab}
+                  {tab === 'My Bids' && userBids.length > 0 && (
+                    <span className="ml-2 text-blue-300 font-mono">[{userBids.length}]</span>
+                  )}
+                </button>
               ))}
-            </select>
-
-            <select 
-              value={artistFilter} 
-              onChange={(e) => setArtistFilter(e.target.value)}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500 focus:bg-blue-600 focus:text-white transition-all"
-            >
-              <option value="All">All Artists</option>
-              {MOCK_ARTISTS.map(a => (
-                <option key={a.name} value={a.name}>{a.name}</option>
-              ))}
-            </select>
-
-            <select 
-              value={rarityFilter} 
-              onChange={(e) => setRarityFilter(e.target.value)}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500 focus:bg-blue-600 focus:text-white transition-all"
-            >
-              <option value="All">All Rarities</option>
-              <option value="Unique">Unique (1/1)</option>
-              <option value="Rare">Rare</option>
-              <option value="Limited">Limited</option>
-            </select>
-
-            <select 
-              value={
-                priceRange[0] === 0 && priceRange[1] === 1000 ? 'All' :
-                priceRange[0] === 0 && priceRange[1] === 100 ? '0-100' :
-                priceRange[0] === 100 && priceRange[1] === 500 ? '100-500' : '500+'
-              } 
-              onChange={(e) => {
-                const p = e.target.value;
-                if (p === 'All') setPriceRange([0, 1000]);
-                else if (p === '0-100') setPriceRange([0, 100]);
-                else if (p === '100-500') setPriceRange([100, 500]);
-                else if (p === '500+') setPriceRange([500, 10000]);
-              }}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500 focus:bg-blue-600 focus:text-white transition-all"
-            >
-              <option value="All">All Prices</option>
-              <option value="0-100">0 - 100 TON</option>
-              <option value="100-500">100 - 500 TON</option>
-              <option value="500+">500+ TON</option>
-            </select>
-
-            <div className="flex-1"></div>
-
-            <select 
-              value={sortBy} 
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-muted/50 text-foreground border border-blue-500/30 rounded-[8px] px-3 py-2 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
-            >
-              {SORT_OPTIONS.map(opt => (
-                <option key={opt} value={opt}>Sort: {opt}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {TABS.map(tab => (
-              <button 
-                key={tab} 
-                onClick={() => setActiveTab(tab)} 
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-white border-neutral-500/20' : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted' }`} 
-              >
-                {tab}
-                {tab === 'My Bids' && userBids.length > 0 && (
-                  <span className="ml-1.5 text-blue-300 font-mono">[{userBids.length}]</span>
-                )}
-              </button>
-            ))}
+            </div>
           </div>
         </div>
       </div>
@@ -371,7 +327,7 @@ const Marketplace: React.FC = () => {
               <p className="text-xs text-neutral-500 uppercase tracking-[0.4em] max-w-md leading-relaxed">Subscribe to the relay for exclusive mint protocols and early access to genesis artifacts.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto relative z-10">
-              <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-background/60 border border-border rounded-[10px] px-6 py-5 text-xs font-bold outline-none text-black focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/30" />
+              <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-muted/50 border border-border rounded-[10px] px-6 py-5 text-xs font-bold outline-none text-foreground focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500" />
               <button className="px-12 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/30 active:scale-95 transition-all">SYNC_NOW</button>
             </div>
           </div>

@@ -70,6 +70,25 @@ service cloud.firestore {
              (!('anthemId' in data) || data.anthemId is string || data.anthemId == null);
     }
 
+    function isValidPlaylist(data) {
+      return data.id is string &&
+             data.title is string &&
+             data.coverUrl is string &&
+             data.trackCount is number &&
+             data.creator is string;
+    }
+
+    function isValidPost(data) {
+      return data.id is string &&
+             data.userId is string &&
+             data.userName is string &&
+             data.userAvatar is string &&
+             data.content is string &&
+             data.likes is number &&
+             data.comments is number &&
+             data.timestamp is string;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -96,9 +115,23 @@ service cloud.firestore {
     }
 
     match /transactions/{transactionId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.senderAddress || request.auth.uid == resource.data.recipientAddress || isAdmin());
+      allow read: if true;
       allow create: if isAuthenticated();
       allow update, delete: if isAdmin();
+    }
+
+    match /playlists/{playlistId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidPlaylist(request.resource.data);
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.creator || isAdmin()) && isValidPlaylist(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidPost(request.resource.data);
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin()) && isValidPost(request.resource.data);
+      allow delete: if isAdmin();
     }
   }
 }

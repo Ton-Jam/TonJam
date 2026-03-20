@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   CheckCircle, 
   Users, 
@@ -130,6 +130,24 @@ const UserProfile: React.FC = () => {
               </p>
             )}
 
+            {/* Friends Avatars */}
+            {user.friends && user.friends.length > 0 && (
+              <div className="mt-6 flex items-center gap-2">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-2">Friends:</span>
+                <div className="flex -space-x-2">
+                  {user.friends.slice(0, 5).map(friendId => {
+                    const friend = MOCK_USERS.find(u => u.id === friendId);
+                    if (!friend) return null;
+                    return (
+                      <Link key={friend.id} to={`/user/${friend.id}`} title={friend.name}>
+                        <img src={friend.avatar} alt={friend.name} className="w-8 h-8 rounded-full border-2 border-background object-cover" />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Stats */}
             <div className="flex flex-wrap gap-8 mt-8 pt-8 border-t border-border/50">
               <div>
@@ -227,7 +245,7 @@ const UserProfile: React.FC = () => {
           {activeTab === 'activity' && (
             <div className="max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
               {userPosts.length > 0 ? (
-                <SocialFeed initialPosts={userPosts} />
+                <SocialFeed posts={userPosts} />
               ) : (
                 <div className="glass p-12 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
                   <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">

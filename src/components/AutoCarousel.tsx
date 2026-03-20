@@ -14,9 +14,10 @@ export interface CarouselItem {
 interface AutoCarouselProps {
   items: CarouselItem[];
   interval?: number;
+  onCtaClick?: (item: CarouselItem) => void;
 }
 
-const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000 }) => {
+const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onCtaClick }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -55,9 +56,11 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000 }) =
       >
         {items.map((item) => (
           <div key={item.id} className="w-full flex-shrink-0 snap-center px-4 lg:px-6">
-            <Link to={item.link} className="block relative w-full aspect-[21/9] sm:aspect-[3/1] lg:aspect-[4/1] rounded-[10px] overflow-hidden group border border-blue-500/50">
-              <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+            <div className="block relative w-full aspect-[21/9] sm:aspect-[3/1] lg:aspect-[4/1] rounded-[10px] overflow-hidden group border border-blue-500/50">
+              <Link to={item.link} className="absolute inset-0">
+                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+              </Link>
               
               <div className="absolute top-4 left-4 bg-blue-500 text-foreground text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-[5px] shadow-lg">
                 Featured
@@ -68,11 +71,20 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000 }) =
                   <h3 className="text-xl sm:text-3xl font-black text-foreground uppercase tracking-tighter leading-tight mb-1">{item.title}</h3>
                   <p className="text-xs sm:text-sm text-foreground/70 font-medium">{item.subtitle}</p>
                 </div>
-                <div className="hidden sm:flex items-center gap-1 bg-muted backdrop-blur-md px-4 py-2 rounded-[5px] text-xs font-bold text-foreground uppercase tracking-widest group-hover:bg-muted/80 transition-colors border border-border">
-                  {item.cta} <ChevronRight className="w-4 h-4" />
-                </div>
+                {onCtaClick ? (
+                  <button 
+                    onClick={() => onCtaClick(item)}
+                    className="hidden sm:flex items-center gap-1 bg-muted backdrop-blur-md px-4 py-2 rounded-[5px] text-xs font-bold text-foreground uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border"
+                  >
+                    {item.cta} <ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <Link to={item.link} className="hidden sm:flex items-center gap-1 bg-muted backdrop-blur-md px-4 py-2 rounded-[5px] text-xs font-bold text-foreground uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border">
+                    {item.cta} <ChevronRight className="w-4 h-4" />
+                  </Link>
+                )}
               </div>
-            </Link>
+            </div>
           </div>
         ))}
       </div>

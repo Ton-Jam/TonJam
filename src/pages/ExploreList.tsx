@@ -147,7 +147,7 @@ const ExploreList: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={`Search in ${type}...`}
-                className="w-full bg-muted/50 py-2 pl-10 pr-6 text-xs outline-none focus:-blue-500/30 transition-all placeholder:text-muted-foreground/30 rounded-full text-foreground"
+                className="w-full bg-muted/50 py-2 pl-10 pr-6 text-xs outline-none focus:border-blue-500/30 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 rounded-full text-foreground"
               />
             </div>
           </div>

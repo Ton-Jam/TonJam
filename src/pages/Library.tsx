@@ -110,7 +110,7 @@ const Library: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               key={stat.label} 
-              className="p-6 rounded-2xl bg-muted/50 border border-blue-500/30 backdrop-blur-xl group hover:bg-foreground/[0.08] transition-all"
+              className="p-6 rounded-2xl bg-muted/50 backdrop-blur-xl group hover:bg-foreground/[0.08] transition-all"
             >
               <div className="flex items-center justify-between mb-4">
                 <stat.icon className="h-5 w-5 text-muted-foreground/50 group-hover:text-blue-500 transition-colors" />
@@ -123,12 +123,12 @@ const Library: React.FC = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-10 border-b border-border/50 mb-10 overflow-x-auto no-scrollbar">
+        <div className="flex gap-10 mb-10 overflow-x-auto no-scrollbar">
           {(['collection', 'playlists', 'activity'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
+              className={`pb-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-blue-500' : 'text-neutral-500 hover:text-neutral-400'}`}
             >
               {tab}
               {activeTab === tab && (
@@ -150,7 +150,7 @@ const Library: React.FC = () => {
             {activeTab === 'collection' && (
               <div className="space-y-16">
                 {/* NFT Artifacts */}
-                <section className="p-8 rounded-3xl bg-blue-500/[0.03] border border-blue-500/30 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-blue-500/[0.03] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -171,7 +171,7 @@ const Library: React.FC = () => {
                 </section>
 
                 {/* Liked Tracks */}
-                <section className="p-8 rounded-3xl bg-emerald-500/[0.03] border border-blue-500/30 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-emerald-500/[0.03] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -191,7 +191,7 @@ const Library: React.FC = () => {
 
             {activeTab === 'playlists' && (
               <div className="space-y-8">
-                <section className="p-8 rounded-3xl bg-violet-600/[0.03] border border-blue-500/30 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-violet-600/[0.03] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ const Library: React.FC = () => {
                 </section>
 
                 {/* Followed Artists */}
-                <section className="p-8 rounded-3xl bg-orange-500/[0.03] border border-blue-500/30 relative overflow-hidden">
+                <section className="p-8 rounded-3xl bg-orange-500/[0.03] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <div className="flex items-center gap-3">
