@@ -37,7 +37,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -52,9 +52,9 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         className="relative w-full max-w-md bg-background border border-blue-500/40 rounded-3xl overflow-hidden shadow-2xl"
       >
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
+        <div className="p-2">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-blue-600/10 text-blue-500">
                 <Wallet className="w-5 h-5" />
               </div>
@@ -72,9 +72,9 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="space-y-6"
+                className="space-y-2"
               >
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pay with TON</label>
                     <span className="text-[10px] font-bold text-muted-foreground/50">Balance: 12.5 TON</span>
@@ -85,7 +85,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                       value={tonAmount}
                       onChange={(e) => setTonAmount(e.target.value)}
                       placeholder="0.00"
-                      className="w-full bg-foreground/[0.02] border border-blue-500/40 rounded-2xl p-5 text-2xl font-black text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                      className="w-full bg-foreground/[0.02] border border-blue-500/40 rounded-2xl p-2 text-[20px] font-black text-foreground outline-none focus:border-neutral-500/50 transition-all"
                     />
                     <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2">
                       <img src={TON_LOGO} className="w-6 h-6 object-contain" alt="" />
@@ -100,13 +100,13 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Receive JAM</label>
                     <span className="text-[10px] font-bold text-blue-500">Rate: 1 TON = 100 JAM</span>
                   </div>
                   <div className="relative">
-                    <div className="w-full bg-neutral-600/5 border border-blue-500/30 rounded-2xl p-5 text-2xl font-black text-neutral-400">
+                    <div className="w-full bg-neutral-600/5 border border-blue-500/30 rounded-2xl p-2 text-[20px] font-black text-neutral-400">
                       {jamAmount.toLocaleString()}
                     </div>
                     <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -116,7 +116,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                   </div>
                 </div>
 
-                <div className="p-4 bg-muted/50 rounded-2xl flex items-center gap-4">
+                <div className="p-2 bg-muted/50 rounded-2xl flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
                     <Info className="w-4 h-4" />
                   </div>
@@ -128,7 +128,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                 <button 
                   onClick={handleBuy}
                   disabled={isProcessing || !tonAmount || parseFloat(tonAmount) <= 0}
-                  className="w-full py-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-foreground text-sm font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="w-full py-2 rounded-2xl bg-blue-600 hover:bg-blue-500 text-foreground text-sm font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
                     <div className="w-5 h-5 border border-white/30 border-t-white rounded-full animate-spin" />
@@ -145,21 +145,21 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                 key="success"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center space-y-8 py-10"
+                className="text-center space-y-2 py-2"
               >
                 <div className="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center mx-auto relative">
                   <div className="absolute inset-0 bg-green-500/10 rounded-full animate-ping" />
                   <CheckCircle2 className="w-12 h-12 text-green-500 relative z-10" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-foreground uppercase tracking-tighter">Protocol Success</h3>
+                  <h3 className="text-[20px] font-black text-foreground uppercase tracking-tighter">Protocol Success</h3>
                   <p className="text-sm font-medium text-muted-foreground">
                     You have successfully forged <span className="text-foreground font-black">{jamAmount.toLocaleString()} JAM</span>.
                   </p>
                 </div>
                 <button 
                   onClick={onClose}
-                  className="w-full py-4 rounded-xl bg-foreground text-background text-xs font-black uppercase tracking-widest hover:bg-neutral-200 transition-all"
+                  className="w-full py-2 rounded-xl bg-foreground text-background text-xs font-black uppercase tracking-widest hover:bg-neutral-200 transition-all"
                 >
                   Return to Center
                 </button>
@@ -167,7 +167,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
             )}
           </AnimatePresence>
 
-          <div className="mt-8 flex items-center justify-center gap-3 opacity-20">
+          <div className="mt-2 flex items-center justify-center gap-2 opacity-20">
             <ShieldCheck className="w-4 h-4" />
             <span className="text-[9px] font-bold uppercase tracking-widest">TON Blockchain Verified</span>
           </div>

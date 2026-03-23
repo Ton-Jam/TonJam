@@ -30,7 +30,7 @@ export default {
         ring: 'hsl(var(--ring))',
       },
       borderWidth: {
-        DEFAULT: '3px',
+        DEFAULT: '0px',
       },
     },
   },

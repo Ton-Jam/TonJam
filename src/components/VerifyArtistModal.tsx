@@ -57,12 +57,12 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose}></div>
       
       <div className="relative w-full max-w-lg bg-neutral-900 border border-border rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="p-6 border-b border-border/50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="p-2 border-b border-border/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-500">
               <ShieldCheck className="h-5 w-5" />
             </div>
@@ -76,9 +76,9 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
           </button>
         </div>
 
-        <div className="p-8 max-h-[80vh] overflow-y-auto no-scrollbar">
+        <div className="p-2 max-h-[80vh] overflow-y-auto no-scrollbar">
           {step === 1 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4">
               <div className="space-y-2">
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Artist Information</h3>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">
@@ -86,9 +86,9 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                 </p>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-2">
                 {/* Bio Section */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                     <FileText className="h-3 w-3" /> Origin Narrative (Bio)
                   </div>
@@ -97,13 +97,13 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                     value={formData.bio}
                     onChange={handleInputChange}
                     placeholder="Tell your story..."
-                    className="w-full bg-muted/50 border border-border rounded-2xl p-4 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all min-h-[100px] resize-none"
+                    className="w-full bg-muted/50 border border-border rounded-2xl p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all min-h-[100px] resize-none"
                     aria-label="Artist Bio"
                   />
                 </div>
 
                 {/* Genre Section */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                     <Music className="h-3 w-3" /> Sonic Genre
                   </div>
@@ -111,7 +111,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                     name="genre"
                     value={formData.genre}
                     onChange={handleInputChange}
-                    className="w-full bg-muted/50 border border-border rounded-2xl p-4 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
+                    className="w-full bg-muted/50 border border-border rounded-2xl p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
                     aria-label="Sonic Genre"
                   >
                     {GENRES.map(g => (
@@ -121,10 +121,10 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                 </div>
 
                 {/* Social Links Section */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Social Protocols</div>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
                       <div className="w-10 h-10 rounded-xl bg-background/40 flex items-center justify-center text-muted-foreground">
                         <Twitter className="h-4 w-4" />
                       </div>
@@ -138,7 +138,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                         aria-label="X (Twitter) URL"
                       />
                     </div>
-                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
+                    <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
                       <div className="w-10 h-10 rounded-xl bg-background/40 flex items-center justify-center text-muted-foreground">
                         <Instagram className="h-4 w-4" />
                       </div>
@@ -152,7 +152,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                         aria-label="Instagram URL"
                       />
                     </div>
-                    <div className="flex items-center gap-3 p-1 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
+                    <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-2xl border border-border/50 focus-within:border-neutral-500/30 transition-all">
                       <div className="w-10 h-10 rounded-xl bg-background/40 flex items-center justify-center text-muted-foreground">
                         <Globe className="h-4 w-4" />
                       </div>
@@ -172,7 +172,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
 
               <button 
                 onClick={() => setStep(2)}
-                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Submit for Verification
               </button>
@@ -180,8 +180,8 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
           )}
 
           {step === 2 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 text-center">
-              <div className="w-20 h-20 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 text-center">
+              <div className="w-20 h-20 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-2">
                 <ShieldCheck className={`h-10 w-10 text-blue-500 ${isVerifying ? 'animate-pulse' : ''}`} />
               </div>
               
@@ -192,7 +192,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                 </p>
               </div>
 
-              <div className="p-4 bg-amber-500/5 border border-neutral-500/10 rounded-2xl flex gap-4 text-left">
+              <div className="p-2 bg-amber-500/5 border border-neutral-500/10 rounded-2xl flex gap-2 text-left">
                 <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0" />
                 <p className="text-[9px] text-muted-foreground leading-relaxed uppercase tracking-tight">
                   Verification is permanent and linked to your wallet address. Ensure you are using your primary artist wallet.
@@ -202,14 +202,14 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
               <button 
                 onClick={handleVerify}
                 disabled={isVerifying}
-                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {isVerifying ? 'Verifying Identity...' : 'Confirm & Verify (0.1 TON)'}
               </button>
               <button 
                 onClick={() => setStep(1)}
                 disabled={isVerifying}
-                className="w-full py-3 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="w-full py-2 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Back to Edit
               </button>
@@ -217,8 +217,8 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
           )}
 
           {step === 3 && (
-            <div className="space-y-6 animate-in fade-in zoom-in-95 text-center py-4">
-              <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="space-y-2 animate-in fade-in zoom-in-95 text-center py-2">
+              <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-2">
                 <CheckCircle2 className="h-10 w-10 text-green-500" />
               </div>
               
@@ -229,16 +229,16 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 <button 
                   onClick={onClose}
-                  className="w-full py-5 bg-foreground text-background rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="w-full py-2 bg-foreground text-background rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Return to Profile
                 </button>
                 <a 
                   href="#" 
-                  className="flex items-center justify-center gap-2 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm px-2 py-1"
+                  className="flex items-center justify-center gap-2 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm px-2 py-2"
                 >
                   View Transaction <ExternalLink className="h-3 w-3" />
                 </a>

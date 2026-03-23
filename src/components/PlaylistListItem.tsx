@@ -37,7 +37,7 @@ const PlaylistListItem: React.FC<PlaylistListItemProps> = ({ playlist, onClick }
     }
 
     return (
-      <div className="w-full h-full grid grid-cols-2 gap-0.5 bg-neutral-800">
+      <div className="w-full h-full grid grid-cols-2 gap-3 bg-neutral-800">
         {playlistTracks.map((track, i) => (
           <img 
             key={i}
@@ -53,7 +53,7 @@ const PlaylistListItem: React.FC<PlaylistListItemProps> = ({ playlist, onClick }
   return (
     <div 
       onClick={onClick}
-      className="group flex items-center gap-4 p-3 rounded-[10px] bg-foreground/[0.02] border border-blue-500/30 hover:bg-muted/50 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
+      className="group flex items-center gap-2 p-2 rounded-[10px] bg-foreground/[0.02] border border-blue-500/30 hover:bg-muted/50 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
     >
       <div className="relative w-14 h-14 rounded-[6px] overflow-hidden flex-shrink-0 shadow-lg">
         {renderCover()}
@@ -63,12 +63,12 @@ const PlaylistListItem: React.FC<PlaylistListItemProps> = ({ playlist, onClick }
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
+        <div className="flex items-center gap-2 mb-3">
           <h4 className="text-xs font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
             {playlist.title}
           </h4>
           {playlist.creator === 'TonJam AI' && (
-            <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-500 text-[7px] font-bold uppercase tracking-widest rounded-[2px]">AI</span>
+            <span className="px-3 py-3 bg-blue-500/10 text-blue-500 text-[7px] font-bold uppercase tracking-widest rounded-2">AI</span>
           )}
         </div>
         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">
@@ -76,7 +76,7 @@ const PlaylistListItem: React.FC<PlaylistListItemProps> = ({ playlist, onClick }
         </p>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2">
         <div className="hidden sm:flex flex-col items-end">
           <span className="text-[10px] font-bold text-foreground tracking-tighter">{playlist.trackCount}</span>
           <span className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-widest">Tracks</span>

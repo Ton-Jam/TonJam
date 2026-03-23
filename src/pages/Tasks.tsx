@@ -105,19 +105,10 @@ const TaskCard: React.FC<{
             : 'bg-muted/50 hover:bg-foreground/[0.07]'
       }`}
     >
-      {/* Rarity & Priority Indicators */}
-      <div className="absolute top-0 right-0 flex items-center gap-1 p-2">
-        {task.priority && (
-          <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-            task.priority === 'high' ? 'bg-red-500/20 text-red-400' :
-            task.priority === 'medium' ? 'bg-amber-500/20 text-amber-400' :
-            'bg-blue-500/20 text-blue-400'
-          }`}>
-            {task.priority} Priority
-          </div>
-        )}
+      {/* Rarity Indicator */}
+      <div className="absolute top-0 right-0 flex items-center gap-4 p-4">
         {task.rarity && task.rarity !== 'common' && (
-          <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+          <div className={`px-4 py-4 rounded-lg text-[8px] font-black uppercase tracking-widest ${
             task.rarity === 'rare' ? 'bg-blue-500/20 text-blue-400' :
             task.rarity === 'epic' ? 'bg-purple-500/20 text-purple-400' :
             'bg-amber-500/20 text-amber-400'
@@ -127,7 +118,7 @@ const TaskCard: React.FC<{
         )}
       </div>
 
-      <div className="p-5 flex flex-col flex-1 mt-4">
+      <div className="p-4 flex flex-col flex-1 mt-4">
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 ${
@@ -139,7 +130,7 @@ const TaskCard: React.FC<{
               <h3 className={`text-sm font-bold uppercase tracking-tight transition-all ${task.completed ? 'text-green-500/80' : 'text-foreground'}`}>
                 {task.title}
               </h3>
-              <p className="text-[10px] font-medium text-muted-foreground leading-relaxed mt-0.5">
+              <p className="text-[10px] font-medium text-muted-foreground leading-relaxed mt-4">
                 {task.description}
               </p>
             </div>
@@ -149,7 +140,7 @@ const TaskCard: React.FC<{
         {/* Progress Bar */}
         {!task.completed && (
           <div className="mt-auto pt-4">
-            <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-foreground/30 mb-1.5">
+            <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-foreground/30 mb-4">
               <span>Progress</span>
               <span>{task.progress} / {task.total}</span>
             </div>
@@ -167,19 +158,19 @@ const TaskCard: React.FC<{
         <div className="mt-4 pt-4 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Reward</span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-4">
               <img src={TJ_COIN_ICON} className="w-4 h-4 object-contain" alt="" referrerPolicy="no-referrer" />
               <span className="text-sm font-black text-foreground">{task.reward}</span>
               <span className="text-[10px] font-bold text-blue-500/60">+{task.points} XP</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             {task.completed && !task.claimed ? (
               <button 
                 onClick={handleClaim}
                 disabled={isClaiming}
-                className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 text-background text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-4 rounded-lg bg-green-500 hover:bg-green-400 text-background text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-4"
               >
                 {isClaiming ? (
                   <>
@@ -194,20 +185,20 @@ const TaskCard: React.FC<{
                 )}
               </button>
             ) : task.claimed ? (
-              <div className="flex items-center gap-1 text-green-500/50 text-[10px] font-bold uppercase tracking-widest">
+              <div className="flex items-center gap-4 text-green-500/50 text-[10px] font-bold uppercase tracking-widest">
                 <CheckCircle2 className="w-3 h-3" /> Claimed
               </div>
             ) : (
               <>
                 <button 
                   onClick={handleIncrement}
-                  className="px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
+                  className="px-4 py-4 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
                 >
                   +1 Progress
                 </button>
                 <button 
                   onClick={handleComplete}
-                  className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
+                  className="px-4 py-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
                 >
                   Complete
                 </button>
@@ -337,9 +328,9 @@ const Tasks: React.FC = () => {
   };
 
   return (
-    <div className="p-6 lg:p-10 space-y-12 max-w-6xl mx-auto pb-40">
+    <div className="p-4 lg:p-4 space-y-4 max-w-6xl mx-auto pb-4">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 relative">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative">
         <div className="absolute -left-20 -top-20 w-64 h-64 opacity-[0.03] pointer-events-none">
           <motion.img 
             src={TJ_COIN_ICON} 
@@ -361,15 +352,15 @@ const Tasks: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-3 relative z-10"
+          className="space-y-4 relative z-10"
         >
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+          <div className="flex items-center gap-4">
+            <div className="p-4 rounded-xl bg-blue-500/10 text-blue-500">
               <Target className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500">Protocol Center</span>
           </div>
-          <h1 className="text-5xl font-black uppercase tracking-tighter text-foreground leading-none">Neural Tasks</h1>
+          <h1 className="text-[44px] font-black uppercase tracking-tighter text-foreground leading-none">Neural Tasks</h1>
           <p className="text-sm font-medium text-foreground/30 max-w-md">
             Execute network protocols to strengthen the ecosystem and earn TJ rewards.
           </p>
@@ -379,7 +370,7 @@ const Tasks: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-muted/50 rounded-2xl p-6 min-w-[280px] relative overflow-hidden group"
+          className="bg-muted/50 rounded-2xl p-4 min-w-[280px] relative overflow-hidden group"
         >
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <TrendingUp className="w-12 h-12" />
@@ -404,12 +395,12 @@ const Tasks: React.FC = () => {
       </div>
 
       {/* Stats Bento Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="min-w-[240px] flex-1 bg-blue-600/10 rounded-2xl p-6 flex items-center gap-6 group hover:bg-blue-600/20 transition-all relative overflow-hidden"
+          className="min-w-[240px] flex-1 bg-blue-600/10 rounded-2xl p-4 flex items-center gap-4 group hover:bg-blue-600/20 transition-all relative overflow-hidden"
         >
           <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity">
             <img src={TJ_COIN_ICON} className="w-full h-full object-contain rotate-12" alt="" referrerPolicy="no-referrer" />
@@ -418,10 +409,10 @@ const Tasks: React.FC = () => {
             <Trophy className="w-7 h-7" />
           </div>
           <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-widest text-blue-500/60 mb-1">Total Earned</p>
-            <div className="flex items-center gap-2">
+            <p className="text-[10px] font-black uppercase tracking-widest text-blue-500/60 mb-4">Total Earned</p>
+            <div className="flex items-center gap-4">
               <img src={TJ_COIN_ICON} className="w-6 h-6 object-contain" alt="" referrerPolicy="no-referrer" />
-              <p className="text-3xl font-black text-foreground tracking-tighter">{userBalance.toLocaleString()} TJ</p>
+              <p className="text-[26px] font-black text-foreground tracking-tighter">{userBalance.toLocaleString()} TJ</p>
             </div>
           </div>
         </motion.div>
@@ -430,18 +421,18 @@ const Tasks: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-purple-600/10 rounded-2xl p-6 flex flex-col justify-center gap-4 group hover:bg-purple-600/20 transition-all relative overflow-hidden"
+          className="bg-purple-600/10 rounded-2xl p-4 flex flex-col justify-center gap-4 group hover:bg-purple-600/20 transition-all relative overflow-hidden"
         >
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform">
               <Star className="w-7 h-7" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-purple-500/60 mb-1">Current Level</p>
-              <p className="text-3xl font-black text-foreground tracking-tighter">LVL {stats.currentLevel}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-purple-500/60 mb-4">Current Level</p>
+              <p className="text-[26px] font-black text-foreground tracking-tighter">LVL {stats.currentLevel}</p>
             </div>
           </div>
-          <div className="space-y-2 w-full">
+          <div className="space-y-4 w-full">
             <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
               <span>Next: LVL {stats.currentLevel + 1}</span>
               <span>{stats.xpToNext} XP needed</span>
@@ -456,15 +447,15 @@ const Tasks: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-amber-600/10 rounded-2xl p-6 flex items-center gap-6 group hover:bg-amber-600/20 transition-all sm:col-span-2 lg:col-span-1"
+          className="bg-amber-600/10 rounded-2xl p-4 flex items-center gap-4 group hover:bg-amber-600/20 transition-all sm:col-span-2 lg:col-span-1"
         >
           <div className="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
             <Gift className="w-7 h-7" />
           </div>
           <div className="flex-1">
-            <p className="text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-1">Next Reward</p>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-2xl font-black text-foreground tracking-tighter">{stats.xpToNext} XP</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-4">Next Reward</p>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[20px] font-black text-foreground tracking-tighter">{stats.xpToNext} XP</p>
               <span className="text-[10px] font-bold text-muted-foreground">75%</span>
             </div>
             <div className="h-1.5 w-full bg-amber-500/10 rounded-full overflow-hidden">
@@ -475,14 +466,14 @@ const Tasks: React.FC = () => {
       </div>
 
       {/* Task Filters & List */}
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6">
-          <div className="flex items-center gap-2 p-1 bg-muted/50 rounded-xl self-start overflow-x-auto no-scrollbar max-w-full">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
+          <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl self-start overflow-x-auto no-scrollbar max-w-full">
             {(['all', 'daily', 'achievements', 'milestones', 'staking', 'leaderboard', 'referrals'] as TaskTab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                className={`px-4 py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                   activeTab === tab 
                     ? 'bg-blue-600 text-foreground shadow-lg shadow-blue-600/20' 
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
@@ -497,7 +488,7 @@ const Tasks: React.FC = () => {
             <select 
               value={statusFilter} 
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="bg-muted/50 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg text-muted-foreground hover:text-foreground focus:outline-none"
+              className="bg-muted/50 text-[10px] font-black uppercase tracking-widest p-4 rounded-lg text-muted-foreground hover:text-foreground focus:outline-none"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -506,7 +497,7 @@ const Tasks: React.FC = () => {
             <select 
               value={priorityFilter} 
               onChange={(e) => setPriorityFilter(e.target.value as any)}
-              className="bg-muted/50 text-[10px] font-black uppercase tracking-widest p-2 rounded-lg text-muted-foreground hover:text-foreground focus:outline-none"
+              className="bg-muted/50 text-[10px] font-black uppercase tracking-widest p-4 rounded-lg text-muted-foreground hover:text-foreground focus:outline-none"
             >
               <option value="all">All Priority</option>
               <option value="high">High</option>
@@ -516,7 +507,7 @@ const Tasks: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <Clock className="w-3 h-3" />
               <span>Resets in 14h 22m</span>
             </div>
@@ -557,7 +548,7 @@ const Tasks: React.FC = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
             >
               {filteredTasks.length > 0 ? (
                 filteredTasks.map(task => (
@@ -570,11 +561,11 @@ const Tasks: React.FC = () => {
                   />
                 ))
               ) : (
-                <div className="col-span-full py-20 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="col-span-full py-4 flex flex-col items-center justify-center text-center space-y-4">
                   <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground/30">
                     <Lock className="w-8 h-8" />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-4">
                     <p className="text-sm font-bold text-foreground uppercase tracking-widest">No protocols found</p>
                     <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Check back later for new network tasks</p>
                   </div>
@@ -608,7 +599,7 @@ const Tasks: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 p-8 flex flex-col md:flex-row items-center justify-between gap-8 group"
+        className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 p-4 flex flex-col md:flex-row items-center justify-between gap-4 group"
       >
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
         <div className="absolute -right-10 -bottom-10 w-48 h-48 opacity-10 group-hover:opacity-20 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700">
@@ -616,15 +607,15 @@ const Tasks: React.FC = () => {
         </div>
         
         <div className="relative z-10 space-y-4 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/80 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-foreground">
+          <div className="inline-flex items-center gap-4 px-4 py-4 rounded-full bg-muted/80 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-foreground">
             <Sparkles className="w-3 h-3" /> Limited Time Event
           </div>
-          <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground">Genesis Launch Season</h2>
+          <h2 className="text-[26px] font-black uppercase tracking-tighter text-foreground">Genesis Launch Season</h2>
           <p className="text-sm font-medium text-muted-foreground/90 max-w-md">
             Complete special seasonal tasks to earn exclusive NFT badges and multiplier bonuses for your TJ earnings.
           </p>
         </div>
-        <button className="relative z-10 px-8 py-4 rounded-xl bg-foreground text-blue-600 text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-xl shadow-black/20">
+        <button className="relative z-10 px-4 py-4 rounded-xl bg-foreground text-blue-600 text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-xl shadow-black/20">
           View Event Tasks
         </button>
       </motion.div>

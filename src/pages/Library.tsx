@@ -13,7 +13,8 @@ import {
   LayoutGrid,
   List,
   Search,
-  ArrowUpRight
+  ArrowUpRight,
+  X
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS, MOCK_ARTISTS, APP_LOGO } from '@/constants';
@@ -37,28 +38,61 @@ const Library: React.FC = () => {
     userTracks, 
     userProfile, 
     artists, 
-    searchQuery, 
     setIsCreatePlaylistModalOpen 
   } = useAudio();
 
   const [activeTab, setActiveTab] = useState<'collection' | 'playlists' | 'activity'>('collection');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
 
   const myCollection = useMemo(() => {
-    return allNFTs.filter(nft => 
+    const base = allNFTs.filter(nft => 
       (nft.owner === userProfile.walletAddress) || 
       (nft.owner === userProfile.name) ||
       userNFTs.some(un => un.id === nft.id)
     );
-  }, [allNFTs, userProfile, userNFTs]);
+    if (!localSearchQuery) return base;
+    const query = localSearchQuery.toLowerCase();
+    return base.filter(nft => 
+      nft.name.toLowerCase().includes(query) || 
+      nft.artist.toLowerCase().includes(query)
+    );
+  }, [allNFTs, userProfile, userNFTs, localSearchQuery]);
 
   const likedTracks = useMemo(() => {
     const allTracks = [...userTracks, ...MOCK_TRACKS];
-    return allTracks.filter(t => likedTrackIds.includes(t.id));
-  }, [likedTrackIds, userTracks]);
+    const base = allTracks.filter(t => likedTrackIds.includes(t.id));
+    if (!localSearchQuery) return base;
+    const query = localSearchQuery.toLowerCase();
+    return base.filter(t => 
+      t.title.toLowerCase().includes(query) || 
+      t.artist.toLowerCase().includes(query)
+    );
+  }, [likedTrackIds, userTracks, localSearchQuery]);
 
   const followedArtists = useMemo(() => {
-    return artists.filter(a => followedUserIds.includes(a.id));
-  }, [followedUserIds, artists]);
+    const base = artists.filter(a => followedUserIds.includes(a.id));
+    if (!localSearchQuery) return base;
+    const query = localSearchQuery.toLowerCase();
+    return base.filter(a => a.name.toLowerCase().includes(query));
+  }, [followedUserIds, artists, localSearchQuery]);
+
+  const filteredPlaylists = useMemo(() => {
+    if (!localSearchQuery) return playlists;
+    const query = localSearchQuery.toLowerCase();
+    return playlists.filter(p => 
+      p.name.toLowerCase().includes(query) || 
+      (p.description && p.description.toLowerCase().includes(query))
+    );
+  }, [playlists, localSearchQuery]);
+
+  const filteredRecentlyPlayed = useMemo(() => {
+    if (!localSearchQuery) return recentlyPlayed;
+    const query = localSearchQuery.toLowerCase();
+    return recentlyPlayed.filter(t => 
+      t.title.toLowerCase().includes(query) || 
+      t.artist.toLowerCase().includes(query)
+    );
+  }, [recentlyPlayed, localSearchQuery]);
 
   const stats = [
     { label: 'NFTs', value: likedTracks.length, icon: Music2 },
@@ -68,33 +102,33 @@ const Library: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen pb-40 relative overflow-hidden">
+    <div className="min-h-screen pb-4 relative overflow-hidden">
       {/* Background Decor */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/5 blur-[100px] rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-0 md:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-4">
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 bg-gradient-to-b from-blue-900/20 to-background p-8 rounded-3xl">
-          <div className="space-y-2">
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-white leading-none">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 bg-gradient-to-b from-blue-900/20 to-background p-4 rounded-3xl">
+          <div className="space-y-4">
+            <h1 className="text-[32px] md:text-[56px] font-black tracking-tighter uppercase text-white leading-none">
               Library
             </h1>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             <button 
               onClick={() => setIsCreatePlaylistModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95"
+              className="flex items-center gap-4 px-4 py-4 bg-blue-600 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95"
             >
               <Plus className="h-4 w-4" />
               New Playlist
             </button>
             <button 
               onClick={createRecommendedPlaylist}
-              className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest hover:bg-neutral-100 transition-all active:scale-95"
+              className="flex items-center gap-4 px-4 py-4 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest hover:bg-neutral-100 transition-all active:scale-95"
             >
               <Sparkles className="h-4 w-4" />
               AI Generation
@@ -103,37 +137,56 @@ const Library: React.FC = () => {
         </header>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           {stats.map((stat, idx) => (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               key={stat.label} 
-              className="p-6 rounded-2xl bg-muted/50 backdrop-blur-xl group hover:bg-foreground/[0.08] transition-all"
+              className="p-4 rounded-2xl bg-muted/50 backdrop-blur-xl group hover:bg-foreground/[0.08] transition-all"
             >
               <div className="flex items-center justify-between mb-4">
                 <stat.icon className="h-5 w-5 text-muted-foreground/50 group-hover:text-blue-500 transition-colors" />
                 <ArrowUpRight className="h-3 w-3 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-all" />
               </div>
-              <p className="text-2xl font-black text-foreground tracking-tighter mb-1">{stat.value}</p>
+              <p className="text-[20px] font-black text-foreground tracking-tighter mb-4">{stat.value}</p>
               <p className="text-[9px] font-bold text-foreground/30 uppercase tracking-widest">{stat.label}</p>
             </motion.div>
           ))}
         </div>
 
+        {/* Search Bar */}
+        <div className="relative mb-6">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-muted-foreground/50" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search within your library..."
+            value={localSearchQuery}
+            onChange={(e) => setLocalSearchQuery(e.target.value)}
+            className="w-full bg-muted/30 border border-border/50 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-muted-foreground/30"
+          />
+          {localSearchQuery && (
+            <button 
+              onClick={() => setLocalSearchQuery('')}
+              className="absolute inset-y-0 right-4 flex items-center text-muted-foreground/50 hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
         {/* Navigation Tabs */}
-        <div className="flex gap-10 mb-10 overflow-x-auto no-scrollbar">
+        <div className="flex gap-4 mb-4 overflow-x-auto no-scrollbar pb-4">
           {(['collection', 'playlists', 'activity'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-blue-500' : 'text-neutral-500 hover:text-neutral-400'}`}
+              className={`px-[7px] py-[7px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${activeTab === tab ? 'bg-blue-500 text-white border-blue-500 shadow-lg active-pill' : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-border hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill'}`}
             >
               {tab}
-              {activeTab === tab && (
-                <motion.div layoutId="activeTabLib" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
-              )}
             </button>
           ))}
         </div>
@@ -148,19 +201,19 @@ const Library: React.FC = () => {
             transition={{ duration: 0.3 }}
           >
             {activeTab === 'collection' && (
-              <div className="space-y-16">
+              <div className="space-y-4">
                 {/* NFT Artifacts */}
-                <section className="p-8 rounded-3xl bg-blue-500/[0.03] relative overflow-hidden">
+                <section className="p-4 rounded-3xl bg-blue-500/[0.03] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-8 relative z-10">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-4">
                       <Zap className="h-4 w-4 text-blue-500" />
                       <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Digital Artifacts</h3>
                     </div>
                     <button onClick={() => navigate('/explore/nfts?title=My Collection&filter=my_nfts')} className="text-[9px] font-bold text-muted-foreground/50 hover:text-foreground transition-colors uppercase tracking-widest">View All</button>
                   </div>
                   {myCollection.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 relative z-10">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 relative z-10">
                       {myCollection.slice(0, 10).map(nft => (
                         <NFTCard key={nft.id} nft={nft} />
                       ))}
@@ -171,10 +224,10 @@ const Library: React.FC = () => {
                 </section>
 
                 {/* Liked Tracks */}
-                <section className="p-8 rounded-3xl bg-emerald-500/[0.03] relative overflow-hidden">
+                <section className="p-4 rounded-3xl bg-emerald-500/[0.03] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-8 relative z-10">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-4">
                       <Music2 className="h-4 w-4 text-emerald-500" />
                       <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Stored Frequencies</h3>
                     </div>
@@ -190,53 +243,63 @@ const Library: React.FC = () => {
             )}
 
             {activeTab === 'playlists' && (
-              <div className="space-y-8">
-                <section className="p-8 rounded-3xl bg-violet-600/[0.03] relative overflow-hidden">
+              <div className="space-y-4">
+                <section className="p-4 rounded-3xl bg-violet-600/[0.03] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-8 relative z-10">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-4">
                       <List className="h-4 w-4 text-violet-500" />
                       <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Active Playlists</h3>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-3 relative z-10">
-                    {playlists.map(playlist => (
-                      <PlaylistListItem 
-                        key={playlist.id} 
-                        playlist={playlist} 
-                        onClick={() => navigate(`/playlist/${playlist.id}`)} 
-                      />
-                    ))}
+                  <div className="flex flex-col gap-4 relative z-10">
+                    {filteredPlaylists.length > 0 ? (
+                      filteredPlaylists.map(playlist => (
+                        <PlaylistListItem 
+                          key={playlist.id} 
+                          playlist={playlist} 
+                          onClick={() => navigate(`/playlist/${playlist.id}`)} 
+                        />
+                      ))
+                    ) : (
+                      <EmptyState icon={List} message={localSearchQuery ? "No matching playlists found" : "No active playlists"} />
+                    )}
                   </div>
                 </section>
               </div>
             )}
 
             {activeTab === 'activity' && (
-              <div className="space-y-16">
+              <div className="space-y-4">
                 {/* Recently Played */}
                 <section>
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
                       <History className="h-4 w-4 text-blue-500" />
                       <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Recent Activity</h3>
                     </div>
                     <button onClick={clearRecentlyPlayed} className="text-[9px] font-bold text-red-500/50 hover:text-red-500 transition-colors uppercase tracking-widest">Purge History</button>
                   </div>
-                  <div className="flex gap-6 overflow-x-auto no-scrollbar pb-4">
-                    {recentlyPlayed.map(track => (
-                      <div key={track.id} className="w-48 flex-shrink-0">
-                        <TrackCard track={track} />
+                  <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                    {filteredRecentlyPlayed.length > 0 ? (
+                      filteredRecentlyPlayed.map(track => (
+                        <div key={track.id} className="w-48 flex-shrink-0">
+                          <TrackCard track={track} />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="w-full">
+                        <EmptyState icon={History} message={localSearchQuery ? "No matching activity found" : "No recent activity"} />
                       </div>
-                    ))}
+                    )}
                   </div>
                 </section>
 
                 {/* Followed Artists */}
-                <section className="p-8 rounded-3xl bg-orange-500/[0.03] relative overflow-hidden">
+                <section className="p-4 rounded-3xl bg-orange-500/[0.03] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-8 relative z-10">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-4">
                       <Users className="h-4 w-4 text-orange-500" />
                       <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Followed Artists</h3>
                     </div>
@@ -254,21 +317,21 @@ const Library: React.FC = () => {
         </AnimatePresence>
 
         {/* Security Footer */}
-        <footer className="mt-32 pt-10 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-6">
+        <footer className="mt-4 pt-4 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <ShieldCheck className="h-8 w-8 text-blue-500/20" />
             <div>
-              <p className="text-[10px] font-bold text-foreground uppercase tracking-widest mb-1">Decentralized Vault v2.4</p>
+              <p className="text-[10px] font-bold text-foreground uppercase tracking-widest mb-4">Decentralized Vault v2.4</p>
               <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest">All assets secured by TON Blockchain NFTs</p>
             </div>
           </div>
-          <div className="flex gap-8">
+          <div className="flex gap-4">
             <div className="text-right">
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Network Status</p>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Network Status</p>
               <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Operational</p>
             </div>
             <div className="text-right">
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Last Update</p>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Last Update</p>
               <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">Just Now</p>
             </div>
           </div>
@@ -279,7 +342,7 @@ const Library: React.FC = () => {
 };
 
 const EmptyState = ({ icon: Icon, message }: { icon: any, message: string }) => (
-  <div className="py-24 text-center flex flex-col items-center justify-center bg-foreground/[0.02] border border-dashed border-blue-500/30 rounded-3xl">
+  <div className="py-4 text-center flex flex-col items-center justify-center bg-foreground/[0.02] border border-dashed border-blue-500/30 rounded-3xl">
     <Icon className="h-12 w-12 text-foreground/5 mb-4" />
     <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">{message}</p>
   </div>

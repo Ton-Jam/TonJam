@@ -45,32 +45,32 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" onClick={onClose}></div>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 animate-in fade-in duration-300">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
       
-      <div className="relative w-full max-w-sm bg-white border border-border rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/10 blur-3xl rounded-full"></div>
-        <div className="p-6 border-b border-border/50 flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-500">
+      <div className="relative w-full max-w-sm bg-white/5 backdrop-blur-md border border-white/10 rounded-[24px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 blur-3xl rounded-full"></div>
+        <div className="p-2 border-b border-white/10 flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-blue-600/20 flex items-center justify-center text-blue-400">
               <Tag className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-black uppercase tracking-tight">List Asset</h2>
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Initiate Market Protocol</p>
+              <h2 className="text-base font-bold text-white uppercase tracking-tight">List Asset</h2>
+              <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Initiate Market Protocol</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label="Close Sell NFT Modal">
+          <button onClick={onClose} className="p-2 text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full bg-white/5 border border-white/10" aria-label="Close Sell NFT Modal">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 relative z-10">
-          <div className="flex gap-3">
+        <form onSubmit={handleSubmit} className="p-2 space-y-2 relative z-10">
+          <div className="flex gap-2">
             <button 
               type="button"
               onClick={() => setListingType('fixed')}
-              className={`flex-1 p-4 rounded-[10px] border transition-all text-center space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${listingType === 'fixed' ? 'bg-blue-600/10 border-neutral-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'}`}
+              className={`flex-1 p-2 rounded-[16px] border transition-all text-center space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${listingType === 'fixed' ? 'bg-blue-600/20 border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}
               aria-pressed={listingType === 'fixed'}
             >
               <Tag className="h-5 w-5 mx-auto" />
@@ -79,7 +79,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
             <button 
               type="button"
               onClick={() => setListingType('auction')}
-              className={`flex-1 p-4 rounded-[10px] border transition-all text-center space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${listingType === 'auction' ? 'bg-amber-500/10 border-amber-500 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'}`}
+              className={`flex-1 p-2 rounded-[16px] border transition-all text-center space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${listingType === 'auction' ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}
               aria-pressed={listingType === 'auction'}
             >
               <Gavel className="h-5 w-5 mx-auto" />
@@ -87,9 +87,9 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div className="space-y-2">
-              <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-1">
+              <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-2">
                 {listingType === 'fixed' ? 'Listing Price' : 'Starting Bid'}
               </label>
               <div className="relative">
@@ -99,7 +99,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
                   step="0.1"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="w-full bg-muted/50 border border-border rounded-[10px] py-3 pl-10 pr-4 text-black font-bold outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-sm"
+                  className="w-full bg-white/5 border border-white/10 rounded-[12px] py-2 pl-2 pr-2 text-white font-bold outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-sm"
                   placeholder="0.00"
                   required
                   aria-label={listingType === 'fixed' ? 'Listing Price' : 'Starting Bid'}
@@ -109,14 +109,14 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
 
             {listingType === 'auction' && (
               <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Duration (Days)</label>
+                <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-2">Duration (Days)</label>
                 <div className="flex gap-2 mb-2">
                   {['1', '3', '7', '14'].map((d) => (
                     <button
                       key={d}
                       type="button"
                       onClick={() => setDuration(d)}
-                      className={`flex-1 py-1.5 rounded-[5px] text-[9px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${duration === d ? 'bg-amber-500 text-background' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
+                      className={`flex-1 py-3 rounded-[8px] text-[9px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${duration === d ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                       aria-pressed={duration === d}
                     >
                       {d}D
@@ -129,27 +129,27 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
                   max="30"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  className="w-full bg-muted/50 border border-border rounded-[10px] py-3 px-4 text-black font-bold outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-all text-sm"
+                  className="w-full bg-white/5 border border-white/10 rounded-[12px] py-2 px-2 text-white font-bold outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-all text-sm"
                   placeholder="Enter custom days..."
                   aria-label="Auction Duration in Days"
                 />
-                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest px-1 mt-1">Protocol will automatically finalize after {duration} days.</p>
+                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest px-2 mt-2">Protocol will automatically finalize after {duration} days.</p>
               </div>
             )}
           </div>
 
-          <div className="p-3 bg-blue-500/5 border border-neutral-500/10 rounded-[10px] flex gap-3">
-            <Info className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
-            <p className="text-[9px] text-muted-foreground/80 leading-relaxed uppercase tracking-widest">
-              TonJam takes a <span className="text-black">2.5%</span> marketplace fee. Artist royalties of <span className="text-black">{nft.royalty}%</span> will be deducted from the final sale.
+          <div className="p-2 bg-blue-500/10 border border-white/5 rounded-[12px] flex gap-2">
+            <Info className="h-4 w-4 text-blue-400 flex-shrink-0 mt-3" />
+            <p className="text-[9px] text-white/40 leading-relaxed uppercase tracking-widest">
+              TonJam takes a <span className="text-white">2.5%</span> marketplace fee. Artist royalties of <span className="text-white">{nft.royalty}%</span> will be deducted from the final sale.
             </p>
           </div>
 
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className={`w-full py-4 rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] text-white transition-all active:scale-95 shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-              ${listingType === 'auction' ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20 text-background focus-visible:ring-amber-500' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/20'}
+            className={`w-full py-2 rounded-[12px] font-bold text-[10px] uppercase tracking-[0.2em] text-white transition-all active:scale-95 shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+              ${listingType === 'auction' ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20 text-black focus-visible:ring-amber-500' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/20'}
               ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
             `}
           >

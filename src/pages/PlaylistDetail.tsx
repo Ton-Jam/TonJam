@@ -174,8 +174,8 @@ const PlaylistDetail: React.FC = () => {
   if (!playlist) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-foreground">
-        <h2 className="text-2xl font-bold mb-4">Playlist not found</h2>
-        <button onClick={() => navigate('/')} className="px-6 py-2 bg-blue-600 rounded-full hover:bg-blue-700 transition-colors">
+        <h2 className="text-[20px] font-bold mb-4">Playlist not found</h2>
+        <button onClick={() => navigate('/')} className="px-4 py-4 bg-blue-600 rounded-full hover:bg-blue-700 transition-colors">
           Go Home
         </button>
       </div>
@@ -190,14 +190,14 @@ const PlaylistDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32 px-4 md:px-8">
-      <div className="flex flex-col md:flex-row gap-8 mb-12 items-center md:items-end bg-gradient-to-b from-blue-900/20 to-background p-8 rounded-3xl">
+    <div className="min-h-screen bg-background pb-4 px-4 md:px-4">
+      <div className="flex flex-col md:flex-row gap-4 mb-4 items-center md:items-end bg-gradient-to-b from-blue-900/20 to-background p-4 rounded-3xl">
         {/* Cover Image / Collage */}
-        <div className="relative group w-48 h-48 md:w-56 md:h-56 flex-shrink-0 rounded-lg overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-neutral-900 border border-white/10 mx-auto md:mx-0">
+        <div className="relative group w-48 h-48 md:w-56 md:h-56 flex-shrink-0 rounded-lg overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-neutral-900 border border-white/10 mx-auto md:mx-4">
           {playlist.coverUrl ? (
             <img src={playlist.coverUrl} alt={playlist.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full grid grid-cols-2 gap-0.5 bg-neutral-800">
+            <div className="w-full h-full grid grid-cols-2 gap-4 bg-neutral-800">
               {coverImages.slice(0, 4).map((img, idx) => (
                 <div key={idx} className="w-full h-full relative bg-neutral-900 flex items-center justify-center overflow-hidden">
                   {img ? (
@@ -215,7 +215,7 @@ const PlaylistDetail: React.FC = () => {
             className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm" 
             onClick={() => fileInputRef.current?.click()}
           >
-            <Camera className="h-8 w-8 text-foreground mb-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300" />
+            <Camera className="h-8 w-8 text-foreground mb-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300" />
             <span className="text-[10px] font-bold text-foreground uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">Change Cover</span>
           </div>
           <input 
@@ -229,43 +229,43 @@ const PlaylistDetail: React.FC = () => {
 
         <div className="flex flex-col justify-end flex-1 w-full text-center md:text-left">
           {isEditing ? (
-            <div className="space-y-4 mb-6">
+            <div className="space-y-4 mb-4">
               <input
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-2xl md:text-4xl font-bold text-foreground focus:outline-none focus:border-blue-500 text-center md:text-left"
+                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-4 text-[20px] md:text-[32px] font-bold text-foreground focus:outline-none focus:border-blue-500 text-center md:text-left"
                 placeholder="Playlist Title"
                 autoFocus
               />
               <textarea
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-2 text-sm text-muted-foreground/90 focus:outline-none focus:border-blue-500 resize-none text-center md:text-left"
+                className="w-full bg-muted border border-border/80 rounded-lg px-4 py-4 text-sm text-muted-foreground/90 focus:outline-none focus:border-blue-500 resize-none text-center md:text-left"
                 placeholder="Add a description..."
                 rows={3}
               />
-              <div className="flex gap-2 justify-center md:justify-start">
-                <button onClick={saveEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
+              <div className="flex gap-4 justify-center md:justify-start">
+                <button onClick={saveEditing} className="flex items-center gap-4 px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
                   <Check className="h-3 w-3" /> Save
                 </button>
-                <button onClick={cancelEditing} className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
+                <button onClick={cancelEditing} className="flex items-center gap-4 px-4 py-4 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
                   <X className="h-3 w-3" /> Cancel
                 </button>
               </div>
             </div>
           ) : (
             <>
-              <div className="group flex items-start justify-center md:justify-start gap-3 mb-2">
-                <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">{playlist.title}</h1>
-                <button onClick={startEditing} className="mt-2 text-neutral-400 hover:text-white transition-all" title="Edit Playlist">
+              <div className="group flex items-start justify-center md:justify-start gap-4 mb-4">
+                <h1 className="text-[26px] md:text-[44px] font-bold text-white tracking-tight">{playlist.title}</h1>
+                <button onClick={startEditing} className="mt-4 text-neutral-400 hover:text-white transition-all" title="Edit Playlist">
                   <Pencil className="h-4 w-4" />
                 </button>
               </div>
               {playlist.description && (
-                <p className="text-neutral-300 text-sm mb-4 max-w-2xl mx-auto md:mx-0">{playlist.description}</p>
+                <p className="text-neutral-300 text-sm mb-4 max-w-2xl mx-auto md:mx-4">{playlist.description}</p>
               )}
-              <div className="flex items-center justify-center md:justify-start gap-3 text-neutral-300 text-xs font-medium mb-6">
+              <div className="flex items-center justify-center md:justify-start gap-4 text-neutral-300 text-xs font-medium mb-4">
                 <span className="font-bold text-white">{playlist.creator}</span>
                 <span>•</span>
                 <span>{playlistTracks.length} tracks</span>
@@ -273,14 +273,14 @@ const PlaylistDetail: React.FC = () => {
             </>
           )}
           
-          <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-            <button onClick={handlePlayAll} className="flex items-center gap-1.5 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95 shadow-lg">
+          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+            <button onClick={handlePlayAll} className="flex items-center gap-4 px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95 shadow-lg">
               <Play className="h-4 w-4 fill-current" /> Play
             </button>
-            <button onClick={handleShuffle} className="flex items-center gap-1.5 px-8 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
+            <button onClick={handleShuffle} className="flex items-center gap-4 px-4 py-4 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
               <Shuffle className="h-4 w-4" /> Shuffle
             </button>
-            <button onClick={handleDeletePlaylist} className="flex items-center gap-1.5 px-4 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Delete Playlist">
+            <button onClick={handleDeletePlaylist} className="flex items-center gap-4 px-4 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Delete Playlist">
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
@@ -289,11 +289,11 @@ const PlaylistDetail: React.FC = () => {
 
       {/* Selection Bar */}
       {isSelectionMode && playlistTracks.length > 0 && (
-        <div className="flex items-center justify-between mb-4 px-2 py-2 bg-blue-500/10 rounded-xl border border-neutral-500/20 animate-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-between mb-4 px-4 py-4 bg-blue-500/10 rounded-xl border border-neutral-500/20 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-4">
             <button 
               onClick={toggleSelectAll}
-              className="flex items-center gap-1.5 text-[8px] font-bold uppercase tracking-widest text-muted-foreground/90 hover:text-foreground transition-colors"
+              className="flex items-center gap-4 text-[8px] font-bold uppercase tracking-widest text-muted-foreground/90 hover:text-foreground transition-colors"
             >
               {selectedTrackIds.length === playlistTracks.length ? (
                 <CheckSquare className="h-3 w-3 text-blue-500" />
@@ -307,7 +307,7 @@ const PlaylistDetail: React.FC = () => {
             </span>
             <button 
               onClick={() => { setIsSelectionMode(false); setSelectedTrackIds([]); }}
-              className="ml-1 text-[8px] text-muted-foreground hover:text-foreground uppercase font-bold tracking-widest"
+              className="ml-4 text-[8px] text-muted-foreground hover:text-foreground uppercase font-bold tracking-widest"
             >
               Cancel
             </button>
@@ -315,7 +315,7 @@ const PlaylistDetail: React.FC = () => {
           
           <button 
             onClick={() => setShowConfirmModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-full font-bold text-[8px] uppercase tracking-widest transition-all"
+            className="flex items-center gap-4 px-4 py-4 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-full font-bold text-[8px] uppercase tracking-widest transition-all"
           >
             <Trash2 className="h-3 w-3" /> Remove
           </button>
@@ -324,11 +324,11 @@ const PlaylistDetail: React.FC = () => {
 
       {/* Filter Bar */}
       {!isSelectionMode && (
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-4">
           <select 
             value={filterGenre} 
             onChange={(e) => setFilterGenre(e.target.value)}
-            className="bg-neutral-900 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white uppercase tracking-widest focus:outline-none focus:border-blue-500"
+            className="bg-neutral-900 border border-white/10 rounded-lg px-4 py-4 text-xs text-white uppercase tracking-widest focus:outline-none focus:border-blue-500"
           >
             <option value="All">All Genres</option>
             {Array.from(new Set(playlistTracks.map(t => t.genre))).map(g => <option key={g} value={g}>{g}</option>)}
@@ -336,7 +336,7 @@ const PlaylistDetail: React.FC = () => {
           <select 
             value={filterMood} 
             onChange={(e) => setFilterMood(e.target.value)}
-            className="bg-neutral-900 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white uppercase tracking-widest focus:outline-none focus:border-blue-500"
+            className="bg-neutral-900 border border-white/10 rounded-lg px-4 py-4 text-xs text-white uppercase tracking-widest focus:outline-none focus:border-blue-500"
           >
             <option value="All">All Moods</option>
             {Array.from(new Set(playlistTracks.map(t => t.mood || 'Unknown'))).map(m => <option key={m} value={m}>{m}</option>)}
@@ -345,18 +345,18 @@ const PlaylistDetail: React.FC = () => {
       )}
 
       {/* Track List Header */}
-      <div className="flex items-center gap-4 px-4 py-2 text-neutral-400 text-xs uppercase tracking-wider border-b border-white/10 mb-2">
+      <div className="flex items-center gap-4 px-4 py-4 text-neutral-400 text-xs uppercase tracking-wider border-b border-white/10 mb-4">
         <div className="w-10 text-center">#</div>
         <div className="flex-1">Title</div>
         <div className="w-24 text-right hidden sm:block">Duration</div>
         <div className="w-16"></div>
       </div>
 
-      <div className="flex flex-col gap-2 pb-8">
+      <div className="flex flex-col gap-4 pb-4">
         {playlistTracks.map((track, index) => (
           <div 
             key={track.id} 
-            className={`w-full flex items-center gap-2 group rounded-[10px] pr-2 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/30' : 'hover:bg-muted/50 border-blue-500/30'}`}
+            className={`w-full flex items-center gap-4 group rounded-[10px] pr-4 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/30' : 'hover:bg-muted/50 border-blue-500/30'}`}
             onClick={() => handleTrackClick(track.id)}
             onMouseDown={() => handleTouchStart(track.id)}
             onMouseUp={handleTouchEnd}
@@ -380,8 +380,8 @@ const PlaylistDetail: React.FC = () => {
               <TrackCard track={track} variant="row" />
             </div>
             
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex flex-col gap-4">
                 <button 
                   onClick={(e) => { e.stopPropagation(); handleMoveTrack(e, track.id, 'up'); }} 
                   disabled={index === 0}
@@ -413,27 +413,27 @@ const PlaylistDetail: React.FC = () => {
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={() => setShowConfirmModal(false)}></div>
-          <div className="relative bg-background border border-border w-full max-w-sm rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="relative bg-background border border-border w-full max-w-sm rounded-2xl p-4 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
+              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4">
                 <AlertTriangle className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-2 uppercase tracking-tighter">Remove Tracks?</h3>
-              <p className="text-muted-foreground/80 text-sm mb-8">
+              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-tighter">Remove Tracks?</h3>
+              <p className="text-muted-foreground/80 text-sm mb-4">
                 Are you sure you want to remove <span className="text-foreground font-bold">{selectedTrackIds.length}</span> selected tracks from this playlist? This action cannot be undone.
               </p>
-              <div className="flex flex-col w-full gap-3">
+              <div className="flex flex-col w-full gap-4">
                 <button 
                   onClick={handleBulkRemove}
-                  className="w-full py-3 bg-red-600 hover:bg-red-500 text-foreground rounded-full font-bold text-xs uppercase tracking-widest transition-all"
+                  className="w-full py-4 bg-red-600 hover:bg-red-500 text-foreground rounded-full font-bold text-xs uppercase tracking-widest transition-all"
                 >
                   Yes, Remove Tracks
                 </button>
                 <button 
                   onClick={() => setShowConfirmModal(false)}
-                  className="w-full py-3 bg-muted/50 hover:bg-muted text-foreground rounded-full font-bold text-xs uppercase tracking-widest transition-all"
+                  className="w-full py-4 bg-muted/50 hover:bg-muted text-foreground rounded-full font-bold text-xs uppercase tracking-widest transition-all"
                 >
                   Cancel
                 </button>

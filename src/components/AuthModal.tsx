@@ -67,7 +67,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-2">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -83,8 +83,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           className="relative w-full max-w-md bg-background border border-border rounded-[12px] overflow-hidden shadow-2xl"
         >
           {/* Hardware Header */}
-          <div className="bg-foreground/[0.02] border-b border-border/50 p-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="bg-foreground/[0.02] border-b border-border/50 p-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
               <h2 className="text-[10px] font-bold text-black uppercase tracking-[0.4em]">
                 {isLogin ? 'Auth_Protocol: Login' : 'Auth_Protocol: Register'}
@@ -98,9 +98,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          <div className="p-8">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-black tracking-tighter uppercase mb-2">
+          <div className="p-2">
+            <div className="mb-2">
+              <h1 className="text-[26px] font-bold text-black tracking-tighter uppercase mb-2">
                 {isLogin ? 'Welcome Back' : 'Join the Network'}
               </h1>
               <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
@@ -108,39 +108,39 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-1">Username</label>
+                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Username</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                     <input
                       {...register('username')}
                       type="text"
                       placeholder="TON_VOYAGER"
-                      className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
+                      className="w-full bg-muted/50 border border-border rounded-[8px] py-2 pl-2 pr-2 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
                     />
-                    {errors.username && <p className="text-[9px] text-red-500 mt-1">{errors.username.message}</p>}
+                    {errors.username && <p className="text-[9px] text-red-500 mt-2">{errors.username.message}</p>}
                   </div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-1">Email Address</label>
+                <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <input
                     {...register('email')}
                     type="email"
                     placeholder="SIGNAL@TONJAM.COM"
-                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
+                    className="w-full bg-muted/50 border border-border rounded-[8px] py-2 pl-2 pr-2 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
                   />
-                  {errors.email && <p className="text-[9px] text-red-500 mt-1">{errors.email.message}</p>}
+                  {errors.email && <p className="text-[9px] text-red-500 mt-2">{errors.email.message}</p>}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between items-center ml-1">
+                <div className="flex justify-between items-center ml-2">
                   <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Password</label>
                   {isLogin && (
                     <button type="button" className="text-[8px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400">
@@ -154,16 +154,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     {...register('password')}
                     type="password"
                     placeholder="••••••••"
-                    className="w-full bg-muted/50 border border-border rounded-[8px] py-3 pl-12 pr-4 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
+                    className="w-full bg-muted/50 border border-border rounded-[8px] py-2 pl-2 pr-2 text-sm text-black outline-none focus:border-neutral-500/50 transition-all placeholder:text-black/5"
                   />
-                  {errors.password && <p className="text-[9px] text-red-500 mt-1">{errors.password.message}</p>}
+                  {errors.password && <p className="text-[9px] text-red-500 mt-2">{errors.password.message}</p>}
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-black rounded-[8px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group"
+                className="w-full py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-black rounded-[8px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -177,47 +177,47 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </form>
             {/* ... rest of the component ... */}
 
-            <div className="mt-8 relative">
+            <div className="mt-2 relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border/50"></div>
               </div>
               <div className="relative flex justify-center text-[8px] font-bold uppercase tracking-widest">
-                <span className="bg-white px-4 text-muted-foreground/50">Social Relay</span>
+                <span className="bg-white px-2 text-muted-foreground/50">Social Relay</span>
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="mt-2 grid grid-cols-2 gap-2">
               <button
                 onClick={() => signInWithGoogle()}
-                className="flex items-center justify-center gap-3 py-3 bg-muted/50 border border-border rounded-[8px] hover:bg-muted transition-all group"
+                className="flex items-center justify-center gap-2 py-2 bg-muted/50 border border-border rounded-[8px] hover:bg-muted transition-all group"
               >
                 <Chrome className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 <span className="text-[9px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">Google</span>
               </button>
               <button
-                className="flex items-center justify-center gap-3 py-3 bg-muted/50 border border-border rounded-[8px] hover:bg-muted transition-all group"
+                className="flex items-center justify-center gap-2 py-2 bg-muted/50 border border-border rounded-[8px] hover:bg-muted transition-all group"
               >
                 <Github className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 <span className="text-[9px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">GitHub</span>
               </button>
             </div>
 
-            <div className="mt-10 text-center">
+            <div className="mt-2 text-center">
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-black transition-colors"
               >
                 {isLogin ? (
-                  <>Don't have a node? <span className="text-blue-500 ml-1">Initialize one</span></>
+                  <>Don't have a node? <span className="text-blue-500 ml-2">Initialize one</span></>
                 ) : (
-                  <>Already have a node? <span className="text-blue-500 ml-1">Establish link</span></>
+                  <>Already have a node? <span className="text-blue-500 ml-2">Establish link</span></>
                 )}
               </button>
             </div>
           </div>
 
           {/* Hardware Footer Deco */}
-          <div className="bg-foreground/[0.02] border-t border-border/50 p-4 flex justify-center gap-8">
+          <div className="bg-foreground/[0.02] border-t border-border/50 p-2 flex justify-center gap-2">
             <div className="flex items-center gap-2">
               <div className="w-1 h-1 rounded-full bg-muted"></div>
               <span className="text-[6px] font-mono text-muted-foreground/30 uppercase tracking-widest">AES-256 Encryption Active</span>

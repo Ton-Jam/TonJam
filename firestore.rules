@@ -5,17 +5,117 @@ service cloud.firestore {
     // Assumed Data Model
     // ===============================================================
     //
-    // Collection: tracks
-    // Fields: id, title, artist, artistId, coverUrl, audioUrl, genre, isNFT, ...
-    //
-    // Collection: nfts
-    // Fields: id, trackId, title, owner, creator, artist, artistId, price, imageUrl, edition, ...
-    //
     // Collection: users
-    // Fields: id, name, handle, avatar, walletAddress, ...
+    // Document ID: userId (UID)
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - name: string (required, < 50 chars)
+    //   - handle: string (required, < 50 chars)
+    //   - avatar: string (required, URL format)
+    //   - bannerUrl: string (optional, URL format)
+    //   - bio: string (optional, < 500 chars)
+    //   - walletAddress: string (optional)
+    //   - role: string (required, ['artist', 'collector', 'admin'])
+    //   - followers: int (optional, >= 0)
+    //   - following: int (optional, >= 0)
+    //   - isVerifiedArtist: bool (optional)
+    //   - jamBalance: number (optional)
+    //   - stakedJam: number (optional)
+    //   - pendingJamRewards: number (optional)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: playlists
+    // Document ID: playlistId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - title: string (required, < 100 chars)
+    //   - creator: string (required, immutable)
+    //   - trackCount: int (required, >= 0)
+    //   - description: string (optional, < 500 chars)
+    //   - trackIds: list (optional)
+    //   - isPrivate: bool (optional)
+    //   - updatedAt: timestamp (required)
     //
     // Collection: transactions
-    // Fields: id, type, amount, recipientAddress, senderAddress, timestamp, status, ...
+    // Document ID: transactionId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - type: string (required, enum)
+    //   - amount: number (required)
+    //   - timestamp: timestamp (required, immutable)
+    //   - status: string (required, enum)
+    //   - senderAddress: string (optional)
+    //   - recipientAddress: string (optional)
+    //   - trackId: string (optional)
+    //
+    // Collection: tracks
+    // Document ID: trackId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - title: string (required, < 100 chars)
+    //   - artistId: string (required, immutable)
+    //   - artistName: string (required, < 50 chars)
+    //   - coverUrl: string (required, URL format)
+    //   - audioUrl: string (required, URL format)
+    //   - genre: string (required, < 50 chars)
+    //   - price: string (required, < 20 chars)
+    //   - isNFT: bool (required)
+    //   - bpm: int (optional, 0-300)
+    //   - key: string (optional, < 10 chars)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: nfts
+    // Document ID: nftId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - trackId: string (required, immutable)
+    //   - title: string (required, < 100 chars)
+    //   - imageUrl: string (required, URL format)
+    //   - price: string (required, < 20 chars)
+    //   - ownerId: string (required)
+    //   - ownerName: string (required, < 50 chars)
+    //   - edition: string (required, ['Unique', 'Limited', 'Standard'])
+    //   - rarity: string (optional, < 50 chars)
+    //   - isListed: bool (required)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: posts
+    // Document ID: postId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - authorId: string (required, immutable)
+    //   - authorName: string (required, < 50 chars)
+    //   - authorPhoto: string (optional, URL format)
+    //   - content: string (required, < 1000 chars)
+    //   - imageUrl: string (optional, URL format)
+    //   - likes: int (required, >= 0)
+    //   - comments: int (required, >= 0)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: nfts/{nftId}/bids
+    // Document ID: bidId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - nftId: string (required, immutable)
+    //   - bidderId: string (required, immutable)
+    //   - bidderName: string (required, < 50 chars)
+    //   - amount: string (required, < 20 chars)
+    //   - timestamp: timestamp (required, immutable)
+    //
+    // Collection: royalties
+    // Document ID: artistId
+    // Fields:
+    //   - artistId: string (required, immutable)
+    //   - totalEarned: string (required, < 20 chars)
+    //   - pendingWithdrawal: string (required, < 20 chars)
+    //   - lastWithdrawal: timestamp (optional)
+    //
+    // ===============================================================
+    //
+    // Collection: test
+    // Document ID: connection
+    // Fields:
+    //   - status: string
     //
     // ===============================================================
 
@@ -36,102 +136,188 @@ service cloud.firestore {
           (request.auth.token.email == "krusherkrupy@gmail.com" && request.auth.token.email_verified == true));
     }
 
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
     function hasOnlyAllowedFields(fields) {
       return request.resource.data.keys().hasOnly(fields);
     }
 
-    function isValidTrack(data) {
-      return data.id is string &&
-             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
-             data.artist is string &&
-             data.artistId is string &&
-             data.coverUrl is string &&
-             data.audioUrl is string &&
-             data.genre is string &&
-             data.isNFT is bool;
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
     }
 
-    function isValidNFT(data) {
-      return data.id is string &&
-             data.trackId is string &&
-             data.title is string &&
-             data.owner is string &&
-             data.creator is string &&
-             data.price is string &&
-             data.imageUrl is string &&
-             data.edition is string;
-    }
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
 
     function isValidUser(data) {
-      return data.id is string &&
+      return hasRequiredFields(['id', 'name', 'handle', 'role', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'name', 'handle', 'avatar', 'bannerUrl', 'bio', 'walletAddress', 'role', 'followers', 'following', 'isVerifiedArtist', 'jamBalance', 'stakedJam', 'pendingJamRewards', 'lastStakingUpdate', 'streamingEarnings', 'nftEarnings', 'followedArtists', 'followedUserIds', 'likedTrackIds', 'friends', 'favoriteGenres', 'transactions', 'createdPlaylistIds', 'ownedNftIds', 'listedNftIds', 'anthemId', 'createdAt']) &&
+             data.id is string && data.id.size() > 0 &&
              data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
-             data.handle is string && data.handle.size() > 0 && data.handle.size() < 30 &&
-             data.avatar is string &&
-             (!('anthemId' in data) || data.anthemId is string || data.anthemId == null);
+             data.handle is string && data.handle.size() > 0 && data.handle.size() < 50 &&
+             data.role in ['artist', 'collector', 'admin'] &&
+             (!('avatar' in data) || isValidUrl(data.avatar)) &&
+             (!('bannerUrl' in data) || isValidUrl(data.bannerUrl)) &&
+             (!('bio' in data) || (data.bio is string && data.bio.size() < 500)) &&
+             (!('followers' in data) || data.followers is int) &&
+             (!('following' in data) || data.following is int) &&
+             (!('jamBalance' in data) || data.jamBalance is number) &&
+             (!('stakedJam' in data) || data.stakedJam is number) &&
+             (!('pendingJamRewards' in data) || data.pendingJamRewards is number) &&
+             data.createdAt is timestamp;
     }
 
     function isValidPlaylist(data) {
-      return data.id is string &&
-             data.title is string &&
-             data.coverUrl is string &&
-             data.trackCount is number &&
-             data.creator is string;
+      return hasRequiredFields(['id', 'title', 'creator', 'trackCount', 'updatedAt']) &&
+             hasOnlyAllowedFields(['id', 'title', 'coverUrl', 'trackCount', 'creator', 'description', 'trackIds', 'isPrivate', 'isCollaborative', 'tags', 'updatedAt']) &&
+             data.id is string && data.title is string && data.title.size() < 100 &&
+             data.creator is string && data.trackCount is int &&
+             (!('coverUrl' in data) || isValidUrl(data.coverUrl)) &&
+             (!('description' in data) || (data.description is string && data.description.size() < 500)) &&
+             (!('trackIds' in data) || data.trackIds is list) &&
+             (!('isPrivate' in data) || data.isPrivate is bool) &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidTransaction(data) {
+      let validTypes = ['stream', 'nft_sale', 'nft_mint', 'withdrawal', 'platform_fee', 'jam_purchase', 'premium_subscription', 'stake', 'unstake', 'claim_rewards'];
+      let validStatuses = ['pending', 'completed', 'failed'];
+      return hasRequiredFields(['id', 'type', 'amount', 'timestamp', 'status']) &&
+             hasOnlyAllowedFields(['id', 'type', 'amount', 'platformFee', 'artistShare', 'recipientAddress', 'senderAddress', 'trackId', 'trackTitle', 'nftId', 'timestamp', 'status', 'txHash']) &&
+             data.id is string && data.type in validTypes &&
+             data.amount is number && data.status in validStatuses &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidTrack(data) {
+      return hasRequiredFields(['id', 'title', 'artistId', 'artistName', 'coverUrl', 'audioUrl', 'genre', 'price', 'isNFT', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'title', 'artistId', 'artistName', 'coverUrl', 'audioUrl', 'genre', 'price', 'isNFT', 'bpm', 'key', 'createdAt']) &&
+             data.id is string && data.title is string && data.title.size() < 100 &&
+             data.artistId is string && data.artistName is string && data.artistName.size() < 50 &&
+             isValidUrl(data.coverUrl) && isValidUrl(data.audioUrl) &&
+             data.genre is string && data.genre.size() < 50 &&
+             data.price is string && data.price.size() < 20 &&
+             data.isNFT is bool &&
+             (!('bpm' in data) || (data.bpm is int && data.bpm >= 0 && data.bpm <= 300)) &&
+             (!('key' in data) || (data.key is string && data.key.size() < 10)) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidNFT(data) {
+      return hasRequiredFields(['id', 'trackId', 'title', 'imageUrl', 'price', 'ownerId', 'ownerName', 'edition', 'isListed', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'trackId', 'title', 'imageUrl', 'price', 'ownerId', 'ownerName', 'edition', 'rarity', 'isListed', 'createdAt']) &&
+             data.id is string && data.trackId is string &&
+             data.title is string && data.title.size() < 100 &&
+             isValidUrl(data.imageUrl) &&
+             data.price is string && data.price.size() < 20 &&
+             data.ownerId is string && data.ownerName is string && data.ownerName.size() < 50 &&
+             data.edition in ['Unique', 'Limited', 'Standard'] &&
+             (!('rarity' in data) || (data.rarity is string && data.rarity.size() < 50)) &&
+             data.isListed is bool &&
+             data.createdAt is timestamp;
     }
 
     function isValidPost(data) {
-      return data.id is string &&
-             data.userId is string &&
-             data.userName is string &&
-             data.userAvatar is string &&
-             data.content is string &&
-             data.likes is number &&
-             data.comments is number &&
-             data.timestamp is string;
+      return hasRequiredFields(['id', 'authorId', 'authorName', 'content', 'likes', 'comments', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'authorId', 'authorName', 'authorPhoto', 'content', 'imageUrl', 'likes', 'comments', 'createdAt']) &&
+             data.id is string && data.authorId is string && data.authorName is string && data.authorName.size() < 50 &&
+             (!('authorPhoto' in data) || isValidUrl(data.authorPhoto)) &&
+             data.content is string && data.content.size() < 1000 &&
+             (!('imageUrl' in data) || isValidUrl(data.imageUrl)) &&
+             data.likes is int && data.likes >= 0 &&
+             data.comments is int && data.comments >= 0 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidBid(data) {
+      return hasRequiredFields(['id', 'nftId', 'bidderId', 'bidderName', 'amount', 'timestamp']) &&
+             hasOnlyAllowedFields(['id', 'nftId', 'bidderId', 'bidderName', 'amount', 'timestamp']) &&
+             data.id is string && data.nftId is string && data.bidderId is string &&
+             data.bidderName is string && data.bidderName.size() < 50 &&
+             data.amount is string && data.amount.size() < 20 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidRoyalty(data) {
+      return hasRequiredFields(['artistId', 'totalEarned', 'pendingWithdrawal']) &&
+             hasOnlyAllowedFields(['artistId', 'totalEarned', 'pendingWithdrawal', 'lastWithdrawal']) &&
+             data.artistId is string &&
+             data.totalEarned is string && data.totalEarned.size() < 20 &&
+             data.pendingWithdrawal is string && data.pendingWithdrawal.size() < 20 &&
+             (!('lastWithdrawal' in data) || data.lastWithdrawal is timestamp);
     }
 
     // ===============================================================
     // Rules
     // ===============================================================
 
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role != 'admin';
+      allow update: if (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == resource.data.role) || isAdmin();
+    }
+
+    match /playlists/{playlistId} {
+      allow read: if true; // Playlists are public by default in this app
+      allow create: if isAuthenticated() && isValidPlaylist(request.resource.data) && request.resource.data.creator == request.auth.uid;
+      allow update: if isAuthenticated() && isValidPlaylist(request.resource.data) && (resource.data.creator == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && (resource.data.creator == request.auth.uid || isAdmin());
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && (resource.data.senderAddress == request.auth.uid || resource.data.recipientAddress == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidTransaction(request.resource.data);
+      allow update: if isAdmin();
+    }
+
+    match /test/{docId} {
+      allow read: if true;
+    }
+
     match /tracks/{trackId} {
       allow read: if true;
-      allow create: if isAuthenticated() && isValidTrack(request.resource.data);
-      allow update: if isAuthenticated() && (request.auth.uid == resource.data.artistId || isAdmin()) && isValidTrack(request.resource.data);
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated() && isValidTrack(request.resource.data) && request.resource.data.artistId == request.auth.uid;
+      allow update: if isAuthenticated() && isValidTrack(request.resource.data) && (resource.data.artistId == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && (resource.data.artistId == request.auth.uid || isAdmin());
     }
 
     match /nfts/{nftId} {
       allow read: if true;
-      allow create: if isAuthenticated() && isValidNFT(request.resource.data);
-      allow update: if isAuthenticated() && (request.auth.uid == resource.data.artistId || request.auth.uid == resource.data.owner || isAdmin()) && isValidNFT(request.resource.data);
-      allow delete: if isAdmin();
-    }
-
-    match /users/{userId} {
-      allow read: if true;
-      allow create: if isOwner(userId) && isValidUser(request.resource.data);
-      allow update: if (isOwner(userId) || isAdmin()) && isValidUser(request.resource.data);
-      allow delete: if isAdmin();
-    }
-
-    match /transactions/{transactionId} {
-      allow read: if true;
-      allow create: if isAuthenticated();
-      allow update, delete: if isAdmin();
-    }
-
-    match /playlists/{playlistId} {
-      allow read: if true;
-      allow create: if isAuthenticated() && isValidPlaylist(request.resource.data);
-      allow update: if isAuthenticated() && (request.auth.uid == resource.data.creator || isAdmin()) && isValidPlaylist(request.resource.data);
+      allow create: if isAuthenticated() && isValidNFT(request.resource.data) && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isAuthenticated() && isValidNFT(request.resource.data); // Owner can update price/listing, or buyer can update owner
       allow delete: if isAdmin();
     }
 
     match /posts/{postId} {
       allow read: if true;
-      allow create: if isAuthenticated() && isValidPost(request.resource.data);
-      allow update: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin()) && isValidPost(request.resource.data);
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated() && isValidPost(request.resource.data) && request.resource.data.authorId == request.auth.uid;
+      allow update: if isAuthenticated() && isValidPost(request.resource.data); // Likes/comments increment
+      allow delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    match /nfts/{nftId}/bids/{bidId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidBid(request.resource.data) && request.resource.data.bidderId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAuthenticated() && (resource.data.bidderId == request.auth.uid || isAdmin());
+    }
+
+    match /royalties/{artistId} {
+      allow read: if isOwner(artistId) || isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
     }
   }
 }

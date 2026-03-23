@@ -50,9 +50,9 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
       <div className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 overflow-hidden ${isFocused ? 'border-blue-500/50 bg-foreground/[0.08] shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
         
         {/* Input Area */}
-        <div className="relative flex items-center px-4 py-0.5 z-10">
-          <div className="pr-2">
-            <Search className={`h-4 w-4 transition-colors duration-300 ${isFocused ? 'text-blue-500' : 'text-foreground/30'}`} />
+        <div className="relative flex items-center px-1.5 py-2 z-10">
+          <div className="pr-1.5">
+            <Search className={`h-3.5 w-3.5 transition-colors duration-300 ${isFocused ? 'text-blue-500' : 'text-foreground/30'}`} />
           </div>
           
           <input
@@ -66,7 +66,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder={placeholder}
-            className="flex-1 bg-transparent border-none outline-none py-1.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight"
+            className="flex-1 bg-transparent border-none outline-none py-2 text-xs font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight"
           />
 
           <div className="flex items-center gap-1">
@@ -77,9 +77,9 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   onClick={handleClear}
-                  className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-all"
+                  className="p-2 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-all"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3 w-3" />
                 </motion.button>
               )}
             </AnimatePresence>
@@ -90,15 +90,15 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                   e.preventDefault();
                   onVoiceSearch();
                 }}
-                className={`p-1.5 rounded-lg transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+                className={`p-2 rounded-lg transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
               >
-                {isListening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+                {isListening ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
               </button>
             )}
             
-            <div className="hidden md:flex items-center gap-1 px-1.5 py-0.5 bg-muted/50 rounded border border-border/50 ml-1">
+            <div className="hidden md:flex items-center gap-1 px-2 py-2 bg-muted/50 rounded border border-border/50 ml-1">
               <Command className="h-2.5 w-2.5 text-muted-foreground/50" />
-              <span className="text-[9px] font-bold text-muted-foreground/50">K</span>
+              <span className="text-[8px] font-bold text-muted-foreground/50">K</span>
             </div>
           </div>
         </div>
@@ -123,10 +123,10 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute top-full left-0 right-0 mt-4 p-2 bg-background/80 backdrop-blur-3xl border border-border rounded-2xl z-50 shadow-2xl overflow-hidden"
+            className="absolute top-full left-0 right-0 mt-2 p-2 bg-background/80 backdrop-blur-3xl border border-border rounded-2xl z-50 shadow-2xl overflow-hidden"
           >
             {!query ? (
-              <div className="p-2 grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="p-2 grid grid-cols-2 md:grid-cols-4 gap-2">
                 {[
                   { label: 'Trending', icon: Zap, color: 'text-amber-500' },
                   { label: 'Artists', icon: User, color: 'text-blue-500' },
@@ -136,7 +136,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                   <button
                     key={item.label}
                     onClick={() => setQuery(item.label)}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50 hover:bg-muted hover:border-border/80 transition-all group/btn"
+                    className="flex items-center gap-2 p-[2px] rounded-xl bg-muted/50 border border-border/50 hover:bg-muted hover:border-border/80 transition-all group/btn"
                   >
                     <item.icon className={`h-4 w-4 ${item.color} group-hover/btn:scale-110 transition-transform`} />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 group-hover/btn:text-foreground">
@@ -146,7 +146,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col gap-1 max-h-[400px] overflow-y-auto no-scrollbar">
+              <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto no-scrollbar">
                 {actions.map((action) => (
                   <button
                     key={action.id}
@@ -154,9 +154,9 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                       if (action.onClick) action.onClick();
                       setIsFocused(false);
                     }}
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-all group/item"
+                    className="flex items-center justify-between p-2 rounded-xl hover:bg-muted/50 transition-all group/item"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
                       <div className="p-2 rounded-lg bg-muted/50 group-hover/item:bg-blue-500/10 transition-colors">
                         {action.icon}
                       </div>

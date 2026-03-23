@@ -58,16 +58,16 @@ const Notifications: React.FC = () => {
   };
 
   return (
-    <div className="animate-in fade-in duration-700 min-h-screen pb-32">
+    <div className="animate-in fade-in duration-700 min-h-screen pb-4">
       {/* Header Area */}
-      <header className="px-6 md:px-12 py-12">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <header className="px-4 md:px-4 py-4">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-4 mb-4">
               <img src={APP_LOGO} className="w-5 h-5 opacity-40" alt="" />
               <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">Neural Relay logs</span>
             </div>
-            <h1 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase text-foreground leading-none">Notifications</h1>
+            <h1 className="text-[32px] md:text-[68px] font-bold tracking-tighter uppercase text-foreground leading-none">Notifications</h1>
           </div>
           <div className="flex gap-4">
             <button onClick={markAllRead} className="text-[10px] font-bold uppercase text-primary tracking-widest hover:text-foreground transition-colors">Mark all read</button>
@@ -77,14 +77,14 @@ const Notifications: React.FC = () => {
       </header>
 
       {/* Tabs - Converted to Pill Buttons */}
-      <nav className="px-6 md:px-12 mb-12 -b sticky top-[var(--header-height,64px)] backdrop-blur-xl z-30 transition-all duration-300">
+      <nav className="px-4 md:px-4 mb-4 -b sticky top-[var(--header-height,64px)] backdrop-blur-xl z-30 transition-all duration-300">
         <div className="max-w-4xl mx-auto flex gap-4 py-4 overflow-x-auto no-scrollbar">
           {['All', 'Social', 'Syncs', 'Rewards', 'System'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
               aria-selected={activeTab === tab}
-              className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}>
+              className={`flex-shrink-0 px-4 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}>
               {tab}
             </button>
           ))}
@@ -92,10 +92,10 @@ const Notifications: React.FC = () => {
       </nav>
 
       {/* List */}
-      <main className="px-6 md:px-12 max-w-4xl mx-auto space-y-2">
+      <main className="px-4 md:px-4 max-w-4xl mx-auto space-y-4">
         {filtered.length > 0 ? (
           filtered.map(item => (
-            <div key={item.id} role="button" tabIndex={0} className={`group flex items-center gap-6 p-6 rounded-[10px] transition-all cursor-pointer ${item.isRead ? 'bg-foreground/[0.02] hover:bg-muted/50' : 'bg-primary/[0.05] border border-primary/20 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]'}`}>
+            <div key={item.id} role="button" tabIndex={0} className={`group flex items-center gap-4 p-4 rounded-[10px] transition-all cursor-pointer ${item.isRead ? 'bg-foreground/[0.02] hover:bg-muted/50' : 'bg-primary/[0.05] border border-primary/20 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]'}`}>
               {/* Icon Container */}
               <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center relative">
                 {renderIcon(item)}
@@ -105,7 +105,7 @@ const Notifications: React.FC = () => {
               </div>
               {/* Text Content */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-4">
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.title}</h4>
                   <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-tighter">{item.time}</span>
                 </div>
@@ -121,8 +121,8 @@ const Notifications: React.FC = () => {
             </div>
           ))
         ) : (
-          <div className="py-32 flex flex-col items-center text-center">
-            <Satellite className="h-16 w-16 text-foreground/5 mb-8 animate-pulse" />
+          <div className="py-4 flex flex-col items-center text-center">
+            <Satellite className="h-16 w-16 text-foreground/5 mb-4 animate-pulse" />
             <p className="text-[10px] font-bold uppercase tracking-[0.6em] text-muted-foreground/30">Neural void detected. No active signals.</p>
           </div>
         )}

@@ -79,45 +79,45 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" onClick={onClose}></div>
-      <div className="relative bg-white w-full max-w-sm rounded-[10px] border border-border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/10 blur-3xl rounded-full"></div>
-        <div className="p-8 relative z-10">
-          <header className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-bold uppercase tracking-tighter text-black">Purchase Asset</h2>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground">
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-2 animate-in fade-in duration-300">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
+      <div className="relative bg-white/5 backdrop-blur-md w-full max-w-sm rounded-[24px] border border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 blur-3xl rounded-full"></div>
+        <div className="p-2 relative z-10">
+          <header className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-bold uppercase tracking-tighter text-white">Purchase Asset</h2>
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors border border-white/10">
               <X className="h-4 w-4" />
             </button>
           </header>
-          <div className="flex items-center gap-4 mb-8 p-4 bg-neutral-100 border border-border/50 rounded-[10px] ">
-            <img src={nft.imageUrl} className="w-16 h-16 rounded-[10px] object-cover" alt="" />
+          <div className="flex items-center gap-2 mb-2 p-2 bg-white/5 border border-white/10 rounded-[16px]">
+            <img src={nft.imageUrl} className="w-16 h-16 rounded-[12px] object-cover border border-white/10" alt="" />
             <div>
-              <p className="text-[10px] font-bold text-black uppercase truncate w-32">{nft.title}</p>
-              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Creator: {nft.creator}</p>
+              <p className="text-[10px] font-bold text-white uppercase truncate w-32">{nft.title}</p>
+              <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-2">Creator: {nft.creator}</p>
             </div>
           </div>
-          <div className="space-y-4 mb-8 bg-neutral-50 border border-border/50 p-6 rounded-[10px] ">
+          <div className="space-y-2 mb-2 bg-white/5 border border-white/5 p-2 rounded-[16px]">
             <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-neutral-500">Asset Price</span>
-              <span className="text-black">{price} TON</span>
+              <span className="text-white/40">Asset Price</span>
+              <span className="text-white">{price} TON</span>
             </div>
             <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-neutral-500">Platform Fee (5% Buyer)</span>
-              <span className="text-blue-600">+{platformFeeFromBuyer.toFixed(2)} TON</span>
+              <span className="text-white/40">Platform Fee (5% Buyer)</span>
+              <span className="text-blue-400">+{platformFeeFromBuyer.toFixed(2)} TON</span>
             </div>
             <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-neutral-500">Network Gas (est)</span>
-              <span className="text-muted-foreground/80">~{gasFee} TON</span>
+              <span className="text-white/40">Network Gas (est)</span>
+              <span className="text-white/20">~{gasFee} TON</span>
             </div>
-            <div className="pt-4 border-t border-border/50 flex justify-between items-center">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Total Required</span>
+            <div className="pt-2 border-t border-white/10 flex justify-between items-center">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Total Required</span>
               <div className="flex items-center gap-2">
                 <img src={TON_LOGO} className="w-4 h-4" alt="" />
-                <span className="text-2xl font-bold text-black tracking-tighter">{total}</span>
+                <span className="text-[20px] font-bold text-white tracking-tighter">{total}</span>
               </div>
             </div>
-            <div className="pt-2 flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-muted-foreground/50">
+            <div className="pt-2 flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/20">
               <span>Artist Receive (Price - 5% Fee)</span>
               <span>{artistShare} TON</span>
             </div>
@@ -125,8 +125,8 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
           <button
             onClick={handlePurchase}
             disabled={isProcessing}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-[10px] text-[10px] font-bold uppercase tracking-widest text-foreground shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
-            {isProcessing ? <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> : <CheckCircle2 className="h-4 w-4" />}
+            className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-[12px] text-[10px] font-bold uppercase tracking-widest text-white shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
             {isProcessing ? 'SYNCING...' : 'CONFIRM PURCHASE'}
           </button>
         </div>

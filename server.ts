@@ -6,6 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
+import FormData from 'form-data';
 
 dotenv.config();
 
@@ -58,6 +59,66 @@ async function startServer() {
         const coverUrl = files.cover ? `/uploads/${files.cover[0].filename}` : null;
 
         res.json({ audioUrl, coverUrl });
+    });
+
+    // Pinata IPFS Upload
+    app.post('/api/pinata/upload', upload.single('file'), async (req, res) => {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const PINATA_API_KEY = process.env.PINATA_API_KEY;
+        const PINATA_API_SECRET = process.env.PINATA_API_SECRET;
+        const PINATA_JWT = process.env.PINATA_JWT;
+
+        if (!PINATA_JWT && (!PINATA_API_KEY || !PINATA_API_SECRET)) {
+            return res.status(500).json({ error: 'Pinata credentials (JWT or API Key/Secret) not configured' });
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('file', fs.createReadStream(req.file.path), {
+                filename: req.file.originalname,
+            });
+
+            const headers: any = {
+                ...formData.getHeaders(),
+            };
+
+            if (PINATA_JWT) {
+                headers['Authorization'] = `Bearer ${PINATA_JWT}`;
+            } else {
+                headers['pinata_api_key'] = PINATA_API_KEY;
+                headers['pinata_secret_api_key'] = PINATA_API_SECRET;
+            }
+
+            const pinataResponse = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+                headers,
+                maxBodyLength: Infinity,
+                maxContentLength: Infinity,
+            });
+
+            // Clean up local file
+            if (fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
+
+            const ipfsHash = pinataResponse.data.IpfsHash;
+            const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+
+            res.json({ ipfsHash, ipfsUrl });
+        } catch (error: any) {
+            const errorData = error.response?.data;
+            console.error('Pinata Upload Error Detail:', JSON.stringify(errorData || error.message, null, 2));
+            
+            // Clean up local file even on error
+            if (req.file && fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
+
+            const errorMessage = errorData?.error?.details || errorData?.error || error.message || 'Failed to upload to IPFS';
+            res.status(500).json({ error: errorMessage });
+        }
     });
 
     // Spotify OAuth Config

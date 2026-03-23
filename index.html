@@ -4,7 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TonJam (Testnet) - Web3 Music & NFT Marketplace</title>
+    <title>Tonjam | Decentralized Music & NFT Marketplace on TON Blockchain</title>
+    <meta name="description" content="Tonjam is the premier decentralized music and NFT marketplace built on the TON blockchain. Discover exclusive tracks, buy and sell music NFTs, and connect directly with independent artists in the Web3 ecosystem.">
+    <meta name="keywords" content="Tonjam, TON blockchain, decentralized music, NFT marketplace, Web3 music, crypto music, music NFTs, independent artists, streaming, audio NFTs, The Open Network">
+    <meta property="og:title" content="Tonjam | Decentralized Music & NFT Marketplace on TON">
+    <meta property="og:description" content="Tonjam is the premier decentralized music and NFT marketplace built on the TON blockchain. Discover exclusive tracks, buy and sell music NFTs, and connect directly with independent artists.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tonjam.com">
+    <meta property="og:site_name" content="Tonjam">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Tonjam | Decentralized Music & NFT Marketplace on TON">
+    <meta name="twitter:description" content="Tonjam is the premier decentralized music and NFT marketplace built on the TON blockchain. Discover exclusive tracks, buy and sell music NFTs, and connect directly with independent artists.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -152,18 +162,17 @@
         /* Text Overrides - Force Blue in Light Mode by default */
         html.light .text-foreground,
         html.light .text-muted-foreground,
-        html.light .text-white,
         html.light .text-primary,
-        html.light [class*="text-"],
-        html.light [class*="text-"] * { 
+        html.light [class*="text-"]:not(.text-white),
+        html.light [class*="text-"]:not(.text-white) * { 
             color: #2563EB !important; 
         }
 
-        /* Dark Mode (Default) Overrides - Blue to Silver */
-        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) .text-blue-400 { color: #A6A6A6 !important; }
-        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) .text-blue-500 { color: #8F8F8F !important; }
-        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) .text-blue-600 { color: #787878 !important; }
-        :not(.light):not(.cyberpunk):not(.ocean):not(.forest) .text-blue-700 { color: #616161 !important; }
+        /* Ensure carousel text is always white regardless of theme */
+        .auto-carousel-text,
+        .auto-carousel-text * {
+            color: #ffffff !important;
+        }
 
         /* Global Border Adjustment - Reducing by 2px from previous 3px */
         .border, 
@@ -222,6 +231,25 @@
             color: #8F8F8F !important; /* Silver 500 / Grey */
         }
 
+        /* Bottom Navigation Bar Styles */
+        html.light nav[aria-label="Mobile Navigation"] {
+            background-color: #ffffff !important;
+            border-top: 1px solid #E5E7EB !important;
+        }
+
+        html.light .mobile-nav-item {
+            color: #9CA3AF !important; /* Grey 400 */
+        }
+
+        html.light .mobile-nav-item.active {
+            color: #2563EB !important; /* Blue 600 */
+        }
+
+        html.light .mobile-nav-item.active * {
+            color: #2563EB !important;
+        }
+
+        /* Pill Styles */
         html.light .active-pill,
         html.light .bg-blue-500.text-white {
             background-color: #2563EB !important;
@@ -232,7 +260,16 @@
         html.light .inactive-pill {
             background-color: #ffffff !important;
             color: #2563EB !important;
-            border-color: #BDBDBD !important; /* Silver 300 */
+            border-color: #D1D5DB !important; /* Silver/Grey 300 */
+        }
+
+        html.light .active-pill *,
+        html.light .bg-blue-500.text-white * {
+            color: #ffffff !important;
+        }
+
+        html.light .inactive-pill * {
+            color: #2563EB !important;
         }
 
         /* Specific Fix for Filter Sections (Selects and Inputs) */

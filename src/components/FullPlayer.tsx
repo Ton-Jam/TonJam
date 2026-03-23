@@ -138,14 +138,14 @@ const LyricsView: React.FC<{ trackId: string }> = ({ trackId }) => {
   ];
 
   return (
-    <div className="w-full h-[400px] overflow-y-auto no-scrollbar py-10 px-4 space-y-8 text-left mask-image-gradient">
+    <div className="w-full h-[400px] overflow-y-auto no-scrollbar py-2 px-2 space-y-2 text-left mask-image-gradient">
       {lyrics.map((line, i) => (
         <motion.p 
           key={i}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1 }}
-          className={`text-2xl md:text-3xl font-bold tracking-tight leading-tight ${i === 1 ? 'text-foreground' : 'text-muted-foreground/50 hover:text-foreground transition-colors'}`}
+          className={`text-[20px] md:text-[26px] font-bold tracking-tight leading-tight ${i === 1 ? 'text-foreground' : 'text-muted-foreground/50 hover:text-foreground transition-colors'}`}
         >
           {line.text}
         </motion.p>
@@ -253,7 +253,7 @@ const FullPlayer: React.FC = () => {
 
       <div className="relative z-10 flex flex-col min-h-full">
         {/* Header */}
-        <div className="relative top-0 flex items-center justify-between p-6 pt-8">
+        <div className="relative top-0 flex items-center justify-between p-2 pt-2">
           <button 
             onClick={() => setFullPlayerOpen(false)}
             className="p-2 -ml-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
@@ -263,7 +263,7 @@ const FullPlayer: React.FC = () => {
           </button>
           <div className="text-center flex flex-col items-center">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50">Now Playing from</span>
-            <span className="text-xs font-bold text-foreground tracking-tight mt-0.5">TonJam Network</span>
+            <span className="text-xs font-bold text-foreground tracking-tight mt-3">TonJam Network</span>
           </div>
           <button 
             className="p-2 -mr-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
@@ -273,7 +273,7 @@ const FullPlayer: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex-1 flex flex-col px-6 pb-8 max-w-md mx-auto w-full">
+        <div className="flex-1 flex flex-col px-2 pb-2 max-w-md mx-auto w-full">
           
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col justify-center min-h-[400px]">
@@ -288,7 +288,7 @@ const FullPlayer: React.FC = () => {
                   className="w-full flex flex-col"
                 >
                   {/* Album Art */}
-                  <div className="w-full aspect-square rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 relative group">
+                  <div className="w-full aspect-square rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-2 relative group">
                     <img 
                       src={currentTrack.coverUrl} 
                       alt={currentTrack.title} 
@@ -297,8 +297,8 @@ const FullPlayer: React.FC = () => {
                   </div>
                   
                   {/* Track Info & Like Button */}
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="min-w-0 flex-1 pr-4 flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="min-w-0 flex-1 pr-2 flex items-center gap-2">
                       {artistData && (
                         <img 
                           src={artistData.avatarUrl} 
@@ -307,7 +307,7 @@ const FullPlayer: React.FC = () => {
                         />
                       )}
                       <div className="min-w-0">
-                        <h2 className="text-2xl font-bold text-foreground tracking-tight truncate mb-0.5">
+                        <h2 className="text-[20px] font-bold text-foreground tracking-tight truncate mb-3">
                           {currentTrack.title}
                         </h2>
                         <button 
@@ -340,7 +340,7 @@ const FullPlayer: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   className="w-full flex-1 flex flex-col"
                 >
-                  <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center gap-2 mb-2">
                     <img src={currentTrack.coverUrl} className="w-16 h-16 rounded-md shadow-lg" alt="" />
                     <div>
                       <h3 className="font-bold text-lg leading-tight">{currentTrack.title}</h3>
@@ -359,21 +359,21 @@ const FullPlayer: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   className="w-full flex-1 flex flex-col"
                 >
-                  <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center gap-2 mb-2">
                     <img src={currentTrack.coverUrl} className="w-16 h-16 rounded-md shadow-lg" alt="" />
                     <div>
                       <h3 className="font-bold text-lg leading-tight">{currentTrack.title}</h3>
                       <p className="text-muted-foreground text-sm">{currentTrack.artist}</p>
                     </div>
                   </div>
-                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-4">
-                    <div className="flex gap-3">
+                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-2 pb-2">
+                    <div className="flex gap-2">
                       <img src={userProfile.avatar} className="w-8 h-8 rounded-full" alt="" />
                       <div className="flex-1 relative">
                         <input 
                           type="text" 
                           placeholder="Add a comment..." 
-                          className="w-full bg-foreground/5 rounded-full py-2 px-4 text-sm text-foreground outline-none border border-transparent focus:border-foreground/20 transition-all"
+                          className="w-full bg-foreground/5 rounded-full py-2 px-2 text-sm text-foreground outline-none border border-transparent focus:border-foreground/20 transition-all"
                         />
                       </div>
                     </div>
@@ -382,10 +382,10 @@ const FullPlayer: React.FC = () => {
                       { id: 2, user: "Sarah Jenkins", avatar: "https://picsum.photos/100/100?random=32", text: "Love the atmospheric vibes here. Great work!", time: "5h ago" },
                       { id: 3, user: "CryptoPioneer", avatar: "https://picsum.photos/100/100?random=50", text: "Added this immediately. A future classic.", time: "1d ago" },
                     ].map(comment => (
-                      <div key={comment.id} className="flex gap-3 group">
+                      <div key={comment.id} className="flex gap-2 group">
                         <img src={comment.avatar} className="w-8 h-8 rounded-full" alt="" />
                         <div className="flex-1">
-                          <div className="flex items-baseline gap-2 mb-0.5">
+                          <div className="flex items-baseline gap-2 mb-3">
                             <span className="text-sm font-bold text-foreground">{comment.user}</span>
                             <span className="text-[10px] text-muted-foreground">{comment.time}</span>
                           </div>
@@ -405,17 +405,17 @@ const FullPlayer: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   className="w-full flex-1 flex flex-col"
                 >
-                  <div className="flex flex-col items-center gap-4 mb-6">
+                  <div className="flex flex-col items-center gap-2 mb-2">
                     {artistData && (
                       <img src={artistData.avatarUrl} className="w-32 h-32 rounded-full shadow-lg" alt={currentTrack.artist} />
                     )}
-                    <h3 className="font-bold text-2xl">{currentTrack.artist}</h3>
+                    <h3 className="font-bold text-[20px]">{currentTrack.artist}</h3>
                     <p className="text-muted-foreground text-sm text-center">{artistData?.bio || "No biography available."}</p>
                   </div>
-                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-4">
+                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-2">
                     <h4 className="font-bold text-foreground">Similar Tracks</h4>
                     {allTracks.filter(t => t.artistId === currentTrack.artistId && t.id !== currentTrack.id).slice(0, 3).map(track => (
-                      <div key={track.id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 cursor-pointer" onClick={() => playTrack(track)}>
+                      <div key={track.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer" onClick={() => playTrack(track)}>
                         <img src={track.coverUrl} className="w-12 h-12 rounded-md" alt="" />
                         <div className="flex-1">
                           <p className="text-sm font-bold text-foreground">{track.title}</p>
@@ -435,14 +435,14 @@ const FullPlayer: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   className="w-full flex-1 flex flex-col"
                 >
-                  <h3 className="font-bold text-lg mb-6">Featured Playlists</h3>
-                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-4">
+                  <h3 className="font-bold text-lg mb-2">Featured Playlists</h3>
+                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-2">
                     {/* Placeholder for playlists */}
-                    <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                    <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
                       <p className="font-bold text-blue-400">Featured: TonJam Top 50</p>
                       <p className="text-xs text-muted-foreground">The best tracks on TonJam right now.</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-muted/50">
+                    <div className="p-2 rounded-xl bg-muted/50">
                       <p className="font-bold text-foreground">Suggested: Chill Vibes</p>
                       <p className="text-xs text-muted-foreground">Perfect for relaxing.</p>
                     </div>
@@ -453,9 +453,9 @@ const FullPlayer: React.FC = () => {
           </div>
 
           {/* Player Controls (Always visible at bottom) */}
-          <div className="mt-auto pt-4">
+          <div className="mt-auto pt-2">
             {/* Progress Bar */}
-            <div className="w-full mb-6 group">
+            <div className="w-full mb-2 group">
               <div className="relative h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden mb-2">
                 <div 
                   className="absolute top-0 left-0 h-full bg-foreground transition-all duration-100 group-hover:bg-blue-500"
@@ -477,7 +477,7 @@ const FullPlayer: React.FC = () => {
             </div>
 
             {/* Main Playback Controls */}
-            <div className="w-full flex items-center justify-between mb-6">
+            <div className="w-full flex items-center justify-between mb-2">
               <button 
                 onClick={toggleShuffle}
                 className={`p-2 transition-all focus-visible:outline-none rounded-full ${isShuffle ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
@@ -486,7 +486,7 @@ const FullPlayer: React.FC = () => {
                 <Shuffle className="h-5 w-5" />
               </button>
               
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
                 <button 
                   onClick={prevTrack}
                   className="p-2 text-foreground hover:text-foreground/80 transition-all active:scale-90 focus-visible:outline-none rounded-full"
@@ -503,7 +503,7 @@ const FullPlayer: React.FC = () => {
                   {isPlaying ? (
                     <Pause className="h-8 w-8 fill-current" />
                   ) : (
-                    <Play className="h-8 w-8 fill-current ml-1" />
+                    <Play className="h-8 w-8 fill-current ml-2" />
                   )}
                 </button>
                 
@@ -526,8 +526,8 @@ const FullPlayer: React.FC = () => {
             </div>
 
             {/* Secondary Actions / View Switcher */}
-            <div className="flex items-center justify-between pt-4">
-              <div className="flex gap-4">
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex gap-2">
                 <button 
                   onClick={() => setActiveView(activeView === 'lyrics' ? 'player' : 'lyrics')}
                   className={`p-2 rounded-full transition-all ${activeView === 'lyrics' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
@@ -558,7 +558,7 @@ const FullPlayer: React.FC = () => {
                 </button>
               </div>
               
-              <div className="flex gap-4">
+              <div className="flex gap-2">
                 <button 
                   className="p-2 text-foreground/50 hover:text-amber-500 transition-all rounded-full"
                   aria-label="Mint NFT"
@@ -600,7 +600,7 @@ const FullPlayer: React.FC = () => {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="absolute inset-0 z-50 bg-background/95 backdrop-blur-3xl flex flex-col"
           >
-            <div className="sticky top-0 flex items-center justify-between p-6 bg-background/80 backdrop-blur-md z-10">
+            <div className="sticky top-0 flex items-center justify-between p-2 bg-background/80 backdrop-blur-md z-10">
               <h3 className="text-lg font-bold uppercase tracking-widest">Play Queue</h3>
               <button 
                 onClick={() => setShowQueue(false)}
@@ -609,9 +609,9 @@ const FullPlayer: React.FC = () => {
                 <ChevronDown className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-6 space-y-2">
-              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Now Playing</h4>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 mb-6">
+            <div className="flex-1 overflow-y-auto p-2 space-y-2">
+              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Now Playing</h4>
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 mb-2">
                 <img src={currentTrack.coverUrl} className="w-12 h-12 rounded-md" alt="" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-blue-400 truncate">{currentTrack.title}</p>
@@ -620,11 +620,11 @@ const FullPlayer: React.FC = () => {
                 <AudioVisualizer isPlaying={isPlaying} />
               </div>
 
-              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Next Up</h4>
+              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Next Up</h4>
               {queue.map((track, index) => (
                 <div 
                   key={`${track.id}-${index}`} 
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer group"
+                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer group"
                   onClick={() => {
                     playTrack(track);
                     setShowQueue(false);
@@ -641,7 +641,7 @@ const FullPlayer: React.FC = () => {
                 </div>
               ))}
               {queue.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
+                <div className="text-center py-2 text-muted-foreground">
                   <p>Queue is empty</p>
                 </div>
               )}

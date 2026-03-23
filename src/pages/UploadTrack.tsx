@@ -6,6 +6,7 @@ import { useAudio } from '@/context/AudioContext';
 import { Track } from '@/types';
 import { toast } from 'sonner';
 import { GoogleGenAI, Type } from "@google/genai";
+import { uploadToIPFS } from '@/services/pinataService';
 
 const UploadTrack: React.FC = () => {
   const { addUserTrack, userProfile } = useAudio();
@@ -186,22 +187,19 @@ const UploadTrack: React.FC = () => {
     setUploadProgress(0);
 
     try {
-      // 1. Prepare FormData for real upload
-      const uploadData = new FormData();
-      uploadData.append('audio', audioFile);
-      uploadData.append('cover', coverFile);
+      // 1. Upload files to IPFS via Pinata
+      toast.info("Uploading artifacts to IPFS...");
+      
+      // We'll upload audio and cover in parallel
+      const [audioRes, coverRes] = await Promise.all([
+        uploadToIPFS(audioFile),
+        uploadToIPFS(coverFile)
+      ]);
 
-      // 2. Perform real upload to our server
-      const response = await axios.post('/api/upload', uploadData, {
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
-          setUploadProgress(percentCompleted);
-        }
-      });
+      const audioUrl = audioRes.ipfsUrl;
+      const coverUrl = coverRes.ipfsUrl;
 
-      const { audioUrl, coverUrl } = response.data;
-
-      // 3. Create the track object with real URLs
+      // 2. Create the track object with IPFS URLs
       const newTrack: Track = {
         id: `track-${Date.now()}`,
         title: formData.title,
@@ -209,6 +207,8 @@ const UploadTrack: React.FC = () => {
         artistId: userProfile.id || 'user-artist',
         coverUrl: coverUrl || 'https://picsum.photos/400/400?seed=default',
         audioUrl: audioUrl,
+        audioIpfsUrl: audioUrl,
+        coverIpfsUrl: coverUrl,
         duration: 180, // We could calculate this from the audio file if needed
         genre: formData.genre,
         bpm: parseInt(formData.bpm) || 0,
@@ -240,11 +240,11 @@ const UploadTrack: React.FC = () => {
   };
 
   return (
-    <div className="w-full px-0 sm:px-6 lg:px-10 py-0 sm:py-8 animate-in fade-in duration-700">
-      <div className="px-6 sm:px-0 py-6 sm:py-0 mb-2 sm:mb-8">
+    <div className="w-full px-4 sm:px-4 lg:px-4 py-4 sm:py-4 animate-in fade-in duration-700">
+      <div className="px-4 sm:px-4 py-4 sm:py-4 mb-4 sm:mb-4">
         <button 
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+          className="flex items-center gap-4 text-muted-foreground hover:text-foreground transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-[10px] font-bold uppercase tracking-widest">Back to Hub</span>
@@ -252,31 +252,31 @@ const UploadTrack: React.FC = () => {
       </div>
 
       <div className="glass border-y sm:border border-border bg-white sm:rounded-[10px] overflow-hidden shadow-2xl">
-        <div className="p-6 sm:p-10 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-4 sm:p-4 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-black tracking-tighter uppercase italic">
+            <h1 className="text-[26px] sm:text-[32px] font-bold text-black tracking-tighter uppercase italic">
               {step === 2 ? 'Upload Complete' : 'Forge New Protocol'}
             </h1>
-            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] mt-2">
+            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] mt-4">
               {step === 1 ? 'Sequence Audio Artifact & Metadata' : 'Frequency Synchronized'}
             </p>
           </div>
           {step === 1 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-neutral-500/20">
+            <div className="flex items-center gap-4 px-4 py-4 rounded-full bg-blue-500/10 border border-neutral-500/20">
               <Sparkles className="h-3.5 w-3.5 text-blue-500" />
               <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">AI Analysis Enabled</span>
             </div>
           )}
         </div>
 
-        <div className="p-6 sm:p-10">
+        <div className="p-4 sm:p-4">
           {step === 1 && (
-            <form onSubmit={handleUpload} className="space-y-10">
+            <form onSubmit={handleUpload} className="space-y-4">
               {/* File Upload Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Cover Art */}
                 <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-4">
                     <Info className="h-3 w-3" /> Cover Art (1:1 Ratio)
                   </label>
                   <div 
@@ -284,7 +284,7 @@ const UploadTrack: React.FC = () => {
                     onDragOver={(e) => handleDragOver(e, 'cover')}
                     onDragLeave={() => handleDragLeave('cover')}
                     onDrop={(e) => handleDrop(e, 'cover')}
-                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-muted/30 flex flex-col items-center justify-center p-2 cursor-pointer transition-all group relative overflow-hidden ${coverFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingCover ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
+                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-muted/30 flex flex-col items-center justify-center p-4 cursor-pointer transition-all group relative overflow-hidden ${coverFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingCover ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
                   >
                     {coverPreview ? (
                       <>
@@ -293,14 +293,14 @@ const UploadTrack: React.FC = () => {
                           <button 
                             type="button"
                             onClick={clearCover}
-                            className="px-4 py-2 bg-red-500 text-white text-[10px] font-bold uppercase rounded-[5px] hover:bg-red-600 transition-colors"
+                            className="px-4 py-4 bg-red-500 text-white text-[10px] font-bold uppercase rounded-[5px] hover:bg-red-600 transition-colors"
                           >
                             Remove
                           </button>
                         </div>
                       </>
                     ) : (
-                      <div className="flex flex-col items-center gap-3">
+                      <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                           <Plus className="h-6 w-6 text-muted-foreground/50" />
                         </div>
@@ -313,7 +313,7 @@ const UploadTrack: React.FC = () => {
 
                 {/* Audio File */}
                 <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-4">
                     <Music className="h-3 w-3" /> Audio Artifact (MP3/WAV)
                   </label>
                   <div 
@@ -321,27 +321,27 @@ const UploadTrack: React.FC = () => {
                     onDragOver={(e) => handleDragOver(e, 'audio')}
                     onDragLeave={() => handleDragLeave('audio')}
                     onDrop={(e) => handleDrop(e, 'audio')}
-                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-muted/30 flex flex-col items-center justify-center p-6 cursor-pointer transition-all group relative ${audioFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingAudio ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
+                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-muted/30 flex flex-col items-center justify-center p-4 cursor-pointer transition-all group relative ${audioFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingAudio ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
                   >
                     {audioFile ? (
                       <div className="flex flex-col items-center text-center gap-4">
                         <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 animate-pulse">
                           <FileAudio className="h-8 w-8" />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-4">
                           <p className="text-xs font-bold text-foreground uppercase tracking-widest line-clamp-1">{audioFile.name}</p>
                           <p className="text-[10px] text-muted-foreground">{(audioFile.size / (1024 * 1024)).toFixed(2)} MB</p>
                         </div>
                         <button 
                           type="button"
                           onClick={clearAudio}
-                          className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all text-[10px] font-bold uppercase rounded-[5px]"
+                          className="px-4 py-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all text-[10px] font-bold uppercase rounded-[5px]"
                         >
                           Clear File
                         </button>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-3">
+                      <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                           <Upload className="h-6 w-6 text-muted-foreground/50" />
                         </div>
@@ -352,7 +352,7 @@ const UploadTrack: React.FC = () => {
                   <input type="file" ref={audioInputRef} onChange={handleAudioChange} accept="audio/*" className="hidden" />
                   
                   {isAnalyzing && (
-                    <div className="p-4 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-3 animate-pulse">
+                    <div className="p-4 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-4 animate-pulse">
                       <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
                       <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">AI Analyzing Frequency...</span>
                     </div>
@@ -362,7 +362,7 @@ const UploadTrack: React.FC = () => {
 
               {/* Progress Bar */}
               {uploadProgress > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Uploading Artifact</span>
                     <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">{uploadProgress}%</span>
@@ -377,8 +377,8 @@ const UploadTrack: React.FC = () => {
               )}
 
               {/* Metadata Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Track Title</label>
                   <input 
                     type="text"
@@ -388,7 +388,7 @@ const UploadTrack: React.FC = () => {
                     placeholder="PROTOCOL_NAME"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Artist Name</label>
                   <input 
                     type="text"
@@ -398,7 +398,7 @@ const UploadTrack: React.FC = () => {
                     placeholder="OPERATOR_ID"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Genre</label>
                   <select 
                     value={formData.genre}
@@ -414,7 +414,7 @@ const UploadTrack: React.FC = () => {
                   </select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">BPM</label>
                     <input 
                       type="number"
@@ -424,7 +424,7 @@ const UploadTrack: React.FC = () => {
                       placeholder="128"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Key</label>
                     <input 
                       type="text"
@@ -437,7 +437,7 @@ const UploadTrack: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Description</label>
                 <textarea 
                   value={formData.description}
@@ -447,7 +447,7 @@ const UploadTrack: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-muted/30 border border-border/50 rounded-[10px]">
+              <div className="flex items-center gap-4 p-4 bg-muted/30 border border-border/50 rounded-[10px]">
                 <input 
                   type="checkbox"
                   id="isNFT"
@@ -461,8 +461,8 @@ const UploadTrack: React.FC = () => {
               </div>
 
               {formData.isNFT && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-in slide-in-from-top-4 duration-500">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in slide-in-from-top-4 duration-500">
+                  <div className="space-y-4">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Price (TON)</label>
                     <input 
                       type="text"
@@ -471,7 +471,7 @@ const UploadTrack: React.FC = () => {
                       className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Editions</label>
                     <input 
                       type="text"
@@ -480,7 +480,7 @@ const UploadTrack: React.FC = () => {
                       className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Royalty %</label>
                     <input 
                       type="text"
@@ -495,7 +495,7 @@ const UploadTrack: React.FC = () => {
               <button 
                 type="submit"
                 disabled={isUploading || isAnalyzing}
-                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 {isUploading ? (
                   <>
@@ -513,12 +513,12 @@ const UploadTrack: React.FC = () => {
           )}
 
           {step === 2 && (
-            <div className="py-20 flex flex-col items-center text-center space-y-8 animate-in zoom-in duration-500">
+            <div className="py-4 flex flex-col items-center text-center space-y-4 animate-in zoom-in duration-500">
               <div className="w-24 h-24 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mb-4 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
                 <CheckCircle2 className="h-12 w-12" />
               </div>
-              <div className="space-y-2">
-                <h3 className="text-3xl font-bold text-foreground tracking-tighter uppercase italic">Protocol Established</h3>
+              <div className="space-y-4">
+                <h3 className="text-[26px] font-bold text-foreground tracking-tighter uppercase italic">Protocol Established</h3>
                 <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.4em] max-w-sm mx-auto leading-relaxed">
                   "{formData.title}" has been successfully broadcasted to the network.
                 </p>

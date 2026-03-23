@@ -59,7 +59,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
 
     // 2x2 Grid for 4 or more tracks
     return (
-      <div className={`${sizeClass} grid grid-cols-2 gap-0.5 group-hover:scale-105 transition-transform duration-700 bg-neutral-800`}>
+      <div className={`${sizeClass} grid grid-cols-2 gap-3 group-hover:scale-105 transition-transform duration-700 bg-neutral-800`}>
         {playlistTracks.map((track, i) => (
           <img 
             key={i}
@@ -76,7 +76,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
     return (
       <div 
         onClick={onClick} 
-        className="group flex items-center gap-4 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full glass bg-foreground/[0.02]"
+        className="group flex items-center gap-2 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full glass bg-foreground/[0.02]"
       >
         <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
           {renderCover()}
@@ -99,7 +99,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   return (
     <div 
       onClick={onClick} 
-      className="group relative cursor-pointer glass p-3 rounded-[10px] bg-foreground/[0.02]"
+      className="group relative cursor-pointer glass p-2 rounded-[10px] bg-foreground/[0.02]"
     >
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
@@ -109,18 +109,18 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
             onClick={handlePlay}
             className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-blue-500/30 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500/40 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
           >
-            <Play className="h-3 w-3 text-foreground fill-white ml-0.5" />
+            <Play className="h-3 w-3 text-foreground fill-white ml-3" />
           </button>
         </div>
       </div>
       
       {/* Content Below Card */}
-      <div className="px-0.5">
+      <div className="px-3">
         <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
           {playlist.title}
         </h3>
         <p 
-          className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-0.5"
+          className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-3"
           onClick={(e) => {
             e.stopPropagation();
             const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);

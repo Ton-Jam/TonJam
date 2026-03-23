@@ -292,10 +292,10 @@ const Discover: React.FC = () => {
     return (
       <div className="flex items-center gap-4 py-4 filter-section">
         {activeFilter !== 'NFTs' && activeFilter !== 'Playlists' && activeFilter !== 'Users' && (
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setSelectedGenre(null)}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+              className={`flex-shrink-0 px-[4px] py-[0px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
                 selectedGenre === null 
                   ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
                   : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
@@ -307,7 +307,7 @@ const Discover: React.FC = () => {
               <button
                 key={g.id}
                 onClick={() => setSelectedGenre(g.name)}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                className={`flex-shrink-0 px-[4px] py-[0px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
                   selectedGenre === g.name 
                     ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
                     : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
@@ -319,12 +319,12 @@ const Discover: React.FC = () => {
           </div>
         )}
         {currentSortOptions.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
             {currentSortOptions.map(o => (
               <button
                 key={o}
                 onClick={() => setSortBy(o)}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                className={`flex-shrink-0 px-[4px] py-[0px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
                   sortBy === o 
                     ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
                     : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
@@ -362,12 +362,12 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="w-full pb-32">
+    <div className="w-full pb-4">
       {/* Search Section */}
       <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-50 w-full bg-background/95 backdrop-blur-xl transition-all duration-300" ref={searchContainerRef}>
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 lg:px-4 py-4">
           <div className="flex flex-col items-center justify-center gap-4">
-            <div className="w-full flex flex-col md:flex-row items-center gap-3">
+            <div className="w-full flex flex-col md:flex-row items-center gap-4">
               <div className="flex-1 relative group w-full">
                 <div className="relative w-full">
                   <DiscoverSearchBar 
@@ -380,23 +380,23 @@ const Discover: React.FC = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
+              <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto no-scrollbar pb-4 md:pb-4">
                 <button 
                   onClick={handleSurpriseMe}
-                  className="flex-shrink-0 px-4 py-1.5 bg-white dark:bg-muted/50 border border-silver-300 dark:border-blue-500/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-blue-500 dark:text-foreground hover:bg-blue-500/10 hover:border-blue-500/60 transition-all flex items-center gap-1.5 group/surprise inactive-pill"
+                  className="flex-shrink-0 px-[10px] py-[6px] bg-white dark:bg-muted/50 border border-silver-300 dark:border-blue-500/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-blue-500 dark:text-foreground hover:bg-blue-500/10 hover:border-blue-500/60 transition-all flex items-center gap-4 group/surprise inactive-pill"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-amber-500 group-hover/surprise:animate-spin" />
                   Surprise Me
                 </button>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                   {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users'].map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setActiveFilter(filter as any)}
-                      className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                      className={`flex-shrink-0 px-[10px] py-[6px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
                         activeFilter === filter
-                          ? 'bg-blue-500 text-white border-blue-500 shadow-lg'
+                          ? 'bg-blue-500 text-white border-blue-500 shadow-lg active-pill'
                           : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
                       }`}
                     >
@@ -410,13 +410,13 @@ const Discover: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-0 lg:px-8 space-y-16 mt-12">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 mt-6">
         {/* Recommendations Section (Visible when no search) */}
         {!search && !selectedGenre && (
           <motion.section 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-12 animate-in fade-in duration-700"
+            className="space-y-4 animate-in fade-in duration-700"
           >
             <SearchCategorySection 
               title="Trending Tracks" 
@@ -445,17 +445,17 @@ const Discover: React.FC = () => {
 
         {/* Search Results / Filtered View */}
         {(search || selectedGenre) && (
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8">
-              <div className="flex items-center gap-6">
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4">
+              <div className="flex items-center gap-4">
                 <button onClick={clearInput} className="w-12 h-12 rounded-xl bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-95">
                   <RotateCcw className="h-5 w-5" />
                 </button>
                 <div>
-                  <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none mb-2">
+                  <h2 className="text-[20px] font-black text-foreground uppercase tracking-tighter leading-none mb-4">
                     {search ? `Results for "${search}"` : activeFilter !== 'All' ? activeFilter : 'Discover'}
                   </h2>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                     <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">{filteredResults.length} Signals Detected</p>
                   </div>
@@ -467,7 +467,7 @@ const Discover: React.FC = () => {
             </div>
             
             {activeFilter === 'All' ? (
-              <div className="space-y-12">
+              <div className="space-y-4">
                 {/* Tracks Section */}
                 <SearchCategorySection 
                   title="Tracks" 
@@ -522,11 +522,11 @@ const Discover: React.FC = () => {
                  MOCK_NFTS.every(n => !n.title.toLowerCase().includes(search.toLowerCase()) && !n.creator.toLowerCase().includes(search.toLowerCase())) &&
                  allPlaylists.every(p => !p.title.toLowerCase().includes(search.toLowerCase())) &&
                  MOCK_USERS.every(u => !u.name.toLowerCase().includes(search.toLowerCase()) && !u.handle.toLowerCase().includes(search.toLowerCase())) && (
-                  <div className="py-24 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-[10px]">
+                  <div className="py-4 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-[10px]">
                     <Satellite className="h-12 w-12 text-foreground/5 mb-4 animate-pulse" />
                     <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
-                    <p className="text-muted-foreground/30 text-[10px] mt-2">Try broadening your search or clearing filters.</p>
-                    <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
+                    <p className="text-muted-foreground/30 text-[10px] mt-4">Try broadening your search or clearing filters.</p>
+                    <button onClick={clearInput} className="mt-4 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
                   </div>
                 )}
               </div>
@@ -544,17 +544,17 @@ const Discover: React.FC = () => {
                       </div>
                     ))}
                     {visibleResults.length < filteredResults.length && (
-                      <div ref={sentinelRef} className="col-span-full py-12 flex items-center justify-center">
+                      <div ref={sentinelRef} className="col-span-full py-4 flex items-center justify-center">
                         <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="py-24 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-[10px]">
+                  <div className="py-4 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-[10px]">
                     <Satellite className="h-12 w-12 text-foreground/5 mb-4 animate-pulse" />
                     <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">No signals detected in this sector</p>
-                    <p className="text-muted-foreground/30 text-[10px] mt-2">Try broadening your search or clearing filters.</p>
-                    <button onClick={clearInput} className="mt-6 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
+                    <p className="text-muted-foreground/30 text-[10px] mt-4">Try broadening your search or clearing filters.</p>
+                    <button onClick={clearInput} className="mt-4 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">Reset Scanner</button>
                   </div>
                 )}
               </>
@@ -591,12 +591,12 @@ const SearchCategorySection = ({
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{title}</h3>
         <button 
           onClick={() => navigate(viewAllLink)}
-          className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-widest flex items-center gap-1"
+          className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-widest flex items-center gap-4"
         >
           View All <ChevronRight className="h-3 w-3" />
         </button>
       </div>
-      <div className={grid ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" : "flex flex-col gap-3"}>
+      <div className={grid ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" : "flex flex-col gap-4"}>
         {items.map((item, idx) => (
           <div key={item.id || idx} className="animate-in fade-in slide-in-from-bottom-2 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
             {renderItem(item)}

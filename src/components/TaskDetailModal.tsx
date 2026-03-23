@@ -18,7 +18,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -33,9 +33,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         className="relative w-full max-w-lg bg-background border border-blue-500/40 rounded-3xl overflow-hidden shadow-2xl"
       >
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
+        <div className="p-2">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
               <div className={`p-2 rounded-xl ${task.completed ? 'bg-green-500/10 text-green-500' : 'bg-blue-600/10 text-blue-500'}`}>
                 {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Zap className="w-6 h-6" />}
               </div>
@@ -46,13 +46,13 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">
               {task.description}
             </p>
 
             {task.dueDate && (
-              <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-2xl">
+              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-2xl">
                 <Calendar className="w-5 h-5 text-blue-500" />
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Due Date</p>
@@ -61,7 +61,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-4 border-t border-border/50">
+            <div className="flex items-center justify-between pt-2 border-t border-border/50">
               <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Reward</div>
               <div className="text-sm font-black text-foreground">{task.reward} + {task.points} XP</div>
             </div>

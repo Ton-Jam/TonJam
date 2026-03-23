@@ -40,7 +40,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
         className="relative w-full max-w-2xl bg-white border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -63,7 +63,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
             <X className="w-5 h-5" />
           </button>
 
-          <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end gap-6">
+          <div className="absolute bottom-0 left-0 right-0 p-2 flex items-end gap-2">
             <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden shrink-0">
               <img 
                 src={artist.avatarUrl} 
@@ -72,17 +72,17 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
               />
             </div>
             <div className="mb-2 flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-2xl sm:text-3xl font-bold text-black">{artist.name}</h2>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-[20px] sm:text-[26px] font-bold text-black">{artist.name}</h2>
                 {artist.verified && <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/20" />}
               </div>
-              <p className="text-sm text-muted-foreground/80 font-medium mb-3">
+              <p className="text-sm text-muted-foreground/80 font-medium mb-2">
                 {artist.followers.toLocaleString()} Followers
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button 
                   onClick={handleFollowClick}
-                  className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all
+                  className={`px-2 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all
                     ${isFollowing 
                       ? 'bg-muted text-foreground hover:bg-muted/80' 
                       : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-600/20'
@@ -101,7 +101,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                 </button>
                 <button 
                   onClick={handleViewFullProfile}
-                  className="px-4 py-2 rounded-full bg-muted/50 hover:bg-muted text-foreground/70 hover:text-foreground text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all border border-border"
+                  className="px-2 py-2 rounded-full bg-muted/50 hover:bg-muted text-foreground/70 hover:text-foreground text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all border border-border"
                 >
                   <ExternalLink className="w-4 h-4" /> View Profile
                 </button>
@@ -111,10 +111,10 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
           {/* Bio */}
           {artist.bio && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">About</h3>
               <p className="text-sm text-muted-foreground/90 leading-relaxed max-w-prose">
                 {artist.bio}
@@ -123,7 +123,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
           )}
 
           {/* Discography / Top Tracks */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                 <Music className="w-4 h-4" /> Popular Tracks
@@ -142,7 +142,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                   return (
                     <div 
                       key={track.id}
-                      className={`group flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer relative ${
+                      className={`group flex items-center gap-2 p-2 rounded-xl transition-all cursor-pointer relative ${
                         isTrackActive 
                           ? 'bg-blue-500/10 border border-neutral-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
                           : 'hover:bg-muted/50 border border-transparent'
@@ -151,7 +151,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                     >
                       <span className="w-4 text-center text-xs font-bold text-muted-foreground/50 group-hover:text-muted-foreground/80">
                         {isTrackPlaying ? (
-                          <div className="flex items-end justify-center gap-0.5 h-3">
+                          <div className="flex items-end justify-center gap-3 h-3">
                             <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_0ms] h-full"></div>
                             <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_200ms] h-2/3"></div>
                             <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_400ms] h-full"></div>
@@ -169,28 +169,28 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                       </div>
  
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
+                        <div className="flex items-center gap-2 mb-3">
                           <h4 className={`text-sm font-bold truncate ${isTrackActive ? 'text-blue-400' : 'text-black'}`}>
                             {track.title}
                           </h4>
                           {isTrending && (
-                            <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[8px] font-black uppercase tracking-tighter">
+                            <span className="flex items-center gap-3 px-3 py-3 rounded-full bg-orange-500/20 text-orange-400 text-[8px] font-black uppercase tracking-tighter">
                               <TrendingUp className="w-2 h-2" /> Hot
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                          <span className="flex items-center gap-1">
-                            <Music className="w-2.5 h-2.5" /> {track.genre}
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                          <span className="flex items-center gap-2">
+                            <Music className="w-3 h-3" /> {track.genre}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Zap className="w-2.5 h-2.5 text-blue-400" /> {jamEarnings} JAM
+                          <span className="flex items-center gap-2">
+                            <Zap className="w-3 h-3 text-blue-400" /> {jamEarnings} JAM
                           </span>
                           <span className="hidden sm:inline">{(track.playCount || 0).toLocaleString()} plays</span>
                         </div>
                       </div>
  
-                      <div className="text-xs font-mono text-muted-foreground flex flex-col items-end gap-1">
+                      <div className="text-xs font-mono text-muted-foreground flex flex-col items-end gap-2">
                         <span>{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
                         <span className="sm:hidden text-[9px] font-bold">{(track.playCount || 0).toLocaleString()}</span>
                       </div>
@@ -199,7 +199,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                 })}
               </div>
             ) : (
-              <div className="p-8 text-center border border-dashed border-border rounded-lg">
+              <div className="p-2 text-center border border-dashed border-border rounded-lg">
                 <Disc className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest">No tracks available</p>
               </div>

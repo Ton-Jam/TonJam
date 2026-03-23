@@ -48,38 +48,38 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
   };
 
   return (
-    <div className="relative w-full overflow-hidden mb-8">
+    <div className="relative w-full overflow-hidden mb-2">
       <div 
         ref={scrollRef} 
         onScroll={handleScroll}
         className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar"
       >
         {items.map((item) => (
-          <div key={item.id} className="w-full flex-shrink-0 snap-center px-4 lg:px-6">
+          <div key={item.id} className="w-full flex-shrink-0 snap-center px-2 lg:px-2">
             <div className="block relative w-full aspect-[21/9] sm:aspect-[3/1] lg:aspect-[4/1] rounded-[10px] overflow-hidden group border border-blue-500/50">
               <Link to={item.link} className="absolute inset-0">
                 <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
               </Link>
               
-              <div className="absolute top-4 left-4 bg-blue-500 text-foreground text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-[5px] shadow-lg">
+              <div className="absolute top-4 left-4 bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest px-2 py-2 rounded-[5px] shadow-lg">
                 Featured
               </div>
               
-              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between auto-carousel-text">
                 <div>
-                  <h3 className="text-xl sm:text-3xl font-black text-foreground uppercase tracking-tighter leading-tight mb-1">{item.title}</h3>
-                  <p className="text-xs sm:text-sm text-foreground/70 font-medium">{item.subtitle}</p>
+                  <h3 className="text-xl sm:text-[26px] font-black text-white uppercase tracking-tighter leading-tight mb-2">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-white/70 font-medium">{item.subtitle}</p>
                 </div>
                 {onCtaClick ? (
                   <button 
                     onClick={() => onCtaClick(item)}
-                    className="hidden sm:flex items-center gap-1 bg-muted backdrop-blur-md px-4 py-2 rounded-[5px] text-xs font-bold text-foreground uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border"
+                    className="hidden sm:flex items-center gap-2 bg-muted backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border"
                   >
                     {item.cta} <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <Link to={item.link} className="hidden sm:flex items-center gap-1 bg-muted backdrop-blur-md px-4 py-2 rounded-[5px] text-xs font-bold text-foreground uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border">
+                  <Link to={item.link} className="hidden sm:flex items-center gap-2 bg-muted backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border">
                     {item.cta} <ChevronRight className="w-4 h-4" />
                   </Link>
                 )}
@@ -90,7 +90,7 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
       </div>
       
       {/* Indicators */}
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex justify-center gap-2 mt-2">
         {items.map((_, idx) => (
           <button 
             key={idx}

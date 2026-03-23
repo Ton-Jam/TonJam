@@ -28,7 +28,7 @@ const LoadingScreen: React.FC = () => {
       className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center overflow-hidden"
     >
       <div className="relative z-10 flex flex-col items-center">
-        <div className="mb-12 relative">
+        <div className="mb-2 relative">
           <motion.img
             layoutId="app-logo"
             src={APP_LOGO}

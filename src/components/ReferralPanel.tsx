@@ -30,22 +30,22 @@ const ReferralPanel: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="glass bg-foreground/[0.01] rounded-2xl p-6">
-        <div className="flex flex-col items-center justify-between gap-6">
-          <div className="flex-1 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-2">
+    <div className="space-y-2">
+      <div className="glass bg-foreground/[0.01] rounded-2xl p-2">
+        <div className="flex flex-col items-center justify-between gap-2">
+          <div className="flex-1 space-y-2">
+            <div className="inline-flex items-center gap-2 px-2 py-2 rounded-full bg-muted/50 text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-2">
               <Users className="w-3 h-3" />
               <span>Invite & Earn</span>
             </div>
-            <h2 className="text-2xl font-black uppercase tracking-tighter text-foreground">
+            <h2 className="text-[20px] font-black uppercase tracking-tighter text-foreground">
               Refer Friends, Earn TJ
             </h2>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-md">
               Invite your friends to join TonJam. You'll both receive 50 TJ tokens when they complete their first daily task.
             </p>
             
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex items-center gap-2 mt-2">
               <div className="flex-1 bg-background/50 rounded-xl p-2 flex items-center justify-between">
                 <span className="text-[10px] font-mono text-muted-foreground truncate mr-2">{referralLink}</span>
                 <button 
@@ -57,7 +57,7 @@ const ReferralPanel: React.FC = () => {
               </div>
               <button 
                 onClick={handleShare}
-                className="bg-blue-600 hover:bg-blue-500 text-foreground px-4 py-2 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-500 text-foreground px-2 py-2 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2"
               >
                 <Share2 className="w-4 h-4" />
                 Share
@@ -65,27 +65,27 @@ const ReferralPanel: React.FC = () => {
             </div>
           </div>
           
-          <div className="w-full flex flex-row gap-3">
-            <div className="bg-muted/30 rounded-xl p-4 flex-1 flex flex-col items-center justify-center">
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Invited</span>
-              <span className="text-2xl font-black text-foreground">{referredCount}</span>
+          <div className="w-full flex flex-row gap-2">
+            <div className="bg-muted/30 rounded-xl p-2 flex-1 flex flex-col items-center justify-center">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Invited</span>
+              <span className="text-[20px] font-black text-foreground">{referredCount}</span>
             </div>
-            <div className="bg-amber-500/10 rounded-xl p-4 flex-1 flex flex-col items-center justify-center">
-              <span className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest mb-1">Earned</span>
-              <span className="text-2xl font-black text-amber-500">{totalEarned}</span>
+            <div className="bg-amber-500/10 rounded-xl p-2 flex-1 flex flex-col items-center justify-center">
+              <span className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest mb-2">Earned</span>
+              <span className="text-[20px] font-black text-amber-500">{totalEarned}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-2">
         {[
           { step: 1, title: 'Share Link', desc: 'Send your unique referral link to friends' },
           { step: 2, title: 'Friends Join', desc: 'They sign up and connect their wallet' },
           { step: 3, title: 'Earn Rewards', desc: 'You both get 50 TJ when they complete a task' }
         ].map((item) => (
-          <div key={item.step} className="glass bg-foreground/[0.01] rounded-xl p-4 relative overflow-hidden group flex items-center gap-4">
-            <div className="text-4xl font-black text-muted/20 group-hover:text-muted/40 transition-colors">
+          <div key={item.step} className="glass bg-foreground/[0.01] rounded-xl p-2 relative overflow-hidden group flex items-center gap-2">
+            <div className="text-[32px] font-black text-muted/20 group-hover:text-muted/40 transition-colors">
               {item.step}
             </div>
             <div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Satellite } from 'lucide-react';
+import { ArrowLeft, Search, Satellite, X } from 'lucide-react';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
 import ArtistCard from '@/components/ArtistCard';
@@ -38,6 +38,7 @@ const ExploreList: React.FC = () => {
   const initialSearch = queryParams.get('search') || '';
 
   const [search, setSearch] = useState(initialSearch);
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -134,34 +135,45 @@ const ExploreList: React.FC = () => {
   const sentinelRef = useInfiniteScroll(loadMore);
 
   return (
-    <div className="animate-in fade-in duration-700 px-4 md:px-12 pb-32">
+    <div className="animate-in fade-in duration-700 px-4 md:px-4 pb-4">
       {/* Sticky Header with Explicit Back Navigation */}
-      <div className="sticky top-[var(--header-height,64px)] left-0 right-0 z-[60] bg-background/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-12 md:px-12 pt-3 pb-3 -b mb-4">
-        <div className="flex flex-col gap-2">
-          {/* Top Row: Search Bar */}
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 h-3 w-3" />
+      <div className="sticky top-0 left-0 right-0 z-[60] bg-background/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-4 md:px-4 pt-4 pb-4 border-b border-blue-500/30 mb-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1">
+            <button onClick={() => navigate(-1)} className="p-4 rounded-full bg-muted/50 hover:bg-muted transition-all">
+              <ArrowLeft className="h-4 w-4 text-foreground" />
+            </button>
+            
+            {isSearchActive ? (
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={`Search in ${type}...`}
-                className="w-full bg-muted/50 py-2 pl-10 pr-6 text-xs outline-none focus:border-blue-500/30 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 rounded-full text-foreground"
+                className="w-full bg-muted/50 py-3 pl-4 pr-4 text-xs outline-none border-2 border-blue-500 focus:border-blue-500 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 rounded-full text-foreground"
+                autoFocus
               />
-            </div>
+            ) : (
+              <h1 className="text-xl md:text-[26px] font-bold tracking-tighter uppercase text-foreground leading-none">
+                {title}
+              </h1>
+            )}
           </div>
-          {/* Bottom Row: Section Title */}
-          <div className="px-1">
-            <h1 className="text-xl md:text-3xl font-bold tracking-tighter uppercase text-foreground leading-none">
-              {title}
-            </h1>
-          </div>
+          
+          <button onClick={() => setIsSearchActive(!isSearchActive)} className="p-4 rounded-full bg-muted/50 hover:bg-muted transition-all">
+            {isSearchActive ? <X className="h-4 w-4 text-foreground" /> : <Search className="h-4 w-4 text-foreground" />}
+          </button>
         </div>
       </div>
 
       {/* Vertical Grid Content */}
-      <div className={`grid gap-4 pb-8 ${type === 'nfts' || type === 'users' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1'}`}>
+      <div className={`grid gap-4 pb-4 ${
+        type === 'nfts' || type === 'users' 
+          ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' 
+          : type === 'artists' || type === 'playlists'
+            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+            : 'grid-cols-1'
+      }`}>
         {filteredItems.map((item, idx) => (
           <div key={`${item.id}-${idx}`} className="animate-in fade-in duration-500 slide-in-from-bottom-2">
             {type === 'tracks' && <TrackCard track={item} variant="row" />}
@@ -177,20 +189,20 @@ const ExploreList: React.FC = () => {
 
       {/* Subtle Loading State */}
       {loading && (
-        <div className="py-20 flex items-center justify-center">
+        <div className="py-4 flex items-center justify-center">
           <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
         </div>
       )}
 
       {/* Empty State */}
       {!loading && filteredItems.length === 0 && (
-        <div className="py-48 text-center flex flex-col items-center">
-          <Satellite className="h-16 w-16 text-foreground/5 mb-8" />
+        <div className="py-4 text-center flex flex-col items-center">
+          <Satellite className="h-16 w-16 text-foreground/5 mb-4" />
           <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">Zero signals detected</p>
           <button
             type="button"
             onClick={() => setSearch('')}
-            className="mt-8 text-[10px] font-bold uppercase text-blue-500 -b -blue-500/30 pb-1"
+            className="mt-4 text-[10px] font-bold uppercase text-blue-500 -b -blue-500/30 pb-4"
           >
             Reset Scanner
           </button>

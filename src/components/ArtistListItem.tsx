@@ -25,14 +25,14 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
   return (
     <div 
       onClick={handleCardClick}
-      className="group flex items-center gap-4 p-3 rounded-[10px] bg-foreground/[0.02] border border-border/50 hover:bg-muted/50 hover:border-border transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
+      className="group flex items-center gap-2 p-2 rounded-[10px] bg-foreground/[0.02] border border-border/50 hover:bg-muted/50 hover:border-border transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
     >
       <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 shadow-lg border border-border/50">
         <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
+        <div className="flex items-center gap-2 mb-3">
           <h4 className="text-xs font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
             {artist.name}
           </h4>
@@ -43,10 +43,10 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
         </p>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         <button 
           onClick={handleFollowClick}
-          className={`px-4 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[8px] font-bold uppercase tracking-widest border
+          className={`px-2 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-[8px] font-bold uppercase tracking-widest border
             ${isFollowing 
               ? 'bg-muted/50 border-border text-muted-foreground/80 hover:bg-muted hover:text-foreground' 
               : 'bg-neutral-600 border-neutral-500 text-foreground hover:bg-neutral-500 shadow-lg shadow-neutral-600/20'

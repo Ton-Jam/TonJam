@@ -41,23 +41,23 @@ export default function TrackPlayerScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-white pb-32">
+    <div className="min-h-screen bg-[#0B0F14] text-white pb-4">
       {/* Header */}
-      <div className="p-5 flex items-center justify-between">
+      <div className="p-4 flex items-center justify-between">
         <button 
           onClick={() => navigate(-1)}
-          className="p-2 transition-colors text-white/70 hover:text-white"
+          className="p-4 transition-colors text-white/70 hover:text-white"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div /> {/* Spacer */}
-        <button className="p-2 transition-colors text-white/70 hover:text-white">
+        <button className="p-4 transition-colors text-white/70 hover:text-white">
           <Share2 className="w-5 h-5" />
         </button>
       </div>
 
       {/* Cover Section */}
-      <div className="px-5 py-2">
+      <div className="px-4 py-4">
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -73,28 +73,28 @@ export default function TrackPlayerScreen() {
       </div>
 
       {/* Track Info */}
-      <div className="px-5 mt-6 flex justify-between items-end">
+      <div className="px-4 mt-4 flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-black tracking-tighter uppercase italic">
+          <h1 className="text-[20px] font-black tracking-tighter uppercase italic">
             {track.title}
           </h1>
-          <p className="text-cyan-400 text-xs font-bold uppercase tracking-widest mt-1">
+          <p className="text-cyan-400 text-xs font-bold uppercase tracking-widest mt-4">
             {track.artist}
           </p>
         </div>
-        <button className="p-3 text-pink-500 hover:scale-110 transition-transform">
+        <button className="p-4 text-pink-500 hover:scale-110 transition-transform">
           <Heart className="w-5 h-5" />
         </button>
       </div>
 
       {/* Player Controls */}
-      <div className="flex flex-col items-center mt-8 px-5">
+      <div className="flex flex-col items-center mt-4 px-4">
         {/* Progress Bar (Mock) */}
-        <div className="w-full h-1 bg-white/10 rounded-full mb-6 relative overflow-hidden">
+        <div className="w-full h-1 bg-white/10 rounded-full mb-4 relative overflow-hidden">
           <div className="absolute top-0 left-0 h-full w-1/3 bg-cyan-400" />
         </div>
 
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
           <button className="text-white/40 hover:text-white transition-colors">
             <Zap className="w-6 h-6" />
           </button>
@@ -106,7 +106,7 @@ export default function TrackPlayerScreen() {
             {isPlaying ? (
               <Pause className="w-10 h-10 fill-current" />
             ) : (
-              <Play className="w-10 h-10 fill-current ml-1" />
+              <Play className="w-10 h-10 fill-current ml-4" />
             )}
           </button>
 
@@ -123,20 +123,20 @@ export default function TrackPlayerScreen() {
       </div>
 
       {/* Track Stats */}
-      <div className="grid grid-cols-3 gap-4 px-5 mt-10">
-        <div className="flex flex-col items-center gap-1">
+      <div className="grid grid-cols-3 gap-4 px-4 mt-4">
+        <div className="flex flex-col items-center gap-4">
           <Heart className="w-4 h-4 text-pink-500" />
           <span className="text-xs font-bold">{track.likes}</span>
           <span className="text-[8px] text-muted-foreground uppercase tracking-widest">Likes</span>
         </div>
 
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-4">
           <Diamond className="w-4 h-4 text-blue-400" />
           <span className="text-xs font-bold">{track.editions}</span>
           <span className="text-[8px] text-muted-foreground uppercase tracking-widest">Editions</span>
         </div>
 
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-4">
           <Coins className="w-4 h-4 text-yellow-500" />
           <span className="text-xs font-bold">{track.price}</span>
           <span className="text-[8px] text-muted-foreground uppercase tracking-widest">Price</span>
@@ -144,12 +144,12 @@ export default function TrackPlayerScreen() {
       </div>
 
       {/* Actions */}
-      <div className="p-5 space-y-3 mt-4">
+      <div className="p-4 space-y-4 mt-4">
         <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-[0.2em] shadow-lg shadow-purple-600/20 hover:opacity-90 transition-all">
           Mint NFT Protocol
         </button>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <button className="bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-neutral-500/20 transition-all">
             Buy Edition
           </button>
@@ -160,17 +160,17 @@ export default function TrackPlayerScreen() {
       </div>
 
       {/* Comments Section */}
-      <div className="px-5 mt-8">
+      <div className="px-4 mt-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+          <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-4">
             <MessageSquare className="w-4 h-4 text-cyan-400" /> Comments
           </h2>
           <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">24 Comments</span>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="border-l-2 border-neutral-500/20 pl-4">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-4 mb-4">
               <div className="w-5 h-5 rounded-full bg-blue-500/20" />
               <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">CryptoKrupy</span>
             </div>
@@ -180,7 +180,7 @@ export default function TrackPlayerScreen() {
           </div>
 
           <div className="border-l-2 border-neutral-500/20 pl-4">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-4 mb-4">
               <div className="w-5 h-5 rounded-full bg-purple-500/20" />
               <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">NeonRider</span>
             </div>

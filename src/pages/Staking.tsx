@@ -65,14 +65,14 @@ const Staking: React.FC = () => {
   };
 
   return (
-    <div className="px-4 pb-4 lg:px-8 lg:pb-8 space-y-12 animate-in fade-in duration-700 mb-32 max-w-7xl mx-auto">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="px-4 pb-4 lg:px-4 lg:pb-4 space-y-4 animate-in fade-in duration-700 mb-4 max-w-7xl mx-auto">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-4 mb-4">
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
             <span className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.5em]">DeFi Protocol</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter uppercase leading-none">
+          <h1 className="text-[32px] md:text-[56px] font-black text-foreground tracking-tighter uppercase leading-none">
             JAM <span className="text-blue-500">Staking</span>
           </h1>
           <p className="text-sm font-bold text-muted-foreground/50 uppercase tracking-[0.3em] mt-4">Lock your tokens to secure the network and earn rewards</p>
@@ -81,45 +81,45 @@ const Staking: React.FC = () => {
         <div className="flex items-center gap-4 bg-neutral-500/10 p-4 rounded-2xl border border-neutral-500/20">
           <TrendingUp className="h-5 w-5 text-blue-500" />
           <div>
-            <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest mb-1">Current APR</p>
+            <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest mb-4">Current APR</p>
             <p className="text-xl font-black text-foreground tracking-tighter">15.0%</p>
           </div>
         </div>
       </header>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass p-8 rounded-2xl border border-border/50 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="glass p-4 rounded-2xl border border-border/50 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <Lock className="w-24 h-24 text-foreground" />
           </div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-4">Staked Balance</p>
           <div className="flex items-end justify-between">
-            <div className="flex items-end gap-3">
-              <span className="text-5xl font-black text-foreground tracking-tighter">{staked.toFixed(2)}</span>
-              <span className="text-xl font-bold text-muted-foreground/50 mb-1 uppercase">JAM</span>
+            <div className="flex items-end gap-4">
+              <span className="text-[44px] font-black text-foreground tracking-tighter">{staked.toFixed(2)}</span>
+              <span className="text-xl font-bold text-muted-foreground/50 mb-4 uppercase">JAM</span>
             </div>
-            <div className="text-right mb-1">
+            <div className="text-right mb-4">
               <span className="text-sm font-bold text-muted-foreground">≈ ${(staked * JAM_PRICE_USD).toFixed(2)}</span>
             </div>
           </div>
         </div>
 
-        <div className="glass p-8 rounded-2xl border border-neutral-500/20 bg-neutral-500/[0.02] relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+        <div className="glass p-4 rounded-2xl border border-neutral-500/20 bg-neutral-500/[0.02] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <Zap className="w-24 h-24 text-blue-500" />
           </div>
           <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em] mb-4">Pending Rewards</p>
           <div className="flex flex-col gap-4">
             <div className="flex items-end justify-between">
-              <div className="flex items-end gap-3">
-                <span className="text-5xl font-black text-foreground tracking-tighter">{pending.toFixed(4)}</span>
-                <span className="text-xl font-bold text-muted-foreground/50 mb-1 uppercase">JAM</span>
+              <div className="flex items-end gap-4">
+                <span className="text-[44px] font-black text-foreground tracking-tighter">{pending.toFixed(4)}</span>
+                <span className="text-xl font-bold text-muted-foreground/50 mb-4 uppercase">JAM</span>
               </div>
               <button 
                 onClick={handleClaim}
                 disabled={isProcessing || pending <= 0}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+                className="px-4 py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
               >
                 Claim
               </button>
@@ -130,17 +130,17 @@ const Staking: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass p-8 rounded-2xl border border-border/50 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+        <div className="glass p-4 rounded-2xl border border-border/50 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <Coins className="w-24 h-24 text-foreground" />
           </div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-4">Available Balance</p>
           <div className="flex items-end justify-between">
-            <div className="flex items-end gap-3">
-              <span className="text-5xl font-black text-foreground tracking-tighter">{balance.toFixed(2)}</span>
-              <span className="text-xl font-bold text-muted-foreground/50 mb-1 uppercase">JAM</span>
+            <div className="flex items-end gap-4">
+              <span className="text-[44px] font-black text-foreground tracking-tighter">{balance.toFixed(2)}</span>
+              <span className="text-xl font-bold text-muted-foreground/50 mb-4 uppercase">JAM</span>
             </div>
-            <div className="text-right mb-1">
+            <div className="text-right mb-4">
               <span className="text-sm font-bold text-muted-foreground">≈ ${(balance * JAM_PRICE_USD).toFixed(2)}</span>
             </div>
           </div>
@@ -148,9 +148,9 @@ const Staking: React.FC = () => {
       </div>
 
       {/* Staking Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Stake Section */}
-        <div className="glass p-10 rounded-3xl border border-border/50 space-y-8">
+        <div className="glass p-4 rounded-3xl border border-border/50 space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500">
               <ArrowUpRight className="h-6 w-6" />
@@ -168,7 +168,7 @@ const Staking: React.FC = () => {
                 value={stakeAmount}
                 onChange={(e) => setStakeAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-background/50 border border-border rounded-2xl py-6 px-8 text-2xl font-black text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                className="w-full bg-background/50 border border-border rounded-2xl py-4 px-4 text-[20px] font-black text-foreground outline-none focus:border-neutral-500/50 transition-all"
               />
               <button 
                 onClick={() => setStakeAmount(balance.toString())}
@@ -177,7 +177,7 @@ const Staking: React.FC = () => {
                 Max
               </button>
             </div>
-            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 px-2">
+            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 px-4">
               <span>Fee: 0.00 JAM</span>
               <span>Balance: {balance.toFixed(2)} JAM</span>
             </div>
@@ -186,7 +186,7 @@ const Staking: React.FC = () => {
           <button 
             onClick={handleStake}
             disabled={isProcessing || !stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > balance}
-            className="w-full py-6 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-3"
+            className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-4"
           >
             {isProcessing ? 'Processing...' : 'Initialize Staking'}
             {!isProcessing && <Lock className="h-4 w-4" />}
@@ -194,7 +194,7 @@ const Staking: React.FC = () => {
         </div>
 
         {/* Unstake Section */}
-        <div className="glass p-10 rounded-3xl border border-border/50 space-y-8">
+        <div className="glass p-4 rounded-3xl border border-border/50 space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground">
               <Unlock className="h-6 w-6" />
@@ -212,7 +212,7 @@ const Staking: React.FC = () => {
                 value={unstakeAmount}
                 onChange={(e) => setUnstakeAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-background/50 border border-border rounded-2xl py-6 px-8 text-2xl font-black text-foreground outline-none focus:border-border/80 transition-all"
+                className="w-full bg-background/50 border border-border rounded-2xl py-4 px-4 text-[20px] font-black text-foreground outline-none focus:border-border/80 transition-all"
               />
               <button 
                 onClick={() => setUnstakeAmount(staked.toString())}
@@ -221,7 +221,7 @@ const Staking: React.FC = () => {
                 Max
               </button>
             </div>
-            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 px-2">
+            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 px-4">
               <span>Fee: 0.00 JAM</span>
               <span>Staked: {staked.toFixed(2)} JAM</span>
             </div>
@@ -230,7 +230,7 @@ const Staking: React.FC = () => {
           <button 
             onClick={handleUnstake}
             disabled={isProcessing || !unstakeAmount || parseFloat(unstakeAmount) <= 0 || parseFloat(unstakeAmount) > staked}
-            className="w-full py-6 bg-muted/50 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.3em] border border-border transition-all active:scale-95 flex items-center justify-center gap-3"
+            className="w-full py-4 bg-muted/50 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.3em] border border-border transition-all active:scale-95 flex items-center justify-center gap-4"
           >
             {isProcessing ? 'Processing...' : 'Unstake JAM'}
             {!isProcessing && <Unlock className="h-4 w-4" />}
@@ -239,33 +239,33 @@ const Staking: React.FC = () => {
       </div>
 
       {/* Info Section */}
-      <div className="bg-gradient-to-br from-neutral-600/20 to-black border border-neutral-500/20 p-10 rounded-3xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-neutral-600/20 to-black border border-neutral-500/20 p-4 rounded-3xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
           <Sparkles className="w-full h-full text-blue-500" />
         </div>
-        <div className="relative z-10 space-y-6 max-w-2xl">
-          <div className="flex items-center gap-3 text-blue-400">
+        <div className="relative z-10 space-y-4 max-w-2xl">
+          <div className="flex items-center gap-4 text-blue-400">
             <Info className="h-5 w-5" />
             <h4 className="text-sm font-bold uppercase tracking-widest">Staking Protocol Information</h4>
           </div>
           <p className="text-sm text-muted-foreground/80 leading-relaxed">
             By staking your JAM tokens, you contribute to the liquidity and stability of the TonJam ecosystem. In return, you receive a share of the protocol's inflation and platform fees. Rewards are calculated every 10 seconds and can be claimed at any time. There is no lock-up period for unstaking.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
             <div>
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Lock Period</p>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Lock Period</p>
               <p className="text-xs font-bold text-foreground uppercase">None</p>
             </div>
             <div>
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Reward Frequency</p>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Reward Frequency</p>
               <p className="text-xs font-bold text-foreground uppercase">10 Seconds</p>
             </div>
             <div>
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Min. Stake</p>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Min. Stake</p>
               <p className="text-xs font-bold text-foreground uppercase">1 JAM</p>
             </div>
             <div>
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Protocol Fee</p>
+              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Protocol Fee</p>
               <p className="text-xs font-bold text-foreground uppercase">0%</p>
             </div>
           </div>
@@ -273,20 +273,20 @@ const Staking: React.FC = () => {
       </div>
 
       {/* Staking History */}
-      <section className="space-y-8">
+      <section className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-1 h-6 electric-blue-bg rounded-full"></div>
-            <h2 className="text-2xl font-bold uppercase tracking-tighter">Staking History</h2>
+            <h2 className="text-[20px] font-bold uppercase tracking-tighter">Staking History</h2>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center bg-muted/50 rounded-full px-4 py-2 border border-border">
-              <Filter className="w-3 h-3 text-muted-foreground mr-2" />
+            <div className="flex items-center bg-muted/50 rounded-full px-4 py-4 border border-border">
+              <Filter className="w-3 h-3 text-muted-foreground mr-4" />
               <select 
                 value={filterType} 
                 onChange={(e) => setFilterType(e.target.value)} 
-                className="bg-transparent text-foreground text-[9px] font-bold uppercase outline-none cursor-pointer pr-1"
+                className="bg-transparent text-foreground text-[9px] font-bold uppercase outline-none cursor-pointer pr-4"
               >
                 <option value="all" className="bg-background">All Actions</option>
                 <option value="stake" className="bg-background">Stakes</option>
@@ -295,12 +295,12 @@ const Staking: React.FC = () => {
               </select>
             </div>
             
-            <div className="flex items-center bg-muted/50 rounded-full px-4 py-2 border border-border">
-              <ArrowDownUp className="w-3 h-3 text-muted-foreground mr-2" />
+            <div className="flex items-center bg-muted/50 rounded-full px-4 py-4 border border-border">
+              <ArrowDownUp className="w-3 h-3 text-muted-foreground mr-4" />
               <select 
                 value={sortOrder} 
                 onChange={(e) => setSortOrder(e.target.value)} 
-                className="bg-transparent text-foreground text-[9px] font-bold uppercase outline-none cursor-pointer pr-1"
+                className="bg-transparent text-foreground text-[9px] font-bold uppercase outline-none cursor-pointer pr-4"
               >
                 <option value="newest" className="bg-background">Newest First</option>
                 <option value="oldest" className="bg-background">Oldest First</option>
@@ -314,17 +314,17 @@ const Staking: React.FC = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-foreground/[0.02] border-b border-border/50">
-                  <th className="px-6 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Action</th>
-                  <th className="px-6 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Protocol</th>
-                  <th className="px-6 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Amount</th>
-                  <th className="px-6 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-right">Timestamp</th>
+                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Action</th>
+                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Protocol</th>
+                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Amount</th>
+                  <th className="px-4 py-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-right">Timestamp</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredTransactions.map((tx) => (
                   <tr key={tx.id} className="hover:bg-foreground/[0.01] transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-4">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                           tx.type === 'stake' ? 'bg-blue-500/10 text-blue-500' :
                           tx.type === 'unstake' ? 'bg-muted text-foreground' :
@@ -337,16 +337,16 @@ const Staking: React.FC = () => {
                         <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">{tx.type.replace('_', ' ')}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <p className="text-[10px] font-bold text-foreground uppercase tracking-tighter">{tx.trackTitle || 'Staking Protocol'}</p>
                       <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest truncate w-32">{tx.txHash}</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-4">
                         <span className="text-[11px] font-bold text-foreground tracking-tighter">JAM</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-4 text-right">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                         {new Date(tx.timestamp).toLocaleDateString()}
                       </p>
@@ -358,7 +358,7 @@ const Staking: React.FC = () => {
                 ))}
                 {filteredTransactions.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center">
+                    <td colSpan={4} className="px-4 py-4 text-center">
                       <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">No staking activity detected</p>
                     </td>
                   </tr>

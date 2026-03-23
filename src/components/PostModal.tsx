@@ -61,7 +61,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -72,7 +72,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
       ></div>
       <div className="relative w-full max-w-sm glass border border-border bg-background rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-neutral-500/30 transition-all">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-        <header className="flex justify-between items-center p-3 border-b border-border/50">
+        <header className="flex justify-between items-center p-2 border-b border-border/50">
           <div className="flex items-center gap-2">
             <img src={APP_LOGO} className="w-4 h-4 object-contain" alt="" aria-hidden="true" />
             <h2 id="modal-title" className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground">
@@ -87,8 +87,8 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             <X className="h-3 w-3" />
           </button>
         </header>
-        <div className="p-3">
-          <div className="flex gap-3">
+        <div className="p-2">
+          <div className="flex gap-2">
             <div className="flex-shrink-0">
               <img
                 src={MOCK_USER.avatar}
@@ -102,16 +102,16 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Describe the vibe..."
-                className="w-full bg-transparent border-none outline-none resize-none text-foreground text-sm placeholder:text-muted-foreground/50 min-h-[80px] font-medium tracking-tight leading-relaxed no-scrollbar focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md p-1"
+                className="w-full bg-transparent border-none outline-none resize-none text-foreground text-sm placeholder:text-muted-foreground/50 min-h-[80px] font-medium tracking-tight leading-relaxed no-scrollbar focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md p-2"
                 aria-label="Post content"
               ></textarea>
 
               {selectedTrack && (
-                <div className="relative rounded-[10px] bg-muted/50 border border-border p-2 flex items-center gap-3 group/track hover:bg-muted transition-colors">
+                <div className="relative rounded-[10px] bg-muted/50 border border-border p-2 flex items-center gap-2 group/track hover:bg-muted transition-colors">
                   <img src={selectedTrack.coverUrl} className="w-10 h-10 rounded-[6px] object-cover shadow-lg" alt="" aria-hidden="true" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-bold text-foreground uppercase truncate tracking-wide">{selectedTrack.title}</p>
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate mt-0.5">{selectedTrack.artist}</p>
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate mt-3">{selectedTrack.artist}</p>
                   </div>
                   <button 
                     onClick={() => setSelectedTrackId(null)} 
@@ -154,26 +154,26 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
 
         {showTrackPicker && (
           <div 
-            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-background z-20 overflow-y-auto no-scrollbar border-t border-border/50 p-3 animate-in slide-in-from-bottom-4 duration-300"
+            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-background z-20 overflow-y-auto no-scrollbar border-t border-border/50 p-2 animate-in slide-in-from-bottom-4 duration-300"
             role="region"
             aria-label="Track picker"
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.3em]">Select Track to Share</h3>
               <button 
                 onClick={() => setShowTrackPicker(false)} 
-                className="text-muted-foreground hover:text-foreground p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                className="text-muted-foreground hover:text-foreground p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                 aria-label="Close track picker"
               >
                 <X className="h-3 w-3" />
               </button>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               {allTracks.map(track => (
                 <button 
                   key={track.id} 
                   onClick={() => { setSelectedTrackId(track.id); setShowTrackPicker(false); }}
-                  className={`w-full flex items-center gap-2.5 p-2 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-neutral-500/30' : 'bg-muted/50 border border-transparent hover:bg-muted'}`}
+                  className={`w-full flex items-center gap-3 p-2 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-neutral-500/30' : 'bg-muted/50 border border-transparent hover:bg-muted'}`}
                   aria-label={`Select ${track.title} by ${track.artist}`}
                   aria-pressed={selectedTrackId === track.id}
                 >
@@ -189,8 +189,8 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
           </div>
         )}
 
-        <footer className="flex items-center justify-between p-3 bg-foreground/[0.02] border-t border-border/50">
-          <div className="flex gap-0.5">
+        <footer className="flex items-center justify-between p-2 bg-foreground/[0.02] border-t border-border/50">
+          <div className="flex gap-3">
             <input
               type="file"
               id="media-upload"
@@ -222,7 +222,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               <Share2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
             </button>
             <button 
-              className="px-2 h-8 rounded-[8px] flex items-center gap-1.5 text-blue-500/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="px-2 h-8 rounded-[8px] flex items-center gap-3 text-blue-500/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Forge AI"
             >
               <Sparkles className="h-3 w-3" />
@@ -231,7 +231,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               </span>
             </button>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-2" aria-label={`Character count: ${content.length} of ${maxLength}`}>
               <div className="w-10 h-1 bg-muted/50 rounded-full overflow-hidden" aria-hidden="true">
                 <div

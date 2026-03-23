@@ -1,183 +1,178 @@
 {
   "entities": {
-    "Track": {
-      "title": "Track",
-      "description": "A music track artifact",
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user profile information, roles, and balances.",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "artist": { "type": "string" },
-        "artistId": { "type": "string" },
-        "coverUrl": { "type": "string" },
-        "audioUrl": { "type": "string" },
-        "duration": { "type": "number" },
-        "genre": { "type": "string" },
-        "isNFT": { "type": "boolean" },
-        "price": { "type": "string" },
-        "bpm": { "type": "number" },
-        "key": { "type": "string" },
-        "playCount": { "type": "number" },
-        "likes": { "type": "number" },
-        "releaseDate": { "type": "string" },
-        "description": { "type": "string" }
+        "id": { "type": "string", "description": "Unique Firebase Auth ID" },
+        "name": { "type": "string", "description": "Display name" },
+        "handle": { "type": "string", "description": "User handle" },
+        "avatar": { "type": "string", "format": "uri", "description": "Profile picture URL" },
+        "bannerUrl": { "type": "string", "format": "uri", "description": "Profile banner URL" },
+        "bio": { "type": "string", "description": "Artist or collector biography" },
+        "walletAddress": { "type": "string", "description": "TON wallet address" },
+        "role": { "type": "string", "enum": ["artist", "collector", "admin"], "description": "User role" },
+        "followers": { "type": "integer", "description": "Number of followers" },
+        "following": { "type": "integer", "description": "Number of following" },
+        "isVerifiedArtist": { "type": "boolean", "description": "Artist verification status" },
+        "jamBalance": { "type": "number", "description": "JAM token balance" },
+        "stakedJam": { "type": "number", "description": "Amount of JAM staked" },
+        "pendingJamRewards": { "type": "number", "description": "Unclaimed JAM rewards" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
       },
-      "required": ["id", "title", "artist", "artistId", "coverUrl", "audioUrl", "genre", "isNFT"]
-    },
-    "NFTItem": {
-      "title": "NFTItem",
-      "description": "A music NFT artifact",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "trackId": { "type": "string" },
-        "title": { "type": "string" },
-        "owner": { "type": "string" },
-        "creator": { "type": "string" },
-        "artist": { "type": "string" },
-        "artistId": { "type": "string" },
-        "price": { "type": "string" },
-        "imageUrl": { "type": "string" },
-        "edition": { "type": "string" },
-        "supply": { "type": "number" },
-        "minted": { "type": "number" },
-        "isAuction": { "type": "boolean" },
-        "description": { "type": "string" },
-        "listingType": { "type": "string" }
-      },
-      "required": ["id", "trackId", "title", "owner", "creator", "price", "imageUrl", "edition"]
-    },
-    "UserProfile": {
-      "title": "UserProfile",
-      "description": "User profile data",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "handle": { "type": "string" },
-        "avatar": { "type": "string" },
-        "walletAddress": { "type": "string" },
-        "isVerifiedArtist": { "type": "boolean" },
-        "jamBalance": { "type": "number" },
-        "stakedJam": { "type": "number" },
-        "pendingJamRewards": { "type": "number" },
-        "likedTrackIds": { "type": "array", "items": { "type": "string" } },
-        "followedUserIds": { "type": "array", "items": { "type": "string" } },
-        "followers": { "type": "number" },
-        "following": { "type": "number" },
-        "earnings": { "type": "number" },
-        "streamingEarnings": { "type": "number" },
-        "nftEarnings": { "type": "number" },
-        "royaltyConfig": {
-          "type": "object",
-          "properties": {
-            "streamingSplits": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "address": { "type": "string" },
-                  "percentage": { "type": "number" },
-                  "label": { "type": "string" }
-                }
-              }
-            },
-            "nftSaleSplits": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "address": { "type": "string" },
-                  "percentage": { "type": "number" },
-                  "label": { "type": "string" }
-                }
-              }
-            }
-          }
-        }
-      },
-      "required": ["id", "name", "handle", "avatar"]
-    },
-    "Transaction": {
-      "title": "Transaction",
-      "description": "A blockchain transaction record",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string" },
-        "amount": { "type": "string" },
-        "recipientAddress": { "type": "string" },
-        "senderAddress": { "type": "string" },
-        "timestamp": { "type": "string" },
-        "status": { "type": "string" }
-      },
-      "required": ["id", "type", "amount", "recipientAddress", "timestamp", "status"]
+      "required": ["id", "name", "handle", "role"]
     },
     "Playlist": {
-      "title": "Playlist",
-      "description": "A user-created playlist",
+      "title": "User Playlist",
+      "description": "A collection of tracks created by a user.",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "coverUrl": { "type": "string" },
-        "trackCount": { "type": "number" },
-        "creator": { "type": "string" },
-        "description": { "type": "string" },
-        "trackIds": { "type": "array", "items": { "type": "string" } },
-        "isPrivate": { "type": "boolean" },
-        "isCollaborative": { "type": "boolean" },
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "updatedAt": { "type": "string" }
+        "id": { "type": "string", "description": "Unique playlist ID" },
+        "title": { "type": "string", "description": "Playlist title" },
+        "coverUrl": { "type": "string", "format": "uri", "description": "Playlist cover image URL" },
+        "trackCount": { "type": "integer", "description": "Number of tracks in the playlist" },
+        "creator": { "type": "string", "description": "UID of the creator" },
+        "description": { "type": "string", "description": "Playlist description" },
+        "trackIds": { "type": "array", "items": { "type": "string" }, "description": "List of track IDs" },
+        "isPrivate": { "type": "boolean", "description": "Whether the playlist is private" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
       },
-      "required": ["id", "title", "creator"]
+      "required": ["id", "title", "creator", "trackCount"]
+    },
+    "Transaction": {
+      "title": "Financial Transaction",
+      "description": "Records of financial activities on the platform.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique transaction ID" },
+        "type": { "type": "string", "enum": ["stream", "nft_sale", "nft_mint", "withdrawal", "platform_fee", "jam_purchase", "premium_subscription", "stake", "unstake", "claim_rewards"], "description": "Transaction type" },
+        "amount": { "type": "number", "description": "Total amount" },
+        "platformFee": { "type": "number", "description": "Platform fee" },
+        "artistShare": { "type": "number", "description": "Artist share" },
+        "recipientAddress": { "type": "string", "description": "Recipient wallet address" },
+        "senderAddress": { "type": "string", "description": "Sender wallet address" },
+        "trackId": { "type": "string", "description": "Associated track ID" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Transaction timestamp" },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed"], "description": "Transaction status" }
+      },
+      "required": ["id", "type", "amount", "timestamp", "status"]
+    },
+    "Track": {
+      "title": "Music Track",
+      "description": "Metadata for music tracks uploaded by artists.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique track ID" },
+        "title": { "type": "string", "description": "Track title" },
+        "artistId": { "type": "string", "description": "UID of the artist" },
+        "artistName": { "type": "string", "description": "Name of the artist" },
+        "coverUrl": { "type": "string", "format": "uri", "description": "Cover art URL" },
+        "audioUrl": { "type": "string", "format": "uri", "description": "Audio file URL" },
+        "genre": { "type": "string", "description": "Music genre" },
+        "price": { "type": "string", "description": "Base price in TON" },
+        "isNFT": { "type": "boolean", "description": "Whether the track is an NFT" },
+        "bpm": { "type": "integer", "description": "Beats per minute" },
+        "key": { "type": "string", "description": "Musical key" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Upload timestamp" }
+      },
+      "required": ["id", "title", "artistId", "artistName", "audioUrl"]
+    },
+    "NFT": {
+      "title": "Music NFT",
+      "description": "Represents a minted music NFT.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique NFT ID" },
+        "trackId": { "type": "string", "description": "Source track ID" },
+        "title": { "type": "string", "description": "NFT title" },
+        "imageUrl": { "type": "string", "format": "uri", "description": "NFT image URL" },
+        "price": { "type": "string", "description": "Current listing price in TON" },
+        "ownerId": { "type": "string", "description": "UID of the current owner" },
+        "ownerName": { "type": "string", "description": "Name of the current owner" },
+        "edition": { "type": "string", "enum": ["Unique", "Limited", "Standard"], "description": "NFT edition type" },
+        "rarity": { "type": "string", "description": "Rarity score or label" },
+        "isListed": { "type": "boolean", "description": "Whether the NFT is currently listed for sale" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Minting timestamp" }
+      },
+      "required": ["id", "trackId", "title", "ownerId", "price"]
     },
     "Post": {
-      "title": "Post",
-      "description": "A social media post",
+      "title": "Social Signal",
+      "description": "Social feed posts (signals) from artists.",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "userName": { "type": "string" },
-        "userHandle": { "type": "string" },
-        "userAvatar": { "type": "string" },
-        "content": { "type": "string" },
-        "imageUrl": { "type": "string" },
-        "trackId": { "type": "string" },
-        "nftId": { "type": "string" },
-        "likes": { "type": "number" },
-        "reposts": { "type": "number" },
-        "comments": { "type": "number" },
-        "timestamp": { "type": "string" }
+        "id": { "type": "string", "description": "Unique post ID" },
+        "authorId": { "type": "string", "description": "UID of the author" },
+        "authorName": { "type": "string", "description": "Name of the author" },
+        "authorPhoto": { "type": "string", "format": "uri", "description": "Author profile photo URL" },
+        "content": { "type": "string", "description": "Post content" },
+        "imageUrl": { "type": "string", "format": "uri", "description": "Optional image URL" },
+        "likes": { "type": "integer", "description": "Number of likes" },
+        "comments": { "type": "integer", "description": "Number of comments" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Post timestamp" }
       },
-      "required": ["id", "userId", "userName", "content", "timestamp"]
+      "required": ["id", "authorId", "authorName", "content"]
+    },
+    "Bid": {
+      "title": "NFT Bid",
+      "description": "A bid placed on an NFT listing.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique bid ID" },
+        "nftId": { "type": "string", "description": "Target NFT ID" },
+        "bidderId": { "type": "string", "description": "UID of the bidder" },
+        "bidderName": { "type": "string", "description": "Name of the bidder" },
+        "amount": { "type": "string", "description": "Bid amount in TON" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Bid timestamp" }
+      },
+      "required": ["id", "nftId", "bidderId", "amount"]
+    },
+    "Royalty": {
+      "title": "Artist Royalty",
+      "description": "Financial records for artist earnings.",
+      "type": "object",
+      "properties": {
+        "artistId": { "type": "string", "description": "UID of the artist" },
+        "totalEarned": { "type": "string", "description": "Total lifetime earnings in TON" },
+        "pendingWithdrawal": { "type": "string", "description": "Earnings available for withdrawal" },
+        "lastWithdrawal": { "type": "string", "format": "date-time", "description": "Last withdrawal timestamp" }
+      },
+      "required": ["artistId", "totalEarned", "pendingWithdrawal"]
     }
   },
   "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents."
+    },
     "/tracks/{trackId}": {
       "schema": "Track",
-      "description": "Global marketplace tracks"
+      "description": "Music track metadata."
     },
     "/nfts/{nftId}": {
-      "schema": "NFTItem",
-      "description": "Global marketplace NFTs"
-    },
-    "/users/{userId}": {
-      "schema": "UserProfile",
-      "description": "User profiles"
-    },
-    "/transactions/{transactionId}": {
-      "schema": "Transaction",
-      "description": "Transaction history"
-    },
-    "/playlists/{playlistId}": {
-      "schema": "Playlist",
-      "description": "User playlists"
+      "schema": "NFT",
+      "description": "Minted NFT documents."
     },
     "/posts/{postId}": {
       "schema": "Post",
-      "description": "Social feed posts"
+      "description": "Social feed signals."
+    },
+    "/nfts/{nftId}/bids/{bidId}": {
+      "schema": "Bid",
+      "description": "Bidding history for specific NFTs."
+    },
+    "/royalties/{artistId}": {
+      "schema": "Royalty",
+      "description": "Artist financial records."
+    },
+    "/playlists/{playlistId}": {
+      "schema": "Playlist",
+      "description": "User created playlists."
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Platform transaction logs."
     }
   }
 }

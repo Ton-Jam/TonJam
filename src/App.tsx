@@ -30,75 +30,105 @@ import Staking from '@/pages/Staking';
 import About from '@/pages/About';
 import { AudioProvider } from '@/context/AudioContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { FirebaseProvider, useFirebase } from '@/context/FirebaseContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import ArtistOnboarding from '@/pages/ArtistOnboarding';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { motion, AnimatePresence } from 'motion/react';
+import { doc, getDocFromServer } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { isAuthReady, loading: firebaseLoading } = useFirebase();
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate initial asset loading
-    const timer = setTimeout(() => setIsAppLoading(false), 2000);
-    return () => clearTimeout(timer);
+    // Test Firestore connection
+    const testConnection = async () => {
+      try {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+      } catch (error) {
+        if (error instanceof Error && (error.message.includes('the client is offline') || error.message.includes('unavailable'))) {
+          console.error("Please check your Firebase configuration. The Firestore backend is currently unreachable.");
+        }
+      }
+    };
+    testConnection();
   }, []);
 
+  useEffect(() => {
+    if (isAuthReady && !firebaseLoading) {
+      const timer = setTimeout(() => setIsAppLoading(false), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthReady, firebaseLoading]);
+
   return (
-    <TonConnectUIProvider manifestUrl="https://ton-jam.vercel.app/tonconnect-manifest.json">
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <AuthProvider>
-          <AudioProvider>
-            <Toaster theme="light" position="top-right" />
-            <Router>
-              <ScrollToTop />
-              <AnimatePresence>
-                {isAppLoading ? (
-                  <LoadingScreen key="loading" />
-                ) : (
-                  <motion.div
-                    key="app"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Layout>
-                      <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/discover" element={<Discover />} />
-                        <Route path="/jamspace" element={<JamSpace />} />
-                        <Route path="/marketplace" element={<Marketplace />} />
-                        <Route path="/nft/:id" element={<NFTDetail />} />
-                        <Route path="/explore/:type" element={<ExploreList />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/user/:id" element={<UserProfile />} />
-                        <Route path="/artist/:id" element={<ArtistProfile />} />
-                        <Route path="/artist-dashboard" element={<ArtistDashboard />} />
-                        <Route path="/artist-onboarding" element={<ArtistOnboarding />} />
-                        <Route path="/upload" element={<UploadTrack />} />
-                        <Route path="/mint" element={<MintNFT />} />
-                        <Route path="/library" element={<Library />} />
-                        <Route path="/wallet" element={<Wallet />} />
-                        <Route path="/staking" element={<Staking />} />
-                        <Route path="/playlist/:id" element={<PlaylistDetail />} />
-                        <Route path="/track/:id" element={<TrackDetail />} />
-                        <Route path="/player" element={<TrackPlayerScreen />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/tasks" element={<Tasks />} />
-                        <Route path="/notifications" element={<Notifications />} />
-                        <Route path="/post/:id" element={<PostDetail />} />
-                        <Route path="/admin" element={<AdminDashboard />} />
-                        <Route path="/about" element={<About />} />
-                      </Routes>
-                    </Layout>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </Router>
-          </AudioProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </TonConnectUIProvider>
+    <AnimatePresence>
+      {isAppLoading ? (
+        <LoadingScreen key="loading" />
+      ) : (
+        <motion.div
+          key="app"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/jamspace" element={<JamSpace />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/nft/:id" element={<NFTDetail />} />
+              <Route path="/explore/:type" element={<ExploreList />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/user/:id" element={<UserProfile />} />
+              <Route path="/artist/:id" element={<ArtistProfile />} />
+              <Route path="/artist-dashboard" element={<ArtistDashboard />} />
+              <Route path="/artist-onboarding" element={<ArtistOnboarding />} />
+              <Route path="/upload" element={<UploadTrack />} />
+              <Route path="/mint" element={<MintNFT />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/wallet" element={<Wallet />} />
+              <Route path="/staking" element={<Staking />} />
+              <Route path="/playlist/:id" element={<PlaylistDetail />} />
+              <Route path="/track/:id" element={<TrackDetail />} />
+              <Route path="/player" element={<TrackPlayerScreen />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/post/:id" element={<PostDetail />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </Layout>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <TonConnectUIProvider manifestUrl="https://ton-jam.vercel.app/tonconnect-manifest.json">
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <FirebaseProvider>
+            <AuthProvider>
+              <AudioProvider>
+                <Toaster theme="light" position="top-right" />
+                <Router>
+                  <ScrollToTop />
+                  <AppContent />
+                </Router>
+              </AudioProvider>
+            </AuthProvider>
+          </FirebaseProvider>
+        </ThemeProvider>
+      </TonConnectUIProvider>
+    </ErrorBoundary>
   );
 };
 

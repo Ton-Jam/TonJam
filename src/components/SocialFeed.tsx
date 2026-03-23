@@ -43,7 +43,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ posts, onDeletePost, emptyMessa
 
   if (posts.length === 0) {
     return (
-      <div className="py-20 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-3xl">
+      <div className="py-2 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-3xl">
         <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">{emptyMessage}</p>
       </div>
     );
@@ -52,7 +52,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ posts, onDeletePost, emptyMessa
   const visiblePosts = posts.slice(0, visibleCount);
 
   return (
-    <div className={layout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "flex flex-col"}>
+    <div className={layout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-2" : "flex flex-col"}>
       {visiblePosts.map((post, idx) => (
         <div key={post.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full" style={{ animationDelay: `${(idx % POSTS_PER_PAGE) * 100}ms` }}>
           <PostCard post={post} onDelete={onDeletePost} />
@@ -60,7 +60,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ posts, onDeletePost, emptyMessa
       ))}
       
       {visibleCount < posts.length && (
-        <div ref={sentinelRef} className={`py-8 flex justify-center items-center ${layout === 'grid' ? 'col-span-full' : ''}`}>
+        <div ref={sentinelRef} className={`py-2 flex justify-center items-center ${layout === 'grid' ? 'col-span-full' : ''}`}>
           <img src={APP_LOGO} className="w-8 h-8 object-contain animate-[spin_3s_linear_infinite] opacity-50" alt="Loading..." />
         </div>
       )}

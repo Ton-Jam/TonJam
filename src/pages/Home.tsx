@@ -15,9 +15,9 @@ import { motion, AnimatePresence } from 'motion/react';
 
 const HomeSection = ({ title, icon: Icon, link, children }: { title: string, icon: React.ElementType, link?: string, children: React.ReactNode }) => {
   return (
-    <section className="space-y-3">
+    <section className="section-container">
       <SectionHeader title={title} viewAllLink={link} />
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
+      <div className="scroll-row">
         {children}
       </div>
     </section>
@@ -144,18 +144,18 @@ const Home: React.FC = () => {
   }, [allNFTs, selectedGenre]);
 
   return (
-    <div className="max-w-7xl mx-auto px-0 pb-[14px] lg:px-[30px] lg:pb-[30px] space-y-8 w-full mb-32">
+    <div className="page-container w-full">
       {/* Filter Section */}
       <div className="max-w-3xl mx-auto w-full relative z-20">
-        <div className="flex items-center justify-between mb-8 pb-4">
-          <div className="flex items-center gap-8">
+        <div className="flex items-center justify-between mb-4 pb-1">
+          <div className="flex items-center gap-4">
             <button 
               onClick={() => setActiveTab('overview')}
               className={`text-xl font-bold uppercase tracking-tighter transition-all relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${activeTab === 'overview' ? 'text-blue-500' : 'text-neutral-500 hover:text-neutral-400'}`}
             >
               Overview
               {activeTab === 'overview' && (
-                <motion.div layoutId="homeTab" className="absolute -bottom-4 left-0 right-0 h-1 bg-blue-500 rounded-full" />
+                <motion.div layoutId="homeTab" className="absolute -bottom-3 left-0 right-0 h-1 bg-blue-500 rounded-full" />
               )}
             </button>
             <button 
@@ -165,17 +165,17 @@ const Home: React.FC = () => {
               Discovery
               <Sparkles className={`h-4 w-4 ${activeTab === 'discovery' ? 'text-blue-400' : 'text-muted-foreground/50'}`} />
               {activeTab === 'discovery' && (
-                <motion.div layoutId="homeTab" className="absolute -bottom-4 left-0 right-0 h-1 bg-blue-500 rounded-full" />
+                <motion.div layoutId="homeTab" className="absolute -bottom-3 left-0 right-0 h-1 bg-blue-500 rounded-full" />
               )}
             </button>
           </div>
         </div>
 
         {activeTab === 'overview' && (
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
+          <div className="scroll-row py-1">
             <button
               onClick={() => setSelectedGenre(null)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[8px] font-semibold uppercase tracking-wider transition-all snap-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border ${
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border ${
                 selectedGenre === null 
                   ? 'bg-blue-500 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
                   : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-transparent hover:text-blue-600 dark:hover:text-neutral-400 hover:bg-muted/10 inactive-pill'
@@ -190,7 +190,7 @@ const Home: React.FC = () => {
                 <button
                   key={genre.id}
                   onClick={() => setSelectedGenre(genre.name)}
-                  className={`relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-semibold uppercase tracking-wider transition-all snap-start overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border ${
+                  className={`relative flex-shrink-0 flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border ${
                     isSelected 
                       ? 'bg-blue-500 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
                       : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-transparent hover:text-blue-600 dark:hover:text-neutral-400 hover:bg-muted/10 inactive-pill'
@@ -219,7 +219,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="space-y-8"
+            className="space-y-4"
           >
             <DiscoveryFeed />
           </motion.div>
@@ -230,7 +230,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="space-y-8"
+            className="space-y-4"
           >
             {/* Featured Sponsored Posts Carousel */}
             <AutoCarousel items={FEATURED_TRACKS_CAROUSEL} onCtaClick={handleCtaClick} />
@@ -240,13 +240,13 @@ const Home: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-transparent z-0"></div>
               <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
               
-              <div className="relative z-10 p-8 lg:p-20 max-w-3xl space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-neutral-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+              <div className="relative z-10 p-4 lg:p-6 max-w-3xl space-y-3">
+                <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-blue-500/10 border border-neutral-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em]">
                   <Zap className="h-3 w-3" />
                   Live on TON Blockchain
                 </div>
                 
-                <h1 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter leading-[0.85] text-foreground">
+                <h1 className="text-[32px] lg:text-[60px] font-black uppercase tracking-tighter leading-[0.85] text-foreground">
                   The Future of <span className="text-blue-500">Music</span> is Here
                 </h1>
                 
@@ -254,17 +254,17 @@ const Home: React.FC = () => {
                   Stream high-fidelity music, collect rare artifacts, and join the decentralized revolution on the TON blockchain.
                 </p>
                 
-                <div className="flex flex-wrap gap-4 pt-4">
+                <div className="flex flex-wrap gap-3 pt-2">
                   <button 
                     onClick={() => playAll(MOCK_TRACKS)}
-                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 group/btn text-xs"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 group/btn text-xs"
                   >
                     <Play className="h-4 w-4 fill-white group-hover/btn:scale-110 transition-transform" />
                     Start Listening
                   </button>
                   <Link 
                     to="/marketplace"
-                    className="px-6 py-2.5 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-2 text-xs"
+                    className="px-4 py-2 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-2 text-xs"
                   >
                     <ShoppingBag className="h-4 w-4" />
                     Explore NFTs
@@ -274,11 +274,11 @@ const Home: React.FC = () => {
             </section>
 
             {/* Trending Now Section */}
-            <section className="space-y-3">
+            <section className="section-container">
               <SectionHeader title="Trending Now" />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Top 5 Songs</h4>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 5 Songs</h4>
                   {trendingTracks.slice(0, 5).map((track, idx) => (
                     <div key={`trend-track-${track.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/track/${track.id}`)}>
                       <span className="text-lg font-black italic text-muted-foreground/30 w-6">{idx + 1}</span>
@@ -290,31 +290,31 @@ const Home: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate text-foreground">{track.title}</p>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Top 3 Artists</h4>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 3 Artists</h4>
                   {trendingArtists.map((artist) => (
                     <div key={`trend-artist-${artist.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/artist/${artist.id}`)}>
                       <img src={artist.avatarUrl} className="w-12 h-12 rounded-full object-cover" alt={artist.name} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate text-foreground">{artist.name}</p>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{artist.genre}</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{artist.genre}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Top 3 NFTs</h4>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 3 NFTs</h4>
                   {trendingNFTs.map((nft) => (
                     <div key={`trend-nft-${nft.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
                       <img src={nft.imageUrl} className="w-12 h-12 rounded-[5px] object-cover" alt={nft.title} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate text-foreground">{nft.title}</p>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.price} TON</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.price} TON</p>
                       </div>
                     </div>
                   ))}
@@ -354,8 +354,8 @@ const Home: React.FC = () => {
             </HomeSection>
 
             {/* Top Charts - List View */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              <div className="lg:col-span-2 space-y-3">
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
                 <SectionHeader title="Global Top 10" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
                 <div className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory no-scrollbar">
                   {trendingTracks.slice(0, 10).map((track, idx) => (
@@ -364,7 +364,7 @@ const Home: React.FC = () => {
                       onClick={() => navigate(`/track/${track.id}`)}
                       className="flex items-center gap-4 group cursor-pointer p-2 rounded-[5px] hover:bg-muted/50 transition-all w-[85vw] sm:w-[300px] snap-start"
                     >
-                      <span className="text-2xl font-black italic text-muted-foreground/30 group-hover:text-blue-500/40 transition-colors w-8 text-center">
+                      <span className="text-[20px] font-black italic text-muted-foreground/30 group-hover:text-blue-500/40 transition-colors w-8 text-center">
                         {idx + 1}
                       </span>
                       <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
@@ -377,7 +377,7 @@ const Home: React.FC = () => {
                         <h4 className="text-sm font-bold uppercase tracking-tight text-foreground truncate group-hover:text-blue-400 transition-colors">{track.title}</h4>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
                       </div>
-                      <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-2">
+                      <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-1">
                         {Math.random() > 0.5 ? (
                           <TrendingUp className="h-3 w-3 text-green-500" />
                         ) : (
@@ -390,9 +390,9 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <SectionHeader title="New Releases" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {newReleases.map(track => (
                     <div 
                       key={`new-${track.id}`} 
@@ -406,10 +406,10 @@ const Home: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold uppercase tracking-tight text-foreground truncate">{track.title}</h4>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[8px] font-bold px-1.5 py-0.5 bg-muted/50 rounded text-muted-foreground uppercase tracking-widest">
+                        <h4 className="text-[10px] font-bold uppercase tracking-tight text-foreground truncate">{track.title}</h4>
+                        <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className="text-[7px] font-bold px-1.5 py-0.5 bg-muted/50 rounded text-muted-foreground uppercase tracking-widest">
                             {track.genre}
                           </span>
                         </div>
@@ -432,7 +432,7 @@ const Home: React.FC = () => {
             )}
 
             {/* Genre Grid - Quick Access */}
-            <section className="space-y-3">
+            <section className="section-container">
               <SectionHeader title="Explore Genres" />
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {GENRES.map(genre => (
@@ -480,15 +480,15 @@ const Home: React.FC = () => {
             </HomeSection>
 
             {/* Community & Artist CTA Section */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="glass bg-card/50 p-6 rounded-[10px] space-y-3 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="glass bg-card/50 p-6 rounded-[10px] space-y-4 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Radio className="h-32 w-32 text-blue-500" />
                 </div>
                 <div className="w-12 h-12 rounded-[5px] bg-blue-600/10 flex items-center justify-center text-blue-500">
                   <Music2 className="h-6 w-6" />
                 </div>
-                <h3 className="text-3xl font-bold uppercase tracking-tighter text-foreground">Join the JamSpace</h3>
+                <h3 className="text-[26px] font-bold uppercase tracking-tighter text-foreground">Join the JamSpace</h3>
                 <p className="text-muted-foreground leading-relaxed max-w-md">
                   Connect with other music lovers, share your favorite tracks, and discover new sounds in our community-driven social feed.
                 </p>
@@ -497,14 +497,14 @@ const Home: React.FC = () => {
                 </Link>
               </div>
               
-              <div className="glass bg-card/50 p-6 rounded-[10px] space-y-3 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+              <div className="glass bg-card/50 p-6 rounded-[10px] space-y-4 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Disc className="h-32 w-32 text-purple-500" />
                 </div>
                 <div className="w-12 h-12 rounded-[5px] bg-purple-600/10 flex items-center justify-center text-purple-500">
                   <TrendingUp className="h-6 w-6" />
                 </div>
-                <h3 className="text-3xl font-bold uppercase tracking-tighter text-foreground">
+                <h3 className="text-[26px] font-bold uppercase tracking-tighter text-foreground">
                   {userProfile.isVerifiedArtist ? 'Artist Hub' : 'Mint Your Legacy'}
                 </h3>
                 <p className="text-muted-foreground leading-relaxed max-w-md">
@@ -525,12 +525,12 @@ const Home: React.FC = () => {
       </AnimatePresence>
 
       {/* Decentralized Footer Info */}
-      <section className="py-12 flex flex-col items-center text-center space-y-4">
-        <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">
+      <section className="py-4 flex flex-col items-center text-center space-y-1">
+        <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">
           <Globe className="h-3 w-3" />
           Secured by TON Blockchain
         </div>
-        <p className="text-[10px] text-muted-foreground/30 uppercase tracking-widest">
+        <p className="text-[9px] text-muted-foreground/30 uppercase tracking-widest">
           TonJam v2.6.4 • Decentralized Music Protocol
         </p>
       </section>

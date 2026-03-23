@@ -18,7 +18,7 @@ const Settings: React.FC = () => {
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const SettingItem = ({ icon: Icon, label, description, children }: any) => (
-    <div className="flex items-center justify-between p-6 bg-muted/50 rounded-2xl">
+    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-2xl">
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-500">
           <Icon className="h-5 w-5" />
@@ -33,9 +33,9 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="px-6 pb-6 lg:px-10 lg:pb-10 space-y-10 max-w-4xl mx-auto mb-32">
-      <div className="space-y-2">
-        <h1 className="text-4xl font-black uppercase tracking-tighter text-foreground">Settings</h1>
+    <div className="px-4 pb-4 lg:px-4 lg:pb-4 space-y-4 max-w-4xl mx-auto mb-4">
+      <div className="space-y-4">
+        <h1 className="text-[32px] font-black uppercase tracking-tighter text-foreground">Settings</h1>
         <p className="text-sm font-bold text-muted-foreground/50 uppercase tracking-[0.3em]">Configure your neural interface</p>
       </div>
 
@@ -47,7 +47,7 @@ const Settings: React.FC = () => {
           label="Profile Identity" 
           description="Manage your public presence and bio"
         >
-          <button className="px-4 py-2 bg-muted/50 hover:bg-muted rounded-xl text-[10px] font-bold text-foreground uppercase tracking-widest transition-all">Edit</button>
+          <button className="px-4 py-4 bg-muted/50 hover:bg-muted rounded-xl text-[10px] font-bold text-foreground uppercase tracking-widest transition-all">Edit</button>
         </SettingItem>
 
         <SettingItem 
@@ -57,7 +57,7 @@ const Settings: React.FC = () => {
         >
           <button 
             onClick={() => navigate('/wallet')}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-[10px] font-bold text-foreground uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+            className="px-4 py-4 bg-blue-600 hover:bg-blue-500 rounded-xl text-[10px] font-bold text-foreground uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
           >
             Manage
           </button>
@@ -141,7 +141,7 @@ const Settings: React.FC = () => {
           <select 
             value={theme}
             onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'system')}
-            className="bg-muted/50 text-foreground text-[10px] font-bold uppercase outline-none cursor-pointer p-2 rounded-lg"
+            className="bg-muted/50 text-foreground text-[10px] font-bold uppercase outline-none cursor-pointer p-4 rounded-lg"
           >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
@@ -162,10 +162,10 @@ const Settings: React.FC = () => {
         </SettingItem>
       </div>
 
-      <div className="pt-10">
+      <div className="pt-4">
         <button 
           onClick={() => signOut()}
-          className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+          className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-4"
         >
           <LogOut className="h-4 w-4" />
           Terminate Session

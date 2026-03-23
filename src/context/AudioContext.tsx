@@ -4,7 +4,12 @@ import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post } from '@/types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
-import { db, auth } from '@/lib/firebase';
+import { 
+  db, 
+  auth, 
+  handleFirestoreError, 
+  OperationType 
+} from '@/lib/firebase';
 import { 
   collection, 
   doc, 
@@ -19,59 +24,6 @@ import {
   increment
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-
-enum OperationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  LIST = 'list',
-  GET = 'get',
-  WRITE = 'write',
-}
-
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId: string | undefined;
-    email: string | null | undefined;
-    emailVerified: boolean | undefined;
-    isAnonymous: boolean | undefined;
-    tenantId: string | null | undefined;
-    providerInfo: {
-      providerId: string;
-      displayName: string | null;
-      email: string | null;
-      photoUrl: string | null;
-    }[];
-  }
-}
-
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, shouldThrow: boolean = true) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData.map(provider => ({
-        providerId: provider.providerId,
-        displayName: provider.displayName,
-        email: provider.email,
-        photoUrl: provider.photoURL
-      })) || []
-    },
-    operationType,
-    path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  if (shouldThrow) {
-    throw new Error(JSON.stringify(errInfo));
-  }
-}
 
 interface Notification {
   id: string;
@@ -159,6 +111,7 @@ interface AudioContextType {
   getTracksByGenre: (genre: string) => Track[];
   getRecommendations: () => { recommendedTracks: Track[], recommendedNFTs: NFTItem[] };
   jamTrack: (trackId: string) => Promise<void>;
+  deleteTrack: (trackId: string) => Promise<void>;
   activeJamRoom: { id: string, name: string, listeners: number, currentTrack: Track | null } | null;
   joinJamRoom: (roomId: string) => void;
   leaveJamRoom: () => void;
@@ -313,7 +266,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [transactions]);
 
   useEffect(() => {
-    if (isPlaying && currentTrack) {
+    if (isPlaying && currentTrack && auth.currentUser) {
       const streamPaymentTimeout = setTimeout(() => {
         // Simulate a micro-payment for the stream
         const streamPrice = 0.001; // 0.001 TON per stream
@@ -338,7 +291,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       return () => clearTimeout(streamPaymentTimeout);
     }
-  }, [isPlaying, currentTrack?.id]);
+  }, [isPlaying, currentTrack?.id, auth.currentUser]);
 
   const [followedUserIds, setFollowedUserIds] = useState<string[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.FOLLOWED_USERS);
@@ -365,6 +318,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Sync with Firebase
   useEffect(() => {
+    // Public listeners
     const tracksQuery = query(collection(db, 'tracks'), orderBy('id', 'desc'));
     const unsubscribeTracks = onSnapshot(tracksQuery, (snapshot) => {
       const tracks = snapshot.docs.map(doc => doc.data() as Track);
@@ -389,14 +343,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       handleFirestoreError(error, OperationType.LIST, 'playlists', false);
     });
 
-    const transactionsQuery = query(collection(db, 'transactions'), orderBy('timestamp', 'desc'));
-    const unsubscribeTransactions = onSnapshot(transactionsQuery, (snapshot) => {
-      const transactions = snapshot.docs.map(doc => doc.data() as Transaction);
-      setFirebaseTransactions(transactions);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'transactions', false);
-    });
-
     const postsQuery = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
     const unsubscribePosts = onSnapshot(postsQuery, (snapshot) => {
       const posts = snapshot.docs.map(doc => doc.data() as Post);
@@ -405,33 +351,105 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       handleFirestoreError(error, OperationType.LIST, 'posts', false);
     });
 
-    const usersQuery = query(collection(db, 'users'));
-    const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
-      const users = snapshot.docs.map(doc => doc.data() as UserProfile);
-      setFirebaseUsers(users);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'users', false);
-    });
-
-    // Test connection
-    const testConnection = async () => {
-      try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration.");
-        }
-      }
-    };
-    testConnection();
-
     return () => {
       unsubscribeTracks();
       unsubscribeNFTs();
       unsubscribePlaylists();
-      unsubscribeTransactions();
       unsubscribePosts();
-      unsubscribeUsers();
+    };
+  }, []);
+
+  // Auth-dependent listeners
+  useEffect(() => {
+    let unsubscribeUsers: (() => void) | null = null;
+    let unsubscribeTransactions: (() => void) | null = null;
+    let unsubscribeUserDoc: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // 1. Start protected collection listeners
+        const usersQuery = query(collection(db, 'users'));
+        unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
+          const users = snapshot.docs.map(doc => doc.data() as UserProfile);
+          setFirebaseUsers(users);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.LIST, 'users', false);
+        });
+
+        const transactionsQuery = query(collection(db, 'transactions'), orderBy('timestamp', 'desc'));
+        unsubscribeTransactions = onSnapshot(transactionsQuery, (snapshot) => {
+          const transactions = snapshot.docs.map(doc => doc.data() as Transaction);
+          setFirebaseTransactions(transactions);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.LIST, 'transactions', false);
+        });
+
+        // 2. Initial fetch and setup listener for current user profile
+        const userDocRef = doc(db, 'users', user.uid);
+        try {
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            setUserProfile(userDoc.data() as UserProfile);
+          } else {
+            const newProfile: UserProfile = {
+              ...MOCK_USER,
+              id: user.uid,
+              name: user.displayName || 'Anonymous',
+              avatar: user.photoURL || 'https://picsum.photos/seed/user/200/200',
+              walletAddress: '',
+              handle: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
+              followers: 0,
+              following: 0,
+              earnings: 0,
+              streamingEarnings: 0,
+              nftEarnings: 0,
+              jamBalance: 100, // Welcome bonus
+              stakedJam: 0,
+              pendingJamRewards: 0,
+              likedTrackIds: [],
+              followedUserIds: [],
+              createdAt: new Date().toISOString() as any
+            };
+            await setDoc(userDocRef, { ...newProfile, createdAt: new Date() });
+            setUserProfile(newProfile);
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.GET, `users/${user.uid}`, false);
+        }
+
+        // Real-time listener for current user profile
+        unsubscribeUserDoc = onSnapshot(userDocRef, (snapshot) => {
+          if (snapshot.exists()) {
+            setUserProfile(snapshot.data() as UserProfile);
+          }
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${user.uid}`, false);
+        });
+      } else {
+        // User is not authenticated, clean up protected listeners
+        if (unsubscribeUsers) {
+          unsubscribeUsers();
+          unsubscribeUsers = null;
+        }
+        if (unsubscribeTransactions) {
+          unsubscribeTransactions();
+          unsubscribeTransactions = null;
+        }
+        if (unsubscribeUserDoc) {
+          unsubscribeUserDoc();
+          unsubscribeUserDoc = null;
+        }
+        setFirebaseUsers([]);
+        setFirebaseTransactions([]);
+        setUserProfile(MOCK_USER);
+      }
+    });
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeUsers) unsubscribeUsers();
+      if (unsubscribeTransactions) unsubscribeTransactions();
+      if (unsubscribeUserDoc) unsubscribeUserDoc();
     };
   }, []);
 
@@ -483,64 +501,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
   }, [firebaseUsers]);
-
-  // Auth Sync
-  useEffect(() => {
-    let unsubscribeUserDoc: (() => void) | null = null;
-
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Initial fetch and setup listener for current user
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-          setUserProfile(userDoc.data() as UserProfile);
-        } else {
-          const newProfile: UserProfile = {
-            ...MOCK_USER,
-            id: user.uid,
-            name: user.displayName || 'Anonymous',
-            avatar: user.photoURL || 'https://picsum.photos/seed/user/200/200',
-            walletAddress: '',
-            handle: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
-            followers: 0,
-            following: 0,
-            earnings: 0,
-            streamingEarnings: 0,
-            nftEarnings: 0,
-            jamBalance: 100, // Welcome bonus
-            stakedJam: 0,
-            pendingJamRewards: 0,
-            likedTrackIds: [],
-            followedUserIds: []
-          };
-          await setDoc(userDocRef, newProfile);
-          setUserProfile(newProfile);
-        }
-
-        // Real-time listener for current user profile
-        unsubscribeUserDoc = onSnapshot(userDocRef, (snapshot) => {
-          if (snapshot.exists()) {
-            setUserProfile(snapshot.data() as UserProfile);
-          }
-        }, (error) => {
-          handleFirestoreError(error, OperationType.GET, `users/${user.uid}`, false);
-        });
-      } else {
-        if (unsubscribeUserDoc) {
-          unsubscribeUserDoc();
-          unsubscribeUserDoc = null;
-        }
-        setUserProfile(MOCK_USER);
-      }
-    });
-
-    return () => {
-      unsubscribeAuth();
-      if (unsubscribeUserDoc) unsubscribeUserDoc();
-    };
-  }, []);
 
   const allTracks = React.useMemo(() => {
     const combined = [...firebaseTracks, ...MOCK_TRACKS];
@@ -728,6 +688,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addNotification(`Track "${track.title}" uploaded`, "success");
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, `tracks/${track.id}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteTrack = async (trackId: string) => {
+    setIsLoading(true);
+    try {
+      await deleteDoc(doc(db, 'tracks', trackId));
+      addNotification("Track deleted successfully", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `tracks/${trackId}`);
     } finally {
       setIsLoading(false);
     }
@@ -933,7 +905,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     
     try {
-      await setDoc(doc(db, 'transactions', txId), newTx);
+      if (auth.currentUser) {
+        await setDoc(doc(db, 'transactions', txId), newTx);
+      }
       setTransactions(prev => [newTx, ...prev]);
       
       // Update user/artist earnings based on transaction
@@ -950,7 +924,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
         
         // If the recipient is the current user, update their profile earnings
-        if (txData.recipientAddress === userProfile.walletAddress) {
+        if (txData.recipientAddress === userProfile.walletAddress && auth.currentUser) {
           await updateDoc(doc(db, 'users', userProfile.id), updateFields);
         }
         
@@ -961,7 +935,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             ? allNFTs.find(n => n.id === txData.nftId)?.artistId 
             : null;
 
-        if (artistId) {
+        if (artistId && auth.currentUser) {
           await updateDoc(doc(db, 'users', artistId), updateFields);
         }
       }
@@ -1216,6 +1190,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updatePost = async (postId: string, updates: Partial<Post>) => {
+    if (!auth.currentUser) {
+      addNotification("Please log in to perform this action", "error");
+      return;
+    }
     try {
       if (postId.startsWith('post-')) {
         await updateDoc(doc(db, 'posts', postId), updates);
@@ -1923,7 +1901,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       posts, createPost, deletePost, updatePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
       updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters,
-      isLoading
+      isLoading, deleteTrack
     }}>
       {children}
       {isLoading && (

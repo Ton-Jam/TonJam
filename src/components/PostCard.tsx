@@ -201,7 +201,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     <motion.div
       whileHover={{ y: -2 }}
       className={cn(
-        "relative isolate w-full overflow-hidden rounded-2xl p-1.5 mb-4 group",
+        "relative isolate w-full overflow-hidden rounded-2xl p-3 mb-2 group",
         "bg-muted/50 dark:bg-background/90",
         "bg-linear-to-br from-black/5 to-black/[0.02] dark:from-white/5 dark:to-white/[0.02]",
         "backdrop-blur-xl backdrop-saturate-[180%]",
@@ -212,7 +212,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     >
       <div
         className={cn(
-          "relative w-full rounded-xl p-5",
+          "relative w-full rounded-xl p-2",
           "bg-linear-to-br from-black/[0.05] to-transparent dark:from-white/[0.08] dark:to-transparent",
           "backdrop-blur-md backdrop-saturate-150",
           "border border-black/[0.05] dark:border-white/[0.08]",
@@ -223,7 +223,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
           "hover:before:opacity-100"
         )}
       >
-        <div className="flex gap-4">
+        <div className="flex gap-2">
           {/* Author Avatar */}
           <div 
             className="flex-shrink-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full" 
@@ -249,7 +249,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 tabIndex={0}
                 aria-label={`View ${post.userName}'s profile`}
               >
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   <span className="font-semibold text-blue-600 hover:underline dark:text-foreground/90">{post.userName}</span>
                   {post.isVerified && (
                     <VerifiedIcon className="h-4 w-4 text-blue-400" />
@@ -261,11 +261,11 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   <span className="text-blue-500 text-sm dark:text-muted-foreground/80">{post.timestamp}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {!isOwnPost && (
                   <button 
                     onClick={handleFollow} 
-                    className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-muted text-foreground' : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-500/20'}`}
+                    className={`px-2 py-2 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-muted text-foreground' : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-500/20'}`}
                     aria-label={isFollowing ? `Unfollow ${post.userName}` : `Follow ${post.userName}`}
                   >
                     {isFollowing ? 'Following' : 'Follow'}
@@ -273,7 +273,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 )}
                 <button 
                   onClick={() => setShowOptions(true)} 
-                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-blue-500 hover:bg-blue-500/5 hover:text-blue-600 dark:text-muted-foreground/90 dark:hover:bg-muted/50 dark:hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg p-2 text-blue-500 hover:bg-blue-500/5 hover:text-blue-600 dark:text-muted-foreground/90 dark:hover:bg-muted/50 dark:hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Post options"
                   aria-haspopup="true"
                 >
@@ -283,14 +283,14 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             </div>
 
             {/* Post Text */}
-            <p className="text-base text-blue-700 dark:text-foreground/90 mb-4 whitespace-pre-wrap">
+            <p className="text-base text-blue-700 dark:text-foreground/90 mb-2 whitespace-pre-wrap">
               {renderContentWithHashtags(post.content)}
             </p>
 
           {/* Media Content */}
           {post.imageUrl && (
             <div 
-              className="rounded-[10px] overflow-hidden mb-4 bg-muted/50 cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
+              className="rounded-[10px] overflow-hidden mb-2 bg-muted/50 cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
               onClick={() => setExpandedImage(post.imageUrl)}
               onKeyDown={(e) => handleKeyDown(e, () => setExpandedImage(post.imageUrl))}
               role="button"
@@ -302,14 +302,14 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
           )}
 
           {post.video && (
-            <div className="rounded-[10px] overflow-hidden mb-4 bg-muted/50 relative aspect-video">
+            <div className="rounded-[10px] overflow-hidden mb-2 bg-muted/50 relative aspect-video">
               <video src={post.video} className="w-full h-full object-cover" aria-label="Post video" />
               <div className="absolute inset-0 flex items-center justify-center bg-background/40">
                 <button 
                   className="w-16 h-16 rounded-full bg-blue-600/80 flex items-center justify-center text-foreground text-xl hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   aria-label="Play video"
                 >
-                  <Play className="h-8 w-8 ml-1 fill-current" />
+                  <Play className="h-8 w-8 ml-2 fill-current" />
                 </button>
               </div>
             </div>
@@ -317,7 +317,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
 
           {track && (
             <div 
-              className="bg-muted/50 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/track cursor-pointer hover:bg-muted transition-all outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
+              className="bg-muted/50 rounded-[10px] p-2 mb-2 flex items-center gap-2 group/track cursor-pointer hover:bg-muted transition-all outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
               onClick={handlePlayTrack}
               onKeyDown={(e) => handleKeyDown(e, () => handlePlayTrack(e as any))}
               role="button"
@@ -338,7 +338,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 <h5 className="text-[10px] font-bold text-foreground uppercase truncate">{track.title}</h5>
                 <p className="text-[8px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <div className="text-right">
                   <p className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Streaming Now</p>
                   <p className="text-[10px] font-bold text-foreground uppercase">{(track.streams || track.playCount || 0).toLocaleString()}</p>
@@ -355,7 +355,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
 
           {nft && (
             <div 
-              className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-neutral-500/20 rounded-[10px] p-4 mb-4 flex items-center gap-4 group/nft cursor-pointer hover:from-blue-600/20 hover:to-purple-600/20 transition-all outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
+              className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-neutral-500/20 rounded-[10px] p-2 mb-2 flex items-center gap-2 group/nft cursor-pointer hover:from-blue-600/20 hover:to-purple-600/20 transition-all outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
               onClick={() => navigate(`/nft/${nft.id}`)}
               onKeyDown={(e) => handleKeyDown(e, () => navigate(`/nft/${nft.id}`))}
               role="button"
@@ -371,15 +371,15 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-2">
                   <span className="text-[7px] font-bold text-blue-400 uppercase tracking-[0.3em]">Sonic Artifact Acquired</span>
                 </div>
                 <h5 className="text-xs font-bold text-foreground uppercase truncate tracking-tight">{nft.title}</h5>
                 <p className="text-[9px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate">Creator: {nft.creator}</p>
               </div>
               <div className="text-right">
-                <p className="text-[8px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest mb-1">Valuation</p>
-                <div className="flex items-center gap-1.5 justify-end">
+                <p className="text-[8px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest mb-2">Valuation</p>
+                <div className="flex items-center gap-3 justify-end">
                   <span className="text-sm font-bold text-foreground tracking-tighter">{nft.price}</span>
                   <span className="text-[8px] font-bold text-blue-500">TON</span>
                 </div>
@@ -388,8 +388,8 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
           )}
 
           {/* Interaction Bar */}
-          <div className="flex items-center justify-between pt-4 relative flex-wrap gap-4">
-            <div className="flex items-center gap-6">
+          <div className="flex items-center justify-between pt-2 relative flex-wrap gap-2">
+            <div className="flex items-center gap-2">
               <button 
                 onClick={handleLike} 
                 className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${isLiked ? 'text-red-500' : 'text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
@@ -426,11 +426,11 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-6 pt-6 border-t border-border/50 overflow-hidden"
+            className="mt-2 pt-2 border-t border-border/50 overflow-hidden"
             id={`comments-${post.id}`}
           >
             {/* Comment Form */}
-            <form onSubmit={handleAddComment} className="flex gap-4 mb-6">
+            <form onSubmit={handleAddComment} className="flex gap-2 mb-2">
               <img src={MOCK_USER.avatar} className="w-8 h-8 rounded-full shadow-lg object-cover" alt="Your avatar" />
               <div className="flex-1 relative">
                 <input
@@ -438,7 +438,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-muted/50 rounded-[10px] py-2 px-4 text-xs outline-none focus:ring-1 focus:ring-blue-500/50 transition-all text-blue-600 dark:text-foreground placeholder:text-blue-500/50 dark:placeholder:text-muted-foreground/50"
+                  className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-xs outline-none focus:ring-1 focus:ring-blue-500/50 transition-all text-blue-600 dark:text-foreground placeholder:text-blue-500/50 dark:placeholder:text-muted-foreground/50"
                   aria-label="Write a comment"
                 />
                 <button
@@ -452,7 +452,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             </form>
 
             {/* Comments List */}
-            <div className="space-y-4" role="log" aria-label="Comments">
+            <div className="space-y-2" role="log" aria-label="Comments">
               <AnimatePresence mode="popLayout">
                 {comments.map(comment => (
                   <motion.div
@@ -461,7 +461,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     key={comment.id}
-                    className="flex gap-3 group/comment"
+                    className="flex gap-2 group/comment"
                   >
                     <img 
                       src={comment.userAvatar} 
@@ -473,8 +473,8 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                       tabIndex={0}
                     />
                     <div className="flex-1">
-                      <div className="bg-muted/50 rounded-[10px] p-3 relative group-hover/comment:bg-foreground/[0.07] transition-colors border border-border/50">
-                        <div className="flex items-center justify-between mb-1">
+                      <div className="bg-muted/50 rounded-[10px] p-2 relative group-hover/comment:bg-foreground/[0.07] transition-colors border border-border/50">
+                        <div className="flex items-center justify-between mb-2">
                           <h5 
                             className="text-[10px] font-bold text-blue-600 dark:text-foreground uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                             onClick={(e) => handleCommentProfileClick(e, comment.userId)}
@@ -490,14 +490,14 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                         
                         {/* Reactions */}
                         <div className="flex items-center gap-2 mt-2">
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-3">
                             {Object.entries(comment.reactions || {}).map(([emoji, count]) => {
                               const isActive = comment.userReactions?.includes(emoji);
                               return (
                                 <button 
                                   key={emoji} 
                                   onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                  className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground/80 hover:text-foreground border border-border/50 hover:bg-muted'}`}
+                                  className={`flex items-center gap-3 rounded-full px-2 py-3 text-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground/80 hover:text-foreground border border-border/50 hover:bg-muted'}`}
                                   aria-label={`${isActive ? 'Remove' : 'Add'} ${emoji} reaction`}
                                 >
                                   <span className="text-xs">{emoji}</span>
@@ -523,7 +523,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
                                   exit={{ opacity: 0, y: 5, scale: 0.95 }}
                                   transition={{ duration: 0.15 }}
-                                  className="absolute bottom-full left-0 mb-2 flex items-center gap-1 bg-background border border-border p-1.5 rounded-full shadow-2xl z-20 backdrop-blur-xl"
+                                  className="absolute bottom-full left-0 mb-2 flex items-center gap-2 bg-background border border-border p-3 rounded-full shadow-2xl z-20 backdrop-blur-xl"
                                   role="menu"
                                 >
                                   {REACTION_EMOJIS.map(emoji => {
@@ -554,7 +554,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 ))}
               </AnimatePresence>
               {comments.length === 0 && (
-                <div className="text-center py-8 border border-dashed border-border/50 rounded-[10px]">
+                <div className="text-center py-2 border border-dashed border-border/50 rounded-[10px]">
                   <MessageSquareOff className="h-6 w-6 text-foreground/5 mx-auto mb-2" />
                   <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em]">No comments yet</p>
                 </div>
@@ -575,7 +575,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md p-2"
             onClick={() => setExpandedImage(null)}
             role="dialog"
             aria-modal="true"

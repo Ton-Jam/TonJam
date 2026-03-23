@@ -18,11 +18,11 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={onClose}></div>
       
       <div className="relative w-full max-w-sm glass border border-border bg-white rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="p-4 border-b border-border/50 flex items-center justify-between">
+        <div className="p-2 border-b border-border/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-1 h-3 bg-blue-500 rounded-full"></div>
             <h2 className="text-[10px] font-bold text-black uppercase tracking-widest">Add to Playlist</h2>
@@ -32,12 +32,12 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
           </button>
         </div>
 
-        <div className="p-2 space-y-1 max-h-[50vh] overflow-y-auto custom-scrollbar">
+        <div className="p-2 space-y-2 max-h-[50vh] overflow-y-auto custom-scrollbar">
           {playlists.map(playlist => (
             <button 
               key={playlist.id} 
               onClick={() => handleAdd(playlist.id, playlist.title)}
-              className="w-full flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="w-full flex items-center gap-2 p-3 rounded-[8px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               <div className="w-8 h-8 rounded-[4px] bg-muted/50 flex items-center justify-center overflow-hidden border border-border/50">
                 {playlist.coverUrl ? (
@@ -54,13 +54,13 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
           ))}
         </div>
 
-        <div className="p-3 border-t border-border/50">
+        <div className="p-2 border-t border-border/50">
           <button 
             onClick={() => {
               onClose();
               setIsCreatePlaylistModalOpen(true);
             }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-blue-600/10 border border-neutral-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-[8px] bg-blue-600/10 border border-neutral-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <Plus className="h-3 w-3" /> Create New Playlist
           </button>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import { 
   Plus, 
   ChartLine, 
@@ -20,9 +21,13 @@ import {
   FileAudio,
   Activity,
   Music2,
-  Key
+  Key,
+  Info,
+  Upload,
+  Trash2
 } from 'lucide-react';
 import { GoogleGenAI, Type } from "@google/genai";
+import { uploadToIPFS } from "@/services/pinataService";
 import {
   LineChart,
   Line,
@@ -59,7 +64,7 @@ import ArtistVerification from "@/components/ArtistVerification";
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery } = useAudio();
+  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery, addUserTrack, userTracks, userNFTs, deleteTrack } = useAudio();
   
   useEffect(() => {
     if (!userProfile.isVerifiedArtist) {
@@ -75,17 +80,26 @@ const ArtistDashboard: React.FC = () => {
 
   const artistData = currentArtist;
 
-  const [tracks, setTracks] = useState<Track[]>(() =>
-    MOCK_TRACKS.filter((t) => t.artistId === artistData.id),
-  );
+  const allArtistTracks = useMemo(() => {
+    const mockTracks = MOCK_TRACKS.filter((t) => t.artistId === artistData.id);
+    // Filter out mock tracks that might have been "replaced" by real ones if we had a way to identify them
+    // For now, just combine them, but prioritize userTracks (real ones)
+    const combined = [...userTracks];
+    mockTracks.forEach(mt => {
+      if (!combined.find(ct => ct.title === mt.title)) {
+        combined.push(mt);
+      }
+    });
+    return combined;
+  }, [userTracks, artistData.id]);
 
   const filteredTracks = useMemo(() => {
-    if (!searchQuery) return tracks;
-    return tracks.filter(t => 
+    if (!searchQuery) return allArtistTracks;
+    return allArtistTracks.filter(t => 
       t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.genre.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [tracks, searchQuery]);
+  }, [allArtistTracks, searchQuery]);
 
   const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification" | "transactions">("overview");
 
@@ -107,9 +121,12 @@ const ArtistDashboard: React.FC = () => {
 
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  
   /* Form states */ const [newTrack, setNewTrack] = useState({
     title: "",
     genre: "Electronic",
+    description: "",
     isNFT: false,
     price: "1.0",
     bpm: 0,
@@ -185,34 +202,56 @@ const ArtistDashboard: React.FC = () => {
       analyzeAudio(file);
     }
   };
+
+  const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
     addNotification("Artist profile updated successfully.", "success");
   };
 
-  const handleUploadTrack = (e: React.FormEvent) => {
+  const handleUploadTrack = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTrack.title || !audioFile || !coverFile) return;
+    if (!newTrack.title || !audioFile || !coverFile) {
+      addNotification("Please provide title, audio file and cover art.", "warning");
+      return;
+    }
     
+    setIsUploading(true);
     setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
 
-    setTimeout(() => {
+    try {
+      // 1. Upload to IPFS
+      addNotification("Uploading artifacts to IPFS...", "info");
+      
+      const [audioRes, coverRes] = await Promise.all([
+        uploadToIPFS(audioFile),
+        uploadToIPFS(coverFile)
+      ]);
+
+      const audioUrl = audioRes.ipfsUrl;
+      const coverUrl = coverRes.ipfsUrl;
+
+      // 2. Create track object
       const track: Track = {
         id: `t-${Date.now()}`,
         title: newTrack.title,
         artist: artistData.name,
         artistId: artistData.id,
-        coverUrl: `https://picsum.photos/400/400?seed=${Date.now()}`,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        coverUrl: coverUrl || `https://picsum.photos/400/400?seed=${Date.now()}`,
+        audioUrl: audioUrl,
+        audioIpfsUrl: audioUrl,
+        coverIpfsUrl: coverUrl,
         duration: 180,
         genre: newTrack.genre,
         bpm: newTrack.bpm,
@@ -223,14 +262,28 @@ const ArtistDashboard: React.FC = () => {
         likes: 0,
         releaseDate: new Date().toISOString().split("T")[0],
       };
-      setTracks([track, ...tracks]);
+
+      // 3. Save to Firestore
+      await addUserTrack(track);
+      
+      if (newTrack.isNFT) {
+        setIsUploading(false);
+        navigate('/mint', { state: { track } });
+        return;
+      }
+
       setIsUploading(false);
       setAudioFile(null);
       setCoverFile(null);
+      setCoverPreview(null);
       setUploadProgress(0);
-      setNewTrack({ title: "", genre: "Electronic", isNFT: false, price: "1.0", bpm: 0, key: "" });
+      setNewTrack({ title: "", genre: "Electronic", description: "", isNFT: false, price: "1.0", bpm: 0, key: "" });
       addNotification("Track broadcasted to the network.", "success");
-    }, 2000);
+    } catch (error: any) {
+      console.error("Upload failed:", error);
+      addNotification("Upload failed: " + (error.response?.data?.error || error.message), "error");
+      setIsUploading(false);
+    }
   };
   const StatCard = ({
     label,
@@ -243,7 +296,7 @@ const ArtistDashboard: React.FC = () => {
     icon: string;
     trend?: string;
   }) => (
-    <div className="glass bg-foreground/[0.02] rounded-[10px] p-6 transition-all group">
+    <div className="glass bg-foreground/[0.02] rounded-[10px] p-4 transition-all group">
       {" "}
       <div className="flex justify-between items-start mb-4">
         {" "}
@@ -259,16 +312,16 @@ const ArtistDashboard: React.FC = () => {
           {icon === 'fa-user-edit' && <UserPen className="h-5 w-5" />}
         </div>{" "}
         {trend && (
-          <span className="text-[10px] font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-[10px]">
+          <span className="text-[10px] font-bold text-green-500 bg-green-500/10 px-4 py-4 rounded-[10px]">
             {" "}
             {trend}{" "}
           </span>
         )}{" "}
       </div>{" "}
-      <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.3em] mb-1">
+      <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em] mb-4">
         {label}
       </p>{" "}
-      <h3 className="text-2xl font-bold text-foreground tracking-tighter">
+      <h3 className="text-[20px] font-bold text-blue-400 tracking-tighter">
         {value}
       </h3>{" "}
     </div>
@@ -303,23 +356,23 @@ const ArtistDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="w-full px-0 sm:px-6 lg:px-10 pb-0 sm:pb-8">
+    <div className="w-full px-4 sm:px-4 lg:px-4 pb-4 sm:pb-4">
       {" "}
       <div className="w-full">
         {" "}
         {/* Header Section */}{" "}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
           {" "}
           <div>
             {" "}
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-4 mb-4">
               {" "}
               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>{" "}
               <span className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.5em]">
                 Artist Command Center
               </span>{" "}
             </div>{" "}
-            <h1 className="text-4xl font-bold text-foreground tracking-tighter uppercase">
+            <h1 className="text-[32px] font-bold text-foreground tracking-tighter uppercase">
               Dashboard
             </h1>{" "}
           </div>{" "}
@@ -327,14 +380,14 @@ const ArtistDashboard: React.FC = () => {
             {" "}
             <button
               onClick={() => setIsUploading(true)}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-neutral-600/20"
+              className="px-4 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-4 shadow-lg shadow-neutral-600/20"
             >
               {" "}
               <Plus className="h-4 w-4" /> Upload Track{" "}
             </button>{" "}
             <button
               onClick={() => navigate(`/artist/${artistData.id}`)}
-              className="px-6 py-3 bg-muted/50 hover:bg-muted text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all"
+              className="px-4 py-4 bg-muted/50 hover:bg-muted text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all"
             >
               {" "}
               View Public Profile{" "}
@@ -342,7 +395,7 @@ const ArtistDashboard: React.FC = () => {
           </div>{" "}
         </div>{" "}
         {/* Navigation Tabs */}{" "}
-        <div className="flex gap-8 -b mb-10 overflow-x-auto no-scrollbar">
+        <div className="flex gap-4 -b mb-4 overflow-x-auto no-scrollbar">
           {" "}
           {[
             { id: "overview", label: "Overview", icon: <ChartLine className="h-4 w-4" /> },
@@ -357,7 +410,7 @@ const ArtistDashboard: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`pb-4 flex items-center gap-3 transition-all relative whitespace-nowrap ${activeTab === tab.id ? "text-blue-500" : "text-neutral-500 hover:text-neutral-400"}`}
+              className={`pb-4 flex items-center gap-4 transition-all relative whitespace-nowrap ${activeTab === tab.id ? "text-blue-500" : "text-neutral-500 hover:text-neutral-400"}`}
             >
               {" "}
               {tab.icon}
@@ -374,13 +427,13 @@ const ArtistDashboard: React.FC = () => {
         <div className="animate-in fade-in duration-500">
           {" "}
           {activeTab === "overview" && (
-            <div className="space-y-10">
+            <div className="space-y-4">
               {" "}
-              <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+              <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
                 <div className="min-w-[240px] flex-1">
                   <StatCard
                     label="Total Streams"
-                    value={tracks
+                    value={allArtistTracks
                       .reduce((acc, t) => acc + (t.playCount || 0), 0)
                       .toLocaleString()}
                     icon="fa-play"
@@ -410,10 +463,10 @@ const ArtistDashboard: React.FC = () => {
                   />
                 </div>
               </div>{" "}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Performance Analytics */}
-                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-8">
-                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
                     Performance Analytics
                   </h3>
                   <div className="h-64 w-full">
@@ -434,8 +487,8 @@ const ArtistDashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Sales */}
-                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-8">
-                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
                     Recent Sales (TON)
                   </h3>
                   <div className="h-64 w-full">
@@ -462,12 +515,12 @@ const ArtistDashboard: React.FC = () => {
                 </div>
 
                 {/* Top Tracks */}
-                <div className="glass bg-foreground/[0.02] rounded-[5px] p-8">
-                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
+                <div className="glass bg-foreground/[0.02] rounded-[5px] p-4">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
                     Top Tracks
                   </h3>
                   <div className="flex flex-col gap-4 pb-4 no-scrollbar">
-                    {tracks.slice(0, 3).map((track) => (
+                    {allArtistTracks.slice(0, 3).map((track) => (
                       <div key={track.id} className="w-full">
                         <TrackCard track={track} />
                       </div>
@@ -478,22 +531,28 @@ const ArtistDashboard: React.FC = () => {
             </div>
           )}{" "}
           {activeTab === "collection" && (
-            <div className="space-y-10 animate-in slide-in-from-right-4 duration-500">
+            <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-foreground uppercase tracking-tighter">Your NFT Collection</h2>
                 <button 
                   onClick={() => setActiveTab('forge')}
-                  className="px-4 py-2 bg-neutral-600/10 rounded-[8px] text-[9px] font-bold text-neutral-500 uppercase tracking-widest hover:bg-neutral-600 hover:text-foreground transition-all"
+                  className="px-4 py-4 bg-neutral-600/10 rounded-[8px] text-[9px] font-bold text-neutral-500 uppercase tracking-widest hover:bg-neutral-600 hover:text-foreground transition-all"
                 >
                   Forge New Protocol
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {MOCK_NFTS.filter(n => n.creator === artistData.name).map(nft => (
-                  <NFTCard key={nft.id} nft={nft} />
-                ))}
-                {MOCK_NFTS.filter(n => n.creator === artistData.name).length === 0 && (
-                  <div className="col-span-full py-32 text-center bg-muted/50 rounded-[20px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {userNFTs.length > 0 ? (
+                  userNFTs.map(nft => (
+                    <NFTCard key={nft.id} nft={nft} />
+                  ))
+                ) : (
+                  MOCK_NFTS.filter(n => n.creator === artistData.name).map(nft => (
+                    <NFTCard key={nft.id} nft={nft} />
+                  ))
+                )}
+                {userNFTs.length === 0 && MOCK_NFTS.filter(n => n.creator === artistData.name).length === 0 && (
+                  <div className="col-span-full py-4 text-center bg-muted/50 rounded-[20px]">
                     <Gem className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
                     <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">No minted protocols in your collection.</p>
                   </div>
@@ -503,7 +562,7 @@ const ArtistDashboard: React.FC = () => {
           )}
 
           {activeTab === "tracks" && (
-            <div className="space-y-8">
+            <div className="space-y-4">
               {" "}
               <div className="flex justify-between items-center">
                 {" "}
@@ -511,25 +570,25 @@ const ArtistDashboard: React.FC = () => {
                   Your Catalog
                 </h3>{" "}
                 <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                  {tracks.length} Tracks Total
+                  {allArtistTracks.length} Tracks Total
                 </span>{" "}
               </div>{" "}
               <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[5px] overflow-x-auto no-scrollbar">
                 <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
                     <tr className="border-b border-border/50 bg-foreground/[0.02]">
-                      <th className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Track</th>
-                      <th className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Genre</th>
-                      <th className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Status</th>
-                      <th className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest text-right">Streams</th>
-                      <th className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest text-right">Likes</th>
-                      <th className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest text-right">Actions</th>
+                      <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Track</th>
+                      <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Genre</th>
+                      <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Status</th>
+                      <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest text-right">Streams</th>
+                      <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest text-right">Likes</th>
+                      <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredTracks.map((track) => (
                       <tr key={track.id} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
-                        <td className="p-6">
+                        <td className="p-4">
                           <div className="flex items-center gap-4">
                             <img src={track.coverUrl} className="w-10 h-10 rounded-[5px] object-cover" alt="" />
                             <div>
@@ -538,34 +597,53 @@ const ArtistDashboard: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="p-6">
+                        <td className="p-4">
                           <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{track.genre}</span>
                         </td>
-                        <td className="p-6">
+                        <td className="p-4">
                           {track.isNFT ? (
-                            <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-[8px] font-bold uppercase rounded-[5px] border border-amber-500/20">Minted NFT</span>
+                            <span className="px-4 py-4 bg-amber-500/10 text-amber-500 text-[8px] font-bold uppercase rounded-[5px] border border-amber-500/20">Minted NFT</span>
                           ) : (
-                            <span className="px-2 py-1 bg-neutral-500/10 text-neutral-500 text-[8px] font-bold uppercase rounded-[5px] border border-neutral-500/20">Ready to Mint</span>
+                            <span className="px-4 py-4 bg-neutral-500/10 text-neutral-500 text-[8px] font-bold uppercase rounded-[5px] border border-neutral-500/20">Ready to Mint</span>
                           )}
                         </td>
-                        <td className="p-6 text-right">
+                        <td className="p-4 text-right">
                           <span className="text-[11px] font-mono text-foreground">{(track.playCount || 0).toLocaleString()}</span>
                         </td>
-                        <td className="p-6 text-right">
+                        <td className="p-4 text-right">
                           <span className="text-[11px] font-mono text-foreground">{(track.likes || 0).toLocaleString()}</span>
                         </td>
-                        <td className="p-6 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-4">
                             {!track.isNFT && (
                               <button 
                                 onClick={() => {
                                   navigate('/mint', { state: { track } });
                                 }}
-                                className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-[5px] text-[8px] font-bold uppercase tracking-widest border border-amber-500/20 transition-all"
+                                className="px-4 py-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-[5px] text-[8px] font-bold uppercase tracking-widest border border-amber-500/20 transition-all"
                               >
                                 Mint NFT
                               </button>
                             )}
+                            <button 
+                              onClick={() => {
+                                toast(`Delete "${track.title}"?`, {
+                                  description: "This action cannot be undone.",
+                                  action: {
+                                    label: "Delete",
+                                    onClick: () => deleteTrack(track.id),
+                                  },
+                                  cancel: {
+                                    label: "Cancel",
+                                    onClick: () => {},
+                                  },
+                                });
+                              }}
+                              className="text-muted-foreground/50 hover:text-red-500 transition-colors"
+                              title="Delete Track"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
                             <button className="text-muted-foreground/50 hover:text-foreground transition-colors">
                               <Ellipsis className="h-4 w-4" />
                             </button>
@@ -592,7 +670,7 @@ const ArtistDashboard: React.FC = () => {
           )}
 
           {activeTab === "transactions" && (
-            <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="space-y-4 animate-in fade-in duration-500">
               <div className="flex justify-between items-center">
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">
                   Transaction History
@@ -602,22 +680,22 @@ const ArtistDashboard: React.FC = () => {
                 <table className="w-full text-left border-collapse min-w-[600px]">
                   <thead>
                     <tr className="border-b border-border/50 bg-foreground/[0.02]">
-                      <th scope="col" className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Type</th>
-                      <th scope="col" className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Amount</th>
-                      <th scope="col" className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Timestamp</th>
-                      <th scope="col" className="p-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Status</th>
+                      <th scope="col" className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Type</th>
+                      <th scope="col" className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Amount</th>
+                      <th scope="col" className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Timestamp</th>
+                      <th scope="col" className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {transactions.filter(tx => tx.recipientAddress === artistData.walletAddress || tx.senderAddress === artistData.walletAddress).map((tx) => (
                       <tr key={tx.id} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
-                        <td scope="row" className="p-6 text-[10px] font-bold text-foreground uppercase tracking-widest">{tx.type.replace('_', ' ')}</td>
-                        <td className="p-6 text-[10px] font-mono text-foreground">{tx.amount} TON</td>
-                        <td className="p-6 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                        <td scope="row" className="p-4 text-[10px] font-bold text-foreground uppercase tracking-widest">{tx.type.replace('_', ' ')}</td>
+                        <td className="p-4 text-[10px] font-mono text-foreground">{tx.amount} TON</td>
+                        <td className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                           {new Date(tx.timestamp).toLocaleDateString()}
                         </td>
-                        <td className="p-6">
-                          <span className="px-2 py-1 bg-green-500/10 text-green-500 text-[8px] font-bold uppercase rounded-[5px] border border-green-500/20">Completed</span>
+                        <td className="p-4">
+                          <span className="px-4 py-4 bg-green-500/10 text-green-500 text-[8px] font-bold uppercase rounded-[5px] border border-green-500/20">Completed</span>
                         </td>
                       </tr>
                     ))}
@@ -628,53 +706,53 @@ const ArtistDashboard: React.FC = () => {
           )}
 
           {activeTab === "royalties" && (
-            <div className="space-y-10">
+            <div className="space-y-4">
               {" "}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {" "}
-                <div className="lg:col-span-2 space-y-10">
+                <div className="lg:col-span-2 space-y-4">
                   {" "}
-                  <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-[10px] p-10 relative overflow-hidden shadow-2xl shadow-neutral-600/20">
+                  <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-[10px] p-4 relative overflow-hidden shadow-2xl shadow-neutral-600/20">
                     {" "}
-                    <div className="absolute top-0 right-0 p-10 opacity-10">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
                       <Coins className="h-24 w-24" />
                     </div>{" "}
                     <div className="relative z-10">
                       {" "}
-                      <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-[0.4em] mb-2">
+                      <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-[0.4em] mb-4">
                         Available for Withdrawal
                       </p>{" "}
-                      <h2 className="text-5xl font-bold text-foreground tracking-tighter mb-8">
+                      <h2 className="text-[44px] font-bold text-foreground tracking-tighter mb-4">
                         {artistData.earnings?.total} TON
                       </h2>{" "}
                       <div className="flex gap-4">
                         {" "}
-                        <button onClick={() => setIsWithdrawModalOpen(true)} className="px-8 py-4 bg-foreground text-background rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl">
+                        <button onClick={() => setIsWithdrawModalOpen(true)} className="px-4 py-4 bg-foreground text-background rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl">
                           {" "}
                           Withdraw to Wallet{" "}
                         </button>{" "}
-                        <button className="px-8 py-4 bg-background/20 backdrop-blur-md text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-background/30 transition-all">
+                        <button className="px-4 py-4 bg-background/20 backdrop-blur-md text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-background/30 transition-all">
                           {" "}
                           View Ledger{" "}
                         </button>{" "}
                       </div>{" "}
                     </div>{" "}
                   </div>{" "}
-                    <div className="glass border border-border bg-white rounded-[10px] p-8 relative overflow-hidden">
+                    <div className="glass border border-border bg-white rounded-[10px] p-4 relative overflow-hidden">
                     {" "}
-                    <div className="absolute top-0 right-0 p-8 opacity-5">
+                    <div className="absolute top-0 right-0 p-4 opacity-5">
                       <Radio className="h-16 w-16 text-blue-400" />
                     </div>{" "}
-                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
                       Royalty Configuration
                     </h3>{" "}
                     <div className="space-y-4">
                       {artistData.royaltyConfig ? (
                         <>
-                          <div className="space-y-2">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Streaming Splits</span>
+                          <div className="space-y-4">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-4">Streaming Splits</span>
                             {artistData.royaltyConfig.streamingSplits.map((split, i) => (
-                              <div key={i} className="flex justify-between items-center bg-muted/50 p-3 rounded-[6px]">
+                              <div key={i} className="flex justify-between items-center bg-muted/50 p-4 rounded-[6px]">
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-bold text-foreground uppercase">{split.label || 'Recipient'}</span>
                                   <span className="text-[7px] font-mono text-muted-foreground/50">{split.address.slice(0, 12)}...</span>
@@ -683,10 +761,10 @@ const ArtistDashboard: React.FC = () => {
                               </div>
                             ))}
                           </div>
-                          <div className="space-y-2 pt-4">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">NFT Secondary Splits</span>
+                          <div className="space-y-4 pt-4">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-4">NFT Secondary Splits</span>
                             {artistData.royaltyConfig.nftSaleSplits.map((split, i) => (
-                              <div key={i} className="flex justify-between items-center bg-muted/50 p-3 rounded-[6px]">
+                              <div key={i} className="flex justify-between items-center bg-muted/50 p-4 rounded-[6px]">
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-bold text-foreground uppercase">{split.label || 'Recipient'}</span>
                                   <span className="text-[7px] font-mono text-muted-foreground/50">{split.address.slice(0, 12)}...</span>
@@ -701,21 +779,21 @@ const ArtistDashboard: React.FC = () => {
                       )}
                       <button 
                         onClick={() => setIsRoyaltyModalOpen(true)}
-                        className="w-full mt-4 py-3 bg-muted/50 border border-border rounded-[6px] text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:bg-muted transition-all"
+                        className="w-full mt-4 py-4 bg-muted/50 border border-border rounded-[6px] text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:bg-muted transition-all"
                       >
                         Edit Configuration
                       </button>
                     </div>
                   </div>
-                  <div className="glass border border-border bg-white rounded-[10px] p-8 relative overflow-hidden">
+                  <div className="glass border border-border bg-white rounded-[10px] p-4 relative overflow-hidden">
                     {" "}
-                    <div className="absolute top-0 right-0 p-8 opacity-5">
+                    <div className="absolute top-0 right-0 p-4 opacity-5">
                       <Radio className="h-16 w-16 text-blue-400" />
                     </div>{" "}
-                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
                       Automated Distribution Protocol
                     </h3>{" "}
-                    <div className="space-y-6 relative z-10">
+                    <div className="space-y-4 relative z-10">
                       {" "}
                       <div className="flex items-start gap-4">
                         {" "}
@@ -725,7 +803,7 @@ const ArtistDashboard: React.FC = () => {
                         </div>{" "}
                         <div>
                           {" "}
-                          <p className="text-[11px] font-bold text-foreground uppercase mb-1">
+                          <p className="text-[11px] font-bold text-foreground uppercase mb-4">
                             Streaming Revenue (10% Platform Fee)
                           </p>{" "}
                           <p className="text-[9px] text-muted-foreground leading-relaxed uppercase tracking-widest">
@@ -745,7 +823,7 @@ const ArtistDashboard: React.FC = () => {
                         </div>{" "}
                         <div>
                           {" "}
-                          <p className="text-[11px] font-bold text-foreground uppercase mb-1">
+                          <p className="text-[11px] font-bold text-foreground uppercase mb-4">
                             NFT Secondary Sales (10% Platform Fee)
                           </p>{" "}
                           <p className="text-[9px] text-muted-foreground leading-relaxed uppercase tracking-widest">
@@ -759,13 +837,13 @@ const ArtistDashboard: React.FC = () => {
                     </div>{" "}
                   </div>{" "}
                   {/* Revenue Chart */}
-                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] overflow-hidden mb-10">
+                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] overflow-hidden mb-4">
                      <ChartRevenue />
                   </div>
 
-                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-8">
+                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
                     {" "}
-                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
                       Transaction Ledger (Auditable)
                     </h3>{" "}
                     <div className="overflow-x-auto no-scrollbar">
@@ -785,7 +863,7 @@ const ArtistDashboard: React.FC = () => {
                             transactions.filter(tx => tx.recipientAddress === artistData.walletAddress).map((tx) => (
                               <tr key={tx.id} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
                                 <td className="py-4">
-                                  <span className={`text-[8px] font-bold uppercase px-2 py-1 rounded-[5px] ${tx.type === 'stream' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                                  <span className={`text-[8px] font-bold uppercase px-4 py-4 rounded-[5px] ${tx.type === 'stream' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
                                     {tx.type.replace('_', ' ')}
                                   </span>
                                 </td>
@@ -797,7 +875,7 @@ const ArtistDashboard: React.FC = () => {
                                 <td className="py-4 text-[10px] font-mono text-red-500/60">-{tx.platformFee}</td>
                                 <td className="py-4 text-[10px] font-mono text-green-400">+{tx.artistShare}</td>
                                 <td className="py-4">
-                                  <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center gap-4">
                                     <div className="w-1 h-1 bg-green-500 rounded-full"></div>
                                     <span className="text-[8px] font-bold text-green-500 uppercase tracking-widest">Verified</span>
                                   </div>
@@ -806,7 +884,7 @@ const ArtistDashboard: React.FC = () => {
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={6} className="py-20 text-center">
+                              <td colSpan={6} className="py-4 text-center">
                                 <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No transactions recorded in this epoch.</p>
                               </td>
                             </tr>
@@ -816,14 +894,14 @@ const ArtistDashboard: React.FC = () => {
                     </div>
                   </div>{" "}
                 </div>{" "}
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {" "}
-                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-8">
+                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
                     {" "}
-                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-8">
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
                       Earnings Breakdown
                     </h3>{" "}
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {" "}
                       <div className="flex justify-between items-center">
                         {" "}
@@ -859,15 +937,15 @@ const ArtistDashboard: React.FC = () => {
                       </div>{" "}
                     </div>{" "}
                   </div>{" "}
-                  <div className="p-8 bg-blue-600/10 border-neutral-500/20 rounded-[10px]">
+                  <div className="p-4 bg-blue-600/10 border-neutral-500/20 rounded-[10px]">
                     {" "}
                     <h4 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-4">
                       Smart Contract Status
                     </h4>{" "}
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-4 mb-4">
                       {" "}
                       <div className="w-2 h-2 rounded-full bg-green-500"></div>{" "}
-                      <span className="text-[10px] font-bold text-foreground uppercase flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-foreground uppercase flex items-center gap-4">
                         <CheckCircle2 className="h-3 w-3" /> Royalty Engine Online
                       </span>{" "}
                     </div>{" "}
@@ -885,27 +963,27 @@ const ArtistDashboard: React.FC = () => {
           {activeTab === "profile" && (
             <div className="max-w-2xl mx-auto">
               {" "}
-              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-10">
+              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
                 {" "}
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-10">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
                   Identity Configuration
                 </h3>{" "}
-                <form onSubmit={handleUpdateProfile} className="space-y-8">
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
                   {" "}
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {" "}
                     <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                       Artist Bio
                     </label>{" "}
                     <textarea
                       defaultValue={artistData.bio}
-                      className="w-full bg-foreground/[0.03] rounded-[10px] p-5 text-sm text-foreground outline-none focus:-blue-500/50 transition-all min-h-[150px]"
+                      className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:-blue-500/50 transition-all min-h-[150px]"
                       placeholder="Tell your story..."
                     />{" "}
                   </div>{" "}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {" "}
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {" "}
                       <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                         X (Twitter)
@@ -916,7 +994,7 @@ const ArtistDashboard: React.FC = () => {
                         className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:-blue-500/50 transition-all"
                       />{" "}
                     </div>{" "}
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {" "}
                       <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                         Instagram
@@ -928,7 +1006,7 @@ const ArtistDashboard: React.FC = () => {
                       />{" "}
                     </div>{" "}
                   </div>{" "}
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {" "}
                     <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                       Website
@@ -954,20 +1032,20 @@ const ArtistDashboard: React.FC = () => {
       </div>{" "}
       {/* Withdraw Confirmation Modal */}
       {isWithdrawModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-background/90 backdrop-blur-xl"
             onClick={() => setIsWithdrawModalOpen(false)}
           ></div>
-          <div className="relative w-full max-w-md glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300">
-            <h2 className="text-2xl font-bold text-foreground tracking-tighter uppercase mb-2">
+          <div className="relative w-full max-w-md glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4 shadow-2xl animate-in zoom-in-95 duration-300">
+            <h2 className="text-[20px] font-bold text-foreground tracking-tighter uppercase mb-4">
               Confirm Withdrawal
             </h2>
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-8">
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">
               Review the details before broadcasting to the network.
             </p>
             
-            <div className="space-y-6 mb-10">
+            <div className="space-y-4 mb-4">
               <div className="flex justify-between items-center p-4 bg-foreground/[0.03] rounded-[10px]">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Amount</span>
                 <span className="text-lg font-bold text-foreground tracking-tighter">{artistData.earnings?.total} TON</span>
@@ -1002,66 +1080,66 @@ const ArtistDashboard: React.FC = () => {
       )}
       {/* Upload Modal */}{" "}
       {isUploading && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           {" "}
           <div
             className="absolute inset-0 bg-background/90 backdrop-blur-xl"
             onClick={() => setIsUploading(false)}
           ></div>{" "}
-          <div className="relative w-full max-w-4xl glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar">
+          <div className="relative w-full max-w-4xl glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4 shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto no-scrollbar">
             {" "}
-            <h2 className="text-2xl font-bold text-foreground tracking-tighter uppercase mb-2">
+            <h2 className="text-[20px] font-bold text-foreground tracking-tighter uppercase mb-4">
               Forge New Frequency
             </h2>{" "}
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-10">
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">
               Upload your music to the TON network
             </p>{" "}
-            <form onSubmit={handleUploadTrack} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                    Cover Image
+            <form onSubmit={handleUploadTrack} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-4">
+                    <Info className="h-3 w-3" /> Cover Art (1:1 Ratio)
                   </label>
                   <div 
                     onClick={() => !coverFile && coverInputRef.current?.click()}
-                    className={`w-full border-2 border-dashed border-border rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500/50 hover:bg-foreground/[0.02] transition-all group ${coverFile ? 'h-auto p-4' : 'h-40'}`}
+                    className={`w-full aspect-square border-2 border-dashed border-border rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500/50 hover:bg-foreground/[0.02] transition-all group relative overflow-hidden ${coverFile ? 'border-neutral-500/50' : ''}`}
                   >
                     <input 
                       type="file" 
                       ref={coverInputRef} 
-                      onChange={(e) => setCoverFile(e.target.files?.[0] || null)} 
+                      onChange={handleCoverFileChange} 
                       accept="image/*" 
                       className="hidden" 
                     />
-                    {coverFile ? (
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-[5px] bg-blue-500/20 flex items-center justify-center text-blue-500">
-                             <FileAudio className="h-4 w-4" />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">{coverFile.name}</span>
-                            <span className="text-[8px] text-muted-foreground uppercase tracking-widest">{(coverFile.size / (1024 * 1024)).toFixed(2)} MB</span>
-                          </div>
+                    {coverPreview ? (
+                      <>
+                        <img src={coverPreview} className="w-full h-full object-cover rounded-[8px]" alt="Cover Preview" referrerPolicy="no-referrer" />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button 
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setCoverFile(null); setCoverPreview(null); }}
+                            className="px-4 py-4 bg-red-500 text-white text-[10px] font-bold uppercase rounded-[5px] hover:bg-red-600 transition-colors"
+                          >
+                            Remove
+                          </button>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); setCoverFile(null); }} className="text-xs text-red-400">Clear</button>
-                      </div>
+                      </>
                     ) : (
-                      <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center gap-4">
                         <Plus className="h-8 w-8 text-muted-foreground/50 group-hover:text-blue-500 transition-colors" />
-                        <span className="text-[10px] font-bold text-muted-foreground/50 group-hover:text-foreground transition-colors uppercase tracking-widest">Drop cover image or click to browse</span>
+                        <span className="text-[10px] font-bold text-muted-foreground/50 group-hover:text-foreground transition-colors uppercase tracking-widest">Select Image</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                    Audio File
+                <div className="space-y-4">
+                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-4">
+                    <Music className="h-3 w-3" /> Audio Artifact (MP3/WAV)
                   </label>
                   <div 
                     onClick={() => !audioFile && audioInputRef.current?.click()}
-                    className={`w-full border-2 border-dashed border-border rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500/50 hover:bg-foreground/[0.02] transition-all group ${audioFile ? 'h-auto p-4' : 'h-40'}`}
+                    className={`w-full aspect-square border-2 border-dashed border-border rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500/50 hover:bg-foreground/[0.02] transition-all group relative ${audioFile ? 'border-neutral-500/50' : ''}`}
                   >
                     <input 
                       type="file" 
@@ -1071,20 +1149,26 @@ const ArtistDashboard: React.FC = () => {
                       className="hidden" 
                     />
                     {audioFile ? (
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-2">
-                          <FileAudio className="h-8 w-8 text-blue-500" />
-                          <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">{audioFile.name}</span>
-                            <span className="text-[8px] text-muted-foreground uppercase tracking-widest">{(audioFile.size / (1024 * 1024)).toFixed(2)} MB</span>
-                          </div>
+                      <div className="flex flex-col items-center text-center gap-4 p-4">
+                        <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 animate-pulse">
+                          <FileAudio className="h-8 w-8" />
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); setAudioFile(null); }} className="text-xs text-red-400">Clear</button>
+                        <div className="space-y-4">
+                          <p className="text-xs font-bold text-foreground uppercase tracking-widest line-clamp-1">{audioFile.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{(audioFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setAudioFile(null); }}
+                          className="px-4 py-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all text-[10px] font-bold uppercase rounded-[5px]"
+                        >
+                          Clear File
+                        </button>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <Plus className="h-8 w-8 text-muted-foreground/50 group-hover:text-blue-500 transition-colors" />
-                        <span className="text-[10px] font-bold text-muted-foreground/50 group-hover:text-foreground transition-colors uppercase tracking-widest">Drop audio file or click to browse</span>
+                      <div className="flex flex-col items-center gap-4">
+                        <Upload className="h-8 w-8 text-muted-foreground/50 group-hover:text-blue-500 transition-colors" />
+                        <span className="text-[10px] font-bold text-muted-foreground/50 group-hover:text-foreground transition-colors uppercase tracking-widest">Select Audio</span>
                       </div>
                     )}
                   </div>
@@ -1092,13 +1176,22 @@ const ArtistDashboard: React.FC = () => {
               </div>
 
               {uploadProgress > 0 && (
-                <div className="w-full bg-gray-700 rounded-full h-2.5">
-                  <div className="bg-cyan-400 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Uploading Artifact</span>
+                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full bg-muted/30 rounded-full h-1.5 overflow-hidden">
+                    <div 
+                      className="bg-blue-500 h-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
                 </div>
               )}
 
               {isAnalyzing && (
-                <div className="p-6 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-4 animate-pulse">
+                <div className="p-4 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-4 animate-pulse">
                   <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
                   <div>
                     <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">Analyzing Frequency...</p>
@@ -1107,7 +1200,7 @@ const ArtistDashboard: React.FC = () => {
                 </div>
               )}
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {" "}
                 <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                   Track Title
@@ -1123,9 +1216,23 @@ const ArtistDashboard: React.FC = () => {
                   required
                 />{" "}
               </div>{" "}
-              <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
                 {" "}
-                <div className="space-y-3">
+                <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                  Description
+                </label>{" "}
+                <textarea
+                  value={newTrack.description}
+                  onChange={(e) =>
+                    setNewTrack({ ...newTrack, description: e.target.value })
+                  }
+                  className="w-full bg-foreground/[0.03] border border-border rounded-[10px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all min-h-[100px] resize-none"
+                  placeholder="Enter track transmission details..."
+                />{" "}
+              </div>{" "}
+              <div className="grid grid-cols-2 gap-4">
+                {" "}
+                <div className="space-y-4">
                   <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                     Genre
                   </label>
@@ -1148,7 +1255,7 @@ const ArtistDashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                     BPM / Key
                   </label>
@@ -1158,7 +1265,7 @@ const ArtistDashboard: React.FC = () => {
                         type="number"
                         value={newTrack.bpm || ''}
                         onChange={(e) => setNewTrack({ ...newTrack, bpm: parseInt(e.target.value) || 0 })}
-                        className="w-full bg-foreground/[0.03] rounded-[10px] p-4 pl-10 text-sm text-foreground outline-none focus:-blue-500/50 transition-all"
+                        className="w-full bg-foreground/[0.03] rounded-[10px] p-4 pl-4 text-sm text-foreground outline-none focus:-blue-500/50 transition-all"
                         placeholder="BPM"
                       />
                       <Activity className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -1168,19 +1275,19 @@ const ArtistDashboard: React.FC = () => {
                         type="text"
                         value={newTrack.key}
                         onChange={(e) => setNewTrack({ ...newTrack, key: e.target.value })}
-                        className="w-full bg-foreground/[0.03] rounded-[10px] p-4 pl-10 text-sm text-foreground outline-none focus:-blue-500/50 transition-all"
+                        className="w-full bg-foreground/[0.03] rounded-[10px] p-4 pl-4 text-sm text-foreground outline-none focus:-blue-500/50 transition-all"
                         placeholder="Key"
                       />
                       <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                     </div>
                   </div>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {" "}
                   <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                     Release Type
                   </label>{" "}
-                  <div className="flex gap-2">
+                  <div className="flex gap-4">
                     {" "}
                     <button
                       type="button"
@@ -1202,7 +1309,7 @@ const ArtistDashboard: React.FC = () => {
                 </div>{" "}
               </div>{" "}
               {newTrack.isNFT && (
-                <div className="space-y-3 animate-in slide-in-from-top-2">
+                <div className="space-y-4 animate-in slide-in-from-top-2">
                   {" "}
                   <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                     Mint Price (TON)

@@ -178,18 +178,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
 
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:font-bold">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-2 focus:py-2 focus:rounded-md focus:font-bold">
         Skip to content
       </a>
 
       {/* Header */}
-      {!isPlayer && (
-        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-4 md:px-6 h-16 flex items-center justify-between lg:left-64 transition-transform duration-300 border-b-0 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
-          <div className="flex items-center gap-4 flex-1">
+      {!isPlayer && !isExplore && (
+        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between lg:left-64 transition-transform duration-300 border-b-0 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+          <div className="flex items-center gap-2 flex-1">
             {(isHome || isTasks) ? (
               <button 
                 onClick={() => setIsMobileSidebarOpen(true)}
-                className="lg:hidden p-1 rounded-full hover:bg-muted transition-all"
+                className="lg:hidden p-3 rounded-full hover:bg-muted transition-all"
                 aria-label="Open sidebar"
               >
                 <motion.img 
@@ -203,12 +203,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <>
                 <button 
                   onClick={() => navigate(-1)} 
-                  className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+                  className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all"
                   aria-label="Go back"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
-                <div className="flex items-center gap-3 lg:hidden">
+                <div className="flex items-center gap-2 lg:hidden">
                   <span className="font-bold text-sm tracking-tight text-foreground uppercase truncate max-w-[100px]">{location.pathname.split('/')[1].replace('-', ' ')}</span>
                 </div>
               </>
@@ -216,11 +216,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {!isHome && !isDiscover && (
               <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`} ref={searchRef}>
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-muted-foreground" aria-hidden="true" />
                 <input 
                   type="text" 
                   placeholder={getSearchPlaceholder()} 
-                  className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
+                  className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-2 pr-2 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchOpen(true)}
@@ -235,15 +235,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-xl border border-blue-500/20 rounded-2xl shadow-2xl overflow-hidden z-50 p-4"
+                      className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-xl border border-blue-500/20 rounded-2xl shadow-2xl overflow-hidden z-50 p-2"
                     >
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <div className="flex items-center gap-2 mb-3 px-2">
-                            <History className="h-3 w-3 text-muted-foreground" />
+                          <div className="flex items-center gap-2 mb-2 px-2">
+                            <History className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Recent Searches</span>
                           </div>
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             {recentSearches.length > 0 ? (
                               recentSearches.map((item) => (
                                 <div key={item} className="group flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
@@ -253,17 +253,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                   >
                                     {item}
                                   </button>
-                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button 
                                       onClick={() => handleSuggestionClick(item)}
-                                      className="p-1.5 rounded-md hover:bg-primary/20 text-primary transition-colors"
+                                      className="p-3 rounded-md hover:bg-primary/20 text-primary transition-colors"
                                       title="Search"
                                     >
                                       <ArrowRight className="h-3 w-3" />
                                     </button>
                                     <button 
                                       onClick={() => removeRecentSearch(item)}
-                                      className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive/70 hover:text-destructive transition-colors"
+                                      className="p-3 rounded-md hover:bg-destructive/10 text-destructive/70 hover:text-destructive transition-colors"
                                       title="Remove"
                                     >
                                       <X className="h-3 w-3" />
@@ -278,11 +278,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </div>
 
                         <div>
-                          <div className="flex items-center gap-2 mb-3 px-2">
-                            <TrendingUp className="h-3 w-3 text-primary" />
+                          <div className="flex items-center gap-2 mb-2 px-2">
+                            <TrendingUp className="h-3 w-3 text-zinc-500 dark:text-primary" />
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trending Now</span>
                           </div>
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             {trendingTopics.map((topic) => (
                               <div key={topic} className="group flex items-center justify-between p-2 rounded-lg hover:bg-primary/5 transition-colors">
                                 <button 
@@ -293,7 +293,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 </button>
                                 <button 
                                   onClick={() => handleSuggestionClick(topic)}
-                                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-primary/10 text-primary transition-all"
+                                  className="opacity-0 group-hover:opacity-100 p-3 rounded-md bg-primary/10 text-primary transition-all"
                                 >
                                   <TrendingUp className="h-3 w-3" />
                                 </button>
@@ -318,11 +318,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="lg:hidden flex-1 flex justify-end">
                 {isSearchOpen ? (
                   <div className="flex-1 relative" ref={searchRef}>
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-muted-foreground" aria-hidden="true" />
                     <input 
                       type="text" 
                       placeholder="Search..." 
-                      className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
+                      className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-2 pr-2 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleSearch}
@@ -336,15 +336,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-background border border-blue-500/20 rounded-xl shadow-2xl overflow-hidden z-50 p-3 max-h-[60vh] overflow-y-auto"
+                        className="absolute top-full left-0 right-0 mt-2 bg-background border border-blue-500/20 rounded-xl shadow-2xl overflow-hidden z-50 p-2 max-h-[60vh] overflow-y-auto"
                       >
-                        <div className="space-y-6">
+                        <div className="space-y-2">
                           <div>
-                            <div className="flex items-center gap-2 mb-2 px-1">
-                              <History className="h-3 w-3 text-muted-foreground" />
+                            <div className="flex items-center gap-2 mb-2 px-2">
+                              <History className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
                               <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Recent</span>
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               {recentSearches.map((item) => (
                                 <div key={item} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
                                   <button 
@@ -354,10 +354,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     {item}
                                   </button>
                                   <div className="flex items-center gap-2">
-                                    <button onClick={() => handleSuggestionClick(item)} className="p-1 text-primary">
+                                    <button onClick={() => handleSuggestionClick(item)} className="p-2 text-primary">
                                       <ArrowRight className="h-3.5 w-3.5" />
                                     </button>
-                                    <button onClick={() => removeRecentSearch(item)} className="p-1 text-destructive/60">
+                                    <button onClick={() => removeRecentSearch(item)} className="p-2 text-destructive/60">
                                       <X className="h-3.5 w-3.5" />
                                     </button>
                                   </div>
@@ -367,11 +367,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                           </div>
 
                           <div>
-                            <div className="flex items-center gap-2 mb-2 px-1">
-                              <TrendingUp className="h-3 w-3 text-primary" />
+                            <div className="flex items-center gap-2 mb-2 px-2">
+                              <TrendingUp className="h-3 w-3 text-zinc-500 dark:text-primary" />
                               <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Trending</span>
                             </div>
-                            <div className="grid grid-cols-1 gap-1">
+                            <div className="grid grid-cols-1 gap-2">
                               {trendingTopics.map((topic) => (
                                 <button 
                                   key={topic}
@@ -393,24 +393,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-4 ml-4">
+          <div className="flex items-center gap-2 sm:gap-2 ml-2">
+            {/* TonJam Coin */}
+            {(isHome || isTasks) && (
+              <Link to="/tasks" className="flex items-center gap-2 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full p-1" aria-label="Tasks">
+                <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-8 h-8 object-contain" />
+              </Link>
+            )}
+
             {/* Wallet */}
             {isHome && (
               <button 
                 onClick={() => tonConnectUI.openModal()}
-                className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="p-2 rounded-full hover:bg-muted/20 transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Connect Wallet"
               >
-                <Wallet className="h-5 w-5 text-primary" />
+                <Wallet className="h-5 w-5 text-zinc-500 dark:text-primary" />
               </button>
-            )}
-
-            {/* TonJam Coin */}
-            {(isHome || isTasks) && (
-              <Link to="/tasks" className="flex items-center gap-1 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full bg-blue-500/10 dark:bg-muted/30 px-2 py-1 border border-blue-500/20 dark:border-transparent" aria-label="Tasks">
-                <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-8 h-8 object-contain" />
-                <span className="text-xs font-black text-blue-600 dark:text-foreground tracking-tighter">{parseFloat(userProfile.jamBalance || '0').toLocaleString()}</span>
-              </Link>
             )}
 
             {/* Notification Icon & Marketplace Filters */}
@@ -420,13 +419,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <DropdownMenu onOpenChange={(open) => { if (!open) setActiveFilterSubMenu(null); }}>
                     <DropdownMenuTrigger asChild>
                       <button 
-                        className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         aria-label="Filters"
                       >
                         <Filter className="h-5 w-5" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[280px] sm:w-72 bg-background border-border shadow-2xl p-0 overflow-hidden" align="end">
+                    <DropdownMenuContent className="w-[280px] sm:w-72 bg-background border-border shadow-2xl p-2 overflow-hidden" align="end">
                       <div className="flex flex-col max-h-[85vh]">
                         <AnimatePresence mode="wait">
                           {activeFilterSubMenu === null ? (
@@ -439,14 +438,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                               className="flex flex-col overflow-hidden"
                             >
                               <div className="overflow-y-auto no-scrollbar max-h-[calc(85vh-60px)]">
-                                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-5 py-4">Filters & Sort</DropdownMenuLabel>
-                                <DropdownMenuSeparator className="m-0" />
+                                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2 py-2">Filters & Sort</DropdownMenuLabel>
+                                <DropdownMenuSeparator className="m-2" />
                                 
                                 <DropdownMenuItem 
-                                  className="flex items-center justify-between px-5 py-4 cursor-pointer focus:bg-muted transition-colors"
+                                  className="flex items-center justify-between px-2 py-2 cursor-pointer focus:bg-muted transition-colors"
                                   onSelect={(e) => { e.preventDefault(); setActiveFilterSubMenu('genre'); }}
                                 >
-                                  <div className="flex flex-col gap-1">
+                                  <div className="flex flex-col gap-2">
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Genre</span>
                                     <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.genre}</span>
                                   </div>
@@ -454,10 +453,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem 
-                                  className="flex items-center justify-between px-5 py-4 cursor-pointer focus:bg-muted transition-colors"
+                                  className="flex items-center justify-between px-2 py-2 cursor-pointer focus:bg-muted transition-colors"
                                   onSelect={(e) => { e.preventDefault(); setActiveFilterSubMenu('artist'); }}
                                 >
-                                  <div className="flex flex-col gap-1">
+                                  <div className="flex flex-col gap-2">
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Artist</span>
                                     <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.artist}</span>
                                   </div>
@@ -465,10 +464,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem 
-                                  className="flex items-center justify-between px-5 py-4 cursor-pointer focus:bg-muted transition-colors"
+                                  className="flex items-center justify-between px-2 py-2 cursor-pointer focus:bg-muted transition-colors"
                                   onSelect={(e) => { e.preventDefault(); setActiveFilterSubMenu('rarity'); }}
                                 >
-                                  <div className="flex flex-col gap-1">
+                                  <div className="flex flex-col gap-2">
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Rarity</span>
                                     <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.rarity}</span>
                                   </div>
@@ -476,10 +475,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem 
-                                  className="flex items-center justify-between px-5 py-4 cursor-pointer focus:bg-muted transition-colors"
+                                  className="flex items-center justify-between px-2 py-2 cursor-pointer focus:bg-muted transition-colors"
                                   onSelect={(e) => { e.preventDefault(); setActiveFilterSubMenu('price'); }}
                                 >
-                                  <div className="flex flex-col gap-1">
+                                  <div className="flex flex-col gap-2">
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Price Range</span>
                                     <span className="text-[10px] text-muted-foreground lowercase">
                                       {marketplaceFilters.priceRange[0] === 0 && marketplaceFilters.priceRange[1] === 1000 ? 'all prices' : 
@@ -489,8 +488,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                 </DropdownMenuItem>
 
-                                <DropdownMenuSeparator className="m-0" />
-                                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-5 py-4">Sort By</DropdownMenuLabel>
+                                <DropdownMenuSeparator className="m-2" />
+                                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2 py-2">Sort By</DropdownMenuLabel>
                                 <DropdownMenuRadioGroup 
                                   value={marketplaceFilters.sortBy} 
                                   onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, sortBy: val }))}
@@ -499,7 +498,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     <DropdownMenuRadioItem 
                                       key={option} 
                                       value={option} 
-                                      className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer"
+                                      className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer"
                                       onSelect={(e) => e.preventDefault()}
                                     >
                                       {option}
@@ -508,7 +507,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 </DropdownMenuRadioGroup>
                               </div>
 
-                              <div className="p-4 border-t border-border bg-background sticky bottom-0 z-10 flex gap-2">
+                              <div className="p-2 border-t border-border bg-background sticky bottom-0 z-10 flex gap-2">
                                 <button 
                                   onClick={() => setMarketplaceFilters({
                                     genre: 'All',
@@ -517,13 +516,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     priceRange: [0, 1000],
                                     sortBy: 'Newest'
                                   })}
-                                  className="flex-1 py-3 text-[10px] font-bold uppercase tracking-widest border border-border rounded-lg hover:bg-muted transition-colors"
+                                  className="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest border border-border rounded-lg hover:bg-muted transition-colors"
                                 >
                                   Clear All
                                 </button>
-                                <DropdownMenuItem className="flex-1 p-0 focus:bg-transparent">
+                                <DropdownMenuItem className="flex-1 p-2 focus:bg-transparent">
                                   <button 
-                                    className="w-full py-3 text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+                                    className="w-full py-2 text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
                                   >
                                     Done
                                   </button>
@@ -541,7 +540,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             >
                               <button 
                                 onClick={() => setActiveFilterSubMenu(null)}
-                                className="flex items-center gap-2 px-5 py-4 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-muted transition-colors border-b border-border sticky top-0 bg-background z-10"
+                                className="flex items-center gap-2 px-2 py-2 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-muted transition-colors border-b border-border sticky top-0 bg-background z-10"
                               >
                                 <ArrowLeft className="h-4 w-4" />
                                 Back to Menu
@@ -550,28 +549,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                               <div className="overflow-y-auto no-scrollbar max-h-[calc(85vh-120px)]">
                                 {activeFilterSubMenu === 'genre' && (
                                   <DropdownMenuRadioGroup value={marketplaceFilters.genre} onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, genre: val }))}>
-                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Genres</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Genres</DropdownMenuRadioItem>
                                     {Array.from(new Set(MOCK_TRACKS.map(t => t.genre))).map(g => (
-                                      <DropdownMenuRadioItem key={g} value={g} className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>{g}</DropdownMenuRadioItem>
+                                      <DropdownMenuRadioItem key={g} value={g} className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>{g}</DropdownMenuRadioItem>
                                     ))}
                                   </DropdownMenuRadioGroup>
                                 )}
 
                                 {activeFilterSubMenu === 'artist' && (
                                   <DropdownMenuRadioGroup value={marketplaceFilters.artist} onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, artist: val }))}>
-                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Artists</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Artists</DropdownMenuRadioItem>
                                     {MOCK_ARTISTS.map(a => (
-                                      <DropdownMenuRadioItem key={a.name} value={a.name} className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>{a.name}</DropdownMenuRadioItem>
+                                      <DropdownMenuRadioItem key={a.name} value={a.name} className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>{a.name}</DropdownMenuRadioItem>
                                     ))}
                                   </DropdownMenuRadioGroup>
                                 )}
 
                                 {activeFilterSubMenu === 'rarity' && (
                                   <DropdownMenuRadioGroup value={marketplaceFilters.rarity} onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, rarity: val }))}>
-                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Rarities</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Unique" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>Unique (1/1)</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Rare" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>Rare</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Limited" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>Limited</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Rarities</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Unique" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>Unique (1/1)</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Rare" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>Rare</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Limited" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>Limited</DropdownMenuRadioItem>
                                   </DropdownMenuRadioGroup>
                                 )}
 
@@ -589,18 +588,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                       else if (val === '500+') setMarketplaceFilters(prev => ({ ...prev, priceRange: [500, 1000] }));
                                     }}
                                   >
-                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Prices</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="0-100" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>0 - 100 TON</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="100-500" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>100 - 500 TON</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="500+" className="text-[11px] font-bold uppercase tracking-widest px-5 py-4 cursor-pointer" onSelect={(e) => e.preventDefault()}>500+ TON</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Prices</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="0-100" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>0 - 100 TON</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="100-500" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>100 - 500 TON</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="500+" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>500+ TON</DropdownMenuRadioItem>
                                   </DropdownMenuRadioGroup>
                                 )}
                               </div>
 
-                              <div className="p-4 border-t border-border bg-background sticky bottom-0 z-10">
-                                <DropdownMenuItem className="p-0 focus:bg-transparent">
+                              <div className="p-2 border-t border-border bg-background sticky bottom-0 z-10">
+                                <DropdownMenuItem className="p-2 focus:bg-transparent">
                                   <button 
-                                    className="w-full py-3 text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+                                    className="w-full py-2 text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
                                   >
                                     Apply & Done
                                   </button>
@@ -615,7 +614,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
                 <button 
                   onClick={() => navigate('/notifications')} 
-                  className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label="Notifications"
                 >
                   <Bell className="h-5 w-5" />
@@ -635,7 +634,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             ) : (
               <button 
                 onClick={() => setIsAuthModalOpen(true)}
-                className="p-2 rounded-full bg-blue-600 dark:bg-primary hover:bg-blue-500 dark:hover:bg-primary/90 text-foreground dark:text-primary-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="p-3 rounded-full bg-blue-600 dark:bg-primary hover:bg-blue-500 dark:hover:bg-primary/90 text-foreground dark:text-primary-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Sign In"
               >
                 <User className="h-5 w-5" />
@@ -647,7 +646,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sidebar - Desktop */}
       {!isPlayer && (
-        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r-0 flex-col p-6 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
+        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r-0 flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
           <SidebarContent user={user} userProfile={userProfile} signOut={signOut} />
         </aside>
       )}
@@ -668,10 +667,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-[280px] bg-background z-[70] lg:hidden flex flex-col p-6 overflow-y-auto"
+              className="fixed top-0 left-0 bottom-0 w-[280px] bg-background z-[70] lg:hidden flex flex-col p-4 overflow-y-auto"
             >
-              <div className="flex items-center justify-between mb-8">
-                <Link to="/" onClick={() => setIsMobileSidebarOpen(false)} className="flex items-center gap-3">
+              <div className="flex items-center justify-between mb-2">
+                <Link to="/" onClick={() => setIsMobileSidebarOpen(false)} className="flex items-center gap-2">
                   <img src={APP_LOGO} alt="" className="w-8 h-8 object-contain" />
                   <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">JamSpace</span>
                 </Link>
@@ -686,7 +685,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`pb-48 lg:pb-32 transition-all w-full ${isPlayer ? 'pt-0' : 'pt-16 lg:pt-16'} ${isPlayer ? 'lg:ml-0' : 'lg:ml-64'} relative z-10 overflow-x-hidden`}>
+      <main id="main-content" className={`transition-all w-full ${isPlayer || isExplore ? '' : 'pt-16'} ${isPlayer ? '' : 'lg:ml-64'} relative z-10 overflow-x-hidden pb-24`}>
         <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>
@@ -701,7 +700,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Mobile Navigation */}
       {!isPlayer && (
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-20 px-2 flex justify-around items-center shadow-2xl" aria-label="Mobile Navigation">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-16 px-2 flex justify-around items-center shadow-2xl" aria-label="Mobile Navigation">
           <MobileNavItem to="/" icon={HomeIcon} label="Home" />
           <MobileNavItem to="/discover" icon={Search} label="Search" />
           <MobileNavItem to="/jamspace" icon={Send} label="JamSpace" />
@@ -715,8 +714,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void }) => (
   <>
-    <div className="flex items-center justify-between mb-10">
-      <Link to="/" onClick={onNavigate} className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm" aria-label="TonJam Home">
+    <div className="flex items-center justify-between mb-2">
+      <Link to="/" onClick={onNavigate} className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm" aria-label="TonJam Home">
         <motion.img 
           layoutId="app-logo"
           src={APP_LOGO} 
@@ -736,8 +735,8 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       <NavItem to="/library" icon={Library} label="Library" onClick={onNavigate} />
       <NavItem to="/marketplace" icon={ShoppingBag} label="NFT Market" onClick={onNavigate} />
       
-      <div className="pt-6 pb-2">
-        <p className="px-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Account</p>
+      <div className="pt-2 pb-2">
+        <p className="px-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Account</p>
         {userProfile.isVerifiedArtist && (
           <NavItem to={`/artist/${userProfile.id}`} icon={User} label="Artist Profile" onClick={onNavigate} />
         )}
@@ -756,7 +755,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
               signOut();
               onNavigate?.();
             }}
-            className="w-full flex items-center gap-4 px-5 py-3 rounded-[5px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Sign Out"
           >
             <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -766,11 +765,11 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       </div>
 
       {userProfile.isVerifiedArtist && (
-        <div className="pt-6 space-y-3">
+        <div className="pt-2 space-y-2">
           <Link 
             to="/upload"
             onClick={onNavigate}
-            className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Upload new track"
           >
             <Upload className="h-5 w-5" />
@@ -779,7 +778,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <Link 
             to="/mint"
             onClick={onNavigate}
-            className="w-full flex items-center gap-4 px-5 py-3.5 rounded-[5px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Mint new NFT"
           >
             <PlusCircle className="h-5 w-5" />
@@ -789,9 +788,9 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       )}
 
       {/* TJ Coin Price Widget */}
-      <div className="mt-8 p-4 rounded-[5px] bg-muted/50 border-0 space-y-3" role="complementary" aria-label="Token Price Info">
+      <div className="mt-2 p-2 rounded-[5px] bg-muted/50 border-0 space-y-2" role="complementary" aria-label="Token Price Info">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <img src={TJ_COIN_ICON} alt="JAM Token" className="w-6 h-6 object-contain" />
             <div>
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">JAM Price</p>
@@ -803,12 +802,12 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           </div>
         </div>
         
-        <div className="pt-3 border-t border-foreground/5 flex items-center justify-between">
+        <div className="pt-2 border-t border-foreground/5 flex items-center justify-between">
           <div>
             <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Your Balance</p>
             <p className="text-sm font-bold text-blue-500 tracking-tighter">{parseFloat(userProfile.jamBalance || '0').toLocaleString()} JAM</p>
           </div>
-          <Link to="/wallet" className="p-1.5 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors">
+          <Link to="/wallet" className="p-3 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors">
             <PlusCircle className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -822,11 +821,11 @@ const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: LucideI
     to={to} 
     onClick={onClick}
     className={({ isActive }) => `
-      flex items-center gap-4 px-5 py-3.5 rounded-[5px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-      ${isActive ? 'bg-blue-500/10 text-blue-500 font-bold' : 'text-neutral-500 hover:text-neutral-400 hover:bg-neutral-500/10'}
+      flex items-center gap-3 px-4 py-3 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+      ${isActive ? 'bg-zinc-500/10 text-zinc-900 dark:text-blue-500 font-bold' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400 hover:bg-zinc-500/5'}
     `}
   >
-    <Icon className="h-6 w-6 stroke-[2.5]" />
+    <Icon className="h-6 w-6 stroke-[3]" />
     <span className="text-[12px] uppercase font-bold tracking-[0.15em]">{label}</span>
   </NavLink>
 );
@@ -834,17 +833,14 @@ const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: LucideI
 const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon; label: string }) => (
   <NavLink 
     to={to} 
+    aria-label={label}
     className={({ isActive }) => `
-      flex-1 flex flex-col items-center justify-center transition-all gap-1.5 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm
-      ${isActive ? 'text-blue-500' : 'text-neutral-500 hover:text-neutral-400'}
+      flex-1 flex flex-col items-center justify-center transition-all gap-2 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm mobile-nav-item
+      ${isActive ? 'text-blue-600 dark:text-blue-500 active' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400'}
     `}
   >
     {({ isActive }) => (
-      <>
-        <Icon className={`h-6 w-6 stroke-[2.5] transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
-        <span className="text-[8px] font-bold uppercase tracking-widest">{label}</span>
-        <div className={`w-1 h-1 rounded-full bg-blue-500 transition-all mt-0.5 ${isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}></div>
-      </>
+      <Icon className={`h-7 w-7 stroke-[3] transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
     )}
   </NavLink>
 );

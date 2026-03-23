@@ -189,7 +189,7 @@ const NFTDetail: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center text-foreground">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Asset Not Found</h2>
+          <h2 className="text-[20px] font-bold mb-4">Asset Not Found</h2>
           <p className="text-muted-foreground/80">The requested NFT could not be located.</p>
           <button onClick={() => navigate(-1)} className="mt-4 text-blue-500 hover:underline">Go Back</button>
         </div>
@@ -276,64 +276,71 @@ const NFTDetail: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen pb-24 animate-in fade-in duration-500">
+    <div className="relative min-h-screen pb-4 animate-in fade-in duration-500 bg-gradient-to-br from-background via-background to-blue-900/10">
+      {/* Immersive background glow */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
+
       {isFetchingMetadata && (
-        <div className="fixed inset-0 z-50 bg-background/60 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300">
-          <Loader2 className="h-12 w-12 text-blue-500 animate-spin mb-4" />
-          <p className="text-xs font-bold text-foreground uppercase tracking-[0.3em] animate-pulse">Syncing Asset Data...</p>
+        <div className="fixed inset-0 z-50 bg-background/60 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-300">
+          <div className="relative">
+            <Loader2 className="h-16 w-16 text-blue-500 animate-spin mb-4" />
+            <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
+          </div>
+          <p className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em] animate-pulse">Syncing Neural Relay...</p>
         </div>
       )}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-6">
-        <div className="flex justify-end items-center mb-10">
-          <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-3 px-3 py-1.5 bg-muted/50 rounded-full border border-border">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-[8px] font-bold text-muted-foreground/80 uppercase tracking-widest">On-Chain Verified</span>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-4 pt-4">
+        <div className="flex justify-end items-center mb-4">
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4 px-4 py-4 bg-white/5 backdrop-blur-md rounded-full border border-white/10">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+              <span className="text-[9px] font-bold text-foreground/80 uppercase tracking-widest">On-Chain Verified</span>
             </div>
-            <button onClick={handleShare} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground hover:text-blue-500 transition-all" >
+            <button onClick={handleShare} className="w-10 h-10 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-muted-foreground hover:text-blue-400 hover:border-blue-400/50 transition-all" title="Share Protocol">
               <Share2 className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4 items-start">
           {/* Left Column: Artwork & Technical Specs */}
-          <div className="lg:col-span-5 space-y-8">
+          <div className="lg:col-span-5 space-y-4">
             <div className="relative group" onClick={handlePlayClick}>
-              <div className="relative aspect-square rounded-[12px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] bg-card">
+              <div className="relative aspect-square rounded-[24px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] bg-black/40 border border-white/10">
                 <img src={localNft.imageUrl} className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" alt={localNft.title} />
                 
                 {/* Play Overlay */}
-                <div className={`absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[2px] transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[4px] transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                   <motion.div 
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+                    className="w-24 h-24 rounded-full bg-blue-600/90 backdrop-blur-md flex items-center justify-center shadow-[0_0_40px_rgba(37,99,235,0.6)] border border-white/20"
                   >
                     {isActive && isPlaying ? (
-                      <Pause className="h-8 w-8 text-white fill-current" />
+                      <Pause className="h-10 w-10 text-white fill-current" />
                     ) : (
-                      <Play className="h-8 w-8 text-white fill-current ml-1" />
+                      <Play className="h-10 w-10 text-white fill-current ml-4" />
                     )}
                   </motion.div>
                 </div>
 
                 {/* Edition Badge */}
                 <div className="absolute top-6 left-6">
-                  <div className="px-4 py-2 bg-background/60 backdrop-blur-xl border border-border rounded-[8px] text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {localNft.edition} <span className="text-muted-foreground ml-1">Edition</span>
+                  <div className="px-4 py-4 bg-background/60 backdrop-blur-xl border border-border rounded-[8px] text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                    {localNft.edition} <span className="text-muted-foreground ml-4">Edition</span>
                   </div>
                 </div>
 
                 {/* Live Auction Badge */}
                 {isAuction && (
                   <div className="absolute bottom-6 left-6 right-6">
-                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-6 py-5 rounded-[12px] flex justify-between items-center shadow-2xl">
+                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-4 py-4 rounded-[12px] flex justify-between items-center shadow-2xl">
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-bold text-amber-500 uppercase tracking-[0.4em] mb-1">Time Remaining</span>
+                        <span className="text-[8px] font-bold text-amber-500 uppercase tracking-[0.4em] mb-4">Time Remaining</span>
                         <span className="text-xl font-bold text-foreground tracking-tighter font-mono">{timeLeft}</span>
                       </div>
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 rounded-full border border-neutral-500/20">
+                      <div className="flex items-center gap-4 px-4 py-4 bg-amber-500/10 rounded-full border border-neutral-500/20">
                         <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
                         <span className="text-[8px] font-bold text-amber-500 uppercase tracking-widest">Active Bid</span>
                       </div>
@@ -351,10 +358,10 @@ const NFTDetail: React.FC = () => {
                 { label: 'BIT', val: associatedTrack?.bitrate || 'FLAC', color: 'text-emerald-500' },
                 { label: 'REL', val: associatedTrack?.releaseDate?.split('-')[0] || '2024', color: 'text-amber-500' }
               ].map((stat, i) => (
-                <div key={i} className="bg-card p-4 rounded-[10px] relative overflow-hidden group transition-all">
-                  <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-20`}></div>
-                  <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-[0.3em] mb-2">{stat.label}</p>
-                  <p className="text-sm font-bold text-foreground tracking-tighter font-mono">{stat.val}</p>
+                <div key={i} className="bg-white/5 backdrop-blur-md p-4 rounded-[16px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20">
+                  <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-40`}></div>
+                  <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.3em] mb-4">{stat.label}</p>
+                  <p className="text-base font-bold text-foreground tracking-tighter font-mono">{stat.val}</p>
                 </div>
               ))}
             </div>
@@ -362,9 +369,9 @@ const NFTDetail: React.FC = () => {
 
           {/* Right Column: Identity & Action */}
           <div className="lg:col-span-7 flex flex-col">
-            <header className="mb-10">
-              <div className="flex flex-wrap items-center gap-6 mb-6">
-                <div className="flex items-center gap-3 cursor-pointer group/creator" onClick={() => {
+            <header className="mb-4">
+              <div className="flex flex-wrap items-center gap-4 mb-4">
+                <div className="flex items-center gap-4 cursor-pointer group/creator" onClick={() => {
                   const artist = MOCK_ARTISTS.find(a => a.name === localNft.creator);
                   if (artist) navigate(`/artist/${artist.id}`);
                 }} >
@@ -382,7 +389,7 @@ const NFTDetail: React.FC = () => {
 
                 <div className="w-px h-8 bg-muted"></div>
 
-                <div className="flex items-center gap-3 cursor-pointer group/owner" onClick={() => {
+                <div className="flex items-center gap-4 cursor-pointer group/owner" onClick={() => {
                   if (localNft.owner === userProfile.walletAddress) {
                     navigate('/profile');
                   } else {
@@ -402,7 +409,7 @@ const NFTDetail: React.FC = () => {
                 </div>
               </div>
 
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase text-foreground leading-[0.85] mb-6">{localNft.title}</h1>
+              <h1 className="text-[44px] md:text-[68px] font-bold tracking-tighter uppercase text-foreground leading-[0.85] mb-4">{localNft.title}</h1>
               
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4">
@@ -410,7 +417,7 @@ const NFTDetail: React.FC = () => {
                   <span className="text-[10px] font-mono text-blue-500/60 uppercase tracking-widest">{localNft.id.toUpperCase()}</span>
                 </div>
                 {localNft.contractAddress && (
-                  <a href={`https://tonviewer.com/${localNft.contractAddress}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-blue-400 transition-colors" >
+                  <a href={`https://tonviewer.com/${localNft.contractAddress}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-blue-400 transition-colors" >
                     Explorer <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
@@ -418,62 +425,62 @@ const NFTDetail: React.FC = () => {
             </header>
 
             {/* Pricing Section - Hardware Style */}
-            <div className="bg-card rounded-[16px] p-10 mb-10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-[0.02] rotate-12"><Zap className="h-32 w-32" /></div>
+            <div className="bg-white/5 backdrop-blur-xl rounded-[24px] p-4 mb-4 border border-white/10 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-[0.05] rotate-12 pointer-events-none"><Zap className="h-48 w-48 text-blue-500" /></div>
               
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 relative z-10">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative z-10">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse' : 'bg-blue-500'} shadow-[0_0_10px_rgba(59,130,246,0.5)]`}></div>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-2 h-2 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`}></div>
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">
                       {isAuction ? 'Current High Signal' : 'Fixed Valuation Protocol'}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-4">
-                    <span className="text-7xl font-bold text-foreground tracking-tighter leading-none">{localNft.price}</span>
-                    <span className="text-2xl font-bold text-blue-500 uppercase tracking-tighter">TON</span>
+                    <span className="text-[68px] font-bold text-foreground tracking-tighter leading-none">{localNft.price}</span>
+                    <span className="text-[20px] font-bold text-blue-500 uppercase tracking-tighter">TON</span>
                   </div>
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
                     ≈ ${(parseFloat(localNft.price) * 5.2).toLocaleString()} USD at current relay rate
                   </p>
                 </div>
 
                 {isAuction && (
-                  <div className="bg-foreground/[0.03] p-6 rounded-[12px] text-right min-w-[200px]">
-                    <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Minimum Next Step</p>
-                    <p className="text-2xl font-bold text-amber-500 tracking-tighter">+{minNextBid} <span className="text-xs">TON</span></p>
+                  <div className="bg-white/5 backdrop-blur-md p-4 rounded-[16px] border border-white/5 text-right min-w-[220px]">
+                    <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-4">Minimum Next Step</p>
+                    <p className="text-[20px] font-bold text-amber-500 tracking-tighter">+{minNextBid} <span className="text-xs">TON</span></p>
                   </div>
                 )}
               </div>
 
-              <div className="mt-12 flex flex-col sm:flex-row gap-4 relative z-10">
+              <div className="mt-4 flex flex-col sm:flex-row gap-4 relative z-10">
                 {isOwner ? (
                   <>
-                    <button onClick={() => setShowListModal(true)} className="flex-1 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all" >
+                    <button onClick={() => setShowListModal(true)} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
                       {localNft.listingType ? 'Manage Listing' : 'List for Sale'}
                     </button>
-                    <button onClick={() => setShowSendModal(true)} className="flex-1 py-5 bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-2" >
+                    <button onClick={() => setShowSendModal(true)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-4 border border-white/10" >
                       <Send className="h-4 w-4" /> Send Asset
                     </button>
                     {localNft.listingType && (
-                      <button onClick={handleCancelListing} className="flex-1 py-5 bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all" >
+                      <button onClick={handleCancelListing} className="flex-1 py-4 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 hover:border-red-500/20" >
                         Cancel Listing
                       </button>
                     )}
                   </>
                 ) : (
                   <>
-                    <button onClick={handleAction} className={`flex-[2] py-6 rounded-[10px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl ${isAuction ? 'bg-amber-500 hover:bg-amber-400 text-background shadow-amber-500/20' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30'}`} >
+                    <button onClick={handleAction} className={`flex-[2] py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border ${isAuction ? 'bg-amber-500 hover:bg-amber-400 text-background shadow-amber-500/20 border-amber-400/30' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30 border-blue-400/30'}`} >
                       {isAuction ? 'Place Bid Signal' : 'Acquire Asset Now'}
                     </button>
                     {!isAuction && (
-                      <button onClick={() => setShowBidModal(true)} className="flex-1 py-6 bg-muted/50 hover:bg-muted text-foreground rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all" >
+                      <button onClick={() => setShowBidModal(true)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
                         Make Offer
                       </button>
                     )}
                     <button 
                       onClick={() => setIsTipping(true)}
-                      className="flex-1 py-6 bg-muted/50 hover:bg-muted text-foreground rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-2"
+                      className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-4 border border-white/10"
                     >
                       <Coins className="h-4 w-4 text-blue-400" /> Tip Creator
                     </button>
@@ -496,13 +503,13 @@ const NFTDetail: React.FC = () => {
                       initial={{ opacity: 0, scale: 0.9, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                      className="relative w-full max-w-sm bg-card rounded-[24px] p-8 overflow-hidden"
+                      className="relative w-full max-w-sm bg-card rounded-[24px] p-4 overflow-hidden"
                     >
                       {/* Hardware style scanline */}
                       <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
                       
                       <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-6">
+                        <div className="flex items-center gap-4 mb-4">
                           <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
                             <Coins className="h-5 w-5 text-blue-500" />
                           </div>
@@ -512,7 +519,7 @@ const NFTDetail: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 mb-8">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
                           {[0.1, 0.5, 1, 5].map((amount) => (
                             <button
                               key={amount}
@@ -543,9 +550,9 @@ const NFTDetail: React.FC = () => {
             {/* AI Lore / Origin Narrative - Removed */}
 
             {/* Information Tabs */}
-            <div className="flex items-center gap-10 mb-10">
+            <div className="flex items-center gap-4 mb-4">
               {['details', 'history', 'offers', ...(isOwner && localNft.exclusiveContent?.length ? ['exclusive'] : [])].map((tab) => (
-                <button key={tab} onClick={() => setActiveTab(tab as any)} className={`pb-5 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? 'text-blue-500' : 'text-muted-foreground/50 hover:text-foreground'}`}>
+                <button key={tab} onClick={() => setActiveTab(tab as any)} className={`pb-4 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? 'text-blue-500' : 'text-muted-foreground/50 hover:text-foreground'}`}>
                   {tab === 'exclusive' ? 'Holder Perks' : tab}
                   {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></motion.div>}
                 </button>
@@ -561,30 +568,38 @@ const NFTDetail: React.FC = () => {
                     className="grid grid-cols-1 md:grid-cols-2 gap-4"
                   >
                     {metadataError && (
-                      <div className="col-span-1 md:col-span-2 p-5 bg-red-500/5 rounded-[12px] flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <X className="h-5 w-5 text-red-500" />
-                          <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">{metadataError}</span>
+                      <div className="col-span-1 md:col-span-2 p-4 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-[16px] flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                            <X className="h-5 w-5 text-red-500" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-4">Sync Error Detected</p>
+                            <p className="text-xs text-red-400/80 font-medium">{metadataError}</p>
+                          </div>
                         </div>
-                        <button onClick={loadMetadata} className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-colors">
+                        <button onClick={loadMetadata} className="px-4 py-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95">
                           Retry Sync
                         </button>
                       </div>
                     )}
                     
                     {associatedTrack && (
-                      <div className="col-span-1 md:col-span-2 p-6 bg-card rounded-[12px]">
-                        <h4 className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em] mb-6">Technical Signal Data</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                      <div className="col-span-1 md:col-span-2 p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[20px]">
+                        <h4 className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
+                          <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                          Technical Signal Data
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           {[
                             { label: 'BPM', val: associatedTrack.bpm || 'N/A' },
                             { label: 'KEY', val: associatedTrack.key || 'N/A' },
                             { label: 'BITRATE', val: associatedTrack.bitrate || 'N/A' },
                             { label: 'DURATION', val: `${Math.floor(associatedTrack.duration / 60)}:${String(associatedTrack.duration % 60).padStart(2, '0')}` }
                           ].map((item, i) => (
-                            <div key={i} className="flex flex-col gap-2">
-                              <span className="text-[7px] font-bold text-muted-foreground/30 uppercase tracking-widest">{item.label}</span>
-                              <span className="text-sm font-bold text-foreground tracking-tight font-mono">{item.val}</span>
+                            <div key={i} className="flex flex-col gap-4">
+                              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">{item.label}</span>
+                              <span className="text-lg font-bold text-foreground tracking-tight font-mono">{item.val}</span>
                             </div>
                           ))}
                         </div>
@@ -592,18 +607,18 @@ const NFTDetail: React.FC = () => {
                     )}
   
                     {localNft.traits?.map((trait, i) => (
-                      <div key={i} className="p-5 bg-card rounded-[12px] flex justify-between items-center group transition-all">
-                        <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest group-hover:text-muted-foreground">{trait.trait_type}</span>
-                        <span className="text-xs font-bold text-foreground tracking-tight">{trait.value}</span>
+                      <div key={i} className="p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[16px] flex justify-between items-center group transition-all hover:bg-white/10 hover:border-white/20">
+                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest group-hover:text-muted-foreground transition-colors">{trait.trait_type}</span>
+                        <span className="text-sm font-bold text-foreground tracking-tight">{trait.value}</span>
                       </div>
                     ))}
-                    <div className="p-5 bg-card rounded-[12px] flex justify-between items-center">
-                      <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Asset Class</span>
-                      <span className="text-xs font-bold text-blue-500 tracking-tight">{localNft.edition}</span>
+                    <div className="p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[16px] flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Asset Class</span>
+                      <span className="text-sm font-bold text-blue-500 tracking-tight">{localNft.edition}</span>
                     </div>
-                    <div className="p-5 bg-card rounded-[12px] flex justify-between items-center">
-                      <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Royalties</span>
-                      <span className="text-xs font-bold text-emerald-500 tracking-tight">{localNft.royalty}%</span>
+                    <div className="p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[16px] flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Royalties</span>
+                      <span className="text-sm font-bold text-emerald-500 tracking-tight">{localNft.royalty}%</span>
                     </div>
                   </motion.div>
                 )}
@@ -614,11 +629,11 @@ const NFTDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="space-y-3"
+                    className="space-y-4"
                   >
                     {localNft.history?.map((h, i) => (
-                      <div key={i} className="flex items-center justify-between p-5 bg-card border border-border rounded-[12px] hover:bg-foreground/[0.02] transition-all group">
-                        <div className="flex items-center gap-5">
+                      <div key={i} className="flex items-center justify-between p-4 bg-card border border-border rounded-[12px] hover:bg-foreground/[0.02] transition-all group">
+                        <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-[10px] bg-muted/50 flex items-center justify-center border border-blue-500/30 group-hover:border-blue-500/50 transition-all">
                             {h.event === 'Minted' ? (
                               <Wand2 className="h-5 w-5 text-blue-500/40" />
@@ -628,12 +643,12 @@ const NFTDetail: React.FC = () => {
                           </div>
                           <div className="flex flex-col">
                             <span className="text-xs font-bold text-foreground uppercase tracking-tight">{h.event}</span>
-                            <span className="text-[8px] text-muted-foreground/50 font-bold uppercase tracking-widest mt-1">{h.date}</span>
+                            <span className="text-[8px] text-muted-foreground/50 font-bold uppercase tracking-widest mt-4">{h.date}</span>
                           </div>
                         </div>
                         <div className="text-right">
                           <span className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors cursor-pointer">@{h.to}</span>
-                          {h.price && <p className="text-sm text-foreground font-bold mt-1 font-mono">{h.price} TON</p>}
+                          {h.price && <p className="text-sm text-foreground font-bold mt-4 font-mono">{h.price} TON</p>}
                         </div>
                       </div>
                     ))}
@@ -652,8 +667,8 @@ const NFTDetail: React.FC = () => {
                       localNft.offers.map((o, i) => {
                         const isTopBid = parseFloat(o.price) === highestOfferPrice;
                         return (
-                          <div key={i} className={`group p-6 bg-card border rounded-[16px] transition-all flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-2xl ${isTopBid ? (isAuction ? 'border-border bg-amber-500/[0.02]' : 'border-border bg-blue-500/[0.02]') : 'border-border opacity-70 hover:opacity-100'}`} >
-                            <div className="flex items-center gap-6 w-full md:w-auto">
+                          <div key={i} className={`group p-4 bg-card border rounded-[16px] transition-all flex flex-col md:flex-row items-center justify-between gap-4 hover:shadow-2xl ${isTopBid ? (isAuction ? 'border-border bg-amber-500/[0.02]' : 'border-border bg-blue-500/[0.02]') : 'border-border opacity-70 hover:opacity-100'}`} >
+                            <div className="flex items-center gap-4 w-full md:w-auto">
                               <div className="relative">
                                 <div className={`w-16 h-16 rounded-full bg-background border border-blue-500/30 flex items-center justify-center overflow-hidden`}>
                                   <img src={`https://picsum.photos/100/100?seed=${o.offerer}`} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="" />
@@ -665,38 +680,38 @@ const NFTDetail: React.FC = () => {
                                 )}
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <div className="flex items-center gap-3 mb-2">
+                                <div className="flex items-center gap-4 mb-4">
                                   <span className="text-sm font-bold text-foreground uppercase tracking-tight truncate max-w-[150px]">
                                     {o.offerer}
                                   </span>
                                   {isTopBid && (
-                                    <span className={`text-[8px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${isAuction ? 'bg-amber-500/20 text-amber-500' : 'bg-blue-500/20 text-blue-500'}`}>Top Signal</span>
+                                    <span className={`text-[8px] px-4 py-4 rounded-full font-bold uppercase tracking-widest ${isAuction ? 'bg-amber-500/20 text-amber-500' : 'bg-blue-500/20 text-blue-500'}`}>Top Signal</span>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-4">
                                   <Clock className="h-3 w-3 text-muted-foreground/50" />
                                   <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{o.timestamp} • Expires in {o.duration}</span>
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-10 w-full md:w-auto justify-between md:justify-end">
+                            <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
                               <div className="text-right">
-                                <div className="flex items-center gap-3">
-                                  <span className={`text-3xl font-bold tracking-tighter font-mono ${isTopBid ? (isAuction ? 'text-amber-500' : 'text-blue-500') : 'text-muted-foreground'}`}>
+                                <div className="flex items-center gap-4">
+                                  <span className={`text-[26px] font-bold tracking-tighter font-mono ${isTopBid ? (isAuction ? 'text-amber-500' : 'text-blue-500') : 'text-muted-foreground'}`}>
                                     {o.price}
                                   </span>
                                   <img src={TON_LOGO} className={`w-6 h-6 ${isTopBid ? 'opacity-100' : 'opacity-30 grayscale'}`} alt="" />
                                 </div>
-                                <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-1">Valuation Protocol</p>
+                                <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Valuation Protocol</p>
                               </div>
                               {isOwner ? (
-                                <div className="flex gap-3">
+                                <div className="flex gap-4">
                                   {o.offerer !== localNft.owner && (
-                                    <button onClick={() => handleAcceptOffer(o)} className={`px-6 py-3 text-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-2 ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`} >
+                                    <button onClick={() => handleAcceptOffer(o)} className={`px-4 py-4 text-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-4 ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`} >
                                       <Check className="h-4 w-4" /> Accept
                                     </button>
                                   )}
-                                  <button onClick={() => handleDeclineOffer(o.offerer)} className="px-6 py-3 bg-muted/50 text-muted-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center gap-2" >
+                                  <button onClick={() => handleDeclineOffer(o.offerer)} className="px-4 py-4 bg-muted/50 text-muted-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center gap-4" >
                                     <X className="h-4 w-4" /> Decline
                                   </button>
                                 </div>
@@ -710,13 +725,13 @@ const NFTDetail: React.FC = () => {
                         );
                       })
                     ) : (
-                      <div className="py-32 flex flex-col items-center justify-center bg-card border border-border rounded-[16px] text-center px-12">
-                        <div className="w-24 h-24 rounded-full bg-foreground/[0.02] border border-blue-500/30 flex items-center justify-center mb-8">
+                      <div className="py-4 flex flex-col items-center justify-center bg-card border border-border rounded-[16px] text-center px-4">
+                        <div className="w-24 h-24 rounded-full bg-foreground/[0.02] border border-blue-500/30 flex items-center justify-center mb-4">
                           <Satellite className="h-10 w-10 text-muted-foreground/30 animate-pulse" />
                         </div>
-                        <h4 className="text-xl font-bold text-muted-foreground uppercase tracking-tighter mb-3">No Active Signals</h4>
+                        <h4 className="text-xl font-bold text-muted-foreground uppercase tracking-tighter mb-4">No Active Signals</h4>
                         <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em] leading-loose max-w-xs mx-auto">Zero valuation signals detected from the neural relay network.</p>
-                        <button onClick={handleAction} className="mt-10 px-12 py-4 bg-blue-600/10 border border-neutral-500/20 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 hover:bg-blue-600 hover:text-white transition-all ">Initiate Broadcast</button>
+                        <button onClick={handleAction} className="mt-4 px-4 py-4 bg-blue-600/10 border border-neutral-500/20 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 hover:bg-blue-600 hover:text-white transition-all ">Initiate Broadcast</button>
                       </div>
                     )}
                   </motion.div>
@@ -728,17 +743,17 @@ const NFTDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="space-y-8"
+                    className="space-y-4"
                   >
-                    <div className="p-8 bg-purple-500/[0.03] border border-blue-500/30 rounded-[16px] relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-8 opacity-[0.05]"><Crown className="h-24 w-24 text-purple-500" /></div>
-                      <div className="flex items-center gap-4 mb-6 relative z-10">
+                    <div className="p-4 bg-purple-500/[0.03] border border-blue-500/30 rounded-[16px] relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-[0.05]"><Crown className="h-24 w-24 text-purple-500" /></div>
+                      <div className="flex items-center gap-4 mb-4 relative z-10">
                         <div className="w-12 h-12 rounded-[12px] bg-purple-500/10 flex items-center justify-center">
                           <Crown className="h-6 w-6 text-purple-500" />
                         </div>
                         <h1 className="text-lg font-bold text-foreground uppercase tracking-widest">Holder-Only Archives</h1>
                       </div>
-                      <p className="text-sm text-muted-foreground/80 leading-relaxed mb-10 relative z-10 max-w-2xl">
+                      <p className="text-sm text-muted-foreground/80 leading-relaxed mb-4 relative z-10 max-w-2xl">
                         As the verified owner of this NFT protocol, you have unlocked access to the following exclusive sonic and visual artifacts. These are stored in your private vault.
                       </p>
                       <div className="grid grid-cols-1 gap-4 relative z-10">
@@ -748,9 +763,9 @@ const NFTDetail: React.FC = () => {
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex items-center justify-between p-5 bg-background/40 hover:bg-background/60 rounded-[12px] border border-border/50 hover:border-neutral-500/30 transition-all group"
+                            className="flex items-center justify-between p-4 bg-background/40 hover:bg-background/60 rounded-[12px] border border-border/50 hover:border-neutral-500/30 transition-all group"
                           >
-                            <div className="flex items-center gap-5">
+                            <div className="flex items-center gap-4">
                               <div className="w-12 h-12 rounded-[10px] bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                                 {item.type === 'video' && <Video className="h-6 w-6" />}
                                 {item.type === 'track' && <MusicIcon className="h-6 w-6" />}
@@ -759,7 +774,7 @@ const NFTDetail: React.FC = () => {
                               </div>
                               <div>
                                 <p className="text-xs font-bold text-foreground uppercase tracking-tight">{item.title}</p>
-                                <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-1">{item.type} artifact</p>
+                                <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4">{item.type} artifact</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -779,17 +794,20 @@ const NFTDetail: React.FC = () => {
   
         {/* More from Creator Section */}
         {moreFromCreator.length > 0 && (
-          <div className="mt-40 animate-in fade-in slide-in-from-bottom duration-1000">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
-                <h2 className="text-lg font-bold tracking-tighter uppercase text-foreground">More from {localNft.creator}</h2>
+          <div className="mt-4 animate-in fade-in slide-in-from-bottom duration-1000">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-2 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.6)]"></div>
+                <div>
+                  <h2 className="text-[20px] font-bold tracking-tighter uppercase text-foreground">More from {localNft.creator}</h2>
+                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">Extended Discography</p>
+                </div>
               </div>
-              <button onClick={() => navigate(`/artist/${localNft.creator}`)} className="text-[10px] font-bold text-foreground/30 hover:text-blue-500 uppercase tracking-[0.3em] transition-all flex items-center group" >
-                VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+              <button onClick={() => navigate(`/artist/${localNft.creator}`)} className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group" >
+                VIEW ALL <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {moreFromCreator.map((nft) => (
                 <NFTCard key={nft.id} nft={nft} />
               ))}
@@ -799,17 +817,20 @@ const NFTDetail: React.FC = () => {
   
         {/* Related NFTs Section */}
         {relatedNfts.length > 0 && (
-          <div className="mt-40 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
-                <h2 className="text-lg font-bold tracking-tighter uppercase text-foreground">Related {associatedTrack?.genre} Vibes</h2>
+          <div className="mt-4 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-2 h-8 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)]"></div>
+                <div>
+                  <h2 className="text-[20px] font-bold tracking-tighter uppercase text-foreground">Related {associatedTrack?.genre} Vibes</h2>
+                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">Sonic Affinities</p>
+                </div>
               </div>
-              <button onClick={() => navigate('/explore/nfts?title=Related Vibes')} className="text-[10px] font-bold text-foreground/30 hover:text-amber-500 uppercase tracking-[0.3em] transition-all flex items-center group" >
-                EXPLORE GENRE <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+              <button onClick={() => navigate('/explore/nfts?title=Related Vibes')} className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group" >
+                EXPLORE GENRE <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {relatedNfts.map((nft) => (
                 <NFTCard key={nft.id} nft={nft} />
               ))}

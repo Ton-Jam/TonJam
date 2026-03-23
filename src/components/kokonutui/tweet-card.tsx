@@ -60,7 +60,7 @@ export default function TweetCard({
     >
       <div
         className={cn(
-          "relative isolate w-full min-w-[400px] max-w-xl overflow-hidden rounded-2xl p-1.5 md:min-w-[500px]",
+          "relative isolate w-full min-w-[400px] max-w-xl overflow-hidden rounded-2xl p-3 md:min-w-[500px]",
           "bg-muted/50 dark:bg-background/90",
           "bg-linear-to-br from-black/5 to-black/[0.02] dark:from-white/5 dark:to-white/[0.02]",
           "backdrop-blur-xl backdrop-saturate-[180%]",
@@ -71,7 +71,7 @@ export default function TweetCard({
       >
         <div
           className={cn(
-            "relative w-full rounded-xl p-5",
+            "relative w-full rounded-xl p-2",
             "bg-linear-to-br from-black/[0.05] to-transparent dark:from-white/[0.08] dark:to-transparent",
             "backdrop-blur-md backdrop-saturate-150",
             "border border-black/[0.05] dark:border-white/[0.08]",
@@ -82,7 +82,7 @@ export default function TweetCard({
             "hover:before:opacity-100"
           )}
         >
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <div className="shrink-0">
               <div className="h-10 w-10 overflow-hidden rounded-full">
                 <img
@@ -96,7 +96,7 @@ export default function TweetCard({
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     <span className="cursor-pointer font-semibold text-background hover:underline dark:text-foreground/90">
                       {authorName}
                     </span>
@@ -109,7 +109,7 @@ export default function TweetCard({
                   </span>
                 </div>
                 <button
-                  className="flex h-8 w-8 items-center justify-center rounded-lg p-1 text-background hover:bg-background/5 hover:text-background dark:text-muted-foreground/90 dark:hover:bg-muted/50 dark:hover:text-foreground"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg p-2 text-background hover:bg-background/5 hover:text-background dark:text-muted-foreground/90 dark:hover:bg-muted/50 dark:hover:text-foreground"
                   type="button"
                 >
                   <svg
@@ -146,8 +146,8 @@ export default function TweetCard({
           </div>
 
           {reply && (
-            <div className="mt-4 border-black/[0.08] border-t pt-4 dark:border-white/[0.08]">
-              <div className="flex gap-3">
+            <div className="mt-2 border-black/[0.08] border-t pt-2 dark:border-white/[0.08]">
+              <div className="flex gap-2">
                 <div className="shrink-0">
                   <div className="h-10 w-10 overflow-hidden rounded-full">
                     <img
@@ -158,7 +158,7 @@ export default function TweetCard({
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     <span className="cursor-pointer font-semibold text-background hover:underline dark:text-foreground/90">
                       {reply.authorName}
                     </span>
@@ -175,7 +175,7 @@ export default function TweetCard({
                       {reply.timestamp}
                     </span>
                   </div>
-                  <p className="mt-1 text-background text-sm dark:text-muted-foreground/90">
+                  <p className="mt-2 text-background text-sm dark:text-muted-foreground/90">
                     {reply.content}
                   </p>
                 </div>

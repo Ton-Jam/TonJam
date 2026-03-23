@@ -8,16 +8,18 @@ import confetti from 'canvas-confetti';
 
 const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { analyser, currentTrack } = useAudio();
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     let animationFrameId: number;
-    const bars = 48; // Increased for more detail
+    const bars = 64; // Increased for better resolution on wider screens
     const heights = Array(bars).fill(2);
     const targets = Array(bars).fill(2);
     let phase = 0;
@@ -28,15 +30,18 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
       : null;
 
     const draw = () => {
-      const displayWidth = canvas.clientWidth;
-      const displayHeight = canvas.clientHeight;
+      const displayWidth = container.clientWidth;
+      const displayHeight = container.clientHeight;
+      
       if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
         canvas.width = displayWidth;
         canvas.height = displayHeight;
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const width = canvas.width / bars;
+      const gap = 2;
+      const width = (canvas.width - (bars - 1) * gap) / bars;
+      
       phase += 0.05;
       pulsePhase += 0.02;
 
@@ -47,48 +52,44 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
       for (let i = 0; i < bars; i++) {
         if (isPlaying) {
           if (analyser && dataArray) {
-            // Map frequency data to bars with a slight logarithmic bias for better visuals
-            const dataIndex = Math.floor(Math.pow(i / bars, 1.5) * (dataArray.length * 0.6));
+            // Map frequency data to bars with a slight logarithmic bias
+            const dataIndex = Math.floor(Math.pow(i / bars, 1.3) * (dataArray.length * 0.5));
             const value = dataArray[dataIndex] || 0;
-            targets[i] = 3 + (value / 255) * (canvas.height * 0.85);
+            targets[i] = 2 + (value / 255) * (canvas.height * 0.9);
           } else {
-            // Fallback animation if no analyser
-            const wave = Math.sin(phase + i * 0.15) * 0.5 + 0.5;
-            targets[i] = 3 + wave * (canvas.height * 0.4) + Math.random() * 5;
+            // Fallback animation
+            const wave = Math.sin(phase + i * 0.1) * 0.5 + 0.5;
+            targets[i] = 2 + wave * (canvas.height * 0.5) + Math.random() * 3;
           }
         } else {
-          // Subtle pulsing effect when paused
-          const pulse = Math.sin(pulsePhase + i * 0.1) * 2 + 3;
+          // Subtle pulse when paused
+          const pulse = Math.sin(pulsePhase + i * 0.15) * 1.5 + 2;
           targets[i] = pulse;
         }
 
-        // Smooth interpolation for fluid movement
-        const lerpSpeed = isPlaying ? 0.25 : 0.1;
+        const lerpSpeed = isPlaying ? 0.2 : 0.1;
         heights[i] += (targets[i] - heights[i]) * lerpSpeed;
         
         const h = Math.max(2, heights[i]);
-        const x = i * width;
-        const y = canvas.height - h;
+        const x = i * (width + gap);
+        const y = (canvas.height - h) / 2; // Center vertically
 
-        // Gradient for the bars
-        const gradient = ctx.createLinearGradient(0, y, 0, canvas.height);
-        gradient.addColorStop(0, "#60a5fa"); // blue-400
-        gradient.addColorStop(1, "#2563eb"); // blue-600
+        const gradient = ctx.createLinearGradient(0, y, 0, y + h);
+        gradient.addColorStop(0, "#60a5fa");
+        gradient.addColorStop(0.5, "#3b82f6");
+        gradient.addColorStop(1, "#2563eb");
 
         ctx.fillStyle = gradient;
-        ctx.shadowBlur = isPlaying ? 8 : 4;
-        ctx.shadowColor = "rgba(59, 130, 246, 0.5)";
+        ctx.shadowBlur = isPlaying ? 10 : 4;
+        ctx.shadowColor = "rgba(59, 130, 246, 0.4)";
         
-        const barWidth = Math.max(1.5, width - 2);
-        const radius = 2;
+        const radius = width / 2;
         
-        // Draw rounded bars
         ctx.beginPath();
         if (ctx.roundRect) {
-          ctx.roundRect(x + (width - barWidth) / 2, y, barWidth, h, [radius, radius, 0, 0]);
+          ctx.roundRect(x, y, width, h, radius);
         } else {
-          // Fallback for older browsers
-          ctx.rect(x + (width - barWidth) / 2, y, barWidth, h);
+          ctx.rect(x, y, width, h);
         }
         ctx.fill();
       }
@@ -102,10 +103,9 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
   }, [isPlaying, analyser, currentTrack?.id]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-full max-w-[320px] h-[40px] opacity-90 mix-blend-screen"
-    />
+    <div ref={containerRef} className="w-full h-16 md:h-24 px-4 opacity-90 mix-blend-screen overflow-hidden">
+      <canvas ref={canvasRef} className="w-full h-full" />
+    </div>
   );
 };
 
@@ -235,15 +235,15 @@ const FullAudioPlayer: React.FC = () => {
         <div className="absolute inset-0 "></div>
       </div>
 
-      <div className="relative z-10 min-h-full flex flex-col p-6 md:p-8 max-w-xl mx-auto w-full pb-8">
-        <header className="flex items-center justify-between mb-8 flex-shrink-0">
+      <div className="relative z-10 min-h-full flex flex-col p-2 md:p-2 max-w-xl mx-auto w-full pb-2">
+        <header className="flex items-center justify-between mb-2 flex-shrink-0">
           <button
             onClick={() => setFullPlayerOpen(false)}
             className="w-12 h-12 rounded-full flex items-center justify-center text-muted-foreground/80 hover:text-foreground transition-all hover:bg-muted/50"
           >
             <ChevronDown className="h-6 w-6" />
           </button>
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-2 items-center">
             <button
               onClick={() => setView("cover")}
               className={`p-2 transition-all ${view === "cover" ? "text-blue-500" : "text-muted-foreground/80 hover:text-foreground"}`}
@@ -261,7 +261,7 @@ const FullAudioPlayer: React.FC = () => {
             {activeJamRoom && (
               <button 
                 onClick={leaveJamRoom}
-                className="flex items-center gap-2 px-4 py-2 bg-neutral-500/10 border border-neutral-500/20 rounded-full text-[10px] font-bold text-neutral-500 uppercase tracking-widest animate-pulse"
+                className="flex items-center gap-2 px-2 py-2 bg-neutral-500/10 border border-neutral-500/20 rounded-full text-[10px] font-bold text-neutral-500 uppercase tracking-widest animate-pulse"
               >
                 <Users className="h-3 w-3" />
                 Live Jam
@@ -286,9 +286,9 @@ const FullAudioPlayer: React.FC = () => {
           </div>
         </header>
 
-        <div className="flex-1 flex flex-col items-center justify-center w-full pb-12">
+        <div className="flex-1 flex flex-col items-center justify-center w-full pb-2">
           {view === "cover" ? (
-            <div className="relative w-full aspect-square rounded-[10px] overflow-hidden shadow-2xl mb-10 group">
+            <div className="relative w-full aspect-square rounded-[10px] overflow-hidden shadow-2xl mb-2 group">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={currentTrack.id}
@@ -304,7 +304,7 @@ const FullAudioPlayer: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80"></div>
             </div>
           ) : (
-            <div className="w-full h-full max-h-[450px] overflow-y-auto no-scrollbar py-10 px-4 space-y-8">
+            <div className="w-full h-full max-h-[450px] overflow-y-auto no-scrollbar py-2 px-2 space-y-2">
               <p className="text-xl font-bold text-foreground uppercase tracking-tighter leading-tight text-left">
                 Frequencies locked, we're forging the soul
               </p>
@@ -317,7 +317,7 @@ const FullAudioPlayer: React.FC = () => {
             </div>
           )}
 
-          <div className="w-full text-center mb-6">
+          <div className="w-full text-center mb-2">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentTrack.id}
@@ -326,7 +326,7 @@ const FullAudioPlayer: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                <h2 className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-foreground leading-none truncate px-4">
+                <h2 className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-foreground leading-none truncate px-2">
                   {currentTrack.title}
                 </h2>
                 <div className="flex items-center justify-center gap-2 mt-2">
@@ -349,18 +349,18 @@ const FullAudioPlayer: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          <div className="w-full flex justify-center mb-6">
+          <div className="w-full flex justify-center mb-2">
             <AudioVisualizer isPlaying={isPlaying} />
           </div>
 
-          <div className="w-full max-w-[420px] mb-12 space-y-8">
+          <div className="w-full max-w-[420px] mb-2 space-y-2">
             {/* Row 1: Utility Icons */}
-            <div className="flex items-center justify-center gap-6">
+            <div className="flex items-center justify-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.1, y: -2 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleAddToPlaylist}
-                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08] hover:border-border transition-all group"
+                className="flex flex-col items-center gap-2 p-2 rounded-2xl bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08] hover:border-border transition-all group"
                 title="Add to Playlist"
               >
                 <PlusCircle className="h-6 w-6 text-muted-foreground group-hover:text-blue-400 transition-colors" />
@@ -374,7 +374,7 @@ const FullAudioPlayer: React.FC = () => {
                   setFullPlayerOpen(false);
                   navigate(`/nft/${currentTrack.id}`);
                 }}
-                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08] hover:border-border transition-all group"
+                className="flex flex-col items-center gap-2 p-2 rounded-2xl bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08] hover:border-border transition-all group"
                 title="Mint NFT"
               >
                 <Gem className="h-6 w-6 text-muted-foreground group-hover:text-purple-400 transition-colors" />
@@ -385,7 +385,7 @@ const FullAudioPlayer: React.FC = () => {
                 whileHover={{ scale: 1.1, y: -2 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleShare}
-                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08] hover:border-border transition-all group"
+                className="flex flex-col items-center gap-2 p-2 rounded-2xl bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08] hover:border-border transition-all group"
                 title="Share"
               >
                 <Share2 className="h-6 w-6 text-muted-foreground group-hover:text-emerald-400 transition-colors" />
@@ -395,7 +395,7 @@ const FullAudioPlayer: React.FC = () => {
               <div className="relative">
                 <motion.div
                   whileHover={{ scale: 1.1 }}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all cursor-pointer ${showVolume ? "bg-blue-500/10 border border-neutral-500/20" : "bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08]"}`}
+                  className={`flex flex-col items-center gap-2 p-2 rounded-2xl transition-all cursor-pointer ${showVolume ? "bg-blue-500/10 border border-neutral-500/20" : "bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08]"}`}
                   onClick={() => setShowVolume(!showVolume)}
                   title="Volume"
                 >
@@ -409,7 +409,7 @@ const FullAudioPlayer: React.FC = () => {
                   <span className={`text-[8px] font-bold uppercase tracking-widest ${showVolume ? "text-blue-400" : "text-muted-foreground/50"}`}>Vol</span>
                 </motion.div>
                 {showVolume && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-white p-5 rounded-[10px] shadow-2xl border border-border/50 animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white p-2 rounded-[10px] shadow-2xl border border-border/50 animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
                     <div
                       className="h-32 w-2 bg-neutral-100 rounded-full relative cursor-pointer group/vslider"
                       onClick={(e) => {
@@ -447,7 +447,7 @@ const FullAudioPlayer: React.FC = () => {
               </motion.button>
               <button
                 onClick={prevTrack}
-                className="text-2xl text-muted-foreground hover:text-foreground transition-all hover:scale-125 active:scale-90 p-2"
+                className="text-[20px] text-muted-foreground hover:text-foreground transition-all hover:scale-125 active:scale-90 p-2"
               >
                 <SkipBack className="h-8 w-8 fill-current" />
               </button>
@@ -490,7 +490,7 @@ const FullAudioPlayer: React.FC = () => {
               </div>
               <button
                 onClick={nextTrack}
-                className="text-2xl text-muted-foreground hover:text-foreground transition-all hover:scale-125 active:scale-90 p-2"
+                className="text-[20px] text-muted-foreground hover:text-foreground transition-all hover:scale-125 active:scale-90 p-2"
               >
                 <SkipForward className="h-8 w-8 fill-current" />
               </button>
@@ -508,8 +508,8 @@ const FullAudioPlayer: React.FC = () => {
         </div>
 
         {/* Track Details Section */}
-        <div className="w-full mt-12 pt-12 space-y-10">
-          <div className="space-y-4">
+        <div className="w-full mt-2 pt-2 space-y-2">
+          <div className="space-y-2">
             <h3 className="text-[14px] font-bold text-muted-foreground/80 uppercase tracking-[0.4em]">
               Track Info
             </h3>
@@ -531,12 +531,12 @@ const FullAudioPlayer: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="text-[14px] font-bold text-muted-foreground/80 uppercase tracking-[0.4em]">
               Artist Info
             </h3>
             <div
-              className="flex items-center gap-4 mb-4 cursor-pointer group/dossier"
+              className="flex items-center gap-2 mb-2 cursor-pointer group/dossier"
               onClick={handleArtistClick}
             >
               <img
@@ -559,12 +559,12 @@ const FullAudioPlayer: React.FC = () => {
             </p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-2">
             <h3 className="text-[14px] font-bold text-muted-foreground/80 uppercase tracking-[0.4em]">
               Track Comments
             </h3>
-            <div className="space-y-6">
-              <div className="flex gap-4">
+            <div className="space-y-2">
+              <div className="flex gap-2">
                 <img
                   src={userProfile.avatar}
                   className="w-10 h-10 rounded-full"
@@ -574,7 +574,7 @@ const FullAudioPlayer: React.FC = () => {
                   <input
                     type="text"
                     placeholder="Add a comment..."
-                    className="w-full bg-muted/50 rounded-[10px] py-3 px-5 text-[14px] text-foreground outline-none transition-all"
+                    className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-[14px] text-foreground outline-none transition-all"
                   />
                   <button className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-500 text-[14px] font-bold uppercase tracking-widest">
                     Post
@@ -582,7 +582,7 @@ const FullAudioPlayer: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-6 max-h-[400px] overflow-y-auto no-scrollbar pr-2">
+              <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar pr-2">
                 {[
                   {
                     id: 1,
@@ -606,14 +606,14 @@ const FullAudioPlayer: React.FC = () => {
                     time: "1d ago",
                   },
                 ].map((comment) => (
-                  <div key={comment.id} className="flex gap-4 group">
+                  <div key={comment.id} className="flex gap-2 group">
                     <img
                       src={comment.avatar}
                       className="w-10 h-10 rounded-full"
                       alt=""
                     />
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="text-[14px] font-bold text-foreground uppercase tracking-tight">
                           {comment.user}
                         </span>
@@ -634,7 +634,7 @@ const FullAudioPlayer: React.FC = () => {
       </div>
 
       {/* Bottom Progress Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-neutral-500/10 px-4 md:px-8 py-4 flex items-center gap-4">
+      <div className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-neutral-500/10 px-2 md:px-2 py-2 flex items-center gap-2">
         <img
           src={APP_LOGO}
           alt="TonJam"
@@ -642,7 +642,7 @@ const FullAudioPlayer: React.FC = () => {
           style={{ animationDuration: "4s" }}
         />
         <div className="flex-1 flex flex-col gap-2">
-          <div className="flex justify-between text-[12px] font-bold text-muted-foreground/80 tracking-widest uppercase px-1">
+          <div className="flex justify-between text-[12px] font-bold text-muted-foreground/80 tracking-widest uppercase px-2">
             <span>
               {Math.floor(((progress / 100) * currentTrack.duration) / 60)}:
               {String(

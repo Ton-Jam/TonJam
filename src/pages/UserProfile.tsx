@@ -72,15 +72,15 @@ const UserProfile: React.FC = () => {
   if (!user) return null;
 
   return (
-    <div className="animate-in fade-in duration-1000 pb-32">
+    <div className="animate-in fade-in duration-1000 pb-4">
       {/* Banner Section */}
       <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-background">
         <img src={user.bannerUrl || `https://picsum.photos/1200/400?random=${user.id}`} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 md:-mt-32 relative z-10">
-        <div className="flex flex-col md:flex-row gap-8 items-start">
+      <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-4 -mt-4 md:-mt-4 relative z-10">
+        <div className="flex flex-col md:flex-row gap-4 items-start">
           
           {/* Avatar & Basic Info */}
           <div className="flex-shrink-0 relative group">
@@ -88,17 +88,17 @@ const UserProfile: React.FC = () => {
               <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
             </div>
             {user.isVerifiedArtist && (
-              <div className="absolute -bottom-2 -right-2 bg-blue-500 text-foreground p-2 rounded-xl border-4 border-black z-20 shadow-lg" title="Verified Artist">
+              <div className="absolute -bottom-2 -right-2 bg-blue-500 text-foreground p-4 rounded-xl border-4 border-black z-20 shadow-lg" title="Verified Artist">
                 <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
               </div>
             )}
           </div>
 
           {/* Profile Details */}
-          <div className="flex-1 pt-4 md:pt-36 w-full">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="flex-1 pt-4 md:pt-4 w-full">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
-                <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground mb-2 uppercase">{user.name}</h1>
+                <h1 className="text-[26px] md:text-[44px] font-black tracking-tighter text-foreground mb-4 uppercase">{user.name}</h1>
                 <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground uppercase tracking-widest">
                   <span>{user.handle}</span>
                   {user.walletAddress && (
@@ -110,10 +110,10 @@ const UserProfile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <button 
                   onClick={handleFollow}
-                  className={`px-8 py-4 rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${
+                  className={`px-4 py-4 rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-4 ${
                     isFollowing 
                       ? 'bg-muted text-foreground hover:bg-muted/80' 
                       : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]'
@@ -125,16 +125,16 @@ const UserProfile: React.FC = () => {
             </div>
 
             {user.bio && (
-              <p className="mt-6 text-sm text-muted-foreground/80 max-w-2xl leading-relaxed font-medium">
+              <p className="mt-4 text-sm text-muted-foreground/80 max-w-2xl leading-relaxed font-medium">
                 {user.bio}
               </p>
             )}
 
             {/* Friends Avatars */}
             {user.friends && user.friends.length > 0 && (
-              <div className="mt-6 flex items-center gap-2">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-2">Friends:</span>
-                <div className="flex -space-x-2">
+              <div className="mt-4 flex items-center gap-4">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-4">Friends:</span>
+                <div className="flex -space-x-4">
                   {user.friends.slice(0, 5).map(friendId => {
                     const friend = MOCK_USERS.find(u => u.id === friendId);
                     if (!friend) return null;
@@ -149,25 +149,25 @@ const UserProfile: React.FC = () => {
             )}
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-8 mt-8 pt-8 border-t border-border/50">
+            <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-border/50">
               <div>
-                <div className="text-2xl font-black text-foreground">{user.followers.toLocaleString()}</div>
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Followers</div>
+                <div className="text-[20px] font-black text-foreground">{user.followers.toLocaleString()}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-4">Followers</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-foreground">{user.following.toLocaleString()}</div>
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Following</div>
+                <div className="text-[20px] font-black text-foreground">{user.following.toLocaleString()}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-4">Following</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-foreground">{ownedNfts.length}</div>
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Assets</div>
+                <div className="text-[20px] font-black text-foreground">{ownedNfts.length}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-4">Assets</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-8 mt-12 border-b border-border/50 overflow-x-auto no-scrollbar">
+        <div className="flex gap-4 mt-4 border-b border-border/50 overflow-x-auto no-scrollbar">
           {[
             { id: 'inventory', label: 'Inventory', icon: Box },
             { id: 'activity', label: 'Activity', icon: Layers },
@@ -176,7 +176,7 @@ const UserProfile: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors whitespace-nowrap relative ${
+              className={`flex items-center gap-4 pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-colors whitespace-nowrap relative ${
                 activeTab === tab.id ? 'text-blue-500' : 'text-muted-foreground hover:text-muted-foreground/90'
               }`}
             >
@@ -190,20 +190,20 @@ const UserProfile: React.FC = () => {
         </div>
 
         {/* Tab Content */}
-        <div className="mt-8">
+        <div className="mt-4">
           {activeTab === 'inventory' && (
-            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {/* Owned NFTs */}
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-4">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                     Digital Assets
                   </h3>
                 </div>
                 
                 {ownedNfts.length > 0 ? (
-                  <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+                  <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
                     {ownedNfts.map(nft => (
                       <div key={nft.id} className="min-w-[280px] sm:min-w-[320px]">
                         <NFTCard nft={nft} />
@@ -211,7 +211,7 @@ const UserProfile: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="glass p-12 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
+                  <div className="glass p-4 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
                     <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
                       <Gem className="w-8 h-8 text-muted-foreground/50" />
                     </div>
@@ -223,14 +223,14 @@ const UserProfile: React.FC = () => {
               {/* Uploaded Tracks (if any) */}
               {uploadedTracks.length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-4">
                       <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                       Uploaded Tracks
                     </h3>
                   </div>
                   
-                  <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar">
+                  <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
                     {uploadedTracks.map((track, index) => (
                       <div key={track.id} className="min-w-[280px] sm:min-w-[320px]">
                         <TrackCard track={track} index={index} />
@@ -247,7 +247,7 @@ const UserProfile: React.FC = () => {
               {userPosts.length > 0 ? (
                 <SocialFeed posts={userPosts} />
               ) : (
-                <div className="glass p-12 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
+                <div className="glass p-4 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
                   <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
                     <Layers className="w-8 h-8 text-muted-foreground/50" />
                   </div>
@@ -258,18 +258,18 @@ const UserProfile: React.FC = () => {
           )}
 
           {activeTab === 'network' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
               {/* Followed Artists */}
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-4">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                     Followed Artists
                   </h3>
                 </div>
                 
                 {user.followedArtists && user.followedArtists.length > 0 ? (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-4">
                      {user.followedArtists.map(artistId => {
                         const artist = MOCK_ARTISTS.find(a => a.id === artistId);
                         if (!artist) return null;
@@ -277,7 +277,7 @@ const UserProfile: React.FC = () => {
                      })}
                   </div>
                 ) : (
-                  <div className="glass p-8 rounded-[10px] border border-border/50 text-center">
+                  <div className="glass p-4 rounded-[10px] border border-border/50 text-center">
                     <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Not following any artists</p>
                   </div>
                 )}
@@ -285,13 +285,13 @@ const UserProfile: React.FC = () => {
 
               {/* Friends / Network */}
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-4">
                     <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                     Network Connections
                   </h3>
                 </div>
-                 <div className="glass p-12 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
+                 <div className="glass p-4 rounded-[10px] border border-border/50 text-center flex flex-col items-center justify-center">
                   <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
                     <Users className="w-8 h-8 text-muted-foreground/50" />
                   </div>

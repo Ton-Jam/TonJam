@@ -34,7 +34,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -46,36 +46,36 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-card border border-border rounded-[24px] p-8"
+            className="relative w-full max-w-md bg-card border border-border rounded-[24px] p-2"
           >
             <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
               <X className="h-5 w-5" />
             </button>
-            <h2 className="text-xl font-bold text-foreground uppercase tracking-tighter mb-6">Manage Listing</h2>
+            <h2 className="text-xl font-bold text-foreground uppercase tracking-tighter mb-2">Manage Listing</h2>
             
-            <div className="space-y-4">
+            <div className="space-y-2">
               <div>
                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">New Price (TON)</label>
                 <input 
                   type="number" 
                   value={newPrice} 
                   onChange={(e) => setNewPrice(e.target.value)}
-                  className="w-full bg-muted/50 border border-border rounded-[8px] p-3 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-muted/50 border border-border rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
-              <div className="flex gap-4">
+              <div className="flex gap-2">
                 <button 
                   onClick={handleUpdatePrice}
                   disabled={isUpdating}
-                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[8px] font-bold text-[10px] uppercase tracking-widest transition-all"
+                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[8px] font-bold text-[10px] uppercase tracking-widest transition-all"
                 >
                   {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Update Price'}
                 </button>
                 <button 
                   onClick={handleDelist}
                   disabled={isUpdating}
-                  className="flex-1 py-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-[8px] font-bold text-[10px] uppercase tracking-widest transition-all"
+                  className="flex-1 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-[8px] font-bold text-[10px] uppercase tracking-widest transition-all"
                 >
                   {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Delist'}
                 </button>

@@ -1,14 +1,70 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
-const { firestoreDatabaseId, ...config } = firebaseConfig;
-const app = initializeApp(config);
-export const auth = getAuth(app);
+// Initialize Firebase SDK
+const app = initializeApp(firebaseConfig);
+
+// Use a more robust initialization for Firestore in this environment
+// We use initializeFirestore to set experimentalForceLongPolling which is required in some sandboxed environments
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
-  cacheSizeBytes: CACHE_SIZE_UNLIMITED
-}, firestoreDatabaseId);
+}, firebaseConfig.firestoreDatabaseId || '(default)');
+
+export const auth = getAuth(app);
+
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+export interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, shouldThrow: boolean = true) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  if (shouldThrow) {
+    throw new Error(JSON.stringify(errInfo));
+  }
+}
 
 export default app;

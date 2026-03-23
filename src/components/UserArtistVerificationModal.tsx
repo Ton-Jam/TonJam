@@ -52,12 +52,12 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
   const canVerify = linkedAccounts.x && linkedAccounts.spotify && linkedAccounts.wallet;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose}></div>
       
       <div className="relative w-full max-w-md bg-background border border-border rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="p-6 border-b border-border/50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="p-2 border-b border-border/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-500">
               <ShieldCheck className="h-5 w-5" />
             </div>
@@ -71,17 +71,17 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
           </button>
         </div>
 
-        <div className="p-8 space-y-8">
+        <div className="p-2 space-y-2">
           <div className="space-y-2 text-center">
             <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">
               Link your accounts to verify your identity and unlock artist features.
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {/* X (Twitter) Link */}
-            <div className="flex items-center justify-between p-4 bg-muted/30 border border-border rounded-2xl">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between p-2 bg-muted/30 border border-border rounded-2xl">
+              <div className="flex items-center gap-2">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${linkedAccounts.x ? 'bg-blue-500/20 text-blue-400' : 'bg-muted text-muted-foreground'}`}>
                   <Twitter className="h-5 w-5" />
                 </div>
@@ -99,7 +99,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
                 <button 
                   onClick={() => handleLinkAccount('x')}
                   disabled={isVerifying}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                  className="px-2 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                 >
                   Connect
                 </button>
@@ -107,8 +107,8 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
             </div>
 
             {/* Spotify Link */}
-            <div className="flex items-center justify-between p-4 bg-muted/30 border border-border rounded-2xl">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between p-2 bg-muted/30 border border-border rounded-2xl">
+              <div className="flex items-center gap-2">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${linkedAccounts.spotify ? 'bg-[#1DB954]/20 text-[#1DB954]' : 'bg-muted text-muted-foreground'}`}>
                   <Music className="h-5 w-5" />
                 </div>
@@ -126,7 +126,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
                 <button 
                   onClick={() => handleLinkAccount('spotify')}
                   disabled={isVerifying}
-                  className="px-4 py-2 bg-[#1DB954] hover:bg-[#1ed760] text-black rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                  className="px-2 py-2 bg-[#1DB954] hover:bg-[#1ed760] text-black rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                 >
                   Connect
                 </button>
@@ -134,8 +134,8 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
             </div>
 
             {/* TON Wallet Link */}
-            <div className="flex items-center justify-between p-4 bg-muted/30 border border-border rounded-2xl">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between p-2 bg-muted/30 border border-border rounded-2xl">
+              <div className="flex items-center gap-2">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${linkedAccounts.wallet ? 'bg-blue-500/20 text-blue-400' : 'bg-muted text-muted-foreground'}`}>
                   <Wallet className="h-5 w-5" />
                 </div>
@@ -153,7 +153,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
                 <button 
                   onClick={() => handleLinkAccount('wallet')}
                   disabled={isVerifying}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                  className="px-2 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                 >
                   Connect
                 </button>
@@ -161,11 +161,11 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
             </div>
           </div>
 
-          <div className="pt-6 border-t border-border/50">
+          <div className="pt-2 border-t border-border/50">
             <button 
               onClick={handleCompleteVerification}
               disabled={!canVerify || isVerifying}
-              className={`w-full py-4 rounded-2xl text-xs font-bold uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 ${
+              className={`w-full py-2 rounded-2xl text-xs font-bold uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2 ${
                 canVerify 
                   ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20' 
                   : 'bg-muted text-muted-foreground cursor-not-allowed'

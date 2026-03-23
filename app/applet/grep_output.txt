@@ -1,0 +1,138 @@
+src/components/RoyaltyConfigModal.tsx:                      className="p-2.5 rounded-[6px] bg-neutral-500/5 hover:bg-neutral-500/10 text-neutral-500/40 hover:text-neutral-500 transition-all border border-neutral-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
+src/components/UserCard.tsx:            <div className="flex items-center gap-2.5">
+src/components/UserCard.tsx:              className={`follow-btn px-2 py-2.5 rounded-[5px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-600 text-foreground shadow-lg shadow-blue-600/20'}`}
+src/components/UserCard.tsx:        <div className="flex items-center justify-center gap-2.5">
+src/components/BuyTJModal.tsx:                    <span className="text-[10px] font-bold text-muted-foreground/50">Balance: 12.5 TON</span>
+src/components/ui/drawer.tsx:        "mt-2.5 text-muted-foreground text-sm",
+src/components/ui/menubar.tsx:      "flex cursor-default select-none items-center rounded-sm px-2 py-2.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+src/components/ui/menubar.tsx:      "relative flex cursor-default select-none items-center rounded-sm px-2 py-2.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+src/components/ui/menubar.tsx:      "relative flex cursor-default select-none items-center rounded-sm py-2.5 pl-2 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+src/components/ui/menubar.tsx:      "px-2 py-2.5 text-sm font-semibold",
+src/components/ui/dialog.tsx:      "flex flex-col space-y-2.5 text-center sm:text-left",
+src/components/ui/select.tsx:    className={cn("px-2 py-2.5 text-sm font-semibold", className)}
+src/components/ui/select.tsx:      "relative flex w-full cursor-default select-none items-center rounded-sm py-2.5 pl-2 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+src/components/ui/toggle.tsx:        sm: "h-8 px-2.5 min-w-8",
+src/components/ui/toggle.tsx:        lg: "h-10 px-2.5 min-w-10",
+src/components/ui/calendar.tsx:          "flex h-[--cell-size] w-full items-center justify-center gap-2.5 text-sm font-medium",
+src/components/ui/scroll-area.tsx:        "h-full w-2.5 border-l border-l-transparent p-[1px]",
+src/components/ui/scroll-area.tsx:        "h-2.5 flex-col border-t border-t-transparent p-[1px]",
+src/components/ui/chart.tsx:          "grid min-w-[8rem] items-start gap-2.5 rounded-lg border border-border/50 bg-background px-2.5 py-2.5 text-xs shadow-xl",
+src/components/ui/chart.tsx:        <div className="grid gap-2.5">
+src/components/ui/chart.tsx:                  "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
+src/components/ui/chart.tsx:                              "h-2.5 w-2.5": indicator === "dot",
+src/components/ui/chart.tsx:                              "my-2.5": nestLabel && indicator === "dashed",
+src/components/ui/chart.tsx:                      <div className="grid gap-2.5">
+src/components/ui/chart.tsx:                "flex items-center gap-2.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
+src/components/ui/dropdown-menu.tsx:      "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+src/components/ui/dropdown-menu.tsx:      "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
+src/components/ui/dropdown-menu.tsx:      "relative flex cursor-default select-none items-center rounded-sm py-2.5 pl-2 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+src/components/ui/dropdown-menu.tsx:      "px-2 py-2.5 text-sm font-semibold",
+src/components/ui/tooltip.tsx:        "z-50 overflow-hidden rounded-md bg-primary px-2 py-2.5 text-xs text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-tooltip-content-transform-origin]",
+src/components/ui/card.tsx:    className={cn("flex flex-col space-y-2.5 p-2", className)}
+src/components/TrackCard.tsx:                <div className="flex items-end justify-center gap-2.5 h-3" aria-hidden="true">
+src/components/TrackCard.tsx:          <div className="flex items-center gap-2.5 mt-2.5">
+src/components/TrackCard.tsx:               className="px-2 py-2.5 bg-blue-600 hover:bg-blue-500 text-foreground text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+src/components/TrackCard.tsx:                     <img src={TJ_COIN_ICON} className="w-2.5 h-2.5" alt="" />
+src/components/TrackCard.tsx:               className={`p-2.5 rounded-full bg-background/40 backdrop-blur-md text-muted-foreground/90 hover:text-foreground hover:bg-background/60 transition-all pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+src/components/TrackCard.tsx:                      className="flex items-end justify-center gap-2.5 w-7 h-7 rounded-full bg-blue-600/90 backdrop-blur-md shadow-xl p-2.5 pointer-events-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+src/components/TrackCard.tsx:                       <Play className="h-3 w-3 text-foreground fill-white ml-2.5" aria-hidden="true" />
+src/components/TrackCard.tsx:      <div className="px-2.5">
+src/components/TrackCard.tsx:        <div className="flex items-center gap-2.5 mt-2.5 mb-2.5">
+src/components/TrackCard.tsx:          {track.artistVerified && <CheckCircle2 className="h-2.5 w-2.5 text-blue-500" aria-label="Verified artist" />}
+src/components/TrackCard.tsx:                     className={`p-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground' : 'hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
+src/components/TrackCard.tsx:                           className="px-2 py-2.5 hover:bg-muted rounded text-[9px] font-bold text-blue-600 dark:text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-2"
+src/components/TrackCard.tsx:                             <img src={TJ_COIN_ICON} className="w-2.5 h-2.5" alt="" />
+src/components/TrackCard.tsx:                  className={`p-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground' : 'hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
+src/components/TrackCard.tsx:                        className="px-2 py-2.5 hover:bg-muted rounded text-[9px] font-bold text-blue-600 dark:text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-2"
+src/components/TrackCard.tsx:                          <img src={TJ_COIN_ICON} className="w-2.5 h-2.5" alt="" />
+src/components/TrackCard.tsx:                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-foreground text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all active:scale-95 shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
+src/components/TrackCard.tsx:                <Headphones className="h-2.5 w-2.5 text-blue-500/50 dark:text-muted-foreground/50" aria-hidden="true" />
+src/components/TrackCard.tsx:                  <Zap className="h-2.5 w-2.5 text-amber-400 ml-2" aria-label="Trending" />
+src/components/TrackCard.tsx:                <Clock className="h-2.5 w-2.5 text-blue-500/50 dark:text-muted-foreground/50" aria-hidden="true" />
+src/components/TrackCard.tsx:                  className={`p-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isTipping ? 'bg-blue-600 text-foreground scale-110' : 'hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
+src/components/TrackCard.tsx:                        className="px-2 py-2.5 hover:bg-muted rounded text-[9px] font-bold text-blue-600 dark:text-foreground whitespace-nowrap transition-colors flex items-center justify-between gap-2"
+src/components/TrackCard.tsx:                          <img src={TJ_COIN_ICON} className="w-2.5 h-2.5" alt="" />
+src/components/PostCard.tsx:        "relative isolate w-full overflow-hidden rounded-2xl p-2.5 mb-2 group",
+src/components/PostCard.tsx:                <div className="flex items-center gap-2.5 justify-end">
+src/components/PostCard.tsx:                          <div className="flex flex-wrap gap-2.5">
+src/components/PostCard.tsx:                                  className={`flex items-center gap-2.5 rounded-full px-2 py-2.5 text-[10px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground/80 hover:text-foreground border border-border/50 hover:bg-muted'}`}
+src/components/PostCard.tsx:                                  className="absolute bottom-full left-0 mb-2 flex items-center gap-2 bg-background border border-border p-2.5 rounded-full shadow-2xl z-20 backdrop-blur-xl"
+src/components/CreatePlaylistModal.tsx:            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-2.5">
+src/components/CreatePlaylistModal.tsx:                    <div className="space-y-2.5">
+src/components/CreatePlaylistModal.tsx:                    <div className="space-y-2.5">
+src/components/CreatePlaylistModal.tsx:                <div className="space-y-2.5">
+src/components/CreatePlaylistModal.tsx:                    <div className="flex items-center gap-2.5">
+src/components/CreatePlaylistModal.tsx:                    <div className="flex items-center gap-2.5">
+src/components/CreatePlaylistModal.tsx:                  className="flex-1 py-2.5 bg-muted/50 text-black rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+src/components/CreatePlaylistModal.tsx:                  className="flex-[1.5] py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+src/components/CreatePlaylistModal.tsx:                {formData.isPrivate && <span className="text-[8px] px-2 py-2.5 bg-muted rounded-full text-muted-foreground/80 uppercase tracking-widest">Private</span>}
+src/components/CreatePlaylistModal.tsx:                {formData.isCollaborative && <span className="text-[8px] px-2 py-2.5 bg-blue-500/10 text-blue-500 rounded-full uppercase tracking-widest">Collaborative</span>}
+src/components/CreatePlaylistModal.tsx:                className="mt-2 w-full sm:w-auto px-2 py-2.5 bg-black text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+src/components/NFTQuickViewModal.tsx:                        <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest mb-2.5">{trait.trait_type}</p>
+src/components/Leaderboard.tsx:        <div className="flex items-center gap-2 px-2 py-2.5 rounded-lg bg-muted/50 border border-border text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+src/components/Leaderboard.tsx:                  <div className="flex items-center gap-2.5">
+src/components/Leaderboard.tsx:                <div className="flex items-center justify-end gap-2.5">
+src/components/Leaderboard.tsx:                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-2.5">JAM</p>
+src/components/BidAcceptanceModal.tsx:                <Info className="h-4 w-4 text-blue-500 mt-2.5" />
+src/components/Layout.tsx:                                      className="p-2.5 rounded-md hover:bg-primary/20 text-primary transition-colors"
+src/components/Layout.tsx:                                      className="p-2.5 rounded-md hover:bg-destructive/10 text-destructive/70 hover:text-destructive transition-colors"
+src/components/Layout.tsx:                                  className="opacity-0 group-hover:opacity-100 p-2.5 rounded-md bg-primary/10 text-primary transition-all"
+src/components/Layout.tsx:          <Link to="/wallet" className="p-2.5 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors">
+src/components/PostModal.tsx:      <div className="relative w-full max-w-sm glass border border-border bg-background rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-neutral-500/30 transition-all">
+src/components/PostModal.tsx:                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate mt-2.5">{selectedTrack.artist}</p>
+src/components/PostModal.tsx:            <div className="space-y-2.5">
+src/components/PostModal.tsx:                  className={`w-full flex items-center gap-2.5 p-2 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-neutral-500/30' : 'bg-muted/50 border border-transparent hover:bg-muted'}`}
+src/components/PostModal.tsx:          <div className="flex gap-2.5">
+src/components/PostModal.tsx:              className="px-2 h-8 rounded-[8px] flex items-center gap-2.5 text-blue-500/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+src/components/SendNFTModal.tsx:                  <Shield className="h-4 w-4 text-amber-500 shrink-0 mt-2.5" />
+src/components/AddToPlaylistModal.tsx:              className="w-full flex items-center gap-2 p-2.5 rounded-[8px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+src/components/AddToPlaylistModal.tsx:            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[8px] bg-blue-600/10 border border-neutral-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+src/components/NFTCard.tsx:          <div className="flex items-center gap-2.5 mt-2.5">
+src/components/NFTCard.tsx:                      className={`p-2.5 rounded-full bg-background/40 backdrop-blur-md transition-all pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isAnthem ? 'text-amber-400 opacity-100' : 'text-muted-foreground/60 opacity-0 group-hover:opacity-100 hover:text-amber-400'} ${isActive ? 'opacity-100' : ''}`}
+src/components/NFTCard.tsx:                      className={`p-2.5 rounded-full bg-background/40 backdrop-blur-md text-muted-foreground/60 hover:text-primary hover:bg-background/60 transition-all pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+src/components/NFTCard.tsx:                    className={`p-2.5 rounded-full bg-background/40 backdrop-blur-md text-muted-foreground/60 hover:text-foreground hover:bg-background/60 transition-all pointer-events-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+src/components/NFTCard.tsx:                       <Play className="h-4 w-4 text-primary-foreground fill-primary-foreground ml-2.5" />
+src/components/NFTCard.tsx:        <div className="px-2.5">
+src/components/NFTCard.tsx:           <div className="flex justify-between items-start gap-2.5">
+src/components/NFTCard.tsx:           <div className="flex items-center gap-2.5 mt-2.5 mb-2.5">
+src/components/NFTCard.tsx:                <CheckCircle2 className="h-2.5 w-2.5 text-blue-500" />
+src/components/NFTCard.tsx:                className={`px-2 py-2.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
+src/components/ArtistDetailModal.tsx:                          <div className="flex items-end justify-center gap-2.5 h-3">
+src/components/ArtistDetailModal.tsx:                        <div className="flex items-center gap-2 mb-2.5">
+src/components/ArtistDetailModal.tsx:                            <span className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-full bg-orange-500/20 text-orange-400 text-[8px] font-black uppercase tracking-tighter">
+src/components/ArtistDetailModal.tsx:                            <Music className="w-2.5 h-2.5" /> {track.genre}
+src/components/ArtistDetailModal.tsx:                            <Zap className="w-2.5 h-2.5 text-blue-400" /> {jamEarnings} JAM
+src/components/PlaylistListItem.tsx:      <div className="w-full h-full grid grid-cols-2 gap-2.5 bg-neutral-800">
+src/components/PlaylistListItem.tsx:        <div className="flex items-center gap-2 mb-2.5">
+src/components/PlaylistListItem.tsx:            <span className="px-2.5 py-2.5 bg-blue-500/10 text-blue-500 text-[7px] font-bold uppercase tracking-widest rounded-2">AI</span>
+src/components/kokonutui/tweet-card.tsx:          "relative isolate w-full min-w-[400px] max-w-xl overflow-hidden rounded-2xl p-2.5 md:min-w-[500px]",
+src/components/kokonutui/action-search-bar.tsx:              className="h-9 rounded-lg py-2.5 pr-2 pl-2 text-sm focus-visible:ring-offset-0"
+src/components/DiscoverSearchBar.tsx:        <div className="relative flex items-center px-2 py-2.5 z-10">
+src/components/DiscoverSearchBar.tsx:            className="flex-1 bg-transparent border-none outline-none py-2.5 text-sm font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight"
+src/components/DiscoverSearchBar.tsx:                  className="p-2.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-all"
+src/components/DiscoverSearchBar.tsx:                className={`p-2.5 rounded-lg transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+src/components/DiscoverSearchBar.tsx:            <div className="hidden md:flex items-center gap-2 px-2.5 py-2.5 bg-muted/50 rounded border border-border/50 ml-2">
+src/components/DiscoverSearchBar.tsx:              <Command className="h-2.5 w-2.5 text-muted-foreground/50" />
+src/components/SellNFTModal.tsx:                      className={`flex-1 py-2.5 rounded-[8px] text-[9px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${duration === d ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+src/components/SellNFTModal.tsx:            <Info className="h-4 w-4 text-blue-400 flex-shrink-0 mt-2.5" />
+src/components/ArtistCard.tsx:        <h3 className="text-[10px] font-bold text-foreground tracking-tight truncate w-full mb-2.5">{artist.name}</h3>
+src/components/ArtistCard.tsx:          className={`w-full py-2.5 rounded-[6px] flex items-center justify-center gap-2 transition-all text-[8px] font-bold uppercase tracking-widest
+src/components/ArtistCard.tsx:          className={`px-2 py-2.5 rounded-full flex items-center justify-center gap-2.5 transition-all text-[8px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+src/components/DrawerSnapPoints.tsx:                      <p className="text-[13px] mt-2.5">{comment.text}</p>
+src/components/DrawerSnapPoints.tsx:                      className="h-auto flex-col gap-2.5 py-2 px-2 rounded-xl"
+src/components/ArtistListItem.tsx:        <div className="flex items-center gap-2 mb-2.5">
+src/components/MiniAudioPlayer.tsx:                <div className="flex gap-2.5 items-end h-3">
+src/components/MiniAudioPlayer.tsx:            <div className="flex items-center gap-2.5 mt-2.5">
+src/components/MiniAudioPlayer.tsx:                <Play className="h-5 w-5 text-white fill-white ml-2.5" />
+src/components/PlaylistCard.tsx:      <div className={`${sizeClass} grid grid-cols-2 gap-2.5 group-hover:scale-105 transition-transform duration-700 bg-neutral-800`}>
+src/components/PlaylistCard.tsx:            <Play className="h-3 w-3 text-foreground fill-white ml-2.5" />
+src/components/PlaylistCard.tsx:      <div className="px-2.5">
+src/components/PlaylistCard.tsx:          className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-2.5"
+src/components/FullPlayer.tsx:            <span className="text-xs font-bold text-foreground tracking-tight mt-2.5">TonJam Network</span>
+src/components/FullPlayer.tsx:                        <h2 className="text-[20px] font-bold text-foreground tracking-tight truncate mb-2.5">
+src/components/FullPlayer.tsx:                          <div className="flex items-baseline gap-2 mb-2.5">
+src/pages/Marketplace.tsx:                <TrendingUp className={`h-2.5 w-2.5 ${stat.up ? 'text-emerald-400' : 'text-rose-400 rotate-180'}`} />
+src/pages/TrackDetail.tsx:                  <CheckCircle2 className="h-2.5 w-2.5 text-foreground" />
+src/pages/AdminDashboard.tsx:                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
+src/pages/AdminDashboard.tsx:                          <ExternalLink className="h-2.5 w-2.5" />
+src/pages/MintNFT.tsx:              <TrendingUp className={`h-2.5 w-2.5 ${stat.up ? 'text-emerald-500' : 'text-rose-500 rotate-180'}`} />

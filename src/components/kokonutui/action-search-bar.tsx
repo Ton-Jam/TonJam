@@ -209,7 +209,7 @@ function ActionSearchBar({
   return (
     <div className="mx-auto w-full max-w-xl">
       <div className="relative flex flex-col items-center justify-start">
-        <div className="sticky top-0 z-10 w-full max-w-sm bg-background pt-4 pb-1">
+        <div className="sticky top-0 z-10 w-full max-w-sm bg-background pt-2 pb-2">
           <div className="relative">
             <Input
               aria-activedescendant={
@@ -220,7 +220,7 @@ function ActionSearchBar({
               aria-autocomplete="list"
               aria-expanded={isFocused && !!result}
               autoComplete="off"
-              className="h-9 rounded-lg py-1.5 pr-9 pl-3 text-sm focus-visible:ring-offset-0"
+              className="h-9 rounded-lg py-3 pr-2 pl-2 text-sm focus-visible:ring-offset-0"
               id="search"
               onBlur={handleBlur}
               onChange={handleInputChange}
@@ -265,7 +265,7 @@ function ActionSearchBar({
               <motion.div
                 animate="show"
                 aria-label="Search results"
-                className="mt-1 w-full overflow-hidden rounded-md border bg-foreground shadow-xs dark:border-gray-800 dark:bg-background"
+                className="mt-2 w-full overflow-hidden rounded-md border bg-foreground shadow-xs dark:border-gray-800 dark:bg-background"
                 exit="exit"
                 initial="hidden"
                 role="listbox"
@@ -277,7 +277,7 @@ function ActionSearchBar({
                       aria-selected={
                         activeIndex === result.actions.indexOf(action)
                       }
-                      className={`flex cursor-pointer items-center justify-between rounded-md px-3 py-2 hover:bg-gray-200 dark:hover:bg-zinc-900 ${
+                      className={`flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-gray-200 dark:hover:bg-zinc-900 ${
                         activeIndex === result.actions.indexOf(action)
                           ? "bg-gray-100 dark:bg-zinc-800"
                           : ""

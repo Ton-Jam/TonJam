@@ -55,17 +55,17 @@ function SnapPointsDrawer() {
       <DrawerPortal>
         <DrawerBackdrop />
         <DrawerViewport>
-          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-0 max-h-dvh flex flex-col  shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
-            <div className="pb-4 border-b px-4">
+          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-2 max-h-dvh flex flex-col  shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+            <div className="pb-2 border-b px-2">
               <DrawerTitle>Snap points</DrawerTitle>
               <DrawerDescription>
                 Drag the sheet to snap between a compact peek and a near full-height
                 view.
               </DrawerDescription>
             </div>
-            <DrawerPrimitive.Content className="pt-4 px-4 flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+            <DrawerPrimitive.Content className="pt-2 px-2 flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
               <div className="max-w-lg mx-auto">
-                <div className="grid gap-3 mt-4 mb-6" aria-hidden>
+                <div className="grid gap-2 mt-2 mb-2" aria-hidden>
                   {Array.from({ length: 20 }, (_, index) => (
                     <div
                       key={index}
@@ -73,7 +73,7 @@ function SnapPointsDrawer() {
                     />
                   ))}
                 </div>
-                <div className="flex items-center justify-end gap-4">
+                <div className="flex items-center justify-end gap-2">
                   <DrawerClose render={<Button variant="outline" />}>
                     Close
                   </DrawerClose>
@@ -99,17 +99,17 @@ function CommentsDrawer() {
       <DrawerPortal>
         <DrawerBackdrop />
         <DrawerViewport>
-          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-0 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
-            <div className="relative pb-4 border-b">
+          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+            <div className="relative pb-2 border-b">
               <DrawerTitle className="text-sm">Comments</DrawerTitle>
               <DrawerDescription className="sr-only">
                 Post comments
               </DrawerDescription>
             </div>
-            <DrawerPrimitive.Content className="flex-1 w-full py-3 overflow-y-auto overscroll-contain">
+            <DrawerPrimitive.Content className="flex-1 w-full py-2 overflow-y-auto overscroll-contain">
               <div className="max-w-md mx-auto">
                 {comments.map((comment) => (
-                  <div key={comment.id} className="flex gap-3 px-4 py-3">
+                  <div key={comment.id} className="flex gap-2 px-2 py-2">
                     <Avatar className="size-8">
                       <AvatarImage src={comment.avatar} alt={comment.author} />
                       <AvatarFallback>
@@ -123,8 +123,8 @@ function CommentsDrawer() {
                           {comment.time}
                         </span>
                       </p>
-                      <p className="text-[13px] mt-0.5">{comment.text}</p>
-                      <div className="flex items-center gap-3 mt-1">
+                      <p className="text-[13px] mt-3">{comment.text}</p>
+                      <div className="flex items-center gap-2 mt-2">
                         <span className="text-[11px] text-muted-foreground font-medium">
                           {comment.likes} likes
                         </span>
@@ -151,8 +151,8 @@ function CommentsDrawer() {
                 ))}
               </div>
             </DrawerPrimitive.Content>
-            <div className="pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] px-4">
-              <div className="max-w-md w-full mx-auto bg-muted px-4 py-3 flex items-center gap-3 rounded-lg">
+            <div className="pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] px-2">
+              <div className="max-w-md w-full mx-auto bg-muted px-2 py-2 flex items-center gap-2 rounded-lg">
                 <Avatar className="size-8">
                   <AvatarImage
                     src="https://github.com/akash3444.png"
@@ -193,8 +193,8 @@ function ReactionsDrawer() {
       <DrawerPortal>
         <DrawerBackdrop />
         <DrawerViewport>
-          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-0 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
-            <div className="will-change-transform px-4 pb-4 border-b">
+          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+            <div className="will-change-transform px-2 pb-2 border-b">
               <DrawerTitle className="text-sm">Reactions and plays</DrawerTitle>
               <DrawerDescription className="text-xs">
                 <span className="font-medium text-foreground">12,847</span> likes
@@ -209,11 +209,11 @@ function ReactionsDrawer() {
               }}
             >
               <div className="max-w-md mx-auto">
-                <div className="px-4 pt-3 pb-2">
+                <div className="px-2 pt-2 pb-2">
                   <Input placeholder="Search" className="h-8 text-sm" />
                 </div>
                 {likers.map((liker) => (
-                  <div key={liker.id} className="flex items-center gap-3 px-4 py-2">
+                  <div key={liker.id} className="flex items-center gap-2 px-2 py-2">
                     <Avatar className="size-10">
                       <AvatarImage src={liker.avatar} alt={liker.name} />
                       <AvatarFallback>
@@ -259,8 +259,8 @@ function ShareDrawer() {
       <DrawerPortal>
         <DrawerBackdrop />
         <DrawerViewport>
-          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-0 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
-            <div className="px-4 pb-4 border-b">
+          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+            <div className="px-2 pb-2 border-b">
               <DrawerTitle className="text-sm">Share</DrawerTitle>
               <DrawerDescription className="sr-only">
                 Share this post
@@ -273,13 +273,13 @@ function ShareDrawer() {
               </div>
             </div>
             <DrawerPrimitive.Content className="flex-1 w-full overflow-y-auto overscroll-contain">
-              <div className="max-w-md mx-auto px-2 py-3">
-                <div className="grid grid-cols-3 gap-1">
+              <div className="max-w-md mx-auto px-2 py-2">
+                <div className="grid grid-cols-3 gap-2">
                   {shareContacts.map((contact) => (
                     <Button
                       key={contact.id}
                       variant="ghost"
-                      className="h-auto flex-col gap-2 py-3 px-2 rounded-xl"
+                      className="h-auto flex-col gap-2 py-2 px-2 rounded-xl"
                     >
                       <Avatar className="size-14">
                         <AvatarImage src={contact.avatar} alt={contact.name} />
@@ -312,7 +312,7 @@ function ShareDrawer() {
                     <Button
                       key={action.label}
                       variant="ghost"
-                      className="h-auto flex-col gap-1.5 py-2 px-3 rounded-xl"
+                      className="h-auto flex-col gap-3 py-2 px-2 rounded-xl"
                     >
                       <div className="size-10 rounded-full bg-muted flex items-center justify-center">
                         <action.icon className="size-4" />

@@ -154,9 +154,9 @@ export function ChartAreaInteractive() {
   })
 
   return (
-    <Card className="pt-0 border-neutral-500/10 bg-foreground/[0.02] text-foreground">
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b border-border/50 py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1">
+    <Card className="pt-2 border-neutral-500/10 bg-foreground/[0.02] text-foreground">
+      <CardHeader className="flex items-center gap-2 space-y-2 border-b border-border/50 py-2 sm:flex-row">
+        <div className="grid flex-1 gap-2">
           <CardTitle className="text-foreground">Area Chart - Interactive</CardTitle>
           <CardDescription className="text-muted-foreground">
             Showing total visitors for the last 3 months
@@ -182,7 +182,7 @@ export function ChartAreaInteractive() {
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+      <CardContent className="px-2 pt-2 sm:px-2 sm:pt-2">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"

@@ -36,7 +36,7 @@ const PostDetail: React.FC = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-[#050505] pt-24 px-6 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#050505] pt-4 px-4 flex flex-col items-center justify-center">
         <img src={APP_LOGO} className="w-12 h-12 object-contain animate-[spin_3s_linear_infinite] opacity-50 mb-4" alt="Loading..." />
         <p className="text-muted-foreground font-bold uppercase tracking-[0.3em] text-[10px]">Synchronizing Signal...</p>
       </div>
@@ -125,7 +125,7 @@ const PostDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 px-4 md:px-12 relative overflow-x-hidden">
+    <div className="min-h-screen bg-background pb-4 px-4 md:px-4 relative overflow-x-hidden">
       {/* Immersive Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
@@ -134,7 +134,7 @@ const PostDetail: React.FC = () => {
 
       <div className="max-w-3xl mx-auto relative z-10">
         {/* Back Button */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-4 text-muted-foreground hover:text-foreground transition-colors mb-4 group">
           <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" />
           <span className="text-[10px] font-bold uppercase tracking-widest">Return to Feed</span>
         </button>
@@ -142,7 +142,7 @@ const PostDetail: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass border border-border bg-card rounded-[10px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+          className="glass border border-border bg-card rounded-[10px] p-4 md:p-4 shadow-2xl relative overflow-hidden">
           {/* Subtle Background Glow */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 
@@ -153,7 +153,7 @@ const PostDetail: React.FC = () => {
           </div>
 
           {/* User Identity Section */}
-          <div className="flex items-center gap-6 mb-10">
+          <div className="flex items-center gap-4 mb-4">
             <div className="relative flex-shrink-0 cursor-pointer group/avatar" onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : navigate(`/user/${post.userId}`)}>
               <img src={post.userAvatar} className="w-16 h-16 rounded-full group-hover/avatar:-blue-500 transition-all object-cover shadow-2xl" alt={post.userName} />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full -black flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.6)]">
@@ -161,7 +161,7 @@ const PostDetail: React.FC = () => {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-1">
+              <div className="flex items-center gap-4 mb-4">
                 <h4 
                   className="font-bold text-lg text-foreground uppercase tracking-tight truncate cursor-pointer hover:text-blue-400 hover:underline inline-block"
                   onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : navigate(`/user/${post.userId}`)}
@@ -170,12 +170,12 @@ const PostDetail: React.FC = () => {
                 </h4>
                 {artist?.verified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
                 {!isMe && (
-                  <button onClick={() => toggleFollowUser(post.userId)} className={`text-[9px] font-bold uppercase tracking-widest transition-all px-3 py-1 rounded-full ${isFollowing ? 'text-blue-500 -blue-500/20 bg-blue-500/5' : 'text-muted-foreground hover:text-blue-400 hover:-blue-400/20 bg-muted/50'}`}>
+                  <button onClick={() => toggleFollowUser(post.userId)} className={`text-[9px] font-bold uppercase tracking-widest transition-all px-4 py-4 rounded-full ${isFollowing ? 'text-blue-500 -blue-500/20 bg-blue-500/5' : 'text-muted-foreground hover:text-blue-400 hover:-blue-400/20 bg-muted/50'}`}>
                     {isFollowing ? 'Following' : 'Follow'}
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <span className="text-[10px] text-foreground/30 uppercase tracking-[0.3em] font-bold"> {post.timestamp} </span>
                 <div className="w-1 h-1 rounded-full bg-blue-500/20"></div>
                 <span className="text-[8px] text-blue-500/40 uppercase font-bold tracking-widest">Neural Sync Active</span>
@@ -184,12 +184,12 @@ const PostDetail: React.FC = () => {
           </div>
 
           {/* Content */}
-          <p className="text-foreground/90 leading-relaxed mb-10 text-lg font-medium border-l border-blue-500/20 pl-8">
+          <p className="text-foreground/90 leading-relaxed mb-4 text-lg font-medium border-l border-blue-500/20 pl-4">
             {post.content}
           </p>
 
           {post.imageUrl && (
-            <div className="mb-10 rounded-[10px] overflow-hidden shadow-2xl">
+            <div className="mb-4 rounded-[10px] overflow-hidden shadow-2xl">
               {post.imageUrl.startsWith('data:video') ? (
                 <video src={post.imageUrl} controls className="w-full max-h-[600px] object-cover" />
               ) : (
@@ -199,26 +199,26 @@ const PostDetail: React.FC = () => {
           )}
 
           {track && (
-            <div className="mb-10 p-6 rounded-[10px] glass border border-border bg-muted/30 relative group/track overflow-hidden">
+            <div className="mb-4 p-4 rounded-[10px] glass border border-border bg-muted/30 relative group/track overflow-hidden">
               <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/track:opacity-100 transition-opacity"></div>
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[8px] font-bold text-blue-500 uppercase tracking-[0.3em]">Sonic Attachment Detected</span>
-                  <div className="px-2 py-0.5 bg-blue-500/10 border-blue-500/20 rounded text-[7px] font-bold text-blue-500 uppercase tracking-widest">Alpha Signal</div>
+                  <div className="px-4 py-4 bg-blue-500/10 border-blue-500/20 rounded text-[7px] font-bold text-blue-500 uppercase tracking-widest">Alpha Signal</div>
                 </div>
                 <TrackCard track={track} variant="row" />
                 {track.isNFT && (
-                  <div className="mt-8 pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="mt-4 pt-4 border-t flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-[10px] bg-blue-500/10 flex items-center justify-center border-blue-500/20">
                         <img src={TON_LOGO} className="w-6 h-6" alt="TON" />
                       </div>
                       <div>
-                        <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Current Price</p>
+                        <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Current Price</p>
                         <p className="text-xl font-bold text-foreground uppercase tracking-tighter">{track.price || '15.0'} TON</p>
                       </div>
                     </div>
-                    <button onClick={() => addNotification('Neural transaction initiated...', 'info')} className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
+                    <button onClick={() => addNotification('Neural transaction initiated...', 'info')} className="w-full md:w-auto px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
                       Buy NFT Now
                     </button>
                   </div>
@@ -228,9 +228,9 @@ const PostDetail: React.FC = () => {
           )}
 
           {nft && (
-            <div className="mb-10 p-8 rounded-[10px] glass border border-border bg-gradient-to-br from-blue-500/5 to-purple-500/5 relative group/nft overflow-hidden cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
+            <div className="mb-4 p-4 rounded-[10px] glass border border-border bg-gradient-to-br from-blue-500/5 to-purple-500/5 relative group/nft overflow-hidden cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
               <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/nft:opacity-100 transition-opacity"></div>
-              <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+              <div className="relative z-10 flex flex-col md:flex-row gap-4 items-center">
                 <div className="relative w-40 h-40 rounded-[10px] overflow-hidden shadow-2xl flex-shrink-0">
                   <img src={nft.imageUrl} className="w-full h-full object-cover" alt={nft.title} />
                   <div className="absolute top-2 right-2">
@@ -240,23 +240,23 @@ const PostDetail: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                  <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
                     <span className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.4em]">Sonic Artifact Acquired</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground uppercase tracking-tighter mb-2">{nft.title}</h3>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-6">Creator: {nft.creator}</p>
+                  <h3 className="text-[20px] font-bold text-foreground uppercase tracking-tighter mb-4">{nft.title}</h3>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Creator: {nft.creator}</p>
                   
-                  <div className="flex items-center justify-center md:justify-start gap-6">
+                  <div className="flex items-center justify-center md:justify-start gap-4">
                     <div>
-                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Valuation</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-foreground tracking-tighter">{nft.price}</span>
+                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Valuation</p>
+                      <div className="flex items-center gap-4">
+                        <span className="text-[20px] font-bold text-foreground tracking-tighter">{nft.price}</span>
                         <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">TON</span>
                       </div>
                     </div>
                     <div className="w-px h-10 bg-muted"></div>
                     <div>
-                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">Rarity</p>
+                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Rarity</p>
                       <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Legendary</p>
                     </div>
                   </div>
@@ -266,7 +266,7 @@ const PostDetail: React.FC = () => {
           )}
 
           {/* Interaction Bar */}
-          <div className="flex items-center gap-12 pt-8 border-t border-border mb-12">
+          <div className="flex items-center gap-4 pt-4 border-t border-border mb-4">
             <button onClick={handleLike} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 group/like ${liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-400'}`}>
               <div className="relative">
                 {liked && <div className="absolute inset-0 bg-red-500/40 blur-md rounded-full animate-ping"></div>}
@@ -290,9 +290,9 @@ const PostDetail: React.FC = () => {
           </div>
 
           {/* Comments Section */}
-          <div className="space-y-10">
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.4em] mb-8">Neural Responses</h3>
-            <form onSubmit={handleAddComment} className="flex gap-6 mb-12">
+          <div className="space-y-4">
+            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.4em] mb-4">Neural Responses</h3>
+            <form onSubmit={handleAddComment} className="flex gap-4 mb-4">
               <img 
                 src={MOCK_USER.avatar} 
                 className="w-10 h-10 rounded-full shadow-xl cursor-pointer hover:opacity-80 transition-opacity" 
@@ -300,17 +300,17 @@ const PostDetail: React.FC = () => {
                 onClick={() => navigate('/profile')}
               />
               <div className="flex-1 relative">
-                <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit your response..." className="w-full bg-muted/50 border border-border rounded-[10px] py-3 px-6 text-sm outline-none focus:border-blue-500/50 transition-all text-foreground shadow-inner" />
+                <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit your response..." className="w-full bg-muted/50 border border-border rounded-[10px] py-4 px-4 text-sm outline-none focus:border-blue-500/50 transition-all text-foreground shadow-inner" />
                 <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-blue-600 rounded-[10px] text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">
                   <Send className="h-3 w-3" />
                 </button>
               </div>
             </form>
 
-            <div className="space-y-8">
+            <div className="space-y-4">
               <AnimatePresence mode="popLayout">
                 {comments.map(comment => (
-                  <motion.div layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} key={comment.id} className="flex gap-6 group/comment">
+                  <motion.div layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} key={comment.id} className="flex gap-4 group/comment">
                     <img 
                       src={comment.userAvatar} 
                       className="w-10 h-10 rounded-full flex-shrink-0 shadow-lg object-cover cursor-pointer" 
@@ -318,7 +318,7 @@ const PostDetail: React.FC = () => {
                       onClick={(e) => handleCommentProfileClick(e, comment.userId)}
                     />
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-4">
                         <h5 
                           className="text-[11px] font-bold text-foreground uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block"
                           onClick={(e) => handleCommentProfileClick(e, comment.userId)}
@@ -328,16 +328,16 @@ const PostDetail: React.FC = () => {
                         <span className="text-[9px] text-muted-foreground/50 font-bold uppercase tracking-widest">{comment.timestamp}</span>
                       </div>
                       <p className="text-[13px] text-foreground/70 leading-relaxed mb-4">{comment.content}</p>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         {/* Existing Reactions */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-4">
                           {Object.entries(comment.reactions || {}).map(([emoji, count]) => {
                             const isActive = comment.userReactions?.includes(emoji);
                             return (
                               <button 
                                 key={emoji} 
                                 onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                className={`flex items-center gap-2 rounded-full px-3 py-1 text-[10px] transition-all ${isActive ? 'bg-neutral-500/20 text-neutral-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground hover:text-neutral-400'}`}
+                                className={`flex items-center gap-4 rounded-full px-4 py-4 text-[10px] transition-all ${isActive ? 'bg-neutral-500/20 text-neutral-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground hover:text-neutral-400'}`}
                               >
                                 <span>{emoji}</span>
                                 <span className="font-bold">{count}</span>
@@ -350,7 +350,7 @@ const PostDetail: React.FC = () => {
                           <button className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-blue-500 transition-all hover:bg-muted/50">
                             <Smile className="h-4 w-4" />
                           </button>
-                          <div className="absolute bottom-full left-0 mb-2 hidden group-hover/picker:flex items-center gap-1 bg-[#1a1a1a] border border-border p-1.5 rounded-full shadow-xl z-20 backdrop-blur-xl">
+                          <div className="absolute bottom-full left-0 mb-4 hidden group-hover/picker:flex items-center gap-4 bg-[#1a1a1a] border border-border p-4 rounded-full shadow-xl z-20 backdrop-blur-xl">
                             {REACTION_EMOJIS.map(emoji => {
                               const isActive = comment.userReactions?.includes(emoji);
                               return (
@@ -371,7 +371,7 @@ const PostDetail: React.FC = () => {
                 ))}
               </AnimatePresence>
               {comments.length === 0 && (
-                <div className="text-center py-12 -dashed rounded-[10px]">
+                <div className="text-center py-4 -dashed rounded-[10px]">
                   <MessageSquareOff className="h-8 w-8 text-foreground/5 mx-auto mb-4" />
                   <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No neural signals detected</p>
                 </div>

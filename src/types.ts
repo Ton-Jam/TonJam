@@ -234,13 +234,7 @@ export interface UserProfile {
   ownedNftIds?: string[];
   listedNftIds?: string[];
   anthemId?: string;
-  socials?: {
-    x?: string;
-    instagram?: string;
-    website?: string;
-    telegram?: string;
-    spotify?: string;
-  };
+  createdAt?: string;
 }
 
 export interface Transaction {
