@@ -15,8 +15,17 @@ const ErrorBoundary: React.FC<Props> = ({ children }) => {
     };
 
     const rejectionHandler = (event: PromiseRejectionEvent) => {
-      setHasError(true);
-      setError(event.reason);
+      const reason = event.reason;
+      const isIgnoredError = reason && (
+        (typeof reason === 'string' && (reason.includes('TON_CONNECT_SDK') || reason.includes('tonconnect'))) ||
+        (reason.message && (reason.message.includes('TON_CONNECT_SDK') || reason.message.includes('tonconnect') || reason.message.includes('Failed to fetch'))) ||
+        (reason.stack && reason.stack.includes('tonconnect'))
+      );
+
+      if (!isIgnoredError) {
+        setHasError(true);
+        setError(event.reason);
+      }
     };
 
     window.addEventListener('error', errorHandler);

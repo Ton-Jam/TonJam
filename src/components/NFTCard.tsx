@@ -4,20 +4,29 @@ import { Play, Pause, MoreVertical, CheckCircle2, Eye, Send, Star } from 'lucide
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 import NFTQuickViewModal from './NFTQuickViewModal';
 import SendNFTModal from './SendNFTModal';
+import BuyNFTModal from './BuyNFTModal';
+import SkeletonCard from './SkeletonCard';
 
 interface NFTCardProps {
   nft: NFTItem;
   variant?: 'default' | 'row';
   onAction?: (nft: NFTItem) => void;
+  isLoading?: boolean;
 }
 
-const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction }) => {
+const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false }) => {
   const navigate = useNavigate();
+  
+  if (isLoading) {
+    return <SkeletonCard />;
+  }
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, userProfile, setAnthem } = useAudio();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
   const isOwner = nft.owner === userProfile.walletAddress;
@@ -57,6 +66,8 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
     e.stopPropagation();
     if (onAction) {
       onAction(nft);
+    } else if (!isOwner && nft.listingType !== 'auction') {
+      setIsBuyModalOpen(true);
     } else {
       navigate(`/nft/${nft.id}`);
     }
@@ -83,14 +94,14 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
         aria-label={`View NFT ${nft.title}`}
       >
         <div className="relative w-12 h-12 rounded-[3px] overflow-hidden flex-shrink-0">
-          <img src={nft.imageUrl} alt={nft.title} className="w-full h-full object-cover" />
+          <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} alt={nft.title} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
           <h4 className={`text-xs font-bold uppercase tracking-tight truncate ${isActive ? 'text-blue-500' : 'text-foreground'}`}>{nft.title}</h4>
           <div className="flex items-center gap-3 mt-3">
             {MOCK_ARTISTS.find(a => a.name === nft.creator) && (
               <img 
-                src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl} 
+                src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl || getPlaceholderImage(`artist-${MOCK_ARTISTS.find(a => a.name === nft.creator)?.id}`)} 
                 alt={nft.creator} 
                 className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 onClick={(e) => {
@@ -165,7 +176,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
         {/* Image Container - 1:1 Aspect Ratio */}
         <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
           <img
-            src={nft.imageUrl}
+            src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
             alt={nft.title}
@@ -249,7 +260,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
            <div className="flex items-center gap-3 mt-3 mb-3">
               {MOCK_ARTISTS.find(a => a.name === nft.creator) && (
                 <img 
-                  src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl} 
+                  src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl || getPlaceholderImage(`artist-${MOCK_ARTISTS.find(a => a.name === nft.creator)?.id}`)} 
                   alt={nft.creator} 
                   className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   onClick={(e) => {
@@ -314,7 +325,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
               
               <button 
                 onClick={handleActionClick} 
-                className={`px-2 py-3 rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
+                className={`px-4 py-2 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
                   ${isOwner 
                     ? 'bg-muted text-foreground hover:bg-muted/80' 
                     : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20'}
@@ -338,6 +349,13 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction })
         isOpen={isSendModalOpen}
         onClose={() => setIsSendModalOpen(false)}
       />
+
+      {isBuyModalOpen && (
+        <BuyNFTModal
+          nft={nft}
+          onClose={() => setIsBuyModalOpen(false)}
+        />
+      )}
     </>
   );
 };

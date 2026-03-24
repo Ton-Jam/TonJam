@@ -12,6 +12,9 @@ export interface Track {
   isNFT: boolean;
   artistVerified?: boolean;
   price?: string; 
+  streamingPrice?: string;
+  editions?: string;
+  royalty?: string;
   bpm?: number;
   key?: string;
   bitrate?: string; // e.g. "FLAC", "320kbps"
@@ -92,6 +95,19 @@ export interface NFTItem {
   auctionStartTime?: string; // ISO string or timestamp
   auctionEndTime?: string; // ISO string or timestamp
   startingBid?: string;
+}
+
+export interface SongRequest {
+  id: string;
+  artistId: string;
+  requesterId: string;
+  requesterName: string;
+  songTitle: string;
+  description?: string;
+  status: 'pending' | 'accepted' | 'fulfilled' | 'rejected';
+  tipAmount?: string; // in TON
+  hasTipped?: boolean;
+  createdAt: string;
 }
 
 export interface RoyaltySplit {

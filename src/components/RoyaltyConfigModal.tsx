@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Save, Info, Percent, Wallet, User } from 'lucide-react';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { Artist, RoyaltySplit } from '@/types';
 import { useAudio } from '@/context/AudioContext';
@@ -62,7 +63,7 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
     const totalNft = nftSaleSplits.reduce((acc, s) => acc + s.percentage, 0);
 
     if (totalStreaming > 1 || totalNft > 1) {
-      alert("Total percentage cannot exceed 100%");
+      toast.error("Total percentage cannot exceed 100%");
       return;
     }
 

@@ -165,7 +165,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
             <button 
               onClick={handleCompleteVerification}
               disabled={!canVerify || isVerifying}
-              className={`w-full py-2 rounded-2xl text-xs font-bold uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2 ${
+              className={`w-full py-[7px] rounded-full text-xs font-bold uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2 ${
                 canVerify 
                   ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20' 
                   : 'bg-muted text-muted-foreground cursor-not-allowed'

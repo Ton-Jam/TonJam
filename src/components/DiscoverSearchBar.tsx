@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Sparkles, Command, Zap, Music, User, Gem, Satellite, Mic, MicOff } from 'lucide-react';
+import { Search, X, Sparkles, Command, Zap, Music, User, Gem, Satellite, Mic, MicOff, SearchIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import useDebounce from '@/hooks/use-debounce';
+import { ButtonGroup } from './ui/button-group';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 interface Action {
   id: string;
@@ -47,73 +50,68 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
   return (
     <div className="w-full mx-auto relative group">
       {/* Main Container */}
-      <div className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 overflow-hidden ${isFocused ? 'border-blue-500/50 bg-foreground/[0.08] shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+      <ButtonGroup className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 ${isFocused ? 'border-blue-500/50 bg-foreground/[0.08] shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+        <Input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setIsTyping(true);
+          }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+          placeholder={placeholder}
+          className="flex-1 bg-transparent border-none outline-none py-6 text-xs font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0"
+        />
         
-        {/* Input Area */}
-        <div className="relative flex items-center px-1.5 py-2 z-10">
-          <div className="pr-1.5">
-            <Search className={`h-3.5 w-3.5 transition-colors duration-300 ${isFocused ? 'text-blue-500' : 'text-foreground/30'}`} />
-          </div>
-          
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setIsTyping(true);
-            }}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            placeholder={placeholder}
-            className="flex-1 bg-transparent border-none outline-none py-2 text-xs font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight"
-          />
-
-          <div className="flex items-center gap-1">
-            <AnimatePresence>
-              {query && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  onClick={handleClear}
-                  className="p-2 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-all"
-                >
-                  <X className="h-3 w-3" />
-                </motion.button>
-              )}
-            </AnimatePresence>
-
-            {onVoiceSearch && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  onVoiceSearch();
-                }}
-                className={`p-2 rounded-lg transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+        <div className="flex items-center gap-1 pr-2">
+          <AnimatePresence>
+            {query && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                onClick={handleClear}
+                className="p-2 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-all"
               >
-                {isListening ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
-              </button>
+                <X className="h-3 w-3" />
+              </motion.button>
             )}
-            
-            <div className="hidden md:flex items-center gap-1 px-2 py-2 bg-muted/50 rounded border border-border/50 ml-1">
-              <Command className="h-2.5 w-2.5 text-muted-foreground/50" />
-              <span className="text-[8px] font-bold text-muted-foreground/50">K</span>
-            </div>
-          </div>
-        </div>
+          </AnimatePresence>
 
-        {/* Bottom Progress Bar (Animated) */}
-        <div className="h-[1px] w-full bg-muted/50 relative overflow-hidden">
-          {isTyping && (
-            <motion.div 
-              initial={{ x: '-100%' }}
-              animate={{ x: '100%' }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent w-1/2"
-            />
+          {onVoiceSearch && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onVoiceSearch();
+              }}
+              className={`p-2 rounded-lg transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+            >
+              {isListening ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
+            </button>
           )}
         </div>
+
+        <Button 
+          variant="outline" 
+          aria-label="Search"
+          className="rounded-l-none border-y-0 border-r-0 border-l border-blue-500/30 h-full py-6"
+        >
+          <SearchIcon className="h-4 w-4" />
+        </Button>
+      </ButtonGroup>
+
+      {/* Bottom Progress Bar (Animated) */}
+      <div className="h-[1px] w-full bg-muted/50 relative overflow-hidden mt-[-1px] z-10 rounded-b-full">
+        {isTyping && (
+          <motion.div 
+            initial={{ x: '-100%' }}
+            animate={{ x: '100%' }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent w-1/2"
+          />
+        )}
       </div>
 
       {/* Results / Suggestions Dropdown */}

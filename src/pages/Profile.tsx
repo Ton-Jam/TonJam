@@ -28,6 +28,7 @@ import {
 
 import PostCard from '@/components/PostCard';
 import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS, MOCK_USERS, APP_LOGO, GENRES } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import NFTVaultSection from '@/components/NFTVaultSection';
@@ -260,7 +261,7 @@ const Profile: React.FC = () => {
     <div className="animate-in fade-in duration-1000 pb-4">
         {/* Banner Section */}
       <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-background">
-        <img src={localUser.bannerUrl} className="w-full h-full object-cover opacity-60" alt="" />
+        <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.id}`, 1200, 400)} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
         
         {isEditing && (
@@ -278,7 +279,7 @@ const Profile: React.FC = () => {
           <div className="absolute inset-0 bg-blue-600/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <div className="relative p-4 rounded-full bg-gradient-to-tr from-blue-600 via-purple-600 to-blue-400 shadow-[0_0_60px_rgba(37,99,235,0.2)] transition-all duration-700 group-hover:scale-105 group-hover:rotate-3">
             <div className="rounded-full overflow-hidden border-2 border-black">
-              <img src={localUser.avatar} className="w-32 h-32 md:w-44 md:h-44 object-cover" alt={localUser.name} />
+              <img src={localUser.avatar || getPlaceholderImage(`user-${localUser.id}`)} className="w-32 h-32 md:w-44 md:h-44 object-cover" alt={localUser.name} />
             </div>
           </div>
           {isSpotifyVerified && (
@@ -527,7 +528,7 @@ const Profile: React.FC = () => {
                     </div>
                     <div className="flex flex-col md:flex-row items-center gap-4 relative z-10">
                       <div className="w-40 h-40 rounded-[12px] overflow-hidden shadow-2xl border-2 border-blue-500/50 flex-shrink-0">
-                        <img src={anthemNft.imageUrl} className="w-full h-full object-cover" alt={anthemNft.title} />
+                        <img src={anthemNft.imageUrl || getPlaceholderImage(`nft-${anthemNft.id}`)} className="w-full h-full object-cover" alt={anthemNft.title} />
                       </div>
                       <div className="flex-1 text-center md:text-left">
                         <div className="flex items-center justify-center md:justify-start gap-4 mb-4">

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { X, Upload, Music, Image as ImageIcon, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, Upload, Music, Image as ImageIcon, CheckCircle2, Loader2, FileAudio } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 import { Track } from '@/types';
 import { MOCK_USER } from '@/constants';
+import { uploadToIPFS } from '@/services/pinataService';
 
 interface TrackUploadModalProps {
   isOpen: boolean;
@@ -20,43 +22,88 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     description: '',
     isNFT: false,
     price: '1.0',
+    streamingPrice: '0.01',
   });
+
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [audioPreview, setAudioPreview] = useState<string>('');
+  const [coverPreview, setCoverPreview] = useState<string>('');
 
   if (!isOpen) return null;
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title) {
-      addNotification("Please enter a track title", "error");
+    if (!formData.title || !audioFile || !coverFile) {
+      addNotification("Please provide title, audio file and cover art.", "warning");
       return;
     }
 
     setIsUploading(true);
     
-    // Simulate upload delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const newTrack: Track = {
-      id: `u-${Date.now()}`,
-      title: formData.title,
-      artist: MOCK_USER.name,
-      artistId: 'u-1', // Mock user ID
-      coverUrl: `https://picsum.photos/400/400?seed=${formData.title}`,
-      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      duration: 180,
-      genre: formData.genre,
-      description: formData.description,
-      isNFT: formData.isNFT,
-      price: formData.isNFT ? formData.price : undefined,
-      playCount: 0,
-      likes: 0,
-      releaseDate: new Date().toISOString().split('T')[0],
-      artistVerified: true
-    };
+    try {
+      // 1. Upload to IPFS
+      addNotification("Uploading artifacts to IPFS...", "info");
+      
+      const [audioRes, coverRes] = await Promise.all([
+        uploadToIPFS(audioFile),
+        uploadToIPFS(coverFile)
+      ]);
 
-    addUserTrack(newTrack);
-    setIsUploading(false);
-    setStep(3); // Success step
+      if (!audioRes?.ipfsUrl || !coverRes?.ipfsUrl) {
+        throw new Error("Upload failed: IPFS URLs missing from response");
+      }
+
+      const audioUrl = audioRes.ipfsUrl;
+      const coverUrl = coverRes.ipfsUrl;
+      
+      const newTrack: Track = {
+        id: `u-${Date.now()}`,
+        title: formData.title,
+        artist: MOCK_USER.name,
+        artistId: 'u-1', // Mock user ID
+        coverUrl: coverUrl,
+        audioUrl: audioUrl,
+        audioIpfsUrl: audioUrl,
+        coverIpfsUrl: coverUrl,
+        duration: 180,
+        genre: formData.genre,
+        description: formData.description,
+        isNFT: formData.isNFT,
+        price: formData.isNFT ? formData.price : undefined,
+        streamingPrice: formData.streamingPrice,
+        playCount: 0,
+        likes: 0,
+        releaseDate: new Date().toISOString().split('T')[0],
+        artistVerified: true
+      };
+
+      addUserTrack(newTrack);
+      addNotification("Track uploaded and broadcasted successfully!", "success");
+      setStep(3); // Success step
+    } catch (error) {
+      console.error("Upload failed:", error);
+      addNotification(error instanceof Error ? error.message : "Failed to upload track", "error");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (type === 'audio') {
+          setAudioFile(file);
+          setAudioPreview(reader.result as string);
+        } else {
+          setCoverFile(file);
+          setCoverPreview(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const resetAndClose = () => {
@@ -68,6 +115,10 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
       isNFT: false,
       price: '1.0',
     });
+    setAudioFile(null);
+    setCoverFile(null);
+    setAudioPreview('');
+    setCoverPreview('');
     onClose();
   };
 
@@ -99,27 +150,62 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {/* Left: Upload Area */}
                 <div className="space-y-2">
-                  <div 
-                    className="aspect-square rounded-[10px] border border-dashed border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                    role="button"
-                    tabIndex={0}
-                    aria-label="Select Audio File"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                      <Music className="h-8 w-8 text-blue-500" />
-                    </div>
-                    <p className="text-[10px] font-bold text-foreground uppercase tracking-widest text-center">Select Audio File</p>
-                    <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">MP3, WAV, FLAC (Max 50MB)</p>
+                  <div className="relative group">
+                    <input 
+                      type="file" 
+                      accept="audio/*" 
+                      onChange={(e) => handleFileChange(e, 'audio')} 
+                      className="hidden" 
+                      id="audio-upload-modal" 
+                    />
+                    <label 
+                      htmlFor="audio-upload-modal"
+                      className="aspect-square rounded-[10px] border border-dashed border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload-modal')?.click(); e.preventDefault(); } }}
+                      aria-label="Select Audio File"
+                    >
+                      {audioPreview ? (
+                        <div className="text-center">
+                          <FileAudio className="h-8 w-8 text-blue-500 mb-2 mx-auto" />
+                          <p className="text-[10px] font-bold text-foreground uppercase truncate px-2">Audio Loaded</p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                            <Music className="h-8 w-8 text-blue-500" />
+                          </div>
+                          <p className="text-[10px] font-bold text-foreground uppercase tracking-widest text-center">Select Audio File</p>
+                          <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">MP3, WAV, FLAC (Max 50MB)</p>
+                        </>
+                      )}
+                    </label>
                   </div>
                   
-                  <div 
-                    className="aspect-video rounded-[10px] border border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                    role="button"
-                    tabIndex={0}
-                    aria-label="Add Cover Art"
-                  >
-                    <ImageIcon className="h-6 w-6 text-muted-foreground/50 mb-2 group-hover:text-blue-500 transition-colors" />
-                    <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Add Cover Art</p>
+                  <div className="relative group">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => handleFileChange(e, 'cover')} 
+                      className="hidden" 
+                      id="cover-upload-modal" 
+                    />
+                    <label 
+                      htmlFor="cover-upload-modal"
+                      className="aspect-video rounded-[10px] border border-blue-500/40 bg-foreground/[0.02] flex flex-col items-center justify-center p-2 group hover:border-neutral-500/50 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 overflow-hidden"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('cover-upload-modal')?.click(); e.preventDefault(); } }}
+                      aria-label="Add Cover Art"
+                    >
+                      {coverPreview ? (
+                        <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
+                      ) : (
+                        <>
+                          <ImageIcon className="h-6 w-6 text-muted-foreground/50 mb-2 group-hover:text-blue-500 transition-colors" />
+                          <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Add Cover Art</p>
+                        </>
+                      )}
+                    </label>
                   </div>
                 </div>
 
@@ -164,6 +250,18 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                       <option value="Synthwave">Synthwave</option>
                       <option value="Pop">Pop</option>
                     </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Streaming Price (TON)</label>
+                    <input 
+                      type="number" 
+                      id="streaming-price"
+                      step="0.01"
+                      value={formData.streamingPrice}
+                      onChange={(e) => setFormData({...formData, streamingPrice: e.target.value})}
+                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -225,19 +323,19 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
               <div className="p-2 bg-foreground/[0.02] border border-blue-500/30 rounded-[10px] space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="w-24 h-24 rounded-[5px] bg-neutral-900 overflow-hidden border border-blue-500/40">
-                    <img src={`https://picsum.photos/400/400?seed=${formData.title}`} className="w-full h-full object-cover" alt="" />
+                    <img src={coverPreview || getPlaceholderImage(formData.title || 'track-preview')} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-foreground uppercase tracking-tight">{formData.title || 'Untitled Frequency'}</h3>
                     <p className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.3em] mt-2">{formData.genre}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Audio Ready</span>
+                        <div className={`w-1.5 h-1.5 rounded-full ${audioFile ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{audioFile ? 'Audio Ready' : 'Audio Missing'}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Metadata Valid</span>
+                        <div className={`w-1.5 h-1.5 rounded-full ${coverFile ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{coverFile ? 'Cover Ready' : 'Cover Missing'}</span>
                       </div>
                     </div>
                   </div>

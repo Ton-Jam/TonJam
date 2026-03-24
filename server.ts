@@ -104,6 +104,9 @@ async function startServer() {
             }
 
             const ipfsHash = pinataResponse.data.IpfsHash;
+            if (!ipfsHash) {
+                throw new Error('Pinata response missing IpfsHash');
+            }
             const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
 
             res.json({ ipfsHash, ipfsUrl });

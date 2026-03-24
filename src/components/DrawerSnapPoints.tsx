@@ -19,6 +19,7 @@ import {
   DrawerPrimitive,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import { ButtonGroupInput } from "@/components/ButtonGroupInput";
 import {
   BookmarkIcon,
   EllipsisIcon,
@@ -210,7 +211,7 @@ function ReactionsDrawer() {
             >
               <div className="max-w-md mx-auto">
                 <div className="px-2 pt-2 pb-2">
-                  <Input placeholder="Search" className="h-8 text-sm" />
+                  <ButtonGroupInput placeholder="Search" className="h-8 text-sm" />
                 </div>
                 {likers.map((liker) => (
                   <div key={liker.id} className="flex items-center gap-2 px-2 py-2">
@@ -266,7 +267,7 @@ function ShareDrawer() {
                 Share this post
               </DrawerDescription>
               <div className="mt-2 max-w-md mx-auto px-2">
-                <Input
+                <ButtonGroupInput
                   placeholder="Search people or groups"
                   className="h-8 text-sm"
                 />

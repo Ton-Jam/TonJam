@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap, Filter, Bell, Rocket } from 'lucide-react';
 import { MOCK_NFTS, TON_LOGO, MOCK_USER, MOCK_ARTISTS, MOCK_TRACKS } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import NFTCard from '@/components/NFTCard';
 import ArtistCard from '@/components/ArtistCard';
 import TopChartNFTs from '@/components/TopChartNFTs';
@@ -222,7 +223,7 @@ const Marketplace: React.FC = () => {
               {topBiddedNfts.map((nft) => (
                 <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full lg:w-[calc(50%-16px)] snap-center cursor-pointer group" >
                   <div className="relative aspect-[21/9] bg-muted/50 backdrop-blur-md border border-border dark:border-transparent rounded-[16px] overflow-hidden transition-all group-hover:border-primary/40 shadow-2xl">
-                    <img src={nft.imageUrl} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-[10s] group-hover:scale-105" alt={nft.title} />
+                    <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`, 800, 400)} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-[10s] group-hover:scale-105" alt={nft.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
                       <div>
@@ -241,38 +242,70 @@ const Marketplace: React.FC = () => {
         </section>
 
         {/* 3. REFINED CONTROLS - Clean Tab Filters */}
-        <div className="sticky top-0 z-[37] bg-background/20 backdrop-blur-2xl py-2 w-full px-4 md:px-4 mb-2 border-b border-border/50 dark:border-transparent">
+        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/20 backdrop-blur-2xl py-2 w-full px-4 md:px-4 mb-2 border-b border-border/50 dark:border-transparent">
           <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
             {/* Tab Filters */}
-            <div className="flex items-center justify-between gap-2 w-full md:w-auto">
-              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 flex-1">
-                {TABS.map(tab => (
-                  <button 
-                    key={tab} 
-                    onClick={() => setActiveTab(tab)} 
-                    className={`flex-shrink-0 px-[6px] py-[2px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-600/20' : 'bg-muted/50 backdrop-blur-md text-muted-foreground border-border dark:border-transparent hover:text-foreground hover:bg-muted' }`} 
-                  >
-                    {tab}
-                    {tab === 'My Bids' && userBids.length > 0 && (
-                      <span className="ml-2 text-blue-400 font-mono">[{userBids.length}]</span>
-                    )}
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar">
+              {TABS.map(tab => (
+                <button 
+                  key={tab} 
+                  onClick={() => setActiveTab(tab)} 
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-600/20' : 'bg-muted/50 backdrop-blur-md text-muted-foreground border-border dark:border-transparent hover:text-foreground hover:bg-muted' }`} 
+                >
+                  {tab}
+                  {tab === 'My Bids' && userBids.length > 0 && (
+                    <span className="ml-2 text-blue-400 font-mono">[{userBids.length}]</span>
+                  )}
+                </button>
+              ))}
             </div>
 
-            {/* Action Buttons */}
+            {/* Search and Filters */}
             <div className="flex items-center gap-2 w-full md:w-auto">
               <div className="flex-1 md:flex-none flex items-center gap-2 px-3 py-2 bg-muted/50 backdrop-blur-md border border-border dark:border-transparent rounded-full group focus-within:border-primary/50 transition-all">
                 <Search className="h-3 w-3 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
                 <input 
                   type="text" 
-                  placeholder="SEARCH_MARKET..." 
+                  placeholder="SEARCH..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="bg-transparent border-none outline-none text-[10px] font-bold uppercase tracking-widest text-foreground placeholder:text-muted-foreground/10 w-full md:w-32"
                 />
               </div>
+              
+              {/* Filter Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full px-3 py-2 h-auto text-[10px] font-bold uppercase tracking-widest bg-muted/50 border-border">
+                    <Filter className="h-3 w-3 mr-2" />
+                    Filters
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Genre</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuRadioGroup value={genreFilter} onValueChange={setGenreFilter}>
+                        {['All', 'Electronic', 'Hip-Hop', 'Pop', 'Rock'].map(genre => (
+                          <DropdownMenuRadioItem key={genre} value={genre}>{genre}</DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Rarity</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuRadioGroup value={rarityFilter} onValueChange={setRarityFilter}>
+                        {['All', 'Unique', 'Limited', 'Standard'].map(rarity => (
+                          <DropdownMenuRadioItem key={rarity} value={rarity}>{rarity}</DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

@@ -17,6 +17,7 @@ import NFTCard from '@/components/NFTCard';
 import ArtistListItem from '@/components/ArtistListItem';
 import SocialFeed from '@/components/SocialFeed';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 import { UserProfile as UserProfileType } from '@/types';
 
 const UserProfile: React.FC = () => {
@@ -75,7 +76,7 @@ const UserProfile: React.FC = () => {
     <div className="animate-in fade-in duration-1000 pb-4">
       {/* Banner Section */}
       <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-background">
-        <img src={user.bannerUrl || `https://picsum.photos/1200/400?random=${user.id}`} className="w-full h-full object-cover opacity-60" alt="" />
+        <img src={user.bannerUrl || getPlaceholderImage(`user-banner-${user.id}`, 1200, 400)} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
       </div>
 

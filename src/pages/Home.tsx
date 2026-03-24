@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import ArtistCard from '@/components/ArtistCard';
@@ -172,7 +173,7 @@ const Home: React.FC = () => {
         </div>
 
         {activeTab === 'overview' && (
-          <div className="scroll-row py-1">
+          <div className="scroll-row py-1 mt-[2px]">
             <button
               onClick={() => setSelectedGenre(null)}
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all snap-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border ${
@@ -233,7 +234,9 @@ const Home: React.FC = () => {
             className="space-y-4"
           >
             {/* Featured Sponsored Posts Carousel */}
-            <AutoCarousel items={FEATURED_TRACKS_CAROUSEL} onCtaClick={handleCtaClick} />
+            <div className="mt-8">
+              <AutoCarousel items={FEATURED_TRACKS_CAROUSEL} onCtaClick={handleCtaClick} />
+            </div>
 
             {/* Hero Section */}
             <section className="relative rounded-[10px] overflow-hidden group">
@@ -283,7 +286,7 @@ const Home: React.FC = () => {
                     <div key={`trend-track-${track.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/track/${track.id}`)}>
                       <span className="text-lg font-black italic text-muted-foreground/30 w-6">{idx + 1}</span>
                       <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
-                        <img src={track.coverUrl} className="w-full h-full object-cover" alt={track.title} />
+                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt={track.title} />
                         <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
                           <Play className="h-4 w-4 text-foreground fill-white" />
                         </div>
@@ -299,7 +302,7 @@ const Home: React.FC = () => {
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 3 Artists</h4>
                   {trendingArtists.map((artist) => (
                     <div key={`trend-artist-${artist.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/artist/${artist.id}`)}>
-                      <img src={artist.avatarUrl} className="w-12 h-12 rounded-full object-cover" alt={artist.name} />
+                      <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} className="w-12 h-12 rounded-full object-cover" alt={artist.name} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate text-foreground">{artist.name}</p>
                         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{artist.genre}</p>
@@ -311,7 +314,7 @@ const Home: React.FC = () => {
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 3 NFTs</h4>
                   {trendingNFTs.map((nft) => (
                     <div key={`trend-nft-${nft.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
-                      <img src={nft.imageUrl} className="w-12 h-12 rounded-[5px] object-cover" alt={nft.title} />
+                      <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-12 h-12 rounded-[5px] object-cover" alt={nft.title} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate text-foreground">{nft.title}</p>
                         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.price} TON</p>
@@ -368,7 +371,7 @@ const Home: React.FC = () => {
                         {idx + 1}
                       </span>
                       <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
-                        <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
+                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
                           <Play className="h-4 w-4 text-foreground fill-white" />
                         </div>
@@ -400,7 +403,7 @@ const Home: React.FC = () => {
                       className="flex items-center gap-4 group cursor-pointer"
                     >
                       <div className="relative w-16 h-16 rounded-[5px] overflow-hidden flex-shrink-0">
-                        <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
                           <Play className="h-4 w-4 text-foreground fill-white" />
                         </div>

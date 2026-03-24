@@ -14,6 +14,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Track } from '@/types';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface NFTMetadataManagerProps {
   artistTracks: Track[];
@@ -96,7 +97,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
               <div className="p-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <img src={track.coverUrl} className="w-12 h-12 rounded-[8px] object-cover shadow-lg" alt="" />
+                    <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-12 h-12 rounded-[8px] object-cover shadow-lg" alt="" />
                     <div className="min-w-0">
                       <h4 className="text-sm font-bold text-foreground truncate uppercase tracking-tight">{track.title}</h4>
                       <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{track.genre} • {track.isNFT ? 'NFT Protocol Active' : 'Standard Stream'}</p>

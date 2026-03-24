@@ -41,6 +41,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import { getPlaceholderImage } from "@/lib/utils";
 import {
   MOCK_USER,
   MOCK_ARTISTS,
@@ -64,7 +65,7 @@ import ArtistVerification from "@/components/ArtistVerification";
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery, addUserTrack, userTracks, userNFTs, deleteTrack } = useAudio();
+  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery, addUserTrack, userTracks, userNFTs, deleteTrack, posts, createPost } = useAudio();
   
   useEffect(() => {
     if (!userProfile.isVerifiedArtist) {
@@ -79,6 +80,10 @@ const ArtistDashboard: React.FC = () => {
   }, [artists, userProfile.name]);
 
   const artistData = currentArtist;
+
+  const artistPosts = useMemo(() => {
+    return posts.filter(p => p.authorId === artistData.id).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [posts, artistData.id]);
 
   const allArtistTracks = useMemo(() => {
     const mockTracks = MOCK_TRACKS.filter((t) => t.artistId === artistData.id);
@@ -101,12 +106,12 @@ const ArtistDashboard: React.FC = () => {
     );
   }, [allArtistTracks, searchQuery]);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification" | "transactions">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification" | "transactions" | "community">("overview");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab && ['overview', 'tracks', 'royalties', 'profile', 'forge', 'collection'].includes(tab)) {
+    if (tab && ['overview', 'tracks', 'royalties', 'profile', 'forge', 'collection', 'verification', 'transactions', 'community'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [location.search]);
@@ -129,8 +134,12 @@ const ArtistDashboard: React.FC = () => {
     description: "",
     isNFT: false,
     price: "1.0",
+    streamingPrice: "0.01",
     bpm: 0,
     key: "",
+    editions: "100",
+    royalty: "10",
+    royaltySplits: [{ address: "", percentage: 100 }]
   });
 
   const analyzeAudio = async (file: File) => {
@@ -148,7 +157,7 @@ const ArtistDashboard: React.FC = () => {
 
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-12-2025",
+        model: "gemini-3-flash-preview",
         contents: [
           {
             role: "user",
@@ -166,6 +175,7 @@ const ArtistDashboard: React.FC = () => {
           },
         ],
         config: {
+          tools: [{ googleSearch: {} }],
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -239,6 +249,10 @@ const ArtistDashboard: React.FC = () => {
         uploadToIPFS(coverFile)
       ]);
 
+      if (!audioRes?.ipfsUrl || !coverRes?.ipfsUrl) {
+        throw new Error("Upload failed: IPFS URLs missing from response");
+      }
+
       const audioUrl = audioRes.ipfsUrl;
       const coverUrl = coverRes.ipfsUrl;
 
@@ -248,7 +262,7 @@ const ArtistDashboard: React.FC = () => {
         title: newTrack.title,
         artist: artistData.name,
         artistId: artistData.id,
-        coverUrl: coverUrl || `https://picsum.photos/400/400?seed=${Date.now()}`,
+        coverUrl: coverUrl || getPlaceholderImage(`track-${Date.now()}`),
         audioUrl: audioUrl,
         audioIpfsUrl: audioUrl,
         coverIpfsUrl: coverUrl,
@@ -258,6 +272,10 @@ const ArtistDashboard: React.FC = () => {
         key: newTrack.key,
         isNFT: newTrack.isNFT,
         price: newTrack.isNFT ? newTrack.price : undefined,
+        editions: newTrack.isNFT ? newTrack.editions : undefined,
+        royalty: newTrack.isNFT ? newTrack.royalty : undefined,
+        royaltySplits: newTrack.isNFT ? newTrack.royaltySplits : undefined,
+        streamingPrice: newTrack.streamingPrice,
         playCount: 0,
         likes: 0,
         releaseDate: new Date().toISOString().split("T")[0],
@@ -277,7 +295,19 @@ const ArtistDashboard: React.FC = () => {
       setCoverFile(null);
       setCoverPreview(null);
       setUploadProgress(0);
-      setNewTrack({ title: "", genre: "Electronic", description: "", isNFT: false, price: "1.0", bpm: 0, key: "" });
+      setNewTrack({ 
+        title: "", 
+        genre: "Electronic", 
+        description: "", 
+        isNFT: false, 
+        price: "1.0", 
+        streamingPrice: "0.01", 
+        bpm: 0, 
+        key: "",
+        editions: "100",
+        royalty: "10",
+        royaltySplits: [{ address: "", percentage: 100 }]
+      });
       addNotification("Track broadcasted to the network.", "success");
     } catch (error: any) {
       console.error("Upload failed:", error);
@@ -406,6 +436,7 @@ const ArtistDashboard: React.FC = () => {
             { id: "royalties", label: "Royalties", icon: <Coins className="h-4 w-4" /> },
             { id: "transactions", label: "Transactions", icon: <Wallet className="h-4 w-4" /> },
             { id: "profile", label: "Profile Settings", icon: <UserPen className="h-4 w-4" /> },
+            { id: "community", label: "Community", icon: <Users className="h-4 w-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -731,7 +762,7 @@ const ArtistDashboard: React.FC = () => {
                           {" "}
                           Withdraw to Wallet{" "}
                         </button>{" "}
-                        <button className="px-4 py-4 bg-background/20 backdrop-blur-md text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-background/30 transition-all">
+                        <button onClick={() => setActiveTab('transactions')} className="px-4 py-4 bg-background/20 backdrop-blur-md text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-background/30 transition-all">
                           {" "}
                           View Ledger{" "}
                         </button>{" "}
@@ -1028,6 +1059,83 @@ const ArtistDashboard: React.FC = () => {
               </div>{" "}
             </div>
           )}{" "}
+          {activeTab === "community" && (
+            <div className="max-w-2xl mx-auto space-y-4">
+              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
+                  Post Announcement
+                </h3>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const form = e.target as HTMLFormElement;
+                    const textarea = form.querySelector('textarea');
+                    if (textarea && textarea.value.trim()) {
+                      createPost({
+                        id: `post-${Date.now()}`,
+                        authorId: artistData.id,
+                        authorName: artistData.name,
+                        authorAvatar: artistData.avatarUrl,
+                        content: textarea.value,
+                        createdAt: new Date().toISOString(),
+                        likes: 0,
+                        comments: [],
+                        reposts: 0
+                      });
+                      addNotification("Announcement posted successfully!", "success");
+                      form.reset();
+                    }
+                  }} 
+                  className="space-y-4"
+                >
+                  <textarea
+                    className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500/50 transition-all min-h-[100px]"
+                    placeholder="Share updates, exclusive content, or announcements with your followers..."
+                    required
+                  />
+                  <div className="flex justify-between items-center">
+                    <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                      <Upload className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+                    >
+                      Post
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
+                  Recent Posts
+                </h3>
+                {artistPosts.length > 0 ? (
+                  <div className="space-y-4">
+                    {artistPosts.map(post => (
+                      <div key={post.id} className="p-4 bg-foreground/[0.03] rounded-[10px] border border-border/50">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center gap-2">
+                            <img src={post.authorAvatar || artistData.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
+                            <span className="text-xs font-bold text-foreground uppercase">{post.authorName || artistData.name}</span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                            {new Date(post.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground/80 whitespace-pre-wrap">{post.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p className="text-xs">No recent announcements.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>{" "}
       </div>{" "}
       {/* Withdraw Confirmation Modal */}
@@ -1283,6 +1391,22 @@ const ArtistDashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-4">
+                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                    Streaming Price (TON)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={newTrack.streamingPrice || ''}
+                    onChange={(e) =>
+                      setNewTrack({ ...newTrack, streamingPrice: e.target.value })
+                    }
+                    className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:-blue-500/50 transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div className="space-y-4">
                   {" "}
                   <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                     Release Type
@@ -1309,22 +1433,116 @@ const ArtistDashboard: React.FC = () => {
                 </div>{" "}
               </div>{" "}
               {newTrack.isNFT && (
-                <div className="space-y-4 animate-in slide-in-from-top-2">
-                  {" "}
-                  <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                    Mint Price (TON)
-                  </label>{" "}
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={newTrack.price}
-                    onChange={(e) =>
-                      setNewTrack({ ...newTrack, price: e.target.value })
-                    }
-                    className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:-blue-500/50 transition-all"
-                  />{" "}
+                <div className="space-y-6 animate-in slide-in-from-top-2 p-4 bg-amber-500/5 border border-amber-500/20 rounded-[15px]">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest">
+                        Mint Price (TON)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={newTrack.price}
+                        onChange={(e) =>
+                          setNewTrack({ ...newTrack, price: e.target.value })
+                        }
+                        className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:ring-1 focus:ring-amber-500/50 transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest">
+                        Total Editions
+                      </label>
+                      <input
+                        type="number"
+                        value={newTrack.editions}
+                        onChange={(e) =>
+                          setNewTrack({ ...newTrack, editions: e.target.value })
+                        }
+                        className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:ring-1 focus:ring-amber-500/50 transition-all"
+                        placeholder="100"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[9px] font-bold text-amber-500/80 uppercase tracking-widest">
+                        Royalty Splits
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setNewTrack({
+                          ...newTrack,
+                          royaltySplits: [...newTrack.royaltySplits, { address: "", percentage: 0 }]
+                        })}
+                        className="text-[8px] font-bold text-amber-500 uppercase tracking-widest hover:text-amber-400 transition-colors flex items-center gap-1"
+                      >
+                        <Plus className="h-3 w-3" /> Add Split
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {newTrack.royaltySplits.map((split, index) => (
+                        <div key={index} className="flex gap-2 items-start">
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              placeholder="Wallet Address"
+                              value={split.address}
+                              onChange={(e) => {
+                                const newSplits = [...newTrack.royaltySplits];
+                                newSplits[index].address = e.target.value;
+                                setNewTrack({ ...newTrack, royaltySplits: newSplits });
+                              }}
+                              className="w-full bg-foreground/[0.03] rounded-[8px] p-3 text-[11px] text-foreground outline-none focus:ring-1 focus:ring-amber-500/30 transition-all"
+                            />
+                          </div>
+                          <div className="w-24">
+                            <div className="relative">
+                              <input
+                                type="number"
+                                placeholder="%"
+                                value={split.percentage}
+                                onChange={(e) => {
+                                  const newSplits = [...newTrack.royaltySplits];
+                                  newSplits[index].percentage = parseInt(e.target.value) || 0;
+                                  setNewTrack({ ...newTrack, royaltySplits: newSplits });
+                                }}
+                                className="w-full bg-foreground/[0.03] rounded-[8px] p-3 pr-8 text-[11px] text-foreground outline-none focus:ring-1 focus:ring-amber-500/30 transition-all"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">%</span>
+                            </div>
+                          </div>
+                          {newTrack.royaltySplits.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newSplits = newTrack.royaltySplits.filter((_, i) => i !== index);
+                                setNewTrack({ ...newTrack, royaltySplits: newSplits });
+                              }}
+                              className="p-3 text-red-500/50 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="flex justify-between items-center px-1">
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Total Percentage</span>
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                        newTrack.royaltySplits.reduce((sum, s) => sum + s.percentage, 0) === 100 
+                          ? "text-green-500" 
+                          : "text-amber-500"
+                      }`}>
+                        {newTrack.royaltySplits.reduce((sum, s) => sum + s.percentage, 0)}%
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              )}{" "}
+              )}
               <div className="pt-4 flex gap-4">
                 {" "}
                 <button

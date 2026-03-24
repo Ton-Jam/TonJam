@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, MapPin, Ticket } from 'lucide-react';
+import { Calendar, MapPin, Ticket, Clock } from 'lucide-react';
 import { Event } from '@/types';
 
 interface ArtistEventsProps {
@@ -25,9 +25,15 @@ const ArtistEvents: React.FC<ArtistEventsProps> = ({ events }) => {
               </div>
               <div>
                 <h4 className="text-sm font-bold text-foreground">{event.title}</h4>
-                <div className="flex items-center gap-4 text-[10px] text-muted-foreground mt-1">
-                  <MapPin className="h-3 w-3" />
-                  {event.venue}, {event.location}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground mt-1">
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {event.venue}, {event.location}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {event.time}
+                  </div>
                 </div>
               </div>
             </div>

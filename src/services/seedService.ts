@@ -1,8 +1,10 @@
-import { collection, getDocs, addDoc, serverTimestamp, query, limit } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+// import { collection, getDocs, addDoc, serverTimestamp, query, limit } from 'firebase/firestore';
+// import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '../constants';
 
 export const seedDatabase = async () => {
+  console.log('Database seeding skipped (Firebase removed).');
+  /*
   try {
     // Check if tracks collection is empty
     const tracksQuery = query(collection(db, 'tracks'), limit(1));
@@ -50,4 +52,5 @@ export const seedDatabase = async () => {
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'seeding');
   }
+  */
 };

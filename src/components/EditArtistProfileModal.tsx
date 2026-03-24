@@ -3,8 +3,8 @@ import { UserPen, X, Twitter, Send, Music, Globe, Image as ImageIcon, Upload, Lo
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { uploadToIPFS } from '@/services/pinataService';
-import { auth, db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { supabase } from '@/lib/supabase';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface EditArtistProfileModalProps {
   artist: Artist;
@@ -88,16 +88,21 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         socials
       } : a));
 
-      // Persist to Firestore if it's the current user
-      if (auth.currentUser && auth.currentUser.uid === artist.id) {
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-        await updateDoc(userRef, {
-          name,
-          bio,
-          bannerUrl: bannerUrl || artist.bannerUrl || '',
-          avatar: avatarUrl || artist.avatarUrl || '',
-          socials
-        });
+      // Persist to Supabase if it's the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && user.id === artist.id) {
+        const { error } = await supabase
+          .from('users')
+          .update({
+            name,
+            bio,
+            bannerUrl: bannerUrl || artist.bannerUrl || '',
+            avatar: avatarUrl || artist.avatarUrl || '',
+            socials
+          })
+          .eq('id', user.id);
+        
+        if (error) throw error;
       }
 
       addNotification("Neural profile updated successfully.", "success");
@@ -127,72 +132,57 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             <X className="h-5 w-5" />
           </button>
         </div>
-        <form onSubmit={handleSave} className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 no-scrollbar">
-          <div className="space-y-2">
+        <form onSubmit={handleSave} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 no-scrollbar">
+          <div className="space-y-4">
             
-            {/* Banner & Avatar Upload Section */}
-            <div className="flex gap-4 items-start">
-              {/* Avatar Upload */}
-              <div className="space-y-2">
-                <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Avatar</label>
-                <div className="relative w-24 h-24 rounded-full overflow-hidden group border border-border bg-muted/50">
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="h-6 w-6 text-muted-foreground/50" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'image/*';
-                        input.onchange = (e) => handleAvatarUpload(e as any);
-                        input.click();
-                      }}
-                      className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg"
-                      disabled={isAvatarUploading}
-                    >
-                      {isAvatarUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                    </button>
-                  </div>
+            {/* Banner Upload Section - Moved to top and made full-width */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Profile Banner</label>
+              <div className="relative w-full h-48 rounded-[10px] overflow-hidden group border border-border bg-muted/50">
+                <img src={bannerUrl || getPlaceholderImage(`banner-${artist.id}`, 1500, 500)} alt="Banner Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button 
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-6 py-3 bg-blue-600 rounded-full text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg hover:bg-blue-500 transition-all"
+                    disabled={isUploading}
+                  >
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {isUploading ? "Uploading..." : "Change Banner"}
+                  </button>
                 </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleBannerUpload} 
+                  className="hidden" 
+                  accept="image/*" 
+                />
               </div>
+              <p className="text-[8px] text-foreground/30 ml-2">Recommended size: 1500x500px. Max 5MB.</p>
+            </div>
 
-              {/* Banner Upload */}
-              <div className="flex-1 space-y-2">
-                <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Profile Banner</label>
-                <div className="relative w-full h-24 rounded-[10px] overflow-hidden group border border-border bg-muted/50">
-                  {bannerUrl ? (
-                    <img src={bannerUrl} alt="Banner Preview" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-blue-600 rounded-full text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg"
-                      disabled={isUploading}
-                    >
-                      {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                      {isUploading ? "Uploading..." : "Change Banner"}
-                    </button>
-                  </div>
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleBannerUpload} 
-                    className="hidden" 
-                    accept="image/*" 
-                  />
+            {/* Avatar Upload Section */}
+            <div className="space-y-2">
+              <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Avatar</label>
+              <div className="relative w-24 h-24 rounded-full overflow-hidden group border border-border bg-muted/50">
+                <img src={avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} alt="Avatar Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*';
+                      input.onchange = (e) => handleAvatarUpload(e as any);
+                      input.click();
+                    }}
+                    className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg hover:bg-blue-500 transition-all"
+                    disabled={isAvatarUploading}
+                  >
+                    {isAvatarUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  </button>
                 </div>
-                <p className="text-[8px] text-foreground/30 ml-2">Recommended size: 1500x500px. Max 5MB.</p>
               </div>
             </div>
 

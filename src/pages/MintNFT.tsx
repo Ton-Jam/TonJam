@@ -136,12 +136,18 @@ const MintNFT: React.FC = () => {
       if (data.audioFile instanceof File) {
         addNotification("Uploading audio to IPFS...", "info");
         const audioRes = await uploadToIPFS(data.audioFile);
+        if (!audioRes?.ipfsUrl) {
+          throw new Error("Audio upload failed: IPFS URL missing from response");
+        }
         audioUrl = audioRes.ipfsUrl;
       }
 
       if (data.coverFile instanceof File) {
         addNotification("Uploading cover art to IPFS...", "info");
         const coverRes = await uploadToIPFS(data.coverFile);
+        if (!coverRes?.ipfsUrl) {
+          throw new Error("Cover art upload failed: IPFS URL missing from response");
+        }
         coverUrl = coverRes.ipfsUrl;
       }
 
@@ -158,6 +164,9 @@ const MintNFT: React.FC = () => {
 
       addNotification("Uploading metadata to IPFS...", "info");
       const metadataRes = await uploadJSONToIPFS(metadata);
+      if (!metadataRes?.ipfsUrl) {
+        throw new Error("Metadata upload failed: IPFS URL missing from response");
+      }
       const ipfsUrl = metadataRes.ipfsUrl;
 
       // 3. Real TON transaction for minting fee

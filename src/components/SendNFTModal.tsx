@@ -3,6 +3,7 @@ import { X, Send, User, Shield, Loader2, CheckCircle2, ArrowRight } from 'lucide
 import { NFTItem } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { motion, AnimatePresence } from 'motion/react';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface SendNFTModalProps {
   nft: NFTItem;
@@ -76,7 +77,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 className="space-y-2"
               >
                 <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-[12px] border border-border/50">
-                  <img src={nft.imageUrl} className="w-16 h-16 rounded-[8px] object-cover" alt="" />
+                  <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-16 h-16 rounded-[8px] object-cover" alt="" />
                   <div>
                     <h3 className="text-sm font-bold text-black uppercase tracking-tight">{nft.title}</h3>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">{nft.edition}</p>

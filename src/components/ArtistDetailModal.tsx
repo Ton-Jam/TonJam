@@ -4,6 +4,7 @@ import { Artist, Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_TRACKS } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface ArtistDetailModalProps {
   artist: Artist;
@@ -49,7 +50,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
         <div className="relative h-48 sm:h-64">
           <div className="absolute inset-0">
             <img 
-              src={artist.bannerUrl || artist.avatarUrl} 
+              src={artist.bannerUrl || artist.avatarUrl || getPlaceholderImage(`artist-banner-${artist.id}`)} 
               alt={artist.name} 
               className="w-full h-full object-cover opacity-60"
             />
@@ -66,7 +67,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
           <div className="absolute bottom-0 left-0 right-0 p-2 flex items-end gap-2">
             <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden shrink-0">
               <img 
-                src={artist.avatarUrl} 
+                src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} 
                 alt={artist.name} 
                 className="w-full h-full object-cover"
               />
@@ -162,7 +163,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                       </span>
                       
                       <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 shadow-lg">
-                        <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
+                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover" />
                         <div className={`absolute inset-0 bg-background/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isTrackActive ? 'opacity-100' : ''}`}>
                           {isTrackPlaying ? <Pause className="w-5 h-5 text-foreground" /> : <Play className="w-5 h-5 text-foreground fill-white" />}
                         </div>

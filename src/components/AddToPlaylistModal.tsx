@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Plus, Music } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { Track } from '@/types';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface AddToPlaylistModalProps {
   track: Track;
@@ -40,11 +41,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
               className="w-full flex items-center gap-2 p-3 rounded-[8px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               <div className="w-8 h-8 rounded-[4px] bg-muted/50 flex items-center justify-center overflow-hidden border border-border/50">
-                {playlist.coverUrl ? (
-                  <img src={playlist.coverUrl} className="w-full h-full object-cover" alt="" />
-                ) : (
-                  <Music className="h-4 w-4 text-muted-foreground/50" />
-                )}
+                <img src={playlist.coverUrl || getPlaceholderImage(`playlist-${playlist.id}`)} className="w-full h-full object-cover" alt="" />
               </div>
               <div className="flex-1 min-w-0">
                 <span className="text-[11px] font-bold text-black uppercase tracking-tight block truncate">{playlist.title}</span>

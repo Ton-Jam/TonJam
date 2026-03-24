@@ -47,7 +47,12 @@ const Settings: React.FC = () => {
           label="Profile Identity" 
           description="Manage your public presence and bio"
         >
-          <button className="px-4 py-4 bg-muted/50 hover:bg-muted rounded-xl text-[10px] font-bold text-foreground uppercase tracking-widest transition-all">Edit</button>
+          <button 
+            onClick={() => navigate('/profile-settings')}
+            className="px-4 py-4 bg-muted/50 hover:bg-muted rounded-xl text-[10px] font-bold text-foreground uppercase tracking-widest transition-all"
+          >
+            Edit
+          </button>
         </SettingItem>
 
         <SettingItem 

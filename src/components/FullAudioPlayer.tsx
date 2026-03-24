@@ -6,7 +6,7 @@ import { MOCK_ARTISTS, APP_LOGO, TJ_COIN_ICON } from "@/constants";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from 'canvas-confetti';
 
-const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
+const AudioVisualizer: React.FC<{ isPlaying: boolean; isHighFidelity?: boolean }> = ({ isPlaying, isHighFidelity }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { analyser, currentTrack } = useAudio();
@@ -75,13 +75,19 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
         const y = (canvas.height - h) / 2; // Center vertically
 
         const gradient = ctx.createLinearGradient(0, y, 0, y + h);
-        gradient.addColorStop(0, "#60a5fa");
-        gradient.addColorStop(0.5, "#3b82f6");
-        gradient.addColorStop(1, "#2563eb");
+        if (isHighFidelity) {
+          gradient.addColorStop(0, "#c084fc");
+          gradient.addColorStop(0.5, "#a855f7");
+          gradient.addColorStop(1, "#9333ea");
+        } else {
+          gradient.addColorStop(0, "#60a5fa");
+          gradient.addColorStop(0.5, "#3b82f6");
+          gradient.addColorStop(1, "#2563eb");
+        }
 
         ctx.fillStyle = gradient;
-        ctx.shadowBlur = isPlaying ? 10 : 4;
-        ctx.shadowColor = "rgba(59, 130, 246, 0.4)";
+        ctx.shadowBlur = isPlaying ? (isHighFidelity ? 15 : 10) : 4;
+        ctx.shadowColor = isHighFidelity ? "rgba(168, 85, 247, 0.4)" : "rgba(59, 130, 246, 0.4)";
         
         const radius = width / 2;
         
@@ -100,7 +106,7 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isPlaying, analyser, currentTrack?.id]);
+  }, [isPlaying, analyser, currentTrack?.id, isHighFidelity]);
 
   return (
     <div ref={containerRef} className="w-full h-16 md:h-24 px-4 opacity-90 mix-blend-screen overflow-hidden">
@@ -136,6 +142,8 @@ const FullAudioPlayer: React.FC = () => {
     jamTrack,
     activeJamRoom,
     leaveJamRoom,
+    isHighFidelity,
+    exclusiveContent,
   } = useAudio();
   const [view, setView] = useState<"cover" | "lyrics">("cover");
   const [showVolume, setShowVolume] = useState(false);
@@ -326,8 +334,13 @@ const FullAudioPlayer: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                <h2 className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-foreground leading-none truncate px-2">
+                <h2 className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-foreground leading-none truncate px-2 flex items-center justify-center gap-2">
                   {currentTrack.title}
+                  {isHighFidelity && (
+                    <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[10px] px-2 py-0.5 rounded-full tracking-widest uppercase">
+                      Hi-Fi
+                    </span>
+                  )}
                 </h2>
                 <div className="flex items-center justify-center gap-2 mt-2">
                   {artistData && (
@@ -350,7 +363,7 @@ const FullAudioPlayer: React.FC = () => {
           </div>
 
           <div className="w-full flex justify-center mb-2">
-            <AudioVisualizer isPlaying={isPlaying} />
+            <AudioVisualizer isPlaying={isPlaying} isHighFidelity={isHighFidelity} />
           </div>
 
           <div className="w-full max-w-[420px] mb-2 space-y-2">
@@ -375,10 +388,12 @@ const FullAudioPlayer: React.FC = () => {
                   navigate(`/nft/${currentTrack.id}`);
                 }}
                 className="flex flex-col items-center gap-2 p-2 rounded-2xl bg-foreground/[0.03] border border-border/50 hover:bg-foreground/[0.08] hover:border-border transition-all group"
-                title="Mint NFT"
+                title={isHighFidelity ? "View NFT" : "Mint NFT"}
               >
-                <Gem className="h-6 w-6 text-muted-foreground group-hover:text-purple-400 transition-colors" />
-                <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest group-hover:text-muted-foreground/80">Mint</span>
+                <Gem className={`h-6 w-6 transition-colors ${isHighFidelity ? "text-purple-500" : "text-muted-foreground group-hover:text-purple-400"}`} />
+                <span className={`text-[8px] font-bold uppercase tracking-widest ${isHighFidelity ? "text-purple-500" : "text-muted-foreground/50 group-hover:text-muted-foreground/80"}`}>
+                  {isHighFidelity ? "Owned" : "Mint"}
+                </span>
               </motion.button>
 
               <motion.button
@@ -509,6 +524,28 @@ const FullAudioPlayer: React.FC = () => {
 
         {/* Track Details Section */}
         <div className="w-full mt-2 pt-2 space-y-2">
+          {exclusiveContent && exclusiveContent.length > 0 && (
+            <div className="space-y-2 bg-purple-500/10 p-3 rounded-xl border border-purple-500/20">
+              <h3 className="text-[14px] font-bold text-purple-400 uppercase tracking-[0.4em] flex items-center gap-2">
+                <Gem className="w-4 h-4" />
+                Exclusive Content
+              </h3>
+              <div className="space-y-2">
+                {exclusiveContent.map((content) => (
+                  <div key={content.id} className="flex items-center justify-between bg-background/50 p-2 rounded-lg">
+                    <div className="flex flex-col">
+                      <span className="text-[12px] font-bold text-foreground uppercase tracking-tight">{content.title}</span>
+                      {content.description && <span className="text-[10px] text-muted-foreground">{content.description}</span>}
+                    </div>
+                    <a href={content.url} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-purple-400 uppercase tracking-widest hover:underline">
+                      View
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <h3 className="text-[14px] font-bold text-muted-foreground/80 uppercase tracking-[0.4em]">
               Track Info

@@ -11,6 +11,7 @@ import Profile from '@/pages/Profile';
 import UserProfile from '@/pages/UserProfile';
 import ArtistProfile from '@/pages/ArtistProfile';
 import ArtistDashboard from '@/pages/ArtistDashboard';
+import ProfileSettings from '@/pages/ProfileSettings';
 import Library from '@/pages/Library';
 import Settings from '@/pages/Settings';
 import Tasks from '@/pages/Tasks';
@@ -22,6 +23,7 @@ import MintNFT from '@/pages/MintNFT';
 import LoadingScreen from '@/components/LoadingScreen';
 import PlaylistDetail from '@/pages/PlaylistDetail';
 import PostDetail from '@/pages/PostDetail';
+import SocialFeedPage from '@/pages/SocialFeedPage';
 import TrackDetail from '@/pages/TrackDetail';
 import TrackPlayerScreen from '@/pages/TrackPlayerScreen';
 import AdminDashboard from '@/pages/AdminDashboard';
@@ -30,39 +32,29 @@ import Staking from '@/pages/Staking';
 import About from '@/pages/About';
 import { AudioProvider } from '@/context/AudioContext';
 import { AuthProvider } from '@/context/AuthContext';
-import { FirebaseProvider, useFirebase } from '@/context/FirebaseContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ArtistOnboarding from '@/pages/ArtistOnboarding';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { motion, AnimatePresence } from 'motion/react';
-import { doc, getDocFromServer } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 
 const AppContent: React.FC = () => {
-  const { isAuthReady, loading: firebaseLoading } = useFirebase();
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
-    // Test Firestore connection
+    // Test Supabase connection
     const testConnection = async () => {
       try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
+        const { error } = await supabase.from('tracks').select('id').limit(1);
+        if (error) throw error;
       } catch (error) {
-        if (error instanceof Error && (error.message.includes('the client is offline') || error.message.includes('unavailable'))) {
-          console.error("Please check your Firebase configuration. The Firestore backend is currently unreachable.");
-        }
+        console.error("Please check your Supabase configuration. The Supabase backend is currently unreachable.");
       }
     };
     testConnection();
+    setIsAppLoading(false);
   }, []);
-
-  useEffect(() => {
-    if (isAuthReady && !firebaseLoading) {
-      const timer = setTimeout(() => setIsAppLoading(false), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthReady, firebaseLoading]);
 
   return (
     <AnimatePresence>
@@ -97,9 +89,11 @@ const AppContent: React.FC = () => {
               <Route path="/track/:id" element={<TrackDetail />} />
               <Route path="/player" element={<TrackPlayerScreen />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/profile-settings" element={<ProfileSettings />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/post/:id" element={<PostDetail />} />
+              <Route path="/social" element={<SocialFeedPage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/about" element={<About />} />
             </Routes>
@@ -115,17 +109,15 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <TonConnectUIProvider manifestUrl="https://ton-jam.vercel.app/tonconnect-manifest.json">
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <FirebaseProvider>
-            <AuthProvider>
-              <AudioProvider>
-                <Toaster theme="light" position="top-right" />
-                <Router>
-                  <ScrollToTop />
-                  <AppContent />
-                </Router>
-              </AudioProvider>
-            </AuthProvider>
-          </FirebaseProvider>
+          <AuthProvider>
+            <AudioProvider>
+              <Toaster theme="light" position="top-right" />
+              <Router>
+                <ScrollToTop />
+                <AppContent />
+              </Router>
+            </AudioProvider>
+          </AuthProvider>
         </ThemeProvider>
       </TonConnectUIProvider>
     </ErrorBoundary>

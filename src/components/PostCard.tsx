@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import PostOptionsModal from '@/components/PostOptionsModal';
 import { MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { AnimatePresence, motion } from 'motion/react';
-import { cn } from '@/lib/utils';
+import { cn, getPlaceholderImage } from '@/lib/utils';
 
 const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ post, onDelete }) => {
   const navigate = useNavigate();
@@ -234,7 +234,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             aria-label={`View ${post.userName}'s profile`}
           >
             <div className="h-10 w-10 overflow-hidden rounded-full">
-              <img src={post.userAvatar} alt="" className="h-full w-full object-cover" />
+              <img src={post.userAvatar || getPlaceholderImage(`user-${post.userId}`)} alt="" className="h-full w-full object-cover" />
             </div>
           </div>
 
@@ -250,15 +250,15 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 aria-label={`View ${post.userName}'s profile`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-blue-600 hover:underline dark:text-foreground/90">{post.userName}</span>
+                  <span className="font-semibold text-blue-600 hover:underline dark:text-silver-100">{post.userName}</span>
                   {post.isVerified && (
                     <VerifiedIcon className="h-4 w-4 text-blue-400" />
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-blue-500 text-sm dark:text-muted-foreground/80">{userHandle}</span>
-                  <span className="text-blue-500 text-sm dark:text-muted-foreground/80">·</span>
-                  <span className="text-blue-500 text-sm dark:text-muted-foreground/80">{post.timestamp}</span>
+                  <span className="text-blue-500 text-sm dark:text-silver-400">{userHandle}</span>
+                  <span className="text-blue-500 text-sm dark:text-silver-400">·</span>
+                  <span className="text-blue-500 text-sm dark:text-silver-400">{post.timestamp}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -283,7 +283,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             </div>
 
             {/* Post Text */}
-            <p className="text-base text-blue-700 dark:text-foreground/90 mb-2 whitespace-pre-wrap">
+            <p className="text-base text-blue-700 dark:text-silver-200 mb-2 whitespace-pre-wrap">
               {renderContentWithHashtags(post.content)}
             </p>
 
@@ -325,7 +325,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
               aria-label={`Play track: ${track.title} by ${track.artist}`}
             >
               <div className="relative w-12 h-12 rounded-[10px] overflow-hidden flex-shrink-0">
-                <img src={track.coverUrl} alt="" className="w-full h-full object-cover" />
+                <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
                 <div className={`absolute inset-0 bg-background/40 flex items-center justify-center transition-opacity ${currentTrack?.id === track.id && isPlaying ? 'opacity-100' : 'opacity-0 group-hover/track:opacity-100'}`}>
                   {currentTrack?.id === track.id && isPlaying ? (
                     <Pause className="h-4 w-4 text-foreground fill-current" />
@@ -335,13 +335,13 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <h5 className="text-[10px] font-bold text-foreground uppercase truncate">{track.title}</h5>
-                <p className="text-[8px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
+                <h5 className="text-[10px] font-bold text-foreground dark:text-silver-100 uppercase truncate">{track.title}</h5>
+                <p className="text-[8px] font-bold text-blue-500/70 dark:text-silver-400 uppercase tracking-widest truncate">{track.artist}</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="text-right">
                   <p className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Streaming Now</p>
-                  <p className="text-[10px] font-bold text-foreground uppercase">{(track.streams || track.playCount || 0).toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-foreground dark:text-silver-100 uppercase">{(track.streams || track.playCount || 0).toLocaleString()}</p>
                 </div>
                 <button 
                   className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -374,13 +374,13 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[7px] font-bold text-blue-400 uppercase tracking-[0.3em]">Sonic Artifact Acquired</span>
                 </div>
-                <h5 className="text-xs font-bold text-foreground uppercase truncate tracking-tight">{nft.title}</h5>
-                <p className="text-[9px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate">Creator: {nft.creator}</p>
+                <h5 className="text-xs font-bold text-foreground dark:text-silver-100 uppercase truncate tracking-tight">{nft.title}</h5>
+                <p className="text-[9px] font-bold text-blue-500/70 dark:text-silver-400 uppercase tracking-widest truncate">Creator: {nft.creator}</p>
               </div>
               <div className="text-right">
-                <p className="text-[8px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest mb-2">Valuation</p>
+                <p className="text-[8px] font-bold text-blue-500/50 dark:text-silver-500 uppercase tracking-widest mb-2">Valuation</p>
                 <div className="flex items-center gap-3 justify-end">
-                  <span className="text-sm font-bold text-foreground tracking-tighter">{nft.price}</span>
+                  <span className="text-sm font-bold text-foreground dark:text-silver-100 tracking-tighter">{nft.price}</span>
                   <span className="text-[8px] font-bold text-blue-500">TON</span>
                 </div>
               </div>
@@ -392,7 +392,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             <div className="flex items-center gap-2">
               <button 
                 onClick={handleLike} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${isLiked ? 'text-red-500' : 'text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm ${isLiked ? 'text-red-500' : 'text-blue-500/70 dark:text-silver-400 hover:text-blue-600 dark:hover:text-silver-200'}`}
                 aria-label={isLiked ? "Unlike post" : "Like post"}
               >
                 <motion.div whileTap={{ scale: 1.5 }}>
@@ -402,7 +402,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
               </button>
               <button 
                 onClick={() => setShowComments(!showComments)} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm hover:scale-105 ${showComments ? 'text-blue-500' : 'text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm hover:scale-105 ${showComments ? 'text-blue-500' : 'text-blue-500/70 dark:text-silver-400 hover:text-blue-600 dark:hover:text-silver-200'}`}
                 aria-label={showComments ? "Hide comments" : "Show comments"}
                 aria-expanded={showComments}
               >
@@ -410,7 +410,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
               </button>
               <button 
                 onClick={handleRepost} 
-                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm hover:scale-105 ${isReposted ? 'text-green-500' : 'text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground'}`}
+                className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm hover:scale-105 ${isReposted ? 'text-green-500' : 'text-blue-500/70 dark:text-silver-400 hover:text-blue-600 dark:hover:text-silver-200'}`}
                 aria-label={isReposted ? "Remove repost" : "Repost post"}
               >
                 <Repeat2 className="h-4 w-4" /> <span>{repostsCount}</span>
@@ -431,14 +431,14 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
           >
             {/* Comment Form */}
             <form onSubmit={handleAddComment} className="flex gap-2 mb-2">
-              <img src={MOCK_USER.avatar} className="w-8 h-8 rounded-full shadow-lg object-cover" alt="Your avatar" />
+              <img src={MOCK_USER.avatar || getPlaceholderImage(`user-${MOCK_USER.id}`)} className="w-8 h-8 rounded-full shadow-lg object-cover" alt="Your avatar" />
               <div className="flex-1 relative">
                 <input
                   type="text"
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-xs outline-none focus:ring-1 focus:ring-blue-500/50 transition-all text-blue-600 dark:text-foreground placeholder:text-blue-500/50 dark:placeholder:text-muted-foreground/50"
+                  className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-xs outline-none focus:ring-1 focus:ring-blue-500/50 transition-all text-blue-600 dark:text-silver-100 placeholder:text-blue-500/50 dark:placeholder:text-silver-500"
                   aria-label="Write a comment"
                 />
                 <button
@@ -464,7 +464,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                     className="flex gap-2 group/comment"
                   >
                     <img 
-                      src={comment.userAvatar} 
+                      src={comment.userAvatar || getPlaceholderImage(`user-${comment.userId}`)} 
                       className="w-8 h-8 rounded-full flex-shrink-0 object-cover shadow-md cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
                       alt={`${comment.userName}'s avatar`} 
                       onClick={(e) => handleCommentProfileClick(e, comment.userId)}
@@ -476,7 +476,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                       <div className="bg-muted/50 rounded-[10px] p-2 relative group-hover/comment:bg-foreground/[0.07] transition-colors border border-border/50">
                         <div className="flex items-center justify-between mb-2">
                           <h5 
-                            className="text-[10px] font-bold text-blue-600 dark:text-foreground uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                            className="text-[10px] font-bold text-blue-600 dark:text-silver-100 uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                             onClick={(e) => handleCommentProfileClick(e, comment.userId)}
                             onKeyDown={(e) => handleKeyDown(e, () => handleCommentProfileClick(e as any, comment.userId))}
                             role="button"
@@ -484,9 +484,9 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                           >
                             {comment.userName}
                           </h5>
-                          <span className="text-[8px] text-blue-500/50 dark:text-muted-foreground/50 font-bold uppercase tracking-widest">{comment.timestamp}</span>
+                          <span className="text-[8px] text-blue-500/50 dark:text-silver-500 font-bold uppercase tracking-widest">{comment.timestamp}</span>
                         </div>
-                        <p className="text-[11px] text-blue-600/70 dark:text-foreground/70 leading-relaxed">{renderContentWithHashtags(comment.content)}</p>
+                        <p className="text-[11px] text-blue-600/70 dark:text-silver-300 leading-relaxed">{renderContentWithHashtags(comment.content)}</p>
                         
                         {/* Reactions */}
                         <div className="flex items-center gap-2 mt-2">

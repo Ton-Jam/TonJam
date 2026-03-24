@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ChevronUp } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_ARTISTS, MOCK_USER } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface ChartNFTCardProps {
   nft: NFTItem;
@@ -28,7 +29,7 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
       {/* Image */}
       <div className="relative w-14 h-14 rounded-[8px] overflow-hidden flex-shrink-0 border border-border">
         <img
-          src={nft.imageUrl}
+          src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100"
           alt={nft.title}
         />

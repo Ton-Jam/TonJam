@@ -1,6 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Rss, Flame, Zap, Users, Plus, Sparkles, Filter, LayoutGrid, List, Radio, Headphones, TrendingUp, ChevronRight } from 'lucide-react';
+import { Search, Bell, Rss, Flame, Zap, Users, Plus, Sparkles, Filter, LayoutGrid, List, Radio, Headphones, TrendingUp, ChevronRight, SearchIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ButtonGroupInput } from '@/components/ButtonGroupInput';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuLabel, 
+  DropdownMenuRadioGroup, 
+  DropdownMenuRadioItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import { MOCK_POSTS, MOCK_ARTISTS, MOCK_USER, MOCK_TRACKS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
 import UserCard from '@/components/UserCard';
 import TrackCard from '@/components/TrackCard';
@@ -8,6 +19,7 @@ import PostModal from '@/components/PostModal';
 import SocialFeed from '@/components/SocialFeed';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 import { Post, Track } from '@/types';
 
 const JamSpace: React.FC = () => {
@@ -24,7 +36,7 @@ const JamSpace: React.FC = () => {
       id: '1',
       title: 'Genesis Mint Event',
       subtitle: 'Exclusive NFTs dropping from Neon Voyager',
-      imageUrl: 'https://picsum.photos/1200/400?random=101',
+      imageUrl: getPlaceholderImage('jam-1', 1200, 400),
       link: '/explore/nfts',
       cta: 'View Drop'
     },
@@ -32,7 +44,7 @@ const JamSpace: React.FC = () => {
       id: '2',
       title: 'Neural Beats Live',
       subtitle: 'Join the global jam session in the Genesis Node',
-      imageUrl: 'https://picsum.photos/1200/400?random=102',
+      imageUrl: getPlaceholderImage('jam-2', 1200, 400),
       link: '/jamspace',
       cta: 'Join Room'
     },
@@ -40,7 +52,7 @@ const JamSpace: React.FC = () => {
       id: '3',
       title: 'TON Ecosystem Growth',
       subtitle: 'Discover the future of decentralized music',
-      imageUrl: 'https://picsum.photos/1200/400?random=103',
+      imageUrl: getPlaceholderImage('jam-3', 1200, 400),
       link: '/explore',
       cta: 'Explore'
     }
@@ -241,66 +253,58 @@ const JamSpace: React.FC = () => {
 
             {/* Search Bar */}
             <div className="relative w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
+              <ButtonGroupInput
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search live nodes and sessions..."
-                className="w-full bg-muted/50 border border-blue-500/30 rounded-xl py-4 pl-4 pr-4 text-sm text-blue-600 dark:text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
+                className="w-full"
+                inputClassName="bg-muted/50 border-blue-500/30 py-6 text-sm text-blue-600 dark:text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
               />
             </div>
 
             {/* Sticky Filters */}
             <div className="sticky top-[var(--header-height,64px)] z-30 backdrop-blur-2xl py-2 w-full bg-background/40 px-4 transition-all duration-300 border-b border-blue-500/10">
-              <div className="flex flex-col gap-2">
-                {/* Combined Filters Row */}
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                    {['All', 'Following', 'Trending'].map(tab => (
-                      <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-[10px] py-[6px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-500 text-white border-blue-500 shadow-xl shadow-blue-500/20 active-pill' : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-border hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill' }`} >
-                        {tab}
-                      </button>
-                    ))}
-                    <div className="w-px h-4 bg-blue-500/20 mx-2 flex-shrink-0" />
-                    {['All', 'Tracks', 'NFTs'].map(type => (
-                      <button 
-                        key={type} 
-                        onClick={() => setFilterType(type as any)}
-                        className={`px-[10px] py-[6px] rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-blue-500 text-white border-blue-500 shadow-lg active-pill' : 'bg-white dark:bg-transparent text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-transparent hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill'}`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button 
-                      onClick={() => setSortOrder(prev => prev === 'Newest' ? 'Oldest' : 'Newest')}
-                      className="flex items-center gap-2 px-3 py-2 rounded-[8px] bg-muted/50 hover:bg-muted border border-blue-500/30 hover:border-blue-500/50 transition-all group"
-                    >
-                      <span className="text-[9px] font-bold text-blue-500/80 dark:text-muted-foreground/80 uppercase tracking-widest group-hover:text-blue-600 dark:group-hover:text-foreground">{sortOrder}</span>
-                      <div className="flex flex-col -space-y-3">
-                        <div className={`w-0 h-0 border-l-[2px] border-l-transparent border-r-[2px] border-r-transparent border-b-[3px] ${sortOrder === 'Oldest' ? 'border-b-blue-500' : 'border-b-blue-500/20 dark:border-b-white/20'}`}></div>
-                        <div className={`w-0 h-0 border-l-[2px] border-l-transparent border-r-[2px] border-r-transparent border-t-[3px] ${sortOrder === 'Newest' ? 'border-t-blue-500' : 'border-t-blue-500/20 dark:border-t-white/20'}`}></div>
-                      </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                  {['All', 'Following', 'Trending'].map(tab => (
+                    <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-[10px] py-[6px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-500 text-white border-blue-500 shadow-xl shadow-blue-500/20 active-pill' : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-border hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill' }`} >
+                      {tab}
                     </button>
+                  ))}
+                  <div className="w-px h-4 bg-blue-500/20 mx-2 flex-shrink-0" />
+                  {['All', 'Tracks', 'NFTs'].map(type => (
+                    <button 
+                      key={type} 
+                      onClick={() => setFilterType(type as any)}
+                      className={`px-[10px] py-[6px] rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-blue-500 text-white border-blue-500 shadow-lg active-pill' : 'bg-white dark:bg-transparent text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-transparent hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill'}`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
 
-                    <div className="flex items-center bg-muted/50 rounded-[8px] p-1 border border-blue-500/30">
-                      <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-[6px] transition-all ${viewMode === 'list' ? 'bg-blue-500/10 text-blue-500 shadow-sm' : 'text-neutral-500 hover:text-neutral-400'}`}
-                      >
-                        <List className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-[6px] transition-all ${viewMode === 'grid' ? 'bg-blue-500/10 text-blue-500 shadow-sm' : 'text-neutral-500 hover:text-neutral-400'}`}
-                      >
-                        <LayoutGrid className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="h-8 w-8 px-0 bg-muted/50 border-blue-500/30">
+                        <Filter className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuLabel>Sort & View</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuRadioGroup value={sortOrder} onValueChange={(val) => setSortOrder(val as any)}>
+                        <DropdownMenuRadioItem value="Newest">Newest</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Oldest">Oldest</DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>View Mode</DropdownMenuLabel>
+                      <DropdownMenuRadioGroup value={viewMode} onValueChange={(val) => setViewMode(val as any)}>
+                        <DropdownMenuRadioItem value="list">List</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>

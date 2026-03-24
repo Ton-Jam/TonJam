@@ -30,15 +30,21 @@ import {
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
+import { TonConnectButton } from '@tonconnect/ui-react';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { motion, AnimatePresence } from 'motion/react';
 import MiniAudioPlayer from './MiniAudioPlayer';
 import FullPlayer from './FullPlayer';
+import AddToPlaylistModal from './AddToPlaylistModal';
+import TrackOptionsModal from './TrackOptionsModal';
 // import TrackUploadModal from './TrackUploadModal';
 import { ModeToggle } from './ModeToggle';
 import CreatePlaylistModal from './CreatePlaylistModal';
 import AuthModal from './AuthModal';
+import ScrollToTopButton from './ScrollToTopButton';
+import AIAssistant from './AIAssistant';
 import { Button } from "@/components/ui/button"
+import { ButtonGroupInput } from './ButtonGroupInput';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,7 +81,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     isDiscoverFiltersOpen, 
     setIsDiscoverFiltersOpen,
     marketplaceFilters,
-    setMarketplaceFilters
+    setMarketplaceFilters,
+    trackToAddToPlaylist,
+    setTrackToAddToPlaylist,
+    optionsTrack,
+    setOptionsTrack
   } = useAudio();
   const { user, signInWithGoogle, signOut } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
@@ -216,16 +226,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {!isHome && !isDiscover && (
               <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`} ref={searchRef}>
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-muted-foreground" aria-hidden="true" />
-                <input 
-                  type="text" 
+                <ButtonGroupInput 
                   placeholder={getSearchPlaceholder()} 
-                  className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-2 pr-2 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchOpen(true)}
                   onKeyDown={handleSearch}
-                  aria-label="Search"
+                  className="w-full"
+                  inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                 />
 
                 {/* Desktop Search Dropdown */}
@@ -318,16 +326,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="lg:hidden flex-1 flex justify-end">
                 {isSearchOpen ? (
                   <div className="flex-1 relative" ref={searchRef}>
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-muted-foreground" aria-hidden="true" />
-                    <input 
-                      type="text" 
+                    <ButtonGroupInput 
                       placeholder="Search..." 
-                      className="w-full bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-2 pr-2 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleSearch}
-                      autoFocus
-                      aria-label="Search"
+                      className="w-full"
+                      inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                     />
 
                     {/* Mobile Search Dropdown */}
@@ -623,6 +628,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
             
             {/* User Avatar / Sign In */}
+            <div className="hidden sm:block">
+              <TonConnectButton />
+            </div>
             {!isMarketplace && (user ? (
               <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-blue-500/20 dark:border-0 hover:opacity-80 transition-all flex items-center justify-center bg-blue-500/10 dark:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
                 {user.user_metadata?.avatar_url ? (
@@ -695,8 +703,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {currentTrack && !isFullPlayerOpen && <MiniAudioPlayer />}
       {isFullPlayerOpen && <FullPlayer />}
 
+      {trackToAddToPlaylist && (
+        <AddToPlaylistModal 
+          track={trackToAddToPlaylist} 
+          onClose={() => setTrackToAddToPlaylist(null)} 
+        />
+      )}
+
+      {optionsTrack && (
+        <TrackOptionsModal 
+          track={optionsTrack} 
+          onClose={() => setOptionsTrack(null)} 
+        />
+      )}
+
       <CreatePlaylistModal isOpen={isCreatePlaylistModalOpen} onClose={() => setIsCreatePlaylistModalOpen(false)} />
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <ScrollToTopButton />
+      <AIAssistant />
 
       {/* Mobile Navigation */}
       {!isPlayer && (

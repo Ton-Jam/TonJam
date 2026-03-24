@@ -5,6 +5,7 @@ import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { buyNFT } from '@/services/tonService';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface BuyNFTModalProps {
   nft: NFTItem;
@@ -91,7 +92,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
             </button>
           </header>
           <div className="flex items-center gap-2 mb-2 p-2 bg-white/5 border border-white/10 rounded-[16px]">
-            <img src={nft.imageUrl} className="w-16 h-16 rounded-[12px] object-cover border border-white/10" alt="" />
+            <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-16 h-16 rounded-[12px] object-cover border border-white/10" alt="" />
             <div>
               <p className="text-[10px] font-bold text-white uppercase truncate w-32">{nft.title}</p>
               <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-2">Creator: {nft.creator}</p>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, UserPlus, UserCheck, ChevronRight } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface ArtistListItemProps {
   artist: Artist;
@@ -25,10 +26,10 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
   return (
     <div 
       onClick={handleCardClick}
-      className="group flex items-center gap-2 p-2 rounded-[10px] bg-foreground/[0.02] border border-border/50 hover:bg-muted/50 hover:border-border transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
+      className="group flex items-center gap-2 p-2 rounded-[10px] bg-foreground/[0.02] hover:bg-muted/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
     >
-      <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 shadow-lg border border-border/50">
-        <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+      <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 shadow-lg">
+        <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
       </div>
       
       <div className="flex-1 min-w-0">

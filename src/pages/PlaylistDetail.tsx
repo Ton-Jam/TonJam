@@ -5,6 +5,8 @@ import { useAudio } from '@/context/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import { MOCK_TRACKS } from '@/constants';
 
+import { getPlaceholderImage } from '@/lib/utils';
+
 const PlaylistDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -183,10 +185,10 @@ const PlaylistDetail: React.FC = () => {
   }
 
   /* Get up to 4 cover images for the collage */
-  const coverImages = playlistTracks.slice(0, 4).map(t => t.coverUrl).filter(Boolean);
+  const coverImages = playlistTracks.slice(0, 4).map(t => t.coverUrl || getPlaceholderImage(`track-${t.id}`)).filter(Boolean);
   /* Fill remaining spots with placeholders if less than 4 */
   while (coverImages.length < 4) {
-    coverImages.push(''); /* Empty string will trigger fallback */
+    coverImages.push(getPlaceholderImage(`playlist-slot-${playlist.id}-${coverImages.length}`));
   }
 
   return (
@@ -203,7 +205,9 @@ const PlaylistDetail: React.FC = () => {
                   {img ? (
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <Music2 className="h-8 w-8 text-muted-foreground/30" />
+                    <div className="w-full h-full bg-neutral-800 flex items-center justify-center">
+                      <Music2 className="h-8 w-8 text-muted-foreground/30" />
+                    </div>
                   )}
                 </div>
               ))}

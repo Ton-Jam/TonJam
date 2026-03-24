@@ -28,10 +28,13 @@ import {
   Image as ImageIcon,
   ArrowLeft,
   Share2,
-  Satellite
+  Satellite,
+  MapPin,
+  Clock
 } from 'lucide-react';
 
-import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, TON_LOGO, TJ_COIN_ICON } from '@/constants';
+import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_SONG_REQUESTS, TON_LOGO, TJ_COIN_ICON } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import { uploadToIPFS } from '@/services/pinataService';
@@ -43,16 +46,18 @@ import NFTMetadataManager from '@/components/NFTMetadataManager';
 import SellNFTModal from '@/components/SellNFTModal';
 import { useAudio } from '@/context/AudioContext';
 import ArtistEvents from '@/components/ArtistEvents';
-import { Artist, Track, Post, NFTItem, Event, Collaboration } from '@/types';
+import SongRequestsTab from '@/components/SongRequestsTab';
+import { Artist, Track, Post, NFTItem, Event, Collaboration, SongRequest } from '@/types';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
+import ArtistProfileHeader from '@/components/ArtistProfileHeader';
 
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addNotification, playAll, currentTrack, isPlaying, followedUserIds, toggleFollowUser, userProfile, artists, setArtists, updateNFT, allNFTs } = useAudio();
-  const [activeTab, setActiveTab] = useState<'tracks' | 'collection' | 'signals' | 'about' | 'management'>('tracks');
+  const [activeTab, setActiveTab] = useState<'tracks' | 'collection' | 'signals' | 'about' | 'requests' | 'management'>('tracks');
   const isFollowing = useMemo(() => id ? followedUserIds.includes(id) : false, [id, followedUserIds]);
   const [customBanner, setCustomBanner] = useState<string | null>(null);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -399,7 +404,7 @@ const ArtistProfile: React.FC = () => {
       <div className="relative h-[30vh] md:h-[35vh] overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || 'https://picsum.photos/1200/400?seed=' + artist.id})` }}
+          style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || getPlaceholderImage(`banner-${artist.id}`, 1200, 400)})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
         
@@ -417,24 +422,7 @@ const ArtistProfile: React.FC = () => {
       {/* 2. INTEGRATED IDENTITY & ACTION HUB */}
       <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-30">
         <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between gap-6 pb-8">
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
-            {/* Profile Picture */}
-            <div className="relative">
-              <img src={artist.avatarUrl} className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-background shadow-xl" alt={artist.name} />
-              {artist.verified && (
-                <div className="absolute bottom-2 right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-4 border-background">
-                  <Check className="text-white h-4 w-4" />
-                </div>
-              )}
-            </div>
-            
-            <div className="flex flex-col items-center md:items-start text-center md:text-left">
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground leading-none mb-2">
-                {artist.name}
-              </h1>
-              <p className="text-muted-foreground font-medium text-sm"> {artist.followers.toLocaleString()} Monthly Listeners </p>
-            </div>
-          </div>
+          <ArtistProfileHeader artist={artist} />
           
           <div className="flex items-center gap-3">
             {isOwnProfile && (
@@ -445,6 +433,11 @@ const ArtistProfile: React.FC = () => {
             <button onClick={() => playAll(artistTracks)} className="px-6 py-2 bg-primary text-primary-foreground rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2" >
               <Play className="h-4 w-4 fill-current" /> Play
             </button>
+            {!isOwnProfile && (
+              <button onClick={() => setActiveTab('requests')} className="px-4 py-1.5 bg-purple-600 text-white rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-purple-700 transition-all flex items-center gap-2" >
+                Request Song
+              </button>
+            )}
             <button 
               onClick={handleFollow} 
               className={`px-6 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-xs font-bold uppercase tracking-widest
@@ -469,7 +462,7 @@ const ArtistProfile: React.FC = () => {
               <div key={`trending-${track.id}`} className="min-w-[280px] sm:min-w-[320px] group relative" >
                 <div className="p-4 rounded-[10px] transition-all bg-card flex items-center gap-4">
                   <div className="relative w-16 h-16 flex-shrink-0 rounded-[10px] overflow-hidden shadow-lg">
-                    <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                    <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                     <button onClick={() => playAll([track])} className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" >
                       <Play className="text-white h-6 w-6 fill-white" />
                     </button>
@@ -498,7 +491,7 @@ const ArtistProfile: React.FC = () => {
               >
                 <span className="w-8 text-sm font-medium text-muted-foreground text-center">{idx + 1}</span>
                 <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0">
-                  <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
+                  <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt="" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Play className="h-4 w-4 text-white fill-white" />
                   </div>
@@ -544,9 +537,9 @@ const ArtistProfile: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-4 mt-4 mb-4 w-full px-4 border-b border-border transition-all duration-300">
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-4 mt-4 mb-4 w-full px-4 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex items-center justify-start gap-8 overflow-x-auto no-scrollbar">
-          {['tracks', 'collection', 'signals', 'about', ...(isOwnProfile ? ['management'] : [])].map(tab => (
+          {['tracks', 'collection', 'signals', 'about', 'requests', ...(isOwnProfile ? ['management'] : [])].map(tab => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab as any)} 
@@ -651,7 +644,7 @@ const ArtistProfile: React.FC = () => {
                           <Satellite className="h-32 w-32 text-amber-500" />
                         </div>
                         <div className="relative w-full md:w-32 aspect-square rounded-[12px] overflow-hidden shadow-2xl">
-                          <img src={featuredNFT.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+                          <img src={featuredNFT.imageUrl || getPlaceholderImage(`nft-${featuredNFT.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
                           <div className="absolute inset-0 bg-black/20" />
                         </div>
                         <div className="flex-1 text-center md:text-left">
@@ -714,19 +707,22 @@ const ArtistProfile: React.FC = () => {
                       <h3 className="text-lg font-bold text-foreground mb-4">Upcoming Events</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {artist.events.map((event) => (
-                          <div key={event.id} className="bg-card p-5 rounded-[12px] flex items-center justify-between group transition-all">
+                          <div key={event.id} className="bg-card p-5 rounded-[12px] flex items-center justify-between group transition-all border border-border/50 hover:border-blue-500/30">
                             <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-center justify-center w-12 h-12 bg-muted rounded-[10px]">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase">{event.date.split('-')[1]}</span>
-                                <span className="text-lg font-bold text-foreground">{event.date.split('-')[2]}</span>
+                              <div className="flex flex-col items-center justify-center w-12 h-12 bg-muted rounded-[10px] min-w-[48px]">
+                                <span className="text-[10px] font-bold text-blue-500 uppercase">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                                <span className="text-lg font-bold text-foreground">{new Date(event.date).getDate()}</span>
                               </div>
                               <div>
                                 <h4 className="text-sm font-bold text-foreground truncate">{event.title}</h4>
-                                <p className="text-xs text-muted-foreground">{event.venue}</p>
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground mt-1">
+                                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {event.venue}</span>
+                                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {event.time}</span>
+                                </div>
                               </div>
                             </div>
                             {event.ticketUrl && (
-                              <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all">
+                              <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-600 text-foreground rounded-full hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
                                 <Plus className="h-4 w-4" />
                               </a>
                             )}
@@ -744,7 +740,7 @@ const ArtistProfile: React.FC = () => {
                         {artist.collaborations.map((collab) => (
                           <div key={collab.id} className="min-w-[160px] group cursor-pointer">
                             <div className="relative aspect-square rounded-[10px] overflow-hidden mb-2 shadow-lg">
-                              <img src={collab.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                              <img src={collab.coverUrl || getPlaceholderImage(`collab-${collab.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <Play className="h-6 w-6 text-white fill-white" />
                               </div>
@@ -977,6 +973,10 @@ const ArtistProfile: React.FC = () => {
                     </button>
                   </div>
                 </div>
+              )}
+
+              {activeTab === 'requests' && (
+                <SongRequestsTab artistId={artist.id} isOwnProfile={isOwnProfile} />
               )}
 
               {activeTab === 'management' && isOwnProfile && (
@@ -1245,7 +1245,7 @@ const ArtistProfile: React.FC = () => {
                           <div className="relative w-full h-48 rounded-[10px] overflow-hidden group border border-blue-500/40 bg-muted/50">
                             <div 
                               className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-40 transition-opacity"
-                              style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || 'https://picsum.photos/1200/400?seed=' + artist.id})` }}
+                              style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || getPlaceholderImage(`banner-${artist.id}`, 1200, 400)})` }}
                             />
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                               <button 

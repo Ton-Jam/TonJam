@@ -4,24 +4,37 @@ import { Play, Pause, MoreVertical, Headphones, Clock, CheckCircle2, Share2, Glo
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_ARTISTS, TJ_COIN_ICON } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 import confetti from 'canvas-confetti';
 import { useTonConnectUI } from '@tonconnect/ui-react';
+import SkeletonCard from './SkeletonCard';
 
 interface TrackCardProps {
   track: Track;
-  variant?: 'default' | 'row'; // Added variant prop to support list views if needed, though default is now 1:1
+  variant?: 'default' | 'row';
   index?: number;
   onMint?: (track: Track) => void;
   className?: string;
+  isLoading?: boolean;
 }
 
-const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMint, className = '' }) => {
+const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMint, className = '', isLoading = false }) => {
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack } = useAudio();
+  
+  if (isLoading) {
+    return <SkeletonCard className={className} />;
+  }
+  const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack, likedTrackIds, toggleLikeTrack } = useAudio();
   const [isTipping, setIsTipping] = React.useState(false);
   const [tonConnectUI] = useTonConnectUI();
   const isActive = currentTrack?.id === track.id;
+  const isLiked = likedTrackIds.includes(track.id);
   const artist = MOCK_ARTISTS.find(a => a.id === track.artistId);
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleLikeTrack(track.id);
+  };
 
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -174,7 +187,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
           tabIndex={0}
           aria-label={isActive && isPlaying ? `Pause ${track.title}` : `Play ${track.title}`}
         >
-          <img src={track.coverUrl} alt="" className="w-full h-full object-cover" />
+          <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
           <div className={`absolute inset-0 flex items-center justify-center bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
              {isActive && isPlaying ? (
                 <div className="flex items-end justify-center gap-3 h-3" aria-hidden="true">
@@ -192,7 +205,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
           <div className="flex items-center gap-3 mt-3">
             {artist && (
               <img 
-                src={artist.avatarUrl} 
+                src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} 
                 alt={artist.name} 
                 className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 onClick={handleArtistClick}
@@ -226,6 +239,13 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
            <span className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest hidden sm:block" aria-label="Duration">
               {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
            </span>
+           <button 
+             onClick={handleLike} 
+             className={`p-2 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isLiked ? 'text-red-500' : 'hover:bg-muted text-blue-500/70 dark:text-muted-foreground hover:text-red-500'}`}
+             aria-label={isLiked ? "Unlike track" : "Like track"}
+           >
+             <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+           </button>
            <div className="relative">
              <button 
                onClick={toggleTipMenu} 
@@ -266,7 +286,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
 
   return (
     <div 
-      className={`group relative cursor-pointer transition-all duration-300 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[12px] p-3 bg-card/50 border border-border ${className}`}
+      className={`group relative cursor-pointer transition-all duration-300 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[12px] p-3 bg-card/50 ${className}`}
       onClick={handleCardClick}
       onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
       role="button"
@@ -276,7 +296,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-3">
         <img 
-          src={track.coverUrl} 
+          src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
           alt="" 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
         />
@@ -298,16 +318,34 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
       </div>
 
       {/* Content Below Card */}
-      <div className="px-1">
-        <h3 className={`text-sm font-bold truncate ${isActive ? 'text-primary' : 'text-foreground'}`}>
-          {track.title}
-        </h3>
-        <p 
-          className="text-xs font-medium text-muted-foreground truncate mt-1 hover:underline cursor-pointer"
-          onClick={handleArtistClick}
-        >
-          {track.artist}
-        </p>
+      <div className="px-1 flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <h3 className={`text-sm font-bold truncate ${isActive ? 'text-primary' : 'text-foreground'}`}>
+            {track.title}
+          </h3>
+          <p 
+            className="text-xs font-medium text-muted-foreground truncate mt-1 hover:underline cursor-pointer"
+            onClick={handleArtistClick}
+          >
+            {track.artist}
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          <button 
+            onClick={handleLike}
+            className={`p-1.5 rounded-full transition-all hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
+            aria-label={isLiked ? "Unlike track" : "Like track"}
+          >
+            <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+          </button>
+          <button 
+            onClick={handleOptions}
+            className="p-1.5 rounded-full transition-all hover:bg-muted text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Track options"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Loader2, CheckCircle2, FileAudio, ArrowLeft, Plus, Music, Info, Sparkles } from 'lucide-react';
+import { Upload, Loader2, CheckCircle2, FileAudio, ArrowLeft, Plus, Music, Info, Sparkles, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAudio } from '@/context/AudioContext';
 import { Track } from '@/types';
+import { getPlaceholderImage } from '@/lib/utils';
 import { toast } from 'sonner';
 import { GoogleGenAI, Type } from "@google/genai";
 import { uploadToIPFS } from '@/services/pinataService';
@@ -29,9 +30,11 @@ const UploadTrack: React.FC = () => {
     bpm: '',
     key: '',
     price: '1.0',
+    streamingPrice: '0.01',
     editions: '100',
     royalty: '10',
-    isNFT: false
+    isNFT: false,
+    royaltySplits: [{ address: '', percentage: 100 }]
   });
 
   const [isDraggingAudio, setIsDraggingAudio] = useState(false);
@@ -126,7 +129,7 @@ const UploadTrack: React.FC = () => {
 
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-12-2025",
+        model: "gemini-3-flash-preview",
         contents: [
           {
             role: "user",
@@ -144,6 +147,7 @@ const UploadTrack: React.FC = () => {
           },
         ],
         config: {
+          tools: [{ googleSearch: {} }],
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -199,13 +203,20 @@ const UploadTrack: React.FC = () => {
       const audioUrl = audioRes.ipfsUrl;
       const coverUrl = coverRes.ipfsUrl;
 
+      if (!audioUrl) {
+        throw new Error("Audio upload failed: IPFS URL is missing");
+      }
+      if (!coverUrl) {
+        throw new Error("Cover art upload failed: IPFS URL is missing");
+      }
+
       // 2. Create the track object with IPFS URLs
       const newTrack: Track = {
         id: `track-${Date.now()}`,
         title: formData.title,
         artist: formData.artist || userProfile.name || 'Unknown Artist',
         artistId: userProfile.id || 'user-artist',
-        coverUrl: coverUrl || 'https://picsum.photos/400/400?seed=default',
+        coverUrl: coverUrl || getPlaceholderImage(formData.title || 'default-track'),
         audioUrl: audioUrl,
         audioIpfsUrl: audioUrl,
         coverIpfsUrl: coverUrl,
@@ -215,6 +226,10 @@ const UploadTrack: React.FC = () => {
         key: formData.key,
         isNFT: formData.isNFT,
         price: formData.isNFT ? formData.price : undefined,
+        editions: formData.isNFT ? formData.editions : undefined,
+        royalty: formData.isNFT ? formData.royalty : undefined,
+        royaltySplits: formData.isNFT ? formData.royaltySplits : undefined,
+        streamingPrice: formData.streamingPrice,
         playCount: 0,
         likes: 0,
         releaseDate: new Date().toISOString().split('T')[0],
@@ -447,6 +462,18 @@ const UploadTrack: React.FC = () => {
                 />
               </div>
 
+              <div className="space-y-4">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Streaming Price (TON)</label>
+                <input 
+                  type="number"
+                  step="0.01"
+                  value={formData.streamingPrice}
+                  onChange={(e) => setFormData({...formData, streamingPrice: e.target.value})}
+                  className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                  placeholder="0.00"
+                />
+              </div>
+
               <div className="flex items-center gap-4 p-4 bg-muted/30 border border-border/50 rounded-[10px]">
                 <input 
                   type="checkbox"
@@ -461,33 +488,106 @@ const UploadTrack: React.FC = () => {
               </div>
 
               {formData.isNFT && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in slide-in-from-top-4 duration-500">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Price (TON)</label>
-                    <input 
-                      type="text"
-                      value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                    />
+                <div className="space-y-6 p-6 bg-amber-500/5 border border-amber-500/20 rounded-[10px] animate-in slide-in-from-top-4 duration-500">
+                  <div className="flex items-center gap-3">
+                    <Sparkles className="h-4 w-4 text-amber-500" />
+                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">NFT Protocol Configuration</span>
                   </div>
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Editions</label>
-                    <input 
-                      type="text"
-                      value={formData.editions}
-                      onChange={(e) => setFormData({...formData, editions: e.target.value})}
-                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                    />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Price (TON)</label>
+                      <input 
+                        type="text"
+                        value={formData.price}
+                        onChange={(e) => setFormData({...formData, price: e.target.value})}
+                        className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Editions</label>
+                      <input 
+                        type="text"
+                        value={formData.editions}
+                        onChange={(e) => setFormData({...formData, editions: e.target.value})}
+                        className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                      />
+                    </div>
                   </div>
+
                   <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Royalty %</label>
-                    <input 
-                      type="text"
-                      value={formData.royalty}
-                      onChange={(e) => setFormData({...formData, royalty: e.target.value})}
-                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                    />
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Royalty Splits</label>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({
+                          ...formData,
+                          royaltySplits: [...formData.royaltySplits, { address: '', percentage: 0 }]
+                        })}
+                        className="text-[9px] font-bold text-amber-500 uppercase tracking-widest hover:text-amber-400 transition-colors flex items-center gap-1"
+                      >
+                        <Plus className="h-3 w-3" /> Add Split
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {formData.royaltySplits.map((split, index) => (
+                        <div key={index} className="flex gap-2 items-start">
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              placeholder="TON Wallet Address"
+                              value={split.address}
+                              onChange={(e) => {
+                                const newSplits = [...formData.royaltySplits];
+                                newSplits[index].address = e.target.value;
+                                setFormData({ ...formData, royaltySplits: newSplits });
+                              }}
+                              className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-3 text-[11px] text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                            />
+                          </div>
+                          <div className="w-24">
+                            <div className="relative">
+                              <input
+                                type="number"
+                                placeholder="%"
+                                value={split.percentage}
+                                onChange={(e) => {
+                                  const newSplits = [...formData.royaltySplits];
+                                  newSplits[index].percentage = parseInt(e.target.value) || 0;
+                                  setFormData({ ...formData, royaltySplits: newSplits });
+                                }}
+                                className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-3 pr-8 text-[11px] text-foreground outline-none focus:border-neutral-500/50 transition-colors"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">%</span>
+                            </div>
+                          </div>
+                          {formData.royaltySplits.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newSplits = formData.royaltySplits.filter((_, i) => i !== index);
+                                setFormData({ ...formData, royaltySplits: newSplits });
+                              }}
+                              className="p-3 text-red-500/50 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-between items-center px-1">
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Total Percentage</span>
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                        formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0) === 100 
+                          ? "text-green-500" 
+                          : "text-amber-500"
+                      }`}>
+                        {formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}

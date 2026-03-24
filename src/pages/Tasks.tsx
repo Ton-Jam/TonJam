@@ -170,7 +170,7 @@ const TaskCard: React.FC<{
               <button 
                 onClick={handleClaim}
                 disabled={isClaiming}
-                className="px-4 py-4 rounded-lg bg-green-500 hover:bg-green-400 text-background text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-4"
+                className="px-[15px] py-[7px] rounded-full bg-green-500 hover:bg-green-400 text-background text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-2"
               >
                 {isClaiming ? (
                   <>
@@ -185,24 +185,24 @@ const TaskCard: React.FC<{
                 )}
               </button>
             ) : task.claimed ? (
-              <div className="flex items-center gap-4 text-green-500/50 text-[10px] font-bold uppercase tracking-widest">
+              <div className="flex items-center gap-2 text-green-500/50 text-[10px] font-bold uppercase tracking-widest">
                 <CheckCircle2 className="w-3 h-3" /> Claimed
               </div>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <button 
                   onClick={handleIncrement}
-                  className="px-4 py-4 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
+                  className="px-[15px] py-[7px] rounded-full bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-all text-[11px] font-bold uppercase tracking-widest"
                 >
                   +1 Progress
                 </button>
                 <button 
                   onClick={handleComplete}
-                  className="px-4 py-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
+                  className="px-[15px] py-[7px] rounded-full bg-blue-600 hover:bg-blue-500 text-foreground transition-all text-[11px] font-bold uppercase tracking-widest"
                 >
                   Complete
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>

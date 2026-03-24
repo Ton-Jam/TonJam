@@ -11,6 +11,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { TJ_COIN_ICON } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface LeaderboardEntry {
   rank: number;
@@ -88,7 +89,7 @@ const Leaderboard: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <img src={entry.avatar} className="w-10 h-10 rounded-full object-cover border border-border" alt="" />
+                  <img src={entry.avatar || getPlaceholderImage(`user-${entry.name}`)} className="w-10 h-10 rounded-full object-cover border border-border" alt="" />
                   {entry.isPartner && (
                     <div className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-blue-600 border-2 border-black flex items-center justify-center">
                       <Sparkles className="w-2 h-2 text-foreground" />

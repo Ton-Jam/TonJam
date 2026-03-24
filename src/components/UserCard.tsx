@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Users, UserPlus, UserCheck } from 'lucide-react';
 import { Artist, UserProfile } from '@/types';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 
 import { MOCK_ARTISTS } from '@/constants';
 
@@ -56,7 +57,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         aria-label={`View profile of ${user.name}`}
       >
         <div className="relative w-10 h-10 rounded-[5px] overflow-hidden">
-          <img src={avatarUrl} alt={user.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }} />
+          <img src={avatarUrl || getPlaceholderImage(`user-${user.id}`)} alt={user.name} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -95,7 +96,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       >
         <div className="flex items-center gap-2">
           <div className="relative w-12 h-12 rounded-[5px] overflow-hidden">
-            <img src={avatarUrl} alt={user.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }} />
+            <img src={avatarUrl || getPlaceholderImage(`user-${user.id}`)} alt={user.name} className="w-full h-full object-cover" />
           </div>
           <div>
             <div className="flex items-center gap-3">
@@ -140,10 +141,9 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     >
       <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-[5px] overflow-hidden border border-blue-500/30 group-hover:border-neutral-500/50 transition-all mb-2">
         <img 
-          src={avatarUrl} 
+          src={avatarUrl || getPlaceholderImage(`user-${user.id}`)} 
           alt={user.name} 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-          onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }}
         />
         <div className="absolute inset-0 bg-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useAudio } from "@/context/AudioContext";
 import { useNavigate } from "react-router-dom";
-import { Play, Pause, MoreVertical, X, Music2, SkipBack, SkipForward } from "lucide-react";
+import { Play, Pause, MoreVertical, X, Music2, SkipBack, SkipForward, Heart } from "lucide-react";
 import TrackOptionsModal from "./TrackOptionsModal";
 import { MOCK_ARTISTS } from "@/constants";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface MiniAudioPlayerProps {
   onOptionsClick?: () => void;
@@ -22,14 +23,24 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     progress,
     closePlayer,
     setFullPlayerOpen,
+    likedTrackIds,
+    toggleLikeTrack,
+    isHighFidelity,
   } = useAudio();
   const [showOptions, setShowOptions] = useState(false);
 
   if (!currentTrack) return null;
 
+  const isLiked = likedTrackIds.includes(currentTrack.id);
+
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/artist/${currentTrack.artistId}`);
+  };
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleLikeTrack(currentTrack.id);
   };
 
   const handleOptionsClick = (e: React.MouseEvent) => {
@@ -44,7 +55,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
   return (
     <>
       <div
-        className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-white dark:bg-black border-t border-border px-2 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-white dark:bg-black px-2 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onClick={() => setFullPlayerOpen(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -59,7 +70,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
         <div className="flex items-center gap-2 w-[50%] sm:w-[60%] cursor-pointer relative z-10">
           <div className="relative w-11 h-11 rounded-2 overflow-hidden flex-shrink-0 bg-muted">
             <img
-              src={currentTrack.coverUrl}
+              src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
               className="w-full h-full object-cover"
               alt=""
             />
@@ -74,13 +85,18 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             )}
           </div>
           <div className="min-w-0">
-            <h4 className="text-[12px] font-bold truncate text-foreground uppercase tracking-tight leading-tight">
+            <h4 className="text-[12px] font-bold truncate text-foreground uppercase tracking-tight leading-tight flex items-center gap-2">
               {currentTrack.title}
+              {isHighFidelity && (
+                <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[8px] px-1.5 py-0.5 rounded-full tracking-widest uppercase flex-shrink-0">
+                  Hi-Fi
+                </span>
+              )}
             </h4>
             <div className="flex items-center gap-3 mt-3">
               {MOCK_ARTISTS.find(a => a.id === currentTrack.artistId) && (
                 <img 
-                  src={MOCK_ARTISTS.find(a => a.id === currentTrack.artistId)?.avatarUrl} 
+                  src={MOCK_ARTISTS.find(a => a.id === currentTrack.artistId)?.avatarUrl || getPlaceholderImage(`artist-${currentTrack.artistId}`)} 
                   alt={currentTrack.artist} 
                   className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   onClick={handleArtistClick}
@@ -118,6 +134,13 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-2 sm:gap-2 mr-2">
+            <button
+              onClick={handleLikeClick}
+              className={`w-10 h-10 flex items-center justify-center transition-all hover:bg-muted rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-foreground"}`}
+              aria-label={isLiked ? "Unlike track" : "Like track"}
+            >
+              <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+            </button>
             <button
               onClick={togglePlay}
               className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"

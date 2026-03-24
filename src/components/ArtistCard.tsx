@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, UserPlus, UserCheck } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface ArtistCardProps {
   artist: Artist;
@@ -27,17 +28,16 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
     return (
       <div 
         onClick={handleCardClick}
-        className="group flex flex-col items-center cursor-pointer text-center p-2 rounded-[12px] bg-muted/50 backdrop-blur-md border border-border hover:bg-muted hover:border-border/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-[130px]"
+        className="group flex flex-col items-center cursor-pointer text-center p-2 rounded-[12px] bg-muted/50 backdrop-blur-md hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-[130px]"
         role="button"
         tabIndex={0}
         aria-label={`View artist: ${artist.name}`}
       >
         <div className="relative w-16 h-16 mb-2">
           <img 
-            src={artist.avatarUrl} 
+            src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} 
             alt={artist.name} 
-            className="w-full h-full rounded-full object-cover border-2 border-border group-hover:border-primary/50 transition-colors" 
-            onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }}
+            className="w-full h-full rounded-full object-cover transition-colors" 
           />
         </div>
         <h3 className="text-[10px] font-bold text-foreground tracking-tight truncate w-full mb-3">{artist.name}</h3>
@@ -74,14 +74,14 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
       >
         <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
           <img 
-            src={artist.avatarUrl} 
+            src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} 
             alt={artist.name} 
             className="w-full h-full object-cover" 
-            onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }}
           />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex items-center gap-1">
           <h4 className="text-xs font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">{artist.name}</h4>
+          {artist.verified && <CheckCircle2 className="w-3 h-3 text-blue-500 flex-shrink-0" />}
         </div>
         <button 
           onClick={handleFollowClick}
@@ -102,7 +102,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
   return (
     <div 
       onClick={handleCardClick}
-      className="group flex flex-col items-center cursor-pointer text-center h-full w-full p-2 rounded-[16px] bg-muted/50 backdrop-blur-md border border-border hover:bg-muted hover:border-border/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className="group flex flex-col items-center cursor-pointer text-center h-full w-full p-2 rounded-[16px] bg-muted/50 backdrop-blur-md hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -114,24 +114,24 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default' }) 
       aria-label={`View artist: ${artist.name}`}
     >
       <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mb-2 mx-auto">
-        <div className="w-full h-full rounded-full overflow-hidden shadow-2xl group-hover:scale-105 transition-transform duration-300 relative border-2 border-border group-hover:border-primary/50">
+        <div className="w-full h-full rounded-full overflow-hidden shadow-2xl group-hover:scale-105 transition-transform duration-300 relative">
           <img 
-            src={artist.avatarUrl} 
+            src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} 
             alt={artist.name} 
             className="w-full h-full object-cover"
-            onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/placeholder/400/400'; }}
           />
         </div>
         
         {artist.verified && (
-          <div className="absolute bottom-1 right-1 bg-background rounded-full p-2 z-10 border border-border">
-            <CheckCircle2 className="w-4 h-4 text-primary fill-primary/20" />
+          <div className="absolute bottom-1 right-1 z-10">
+            <CheckCircle2 className="w-5 h-5 text-blue-500 fill-background" />
           </div>
         )}
       </div>
       
-      <h3 className="text-sm sm:text-base font-bold text-foreground tracking-tight mb-2 group-hover:text-primary transition-colors truncate w-full max-w-full px-2">
+      <h3 className="text-sm sm:text-base font-bold text-foreground tracking-tight mb-2 group-hover:text-primary transition-colors truncate w-full max-w-full px-2 flex items-center justify-center gap-1">
         {artist.name}
+        {artist.verified && <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />}
       </h3>
       
       <p className="text-[8px] font-bold text-muted-foreground/20 uppercase tracking-widest mb-2">

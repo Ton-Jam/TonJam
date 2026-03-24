@@ -2,6 +2,7 @@ import React from 'react';
 import { Play, Music, ChevronRight } from 'lucide-react';
 import { Playlist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface PlaylistListItemProps {
   playlist: Playlist;
@@ -21,7 +22,7 @@ const PlaylistListItem: React.FC<PlaylistListItemProps> = ({ playlist, onClick }
     if (playlist.coverUrl) {
       return (
         <img 
-          src={playlist.coverUrl} 
+          src={playlist.coverUrl || getPlaceholderImage(`playlist-${playlist.id}`)} 
           className="w-full h-full object-cover" 
           alt={playlist.title} 
         />
@@ -41,7 +42,7 @@ const PlaylistListItem: React.FC<PlaylistListItemProps> = ({ playlist, onClick }
         {playlistTracks.map((track, i) => (
           <img 
             key={i}
-            src={track?.coverUrl} 
+            src={track?.coverUrl || getPlaceholderImage(`track-${track?.id}`)} 
             className="w-full h-full object-cover" 
             alt="" 
           />

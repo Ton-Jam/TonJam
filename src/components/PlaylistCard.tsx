@@ -4,6 +4,7 @@ import { Playlist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface PlaylistCardProps {
   playlist: Playlist;
@@ -39,9 +40,11 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
 
     if (playlistTracks.length === 0) {
       return (
-        <div className={`${sizeClass} flex items-center justify-center bg-gradient-to-br from-blue-900/20 to-purple-900/20 group-hover:scale-110 transition-transform duration-500`}>
-          <Music className="text-muted-foreground/50 h-8 w-8" />
-        </div>
+        <img 
+          src={getPlaceholderImage(`playlist-${playlist.id}`)} 
+          className={`${sizeClass} object-cover group-hover:scale-110 transition-transform duration-500`} 
+          alt={playlist.title} 
+        />
       );
     }
 
@@ -50,7 +53,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       const track = playlistTracks[0];
       return (
         <img 
-          src={track?.coverUrl} 
+          src={track?.coverUrl || getPlaceholderImage(`track-${track?.id}`)} 
           className={`${sizeClass} object-cover group-hover:scale-110 transition-transform duration-500`} 
           alt={playlist.title} 
         />
@@ -63,7 +66,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         {playlistTracks.map((track, i) => (
           <img 
             key={i}
-            src={track?.coverUrl} 
+            src={track?.coverUrl || getPlaceholderImage(`track-${track?.id}`)} 
             className="w-full h-full object-cover" 
             alt="" 
           />

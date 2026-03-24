@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Music, Image, Info, Box } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 import { Track, NFTItem } from '@/types';
 import { MOCK_USER, APP_LOGO } from '@/constants';
 
@@ -63,7 +64,7 @@ const ArtistOnboarding: React.FC = () => {
         title: trackData.title,
         artist: profileData.name,
         artistId: userProfile.id,
-        coverUrl: trackData.coverPreview || 'https://picsum.photos/400/400',
+        coverUrl: trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track'),
         audioUrl: '', /* In a real app, this would be the uploaded URL */
         duration: 180, /* Mock duration */
         genre: trackData.genre,
@@ -91,7 +92,7 @@ const ArtistOnboarding: React.FC = () => {
         owner: profileData.name,
         creator: profileData.name,
         price: mintData.price,
-        imageUrl: trackData.coverPreview || 'https://picsum.photos/400/400',
+        imageUrl: trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track'),
         edition: `1 of ${mintData.supply}`,
         royaltySplits: mintData.royaltySplits,
         description: trackData.description,
@@ -224,7 +225,7 @@ const ArtistOnboarding: React.FC = () => {
               <h2 className="text-xl font-bold uppercase tracking-tight mb-4">Mint Genesis Asset</h2>
               <div className="flex gap-4 mb-4">
                 <div className="w-32 h-32 rounded-[10px] overflow-hidden shadow-xl -white/10 flex-shrink-0">
-                  <img src={trackData.coverPreview || 'https://picsum.photos/400/400'} alt="Cover" className="w-full h-full object-cover" />
+                  <img src={trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track')} alt="Cover" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-foreground uppercase tracking-tight">{trackData.title}</h3>

@@ -15,10 +15,12 @@ import {
   Activity,
   ExternalLink,
   Users,
-  Coins
+  Coins,
+  PlusCircle
 } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
+import { getPlaceholderImage } from '@/lib/utils';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
@@ -27,7 +29,7 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 const TrackDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, jamTrack, likedTrackIds, toggleLikeTrack, addNotification } = useAudio();
+  const { playTrack, currentTrack, isPlaying, jamTrack, likedTrackIds, toggleLikeTrack, addNotification, setTrackToAddToPlaylist, setOptionsTrack } = useAudio();
   const [isTipping, setIsTipping] = useState(false);
   const [tonConnectUI] = useTonConnectUI();
   
@@ -130,7 +132,7 @@ const TrackDetail: React.FC = () => {
             onClick={() => navigate(`/artist/${track.artistId}`)}
           >
             <div className="relative">
-              <img src={artist?.avatarUrl || `https://picsum.photos/100/100?seed=${track.artistId}`} className="w-10 h-10 rounded-full object-cover" alt="" />
+              <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 100, 100)} className="w-10 h-10 rounded-full object-cover" alt="" />
               {track.artistVerified && (
                 <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-full p-4 border-2 border-black">
                   <CheckCircle2 className="h-3 w-3 text-foreground" />
@@ -166,7 +168,11 @@ const TrackDetail: React.FC = () => {
             >
               <Share2 className="h-4 w-4" />
             </button>
-            <button className="p-4 rounded-full bg-muted/50 text-muted-foreground hover:text-foreground transition-all" aria-label="More options">
+            <button 
+              onClick={() => setOptionsTrack(track)}
+              className="p-4 rounded-full bg-muted/50 text-muted-foreground hover:text-foreground transition-all" 
+              aria-label="More options"
+            >
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </div>
@@ -208,6 +214,13 @@ const TrackDetail: React.FC = () => {
                 className={`p-4 rounded-xl transition-all active:scale-95 ${isLiked ? 'bg-neutral-500/10 text-neutral-500' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}
               >
                 <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+              </button>
+              <button 
+                onClick={() => setTrackToAddToPlaylist(track)}
+                className="p-4 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all active:scale-95"
+                aria-label="Add to playlist"
+              >
+                <PlusCircle className="h-5 w-5" />
               </button>
               <div className="relative">
                 <button 
@@ -406,7 +419,7 @@ const TrackDetail: React.FC = () => {
             <div className="pt-4 border-t border-border/50">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <img src={artist?.avatarUrl || `https://picsum.photos/200/200?seed=${track.artistId}`} className="w-16 h-16 rounded-2xl object-cover" alt="" />
+                  <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 200, 200)} className="w-16 h-16 rounded-2xl object-cover" alt="" />
                   <div>
                     <h3 className="text-xl font-bold text-foreground tracking-tight mb-4">{track.artist}</h3>
                     <div className="flex items-center gap-4">

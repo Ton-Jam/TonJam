@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { X, Image, Share2, Sparkles, Music, Check, Send } from "lucide-react";
 import { MOCK_USER, APP_LOGO } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
+import { getPlaceholderImage } from "@/lib/utils";
 
 interface PostModalProps {
   onClose: () => void;
@@ -91,7 +92,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
           <div className="flex gap-2">
             <div className="flex-shrink-0">
               <img
-                src={MOCK_USER.avatar}
+                src={MOCK_USER.avatar || getPlaceholderImage(`user-${MOCK_USER.id}`)}
                 className="w-8 h-8 rounded-full object-cover border border-border"
                 alt="Your avatar"
               />
@@ -108,7 +109,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
 
               {selectedTrack && (
                 <div className="relative rounded-[10px] bg-muted/50 border border-border p-2 flex items-center gap-2 group/track hover:bg-muted transition-colors">
-                  <img src={selectedTrack.coverUrl} className="w-10 h-10 rounded-[6px] object-cover shadow-lg" alt="" aria-hidden="true" />
+                  <img src={selectedTrack.coverUrl || getPlaceholderImage(`track-${selectedTrack.id}`)} className="w-10 h-10 rounded-[6px] object-cover shadow-lg" alt="" aria-hidden="true" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-bold text-foreground uppercase truncate tracking-wide">{selectedTrack.title}</p>
                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate mt-3">{selectedTrack.artist}</p>
@@ -177,7 +178,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
                   aria-label={`Select ${track.title} by ${track.artist}`}
                   aria-pressed={selectedTrackId === track.id}
                 >
-                  <img src={track.coverUrl} className="w-7 h-7 rounded-[4px] object-cover" alt="" aria-hidden="true" />
+                  <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-7 h-7 rounded-[4px] object-cover" alt="" aria-hidden="true" />
                   <div className="flex-1 text-left min-w-0">
                     <p className="text-[9px] font-bold text-foreground uppercase truncate">{track.title}</p>
                     <p className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>

@@ -19,11 +19,13 @@ import {
   ListMusic,
   MessageSquare,
   Music2,
-  Mic2
+  Mic2,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_ARTISTS } from '@/constants';
 import { useNavigate } from 'react-router-dom';
+import { getPlaceholderImage } from '@/lib/utils';
 
 const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -123,31 +125,21 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
   );
 };
 
-const LyricsView: React.FC<{ trackId: string }> = ({ trackId }) => {
-  // Mock lyrics with timing
-  const lyrics = [
-    { time: 0, text: "Frequencies locked, we're forging the soul" },
-    { time: 4, text: "Digital diamonds in a decentralized bowl" },
-    { time: 8, text: "TON blockchain rhythm, heart under control" },
-    { time: 12, text: "Decentralized beats, we're taking the toll" },
-    { time: 16, text: "..." },
-    { time: 20, text: "Circuit board veins, electric desire" },
-    { time: 24, text: "Setting the metaverse completely on fire" },
-    { time: 28, text: "No intermediaries, we're taking it higher" },
-    { time: 32, text: "The future of music, the ultimate choir" },
-  ];
+const LyricsView: React.FC<{ lyrics: string }> = ({ lyrics }) => {
+  // Simple split by newline for now, assuming lyrics are provided as a string
+  const lines = lyrics.split('\n');
 
   return (
     <div className="w-full h-[400px] overflow-y-auto no-scrollbar py-2 px-2 space-y-2 text-left mask-image-gradient">
-      {lyrics.map((line, i) => (
+      {lines.map((line, i) => (
         <motion.p 
           key={i}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          className={`text-[20px] md:text-[26px] font-bold tracking-tight leading-tight ${i === 1 ? 'text-foreground' : 'text-muted-foreground/50 hover:text-foreground transition-colors'}`}
+          transition={{ delay: i * 0.05 }}
+          className="text-[16px] md:text-[20px] font-bold tracking-tight leading-tight text-foreground/80 hover:text-foreground transition-colors"
         >
-          {line.text}
+          {line || <br />}
         </motion.p>
       ))}
     </div>
@@ -180,7 +172,8 @@ const FullPlayer: React.FC = () => {
     toggleMute,
     userProfile,
     addNotification,
-    allTracks
+    allTracks,
+    setTrackToAddToPlaylist
   } = useAudio();
 
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'playlist'>('player');
@@ -244,7 +237,7 @@ const FullPlayer: React.FC = () => {
       <div 
         className="absolute inset-0 z-0 opacity-40 blur-[100px] scale-150 pointer-events-none transition-all duration-1000"
         style={{
-          backgroundImage: `url(${currentTrack.coverUrl})`,
+          backgroundImage: `url(${currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)})`,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
         }}
@@ -290,7 +283,7 @@ const FullPlayer: React.FC = () => {
                   {/* Album Art */}
                   <div className="w-full aspect-square rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-2 relative group">
                     <img 
-                      src={currentTrack.coverUrl} 
+                      src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} 
                       alt={currentTrack.title} 
                       className={`w-full h-full object-cover transition-transform duration-[20s] ease-linear ${isPlaying ? 'scale-105' : 'scale-100'}`}
                     />
@@ -301,13 +294,13 @@ const FullPlayer: React.FC = () => {
                     <div className="min-w-0 flex-1 pr-2 flex items-center gap-2">
                       {artistData && (
                         <img 
-                          src={artistData.avatarUrl} 
+                          src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.id}`)} 
                           alt={currentTrack.artist} 
                           className="w-10 h-10 rounded-full object-cover border-2 border-background shadow-md"
                         />
                       )}
                       <div className="min-w-0">
-                        <h2 className="text-[20px] font-bold text-foreground tracking-tight truncate mb-3">
+                        <h2 className="text-[20px] font-bold text-foreground tracking-tight truncate mb-1">
                           {currentTrack.title}
                         </h2>
                         <button 
@@ -329,6 +322,36 @@ const FullPlayer: React.FC = () => {
                       <Heart className={`h-7 w-7 ${isLiked ? 'fill-current' : ''}`} />
                     </button>
                   </div>
+
+                  {/* Track Metadata */}
+                  <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 bg-foreground/5 p-3 rounded-lg">
+                    {currentTrack.releaseDate && <span>{new Date(currentTrack.releaseDate).toLocaleDateString()}</span>}
+                    {currentTrack.bpm && <span>{currentTrack.bpm} BPM</span>}
+                    {currentTrack.key && <span>KEY: {currentTrack.key}</span>}
+                  </div>
+
+                  {/* New Actions Row */}
+                  <div className="flex items-center justify-center gap-4 mb-4">
+                    <button 
+                      onClick={() => setTrackToAddToPlaylist(currentTrack)}
+                      className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-foreground/5 transition-all group"
+                      aria-label="Add to playlist"
+                    >
+                      <PlusCircle className="h-6 w-6 text-foreground/50 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Add to Playlist</span>
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setFullPlayerOpen(false);
+                        navigate(`/track/${currentTrack.id}`);
+                      }}
+                      className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-foreground/5 transition-all group"
+                      aria-label="View track details"
+                    >
+                      <Info className="h-6 w-6 text-foreground/50 group-hover:text-blue-500 transition-colors" />
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">View Details</span>
+                    </button>
+                  </div>
                 </motion.div>
               )}
 
@@ -341,13 +364,19 @@ const FullPlayer: React.FC = () => {
                   className="w-full flex-1 flex flex-col"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <img src={currentTrack.coverUrl} className="w-16 h-16 rounded-md shadow-lg" alt="" />
+                    <img src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} className="w-16 h-16 rounded-md shadow-lg" alt="" />
                     <div>
                       <h3 className="font-bold text-lg leading-tight">{currentTrack.title}</h3>
                       <p className="text-muted-foreground text-sm">{currentTrack.artist}</p>
                     </div>
                   </div>
-                  <LyricsView trackId={currentTrack.id} />
+                  {currentTrack.lyrics ? (
+                    <LyricsView lyrics={currentTrack.lyrics} />
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                      <p>No lyrics available for this track.</p>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
@@ -360,7 +389,7 @@ const FullPlayer: React.FC = () => {
                   className="w-full flex-1 flex flex-col"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <img src={currentTrack.coverUrl} className="w-16 h-16 rounded-md shadow-lg" alt="" />
+                    <img src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} className="w-16 h-16 rounded-md shadow-lg" alt="" />
                     <div>
                       <h3 className="font-bold text-lg leading-tight">{currentTrack.title}</h3>
                       <p className="text-muted-foreground text-sm">{currentTrack.artist}</p>
@@ -368,7 +397,7 @@ const FullPlayer: React.FC = () => {
                   </div>
                   <div className="flex-1 overflow-y-auto no-scrollbar space-y-2 pb-2">
                     <div className="flex gap-2">
-                      <img src={userProfile.avatar} className="w-8 h-8 rounded-full" alt="" />
+                      <img src={userProfile.avatar || getPlaceholderImage(`user-${userProfile.id}`)} className="w-8 h-8 rounded-full" alt="" />
                       <div className="flex-1 relative">
                         <input 
                           type="text" 
@@ -407,7 +436,7 @@ const FullPlayer: React.FC = () => {
                 >
                   <div className="flex flex-col items-center gap-2 mb-2">
                     {artistData && (
-                      <img src={artistData.avatarUrl} className="w-32 h-32 rounded-full shadow-lg" alt={currentTrack.artist} />
+                      <img src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.id}`)} className="w-32 h-32 rounded-full shadow-lg" alt={currentTrack.artist} />
                     )}
                     <h3 className="font-bold text-[20px]">{currentTrack.artist}</h3>
                     <p className="text-muted-foreground text-sm text-center">{artistData?.bio || "No biography available."}</p>
@@ -416,7 +445,7 @@ const FullPlayer: React.FC = () => {
                     <h4 className="font-bold text-foreground">Similar Tracks</h4>
                     {allTracks.filter(t => t.artistId === currentTrack.artistId && t.id !== currentTrack.id).slice(0, 3).map(track => (
                       <div key={track.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer" onClick={() => playTrack(track)}>
-                        <img src={track.coverUrl} className="w-12 h-12 rounded-md" alt="" />
+                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-12 h-12 rounded-md" alt="" />
                         <div className="flex-1">
                           <p className="text-sm font-bold text-foreground">{track.title}</p>
                           <p className="text-xs text-muted-foreground">{track.artist}</p>
@@ -612,7 +641,7 @@ const FullPlayer: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-2 space-y-2">
               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Now Playing</h4>
               <div className="flex items-center gap-2 p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 mb-2">
-                <img src={currentTrack.coverUrl} className="w-12 h-12 rounded-md" alt="" />
+                <img src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} className="w-12 h-12 rounded-md" alt="" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-blue-400 truncate">{currentTrack.title}</p>
                   <p className="text-xs text-muted-foreground truncate">{currentTrack.artist}</p>
@@ -630,7 +659,7 @@ const FullPlayer: React.FC = () => {
                     setShowQueue(false);
                   }}
                 >
-                  <img src={track.coverUrl} className="w-12 h-12 rounded-md opacity-70 group-hover:opacity-100 transition-opacity" alt="" />
+                  <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-12 h-12 rounded-md opacity-70 group-hover:opacity-100 transition-opacity" alt="" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-foreground truncate">{track.title}</p>
                     <p className="text-xs text-muted-foreground truncate">{track.artist}</p>

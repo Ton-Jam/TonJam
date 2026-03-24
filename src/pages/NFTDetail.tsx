@@ -43,6 +43,7 @@ import BidAcceptanceModal from '@/components/BidAcceptanceModal';
 import NFTCard from '@/components/NFTCard';
 import SendNFTModal from '@/components/SendNFTModal';
 import confetti from 'canvas-confetti';
+import { getPlaceholderImage } from '@/lib/utils';
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -308,7 +309,7 @@ const NFTDetail: React.FC = () => {
           <div className="lg:col-span-5 space-y-4">
             <div className="relative group" onClick={handlePlayClick}>
               <div className="relative aspect-square rounded-[24px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] bg-black/40 border border-white/10">
-                <img src={localNft.imageUrl} className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" alt={localNft.title} />
+                <img src={localNft.imageUrl || getPlaceholderImage(`nft-${localNft.id}`)} className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" alt={localNft.title} />
                 
                 {/* Play Overlay */}
                 <div className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[4px] transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -376,7 +377,7 @@ const NFTDetail: React.FC = () => {
                   if (artist) navigate(`/artist/${artist.id}`);
                 }} >
                   <div className="relative w-10 h-10">
-                    <img src={`https://picsum.photos/100/100?seed=${localNft.creator}`} className="w-full h-full rounded-full object-cover" alt="" />
+                    <img src={MOCK_ARTISTS.find(a => a.name === localNft.creator)?.avatarUrl || getPlaceholderImage(`artist-${localNft.creator}`)} className="w-full h-full rounded-full object-cover" alt="" />
                     <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-black flex items-center justify-center">
                       <Check className="h-2 w-2 text-white" />
                     </div>
@@ -514,7 +515,7 @@ const NFTDetail: React.FC = () => {
                             <Coins className="h-5 w-5 text-blue-500" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-bold text-foreground uppercase tracking-tight">Tip Creator</h3>
+                            <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Tip Creator</h3>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Support {localNft.creator}</p>
                           </div>
                         </div>
@@ -586,7 +587,7 @@ const NFTDetail: React.FC = () => {
                     
                     {associatedTrack && (
                       <div className="col-span-1 md:col-span-2 p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[20px]">
-                        <h4 className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
+                        <h4 className="text-[5px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
                           <div className="w-1 h-3 bg-blue-500 rounded-full" />
                           Technical Signal Data
                         </h4>
@@ -729,7 +730,7 @@ const NFTDetail: React.FC = () => {
                         <div className="w-24 h-24 rounded-full bg-foreground/[0.02] border border-blue-500/30 flex items-center justify-center mb-4">
                           <Satellite className="h-10 w-10 text-muted-foreground/30 animate-pulse" />
                         </div>
-                        <h4 className="text-xl font-bold text-muted-foreground uppercase tracking-tighter mb-4">No Active Signals</h4>
+                        <h4 className="text-base font-bold text-muted-foreground uppercase tracking-tighter mb-4">No Active Signals</h4>
                         <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em] leading-loose max-w-xs mx-auto">Zero valuation signals detected from the neural relay network.</p>
                         <button onClick={handleAction} className="mt-4 px-4 py-4 bg-blue-600/10 border border-neutral-500/20 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 hover:bg-blue-600 hover:text-white transition-all ">Initiate Broadcast</button>
                       </div>
@@ -751,7 +752,7 @@ const NFTDetail: React.FC = () => {
                         <div className="w-12 h-12 rounded-[12px] bg-purple-500/10 flex items-center justify-center">
                           <Crown className="h-6 w-6 text-purple-500" />
                         </div>
-                        <h1 className="text-lg font-bold text-foreground uppercase tracking-widest">Holder-Only Archives</h1>
+                        <h1 className="text-sm font-bold text-foreground uppercase tracking-widest">Holder-Only Archives</h1>
                       </div>
                       <p className="text-sm text-muted-foreground/80 leading-relaxed mb-4 relative z-10 max-w-2xl">
                         As the verified owner of this NFT protocol, you have unlocked access to the following exclusive sonic and visual artifacts. These are stored in your private vault.
@@ -799,7 +800,7 @@ const NFTDetail: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="w-2 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.6)]"></div>
                 <div>
-                  <h2 className="text-[20px] font-bold tracking-tighter uppercase text-foreground">More from {localNft.creator}</h2>
+                  <h2 className="text-base font-bold tracking-tighter uppercase text-foreground">More from {localNft.creator}</h2>
                   <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">Extended Discography</p>
                 </div>
               </div>
@@ -822,7 +823,7 @@ const NFTDetail: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="w-2 h-8 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)]"></div>
                 <div>
-                  <h2 className="text-[20px] font-bold tracking-tighter uppercase text-foreground">Related {associatedTrack?.genre} Vibes</h2>
+                  <h2 className="text-base font-bold tracking-tighter uppercase text-foreground">Related {associatedTrack?.genre} Vibes</h2>
                   <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">Sonic Affinities</p>
                 </div>
               </div>

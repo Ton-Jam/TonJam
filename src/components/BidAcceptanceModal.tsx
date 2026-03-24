@@ -5,6 +5,7 @@ import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { acceptBid } from '@/services/tonService';
+import { getPlaceholderImage } from '@/lib/utils';
 
 interface BidAcceptanceModalProps {
   nft: NFTItem;
@@ -15,7 +16,7 @@ interface BidAcceptanceModalProps {
 
 const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onClose, onAccept }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { addNotification } = useAudio();
+  const { addNotification, updateNFT } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
 
   const handleConfirm = async () => {
@@ -24,6 +25,9 @@ const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onC
     
     try {
       await acceptBid(tonConnectUI, offer.offerer);
+      
+      // Update NFT owner in Firestore
+      await updateNFT(nft.id, { owner: offer.offerer });
       
       setIsProcessing(false);
       onAccept();
@@ -49,7 +53,7 @@ const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onC
           </div>
 
           <div className="flex items-center gap-2 p-2 bg-muted/50 border border-border/50 rounded-[10px] mb-2">
-            <img src={nft.imageUrl} className="w-16 h-16 rounded-[10px] object-cover" alt="" />
+            <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-16 h-16 rounded-[10px] object-cover" alt="" />
             <div>
               <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">{nft.title}</h3>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">@{nft.creator}</p>

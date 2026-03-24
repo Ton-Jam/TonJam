@@ -92,6 +92,32 @@ service cloud.firestore {
     //   - comments: int (required, >= 0)
     //   - createdAt: timestamp (required, immutable)
     //
+    // Collection: posts/{postId}/likes
+    // Document ID: likeId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - postId: string (required, immutable)
+    //   - userId: string (required, immutable)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: posts/{postId}/comments
+    // Document ID: commentId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - postId: string (required, immutable)
+    //   - userId: string (required, immutable)
+    //   - userName: string (required, < 50 chars)
+    //   - content: string (required, < 500 chars)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: follows
+    // Document ID: followId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - followerId: string (required, immutable)
+    //   - followingId: string (required, immutable)
+    //   - createdAt: timestamp (required, immutable)
+    //
     // Collection: nfts/{nftId}/bids
     // Document ID: bidId
     // Fields:
@@ -245,6 +271,29 @@ service cloud.firestore {
              data.timestamp is timestamp;
     }
 
+    function isValidLike(data) {
+      return hasRequiredFields(['id', 'postId', 'userId', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'postId', 'userId', 'createdAt']) &&
+             data.id is string && data.postId is string && data.userId is string &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidComment(data) {
+      return hasRequiredFields(['id', 'postId', 'userId', 'userName', 'content', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'postId', 'userId', 'userName', 'content', 'createdAt']) &&
+             data.id is string && data.postId is string && data.userId is string &&
+             data.userName is string && data.userName.size() < 50 &&
+             data.content is string && data.content.size() < 500 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidFollow(data) {
+      return hasRequiredFields(['id', 'followerId', 'followingId', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'followerId', 'followingId', 'createdAt']) &&
+             data.id is string && data.followerId is string && data.followingId is string &&
+             data.createdAt is timestamp;
+    }
+
     function isValidRoyalty(data) {
       return hasRequiredFields(['artistId', 'totalEarned', 'pendingWithdrawal']) &&
              hasOnlyAllowedFields(['artistId', 'totalEarned', 'pendingWithdrawal', 'lastWithdrawal']) &&
@@ -307,6 +356,24 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isValidBid(request.resource.data) && request.resource.data.bidderId == request.auth.uid;
       allow update: if isAdmin();
       allow delete: if isAuthenticated() && (resource.data.bidderId == request.auth.uid || isAdmin());
+    }
+
+    match /posts/{postId}/likes/{likeId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidLike(request.resource.data) && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /posts/{postId}/comments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidComment(request.resource.data) && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidFollow(request.resource.data) && request.resource.data.followerId == request.auth.uid;
+      allow delete: if isAuthenticated() && (resource.data.followerId == request.auth.uid || isAdmin());
     }
 
     match /royalties/{artistId} {

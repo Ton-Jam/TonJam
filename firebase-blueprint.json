@@ -114,6 +114,44 @@
       },
       "required": ["id", "authorId", "authorName", "content"]
     },
+    "Like": {
+      "title": "Post Like",
+      "description": "Records a like on a post.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique like ID" },
+        "postId": { "type": "string", "description": "Target post ID" },
+        "userId": { "type": "string", "description": "UID of the user who liked" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Like timestamp" }
+      },
+      "required": ["id", "postId", "userId"]
+    },
+    "Comment": {
+      "title": "Post Comment",
+      "description": "Records a comment on a post.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique comment ID" },
+        "postId": { "type": "string", "description": "Target post ID" },
+        "userId": { "type": "string", "description": "UID of the commenter" },
+        "userName": { "type": "string", "description": "Name of the commenter" },
+        "content": { "type": "string", "description": "Comment content" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Comment timestamp" }
+      },
+      "required": ["id", "postId", "userId", "content"]
+    },
+    "Follow": {
+      "title": "User Follow",
+      "description": "Records a follow relationship.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique follow ID" },
+        "followerId": { "type": "string", "description": "UID of the follower" },
+        "followingId": { "type": "string", "description": "UID of the followed user" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Follow timestamp" }
+      },
+      "required": ["id", "followerId", "followingId"]
+    },
     "Bid": {
       "title": "NFT Bid",
       "description": "A bid placed on an NFT listing.",
@@ -157,6 +195,18 @@
     "/posts/{postId}": {
       "schema": "Post",
       "description": "Social feed signals."
+    },
+    "/posts/{postId}/likes/{likeId}": {
+      "schema": "Like",
+      "description": "Likes on a post."
+    },
+    "/posts/{postId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments on a post."
+    },
+    "/follows/{followId}": {
+      "schema": "Follow",
+      "description": "Follow relationships."
     },
     "/nfts/{nftId}/bids/{bidId}": {
       "schema": "Bid",

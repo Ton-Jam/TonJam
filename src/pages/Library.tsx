@@ -14,7 +14,8 @@ import {
   List,
   Search,
   ArrowUpRight,
-  X
+  X,
+  SearchIcon
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS, MOCK_ARTISTS, APP_LOGO } from '@/constants';
@@ -22,6 +23,7 @@ import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import PlaylistListItem from '@/components/PlaylistListItem';
 import ArtistListItem from '@/components/ArtistListItem';
+import { ButtonGroupInput } from '@/components/ButtonGroupInput';
 import { motion, AnimatePresence } from 'motion/react';
 
 const Library: React.FC = () => {
@@ -110,6 +112,16 @@ const Library: React.FC = () => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-4">
+        {/* Search Bar at the Top */}
+        <div className="pt-4 mb-4">
+          <ButtonGroupInput 
+            placeholder="Search within your library..." 
+            value={localSearchQuery}
+            onChange={(e) => setLocalSearchQuery(e.target.value)}
+            className="max-w-md mx-auto"
+          />
+        </div>
+
         {/* Header Section */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 bg-gradient-to-b from-blue-900/20 to-background p-4 rounded-3xl">
           <div className="space-y-4">
@@ -154,28 +166,6 @@ const Library: React.FC = () => {
               <p className="text-[9px] font-bold text-foreground/30 uppercase tracking-widest">{stat.label}</p>
             </motion.div>
           ))}
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-muted-foreground/50" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search within your library..."
-            value={localSearchQuery}
-            onChange={(e) => setLocalSearchQuery(e.target.value)}
-            className="w-full bg-muted/30 border border-border/50 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-muted-foreground/30"
-          />
-          {localSearchQuery && (
-            <button 
-              onClick={() => setLocalSearchQuery('')}
-              className="absolute inset-y-0 right-4 flex items-center text-muted-foreground/50 hover:text-foreground transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
         </div>
 
         {/* Navigation Tabs */}
@@ -235,6 +225,22 @@ const Library: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                     {likedTracks.slice(0, 10).map(track => (
+                      <TrackCard key={track.id} track={track} variant="row" />
+                    ))}
+                  </div>
+                </section>
+
+                {/* My Tracks */}
+                <section className="p-4 rounded-3xl bg-purple-500/[0.03] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-4">
+                      <Music2 className="h-4 w-4 text-purple-500" />
+                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">My Uploaded Tracks</h3>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                    {userTracks.slice(0, 10).map(track => (
                       <TrackCard key={track.id} track={track} variant="row" />
                     ))}
                   </div>
