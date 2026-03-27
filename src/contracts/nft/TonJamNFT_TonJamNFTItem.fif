@@ -1,0 +1,108 @@
+// automatically generated from `@stdlib/std/stdlib.fc` `/app/applet/src/contracts/nft/TonJamNFT_TonJamNFTItem.fc` 
+PROGRAM{
+  DECLPROC $TonJamNFTItem$_store
+  DECLPROC $TonJamNFTItem$_load
+  DECLPROC $TonJamNFTItem$init$_load
+  DECLPROC $TonJamNFTItem$_contract_init
+  DECLPROC $TonJamNFTItem$_contract_load
+  DECLPROC $TonJamNFTItem$_contract_store
+  DECLPROC $TonJamNFTItem$_fun_get_nft_data
+  102351 DECLMETHOD %get_nft_data
+  DECLPROC recv_internal
+  DECLGLOBVAR __tact_context
+  DECLGLOBVAR __tact_context_sender
+  DECLGLOBVAR __tact_child_contract_codes
+  DECLGLOBVAR __tact_randomized
+  $TonJamNFTItem$_store PROCINLINE:<{
+    s3 s4 XCHG2
+    STSLICE
+    STSLICE
+    64 STU
+    STREF
+  }>
+  $TonJamNFTItem$_load PROCINLINE:<{
+    LDMSGADDR
+    LDMSGADDR
+    64 LDU
+    LDREF
+    4 -ROLL
+  }>
+  $TonJamNFTItem$init$_load PROCINLINE:<{
+    LDMSGADDR
+    LDMSGADDR
+    257 PUSHINT
+    LDIX
+    LDREF
+    4 -ROLL
+  }>
+  $TonJamNFTItem$_contract_init PROCINLINE:<{
+  }>
+  $TonJamNFTItem$_contract_load PROCINLINE:<{
+    c4 PUSH
+    CTOS
+    1 LDI
+    SWAP
+    IF:<{
+      $TonJamNFTItem$_load INLINECALLDICT
+      1 4 BLKDROP2
+    }>ELSE<{
+      $TonJamNFTItem$init$_load INLINECALLDICT
+      s0 s4 XCHG
+      ENDS
+      3 ROLL
+      $TonJamNFTItem$_contract_init INLINECALLDICT
+    }>
+  }>
+  $TonJamNFTItem$_contract_store PROCINLINE:<{
+    NEWC
+    TRUE
+    SWAP
+    1 STI
+    4 -ROLL
+    $TonJamNFTItem$_store INLINECALLDICT
+    ENDC
+    c4 POP
+  }>
+  $TonJamNFTItem$_fun_get_nft_data PROCREF:<{
+    TRUE
+        NEWC
+        1 STI
+    s2 s(-1) PUXC
+    64 STU
+    s3 PUSH
+        STSLICER
+    s4 PUSH
+        STSLICER
+    s1 s(-1) PUXC
+        STREF
+        ENDC
+  }>
+  %get_nft_data PROC:<{
+    $TonJamNFTItem$_contract_load INLINECALLDICT
+    $TonJamNFTItem$_fun_get_nft_data INLINECALLDICT
+    4 1 BLKDROP2
+  }>
+  recv_internal PROC:<{
+    DROP
+    CTOS
+    2 PUSHINT
+    SDSKIPFIRST
+    1 LDI
+    1 LDI
+    LDMSGADDR
+    OVER
+    s3 s4 XCHG
+    s5 s5 XCHG2
+    4 TUPLE
+    __tact_context SETGLOB
+    SWAP
+    __tact_context_sender SETGLOB
+    $TonJamNFTItem$_contract_load INLINECALLDICT
+    s0 s4 XCHG
+    IFJMP:<{
+      4 BLKDROP
+    }>
+    3 ROLL
+    $TonJamNFTItem$_contract_store INLINECALLDICT
+  }>
+}END>c

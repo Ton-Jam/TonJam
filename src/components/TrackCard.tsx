@@ -20,13 +20,13 @@ interface TrackCardProps {
 
 const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMint, className = '', isLoading = false }) => {
   const navigate = useNavigate();
-  
-  if (isLoading) {
-    return <SkeletonCard className={className} />;
-  }
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack, likedTrackIds, toggleLikeTrack } = useAudio();
   const [isTipping, setIsTipping] = React.useState(false);
   const [tonConnectUI] = useTonConnectUI();
+  
+  if (isLoading) {
+    return <SkeletonCard variant={variant} className={className} />;
+  }
   const isActive = currentTrack?.id === track.id;
   const isLiked = likedTrackIds.includes(track.id);
   const artist = MOCK_ARTISTS.find(a => a.id === track.artistId);

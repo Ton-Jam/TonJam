@@ -422,7 +422,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a1', 
     name: 'Neon Voyager', 
-    walletAddress: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1',
+    walletAddress: 'UQCc_NeonVoyager_x9y1_v8s2_m5n6_z2w3',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Neon%20Voyager?width=200&height=200&nologo=true', 
     followers: 12400, 
     verified: true,
@@ -432,8 +432,8 @@ export const MOCK_ARTISTS: Artist[] = [
     bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Neon%20Voyager%20cyberpunk%20city?width=1200&height=400&nologo=true",
     socials: { x: 'https://x.com/neon_voyager', spotify: 'https://spotify.com/artist/neon_voyager', instagram: 'https://instagram.com/neon_voyager', telegram: 'https://t.me/neon_voyager' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.05, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'EQD4FP_Neon_Voyager_Wallet_Address_X9y1', percentage: 0.10, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQCc_NeonVoyager_x9y1_v8s2_m5n6_z2w3', percentage: 0.05, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQCc_NeonVoyager_x9y1_v8s2_m5n6_z2w3', percentage: 0.10, label: 'Main Artist' }]
     },
     earnings: { streaming: 12.4, nftSales: 45.2, total: 57.6 },
     events: [
@@ -448,7 +448,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a2', 
     name: 'Byte Beat', 
-    walletAddress: 'EQB_Byte_Beat_Wallet_Address_7777',
+    walletAddress: 'UQByteBeat_n7m2_k9p4_j8h3_f5g6',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Byte%20Beat?width=200&height=200&nologo=true', 
     followers: 8900, 
     verified: true,
@@ -458,8 +458,8 @@ export const MOCK_ARTISTS: Artist[] = [
     bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Byte%20Beat%20digital%20circuits?width=1200&height=400&nologo=true",
     socials: { x: 'https://x.com/byte_beat', spotify: 'https://spotify.com/artist/byte_beat' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'EQB_Byte_Beat_Wallet_Address_7777', percentage: 0.04, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'EQB_Byte_Beat_Wallet_Address_7777', percentage: 0.08, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQByteBeat_n7m2_k9p4_j8h3_f5g6', percentage: 0.04, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQByteBeat_n7m2_k9p4_j8h3_f5g6', percentage: 0.08, label: 'Main Artist' }]
     },
     earnings: { streaming: 5.2, nftSales: 12.8, total: 18.0 },
     events: [
@@ -474,7 +474,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a3', 
     name: 'Echo Phase', 
-    walletAddress: 'EQE_Echo_Phase_Wallet_Address_8888',
+    walletAddress: 'UQEchoPhase_v8s1_m5n6_k9p4_j8h3',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Echo%20Phase?width=200&height=200&nologo=true', 
     followers: 5600, 
     verified: false,
@@ -484,15 +484,15 @@ export const MOCK_ARTISTS: Artist[] = [
     bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Echo%20Phase%20ambient%20void?width=1200&height=400&nologo=true",
     socials: { website: 'https://echophase.io' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'EQE_Echo_Phase_Wallet_Address_8888', percentage: 0.03, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'EQE_Echo_Phase_Wallet_Address_8888', percentage: 0.05, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQEchoPhase_v8s1_m5n6_k9p4_j8h3', percentage: 0.03, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQEchoPhase_v8s1_m5n6_k9p4_j8h3', percentage: 0.05, label: 'Main Artist' }]
     },
     earnings: { streaming: 2.1, nftSales: 8.5, total: 10.6 }
   },
   { 
     id: 'a4', 
     name: 'Luna Ray', 
-    walletAddress: 'EQL_Luna_Ray_Wallet_Address_9999',
+    walletAddress: 'UQLunaRay_p3q9_r7t8_w2x4_b1c2',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Luna%20Ray?width=200&height=200&nologo=true', 
     followers: 15200, 
     verified: true,
@@ -502,15 +502,15 @@ export const MOCK_ARTISTS: Artist[] = [
     bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Luna%20Ray%20ethereal%20pop?width=1200&height=400&nologo=true",
     socials: { x: 'https://x.com/lunaray', instagram: 'https://instagram.com/lunaray' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'EQL_Luna_Ray_Wallet_Address_9999', percentage: 0.06, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'EQL_Luna_Ray_Wallet_Address_9999', percentage: 0.12, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQLunaRay_p3q9_r7t8_w2x4_b1c2', percentage: 0.06, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQLunaRay_p3q9_r7t8_w2x4_b1c2', percentage: 0.12, label: 'Main Artist' }]
     },
     earnings: { streaming: 18.5, nftSales: 32.1, total: 50.6 }
   },
   { 
     id: 'a5', 
     name: 'City Ghost', 
-    walletAddress: 'EQC_City_Ghost_Wallet_Address_5555',
+    walletAddress: 'UQCityGhost_w2x4_b1c2_d5f6_g7h8',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20City%20Ghost?width=200&height=200&nologo=true', 
     followers: 4300, 
     verified: false,
@@ -520,15 +520,15 @@ export const MOCK_ARTISTS: Artist[] = [
     bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20City%20Ghost%20lofi%20urban?width=1200&height=400&nologo=true",
     socials: { spotify: 'https://spotify.com/artist/cityghost' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'EQC_City_Ghost_Wallet_Address_5555', percentage: 0.02, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'EQC_City_Ghost_Wallet_Address_5555', percentage: 0.04, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQCityGhost_w2x4_b1c2_d5f6_g7h8', percentage: 0.02, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQCityGhost_w2x4_b1c2_d5f6_g7h8', percentage: 0.04, label: 'Main Artist' }]
     },
     earnings: { streaming: 1.2, nftSales: 4.3, total: 5.5 }
   },
   { 
     id: 'a6', 
     name: 'Prism Core', 
-    walletAddress: 'EQP_Prism_Core_Wallet_Address_1111',
+    walletAddress: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Prism%20Core?width=200&height=200&nologo=true', 
     followers: 7800, 
     verified: true,
@@ -538,8 +538,8 @@ export const MOCK_ARTISTS: Artist[] = [
     bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Prism%20Core%20experimental%20techno?width=1200&height=400&nologo=true",
     socials: { x: 'https://x.com/prismcore', website: 'https://prismcore.tech' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'EQP_Prism_Core_Wallet_Address_1111', percentage: 0.05, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'EQP_Prism_Core_Wallet_Address_1111', percentage: 0.10, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2', percentage: 0.05, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2', percentage: 0.10, label: 'Main Artist' }]
     },
     earnings: { streaming: 8.4, nftSales: 22.1, total: 30.5 }
   },

@@ -1,6 +1,16 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Rss, Flame, Zap, Users, Plus, Sparkles, Filter, LayoutGrid, List, Radio, Headphones, TrendingUp, ChevronRight, SearchIcon } from 'lucide-react';
+import { 
+  RadioIcon, 
+  SpeakerWaveIcon, 
+  RssIcon, 
+  FireIcon, 
+  UsersIcon, 
+  PlusIcon, 
+  SparklesIcon, 
+  ArrowTrendingUpIcon, 
+  ChevronRightIcon 
+} from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
 import { ButtonGroupInput } from '@/components/ButtonGroupInput';
 import { 
@@ -24,12 +34,10 @@ import { Post, Track } from '@/types';
 
 const JamSpace: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch } = useAudio();
+  const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch, jamspaceFilters } = useAudio();
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'All' | 'Following' | 'Trending'>('All');
   const [filterType, setFilterType] = useState<'All' | 'Tracks' | 'NFTs'>('All');
-  const [sortOrder, setSortOrder] = useState<'Newest' | 'Oldest'>('Newest');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   const carouselItems: CarouselItem[] = [
     {
@@ -96,21 +104,17 @@ const JamSpace: React.FC = () => {
     }
 
     // 4. Sorting (Date)
-    if (sortOrder === 'Oldest') {
+    if (jamspaceFilters.sortOrder === 'Oldest') {
       basePosts.reverse();
     }
 
     return basePosts;
-  }, [posts, search, activeTab, followedUserIds, filterType, sortOrder]);
+  }, [posts, search, activeTab, followedUserIds, filterType, jamspaceFilters.sortOrder]);
 
   // Auto-switch view mode based on filter type
-  useEffect(() => {
-    if (filterType === 'Tracks' || filterType === 'NFTs') {
-      setViewMode('grid');
-    } else {
-      setViewMode('list');
-    }
-  }, [filterType]);
+  // Note: viewMode is now managed in global state, so we might not want to auto-switch it here,
+  // or we need to call setJamspaceFilters from useAudio. For now, let's remove the auto-switch
+  // since viewMode is controlled globally.
 
   const handleCreatePost = (content: string, mediaUrl?: string, trackId?: string) => {
     createPost({
@@ -153,15 +157,12 @@ const JamSpace: React.FC = () => {
       </div>
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 relative z-10">
-        <header className="flex items-center justify-between mb-6 px-0">
-          <h1 className="text-[20px] font-bold text-blue-600 dark:text-foreground uppercase tracking-widest">JamSpace</h1>
-        </header>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Navigation & Trending */}
           <aside className="hidden lg:block lg:col-span-3 space-y-4 sticky top-32 h-fit">
             {/* Live Jam Rooms - Hardware Style */}
             <div className="bg-background border border-border rounded-[12px] p-4 shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-[0.03] rotate-12"><Radio className="h-24 w-24" /></div>
+              <div className="absolute top-0 right-0 p-4 opacity-[0.03] rotate-12"><RadioIcon className="h-24 w-24" /></div>
               <div className="flex items-center justify-between mb-4 relative z-10">
                 <div className="flex flex-col">
                   <h3 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.5em]">Live Jam Rooms</h3>
@@ -174,8 +175,8 @@ const JamSpace: React.FC = () => {
               </div>
               <div className="space-y-4 relative z-10">
                 {[
-                  { id: 'genesis', name: 'Genesis Node', listeners: 124, icon: Radio, freq: '44.1kHz' },
-                  { id: 'drift', name: 'Cyber Drift', listeners: 89, icon: Headphones, freq: '48.0kHz' }
+                  { id: 'genesis', name: 'Genesis Node', listeners: 124, icon: RadioIcon, freq: '44.1kHz' },
+                  { id: 'drift', name: 'Cyber Drift', listeners: 89, icon: SpeakerWaveIcon, freq: '48.0kHz' }
                 ].map(room => (
                   <button 
                     key={room.id}
@@ -208,9 +209,9 @@ const JamSpace: React.FC = () => {
               <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em] mb-4">Navigation</h3>
               <nav className="space-y-4">
                 {[
-                  { id: 'All', label: 'Global Feed', icon: Rss },
-                  { id: 'Following', label: 'Following', icon: Users },
-                  { id: 'Trending', label: 'Trending', icon: Flame }
+                  { id: 'All', label: 'Global Feed', icon: RssIcon },
+                  { id: 'Following', label: 'Following', icon: UsersIcon },
+                  { id: 'Trending', label: 'Trending', icon: FireIcon }
                 ].map(item => (
                   <button 
                     key={item.id} 
@@ -224,10 +225,10 @@ const JamSpace: React.FC = () => {
               </nav>
             </div>
 
-            <div className="bg-background border border-border rounded-[12px] p-4">
+            <div className="bg-background rounded-[12px] p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">Trending Ledger</h3>
-                <TrendingUp className="h-3 w-3 text-muted-foreground/30" />
+                <ArrowTrendingUpIcon className="h-3 w-3 text-muted-foreground/30" />
               </div>
               <div className="space-y-4">
                 {trendingTopics.map((topic, idx) => (
@@ -239,7 +240,7 @@ const JamSpace: React.FC = () => {
                         <p className="text-[8px] text-muted-foreground/50 font-bold uppercase tracking-widest mt-4">{topic.count} Signals</p>
                       </div>
                     </div>
-                    <ChevronRight className="h-3 w-3 text-foreground/5 group-hover:text-blue-400 transition-all group-hover:translate-x-1" />
+                    <ChevronRightIcon className="h-3 w-3 text-foreground/5 group-hover:text-blue-400 transition-all group-hover:translate-x-1" />
                   </div>
                 ))}
               </div>
@@ -250,17 +251,6 @@ const JamSpace: React.FC = () => {
           <main className="lg:col-span-6 space-y-4">
             {/* Auto Carousel at the top */}
             <AutoCarousel items={carouselItems} />
-
-            {/* Search Bar */}
-            <div className="relative w-full">
-              <ButtonGroupInput
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search live nodes and sessions..."
-                className="w-full"
-                inputClassName="bg-muted/50 border-blue-500/30 py-6 text-sm text-blue-600 dark:text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 focus:border-blue-500/60 focus:bg-blue-500/10 transition-all"
-              />
-            </div>
 
             {/* Sticky Filters */}
             <div className="sticky top-[var(--header-height,64px)] z-30 backdrop-blur-2xl py-2 w-full bg-background/40 px-4 transition-all duration-300 border-b border-blue-500/10">
@@ -282,36 +272,12 @@ const JamSpace: React.FC = () => {
                     </button>
                   ))}
                 </div>
-
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="h-8 w-8 px-0 bg-muted/50 border-blue-500/30">
-                        <Filter className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuLabel>Sort & View</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup value={sortOrder} onValueChange={(val) => setSortOrder(val as any)}>
-                        <DropdownMenuRadioItem value="Newest">Newest</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="Oldest">Oldest</DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel>View Mode</DropdownMenuLabel>
-                      <DropdownMenuRadioGroup value={viewMode} onValueChange={(val) => setViewMode(val as any)}>
-                        <DropdownMenuRadioItem value="list">List</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
               </div>
             </div>
 
             {/* Main Feed */}
             <div className="bg-transparent space-y-4">
-              <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={viewMode} />
+              <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={jamspaceFilters.viewMode} />
             </div>
           </main>
 
@@ -352,7 +318,7 @@ const JamSpace: React.FC = () => {
             <section className="bg-background border border-border rounded-[12px] p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <Sparkles className="h-4 w-4 text-blue-500" />
+                  <SparklesIcon className="h-4 w-4 text-blue-500" />
                   <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em]">AI Frequencies</h3>
                 </div>
                 <div className="flex gap-4">

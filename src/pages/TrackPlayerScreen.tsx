@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { BackButton } from '@/components/BackButton';
 import { 
   Heart, 
   Share2, 
@@ -9,7 +10,11 @@ import {
   Diamond, 
   Coins,
   MessageSquare,
-  Zap
+  Zap,
+  User,
+  Music,
+  ListMusic,
+  ThumbsUp
 } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -44,12 +49,10 @@ export default function TrackPlayerScreen() {
     <div className="min-h-screen bg-[#0B0F14] text-white pb-4">
       {/* Header */}
       <div className="p-4 flex items-center justify-between">
-        <button 
-          onClick={() => navigate(-1)}
+        <BackButton 
           className="p-4 transition-colors text-white/70 hover:text-white"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+          iconClassName="w-5 h-5"
+        />
         <div /> {/* Spacer */}
         <button className="p-4 transition-colors text-white/70 hover:text-white">
           <Share2 className="w-5 h-5" />
@@ -188,6 +191,56 @@ export default function TrackPlayerScreen() {
               I’m minting this one 💎 absolute protocol classic.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Artist Card */}
+      <div className="px-4 mt-8">
+        <h2 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+          <User className="w-4 h-4 text-cyan-400" /> Artist
+        </h2>
+        <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 border border-white/5">
+          <img src="https://picsum.photos/seed/djton/200/200" className="w-12 h-12 rounded-full" alt="Artist" />
+          <div>
+            <h3 className="font-bold text-sm">DJ Ton</h3>
+            <p className="text-xs text-muted-foreground">12.5k followers</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Featured Playlist */}
+      <div className="px-4 mt-8">
+        <h2 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+          <ListMusic className="w-4 h-4 text-cyan-400" /> Featured Playlist
+        </h2>
+        <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 border border-white/5">
+          <img src="https://picsum.photos/seed/playlist/400/400" className="w-12 h-12 rounded-lg" alt="Playlist" />
+          <h3 className="font-bold text-sm">Afro-Electronic Gems</h3>
+        </div>
+      </div>
+
+      {/* Similar & Recommended Tracks */}
+      <div className="px-4 mt-8 pb-8">
+        <h2 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+          <Music className="w-4 h-4 text-cyan-400" /> Similar & Recommended
+        </h2>
+        <div className="space-y-3">
+          {[
+            { title: "Night Drive", artist: "DJ Afro" },
+            { title: "Bass Pulse", artist: "BeatMaster" },
+            { title: "Deep Sea", artist: "Oceanic" },
+            { title: "Sky High", artist: "Cloud9" }
+          ].map((track, i) => (
+            <div key={i} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5">
+              <div>
+                <h4 className="text-xs font-bold">{track.title}</h4>
+                <p className="text-[10px] text-muted-foreground">{track.artist}</p>
+              </div>
+              <button className="text-white/40 hover:text-cyan-400">
+                <ThumbsUp className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

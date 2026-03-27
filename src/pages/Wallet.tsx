@@ -6,6 +6,7 @@ import { TON_LOGO, JAM_PRICE_USD } from '@/constants';
 
 const Wallet: React.FC = () => {
   const { userProfile, purchaseJAM, subscribePremium, transactions } = useAudio();
+  const safeTransactions = transactions || [];
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -220,7 +221,7 @@ const Wallet: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {transactions.filter(tx => tx.senderAddress === userAddress || tx.recipientAddress === userAddress || tx.type === 'jam_purchase' || tx.type === 'premium_subscription').map((tx) => (
+                {safeTransactions.filter(tx => tx.senderAddress === userAddress || tx.recipientAddress === userAddress || tx.type === 'jam_purchase' || tx.type === 'premium_subscription').map((tx) => (
                   <tr key={tx.id} className="hover:bg-foreground/[0.01] transition-colors group">
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-4">

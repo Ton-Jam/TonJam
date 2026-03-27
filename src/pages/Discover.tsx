@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import DiscoverSearchBar from '@/components/DiscoverSearchBar';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, X, Music, User, Gem, RotateCcw, Satellite, ChevronRight, Sparkles } from 'lucide-react';
-
+import { Search, X, Music, User, Gem, RotateCcw, Satellite, ChevronRight, Sparkles, Filter, Calendar, DollarSign, Award, Layers } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_NFTS, GENRES, MOCK_USERS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
@@ -35,6 +34,13 @@ const Discover: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists' | 'Users' | 'All'>('All');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('Newest');
+  const [filters, setFilters] = useState({
+    minPrice: '',
+    maxPrice: '',
+    rarity: 'All',
+    editionType: 'All',
+    timeframe: 'All Time'
+  });
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
@@ -147,51 +153,105 @@ const Discover: React.FC = () => {
     if (item.type === 'User') setActiveFilter('Users');
   };
 
+  const filteredTracks = useMemo(() => {
+    let results = [...MOCK_TRACKS];
+    if (search) {
+      results = results.filter(t =>
+        t.title.toLowerCase().includes(search.toLowerCase()) ||
+        t.artist.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    if (selectedGenre) {
+      results = results.filter(t => t.genre.toLowerCase() === selectedGenre.toLowerCase());
+    }
+    
+    // Advanced Filters for Tracks
+    if (filters.minPrice) {
+      results = results.filter(t => parseFloat(t.price || '0') >= parseFloat(filters.minPrice));
+    }
+    if (filters.maxPrice) {
+      results = results.filter(t => parseFloat(t.price || '0') <= parseFloat(filters.maxPrice));
+    }
+    if (filters.timeframe !== 'All Time') {
+      const now = new Date();
+      results = results.filter(t => {
+        if (!t.releaseDate) return false;
+        const releaseDate = new Date(t.releaseDate);
+        const diffTime = Math.abs(now.getTime() - releaseDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (filters.timeframe === 'Last 24h') return diffDays <= 1;
+        if (filters.timeframe === 'Last Week') return diffDays <= 7;
+        if (filters.timeframe === 'Last Month') return diffDays <= 30;
+        return true;
+      });
+    }
+
+    if (sortBy === 'Popularity') {
+      results.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+    } else if (sortBy === 'Most Liked') {
+      results.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    } else if (sortBy === 'Newest') {
+      results.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+    }
+    return results;
+  }, [search, selectedGenre, filters, sortBy]);
+
+  const filteredNFTs = useMemo(() => {
+    let results = [...MOCK_NFTS];
+    if (search) {
+      results = results.filter(n =>
+        n.title.toLowerCase().includes(search.toLowerCase()) ||
+        n.creator.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // Advanced Filters for NFTs
+    if (filters.minPrice) {
+      results = results.filter(n => parseFloat(n.price) >= parseFloat(filters.minPrice));
+    }
+    if (filters.maxPrice) {
+      results = results.filter(n => parseFloat(n.price) <= parseFloat(filters.maxPrice));
+    }
+    if (filters.rarity !== 'All') {
+      results = results.filter(n => 
+        (n.traits?.some(attr => attr.trait_type === 'Rarity' && attr.value === filters.rarity)) ||
+        (n.attributes?.some(attr => attr.trait_type === 'Rarity' && attr.value === filters.rarity))
+      );
+    }
+    if (filters.editionType !== 'All') {
+      results = results.filter(n => n.edition === filters.editionType);
+    }
+    if (filters.timeframe !== 'All Time') {
+      const now = new Date();
+      results = results.filter(n => {
+        const mintedEvent = n.history?.find(h => h.event === 'Minted');
+        if (!mintedEvent?.date) return false;
+        const mintedDate = new Date(mintedEvent.date);
+        const diffTime = Math.abs(now.getTime() - mintedDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (filters.timeframe === 'Last 24h') return diffDays <= 1;
+        if (filters.timeframe === 'Last Week') return diffDays <= 7;
+        if (filters.timeframe === 'Last Month') return diffDays <= 30;
+        return true;
+      });
+    }
+
+    if (sortBy === 'Price (High to Low)') {
+      results.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    } else if (sortBy === 'Price (Low to High)') {
+      results.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    } else if (sortBy === 'Newest') {
+      results.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+    }
+    return results;
+  }, [search, filters, sortBy]);
+
   const filteredResults = useMemo(() => {
+    if (activeFilter === 'Tracks') return filteredTracks;
+    if (activeFilter === 'NFTs') return filteredNFTs;
+    
     let results: any[] = [];
-    if (activeFilter === 'Tracks') {
-      results = [...MOCK_TRACKS];
-      if (search) {
-        results = results.filter(t =>
-          t.title.toLowerCase().includes(search.toLowerCase()) ||
-          t.artist.toLowerCase().includes(search.toLowerCase())
-        );
-      }
-      if (selectedGenre) {
-        results = results.filter(t => t.genre.toLowerCase() === selectedGenre.toLowerCase());
-      }
-      if (sortBy === 'Popularity') {
-        results.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
-      } else if (sortBy === 'Most Liked') {
-        results.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      } else if (sortBy === 'Newest') {
-        results.sort((a, b) => parseInt(b.id) - parseInt(a.id));
-      }
-    } else if (activeFilter === 'Artists') {
-      results = [...artists];
-      if (search) {
-        results = results.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
-      }
-      if (selectedGenre) {
-        results = results.filter(a => a.genre?.toLowerCase() === selectedGenre.toLowerCase());
-      }
-      if (sortBy === 'Popularity') {
-        results.sort((a, b) => (b.followers || 0) - (a.followers || 0));
-      }
-    } else if (activeFilter === 'NFTs') {
-      results = [...MOCK_NFTS];
-      if (search) {
-        results = results.filter(n =>
-          n.title.toLowerCase().includes(search.toLowerCase()) ||
-          n.creator.toLowerCase().includes(search.toLowerCase())
-        );
-      }
-      if (sortBy === 'Price (High to Low)') {
-        results.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
-      } else if (sortBy === 'Price (Low to High)') {
-        results.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-      }
-    } else if (activeFilter === 'Playlists') {
+    if (activeFilter === 'Artists') {
       results = allPlaylists;
       if (search) {
         results = results.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
@@ -368,8 +428,8 @@ const Discover: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 lg:px-4 py-4">
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="w-full flex flex-col md:flex-row items-center gap-4">
-              <div className="flex-1 relative group w-full">
-                <div className="relative w-full">
+              <div className="flex-1 relative group w-full flex items-center gap-4">
+                <div className="relative flex-1">
                   <DiscoverSearchBar 
                     onSearch={(q) => setSearch(q)}
                     placeholder="Search tracks, artists, or NFTs..."
@@ -380,7 +440,7 @@ const Discover: React.FC = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto no-scrollbar pb-4 md:pb-4">
+              <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto no-scrollbar pb-4 md:pb-4 sticky top-[80px] z-40 bg-background/95 backdrop-blur-xl pt-2">
                 <button 
                   onClick={handleSurpriseMe}
                   className="flex-shrink-0 px-[10px] py-[6px] bg-white dark:bg-muted/50 border border-silver-300 dark:border-blue-500/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-blue-500 dark:text-foreground hover:bg-blue-500/10 hover:border-blue-500/60 transition-all flex items-center gap-4 group/surprise inactive-pill"
@@ -407,6 +467,104 @@ const Discover: React.FC = () => {
               </div>
             </div>
           </div>
+          
+          {/* Advanced Filters Panel */}
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="py-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 border-t border-border/50 mt-4">
+                  {/* Price Range */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                      <DollarSign className="h-3 w-3" /> Price Range (TON)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="number" 
+                        placeholder="Min" 
+                        value={filters.minPrice}
+                        onChange={(e) => setFilters({...filters, minPrice: e.target.value})}
+                        className="w-full bg-muted/30 border border-border/50 rounded-lg p-2 text-xs focus:border-blue-500/50 outline-none"
+                      />
+                      <span className="text-muted-foreground">-</span>
+                      <input 
+                        type="number" 
+                        placeholder="Max" 
+                        value={filters.maxPrice}
+                        onChange={(e) => setFilters({...filters, maxPrice: e.target.value})}
+                        className="w-full bg-muted/30 border border-border/50 rounded-lg p-2 text-xs focus:border-blue-500/50 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Rarity Filter */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                      <Award className="h-3 w-3" /> Rarity
+                    </label>
+                    <select 
+                      value={filters.rarity}
+                      onChange={(e) => setFilters({...filters, rarity: e.target.value})}
+                      className="w-full bg-muted/30 border border-border/50 rounded-lg p-2 text-xs focus:border-blue-500/50 outline-none appearance-none"
+                    >
+                      <option value="All">All Rarities</option>
+                      <option value="Common">Common</option>
+                      <option value="Rare">Rare</option>
+                      <option value="Epic">Epic</option>
+                      <option value="Legendary">Legendary</option>
+                    </select>
+                  </div>
+
+                  {/* Edition Type */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                      <Layers className="h-3 w-3" /> Edition Type
+                    </label>
+                    <select 
+                      value={filters.editionType}
+                      onChange={(e) => setFilters({...filters, editionType: e.target.value})}
+                      className="w-full bg-muted/30 border border-border/50 rounded-lg p-2 text-xs focus:border-blue-500/50 outline-none appearance-none"
+                    >
+                      <option value="All">All Types</option>
+                      <option value="Standard">Standard</option>
+                      <option value="Limited">Limited</option>
+                      <option value="Unique">Unique (1/1)</option>
+                    </select>
+                  </div>
+
+                  {/* Timeframe */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                      <Calendar className="h-3 w-3" /> Release Date
+                    </label>
+                    <select 
+                      value={filters.timeframe}
+                      onChange={(e) => setFilters({...filters, timeframe: e.target.value})}
+                      className="w-full bg-muted/30 border border-border/50 rounded-lg p-2 text-xs focus:border-blue-500/50 outline-none appearance-none"
+                    >
+                      <option value="All Time">All Time</option>
+                      <option value="Last 24h">Last 24h</option>
+                      <option value="Last Week">Last Week</option>
+                      <option value="Last Month">Last Month</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end pb-4">
+                  <button 
+                    onClick={() => setFilters({ minPrice: '', maxPrice: '', rarity: 'All', editionType: 'All', timeframe: 'All Time' })}
+                    className="text-[10px] font-bold text-muted-foreground hover:text-foreground uppercase tracking-widest transition-colors"
+                  >
+                    Clear Advanced Filters
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -471,11 +629,11 @@ const Discover: React.FC = () => {
                 {/* Tracks Section */}
                 <SearchCategorySection 
                   title="Tracks" 
-                  items={MOCK_TRACKS.filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase())).slice(0, 10)}
+                  items={filteredTracks.slice(0, 10)}
                   renderItem={(item) => <TrackCard track={item} className="border border-blue-500/30" />}
                   viewAllLink={`/explore/tracks?title=Search Results: Tracks&search=${search}`}
                   grid
-                  isEmpty={!MOCK_TRACKS.some(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.artist.toLowerCase().includes(search.toLowerCase()))}
+                  isEmpty={filteredTracks.length === 0}
                 />
 
                 {/* Artists Section */}
@@ -490,11 +648,11 @@ const Discover: React.FC = () => {
                 {/* NFTs Section */}
                 <SearchCategorySection 
                   title="NFTs" 
-                  items={MOCK_NFTS.filter(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.creator.toLowerCase().includes(search.toLowerCase())).slice(0, 5)}
+                  items={filteredNFTs.slice(0, 5)}
                   renderItem={(item) => <NFTCard nft={item} />}
                   viewAllLink={`/explore/nfts?title=Search Results: NFTs&search=${search}`}
                   grid
-                  isEmpty={!MOCK_NFTS.some(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.creator.toLowerCase().includes(search.toLowerCase()))}
+                  isEmpty={filteredNFTs.length === 0}
                 />
 
                 {/* Playlists Section */}
@@ -517,9 +675,9 @@ const Discover: React.FC = () => {
                 />
                 
                 {/* Empty State for "All" filter */}
-                {MOCK_TRACKS.every(t => !t.title.toLowerCase().includes(search.toLowerCase()) && !t.artist.toLowerCase().includes(search.toLowerCase())) &&
+                {filteredTracks.length === 0 &&
                  artists.every(a => !a.name.toLowerCase().includes(search.toLowerCase())) &&
-                 MOCK_NFTS.every(n => !n.title.toLowerCase().includes(search.toLowerCase()) && !n.creator.toLowerCase().includes(search.toLowerCase())) &&
+                 filteredNFTs.length === 0 &&
                  allPlaylists.every(p => !p.title.toLowerCase().includes(search.toLowerCase())) &&
                  MOCK_USERS.every(u => !u.name.toLowerCase().includes(search.toLowerCase()) && !u.handle.toLowerCase().includes(search.toLowerCase())) && (
                   <div className="py-4 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-[10px]">
@@ -596,9 +754,9 @@ const SearchCategorySection = ({
           View All <ChevronRight className="h-3 w-3" />
         </button>
       </div>
-      <div className={grid ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" : "flex flex-col gap-4"}>
+      <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
         {items.map((item, idx) => (
-          <div key={item.id || idx} className="animate-in fade-in slide-in-from-bottom-2 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
+          <div key={item.id || idx} className={`flex-shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300 ${grid ? 'w-[200px] sm:w-[240px]' : 'w-full max-w-[400px]'}`} style={{ animationDelay: `${idx * 50}ms` }}>
             {renderItem(item)}
           </div>
         ))}

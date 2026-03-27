@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { Bot, X, Send, Music, Sparkles, Loader2 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { GoogleGenAI, Type, FunctionDeclaration } from '@google/genai';
@@ -13,6 +13,8 @@ const AIAssistant: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const constraintsRef = useRef(null);
+  const dragControls = useDragControls();
   
   const { allTracks, playTrack, addNotification, setSearchQuery, createRecommendedPlaylist } = useAudio();
   const navigate = useNavigate();
@@ -136,14 +138,22 @@ Keep your responses concise, friendly, and enthusiastic.`;
 
   return (
     <>
+      {/* Constraints container */}
+      <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-[99]" />
+
       {/* Floating Action Button */}
       <motion.button
-        className="fixed bottom-24 right-6 lg:bottom-6 lg:right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-blue-700 transition-colors"
-        whileHover={{ scale: 1.1 }}
+        drag
+        dragConstraints={constraintsRef}
+        dragMomentum={false}
+        dragElastic={0.1}
+        className="fixed bottom-24 right-6 lg:bottom-6 lg:right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-blue-700 transition-colors cursor-grab active:cursor-grabbing pointer-events-auto"
+        whileHover={{ scale: 1.1, opacity: 1 }}
         whileTap={{ scale: 0.9 }}
+        whileDrag={{ opacity: 1 }}
         onClick={() => setIsOpen(true)}
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0.5, y: 0 }}
+        animate={{ opacity: 0.5, y: 0 }}
       >
         <Sparkles className="w-6 h-6" />
       </motion.button>
@@ -152,19 +162,27 @@ Keep your responses concise, friendly, and enthusiastic.`;
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            drag
+            dragControls={dragControls}
+            dragListener={false}
+            dragConstraints={constraintsRef}
+            dragMomentum={false}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
             className="fixed bottom-24 right-6 lg:bottom-24 lg:right-6 z-[101] w-[350px] h-[500px] max-h-[80vh] bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden"
           >
-            {/* Header */}
-            <div className="bg-blue-600 p-4 flex items-center justify-between text-white">
+            {/* Header - Drag Handle */}
+            <div 
+              onPointerDown={(e) => dragControls.start(e)}
+              className="bg-blue-600 p-4 flex items-center justify-between text-white cursor-move touch-none"
+            >
               <div className="flex items-center gap-2">
                 <Bot className="w-5 h-5" />
                 <h3 className="font-bold">TonJam AI</h3>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors">
+              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors pointer-events-auto">
                 <X className="w-5 h-5" />
               </button>
             </div>

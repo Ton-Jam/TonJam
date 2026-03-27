@@ -102,23 +102,23 @@ Return ONLY the bio text, nothing else.`;
     <div className="p-6 bg-background min-h-screen pb-24 lg:pb-6">
       <div className="max-w-3xl mx-auto space-y-12">
         <form onSubmit={handleSubmit} className="space-y-12">
-          <div className="border-b border-white/10 pb-12">
-            <h2 className="text-2xl font-bold text-white mb-2">Profile Settings</h2>
-            <p className="text-sm text-gray-400">
+          <div className="pb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-2">Profile Settings</h2>
+            <p className="text-sm text-muted-foreground">
               Customize your TonJam Web3 identity. This information will be displayed publicly.
             </p>
 
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               
               {/* Wallet Connection Section */}
-              <div className="col-span-full bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="col-span-full bg-muted/20 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Web3 Wallet</h3>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <h3 className="text-lg font-semibold text-foreground">Web3 Wallet</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
                     Connect your TON wallet to mint NFTs, stake JAM, and earn rewards.
                   </p>
                   {tonAddress && (
-                    <p className="text-xs font-mono text-blue-400 mt-2 bg-blue-400/10 px-2 py-1 rounded inline-block">
+                    <p className="text-xs font-mono text-blue-500 mt-2 bg-blue-500/10 px-2 py-1 rounded inline-block">
                       {tonAddress.slice(0, 6)}...{tonAddress.slice(-4)}
                     </p>
                   )}
@@ -127,7 +127,7 @@ Return ONLY the bio text, nothing else.`;
               </div>
 
               <div className="sm:col-span-3">
-                <label htmlFor="name" className="block text-sm font-medium text-white">
+                <label htmlFor="name" className="block text-sm font-medium text-foreground">
                   Display Name
                 </label>
                 <div className="mt-2">
@@ -137,38 +137,38 @@ Return ONLY the bio text, nothing else.`;
                     type="text"
                     value={profile.name}
                     onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    className="block w-full rounded-md bg-white/5 px-3 py-2 text-white outline-none border border-white/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
                   />
                 </div>
               </div>
 
               <div className="sm:col-span-3">
-                <label htmlFor="handle" className="block text-sm font-medium text-white">
+                <label htmlFor="handle" className="block text-sm font-medium text-foreground">
                   Handle
                 </label>
-                <div className="mt-2 flex rounded-md bg-white/5 border border-white/10 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-                  <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">@</span>
+                <div className="mt-2 flex rounded-xl bg-muted/20 focus-within:ring-2 focus-within:ring-foreground transition-all">
+                  <span className="flex select-none items-center pl-4 text-muted-foreground sm:text-sm">@</span>
                   <input
                     id="handle"
                     name="handle"
                     type="text"
                     value={profile.handle}
                     onChange={(e) => setProfile({ ...profile, handle: e.target.value })}
-                    className="block w-full min-w-0 grow bg-transparent py-2 pl-1 pr-3 text-white placeholder:text-gray-500 focus:outline-none sm:text-sm"
+                    className="block w-full min-w-0 grow bg-transparent py-3 pl-1 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-sm"
                   />
                 </div>
               </div>
 
               <div className="col-span-full">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="bio" className="block text-sm font-medium text-white">
+                  <label htmlFor="bio" className="block text-sm font-medium text-foreground">
                     Bio
                   </label>
                   <button
                     type="button"
                     onClick={generateAIBio}
                     disabled={aiLoading}
-                    className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-400 transition-colors disabled:opacity-50"
                   >
                     {aiLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <SparklesIcon className="w-3 h-3" />}
                     Generate with AI
@@ -181,21 +181,21 @@ Return ONLY the bio text, nothing else.`;
                     rows={3}
                     value={profile.bio}
                     onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                    className="block w-full rounded-md bg-white/5 px-3 py-2 text-white outline-none border border-white/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
                   />
                 </div>
-                <p className="mt-2 text-xs text-gray-400">Brief description for your profile. URLs are hyperlinked.</p>
+                <p className="mt-2 text-xs text-muted-foreground">Brief description for your profile. URLs are hyperlinked.</p>
               </div>
 
               <div className="col-span-full">
-                <label htmlFor="avatar" className="block text-sm font-medium text-white">
+                <label htmlFor="avatar" className="block text-sm font-medium text-foreground">
                   Avatar URL
                 </label>
                 <div className="mt-2 flex items-center gap-x-4">
                   {profile.avatar ? (
-                    <img src={profile.avatar} alt="Avatar" className="h-12 w-12 rounded-full object-cover bg-white/10" />
+                    <img src={profile.avatar} alt="Avatar" className="h-12 w-12 rounded-full object-cover bg-muted" />
                   ) : (
-                    <UserCircleIcon aria-hidden="true" className="h-12 w-12 text-gray-500" />
+                    <UserCircleIcon aria-hidden="true" className="h-12 w-12 text-muted-foreground" />
                   )}
                   <input
                     id="avatar"
@@ -204,7 +204,7 @@ Return ONLY the bio text, nothing else.`;
                     placeholder="https://example.com/avatar.png"
                     value={profile.avatar}
                     onChange={(e) => setProfile({ ...profile, avatar: e.target.value })}
-                    className="block w-full rounded-md bg-white/5 px-3 py-2 text-white outline-none border border-white/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
                   />
                 </div>
               </div>
@@ -215,7 +215,7 @@ Return ONLY the bio text, nothing else.`;
           <div className="flex items-center justify-end gap-x-4">
             <button 
               type="button" 
-              className="text-sm font-semibold text-white hover:text-gray-300"
+              className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => {
                 setProfile({
                   name: userProfile?.name || '',
@@ -230,7 +230,7 @@ Return ONLY the bio text, nothing else.`;
             <button
               type="submit"
               disabled={loading}
-              className="rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 flex items-center gap-2"
+              className="rounded-xl bg-foreground px-6 py-2 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-50 flex items-center gap-2 transition-all"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Save Changes

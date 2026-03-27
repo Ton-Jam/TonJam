@@ -32,7 +32,9 @@ const UploadTrack: React.FC = () => {
     price: '1.0',
     streamingPrice: '0.01',
     editions: '100',
-    royalty: '10',
+    editionType: 'Standard',
+    rarity: 'Common',
+    totalRoyalty: '10',
     isNFT: false,
     royaltySplits: [{ address: '', percentage: 100 }]
   });
@@ -227,7 +229,9 @@ const UploadTrack: React.FC = () => {
         isNFT: formData.isNFT,
         price: formData.isNFT ? formData.price : undefined,
         editions: formData.isNFT ? formData.editions : undefined,
-        royalty: formData.isNFT ? formData.royalty : undefined,
+        editionType: formData.isNFT ? formData.editionType : undefined,
+        rarity: formData.isNFT ? formData.rarity : undefined,
+        royalty: formData.isNFT ? formData.totalRoyalty : undefined,
         royaltySplits: formData.isNFT ? formData.royaltySplits : undefined,
         streamingPrice: formData.streamingPrice,
         playCount: 0,
@@ -452,6 +456,164 @@ const UploadTrack: React.FC = () => {
                 </div>
               </div>
 
+              {/* NFT Toggle Section - Moved Higher */}
+              <div className={`p-6 rounded-[10px] border transition-all duration-500 ${formData.isNFT ? 'bg-amber-500/5 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' : 'bg-muted/20 border-border/50'}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${formData.isNFT ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'}`}>
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-[11px] font-bold text-foreground uppercase tracking-widest">Mint as NFT Protocol</h3>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider mt-1">Enable ownership & marketplace trading</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, isNFT: !formData.isNFT})}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${formData.isNFT ? 'bg-amber-500' : 'bg-muted-foreground/30'}`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isNFT ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                </div>
+
+                {formData.isNFT && (
+                  <div className="space-y-6 pt-4 border-t border-amber-500/20 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Listing Price (TON)</label>
+                        <input 
+                          type="number"
+                          step="0.1"
+                          value={formData.price}
+                          onChange={(e) => setFormData({...formData, price: e.target.value})}
+                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                          placeholder="1.0"
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Editions</label>
+                        <input 
+                          type="number"
+                          value={formData.editions}
+                          onChange={(e) => setFormData({...formData, editions: e.target.value})}
+                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                          placeholder="100"
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Edition Type</label>
+                        <select 
+                          value={formData.editionType}
+                          onChange={(e) => setFormData({...formData, editionType: e.target.value})}
+                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors appearance-none"
+                        >
+                          <option value="Standard">Standard</option>
+                          <option value="Limited">Limited</option>
+                          <option value="Unique">Unique (1/1)</option>
+                        </select>
+                      </div>
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rarity Label</label>
+                        <input 
+                          type="text"
+                          value={formData.rarity}
+                          onChange={(e) => setFormData({...formData, rarity: e.target.value})}
+                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                          placeholder="Common"
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Royalty (%)</label>
+                        <input 
+                          type="number"
+                          max="100"
+                          value={formData.totalRoyalty}
+                          onChange={(e) => setFormData({...formData, totalRoyalty: e.target.value})}
+                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                          placeholder="10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Royalty Splits</label>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({
+                            ...formData,
+                            royaltySplits: [...formData.royaltySplits, { address: '', percentage: 0 }]
+                          })}
+                          className="text-[9px] font-bold text-amber-500 uppercase tracking-widest hover:text-amber-400 transition-colors flex items-center gap-1"
+                        >
+                          <Plus className="h-3 w-3" /> Add Split
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {formData.royaltySplits.map((split, index) => (
+                          <div key={index} className="flex gap-2 items-start">
+                            <div className="flex-1">
+                              <input
+                                type="text"
+                                placeholder="TON Wallet Address"
+                                value={split.address}
+                                onChange={(e) => {
+                                  const newSplits = [...formData.royaltySplits];
+                                  newSplits[index].address = e.target.value;
+                                  setFormData({ ...formData, royaltySplits: newSplits });
+                                }}
+                                className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-3 text-[11px] text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                              />
+                            </div>
+                            <div className="w-24">
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  placeholder="%"
+                                  value={split.percentage}
+                                  onChange={(e) => {
+                                    const newSplits = [...formData.royaltySplits];
+                                    newSplits[index].percentage = parseInt(e.target.value) || 0;
+                                    setFormData({ ...formData, royaltySplits: newSplits });
+                                  }}
+                                  className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-3 pr-8 text-[11px] text-foreground outline-none focus:border-amber-500/50 transition-colors"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">%</span>
+                              </div>
+                            </div>
+                            {formData.royaltySplits.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newSplits = formData.royaltySplits.filter((_, i) => i !== index);
+                                  setFormData({ ...formData, royaltySplits: newSplits });
+                                }}
+                                className="p-3 text-red-500/50 hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex justify-between items-center px-1">
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Split Total</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                          formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0) === 100 
+                            ? "text-green-500" 
+                            : "text-amber-500"
+                        }`}>
+                          {formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-4">
                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Description</label>
                 <textarea 
@@ -470,127 +632,9 @@ const UploadTrack: React.FC = () => {
                   value={formData.streamingPrice}
                   onChange={(e) => setFormData({...formData, streamingPrice: e.target.value})}
                   className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                  placeholder="0.00"
+                  placeholder="0.01"
                 />
               </div>
-
-              <div className="flex items-center gap-4 p-4 bg-muted/30 border border-border/50 rounded-[10px]">
-                <input 
-                  type="checkbox"
-                  id="isNFT"
-                  checked={formData.isNFT}
-                  onChange={(e) => setFormData({...formData, isNFT: e.target.checked})}
-                  className="w-4 h-4 rounded border-border bg-background text-blue-500 focus:ring-neutral-500/50"
-                />
-                <label htmlFor="isNFT" className="text-[10px] font-bold text-foreground uppercase tracking-widest cursor-pointer">
-                  Mint as NFT Protocol
-                </label>
-              </div>
-
-              {formData.isNFT && (
-                <div className="space-y-6 p-6 bg-amber-500/5 border border-amber-500/20 rounded-[10px] animate-in slide-in-from-top-4 duration-500">
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="h-4 w-4 text-amber-500" />
-                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">NFT Protocol Configuration</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Price (TON)</label>
-                      <input 
-                        type="text"
-                        value={formData.price}
-                        onChange={(e) => setFormData({...formData, price: e.target.value})}
-                        className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                      />
-                    </div>
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Editions</label>
-                      <input 
-                        type="text"
-                        value={formData.editions}
-                        onChange={(e) => setFormData({...formData, editions: e.target.value})}
-                        className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Royalty Splits</label>
-                      <button
-                        type="button"
-                        onClick={() => setFormData({
-                          ...formData,
-                          royaltySplits: [...formData.royaltySplits, { address: '', percentage: 0 }]
-                        })}
-                        className="text-[9px] font-bold text-amber-500 uppercase tracking-widest hover:text-amber-400 transition-colors flex items-center gap-1"
-                      >
-                        <Plus className="h-3 w-3" /> Add Split
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {formData.royaltySplits.map((split, index) => (
-                        <div key={index} className="flex gap-2 items-start">
-                          <div className="flex-1">
-                            <input
-                              type="text"
-                              placeholder="TON Wallet Address"
-                              value={split.address}
-                              onChange={(e) => {
-                                const newSplits = [...formData.royaltySplits];
-                                newSplits[index].address = e.target.value;
-                                setFormData({ ...formData, royaltySplits: newSplits });
-                              }}
-                              className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-3 text-[11px] text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                            />
-                          </div>
-                          <div className="w-24">
-                            <div className="relative">
-                              <input
-                                type="number"
-                                placeholder="%"
-                                value={split.percentage}
-                                onChange={(e) => {
-                                  const newSplits = [...formData.royaltySplits];
-                                  newSplits[index].percentage = parseInt(e.target.value) || 0;
-                                  setFormData({ ...formData, royaltySplits: newSplits });
-                                }}
-                                className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-3 pr-8 text-[11px] text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                              />
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">%</span>
-                            </div>
-                          </div>
-                          {formData.royaltySplits.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newSplits = formData.royaltySplits.filter((_, i) => i !== index);
-                                setFormData({ ...formData, royaltySplits: newSplits });
-                              }}
-                              className="p-3 text-red-500/50 hover:text-red-500 transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex justify-between items-center px-1">
-                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Total Percentage</span>
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                        formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0) === 100 
-                          ? "text-green-500" 
-                          : "text-amber-500"
-                      }`}>
-                        {formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <button 
                 type="submit"

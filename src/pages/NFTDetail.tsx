@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { BackButton } from '@/components/BackButton';
 import { 
   ArrowLeft, 
   Pause, 
@@ -192,7 +193,12 @@ const NFTDetail: React.FC = () => {
         <div className="text-center">
           <h2 className="text-[20px] font-bold mb-4">Asset Not Found</h2>
           <p className="text-muted-foreground/80">The requested NFT could not be located.</p>
-          <button onClick={() => navigate(-1)} className="mt-4 text-blue-500 hover:underline">Go Back</button>
+          <BackButton 
+            className="mt-4 text-blue-500 hover:underline p-0"
+            ariaLabel="Go Back"
+          >
+            Go Back
+          </BackButton>
         </div>
       </div>
     );

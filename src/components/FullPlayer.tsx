@@ -1,29 +1,37 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAudio } from '@/context/AudioContext';
 import { 
-  Play, 
-  Pause, 
-  SkipBack, 
-  SkipForward, 
-  Repeat, 
-  Shuffle, 
-  ChevronDown, 
-  Heart, 
-  Share2, 
-  MoreHorizontal,
-  Volume2,
-  VolumeX,
-  PlusCircle,
-  Gem,
-  CheckCircle2,
-  ListMusic,
-  MessageSquare,
-  Music2,
-  Mic2,
-  Info
-} from 'lucide-react';
+  PlayIcon, 
+  PauseIcon, 
+  BackwardIcon, 
+  ForwardIcon, 
+  ArrowPathRoundedSquareIcon,
+  ArrowsRightLeftIcon,
+  ChevronDownIcon, 
+  HeartIcon, 
+  ShareIcon, 
+  EllipsisHorizontalIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon,
+  PlusCircleIcon,
+  SparklesIcon,
+  ListBulletIcon,
+  ChatBubbleLeftRightIcon,
+  MusicalNoteIcon,
+  MicrophoneIcon,
+  InformationCircleIcon,
+  UserPlusIcon,
+  CheckBadgeIcon
+} from '@heroicons/react/24/outline';
+import { 
+  PlayIcon as PlayIconSolid,
+  PauseIcon as PauseIconSolid,
+  HeartIcon as HeartIconSolid,
+  BackwardIcon as BackwardIconSolid,
+  ForwardIcon as ForwardIconSolid
+} from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'motion/react';
-import { MOCK_ARTISTS } from '@/constants';
+import { MOCK_ARTISTS, MOCK_TRACKS } from '@/constants';
 import { useNavigate } from 'react-router-dom';
 import { getPlaceholderImage } from '@/lib/utils';
 
@@ -226,9 +234,9 @@ const FullPlayer: React.FC = () => {
 
   return (
     <motion.div 
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      exit={{ y: '100%' }}
+      initial={{ y: '100%', opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: '100%', opacity: 0 }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
       className="fixed inset-0 z-[60] bg-background overflow-y-auto no-scrollbar"
       ref={containerRef}
@@ -246,246 +254,71 @@ const FullPlayer: React.FC = () => {
 
       <div className="relative z-10 flex flex-col min-h-full">
         {/* Header */}
-        <div className="relative top-0 flex items-center justify-between p-2 pt-2">
+        <div className="sticky top-0 z-30 flex items-center justify-between p-4 bg-background/10 backdrop-blur-md">
           <button 
             onClick={() => setFullPlayerOpen(false)}
             className="p-2 -ml-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
             aria-label="Close full player"
           >
-            <ChevronDown className="h-8 w-8" />
+            <ChevronDownIcon className="h-8 w-8" />
           </button>
           <div className="text-center flex flex-col items-center">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50">Now Playing from</span>
-            <span className="text-xs font-bold text-foreground tracking-tight mt-3">TonJam Network</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50">Now Playing</span>
+            <span className="text-xs font-bold text-foreground tracking-tight mt-1">TonJam Network</span>
           </div>
           <button 
             className="p-2 -mr-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
             aria-label="More options"
           >
-            <MoreHorizontal className="h-6 w-6" />
+            <EllipsisHorizontalIcon className="h-6 w-6" />
           </button>
         </div>
 
-        <div className="flex-1 flex flex-col px-2 pb-2 max-w-md mx-auto w-full">
+        <div className="flex-1 flex flex-col px-4 pb-20 max-w-2xl mx-auto w-full space-y-12">
           
-          {/* Main Content Area */}
-          <div className="flex-1 flex flex-col justify-center min-h-[400px]">
-            <AnimatePresence mode="wait">
-              {activeView === 'player' && (
-                <motion.div 
-                  key="player"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full flex flex-col"
+          {/* 1. Main Player Section */}
+          <section className="w-full flex flex-col pt-4">
+            {/* Album Art */}
+            <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 relative group">
+              <img 
+                src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} 
+                alt={currentTrack.title} 
+                className={`w-full h-full object-cover transition-transform duration-[20s] ease-linear ${isPlaying ? 'scale-105' : 'scale-100'}`}
+              />
+            </div>
+            
+            {/* Track Info & Like Button */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="min-w-0 flex-1 pr-4">
+                <h2 className="text-[28px] md:text-[32px] font-bold text-foreground tracking-tight truncate mb-1">
+                  {currentTrack.title}
+                </h2>
+                <button 
+                  onClick={() => {
+                    setFullPlayerOpen(false);
+                    navigate(`/artist/${currentTrack.artistId}`);
+                  }}
+                  className="text-lg md:text-xl text-muted-foreground hover:text-foreground transition-colors truncate text-left w-full focus-visible:outline-none focus-visible:underline"
                 >
-                  {/* Album Art */}
-                  <div className="w-full aspect-square rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-2 relative group">
-                    <img 
-                      src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} 
-                      alt={currentTrack.title} 
-                      className={`w-full h-full object-cover transition-transform duration-[20s] ease-linear ${isPlaying ? 'scale-105' : 'scale-100'}`}
-                    />
-                  </div>
-                  
-                  {/* Track Info & Like Button */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="min-w-0 flex-1 pr-2 flex items-center gap-2">
-                      {artistData && (
-                        <img 
-                          src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.id}`)} 
-                          alt={currentTrack.artist} 
-                          className="w-10 h-10 rounded-full object-cover border-2 border-background shadow-md"
-                        />
-                      )}
-                      <div className="min-w-0">
-                        <h2 className="text-[20px] font-bold text-foreground tracking-tight truncate mb-1">
-                          {currentTrack.title}
-                        </h2>
-                        <button 
-                          onClick={() => {
-                            setFullPlayerOpen(false);
-                            navigate(`/artist/${currentTrack.artistId}`);
-                          }}
-                          className="text-base text-muted-foreground hover:text-foreground transition-colors truncate text-left w-full focus-visible:outline-none focus-visible:underline"
-                        >
-                          {currentTrack.artist}
-                        </button>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => toggleLikeTrack(currentTrack.id)}
-                      className={`p-2 -mr-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full ${isLiked ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
-                      aria-label={isLiked ? "Unlike track" : "Like track"}
-                    >
-                      <Heart className={`h-7 w-7 ${isLiked ? 'fill-current' : ''}`} />
-                    </button>
-                  </div>
+                  {currentTrack.artist}
+                </button>
+              </div>
+              <button 
+                onClick={() => toggleLikeTrack(currentTrack.id)}
+                className={`p-3 -mr-3 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full ${isLiked ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
+                aria-label={isLiked ? "Unlike track" : "Like track"}
+              >
+                {isLiked ? (
+                  <HeartIconSolid className="h-9 w-9" />
+                ) : (
+                  <HeartIcon className="h-9 w-9" />
+                )}
+              </button>
+            </div>
 
-                  {/* Track Metadata */}
-                  <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 bg-foreground/5 p-3 rounded-lg">
-                    {currentTrack.releaseDate && <span>{new Date(currentTrack.releaseDate).toLocaleDateString()}</span>}
-                    {currentTrack.bpm && <span>{currentTrack.bpm} BPM</span>}
-                    {currentTrack.key && <span>KEY: {currentTrack.key}</span>}
-                  </div>
-
-                  {/* New Actions Row */}
-                  <div className="flex items-center justify-center gap-4 mb-4">
-                    <button 
-                      onClick={() => setTrackToAddToPlaylist(currentTrack)}
-                      className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-foreground/5 transition-all group"
-                      aria-label="Add to playlist"
-                    >
-                      <PlusCircle className="h-6 w-6 text-foreground/50 group-hover:text-blue-500 transition-colors" />
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Add to Playlist</span>
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setFullPlayerOpen(false);
-                        navigate(`/track/${currentTrack.id}`);
-                      }}
-                      className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-foreground/5 transition-all group"
-                      aria-label="View track details"
-                    >
-                      <Info className="h-6 w-6 text-foreground/50 group-hover:text-blue-500 transition-colors" />
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">View Details</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeView === 'lyrics' && (
-                <motion.div 
-                  key="lyrics"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="w-full flex-1 flex flex-col"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <img src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} className="w-16 h-16 rounded-md shadow-lg" alt="" />
-                    <div>
-                      <h3 className="font-bold text-lg leading-tight">{currentTrack.title}</h3>
-                      <p className="text-muted-foreground text-sm">{currentTrack.artist}</p>
-                    </div>
-                  </div>
-                  {currentTrack.lyrics ? (
-                    <LyricsView lyrics={currentTrack.lyrics} />
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                      <p>No lyrics available for this track.</p>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-
-              {activeView === 'comments' && (
-                <motion.div 
-                  key="comments"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="w-full flex-1 flex flex-col"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <img src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} className="w-16 h-16 rounded-md shadow-lg" alt="" />
-                    <div>
-                      <h3 className="font-bold text-lg leading-tight">{currentTrack.title}</h3>
-                      <p className="text-muted-foreground text-sm">{currentTrack.artist}</p>
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-2 pb-2">
-                    <div className="flex gap-2">
-                      <img src={userProfile.avatar || getPlaceholderImage(`user-${userProfile.id}`)} className="w-8 h-8 rounded-full" alt="" />
-                      <div className="flex-1 relative">
-                        <input 
-                          type="text" 
-                          placeholder="Add a comment..." 
-                          className="w-full bg-foreground/5 rounded-full py-2 px-2 text-sm text-foreground outline-none border border-transparent focus:border-foreground/20 transition-all"
-                        />
-                      </div>
-                    </div>
-                    {[
-                      { id: 1, user: "Neon Voyager", avatar: "https://picsum.photos/100/100?random=21", text: "This track is absolutely mind-blowing! The bass is perfect.", time: "2h ago" },
-                      { id: 2, user: "Sarah Jenkins", avatar: "https://picsum.photos/100/100?random=32", text: "Love the atmospheric vibes here. Great work!", time: "5h ago" },
-                      { id: 3, user: "CryptoPioneer", avatar: "https://picsum.photos/100/100?random=50", text: "Added this immediately. A future classic.", time: "1d ago" },
-                    ].map(comment => (
-                      <div key={comment.id} className="flex gap-2 group">
-                        <img src={comment.avatar} className="w-8 h-8 rounded-full" alt="" />
-                        <div className="flex-1">
-                          <div className="flex items-baseline gap-2 mb-3">
-                            <span className="text-sm font-bold text-foreground">{comment.user}</span>
-                            <span className="text-[10px] text-muted-foreground">{comment.time}</span>
-                          </div>
-                          <p className="text-sm text-foreground/80">{comment.text}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {activeView === 'artist' && (
-                <motion.div 
-                  key="artist"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="w-full flex-1 flex flex-col"
-                >
-                  <div className="flex flex-col items-center gap-2 mb-2">
-                    {artistData && (
-                      <img src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.id}`)} className="w-32 h-32 rounded-full shadow-lg" alt={currentTrack.artist} />
-                    )}
-                    <h3 className="font-bold text-[20px]">{currentTrack.artist}</h3>
-                    <p className="text-muted-foreground text-sm text-center">{artistData?.bio || "No biography available."}</p>
-                  </div>
-                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-2">
-                    <h4 className="font-bold text-foreground">Similar Tracks</h4>
-                    {allTracks.filter(t => t.artistId === currentTrack.artistId && t.id !== currentTrack.id).slice(0, 3).map(track => (
-                      <div key={track.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer" onClick={() => playTrack(track)}>
-                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-12 h-12 rounded-md" alt="" />
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-foreground">{track.title}</p>
-                          <p className="text-xs text-muted-foreground">{track.artist}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {activeView === 'playlist' && (
-                <motion.div 
-                  key="playlist"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="w-full flex-1 flex flex-col"
-                >
-                  <h3 className="font-bold text-lg mb-2">Featured Playlists</h3>
-                  <div className="flex-1 overflow-y-auto no-scrollbar space-y-2">
-                    {/* Placeholder for playlists */}
-                    <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                      <p className="font-bold text-blue-400">Featured: TonJam Top 50</p>
-                      <p className="text-xs text-muted-foreground">The best tracks on TonJam right now.</p>
-                    </div>
-                    <div className="p-2 rounded-xl bg-muted/50">
-                      <p className="font-bold text-foreground">Suggested: Chill Vibes</p>
-                      <p className="text-xs text-muted-foreground">Perfect for relaxing.</p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Player Controls (Always visible at bottom) */}
-          <div className="mt-auto pt-2">
             {/* Progress Bar */}
-            <div className="w-full mb-2 group">
-              <div className="relative h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden mb-2">
+            <div className="w-full mb-6 group">
+              <div className="relative h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden mb-3">
                 <div 
                   className="absolute top-0 left-0 h-full bg-foreground transition-all duration-100 group-hover:bg-blue-500"
                   style={{ width: `${progress}%` }}
@@ -499,40 +332,40 @@ const FullPlayer: React.FC = () => {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
               </div>
-              <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
+              <div className="flex justify-between text-[12px] font-mono text-muted-foreground">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
             </div>
 
             {/* Main Playback Controls */}
-            <div className="w-full flex items-center justify-between mb-2">
+            <div className="w-full flex items-center justify-between mb-8">
               <button 
                 onClick={toggleShuffle}
                 className={`p-2 transition-all focus-visible:outline-none rounded-full ${isShuffle ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
                 aria-label={isShuffle ? "Disable shuffle" : "Enable shuffle"}
               >
-                <Shuffle className="h-5 w-5" />
+                <ArrowsRightLeftIcon className="h-6 w-6" />
               </button>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-6">
                 <button 
                   onClick={prevTrack}
                   className="p-2 text-foreground hover:text-foreground/80 transition-all active:scale-90 focus-visible:outline-none rounded-full"
                   aria-label="Previous track"
                 >
-                  <SkipBack className="h-8 w-8 fill-current" />
+                  <BackwardIconSolid className="h-10 w-10" />
                 </button>
                 
                 <button 
                   onClick={togglePlay}
-                  className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-background focus-visible:outline-none"
+                  className="w-20 h-20 rounded-full bg-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-background focus-visible:outline-none shadow-xl shadow-foreground/10"
                   aria-label={isPlaying ? "Pause" : "Play"}
                 >
                   {isPlaying ? (
-                    <Pause className="h-8 w-8 fill-current" />
+                    <PauseIconSolid className="h-10 w-10" />
                   ) : (
-                    <Play className="h-8 w-8 fill-current ml-2" />
+                    <PlayIconSolid className="h-10 w-10 ml-1" />
                   )}
                 </button>
                 
@@ -541,7 +374,7 @@ const FullPlayer: React.FC = () => {
                   className="p-2 text-foreground hover:text-foreground/80 transition-all active:scale-90 focus-visible:outline-none rounded-full"
                   aria-label="Next track"
                 >
-                  <SkipForward className="h-8 w-8 fill-current" />
+                  <ForwardIconSolid className="h-10 w-10" />
                 </button>
               </div>
               
@@ -550,72 +383,229 @@ const FullPlayer: React.FC = () => {
                 className={`p-2 transition-all focus-visible:outline-none rounded-full ${isRepeat ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
                 aria-label={isRepeat ? "Disable repeat" : "Enable repeat"}
               >
-                <Repeat className="h-5 w-5" />
+                <ArrowPathRoundedSquareIcon className="h-6 w-6" />
               </button>
             </div>
 
-            {/* Secondary Actions / View Switcher */}
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex gap-2">
+            {/* Quick Actions Row */}
+            <div className="flex items-center justify-between bg-foreground/5 p-4 rounded-2xl">
+              <div className="flex gap-4">
                 <button 
-                  onClick={() => setActiveView(activeView === 'lyrics' ? 'player' : 'lyrics')}
-                  className={`p-2 rounded-full transition-all ${activeView === 'lyrics' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
-                  aria-label="Toggle Lyrics"
+                  onClick={() => setTrackToAddToPlaylist(currentTrack)}
+                  className="p-2 text-foreground/50 hover:text-blue-500 transition-all rounded-full"
+                  aria-label="Add to playlist"
                 >
-                  <Mic2 className="h-5 w-5" />
-                </button>
-                <button 
-                  onClick={() => setActiveView(activeView === 'artist' ? 'player' : 'artist')}
-                  className={`p-2 rounded-full transition-all ${activeView === 'artist' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
-                  aria-label="Toggle Artist Info"
-                >
-                  <Music2 className="h-5 w-5" />
-                </button>
-                <button 
-                  onClick={() => setActiveView(activeView === 'playlist' ? 'player' : 'playlist')}
-                  className={`p-2 rounded-full transition-all ${activeView === 'playlist' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
-                  aria-label="Toggle Playlists"
-                >
-                  <ListMusic className="h-5 w-5" />
-                </button>
-                <button 
-                  onClick={() => setActiveView(activeView === 'comments' ? 'player' : 'comments')}
-                  className={`p-2 rounded-full transition-all ${activeView === 'comments' ? 'bg-foreground/20 text-foreground' : 'text-foreground/50 hover:text-foreground'}`}
-                  aria-label="Toggle Comments"
-                >
-                  <MessageSquare className="h-5 w-5" />
-                </button>
-              </div>
-              
-              <div className="flex gap-2">
-                <button 
-                  className="p-2 text-foreground/50 hover:text-amber-500 transition-all rounded-full"
-                  aria-label="Mint NFT"
-                >
-                  <Gem className="h-5 w-5" />
+                  <PlusCircleIcon className="h-6 w-6" />
                 </button>
                 <button 
                   onClick={handleShare}
                   className="p-2 text-foreground/50 hover:text-foreground transition-all rounded-full"
                   aria-label="Share"
                 >
-                  <Share2 className="h-5 w-5" />
+                  <ShareIcon className="h-6 w-6" />
                 </button>
                 <button 
                   onClick={() => setShowQueue(!showQueue)}
                   className={`p-2 rounded-full transition-all ${showQueue ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
                   aria-label="Queue"
                 >
-                  <ListMusic className="h-5 w-5" />
+                  <ListBulletIcon className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="flex gap-4">
+                <button 
+                  className="p-2 text-foreground/50 hover:text-amber-500 transition-all rounded-full"
+                  aria-label="Mint NFT"
+                >
+                  <SparklesIcon className="h-6 w-6" />
                 </button>
               </div>
             </div>
 
-            {/* Visualizer (Subtle at the bottom) */}
-            {activeView === 'player' && (
-              <AudioVisualizer isPlaying={isPlaying} />
+            {/* Visualizer */}
+            <AudioVisualizer isPlaying={isPlaying} />
+          </section>
+
+          {/* 2. Track Details Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <InformationCircleIcon className="h-5 w-5 text-blue-500" />
+              <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Track Details</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-foreground/5 p-4 rounded-xl">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Release Date</p>
+                <p className="text-sm font-bold text-foreground">{currentTrack.releaseDate ? new Date(currentTrack.releaseDate).toLocaleDateString() : 'N/A'}</p>
+              </div>
+              <div className="bg-foreground/5 p-4 rounded-xl">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Genre</p>
+                <p className="text-sm font-bold text-foreground">{currentTrack.genre || 'N/A'}</p>
+              </div>
+              <div className="bg-foreground/5 p-4 rounded-xl">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Tempo</p>
+                <p className="text-sm font-bold text-foreground">{currentTrack.bpm ? `${currentTrack.bpm} BPM` : 'N/A'}</p>
+              </div>
+              <div className="bg-foreground/5 p-4 rounded-xl">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Key</p>
+                <p className="text-sm font-bold text-foreground">{currentTrack.key || 'N/A'}</p>
+              </div>
+            </div>
+          </section>
+
+          {/* 3. Artist Card Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <MusicalNoteIcon className="h-5 w-5 text-blue-500" />
+              <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">About the Artist</h3>
+            </div>
+            {artistData && (
+              <div className="bg-foreground/5 p-6 rounded-2xl space-y-4">
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.id}`)} 
+                    className="w-20 h-20 rounded-full object-cover border-2 border-background shadow-xl" 
+                    alt={artistData.name} 
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1">
+                      <h4 className="text-xl font-bold text-foreground">{artistData.name}</h4>
+                      {artistData.verified && <CheckBadgeIcon className="h-5 w-5 text-blue-500" />}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{artistData.followers?.toLocaleString() || '0'} Followers</p>
+                  </div>
+                  <button className="px-4 py-2 rounded-full bg-foreground text-background text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity">
+                    Follow
+                  </button>
+                </div>
+                <p className="text-sm text-foreground/70 leading-relaxed line-clamp-3">
+                  {artistData.bio || "No biography available for this artist."}
+                </p>
+                <button 
+                  onClick={() => {
+                    setFullPlayerOpen(false);
+                    navigate(`/artist/${artistData.id}`);
+                  }}
+                  className="text-xs font-bold text-blue-500 uppercase tracking-widest hover:underline"
+                >
+                  View Full Profile
+                </button>
+              </div>
             )}
-          </div>
+          </section>
+
+          {/* 4. Lyrics Section (If available) */}
+          {currentTrack.lyrics && (
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <MicrophoneIcon className="h-5 w-5 text-blue-500" />
+                <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Lyrics</h3>
+              </div>
+              <div className="bg-foreground/5 p-6 rounded-2xl">
+                <LyricsView lyrics={currentTrack.lyrics} />
+              </div>
+            </section>
+          )}
+
+          {/* 5. Comments Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <ChatBubbleLeftRightIcon className="h-5 w-5 text-blue-500" />
+              <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Comments</h3>
+            </div>
+            <div className="bg-foreground/5 p-6 rounded-2xl space-y-6">
+              <div className="flex gap-3">
+                <img src={userProfile.avatar || getPlaceholderImage(`user-${userProfile.id}`)} className="w-10 h-10 rounded-full object-cover" alt="" />
+                <div className="flex-1 relative">
+                  <input 
+                    type="text" 
+                    placeholder="Add a comment..." 
+                    className="w-full bg-background/50 rounded-xl py-3 px-4 text-sm text-foreground outline-none border border-foreground/10 focus:border-blue-500/50 transition-all"
+                  />
+                </div>
+              </div>
+              <div className="space-y-6">
+                {[
+                  { id: 1, user: "Neon Voyager", avatar: "https://picsum.photos/100/100?random=21", text: "This track is absolutely mind-blowing! The bass is perfect.", time: "2h ago" },
+                  { id: 2, user: "Sarah Jenkins", avatar: "https://picsum.photos/100/100?random=32", text: "Love the atmospheric vibes here. Great work!", time: "5h ago" },
+                  { id: 3, user: "CryptoPioneer", avatar: "https://picsum.photos/100/100?random=50", text: "Added this immediately. A future classic.", time: "1d ago" },
+                ].map(comment => (
+                  <div key={comment.id} className="flex gap-3 group">
+                    <img src={comment.avatar} className="w-10 h-10 rounded-full object-cover" alt="" />
+                    <div className="flex-1">
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-sm font-bold text-foreground">{comment.user}</span>
+                        <span className="text-[10px] text-muted-foreground">{comment.time}</span>
+                      </div>
+                      <p className="text-sm text-foreground/80 leading-relaxed">{comment.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button className="w-full py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors border-t border-foreground/5 mt-4">
+                View all 24 comments
+              </button>
+            </div>
+          </section>
+
+          {/* 6. Similar Tracks Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <MusicalNoteIcon className="h-5 w-5 text-blue-500" />
+              <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Similar Tracks</h3>
+            </div>
+            <div className="space-y-2">
+              {(allTracks || []).filter(t => t.id !== currentTrack?.id).slice(0, 5).map(track => (
+                <div 
+                  key={track.id} 
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-foreground/5 cursor-pointer transition-all group" 
+                  onClick={() => playTrack(track)}
+                >
+                  <div className="relative w-14 h-14 rounded-lg overflow-hidden">
+                    <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt="" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <PlayIconSolid className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground truncate">{track.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-muted-foreground">{formatTime(track.duration || 0)}</span>
+                    <button className="p-2 text-foreground/30 hover:text-foreground transition-colors">
+                      <EllipsisHorizontalIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 7. Featured Playlists Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <ListBulletIcon className="h-5 w-5 text-blue-500" />
+              <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Featured Playlists</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer group">
+                <div className="w-full aspect-video rounded-xl bg-blue-500/20 mb-3 overflow-hidden">
+                  <img src={getPlaceholderImage('playlist-1')} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" alt="" />
+                </div>
+                <p className="font-bold text-blue-400">TonJam Top 50</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Updated Daily</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-muted/50 border border-transparent hover:border-foreground/10 transition-all cursor-pointer group">
+                <div className="w-full aspect-video rounded-xl bg-foreground/5 mb-3 overflow-hidden">
+                  <img src={getPlaceholderImage('playlist-2')} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" alt="" />
+                </div>
+                <p className="font-bold text-foreground">Chill Vibes</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Curated for you</p>
+              </div>
+            </div>
+          </section>
+
         </div>
       </div>
 
@@ -627,51 +617,59 @@ const FullPlayer: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="absolute inset-0 z-50 bg-background/95 backdrop-blur-3xl flex flex-col"
+            className="fixed inset-0 z-[70] bg-background/95 backdrop-blur-3xl flex flex-col"
           >
-            <div className="sticky top-0 flex items-center justify-between p-2 bg-background/80 backdrop-blur-md z-10">
+            <div className="sticky top-0 flex items-center justify-between p-4 bg-background/80 backdrop-blur-md z-10">
               <h3 className="text-lg font-bold uppercase tracking-widest">Play Queue</h3>
               <button 
                 onClick={() => setShowQueue(false)}
                 className="p-2 rounded-full bg-muted/50 hover:bg-muted text-foreground transition-all"
               >
-                <ChevronDown className="h-5 w-5" />
+                <ChevronDownIcon className="h-6 w-6" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-2 space-y-2">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Now Playing</h4>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 mb-2">
-                <img src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} className="w-12 h-12 rounded-md" alt="" />
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-4">
+                <img src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} className="w-16 h-16 rounded-xl shadow-lg" alt="" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-blue-400 truncate">{currentTrack.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">{currentTrack.artist}</p>
+                  <p className="text-base font-bold text-blue-400 truncate">{currentTrack.title}</p>
+                  <p className="text-sm text-muted-foreground truncate">{currentTrack.artist}</p>
                 </div>
-                <AudioVisualizer isPlaying={isPlaying} />
+                <div className="w-12">
+                  <AudioVisualizer isPlaying={isPlaying} />
+                </div>
               </div>
 
               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Next Up</h4>
               {queue.map((track, index) => (
                 <div 
                   key={`${track.id}-${index}`} 
-                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer group"
+                  className="flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/50 transition-colors cursor-pointer group"
                   onClick={() => {
                     playTrack(track);
                     setShowQueue(false);
                   }}
                 >
-                  <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-12 h-12 rounded-md opacity-70 group-hover:opacity-100 transition-opacity" alt="" />
+                  <div className="relative w-14 h-14 rounded-xl overflow-hidden shadow-md">
+                    <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <PlayIconSolid className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-foreground truncate">{track.title}</p>
                     <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
                   </div>
                   <button className="p-2 opacity-0 group-hover:opacity-100 transition-opacity text-foreground">
-                    <Play className="h-4 w-4 fill-current" />
+                    <EllipsisHorizontalIcon className="h-5 w-5" />
                   </button>
                 </div>
               ))}
               {queue.length === 0 && (
-                <div className="text-center py-2 text-muted-foreground">
-                  <p>Queue is empty</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <MusicalNoteIcon className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                  <p className="font-bold uppercase tracking-widest text-xs">Queue is empty</p>
                 </div>
               )}
             </div>

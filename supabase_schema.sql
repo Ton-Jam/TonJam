@@ -8,6 +8,7 @@ CREATE TABLE profiles (
   bio TEXT,
   wallet_address TEXT UNIQUE,
   earnings_total DECIMAL DEFAULT 0,
+  role TEXT DEFAULT 'collector' CHECK (role IN ('artist', 'collector', 'admin')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

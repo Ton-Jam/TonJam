@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Zap, CheckCircle2 } from 'lucide-react';
-import { Task } from '@/pages/Tasks';
+import { Task } from '@/types';
 
 interface TaskDetailModalProps {
   task: Task;

@@ -1,0 +1,156 @@
+import React from 'react';
+import { Play, Satellite, Tag, Gavel, Info } from 'lucide-react';
+import { Track, NFTItem, Event, Collaboration, Artist } from '@/types';
+import TrackCard from '@/components/TrackCard';
+import { getPlaceholderImage } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { TON_LOGO } from '@/constants';
+
+interface ArtistTracksSectionProps {
+  artistTracks: Track[];
+  isOwnProfile: boolean;
+  playAll: (tracks: Track[]) => void;
+  featuredNFT?: NFTItem;
+  topTracks: Track[];
+  trackFilter: string;
+  setTrackFilter: (filter: string) => void;
+  artist: Artist;
+}
+
+const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
+  artistTracks,
+  isOwnProfile,
+  playAll,
+  featuredNFT,
+  topTracks,
+  trackFilter,
+  setTrackFilter,
+  artist,
+}) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="space-y-4 animate-in fade-in duration-700">
+      {/* Featured NFT Highlight */}
+      {featuredNFT && (
+        <div className="mb-4 relative group cursor-pointer" onClick={() => navigate(`/nft/${featuredNFT.id}`)}>
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-purple-500/20 blur-2xl opacity-50 group-hover:opacity-100 transition-opacity" />
+          <div className="relative glass border border-amber-500/30 bg-foreground/[0.01] p-5 rounded-[16px] flex flex-col md:flex-row items-center gap-4 overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <Satellite className="h-32 w-32 text-amber-500" />
+            </div>
+            <div className="relative w-full md:w-32 aspect-square rounded-[12px] overflow-hidden shadow-2xl">
+              <img src={featuredNFT.imageUrl || getPlaceholderImage(`nft-${featuredNFT.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+              <div className="absolute inset-0 bg-black/20" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
+                <span className="px-2 py-2 bg-amber-500 text-background rounded-[4px] text-[8px] font-bold uppercase tracking-widest">Featured Artifact</span>
+                {featuredNFT.listingType === 'auction' && (
+                  <span className="flex items-center gap-2 text-[8px] font-bold text-amber-500 uppercase tracking-widest">
+                    <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" /> Live Auction
+                  </span>
+                )}
+              </div>
+              <h3 className="text-2xl font-bold text-foreground uppercase tracking-tighter mb-1">{featuredNFT.title}</h3>
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Minted Protocol • {featuredNFT.edition} Edition</p>
+              <div className="flex items-center justify-center md:justify-start gap-4">
+                <div className="flex items-center gap-4">
+                  <img src={TON_LOGO} className="w-4 h-4" alt="" />
+                  <span className="text-xl font-bold text-foreground tracking-tighter">{featuredNFT.price} TON</span>
+                </div>
+                <button className="px-4 py-4 bg-amber-500 hover:bg-amber-400 text-background rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-amber-500/20">
+                  {featuredNFT.listingType === 'auction' ? 'Place Bid' : 'Acquire Protocol'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Tracks Section */}
+      {topTracks.length > 0 && (
+        <section className="bg-card rounded-[10px] p-5">
+          <h3 className="text-lg font-bold text-foreground mb-4">Popular</h3>
+          <div className="space-y-2">
+            {topTracks.map((track, idx) => (
+              <div 
+                key={`top-${track.id}`} 
+                className="group flex items-center gap-4 p-2 rounded-[8px] hover:bg-muted/50 transition-all cursor-pointer"
+                onClick={() => playAll([track])}
+              >
+                <span className="w-8 text-sm font-medium text-muted-foreground text-center">{idx + 1}</span>
+                <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0">
+                  <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt="" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Play className="h-4 w-4 text-white fill-white" />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-foreground truncate">{track.title}</h4>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {(track.playCount || 0).toLocaleString()}
+                </div>
+                <div className="text-sm text-muted-foreground w-16 text-right">
+                  {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* All Tracks Grid */}
+      <section className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-foreground">All Tracks</h3>
+          <div className="flex items-center gap-2">
+            {['All', 'NFTs', 'Releases', 'Collaborations'].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setTrackFilter(filter)}
+                className={`px-3 py-1 rounded-full text-xs font-bold uppercase transition-all ${
+                  trackFilter === filter 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
+          {artistTracks.filter(t => {
+            if (trackFilter === 'All') return true;
+            if (trackFilter === 'NFTs') return t.isNFT;
+            if (trackFilter === 'Releases') return !t.isCollaboration;
+            if (trackFilter === 'Collaborations') return t.isCollaboration;
+            return true;
+          }).map(t => (
+            <div key={t.id} className="min-w-[280px] sm:min-w-[320px]">
+              <TrackCard 
+                track={t} 
+                onMint={isOwnProfile ? (track) => navigate('/mint', { state: { track } }) : undefined}
+              />
+            </div>
+          ))}
+        </div>
+        {artistTracks.filter(t => {
+          if (trackFilter === 'All') return true;
+          if (trackFilter === 'NFTs') return t.isNFT;
+          if (trackFilter === 'Releases') return !t.isCollaboration;
+          if (trackFilter === 'Collaborations') return t.isCollaboration;
+          return true;
+        }).length === 0 && (
+          <div className="py-4 text-center bg-card rounded-[10px]">
+            <p className="text-xs text-muted-foreground">No tracks broadcasted.</p>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
+export default ArtistTracksSection;

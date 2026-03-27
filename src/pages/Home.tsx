@@ -34,22 +34,130 @@ const FEATURED_TRACKS_CAROUSEL: CarouselItem[] = MOCK_TRACKS.slice(0, 3).map(tra
   cta: 'Play'
 }));
 
+const WelcomeBanner = ({ onDismiss }: { onDismiss: () => void }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+      animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+      className="relative overflow-hidden rounded-[10px] bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white shadow-2xl shadow-blue-500/20"
+    >
+      <button 
+        onClick={onDismiss}
+        className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors z-20"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      
+      <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+        <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center flex-shrink-0">
+          <Sparkles className="h-10 w-10 text-white" />
+        </div>
+        
+        <div className="space-y-2 text-center md:text-left">
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Welcome to TonJam</h2>
+          <p className="text-white/80 font-medium max-w-xl">
+            You've just entered the future of music. Discover decentralized sounds, collect rare NFTs, and connect with your favorite artists on the TON blockchain.
+          </p>
+          <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
+            <button 
+              onClick={onDismiss}
+              className="px-6 py-2 bg-white text-blue-600 font-bold uppercase tracking-widest rounded-full text-[10px] hover:bg-neutral-100 transition-all shadow-lg"
+            >
+              Start Exploring
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Decorative elements */}
+      <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 blur-3xl rounded-full"></div>
+      <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/5 blur-3xl rounded-full"></div>
+    </motion.div>
+  );
+};
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { playTrack, playAll, artists, userProfile, recentlyPlayed, getTrendingTracks, getTopNFTTracks, allPlaylists, searchQuery, setSearchQuery, generateDiscoverWeekly, getRecommendations, allNFTs } = useAudio();
+  const { 
+    playTrack, 
+    playAll, 
+    artists, 
+    userProfile, 
+    recentlyPlayed, 
+    getTrendingTracks, 
+    getTopNFTTracks, 
+    allPlaylists, 
+    searchQuery, 
+    setSearchQuery, 
+    generateDiscoverWeekly, 
+    getRecommendations, 
+    allNFTs,
+    sponsoredPosts
+  } = useAudio();
   
+  const carouselItems = useMemo(() => {
+    const approvedSponsorships = sponsoredPosts
+      .filter(post => post.status === 'approved')
+      .map(post => ({
+        id: post.id,
+        title: post.title,
+        subtitle: post.artistName,
+        imageUrl: post.imageUrl,
+        link: post.link,
+        cta: post.type === 'track' ? 'Play' : 'View'
+      }));
+
+    // Combine with default featured tracks, ensuring uniqueness if needed (though IDs might differ)
+    return [...approvedSponsorships, ...FEATURED_TRACKS_CAROUSEL];
+  }, [sponsoredPosts]);
+  
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'discovery'>('overview');
+  const [showWelcome, setShowWelcome] = useState(false);
+
   useEffect(() => {
     generateDiscoverWeekly();
+    
+    const hasVisited = localStorage.getItem('tonjam_has_visited');
+    if (!hasVisited) {
+      setShowWelcome(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'discovery'>('overview');
+  const dismissWelcome = () => {
+    setShowWelcome(false);
+    localStorage.setItem('tonjam_has_visited', 'true');
+  };
 
   const handleCtaClick = (item: CarouselItem) => {
+    // Check if it's a mock track
     const track = MOCK_TRACKS.find(t => t.id === item.id);
     if (track) {
       playTrack(track);
+      return;
+    }
+
+    // Check if it's a sponsored post
+    const sponsoredPost = sponsoredPosts.find(p => p.id === item.id);
+    if (sponsoredPost) {
+      if (sponsoredPost.type === 'track') {
+        const trackToPlay = MOCK_TRACKS.find(t => t.id === sponsoredPost.targetId);
+        if (trackToPlay) {
+          playTrack(trackToPlay);
+        } else {
+          navigate(sponsoredPost.link);
+        }
+      } else {
+        navigate(sponsoredPost.link);
+      }
+      return;
+    }
+
+    // Fallback to link navigation
+    if (item.link) {
+      navigate(item.link);
     }
   };
 
@@ -146,6 +254,64 @@ const Home: React.FC = () => {
 
   return (
     <div className="page-container w-full">
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="relative z-50 mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-transparent border border-blue-500/20 backdrop-blur-xl p-8 lg:p-12 shadow-2xl"
+          >
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 blur-[60px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
+            
+            <button 
+              onClick={dismissWelcome}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all"
+              aria-label="Dismiss welcome message"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="relative z-10 space-y-6 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 text-[11px] font-bold uppercase tracking-[0.2em]">
+                <Sparkles className="h-3.5 w-3.5" />
+                Welcome to the Future
+              </div>
+              
+              <h2 className="text-[40px] lg:text-[72px] font-black uppercase tracking-tighter leading-[0.85] text-foreground">
+                Welcome to <span className="text-blue-500">TonJam</span>
+              </h2>
+              
+              <p className="text-xl lg:text-2xl text-muted-foreground leading-relaxed font-medium">
+                Experience the first decentralized music protocol on TON. Stream, collect, and connect directly with your favorite artists.
+              </p>
+              
+              <div className="flex flex-wrap gap-4 pt-4">
+                <button 
+                  onClick={() => {
+                    dismissWelcome();
+                    navigate('/marketplace');
+                  }}
+                  className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 group/btn text-sm"
+                >
+                  <ShoppingBag className="h-5 w-5 group-hover/btn:scale-110 transition-transform" />
+                  Explore Marketplace
+                </button>
+                <button 
+                  onClick={dismissWelcome}
+                  className="px-8 py-4 bg-white/5 hover:bg-white/10 text-foreground font-bold uppercase tracking-widest rounded-full border border-white/10 transition-all text-sm"
+                >
+                  Start Listening
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Filter Section */}
       <div className="max-w-3xl mx-auto w-full relative z-20">
         <div className="flex items-center justify-between mb-4 pb-1">
@@ -233,9 +399,16 @@ const Home: React.FC = () => {
             transition={{ duration: 0.4 }}
             className="space-y-4"
           >
+            {/* Welcome Banner */}
+            <AnimatePresence>
+              {showWelcome && (
+                <WelcomeBanner onDismiss={dismissWelcome} />
+              )}
+            </AnimatePresence>
+
             {/* Featured Sponsored Posts Carousel */}
             <div className="mt-8">
-              <AutoCarousel items={FEATURED_TRACKS_CAROUSEL} onCtaClick={handleCtaClick} />
+              <AutoCarousel items={carouselItems} onCtaClick={handleCtaClick} />
             </div>
 
             {/* Hero Section */}

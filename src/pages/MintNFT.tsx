@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BackButton } from '@/components/BackButton';
 import { Hammer, FileAudio, CloudUpload, Image, Rocket, Check, Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +17,8 @@ const mintSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
   genre: z.string().min(1, 'Genre is required'),
+  editionType: z.enum(['Unique', 'Limited', 'Standard']),
+  rarity: z.string().optional(),
   lyrics: z.string().optional(),
   royaltySplits: z.array(z.object({
     address: z.string().min(1, 'Address is required'),
@@ -63,16 +66,20 @@ const MintNFT: React.FC = () => {
     resolver: zodResolver(mintSchema),
     defaultValues: {
       title: track?.title || '',
-      description: '',
+      description: track?.description || '',
       genre: track?.genre || 'Electronic',
+      editionType: (track?.editionType as any) || 'Standard',
+      rarity: track?.rarity || 'Common',
       lyrics: track?.lyrics || '',
-      royaltySplits: [{ address: userAddress || '', percentage: 100 }],
-      supply: '100',
-      price: '5',
+      royaltySplits: track?.royaltySplits || [{ address: userAddress || '', percentage: 100 }],
+      supply: track?.editions || '100',
+      price: track?.price || '5',
       audioPreview: track?.audioUrl || '',
       coverPreview: track?.coverUrl || '',
       traits: [
         { trait_type: 'Genre', value: track?.genre || 'Electronic' },
+        { trait_type: 'BPM', value: track?.bpm || 128 },
+        { trait_type: 'Key', value: track?.key || 'Am' },
         { trait_type: 'Rarity', value: 'Common' }
       ],
       exclusiveContent: []
@@ -194,14 +201,18 @@ const MintNFT: React.FC = () => {
         imageUrl: coverUrl,
         coverUrl: coverUrl,
         price: data.price,
-        edition: 'Genesis',
+        edition: data.editionType,
         supply: parseInt(data.supply),
         minted: 1,
         description: data.description || '',
         audioUrl: audioUrl,
         ipfsUrl: ipfsUrl,
         isAuction: false,
-        attributes: data.traits as NFTTrait[],
+        attributes: [
+          ...data.traits,
+          { trait_type: 'Edition Type', value: data.editionType },
+          { trait_type: 'Rarity', value: data.rarity || 'Common' }
+        ] as NFTTrait[],
         royaltySplits: data.royaltySplits,
         exclusiveContent: data.exclusiveContent.filter(e => e.title && e.url).map(e => ({
           ...e,
@@ -269,13 +280,12 @@ const MintNFT: React.FC = () => {
 
       <div className="w-full">
         <div className="px-4 sm:px-4 py-4 sm:py-4 mb-4 sm:mb-4">
-          <button 
-            onClick={() => navigate(-1)}
+          <BackButton 
             className="flex items-center gap-4 text-muted-foreground hover:text-foreground transition-colors group"
+            iconClassName="w-4 h-4 group-hover:-translate-x-1 transition-transform"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             <span className="text-[10px] font-bold uppercase tracking-widest">Back</span>
-          </button>
+          </BackButton>
         </div>
 
         <div className="relative glass border-y sm:border border-neutral-500/10 w-full sm:rounded-[10px] p-4 sm:p-4 shadow-2xl flex flex-col overflow-hidden">
@@ -395,6 +405,18 @@ const MintNFT: React.FC = () => {
                   <div className="space-y-4">
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Mint Price (TON)</label>
                     <input {...register('price')} type="number" className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" aria-label="Mint Price (TON)" />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Edition Type</label>
+                    <select {...register('editionType')} className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground">
+                      <option value="Standard">Standard</option>
+                      <option value="Limited">Limited</option>
+                      <option value="Unique">Unique (1/1)</option>
+                    </select>
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Rarity Label/Score</label>
+                    <input {...register('rarity')} placeholder="e.g. Legendary, 99/100" className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" />
                   </div>
                   <div className="space-y-4 sm:space-y-4 col-span-1 sm:col-span-3">
                     <div className="flex justify-between items-center">
@@ -539,6 +561,14 @@ const MintNFT: React.FC = () => {
                       <div className="bg-background/30 px-4 sm:px-4 py-4 rounded-full">
                         <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-4">Supply:</span>
                         <span className="text-[10px] sm:text-xs font-bold text-foreground">{mintData.supply}</span>
+                      </div>
+                      <div className="bg-background/30 px-4 sm:px-4 py-4 rounded-full">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-4">Edition:</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-foreground">{mintData.editionType}</span>
+                      </div>
+                      <div className="bg-background/30 px-4 sm:px-4 py-4 rounded-full">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-4">Rarity:</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-foreground">{mintData.rarity}</span>
                       </div>
                     </div>
                   </div>

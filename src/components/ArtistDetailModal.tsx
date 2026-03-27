@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
-import { X, CheckCircle2, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause, TrendingUp, Zap } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { X, CheckCircle2, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause, TrendingUp, Zap, ChevronDown, ChevronUp, Clock, Activity, Key } from 'lucide-react';
 import { Artist, Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_TRACKS } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface ArtistDetailModalProps {
   artist: Artist;
@@ -14,6 +15,7 @@ interface ArtistDetailModalProps {
 const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser, playTrack, currentTrack, isPlaying, togglePlay } = useAudio();
+  const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
   const isFollowing = followedUserIds.includes(artist.id);
 
   const artistTracks = useMemo(() => {
@@ -141,60 +143,121 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                   const jamEarnings = ((track.playCount || 0) * 0.001).toFixed(2);
                   
                   return (
-                    <div 
-                      key={track.id}
-                      className={`group flex items-center gap-2 p-2 rounded-xl transition-all cursor-pointer relative ${
-                        isTrackActive 
-                          ? 'bg-blue-500/10 border border-neutral-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
-                          : 'hover:bg-muted/50 border border-transparent'
-                      }`}
-                      onClick={() => handlePlayTrack(track)}
-                    >
-                      <span className="w-4 text-center text-xs font-bold text-muted-foreground/50 group-hover:text-muted-foreground/80">
-                        {isTrackPlaying ? (
-                          <div className="flex items-end justify-center gap-3 h-3">
-                            <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_0ms] h-full"></div>
-                            <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_200ms] h-2/3"></div>
-                            <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_400ms] h-full"></div>
-                          </div>
-                        ) : (
-                          index + 1
-                        )}
-                      </span>
-                      
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 shadow-lg">
-                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover" />
-                        <div className={`absolute inset-0 bg-background/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isTrackActive ? 'opacity-100' : ''}`}>
-                          {isTrackPlaying ? <Pause className="w-5 h-5 text-foreground" /> : <Play className="w-5 h-5 text-foreground fill-white" />}
-                        </div>
-                      </div>
- 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-3">
-                          <h4 className={`text-sm font-bold truncate ${isTrackActive ? 'text-blue-400' : 'text-black'}`}>
-                            {track.title}
-                          </h4>
-                          {isTrending && (
-                            <span className="flex items-center gap-3 px-3 py-3 rounded-full bg-orange-500/20 text-orange-400 text-[8px] font-black uppercase tracking-tighter">
-                              <TrendingUp className="w-2 h-2" /> Hot
-                            </span>
+                    <div key={track.id} className="space-y-1">
+                      <div 
+                        className={`group flex items-center gap-2 p-2 rounded-xl transition-all cursor-pointer relative ${
+                          isTrackActive 
+                            ? 'bg-blue-500/10 border border-neutral-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
+                            : 'hover:bg-muted/50 border border-transparent'
+                        }`}
+                        onClick={() => handlePlayTrack(track)}
+                      >
+                        <span className="w-4 text-center text-xs font-bold text-muted-foreground/50 group-hover:text-muted-foreground/80">
+                          {isTrackPlaying ? (
+                            <div className="flex items-end justify-center gap-3 h-3">
+                              <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_0ms] h-full"></div>
+                              <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_200ms] h-2/3"></div>
+                              <div className="w-0.5 bg-blue-500 animate-[bounce_1s_infinite_400ms] h-full"></div>
+                            </div>
+                          ) : (
+                            index + 1
                           )}
+                        </span>
+                        
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 shadow-lg">
+                          <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover" />
+                          <div className={`absolute inset-0 bg-background/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isTrackActive ? 'opacity-100' : ''}`}>
+                            {isTrackPlaying ? <Pause className="w-5 h-5 text-foreground" /> : <Play className="w-5 h-5 text-foreground fill-white" />}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                          <span className="flex items-center gap-2">
-                            <Music className="w-3 h-3" /> {track.genre}
-                          </span>
-                          <span className="flex items-center gap-2">
-                            <Zap className="w-3 h-3 text-blue-400" /> {jamEarnings} JAM
-                          </span>
-                          <span className="hidden sm:inline">{(track.playCount || 0).toLocaleString()} plays</span>
+   
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-3">
+                            <h4 className={`text-sm font-bold truncate ${isTrackActive ? 'text-blue-400' : 'text-black'}`}>
+                              {track.title}
+                            </h4>
+                            {isTrending && (
+                              <span className="flex items-center gap-3 px-3 py-3 rounded-full bg-orange-500/20 text-orange-400 text-[8px] font-black uppercase tracking-tighter">
+                                <TrendingUp className="w-2 h-2" /> Hot
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                            <span className="flex items-center gap-2">
+                              <Music className="w-3 h-3" /> {track.genre}
+                            </span>
+                            <span className="flex items-center gap-2">
+                              <Zap className="w-3 h-3 text-blue-400" /> {jamEarnings} JAM
+                            </span>
+                            <span className="hidden sm:inline">{(track.playCount || 0).toLocaleString()} plays</span>
+                          </div>
+                        </div>
+   
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="text-xs font-mono text-muted-foreground flex flex-col items-end gap-2">
+                            <span>{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                            <span className="sm:hidden text-[9px] font-bold">{(track.playCount || 0).toLocaleString()}</span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedTrackId(expandedTrackId === track.id ? null : track.id);
+                            }}
+                            className="p-1 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+                          >
+                            {expandedTrackId === track.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </button>
                         </div>
                       </div>
- 
-                      <div className="text-xs font-mono text-muted-foreground flex flex-col items-end gap-2">
-                        <span>{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
-                        <span className="sm:hidden text-[9px] font-bold">{(track.playCount || 0).toLocaleString()}</span>
-                      </div>
+
+                      <AnimatePresence>
+                        {expandedTrackId === track.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="mx-6 p-3 bg-muted/30 rounded-xl border border-border/50 flex flex-wrap gap-4">
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                <div className="flex flex-col">
+                                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Duration</span>
+                                  <span className="text-xs font-medium">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                                </div>
+                              </div>
+                              {track.bpm && (
+                                <div className="flex items-center gap-2">
+                                  <Activity className="w-3.5 h-3.5 text-muted-foreground" />
+                                  <div className="flex flex-col">
+                                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">BPM</span>
+                                    <span className="text-xs font-medium">{track.bpm}</span>
+                                  </div>
+                                </div>
+                              )}
+                              {track.key && (
+                                <div className="flex items-center gap-2">
+                                  <Key className="w-3.5 h-3.5 text-muted-foreground" />
+                                  <div className="flex flex-col">
+                                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Key</span>
+                                    <span className="text-xs font-medium">{track.key}</span>
+                                  </div>
+                                </div>
+                              )}
+                              {track.bitrate && (
+                                <div className="flex items-center gap-2">
+                                  <Disc className="w-3.5 h-3.5 text-muted-foreground" />
+                                  <div className="flex flex-col">
+                                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Quality</span>
+                                    <span className="text-xs font-medium">{track.bitrate}</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   );
                 })}

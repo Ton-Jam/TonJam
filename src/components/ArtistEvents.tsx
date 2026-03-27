@@ -44,7 +44,7 @@ const ArtistEvents: React.FC<ArtistEventsProps> = ({ events }) => {
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-blue-600 text-foreground rounded-[8px] text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-2"
               >
-                <Ticket className="h-3 w-3" /> Tickets
+                <Ticket className="h-3 w-3" /> Get Tickets
               </a>
             )}
           </div>

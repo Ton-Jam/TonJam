@@ -41,6 +41,7 @@ import { supabase } from '@/lib/supabase';
 
 const AppContent: React.FC = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
+  const [isSupabaseReachable, setIsSupabaseReachable] = useState(true);
 
   useEffect(() => {
     // Test Supabase connection
@@ -48,13 +49,26 @@ const AppContent: React.FC = () => {
       try {
         const { error } = await supabase.from('tracks').select('id').limit(1);
         if (error) throw error;
+        setIsSupabaseReachable(true);
       } catch (error) {
-        console.error("Please check your Supabase configuration. The Supabase backend is currently unreachable.");
+        console.error("Please check your Supabase configuration. The Supabase backend is currently unreachable.", error);
+        setIsSupabaseReachable(false);
       }
     };
     testConnection();
     setIsAppLoading(false);
   }, []);
+
+  if (!isSupabaseReachable) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background text-foreground">
+        <div className="text-center p-4">
+          <h1 className="text-2xl font-bold mb-2">Connection Error</h1>
+          <p>The Supabase backend is currently unreachable. Please check your configuration.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence>
@@ -107,19 +121,17 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ErrorBoundary>
-      <TonConnectUIProvider manifestUrl="https://ton-jam.vercel.app/tonconnect-manifest.json">
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <AuthProvider>
-            <AudioProvider>
-              <Toaster theme="light" position="top-right" />
-              <Router>
-                <ScrollToTop />
-                <AppContent />
-              </Router>
-            </AudioProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </TonConnectUIProvider>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <AuthProvider>
+          <AudioProvider>
+            <Toaster theme="light" position="top-right" />
+            <Router>
+              <ScrollToTop />
+              <AppContent />
+            </Router>
+          </AudioProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 };

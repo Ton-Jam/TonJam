@@ -40,11 +40,11 @@ const Library: React.FC = () => {
     userTracks, 
     userProfile, 
     artists, 
-    setIsCreatePlaylistModalOpen 
+    setIsCreatePlaylistModalOpen,
+    searchQuery
   } = useAudio();
 
   const [activeTab, setActiveTab] = useState<'collection' | 'playlists' | 'activity'>('collection');
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
 
   const myCollection = useMemo(() => {
     const base = allNFTs.filter(nft => 
@@ -52,49 +52,49 @@ const Library: React.FC = () => {
       (nft.owner === userProfile.name) ||
       userNFTs.some(un => un.id === nft.id)
     );
-    if (!localSearchQuery) return base;
-    const query = localSearchQuery.toLowerCase();
+    if (!searchQuery) return base;
+    const query = searchQuery.toLowerCase();
     return base.filter(nft => 
       nft.name.toLowerCase().includes(query) || 
       nft.artist.toLowerCase().includes(query)
     );
-  }, [allNFTs, userProfile, userNFTs, localSearchQuery]);
+  }, [allNFTs, userProfile, userNFTs, searchQuery]);
 
   const likedTracks = useMemo(() => {
     const allTracks = [...userTracks, ...MOCK_TRACKS];
     const base = allTracks.filter(t => likedTrackIds.includes(t.id));
-    if (!localSearchQuery) return base;
-    const query = localSearchQuery.toLowerCase();
+    if (!searchQuery) return base;
+    const query = searchQuery.toLowerCase();
     return base.filter(t => 
       t.title.toLowerCase().includes(query) || 
       t.artist.toLowerCase().includes(query)
     );
-  }, [likedTrackIds, userTracks, localSearchQuery]);
+  }, [likedTrackIds, userTracks, searchQuery]);
 
   const followedArtists = useMemo(() => {
     const base = artists.filter(a => followedUserIds.includes(a.id));
-    if (!localSearchQuery) return base;
-    const query = localSearchQuery.toLowerCase();
+    if (!searchQuery) return base;
+    const query = searchQuery.toLowerCase();
     return base.filter(a => a.name.toLowerCase().includes(query));
-  }, [followedUserIds, artists, localSearchQuery]);
+  }, [followedUserIds, artists, searchQuery]);
 
   const filteredPlaylists = useMemo(() => {
-    if (!localSearchQuery) return playlists;
-    const query = localSearchQuery.toLowerCase();
+    if (!searchQuery) return playlists;
+    const query = searchQuery.toLowerCase();
     return playlists.filter(p => 
       p.name.toLowerCase().includes(query) || 
       (p.description && p.description.toLowerCase().includes(query))
     );
-  }, [playlists, localSearchQuery]);
+  }, [playlists, searchQuery]);
 
   const filteredRecentlyPlayed = useMemo(() => {
-    if (!localSearchQuery) return recentlyPlayed;
-    const query = localSearchQuery.toLowerCase();
+    if (!searchQuery) return recentlyPlayed;
+    const query = searchQuery.toLowerCase();
     return recentlyPlayed.filter(t => 
       t.title.toLowerCase().includes(query) || 
       t.artist.toLowerCase().includes(query)
     );
-  }, [recentlyPlayed, localSearchQuery]);
+  }, [recentlyPlayed, searchQuery]);
 
   const stats = [
     { label: 'NFTs', value: likedTracks.length, icon: Music2 },
@@ -112,18 +112,8 @@ const Library: React.FC = () => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-4">
-        {/* Search Bar at the Top */}
-        <div className="pt-4 mb-4">
-          <ButtonGroupInput 
-            placeholder="Search within your library..." 
-            value={localSearchQuery}
-            onChange={(e) => setLocalSearchQuery(e.target.value)}
-            className="max-w-md mx-auto"
-          />
-        </div>
-
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 bg-gradient-to-b from-blue-900/20 to-background p-4 rounded-3xl">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 bg-gradient-to-b from-blue-900/20 to-background p-4 rounded-3xl mt-4">
           <div className="space-y-4">
             <h1 className="text-[32px] md:text-[56px] font-black tracking-tighter uppercase text-white leading-none">
               Library
@@ -268,7 +258,7 @@ const Library: React.FC = () => {
                         />
                       ))
                     ) : (
-                      <EmptyState icon={List} message={localSearchQuery ? "No matching playlists found" : "No active playlists"} />
+                      <EmptyState icon={List} message={searchQuery ? "No matching playlists found" : "No active playlists"} />
                     )}
                   </div>
                 </section>
@@ -295,7 +285,7 @@ const Library: React.FC = () => {
                       ))
                     ) : (
                       <div className="w-full">
-                        <EmptyState icon={History} message={localSearchQuery ? "No matching activity found" : "No recent activity"} />
+                        <EmptyState icon={History} message={searchQuery ? "No matching activity found" : "No recent activity"} />
                       </div>
                     )}
                   </div>

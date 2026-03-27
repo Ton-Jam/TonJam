@@ -1,8 +1,14 @@
 import { TonConnectUI } from '@tonconnect/ui-react';
-import { TonClient, Address, TupleItemSlice } from '@ton/ton';
+import { TonClient, Address, TupleItemSlice, beginCell, toNano, Cell, contractAddress } from '@ton/ton';
+import { TonJamCollection, storeStateInit as storeCollectionInit } from '../contracts/nft/TonJamNFT_TonJamCollection';
+import { TonJamMarketplace, storeStateInit as storeMarketplaceInit } from '../contracts/marketplace/TonJamMarketplace_TonJamMarketplace';
 
 const TONCENTER_API_KEY = ''; // Optional: Add your API key here
 const TON_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC';
+
+// Contract Addresses (Placeholders - would be replaced after deployment)
+export const TONJAM_COLLECTION_ADDRESS = localStorage.getItem('tonjam_collection_address') || "EQB_TONJAM_COLLECTION_ADDRESS";
+export const TONJAM_MARKETPLACE_ADDRESS = localStorage.getItem('tonjam_marketplace_address') || "EQB_TONJAM_MARKETPLACE_ADDRESS";
 
 /**
  * Fetches Jetton balance for a given wallet address
@@ -49,7 +55,131 @@ export const getJettonBalance = async (
 };
 
 /**
- * Simulates buying an NFT on the TON blockchain
+ * Lists an NFT on the TonJam Marketplace
+ */
+export const listNFTOnMarketplace = async (
+  tonConnectUI: TonConnectUI,
+  nftAddress: string,
+  price: string
+): Promise<boolean> => {
+  try {
+    const priceInNanotons = toNano(price);
+    
+    // Construct the ListNFT message body
+    // Message structure from Tact:
+    // message ListNFT { query_id: Int as uint64; nft_address: Address; price: Int as coins; }
+    const body = beginCell()
+      .storeUint(0x12345678, 32) // Opcode for ListNFT (example)
+      .storeUint(0, 64) // query_id
+      .storeAddress(Address.parse(nftAddress))
+      .storeCoins(priceInNanotons)
+      .endCell();
+
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: TONJAM_MARKETPLACE_ADDRESS,
+          amount: toNano("0.05").toString(), // Gas for listing
+          payload: body.toBoc().toString('base64'),
+        },
+      ],
+    };
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log("NFT Listing Transaction sent:", result);
+    return true;
+  } catch (error) {
+    console.error("Error listing NFT:", error);
+    throw error;
+  }
+};
+
+/**
+ * Buys an NFT from the TonJam Marketplace
+ */
+export const buyNFTFromMarketplace = async (
+  tonConnectUI: TonConnectUI,
+  nftAddress: string,
+  price: string
+): Promise<boolean> => {
+  try {
+    const priceInNanotons = toNano(price);
+    
+    // Construct the BuyNFT message body
+    // message BuyNFT { query_id: Int as uint64; nft_address: Address; }
+    const body = beginCell()
+      .storeUint(0x87654321, 32) // Opcode for BuyNFT (example)
+      .storeUint(0, 64) // query_id
+      .storeAddress(Address.parse(nftAddress))
+      .endCell();
+
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: TONJAM_MARKETPLACE_ADDRESS,
+          amount: (priceInNanotons + toNano("0.1")).toString(), // Price + Gas
+          payload: body.toBoc().toString('base64'),
+        },
+      ],
+    };
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log("NFT Purchase Transaction sent:", result);
+    return true;
+  } catch (error) {
+    console.error("Error buying NFT:", error);
+    throw error;
+  }
+};
+
+/**
+ * Mints a new TonJam NFT
+ */
+export const mintTonJamNFT = async (
+  tonConnectUI: TonConnectUI,
+  receiverAddress: string,
+  metadataUrl: string
+): Promise<boolean> => {
+  try {
+    // Construct the Mint message body
+    // message Mint { query_id: Int as uint64; receiver: Address; content: Cell; royalty_params: RoyaltyParams; }
+    const content = beginCell().storeStringTail(metadataUrl).endCell();
+    
+    const body = beginCell()
+      .storeUint(0x11111111, 32) // Opcode for Mint (example)
+      .storeUint(0, 64) // query_id
+      .storeAddress(Address.parse(receiverAddress))
+      .storeRef(content)
+      // RoyaltyParams: numerator (uint16), denominator (uint16), destination (Address)
+      .storeUint(250, 16) // 2.5%
+      .storeUint(10000, 16)
+      .storeAddress(Address.parse(receiverAddress)) // Royalty goes to creator
+      .endCell();
+
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: TONJAM_COLLECTION_ADDRESS,
+          amount: toNano("0.1").toString(), // Gas for minting
+          payload: body.toBoc().toString('base64'),
+        },
+      ],
+    };
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log("NFT Minting Transaction sent:", result);
+    return true;
+  } catch (error) {
+    console.error("Error minting TonJam NFT:", error);
+    throw error;
+  }
+};
+
+/**
+ * Simulates buying an NFT on the TON blockchain (Legacy/Mock)
  */
 export const buyNFT = async (
   tonConnectUI: TonConnectUI,
@@ -187,6 +317,100 @@ export const purchaseJAM = async (
     return true;
   } catch (error) {
     console.error("Error purchasing JAM:", error);
+    throw error;
+  }
+};
+
+/**
+ * Deploys the TonJam NFT Collection contract
+ */
+export const deployTonJamCollection = async (
+  tonConnectUI: TonConnectUI,
+  ownerAddress: string,
+  metadataUrl: string = "https://tonjam.app/collection.json"
+): Promise<string> => {
+  try {
+    const owner = Address.parse(ownerAddress);
+    const content = beginCell().storeStringTail(metadataUrl).endCell();
+    const royaltyParams = {
+      $$type: 'RoyaltyParams' as const,
+      numerator: 250n,
+      denominator: 10000n,
+      destination: owner,
+    };
+
+    const collection = await TonJamCollection.init(owner, content, royaltyParams);
+    const stateInit = { ...collection, $$type: 'StateInit' as const };
+    const address = contractAddress(0, stateInit).toString();
+
+    // TonConnect transaction format for StateInit
+    const deployTransaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: address,
+          amount: toNano("0.1").toString(),
+          stateInit: beginCell()
+            .store(storeCollectionInit(stateInit))
+            .endCell()
+            .toBoc()
+            .toString('base64'),
+        },
+      ],
+    };
+
+    await tonConnectUI.sendTransaction(deployTransaction);
+    
+    // Store in localStorage for persistence in this session
+    localStorage.setItem('tonjam_collection_address', address);
+    console.log("NFT Collection Deployed to:", address);
+    return address;
+  } catch (error) {
+    console.error("Error deploying TonJam Collection:", error);
+    throw error;
+  }
+};
+
+/**
+ * Deploys the TonJam Marketplace contract
+ */
+export const deployTonJamMarketplace = async (
+  tonConnectUI: TonConnectUI,
+  ownerAddress: string,
+  feeDestinationAddress: string
+): Promise<string> => {
+  try {
+    const owner = Address.parse(ownerAddress);
+    const feeDestination = Address.parse(feeDestinationAddress);
+    const feePercentage = 250n; // 2.5%
+
+    const marketplace = await TonJamMarketplace.init(owner, feeDestination, feePercentage);
+    const stateInit = { ...marketplace, $$type: 'StateInit' as const };
+    const address = contractAddress(0, stateInit).toString();
+
+    const deployTransaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: address,
+          amount: toNano("0.1").toString(),
+          stateInit: beginCell()
+            .store(storeMarketplaceInit(stateInit))
+            .endCell()
+            .toBoc()
+            .toString('base64'),
+        },
+      ],
+    };
+
+    await tonConnectUI.sendTransaction(deployTransaction);
+    
+    // Store in localStorage for persistence in this session
+    localStorage.setItem('tonjam_marketplace_address', address);
+    console.log("Marketplace Deployed to:", address);
+    return address;
+  } catch (error) {
+    console.error("Error deploying TonJam Marketplace:", error);
     throw error;
   }
 };

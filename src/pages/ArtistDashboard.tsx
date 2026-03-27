@@ -24,8 +24,11 @@ import {
   Key,
   Info,
   Upload,
-  Trash2
+  Trash2,
+  Megaphone,
+  XCircle
 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import { GoogleGenAI, Type } from "@google/genai";
 import { uploadToIPFS } from "@/services/pinataService";
 import {
@@ -65,14 +68,14 @@ import ArtistVerification from "@/components/ArtistVerification";
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery, addUserTrack, userTracks, userNFTs, deleteTrack, posts, createPost } = useAudio();
+  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery, addUserTrack, userTracks, userNFTs, deleteTrack, posts, createPost, sponsoredPosts, submitSponsorship, allTracks, allNFTs, userAddress } = useAudio();
   
   useEffect(() => {
-    if (!userProfile.isVerifiedArtist) {
-      addNotification("Access Denied: Artist verification required.", "error");
+    if (userProfile.role !== 'artist' && !userProfile.isVerifiedArtist) {
+      addNotification("Access Denied: Artist role required.", "error");
       navigate('/');
     }
-  }, [userProfile.isVerifiedArtist, navigate, addNotification]);
+  }, [userProfile.role, userProfile.isVerifiedArtist, navigate, addNotification]);
 
   /* Find the artist profile for the current user (mocking that MOCK_USER is Neon Voyager for this demo) */ 
   const currentArtist = useMemo(() => {
@@ -106,12 +109,12 @@ const ArtistDashboard: React.FC = () => {
     );
   }, [allArtistTracks, searchQuery]);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification" | "transactions" | "community">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification" | "transactions" | "community" | "sponsorship">("overview");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab && ['overview', 'tracks', 'royalties', 'profile', 'forge', 'collection', 'verification', 'transactions', 'community'].includes(tab)) {
+    if (tab && ['overview', 'tracks', 'royalties', 'profile', 'forge', 'collection', 'verification', 'transactions', 'community', 'sponsorship'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [location.search]);
@@ -124,7 +127,48 @@ const ArtistDashboard: React.FC = () => {
   const audioInputRef = React.useRef<HTMLInputElement>(null);
   const coverInputRef = React.useRef<HTMLInputElement>(null);
 
+  const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawCurrency, setWithdrawCurrency] = useState<'TON' | 'JAM'>('TON');
+  const [withdrawAddress, setWithdrawAddress] = useState(userAddress || '');
+  const [sponsorshipForm, setSponsorshipForm] = useState({
+    type: 'track' as 'track' | 'nft' | 'announcement',
+    targetId: '',
+    title: '',
+    subtitle: '',
+    imageUrl: '',
+    link: '',
+    cta: 'Listen Now',
+    paymentAmount: '10',
+    paymentCurrency: 'TON' as 'TON' | 'JAM',
+    durationDays: 7
+  });
+
+  const handleSponsorshipSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await submitSponsorship({
+        artistId: artistData.id,
+        ...sponsorshipForm
+      });
+      setIsSponsorshipModalOpen(false);
+      setSponsorshipForm({
+        type: 'track',
+        targetId: '',
+        title: '',
+        subtitle: '',
+        imageUrl: '',
+        link: '',
+        cta: 'Listen Now',
+        paymentAmount: '10',
+        paymentCurrency: 'TON',
+        durationDays: 7
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   
@@ -437,6 +481,7 @@ const ArtistDashboard: React.FC = () => {
             { id: "transactions", label: "Transactions", icon: <Wallet className="h-4 w-4" /> },
             { id: "profile", label: "Profile Settings", icon: <UserPen className="h-4 w-4" /> },
             { id: "community", label: "Community", icon: <Users className="h-4 w-4" /> },
+            { id: "sponsorship", label: "Sponsorship", icon: <Megaphone className="h-4 w-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -733,6 +778,256 @@ const ArtistDashboard: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {activeTab === "sponsorship" && (
+            <div className="space-y-4 animate-in fade-in duration-500">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">Sponsorship Console</h3>
+                  <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em] mt-2">Boost your reach with featured placements</p>
+                </div>
+                <button 
+                  onClick={() => setIsSponsorshipModalOpen(true)}
+                  className="px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" /> New Sponsorship
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[5px] overflow-x-auto no-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[600px]">
+                      <thead>
+                        <tr className="border-b border-border/50 bg-foreground/[0.02]">
+                          <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Campaign</th>
+                          <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Type</th>
+                          <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Cost</th>
+                          <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Status</th>
+                          <th className="p-4 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sponsoredPosts.filter(sp => sp.artistId === artistData.id).map((sp) => (
+                          <tr key={sp.id} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
+                            <td className="p-4">
+                              <div className="flex items-center gap-4">
+                                <img src={sp.imageUrl} className="w-10 h-10 rounded-[5px] object-cover" alt="" />
+                                <div>
+                                  <p className="text-[10px] font-bold text-foreground uppercase">{sp.title}</p>
+                                  <p className="text-[8px] text-muted-foreground uppercase">{sp.subtitle}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{sp.type}</span>
+                            </td>
+                            <td className="p-4">
+                              <span className="text-[10px] font-mono text-foreground">{sp.paymentAmount} {sp.paymentCurrency}</span>
+                            </td>
+                            <td className="p-4">
+                              <span className={`text-[7px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                                sp.status === 'approved' ? 'bg-green-500/10 text-green-500' : 
+                                sp.status === 'rejected' ? 'bg-red-500/10 text-red-500' : 
+                                'bg-amber-500/10 text-amber-500'
+                              }`}>
+                                {sp.status}
+                              </span>
+                            </td>
+                            <td className="p-4 text-[9px] text-muted-foreground font-mono">
+                              {new Date(sp.createdAt).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                        {sponsoredPosts.filter(sp => sp.artistId === artistData.id).length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="p-8 text-center opacity-30">
+                              <p className="text-[8px] font-bold uppercase tracking-widest">No active or past campaigns</p>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="glass border border-blue-500/20 bg-blue-500/5 rounded-[10px] p-6">
+                    <h4 className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.3em] mb-4">Why Sponsor?</h4>
+                    <ul className="space-y-4">
+                      {[
+                        { title: 'Top Placement', desc: 'Appear in the main auto-scrolling carousel on the homepage.' },
+                        { title: 'Targeted Reach', desc: 'Reach users interested in your specific genre and style.' },
+                        { title: 'NFT Visibility', desc: 'Boost your NFT drops to potential collectors and traders.' }
+                      ].map((item, i) => (
+                        <li key={i} className="flex gap-4">
+                          <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                            <CheckCircle2 className="h-3 w-3 text-blue-500" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-foreground uppercase tracking-tight">{item.title}</p>
+                            <p className="text-[8px] text-muted-foreground leading-relaxed mt-1">{item.desc}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sponsorship Modal */}
+              {isSponsorshipModalOpen && (
+                <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
+                  <div className="glass border border-border w-full max-w-2xl rounded-[20px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+                    <div className="flex justify-between items-start mb-6">
+                      <div>
+                        <h2 className="text-xl font-bold text-foreground tracking-tighter uppercase mb-2">New Sponsorship Pitch</h2>
+                        <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Submit your content for featured placement</p>
+                      </div>
+                      <button onClick={() => setIsSponsorshipModalOpen(false)} className="p-2 hover:bg-muted rounded-full transition-colors">
+                        <XCircle className="h-6 w-6 text-muted-foreground" />
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleSponsorshipSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">Content Type</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {['track', 'nft', 'announcement'].map((type) => (
+                                <button
+                                  key={type}
+                                  type="button"
+                                  onClick={() => setSponsorshipForm(prev => ({ ...prev, type: type as any }))}
+                                  className={`py-3 rounded-[8px] text-[8px] font-bold uppercase tracking-widest border transition-all ${
+                                    sponsorshipForm.type === type ? 'bg-blue-600 border-blue-600 text-white' : 'bg-muted/30 border-border/50 text-muted-foreground'
+                                  }`}
+                                >
+                                  {type}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">Select {sponsorshipForm.type}</label>
+                            <select 
+                              value={sponsorshipForm.targetId}
+                              onChange={(e) => {
+                                const id = e.target.value;
+                                const item = sponsorshipForm.type === 'track' 
+                                  ? allTracks.find(t => t.id === id) 
+                                  : allNFTs.find(n => n.id === id);
+                                
+                                setSponsorshipForm(prev => ({
+                                  ...prev,
+                                  targetId: id,
+                                  title: item?.title || '',
+                                  subtitle: sponsorshipForm.type === 'track' ? `Featured Track by ${artistData.name}` : `Featured NFT by ${artistData.name}`,
+                                  imageUrl: item?.coverUrl || '',
+                                  link: sponsorshipForm.type === 'track' ? `/track/${id}` : `/nft/${id}`,
+                                  cta: sponsorshipForm.type === 'track' ? 'Listen Now' : 'View NFT'
+                                }));
+                              }}
+                              className="w-full bg-muted/50 border border-border rounded-[10px] px-4 py-4 text-[10px] font-bold text-foreground focus:outline-none"
+                            >
+                              <option value="">Select an item...</option>
+                              {sponsorshipForm.type === 'track' && allArtistTracks.map(t => (
+                                <option key={t.id} value={t.id}>{t.title}</option>
+                              ))}
+                              {sponsorshipForm.type === 'nft' && MOCK_NFTS.filter(n => n.creator === artistData.name).map(n => (
+                                <option key={n.id} value={n.id}>{n.title}</option>
+                              ))}
+                              {sponsorshipForm.type === 'announcement' && (
+                                <option value="custom">Custom Announcement</option>
+                              )}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">Display Title</label>
+                            <input 
+                              type="text"
+                              value={sponsorshipForm.title}
+                              onChange={(e) => setSponsorshipForm(prev => ({ ...prev, title: e.target.value }))}
+                              className="w-full bg-muted/50 border border-border rounded-[10px] px-4 py-4 text-[10px] font-bold text-foreground"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">Display Subtitle</label>
+                            <input 
+                              type="text"
+                              value={sponsorshipForm.subtitle}
+                              onChange={(e) => setSponsorshipForm(prev => ({ ...prev, subtitle: e.target.value }))}
+                              className="w-full bg-muted/50 border border-border rounded-[10px] px-4 py-4 text-[10px] font-bold text-foreground"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">Sponsorship Duration</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {[7, 14, 30].map((days) => (
+                                <button
+                                  key={days}
+                                  type="button"
+                                  onClick={() => setSponsorshipForm(prev => ({ ...prev, durationDays: days, paymentAmount: (days * 2).toString() }))}
+                                  className={`py-3 rounded-[8px] text-[8px] font-bold uppercase tracking-widest border transition-all ${
+                                    sponsorshipForm.durationDays === days ? 'bg-blue-600 border-blue-600 text-white' : 'bg-muted/30 border-border/50 text-muted-foreground'
+                                  }`}
+                                >
+                                  {days} Days
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="bg-blue-500/10 p-4 rounded-[10px] border border-blue-500/20">
+                            <div className="flex justify-between items-center mb-2">
+                              <p className="text-[8px] font-bold text-blue-500 uppercase">Total Cost</p>
+                              <p className="text-lg font-bold text-blue-400 tracking-tighter">{sponsorshipForm.paymentAmount} {sponsorshipForm.paymentCurrency}</p>
+                            </div>
+                            <p className="text-[7px] text-blue-500/70 uppercase tracking-widest">Payment will be deducted from your wallet upon submission.</p>
+                          </div>
+
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">Banner Image URL</label>
+                            <input 
+                              type="text"
+                              value={sponsorshipForm.imageUrl}
+                              onChange={(e) => setSponsorshipForm(prev => ({ ...prev, imageUrl: e.target.value }))}
+                              className="w-full bg-muted/50 border border-border rounded-[10px] px-4 py-4 text-[10px] font-bold text-foreground"
+                              placeholder="https://..."
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2 block">Call to Action Text</label>
+                            <input 
+                              type="text"
+                              value={sponsorshipForm.cta}
+                              onChange={(e) => setSponsorshipForm(prev => ({ ...prev, cta: e.target.value }))}
+                              className="w-full bg-muted/50 border border-border rounded-[10px] px-4 py-4 text-[10px] font-bold text-foreground"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <Button 
+                        type="submit"
+                        className="w-full py-8 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] text-[12px] font-bold uppercase tracking-widest shadow-xl shadow-blue-600/20"
+                      >
+                        Submit Sponsorship Pitch
+                      </Button>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -12,10 +12,12 @@ import {
   Sparkles, 
   TrendingUp, 
   Target,
-  Info
+  Info,
+  Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 import SectionHeader from '@/components/SectionHeader';
 import { useAudio } from '@/context/AudioContext';
 import { TJ_COIN_ICON, TON_LOGO } from '@/constants';
@@ -56,17 +58,41 @@ const TaskCard: React.FC<{
     if (isClaiming || task.claimed || !task.completed) return;
     
     setIsClaiming(true);
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    onClaim(task.id);
-    setIsClaiming(false);
-    
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#3b82f6', '#10b981', '#f59e0b']
-    });
+    try {
+      // Simulate network delay and potential failure
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // 10% chance of failure for demonstration
+          if (Math.random() < 0.1) {
+            reject(new Error("Network connection lost. Please check your internet and try again."));
+          } else {
+            resolve(true);
+          }
+        }, 1200);
+      });
+      
+      onClaim(task.id);
+      toast.success(`Successfully claimed ${task.reward}!`, {
+        description: `Your balance has been updated with ${task.reward}.`
+      });
+      
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#3b82f6', '#10b981', '#f59e0b']
+      });
+    } catch (error: any) {
+      toast.error("Failed to claim reward", {
+        description: error.message || "An unexpected error occurred. Please try again later.",
+        action: {
+          label: "Retry",
+          onClick: () => handleClaim(e)
+        }
+      });
+    } finally {
+      setIsClaiming(false);
+    }
   };
 
   const handleIncrement = (e: React.MouseEvent) => {
@@ -212,13 +238,14 @@ const TaskCard: React.FC<{
 };
 
 const Tasks: React.FC = () => {
+  const { addNotification, tasks, updateTaskProgress, claimTaskReward } = useAudio();
+  const safeTasks = tasks || [];
   const [activeTab, setActiveTab] = useState<TaskTab>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [userBalance, setUserBalance] = useState(1240);
-  const { addNotification } = useAudio();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleTaskClick = (task: Task) => {
@@ -231,26 +258,15 @@ const Tasks: React.FC = () => {
     setSelectedTask(null);
   };
 
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: 'Daily Sync', description: 'Stream 5 tracks today', reward: '5 TJ', points: 50, completed: true, claimed: true, type: 'daily', progress: 5, total: 5, rarity: 'common', priority: 'medium' },
-    { id: '2', title: 'Network Supporter', description: 'Follow 3 new artists', reward: '10 TJ', points: 100, completed: false, claimed: false, type: 'daily', progress: 1, total: 3, rarity: 'common', priority: 'low' },
-    { id: '3', title: 'Collector Genesis', description: 'Purchase your first NFT', reward: '50 TJ', points: 500, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1, rarity: 'rare', priority: 'high' },
-    { id: '4', title: 'Signal Broadcaster', description: 'Share a track to JamSpace', reward: '5 TJ', points: 25, completed: false, claimed: false, type: 'daily', progress: 0, total: 1, rarity: 'common', priority: 'low' },
-    { id: '5', title: 'High Fidelity', description: 'Listen for 10 hours total', reward: '100 TJ', points: 1000, completed: true, claimed: false, type: 'milestone', progress: 10, total: 10, rarity: 'epic', priority: 'medium' },
-    { id: '6', title: 'Legend of TON', description: 'Stake 10,000 JAM for 30 days', reward: '500 TJ', points: 5000, completed: false, claimed: false, type: 'milestone', progress: 12, total: 30, rarity: 'legendary', priority: 'high' },
-    { id: '7', title: 'TON Ecosystem', description: 'Follow TON on X', reward: '20 TJ', points: 200, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1, rarity: 'rare', priority: 'high' },
-    { id: '8', title: 'Join the Jam', description: 'Follow TonJam on X', reward: '20 TJ', points: 200, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1, rarity: 'rare', priority: 'high' },
-    { id: '9', title: 'Network Expansion', description: 'Invite 3 friends to TonJam', reward: '100 TJ', points: 1000, completed: false, claimed: false, type: 'milestone', progress: 0, total: 3, rarity: 'epic', priority: 'medium' },
-  ]);
-
   const stats = useMemo(() => {
-    const completed = tasks.filter(t => t.completed).length;
-    const total = tasks.length;
-    const dailyCompleted = tasks.filter(t => t.type === 'daily' && t.completed).length;
-    const dailyTotal = tasks.filter(t => t.type === 'daily').length;
+    const safeTasks = tasks || [];
+    const completed = safeTasks.filter(t => t.completed).length;
+    const total = safeTasks.length;
+    const dailyCompleted = safeTasks.filter(t => t.type === 'daily' && t.completed).length;
+    const dailyTotal = safeTasks.filter(t => t.type === 'daily').length;
     
     // Calculate total XP from claimed tasks
-    const totalXP = tasks.filter(t => t.claimed).reduce((sum, t) => sum + t.points, 0) + 14400; // Base XP
+    const totalXP = safeTasks.filter(t => t.claimed).reduce((sum, t) => sum + t.points, 0) + 14400; // Base XP
     
     // Level formula: Level = floor(sqrt(totalXP / 100))
     const currentLevel = Math.floor(Math.sqrt(totalXP / 100));
@@ -262,17 +278,17 @@ const Tasks: React.FC = () => {
     const xpToNext = nextLevelXP - totalXP;
     
     return {
-      percent: Math.round((completed / total) * 100),
-      dailyPercent: Math.round((dailyCompleted / dailyTotal) * 100),
+      percent: total > 0 ? Math.round((completed / total) * 100) : 0,
+      dailyPercent: dailyTotal > 0 ? Math.round((dailyCompleted / dailyTotal) * 100) : 0,
       totalEarned: 1240,
       currentLevel,
       xpToNext,
       xpPercent
     };
-  }, [tasks]);
+  }, [safeTasks]);
 
   const filteredTasks = useMemo(() => {
-    let result = tasks;
+    let result = safeTasks;
     
     // Tab filter
     if (activeTab === 'daily') result = result.filter(t => t.type === 'daily');
@@ -287,19 +303,35 @@ const Tasks: React.FC = () => {
     if (priorityFilter !== 'all') result = result.filter(t => t.priority === priorityFilter);
     
     return result;
-  }, [tasks, activeTab, statusFilter, priorityFilter]);
+  }, [safeTasks, activeTab, statusFilter, priorityFilter]);
 
   const handleClaim = (id: string) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, claimed: true } : t));
+    claimTaskReward(id);
   };
 
-  const handleToggle = (id: string, progress: number) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        const newProgress = Math.min(t.total, progress);
-        const isNowCompleted = newProgress >= t.total;
-        if (isNowCompleted && !t.completed) {
-            addNotification(`Task "${t.title}" completed!`, "success");
+  const handleToggle = async (id: string, progress: number) => {
+    try {
+      // Simulate API call for task progress update
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // 5% chance of failure for demonstration
+          if (Math.random() < 0.05) {
+            reject(new Error("Failed to sync progress with the network."));
+          } else {
+            resolve(true);
+          }
+        }, 500);
+      });
+
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        const newProgress = Math.min(task.total, progress);
+        const isNowCompleted = newProgress >= task.total;
+        if (isNowCompleted && !task.completed) {
+            toast.success(`Task "${task.title}" completed!`, {
+              description: "You can now claim your reward."
+            });
+            addNotification(`Task "${task.title}" completed!`, "success");
             confetti({
               particleCount: 100,
               spread: 70,
@@ -307,15 +339,16 @@ const Tasks: React.FC = () => {
               colors: ['#3b82f6', '#10b981', '#f59e0b']
             });
         }
-        return { 
-          ...t, 
-          progress: newProgress,
-          completed: isNowCompleted
-        };
+        updateTaskProgress(id, newProgress);
       }
-      return t;
-    }));
+    } catch (error: any) {
+      toast.error("Update failed", {
+        description: error.message || "Could not update task progress. Please try again.",
+      });
+    }
   };
+
+
 
   const handleStake = (amount: number) => {
     setUserBalance(prev => prev - amount);
@@ -360,7 +393,9 @@ const Tasks: React.FC = () => {
             </div>
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500">Protocol Center</span>
           </div>
-          <h1 className="text-[44px] font-black uppercase tracking-tighter text-foreground leading-none">Neural Tasks</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-[44px] font-black uppercase tracking-tighter text-foreground leading-none">Neural Tasks</h1>
+          </div>
           <p className="text-sm font-medium text-foreground/30 max-w-md">
             Execute network protocols to strengthen the ecosystem and earn TJ rewards.
           </p>
@@ -388,7 +423,7 @@ const Tasks: React.FC = () => {
               />
             </div>
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-              {tasks.filter(t => t.type === 'daily' && t.completed).length} of {tasks.filter(t => t.type === 'daily').length} protocols completed
+              {safeTasks.filter(t => t.type === 'daily' && t.completed).length} of {safeTasks.filter(t => t.type === 'daily').length} protocols completed
             </p>
           </div>
         </motion.div>
@@ -575,6 +610,7 @@ const Tasks: React.FC = () => {
           )}
         </AnimatePresence>
       </div>
+
 
       <AnimatePresence>
         {isModalOpen && selectedTask && (

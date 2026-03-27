@@ -1,0 +1,307 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; TonJamMarketplace_TonJamMarketplace.headers.fc
+;;
+;; Header files for TonJamMarketplace
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; $DeployOk$_store
+builder $DeployOk$_store(builder build_0, (int) v) inline;
+
+;; $DeployOk$_store_cell
+cell $DeployOk$_store_cell((int) v, builder b) inline;
+
+;; $TonJamMarketplace$_store
+builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int) v) inline;
+
+;; $TonJamMarketplace$_load
+(slice, ((slice, slice, int))) $TonJamMarketplace$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $TonJamMarketplace$init$_load
+(slice, ((slice, slice, int))) $TonJamMarketplace$init$_load(slice sc_0) inline;
+
+;; $TonJamMarketplace$_contract_init
+(slice, slice, int) $TonJamMarketplace$_contract_init(slice $owner, slice $fee_destination, int $fee_percentage) impure inline;
+
+;; $TonJamMarketplace$_contract_load
+(slice, slice, int) $TonJamMarketplace$_contract_load() impure inline;
+
+;; $TonJamMarketplace$_contract_store
+() $TonJamMarketplace$_contract_store((slice, slice, int) v) impure inline;
+
+;; $TonJamMarketplace$_fun_get_marketplace_data
+((slice, slice, int), cell) $TonJamMarketplace$_fun_get_marketplace_data((slice, slice, int) $self) impure inline_ref;
+
+;; $MessageParameters$_constructor_bounce_to_value_mode_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
+
+;; $TonJamMarketplace$_fun_notify
+((slice, slice, int), ()) $TonJamMarketplace$_fun_notify((slice, slice, int) $self, cell $body) impure inline;
+
+;; $DeployOk$_constructor_queryId
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
+
+
+;; TonJamMarketplace_TonJamMarketplace.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+builder $global_beginCell() impure asm """
+    NEWC
+""";
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_nativeReserve(int $amount, int $mode) impure asm """
+    RAWRESERVE
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+cell $Builder$_fun_endCell(builder $self) impure asm """
+    ENDC
+""";
+
+builder $Builder$_fun_storeAddress(builder $self, slice $address) impure asm """
+    STSLICER
+""";
+
+((slice, slice, int), ()) $TonJamMarketplace$_fun_notify((slice, slice, int) $self, cell $body) impure inline {
+    var (($self'owner, $self'fee_destination, $self'fee_percentage)) = $self;
+    slice $to = __tact_context_get_sender();
+    int $bounce = false;
+    if (false) {
+        int $balance = $global_myBalance();
+        int $balanceBeforeMessage = ($balance - $Context$_get_value(__tact_context_get()));
+        if (($balanceBeforeMessage < 0)) {
+            $global_nativeReserve(0, 0);
+            $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
+            return (($self'owner, $self'fee_destination, $self'fee_percentage), ());
+        }
+    }
+    $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
+    return (($self'owner, $self'fee_destination, $self'fee_percentage), ());
+}
+
+;; TonJamMarketplace_TonJamMarketplace.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v, builder b) inline {
+    return $DeployOk$_store(b, v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: TonJamMarketplace
+;; TLB: _ owner:address fee_destination:address fee_percentage:uint16 = TonJamMarketplace
+;;
+
+builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int) v) inline {
+    var (v'owner, v'fee_destination, v'fee_percentage) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = build_0.store_slice(v'fee_destination);
+    build_0 = build_0.store_uint(v'fee_percentage, 16);
+    return build_0;
+}
+
+(slice, ((slice, slice, int))) $TonJamMarketplace$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'fee_destination = sc_0~load_msg_addr();
+    var v'fee_percentage = sc_0~load_uint(16);
+    return (sc_0, (v'owner, v'fee_destination, v'fee_percentage));
+}
+
+(slice, ((slice, slice, int))) $TonJamMarketplace$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'fee_destination = sc_0~load_msg_addr();
+    var v'fee_percentage = sc_0~load_int(257);
+    return (sc_0, (v'owner, v'fee_destination, v'fee_percentage));
+}
+
+(slice, slice, int) $TonJamMarketplace$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$TonJamMarketplace$_load();
+    }
+    else {
+        (slice $owner, slice $fee_destination, int $fee_percentage) = $sc~$TonJamMarketplace$init$_load();
+        $sc.end_parse();
+        return $TonJamMarketplace$_contract_init($owner, $fee_destination, $fee_percentage);
+    }
+}
+
+() $TonJamMarketplace$_contract_store((slice, slice, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $TonJamMarketplace$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract TonJamMarketplace functions
+;;
+
+(slice, slice, int) $TonJamMarketplace$_contract_init(slice $owner, slice $fee_destination, int $fee_percentage) impure inline {
+    var (($self'owner, $self'fee_destination, $self'fee_percentage)) = (null(), null(), null());
+    $self'owner = $owner;
+    $self'fee_destination = $fee_destination;
+    $self'fee_percentage = $fee_percentage;
+    return ($self'owner, $self'fee_destination, $self'fee_percentage);
+}
+
+((slice, slice, int), cell) $TonJamMarketplace$_fun_get_marketplace_data((slice, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'fee_destination, $self'fee_percentage)) = $self;
+    var $fresh$ret_10 = $Builder$_fun_endCell(store_uint($Builder$_fun_storeAddress($Builder$_fun_storeAddress($global_beginCell(), $self'owner), $self'fee_destination), $self'fee_percentage, 16));
+    return (($self'owner, $self'fee_destination, $self'fee_percentage), $fresh$ret_10);
+}
+
+;;
+;; Get methods of a Contract TonJamMarketplace
+;;
+
+_ %get_marketplace_data() method_id(72560) {
+    var self = $TonJamMarketplace$_contract_load();
+    var res = self~$TonJamMarketplace$_fun_get_marketplace_data();
+    return res;
+}
+
+;;
+;; Routing of a Contract TonJamMarketplace
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'owner, $self'fee_destination, $self'fee_percentage) = $TonJamMarketplace$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    var op = in_msg~load_opcode_internal();
+    ;; Receive ListNFT message
+    if (op == 505469326) {
+        var $msg'query_id = in_msg~load_uint(64);
+        var $msg'nft_address = in_msg~load_msg_addr();
+        var $msg'price = in_msg~load_varuint16();
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage));
+        return ();
+    }
+    
+    ;; Receive BuyNFT message
+    if (op == 112407828) {
+        var $msg'query_id = in_msg~load_uint(64);
+        var $msg'nft_address = in_msg~load_msg_addr();
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage));
+        return ();
+    }
+    
+    ;; Receive CancelSale message
+    if (op == 1393330205) {
+        var $msg'query_id = in_msg~load_uint(64);
+        var $msg'nft_address = in_msg~load_msg_addr();
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage));
+        return ();
+    }
+    
+    ;; Receive Deploy message
+    if (op == 0x946a98b6) {
+        var $deploy'queryId = in_msg~load_uint(64);
+        ($self'owner, $self'fee_destination, $self'fee_percentage)~$TonJamMarketplace$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage));
+        return ();
+    }
+    
+    ;; Throw if not handled
+    throw(130);
+}

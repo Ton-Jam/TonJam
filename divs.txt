@@ -1,0 +1,64 @@
+190:    <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300 relative">
+192:      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+193:        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]" />
+194:        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] bg-blue-500/5 rounded-full blur-[120px]" />
+204:          <div className="flex items-center gap-2 flex-1">
+227:                <div className="flex items-center gap-2 lg:hidden w-full">
+250:                  <div className="hidden lg:flex items-center gap-2 ml-4 flex-1">
+256:                <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'} ${(isJamspace || isLibrary || isMarketplace) && !isHeaderSearchOpen ? '!hidden' : ''}`} ref={searchRef}>
+276:                      <div className="grid grid-cols-2 gap-2">
+277:                        <div>
+278:                          <div className="flex items-center gap-2 mb-2 px-2">
+282:                          <div className="space-y-2">
+285:                                <div key={item} className="group flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+292:                                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+316:                        <div>
+317:                          <div className="flex items-center gap-2 mb-2 px-2">
+321:                          <div className="space-y-2">
+323:                              <div key={topic} className="group flex items-center justify-between p-2 rounded-lg hover:bg-primary/5 transition-colors">
+349:              <div className="flex-1 flex justify-end lg:justify-start">
+355:              <div className="lg:hidden flex-1 flex justify-end">
+357:                  <div className="flex-1 relative" ref={searchRef}>
+375:                        <div className="space-y-2">
+376:                          <div>
+377:                            <div className="flex items-center gap-2 mb-2 px-2">
+381:                            <div className="space-y-2">
+383:                                <div key={item} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+390:                                  <div className="flex items-center gap-2">
+403:                          <div>
+404:                            <div className="flex items-center gap-2 mb-2 px-2">
+408:                            <div className="grid grid-cols-1 gap-2">
+430:          <div className="flex items-center gap-2 sm:gap-2 ml-2">
+451:              <div className="flex items-center gap-2">
+474:                          <div className="flex flex-col max-h-[85vh]">
+485:                                  <div className="overflow-y-auto no-scrollbar max-h-[calc(85vh-60px)]">
+493:                                      <div className="flex flex-col gap-2">
+504:                                      <div className="flex flex-col gap-2">
+515:                                      <div className="flex flex-col gap-2">
+526:                                      <div className="flex flex-col gap-2">
+555:                                  <div className="p-2 border-t border-border bg-background sticky bottom-0 z-10 flex gap-2">
+594:                                  <div className="overflow-y-auto no-scrollbar max-h-[calc(85vh-120px)]">
+644:                                  <div className="p-2 border-t border-border bg-background sticky bottom-0 z-10">
+674:                          <div className="flex flex-col max-h-[85vh]">
+685:                                  <div className="overflow-y-auto no-scrollbar max-h-[calc(85vh-60px)]">
+693:                                      <div className="flex flex-col gap-2">
+704:                                      <div className="flex flex-col gap-2">
+715:                                      <div className="flex flex-col gap-2">
+726:                                      <div className="flex flex-col gap-2">
+755:                                  <div className="p-2 border-t border-border bg-background sticky bottom-0 z-10 flex gap-2">
+794:                                  <div className="overflow-y-auto no-scrollbar max-h-[calc(85vh-120px)]">
+844:                                  <div className="p-2 border-t border-border bg-background sticky bottom-0 z-10">
+911:            <div className="hidden sm:block">
+969:              <div className="flex items-center justify-between mb-2">
+986:        <div className="w-full max-w-full overflow-x-hidden">
+1032:    <div className="flex items-center justify-between mb-2">
+1053:      <div className="pt-2 pb-2">
+1083:        <div className="pt-2 space-y-2">
+1104:        <div className="pt-2 space-y-2">
+1118:      <div className="mt-2 p-2 rounded-[5px] bg-muted/50 border-0 space-y-2" role="complementary" aria-label="Token Price Info">
+1119:        <div className="flex items-center justify-between">
+1120:          <div className="flex items-center gap-2">
+1122:            <div>
+1127:          <div className="text-right">
+1132:        <div className="pt-2 border-t border-foreground/5 flex items-center justify-between">
+1133:          <div>

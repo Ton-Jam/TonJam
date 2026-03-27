@@ -6,6 +6,7 @@ import { JAM_PRICE_USD } from '@/constants';
 
 const Staking: React.FC = () => {
   const { userProfile, stakeJam, unstakeJam, claimJamRewards, transactions } = useAudio();
+  const safeTransactions = transactions || [];
   const userAddress = useTonAddress();
   const [stakeAmount, setStakeAmount] = useState('');
   const [unstakeAmount, setUnstakeAmount] = useState('');
@@ -18,7 +19,7 @@ const Staking: React.FC = () => {
   const balance = parseFloat(userProfile.jamBalance || '0');
 
   const filteredTransactions = useMemo(() => {
-    let filtered = transactions.filter(tx => ['stake', 'unstake', 'claim_rewards'].includes(tx.type));
+    let filtered = safeTransactions.filter(tx => ['stake', 'unstake', 'claim_rewards'].includes(tx.type));
     
     if (filterType !== 'all') {
       filtered = filtered.filter(tx => tx.type === filterType);
@@ -31,7 +32,7 @@ const Staking: React.FC = () => {
     });
 
     return filtered;
-  }, [transactions, filterType, sortOrder]);
+  }, [safeTransactions, filterType, sortOrder]);
 
   const handleStake = async () => {
     if (!stakeAmount || isNaN(parseFloat(stakeAmount))) return;

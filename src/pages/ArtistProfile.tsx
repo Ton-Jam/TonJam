@@ -45,8 +45,10 @@ import EditArtistProfileModal from '@/components/EditArtistProfileModal';
 import NFTMetadataManager from '@/components/NFTMetadataManager';
 import SellNFTModal from '@/components/SellNFTModal';
 import { useAudio } from '@/context/AudioContext';
+import ArtistTracksSection from '@/components/ArtistTracksSection';
+import ArtistNFTsSection from '@/components/ArtistNFTsSection';
+import ArtistActivitySection from '@/components/ArtistActivitySection';
 import ArtistEvents from '@/components/ArtistEvents';
-import SongRequestsTab from '@/components/SongRequestsTab';
 import { Artist, Track, Post, NFTItem, Event, Collaboration, SongRequest } from '@/types';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import confetti from 'canvas-confetti';
@@ -539,7 +541,7 @@ const ArtistProfile: React.FC = () => {
       )}
       <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-4 mt-4 mb-4 w-full px-4 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex items-center justify-start gap-8 overflow-x-auto no-scrollbar">
-          {['tracks', 'collection', 'signals', 'about', 'requests', ...(isOwnProfile ? ['management'] : [])].map(tab => (
+          {['tracks', 'collection', 'signals', 'about', ...(isOwnProfile ? ['management'] : [])].map(tab => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab as any)} 
@@ -634,199 +636,28 @@ const ArtistProfile: React.FC = () => {
           <div className="lg:col-span-8">
             <div className="min-h-[500px]">
               {activeTab === 'tracks' && (
-                <div className="space-y-4 animate-in fade-in duration-700">
-                  {/* Featured NFT Highlight */}
-                  {featuredNFT && (
-                    <div className="mb-4 relative group cursor-pointer" onClick={() => navigate(`/nft/${featuredNFT.id}`)}>
-                      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-purple-500/20 blur-2xl opacity-50 group-hover:opacity-100 transition-opacity" />
-                      <div className="relative glass border border-amber-500/30 bg-foreground/[0.01] p-5 rounded-[16px] flex flex-col md:flex-row items-center gap-4 overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-5">
-                          <Satellite className="h-32 w-32 text-amber-500" />
-                        </div>
-                        <div className="relative w-full md:w-32 aspect-square rounded-[12px] overflow-hidden shadow-2xl">
-                          <img src={featuredNFT.imageUrl || getPlaceholderImage(`nft-${featuredNFT.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
-                          <div className="absolute inset-0 bg-black/20" />
-                        </div>
-                        <div className="flex-1 text-center md:text-left">
-                          <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-                            <span className="px-2 py-2 bg-amber-500 text-background rounded-[4px] text-[8px] font-bold uppercase tracking-widest">Featured Artifact</span>
-                            {featuredNFT.listingType === 'auction' && (
-                              <span className="flex items-center gap-2 text-[8px] font-bold text-amber-500 uppercase tracking-widest">
-                                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" /> Live Auction
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="text-2xl font-bold text-foreground uppercase tracking-tighter mb-1">{featuredNFT.title}</h3>
-                          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Minted Protocol • {featuredNFT.edition} Edition</p>
-                          <div className="flex items-center justify-center md:justify-start gap-4">
-                            <div className="flex items-center gap-4">
-                              <img src={TON_LOGO} className="w-4 h-4" alt="" />
-                              <span className="text-xl font-bold text-foreground tracking-tighter">{featuredNFT.price} TON</span>
-                            </div>
-                            <button className="px-4 py-4 bg-amber-500 hover:bg-amber-400 text-background rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-amber-500/20">
-                              {featuredNFT.listingType === 'auction' ? 'Place Bid' : 'Acquire Protocol'}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Top Tracks Section */}
-                  {topTracks.length > 0 && (
-                    <section className="bg-card rounded-[10px] p-5">
-                      <h3 className="text-lg font-bold text-foreground mb-4">Popular</h3>
-                      <div className="space-y-2">
-                        {topTracks.map((track, idx) => (
-                          <div key={`top-${track.id}`} className="group flex items-center gap-4 p-2 rounded-[8px] hover:bg-muted/50 transition-all cursor-pointer" onClick={() => playAll([track])}>
-                            <span className="w-8 text-sm font-medium text-muted-foreground text-center">{idx + 1}</span>
-                            <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0">
-                              <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Play className="h-4 w-4 text-white fill-white" />
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-bold text-foreground truncate">{track.title}</h4>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {(track.playCount || 0).toLocaleString()}
-                            </div>
-                            <div className="text-sm text-muted-foreground w-16 text-right">
-                              {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Upcoming Events Section */}
-                  {artist.events && artist.events.length > 0 && (
-                    <section className="space-y-4 p-5">
-                      <h3 className="text-lg font-bold text-foreground mb-4">Upcoming Events</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {artist.events.map((event) => (
-                          <div key={event.id} className="bg-card p-5 rounded-[12px] flex items-center justify-between group transition-all border border-border/50 hover:border-blue-500/30">
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-center justify-center w-12 h-12 bg-muted rounded-[10px] min-w-[48px]">
-                                <span className="text-[10px] font-bold text-blue-500 uppercase">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                                <span className="text-lg font-bold text-foreground">{new Date(event.date).getDate()}</span>
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-bold text-foreground truncate">{event.title}</h4>
-                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground mt-1">
-                                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {event.venue}</span>
-                                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {event.time}</span>
-                                </div>
-                              </div>
-                            </div>
-                            {event.ticketUrl && (
-                              <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-600 text-foreground rounded-full hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
-                                <Plus className="h-4 w-4" />
-                              </a>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Featured Collaborations Section */}
-                  {artist.collaborations && artist.collaborations.length > 0 && (
-                    <section className="space-y-4 p-5">
-                      <h3 className="text-lg font-bold text-foreground mb-4">Collaborations</h3>
-                      <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-                        {artist.collaborations.map((collab) => (
-                          <div key={collab.id} className="min-w-[160px] group cursor-pointer">
-                            <div className="relative aspect-square rounded-[10px] overflow-hidden mb-2 shadow-lg">
-                              <img src={collab.coverUrl || getPlaceholderImage(`collab-${collab.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Play className="h-6 w-6 text-white fill-white" />
-                              </div>
-                            </div>
-                            <h4 className="text-sm font-bold text-foreground truncate">{collab.trackTitle}</h4>
-                            <p className="text-xs text-muted-foreground truncate">w/ {collab.artistName}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* All Tracks Grid */}
-                  <section className="p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold text-foreground">All Tracks</h3>
-                      {/* Filter Section Moved Here */}
-                      <div className="flex items-center gap-2">
-                        {['All', 'NFTs', 'Releases', 'Collaborations'].map((filter) => (
-                          <button
-                            key={filter}
-                            onClick={() => setTrackFilter(filter)}
-                            className={`px-3 py-1 rounded-full text-xs font-bold uppercase transition-all ${
-                              trackFilter === filter 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-muted text-muted-foreground hover:text-foreground'
-                            }`}
-                          >
-                            {filter}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-                      {artistTracks.filter(t => {
-                        if (trackFilter === 'All') return true;
-                        if (trackFilter === 'NFTs') return t.isNFT;
-                        if (trackFilter === 'Releases') return !t.isCollaboration;
-                        if (trackFilter === 'Collaborations') return t.isCollaboration;
-                        return true;
-                      }).map(t => (
-                        <div key={t.id} className="min-w-[280px] sm:min-w-[320px]">
-                          <TrackCard 
-                            track={t} 
-                            onMint={isOwnProfile ? (track) => navigate('/mint', { state: { track } }) : undefined}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    {artistTracks.filter(t => {
-                      if (trackFilter === 'All') return true;
-                      if (trackFilter === 'NFTs') return t.isNFT;
-                      if (trackFilter === 'Releases') return !t.isCollaboration;
-                      if (trackFilter === 'Collaborations') return t.isCollaboration;
-                      return true;
-                    }).length === 0 && (
-                      <div className="py-4 text-center bg-card rounded-[10px]">
-                        <p className="text-xs text-muted-foreground">No tracks broadcasted.</p>
-                      </div>
-                    )}
-                  </section>
-                </div>
+                <ArtistTracksSection 
+                  artistTracks={artistTracks}
+                  isOwnProfile={isOwnProfile}
+                  playAll={playAll}
+                  featuredNFT={featuredNFT}
+                  topTracks={topTracks}
+                  trackFilter={trackFilter}
+                  setTrackFilter={setTrackFilter}
+                  artist={artist}
+                />
               )}
 
               {activeTab === 'collection' && (
-                <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar animate-in slide-in-from-right-4 duration-500">
-                  {artistNFTs.map(n => (
-                    <div key={n.id} className="min-w-[280px] sm:min-w-[320px]">
-                      <NFTCard 
-                        nft={n} 
-                        onAction={isOwnProfile ? (nft) => setSelectedNftForListing(nft) : undefined}
-                      />
-                    </div>
-                  ))}
-                  {artistNFTs.length === 0 && (
-                    <div className="w-full py-4 text-center bg-card rounded-[10px]">
-                      <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No assets detected.</p>
-                    </div>
-                  )}
-                </div>
+                <ArtistNFTsSection 
+                  artistNFTs={artistNFTs}
+                  isOwnProfile={isOwnProfile}
+                  setSelectedNftForListing={setSelectedNftForListing}
+                />
               )}
 
               {activeTab === 'signals' && (
-                <div className="animate-in slide-in-from-bottom-4 duration-500">
-                  <SocialFeed posts={artistPosts} emptyMessage="Signal void detected." />
-                </div>
+                <ArtistActivitySection artistPosts={artistPosts} />
               )}
 
               {activeTab === 'about' && (
@@ -975,9 +806,6 @@ const ArtistProfile: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'requests' && (
-                <SongRequestsTab artistId={artist.id} isOwnProfile={isOwnProfile} />
-              )}
 
               {activeTab === 'management' && isOwnProfile && (
                 <div className="space-y-4 animate-in fade-in duration-700">

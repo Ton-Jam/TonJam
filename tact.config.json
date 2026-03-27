@@ -1,0 +1,14 @@
+{
+  "projects": [
+    {
+      "name": "TonJamNFT",
+      "path": "./src/contracts/nft/TonJamNFT.tact",
+      "output": "./src/contracts/nft"
+    },
+    {
+      "name": "TonJamMarketplace",
+      "path": "./src/contracts/marketplace/TonJamMarketplace.tact",
+      "output": "./src/contracts/marketplace"
+    }
+  ]
+}

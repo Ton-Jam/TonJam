@@ -156,7 +156,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     }
   };
 
-  const userHandle = post.userHandle || `@${post.userName.toLowerCase().replace(/\s+/g, '')}`;
+  const userHandle = post.userHandle || `@${(post.userName || 'user').toLowerCase().replace(/\s+/g, '')}`;
 
   const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -258,7 +258,9 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 <div className="flex items-center gap-2">
                   <span className="text-blue-500 text-sm dark:text-silver-400">{userHandle}</span>
                   <span className="text-blue-500 text-sm dark:text-silver-400">·</span>
-                  <span className="text-blue-500 text-sm dark:text-silver-400">{post.timestamp}</span>
+                  <span className="text-blue-500 text-sm dark:text-silver-400">
+                    {new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -484,7 +486,9 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                           >
                             {comment.userName}
                           </h5>
-                          <span className="text-[8px] text-blue-500/50 dark:text-silver-500 font-bold uppercase tracking-widest">{comment.timestamp}</span>
+                          <span className="text-[8px] text-blue-500/50 dark:text-silver-500 font-bold uppercase tracking-widest">
+                            {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
                         <p className="text-[11px] text-blue-600/70 dark:text-silver-300 leading-relaxed">{renderContentWithHashtags(comment.content)}</p>
                         

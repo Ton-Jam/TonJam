@@ -14,6 +14,8 @@ export interface Track {
   price?: string; 
   streamingPrice?: string;
   editions?: string;
+  editionType?: string;
+  rarity?: string;
   royalty?: string;
   bpm?: number;
   key?: string;
@@ -251,11 +253,12 @@ export interface UserProfile {
   listedNftIds?: string[];
   anthemId?: string;
   createdAt?: string;
+  role?: 'artist' | 'collector' | 'admin';
 }
 
 export interface Transaction {
   id: string;
-  type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards';
+  type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards' | 'sponsorship';
   amount: number; // Total amount in TON or JAM
   platformFee: number; // Total platform fee
   artistShare: number; // Amount sent to artist
@@ -267,4 +270,49 @@ export interface Transaction {
   timestamp: string;
   status: 'pending' | 'completed' | 'failed';
   txHash?: string;
+}
+
+export interface SponsoredContent {
+  id: string;
+  artistId: string;
+  artistName: string;
+  type: 'track' | 'nft' | 'announcement';
+  title: string;
+  description?: string;
+  imageUrl: string;
+  targetId?: string; // trackId or nftId
+  link?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'expired';
+  paymentAmount: string; // in TON or JAM
+  paymentCurrency: 'TON' | 'JAM';
+  durationDays: number;
+  startDate?: string;
+  endDate?: string;
+  createdAt: string;
+}
+
+export interface WithdrawalRequest {
+  id: string;
+  amount: string;
+  currency: 'TON' | 'JAM';
+  recipientAddress: string;
+  status: 'pending' | 'completed' | 'failed';
+  timestamp: string;
+  txHash?: string;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  reward: string;
+  points: number;
+  completed: boolean;
+  claimed: boolean;
+  type: 'daily' | 'achievement' | 'milestone' | 'seasonal';
+  progress: number;
+  total: number;
+  dueDate?: string;
+  rarity?: 'common' | 'rare' | 'epic' | 'legendary';
+  priority?: 'high' | 'medium' | 'low';
 }

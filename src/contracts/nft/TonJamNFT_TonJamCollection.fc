@@ -1,0 +1,615 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; TonJamNFT_TonJamCollection.headers.fc
+;;
+;; Header files for TonJamCollection
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; $DeployOk$_store
+builder $DeployOk$_store(builder build_0, (int) v) inline;
+
+;; $DeployOk$_store_cell
+cell $DeployOk$_store_cell((int) v, builder b) inline;
+
+;; $RoyaltyParams$_store
+builder $RoyaltyParams$_store(builder build_0, (int, int, slice) v) inline;
+
+;; $RoyaltyParams$_load
+(slice, ((int, int, slice))) $RoyaltyParams$_load(slice sc_0) inline;
+
+;; $ReportRoyaltyParams$_store
+builder $ReportRoyaltyParams$_store(builder build_0, (int, int, int, slice) v) inline;
+
+;; $ReportRoyaltyParams$_store_cell
+cell $ReportRoyaltyParams$_store_cell((int, int, int, slice) v, builder b) inline;
+
+;; $TonJamCollection$_store
+builder $TonJamCollection$_store(builder build_0, (slice, int, cell, (int, int, slice)) v) inline;
+
+;; $TonJamCollection$_load
+(slice, ((slice, int, cell, (int, int, slice)))) $TonJamCollection$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $RoyaltyParams$_to_external
+(int, int, slice) $RoyaltyParams$_to_external(((int, int, slice)) v) inline;
+
+;; $TonJamCollection$init$_load
+(slice, ((slice, cell, (int, int, slice)))) $TonJamCollection$init$_load(slice sc_0) inline;
+
+;; $TonJamNFTItem$init$_store
+builder $TonJamNFTItem$init$_store(builder build_0, (slice, slice, int, cell) v) inline;
+
+;; $TonJamCollection$_contract_init
+(slice, int, cell, (int, int, slice)) $TonJamCollection$_contract_init(slice $owner, cell $content, (int, int, slice) $royalty_params) impure inline;
+
+;; $TonJamCollection$_contract_load
+(slice, int, cell, (int, int, slice)) $TonJamCollection$_contract_load() impure inline;
+
+;; $TonJamCollection$_contract_store
+() $TonJamCollection$_contract_store((slice, int, cell, (int, int, slice)) v) impure inline;
+
+;; $Cell$_fun_asSlice
+slice $Cell$_fun_asSlice(cell $self) impure inline;
+
+;; $global_newAddress
+slice $global_newAddress(int $chain, int $hash) impure inline;
+
+;; $global_contractAddressExt
+slice $global_contractAddressExt(int $chain, cell $code, cell $data) impure inline;
+
+;; $global_contractAddress
+slice $global_contractAddress((cell, cell) $s) impure inline;
+
+;; $TonJamCollection$_fun_get_collection_data
+((slice, int, cell, (int, int, slice)), cell) $TonJamCollection$_fun_get_collection_data((slice, int, cell, (int, int, slice)) $self) impure inline_ref;
+
+;; $TonJamNFTItem$_init_child
+(cell, cell) $TonJamNFTItem$_init_child(slice $owner, slice $collection_address, int $item_index, cell $content) inline_ref;
+
+;; $TonJamCollection$_fun_getNftItemInit
+((slice, int, cell, (int, int, slice)), (cell, cell)) $TonJamCollection$_fun_getNftItemInit((slice, int, cell, (int, int, slice)) $self, int $item_index) impure inline_ref;
+
+;; $TonJamCollection$_fun_get_nft_address_by_index
+((slice, int, cell, (int, int, slice)), slice) $TonJamCollection$_fun_get_nft_address_by_index((slice, int, cell, (int, int, slice)) $self, int $item_index) impure inline_ref;
+
+;; $TonJamCollection$_fun_royalty_params
+((slice, int, cell, (int, int, slice)), (int, int, slice)) $TonJamCollection$_fun_royalty_params((slice, int, cell, (int, int, slice)) $self) impure inline_ref;
+
+;; $MessageParameters$_constructor_bounce_to_value_mode_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
+
+;; $TonJamCollection$_fun_notify
+((slice, int, cell, (int, int, slice)), ()) $TonJamCollection$_fun_notify((slice, int, cell, (int, int, slice)) $self, cell $body) impure inline;
+
+;; $SendParameters$_constructor_to_value_bounce_mode_body_code_data
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_bounce_mode_body_code_data(slice $to, int $value, int $bounce, int $mode, cell $body, cell $code, cell $data) inline;
+
+;; $SendParameters$_constructor_to_value_mode_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
+
+;; $ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination
+((int, int, int, slice)) $ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination(int $query_id, int $numerator, int $denominator, slice $destination) inline;
+
+;; $DeployOk$_constructor_queryId
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
+
+
+;; TonJamNFT_TonJamCollection.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+builder $global_beginCell() impure asm """
+    NEWC
+""";
+
+int $global_contractHash(cell $code, cell $data) impure asm """
+    s0 PUSH HASHCU // `data` hash
+    s2 PUSH HASHCU // `code` hash
+    SWAP2
+    CDEPTH         // `data` depth
+    SWAP
+    CDEPTH         // `code` depth
+    131380 INT     // (2 << 16) | (1 << 8) | 0x34
+
+    // Group 2: Composition of the Builder
+    NEWC
+    24 STU  // store refs_descriptor | bits_descriptor | data
+    16 STU  // store depth_descriptor for `code`
+    16 STU  // store depth_descriptor for `data`
+    256 STU // store `code` hash
+    256 STU // store `data` hash
+
+    // Group 3: SHA256 hash of the resulting Builder
+    ONE HASHEXT_SHA256
+""";
+
+slice $Slice$_fun_asAddressUnsafe(slice $self) impure asm "NOP";
+
+slice $Cell$_fun_beginParse(cell $self) impure asm """
+    CTOS
+""";
+
+slice $Cell$_fun_asSlice(cell $self) impure inline {
+    var ($self) = $self;
+    return $Cell$_fun_beginParse($self);
+}
+
+cell $Builder$_fun_endCell(builder $self) impure asm """
+    ENDC
+""";
+
+slice $global_newAddress(int $chain, int $hash) impure inline {
+    return $Slice$_fun_asAddressUnsafe($Cell$_fun_asSlice($Builder$_fun_endCell(store_uint(store_int(store_uint($global_beginCell(), 4, 3), $chain, 8), $hash, 256))));
+}
+
+slice $global_contractAddressExt(int $chain, cell $code, cell $data) impure inline {
+    int $hash = $global_contractHash($code, $data);
+    return $global_newAddress($chain, $hash);
+}
+
+slice $global_contractAddress((cell, cell) $s) impure inline {
+    var (($s'code, $s'data)) = $s;
+    return $global_contractAddressExt(0, $s'code, $s'data);
+}
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_nativeReserve(int $amount, int $mode) impure asm """
+    RAWRESERVE
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
+
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+    ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+""";
+
+builder $Builder$_fun_storeBit(int $value, builder $self) impure asm """
+    1 STI
+""";
+
+builder $Builder$_fun_storeCoins(builder $self, int $value) impure asm """
+    STVARUINT16
+""";
+
+builder $Builder$_fun_storeRef(cell $cell, builder $self) impure asm """
+    STREF
+""";
+
+builder $Builder$_fun_storeAddress(builder $self, slice $address) impure asm """
+    STSLICER
+""";
+
+((slice, int, cell, (int, int, slice)), ()) $TonJamCollection$_fun_notify((slice, int, cell, (int, int, slice)) $self, cell $body) impure inline {
+    var (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    slice $to = __tact_context_get_sender();
+    int $bounce = false;
+    if (false) {
+        int $balance = $global_myBalance();
+        int $balanceBeforeMessage = ($balance - $Context$_get_value(__tact_context_get()));
+        if (($balanceBeforeMessage < 0)) {
+            $global_nativeReserve(0, 0);
+            $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
+            return (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+        }
+    }
+    $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
+    return (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), ());
+}
+
+;; TonJamNFT_TonJamCollection.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_bounce_mode_body_code_data(slice $to, int $value, int $bounce, int $mode, cell $body, cell $code, cell $data) inline {
+    return ($mode, $body, $code, $data, $value, $to, $bounce);
+}
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, null(), null(), $value, $to, true);
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v, builder b) inline {
+    return $DeployOk$_store(b, v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: RoyaltyParams
+;; TLB: _ numerator:uint16 denominator:uint16 destination:address = RoyaltyParams
+;;
+
+builder $RoyaltyParams$_store(builder build_0, (int, int, slice) v) inline {
+    var (v'numerator, v'denominator, v'destination) = v;
+    build_0 = build_0.store_uint(v'numerator, 16);
+    build_0 = build_0.store_uint(v'denominator, 16);
+    build_0 = build_0.store_slice(v'destination);
+    return build_0;
+}
+
+(slice, ((int, int, slice))) $RoyaltyParams$_load(slice sc_0) inline {
+    var v'numerator = sc_0~load_uint(16);
+    var v'denominator = sc_0~load_uint(16);
+    var v'destination = sc_0~load_msg_addr();
+    return (sc_0, (v'numerator, v'denominator, v'destination));
+}
+
+(int, int, slice) $RoyaltyParams$_to_external(((int, int, slice)) v) inline {
+    var (v'numerator, v'denominator, v'destination) = v; 
+    return (v'numerator, v'denominator, v'destination);
+}
+
+;;
+;; Type: ReportRoyaltyParams
+;; Header: 0xa8981987
+;; TLB: report_royalty_params#a8981987 query_id:uint64 numerator:uint16 denominator:uint16 destination:address = ReportRoyaltyParams
+;;
+
+builder $ReportRoyaltyParams$_store(builder build_0, (int, int, int, slice) v) inline {
+    var (v'query_id, v'numerator, v'denominator, v'destination) = v;
+    build_0 = store_uint(build_0, 2828540295, 32);
+    build_0 = build_0.store_uint(v'query_id, 64);
+    build_0 = build_0.store_uint(v'numerator, 16);
+    build_0 = build_0.store_uint(v'denominator, 16);
+    build_0 = build_0.store_slice(v'destination);
+    return build_0;
+}
+
+cell $ReportRoyaltyParams$_store_cell((int, int, int, slice) v, builder b) inline {
+    return $ReportRoyaltyParams$_store(b, v).end_cell();
+}
+
+((int, int, int, slice)) $ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination(int $query_id, int $numerator, int $denominator, slice $destination) inline {
+    return ($query_id, $numerator, $denominator, $destination);
+}
+
+;;
+;; Type: TonJamCollection
+;; TLB: _ owner:address next_item_index:uint64 content:^cell royalty_params:RoyaltyParams{numerator:uint16,denominator:uint16,destination:address} = TonJamCollection
+;;
+
+builder $TonJamCollection$_store(builder build_0, (slice, int, cell, (int, int, slice)) v) inline {
+    var (v'owner, v'next_item_index, v'content, (v'royalty_params'numerator, v'royalty_params'denominator, v'royalty_params'destination)) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = build_0.store_uint(v'next_item_index, 64);
+    build_0 = build_0.store_ref(v'content);
+    build_0 = $RoyaltyParams$_store(build_0, (v'royalty_params'numerator, v'royalty_params'denominator, v'royalty_params'destination));
+    return build_0;
+}
+
+(slice, ((slice, int, cell, (int, int, slice)))) $TonJamCollection$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'next_item_index = sc_0~load_uint(64);
+    var v'content = sc_0~load_ref();
+    var v'royalty_params = sc_0~$RoyaltyParams$_load();
+    return (sc_0, (v'owner, v'next_item_index, v'content, v'royalty_params));
+}
+
+(slice, ((slice, cell, (int, int, slice)))) $TonJamCollection$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'content = sc_0~load_ref();
+    var v'royalty_params = sc_0~$RoyaltyParams$_load();
+    return (sc_0, (v'owner, v'content, v'royalty_params));
+}
+
+(slice, int, cell, (int, int, slice)) $TonJamCollection$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$TonJamCollection$_load();
+    }
+    else {
+        (slice $owner, cell $content, (int, int, slice) $royalty_params) = $sc~$TonJamCollection$init$_load();
+        $sc.end_parse();
+        return $TonJamCollection$_contract_init($owner, $content, $royalty_params);
+    }
+}
+
+() $TonJamCollection$_contract_store((slice, int, cell, (int, int, slice)) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $TonJamCollection$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Type: TonJamNFTItem
+;; TLB: _ owner:address collection_address:address item_index:uint64 content:^cell = TonJamNFTItem
+;;
+
+builder $TonJamNFTItem$init$_store(builder build_0, (slice, slice, int, cell) v) inline {
+    var (v'owner, v'collection_address, v'item_index, v'content) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = build_0.store_slice(v'collection_address);
+    build_0 = build_0.store_int(v'item_index, 257);
+    build_0 = build_0.store_ref(v'content);
+    return build_0;
+}
+
+cell $TonJamNFTItem$_child_get_code() impure asm """
+    B{b5ee9c720101050100ac000114ff00f4a413f4bcf2c80b01020162020300aad030d072d721d200d200fa4021103450556f04f86101f862ed44d0d200019bfa40fa40d33fd455306c148e10fa40fa40810101d700d4553004d15502e204925f04e05502c87f01ca0055305034cececb3fccc9ed540157a11f9fda89a1a4000337f481f481a67fa8aa60d8291c21f481f481020203ae01a8aa6009a2aa05c5b678d8830400247fc8ca005220cb3f23cf1624cf165210ccc9} B>boc PUSHREF
+""";
+
+(cell, cell) $TonJamNFTItem$_init_child(slice $owner, slice $collection_address, int $item_index, cell $content) inline_ref {
+    ;; Build init code cell
+
+    ;; Contract Code: TonJamNFTItem
+    cell init_code = $TonJamNFTItem$_child_get_code();
+
+
+    builder b = begin_cell();
+    b = b.store_int(false, 1);
+    b = $TonJamNFTItem$init$_store(b, ($owner, $collection_address, $item_index, $content));
+    return (init_code, b.end_cell());
+}
+
+;;
+;; Contract TonJamCollection functions
+;;
+
+(slice, int, cell, (int, int, slice)) $TonJamCollection$_contract_init(slice $owner, cell $content, (int, int, slice) $royalty_params) impure inline {
+    var (($royalty_params'numerator, $royalty_params'denominator, $royalty_params'destination)) = $royalty_params;
+    var (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = (null(), null(), null(), null());
+    $self'owner = $owner;
+    $self'next_item_index = 0;
+    $self'content = $content;
+    ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination) = ($royalty_params'numerator, $royalty_params'denominator, $royalty_params'destination);
+    return ($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination));
+}
+
+((slice, int, cell, (int, int, slice)), cell) $TonJamCollection$_fun_get_collection_data((slice, int, cell, (int, int, slice)) $self) impure inline_ref {
+    var (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    var $fresh$ret_5 = $Builder$_fun_endCell($Builder$_fun_storeAddress($Builder$_fun_storeRef($self'content, store_uint($global_beginCell(), $self'next_item_index, 64)), $self'owner));
+    return (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), $fresh$ret_5);
+}
+
+((slice, int, cell, (int, int, slice)), (cell, cell)) $TonJamCollection$_fun_getNftItemInit((slice, int, cell, (int, int, slice)) $self, int $item_index) impure inline_ref {
+    var (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    var $fresh$ret_7 = $TonJamNFTItem$_init_child($self'owner, $self'owner, $item_index, $self'content);
+    return (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), $fresh$ret_7);
+}
+
+((slice, int, cell, (int, int, slice)), slice) $TonJamCollection$_fun_get_nft_address_by_index((slice, int, cell, (int, int, slice)) $self, int $item_index) impure inline_ref {
+    var (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    var ($init'code, $init'data) = ($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$TonJamCollection$_fun_getNftItemInit($item_index);
+    var $fresh$ret_6 = $global_contractAddress(($init'code, $init'data));
+    return (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), $fresh$ret_6);
+}
+
+((slice, int, cell, (int, int, slice)), (int, int, slice)) $TonJamCollection$_fun_royalty_params((slice, int, cell, (int, int, slice)) $self) impure inline_ref {
+    var (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))) = $self;
+    var $fresh$ret_8 = ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination);
+    return (($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)), $fresh$ret_8);
+}
+
+;;
+;; Get methods of a Contract TonJamCollection
+;;
+
+_ %get_collection_data() method_id(102491) {
+    var self = $TonJamCollection$_contract_load();
+    var res = self~$TonJamCollection$_fun_get_collection_data();
+    return res;
+}
+
+_ %get_nft_address_by_index(int $item_index) method_id(92067) {
+    int $item_index = $item_index;
+    var self = $TonJamCollection$_contract_load();
+    var res = self~$TonJamCollection$_fun_get_nft_address_by_index($item_index);
+    return res;
+}
+
+_ %royalty_params() method_id(85719) {
+    var self = $TonJamCollection$_contract_load();
+    var res = self~$TonJamCollection$_fun_royalty_params();
+    return $RoyaltyParams$_to_external(res);
+}
+
+;;
+;; Routing of a Contract TonJamCollection
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)) = $TonJamCollection$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    var op = in_msg~load_opcode_internal();
+    ;; Receive Mint message
+    if (op == 2107022347) {
+        var $msg'query_id = in_msg~load_uint(64);
+        var $msg'receiver = in_msg~load_msg_addr();
+        var $msg'content = in_msg~load_ref();
+        var ($msg'royalty_params'numerator, $msg'royalty_params'denominator, $msg'royalty_params'destination) = in_msg~$RoyaltyParams$_load();
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        throw_unless(57579, ( equal_slices_bits($ctx'sender, $self'owner) ));
+        var ($nft_init'code, $nft_init'data) = ($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$TonJamCollection$_fun_getNftItemInit($self'next_item_index);
+        $global_send($SendParameters$_constructor_to_value_bounce_mode_body_code_data($global_contractAddress(($nft_init'code, $nft_init'data)), 0, false, 64, $Builder$_fun_endCell($Builder$_fun_storeBit(false, $Builder$_fun_storeCoins($Builder$_fun_storeBit(false, $Builder$_fun_storeAddress($Builder$_fun_storeAddress(store_uint(store_uint($global_beginCell(), 1607220500, 32), $msg'query_id, 64), $msg'receiver), $self'owner)), 0))), $nft_init'code, $nft_init'data));
+        $self'next_item_index = ($self'next_item_index + 1);
+        $TonJamCollection$_contract_store(($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)));
+        return ();
+    }
+    
+    ;; Receive GetRoyaltyParams message
+    if (op == 0x693d3950) {
+        var $msg'query_id = in_msg~load_uint(64);
+        $global_send($SendParameters$_constructor_to_value_mode_body(__tact_context_get_sender(), 0, 64, $ReportRoyaltyParams$_store_cell($ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination($msg'query_id, $self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination), begin_cell())));
+        $TonJamCollection$_contract_store(($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)));
+        return ();
+    }
+    
+    ;; Receive Deploy message
+    if (op == 0x946a98b6) {
+        var $deploy'queryId = in_msg~load_uint(64);
+        ($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination))~$TonJamCollection$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+        $TonJamCollection$_contract_store(($self'owner, $self'next_item_index, $self'content, ($self'royalty_params'numerator, $self'royalty_params'denominator, $self'royalty_params'destination)));
+        return ();
+    }
+    
+    ;; Throw if not handled
+    throw(130);
+}

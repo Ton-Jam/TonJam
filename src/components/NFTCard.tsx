@@ -19,14 +19,14 @@ interface NFTCardProps {
 
 const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false }) => {
   const navigate = useNavigate();
-  
-  if (isLoading) {
-    return <SkeletonCard />;
-  }
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, userProfile, setAnthem } = useAudio();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+  
+  if (isLoading) {
+    return <SkeletonCard variant={variant} />;
+  }
   const associatedTrack = MOCK_TRACKS.find(t => t.id === nft.trackId);
   const isActive = currentTrack?.id === nft.trackId;
   const isOwner = nft.owner === userProfile.walletAddress;

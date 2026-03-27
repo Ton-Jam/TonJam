@@ -1,32 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
+import { BackButton } from '@/components/BackButton';
 import { 
-  Home as HomeIcon, 
-  Search, 
-  Send, 
-  Library, 
-  ShoppingBag, 
-  User, 
-  Settings as SettingsIcon, 
-  Bell,
-  PlusCircle,
-  LucideIcon,
-  Wallet,
-  LayoutDashboard,
-  Upload,
-  Shield,
-  TrendingUp,
-  ArrowLeft,
-  LogOut,
-  LogIn,
-  PlusCircle as PlusCircleIcon,
-  Filter,
-  Share2,
-  History,
-  X,
-  ArrowRight,
-  ChevronRight
-} from 'lucide-react';
+  MagnifyingGlassIcon, 
+  AdjustmentsHorizontalIcon,
+  BellIcon,
+  WalletIcon,
+  UserIcon,
+  FunnelIcon,
+  ClockIcon,
+  ArrowTrendingUpIcon,
+  ArrowRightIcon,
+  XMarkIcon,
+  ArrowLeftIcon,
+  ChevronRightIcon,
+  HomeIcon,
+  PaperAirplaneIcon,
+  RectangleStackIcon,
+  ShoppingBagIcon,
+  Squares2X2Icon,
+  ShieldCheckIcon,
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon,
+  ArrowUpTrayIcon,
+  PlusCircleIcon,
+  StarIcon
+} from '@heroicons/react/24/outline';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
@@ -82,6 +81,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setIsDiscoverFiltersOpen,
     marketplaceFilters,
     setMarketplaceFilters,
+    jamspaceFilters,
+    setJamspaceFilters,
     trackToAddToPlaylist,
     setTrackToAddToPlaylist,
     optionsTrack,
@@ -93,6 +94,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [activeFilterSubMenu, setActiveFilterSubMenu] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
@@ -119,6 +121,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isTasks = location.pathname === '/tasks';
   const isMarketplace = location.pathname.startsWith('/marketplace');
   const isJamspace = location.pathname.startsWith('/jamspace');
+  const isLibrary = location.pathname.startsWith('/library');
   const isExplore = location.pathname.startsWith('/explore');
   const isDiscover = location.pathname === '/discover';
   const isArtistProfile = location.pathname.startsWith('/artist/');
@@ -211,22 +214,41 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
             ) : (
               <>
-                <button 
-                  onClick={() => navigate(-1)} 
+                <BackButton 
                   className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all"
-                  aria-label="Go back"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </button>
-                <div className="flex items-center gap-2 lg:hidden">
-                  <span className="font-bold text-sm tracking-tight text-foreground uppercase truncate max-w-[100px]">{location.pathname.split('/')[1].replace('-', ' ')}</span>
+                  ariaLabel="Go back"
+                />
+                <div className="flex items-center gap-2 lg:hidden w-full">
+                  {(isJamspace || isLibrary || isMarketplace) && isHeaderSearchOpen ? (
+                    <input 
+                      type="text" 
+                      placeholder="Search..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleSearch}
+                      className="bg-transparent border-none outline-none text-sm w-full text-foreground placeholder:text-muted-foreground"
+                      autoFocus
+                    />
+                  ) : (
+                    <span className="font-bold text-sm tracking-tight text-foreground uppercase truncate max-w-[100px]">
+                      {isJamspace ? 'JamSpace' : location.pathname.split('/')[1].replace('-', ' ')}
+                    </span>
+                  )}
                 </div>
               </>
             )}
 
             {!isHome && !isDiscover && (
-              <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`} ref={searchRef}>
-                <ButtonGroupInput 
+              <>
+                {(isJamspace || isLibrary || isMarketplace) && !isHeaderSearchOpen && (
+                  <div className="hidden lg:flex items-center gap-2 ml-4 flex-1">
+                    <span className="font-bold text-lg tracking-tight text-foreground uppercase truncate">
+                      {isJamspace ? 'JamSpace' : isLibrary ? 'Library' : 'Marketplace'}
+                    </span>
+                  </div>
+                )}
+                <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'} ${(isJamspace || isLibrary || isMarketplace) && !isHeaderSearchOpen ? '!hidden' : ''}`} ref={searchRef}>
+                  <ButtonGroupInput 
                   placeholder={getSearchPlaceholder()} 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -248,7 +270,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <div className="flex items-center gap-2 mb-2 px-2">
-                            <History className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
+                            <ClockIcon className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Recent Searches</span>
                           </div>
                           <div className="space-y-2">
@@ -267,14 +289,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                       className="p-3 rounded-md hover:bg-primary/20 text-primary transition-colors"
                                       title="Search"
                                     >
-                                      <ArrowRight className="h-3 w-3" />
+                                      <ArrowRightIcon className="h-3 w-3" />
                                     </button>
                                     <button 
                                       onClick={() => removeRecentSearch(item)}
                                       className="p-3 rounded-md hover:bg-destructive/10 text-destructive/70 hover:text-destructive transition-colors"
                                       title="Remove"
                                     >
-                                      <X className="h-3 w-3" />
+                                      <XMarkIcon className="h-3 w-3" />
                                     </button>
                                   </div>
                                 </div>
@@ -287,7 +309,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                         <div>
                           <div className="flex items-center gap-2 mb-2 px-2">
-                            <TrendingUp className="h-3 w-3 text-zinc-500 dark:text-primary" />
+                            <ArrowTrendingUpIcon className="h-3 w-3 text-zinc-500 dark:text-primary" />
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trending Now</span>
                           </div>
                           <div className="space-y-2">
@@ -303,7 +325,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                   onClick={() => handleSuggestionClick(topic)}
                                   className="opacity-0 group-hover:opacity-100 p-3 rounded-md bg-primary/10 text-primary transition-all"
                                 >
-                                  <TrendingUp className="h-3 w-3" />
+                                  <ArrowTrendingUpIcon className="h-3 w-3" />
                                 </button>
                               </div>
                             ))}
@@ -314,6 +336,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   )}
                 </AnimatePresence>
               </div>
+              </>
             )}
 
             {isDiscover && (
@@ -346,7 +369,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <div className="space-y-2">
                           <div>
                             <div className="flex items-center gap-2 mb-2 px-2">
-                              <History className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
+                              <ClockIcon className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
                               <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Recent</span>
                             </div>
                             <div className="space-y-2">
@@ -360,10 +383,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                   </button>
                                   <div className="flex items-center gap-2">
                                     <button onClick={() => handleSuggestionClick(item)} className="p-2 text-primary">
-                                      <ArrowRight className="h-3.5 w-3.5" />
+                                      <ArrowRightIcon className="h-3.5 w-3.5" />
                                     </button>
                                     <button onClick={() => removeRecentSearch(item)} className="p-2 text-destructive/60">
-                                      <X className="h-3.5 w-3.5" />
+                                      <XMarkIcon className="h-3.5 w-3.5" />
                                     </button>
                                   </div>
                                 </div>
@@ -373,7 +396,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                           <div>
                             <div className="flex items-center gap-2 mb-2 px-2">
-                              <TrendingUp className="h-3 w-3 text-zinc-500 dark:text-primary" />
+                              <ArrowTrendingUpIcon className="h-3 w-3 text-zinc-500 dark:text-primary" />
                               <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Trending</span>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
@@ -384,7 +407,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                   className="flex items-center justify-between p-2 rounded-lg bg-primary/5 text-xs text-foreground/90 text-left"
                                 >
                                   <span>{topic}</span>
-                                  <TrendingUp className="h-3 w-3 text-primary/60" />
+                                  <ArrowTrendingUpIcon className="h-3 w-3 text-primary/60" />
                                 </button>
                               ))}
                             </div>
@@ -413,24 +436,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="p-2 rounded-full hover:bg-muted/20 transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Connect Wallet"
               >
-                <Wallet className="h-5 w-5 text-zinc-500 dark:text-primary" />
+                <WalletIcon className="h-5 w-5 text-zinc-500 dark:text-primary" />
               </button>
             )}
 
             {/* Notification Icon & Marketplace Filters */}
-            {(isMarketplace || isJamspace) && (
+            {(isMarketplace || isJamspace || isLibrary) && (
               <div className="flex items-center gap-2">
-                {isMarketplace && (
+                {(isMarketplace || isLibrary) && (
                   <DropdownMenu onOpenChange={(open) => { if (!open) setActiveFilterSubMenu(null); }}>
                     <DropdownMenuTrigger asChild>
                       <button 
                         className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         aria-label="Filters"
                       >
-                        <Filter className="h-5 w-5" />
+                        <AdjustmentsHorizontalIcon className="h-6 w-6" strokeWidth={2.5} />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[280px] sm:w-72 bg-background border-border shadow-2xl p-2 overflow-hidden" align="end">
+                    <DropdownMenuContent className="w-[280px] sm:w-72 bg-background border-none shadow-2xl p-2 overflow-hidden" align="end">
                       <div className="flex flex-col max-h-[85vh]">
                         <AnimatePresence mode="wait">
                           {activeFilterSubMenu === null ? (
@@ -454,7 +477,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Genre</span>
                                     <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.genre}</span>
                                   </div>
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                  <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem 
@@ -465,7 +488,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Artist</span>
                                     <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.artist}</span>
                                   </div>
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                  <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem 
@@ -476,7 +499,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Rarity</span>
                                     <span className="text-[10px] text-muted-foreground lowercase">{marketplaceFilters.rarity}</span>
                                   </div>
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                  <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem 
@@ -487,10 +510,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Price Range</span>
                                     <span className="text-[10px] text-muted-foreground lowercase">
                                       {marketplaceFilters.priceRange[0] === 0 && marketplaceFilters.priceRange[1] === 1000 ? 'all prices' : 
-                                       `${marketplaceFilters.priceRange[0]}-${marketplaceFilters.priceRange[1]} TON`}
+                                      `${marketplaceFilters.priceRange[0]}-${marketplaceFilters.priceRange[1]} TON`}
                                     </span>
                                   </div>
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                  <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
                                 </DropdownMenuItem>
 
                                 <DropdownMenuSeparator className="m-2" />
@@ -547,7 +570,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 onClick={() => setActiveFilterSubMenu(null)}
                                 className="flex items-center gap-2 px-2 py-2 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-muted transition-colors border-b border-border sticky top-0 bg-background z-10"
                               >
-                                <ArrowLeft className="h-4 w-4" />
+                                <ArrowLeftIcon className="h-4 w-4" />
                                 Back to Menu
                               </button>
 
@@ -617,26 +640,73 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
-                <button 
-                  onClick={() => navigate('/notifications')} 
-                  className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label="Notifications"
-                >
-                  <Bell className="h-5 w-5" />
-                </button>
+                {(isJamspace || isLibrary || isMarketplace) && (
+                  <button 
+                    onClick={() => setIsHeaderSearchOpen(!isHeaderSearchOpen)}
+                    className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label="Search"
+                  >
+                    <MagnifyingGlassIcon className="h-6 w-6" strokeWidth={2.5} />
+                  </button>
+                )}
+                {isJamspace && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button 
+                        className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        aria-label="Filters"
+                      >
+                        <AdjustmentsHorizontalIcon className="h-6 w-6" strokeWidth={2.5} />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-background border-none shadow-2xl">
+                      <DropdownMenuLabel>Sort & View</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuRadioGroup value={jamspaceFilters.sortOrder} onValueChange={(val) => setJamspaceFilters(prev => ({ ...prev, sortOrder: val as any }))}>
+                        <DropdownMenuRadioItem value="Newest">Newest</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Oldest">Oldest</DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>View Mode</DropdownMenuLabel>
+                      <DropdownMenuRadioGroup value={jamspaceFilters.viewMode} onValueChange={(val) => setJamspaceFilters(prev => ({ ...prev, viewMode: val as any }))}>
+                        <DropdownMenuRadioItem value="list">List</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             )}
+                {!isJamspace && !isLibrary && !isMarketplace && (
+                  <button 
+                    onClick={() => navigate('/notifications')} 
+                    className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label="Notifications"
+                  >
+                    <BellIcon className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
             
             {/* User Avatar / Sign In */}
             <div className="hidden sm:block">
               <TonConnectButton />
             </div>
-            {!isMarketplace && (user ? (
+            {isDiscover && (
+              <button 
+                onClick={() => setIsDiscoverFiltersOpen(!isDiscoverFiltersOpen)}
+                className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isDiscoverFiltersOpen ? 'bg-blue-500 text-white shadow-lg' : 'hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground'}`}
+                aria-label="Toggle Filters"
+              >
+                <FunnelIcon className="h-5 w-5" />
+              </button>
+            )}
+            {!isMarketplace && !isDiscover && !isJamspace && !isLibrary && (user ? (
               <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-blue-500/20 dark:border-0 hover:opacity-80 transition-all flex items-center justify-center bg-blue-500/10 dark:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
                 {user.user_metadata?.avatar_url ? (
                   <img src={user.user_metadata.avatar_url} alt={`${user.user_metadata.full_name || 'User'} avatar`} className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-4 h-4 text-blue-600 dark:text-muted-foreground" />
+                  <UserIcon className="w-4 h-4 text-blue-600 dark:text-muted-foreground" />
                 )}
               </Link>
             ) : (
@@ -645,10 +715,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="p-3 rounded-full bg-blue-600 dark:bg-primary hover:bg-blue-500 dark:hover:bg-primary/90 text-foreground dark:text-primary-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Sign In"
               >
-                <User className="h-5 w-5" />
+                <UserIcon className="h-5 w-5" />
               </button>
             ))}
-          </div>
         </header>
       )}
 
@@ -683,7 +752,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">JamSpace</span>
                 </Link>
                 <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 rounded-full hover:bg-muted">
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeftIcon className="h-5 w-5" />
                 </button>
               </div>
               <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onNavigate={() => setIsMobileSidebarOpen(false)} />
@@ -701,7 +770,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Audio Player */}
       {currentTrack && !isFullPlayerOpen && <MiniAudioPlayer />}
-      {isFullPlayerOpen && <FullPlayer />}
+      <AnimatePresence>
+        {isFullPlayerOpen && <FullPlayer />}
+      </AnimatePresence>
 
       {trackToAddToPlaylist && (
         <AddToPlaylistModal 
@@ -726,10 +797,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {!isPlayer && (
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-16 px-2 flex justify-around items-center shadow-2xl" aria-label="Mobile Navigation">
           <MobileNavItem to="/" icon={HomeIcon} label="Home" />
-          <MobileNavItem to="/discover" icon={Search} label="Search" />
-          <MobileNavItem to="/jamspace" icon={Send} label="JamSpace" />
-          <MobileNavItem to="/library" icon={Library} label="Library" />
-          <MobileNavItem to="/marketplace" icon={ShoppingBag} label="NFT Market" />
+          <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
+          <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" />
+          <MobileNavItem to="/library" icon={RectangleStackIcon} label="Library" />
+          <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="NFT Market" />
         </nav>
       )}
     </div>
@@ -754,25 +825,25 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
 
     <nav className="flex-1 space-y-2" aria-label="Main Navigation">
       <NavItem to="/" icon={HomeIcon} label="Home" onClick={onNavigate} />
-      <NavItem to="/discover" icon={Search} label="Search" onClick={onNavigate} />
-      <NavItem to="/jamspace" icon={Send} label="JamSpace" onClick={onNavigate} />
-      <NavItem to="/library" icon={Library} label="Library" onClick={onNavigate} />
-      <NavItem to="/marketplace" icon={ShoppingBag} label="NFT Market" onClick={onNavigate} />
+      <NavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={onNavigate} />
+      <NavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" onClick={onNavigate} />
+      <NavItem to="/library" icon={RectangleStackIcon} label="Library" onClick={onNavigate} />
+      <NavItem to="/marketplace" icon={ShoppingBagIcon} label="NFT Market" onClick={onNavigate} />
       
       <div className="pt-2 pb-2">
         <p className="px-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Account</p>
         {userProfile.isVerifiedArtist && (
-          <NavItem to={`/artist/${userProfile.id}`} icon={User} label="Artist Profile" onClick={onNavigate} />
+          <NavItem to={`/artist/${userProfile.id}`} icon={UserIcon} label="Artist Profile" onClick={onNavigate} />
         )}
         {userProfile.isVerifiedArtist && (
-          <NavItem to="/artist-dashboard" icon={LayoutDashboard} label="Artist Dashboard" onClick={onNavigate} />
+          <NavItem to="/artist-dashboard" icon={Squares2X2Icon} label="Artist Dashboard" onClick={onNavigate} />
         )}
-        <NavItem to="/admin" icon={Shield} label="Admin Console" onClick={onNavigate} />
-        <NavItem to="/profile" icon={User} label="User Profile" onClick={onNavigate} />
-        <NavItem to="/wallet" icon={Wallet} label="Wallet" onClick={onNavigate} />
-        <NavItem to="/staking" icon={TrendingUp} label="Staking" onClick={onNavigate} />
-        <NavItem to="/about" icon={Shield} label="About Us" onClick={onNavigate} />
-        <NavItem to="/settings" icon={SettingsIcon} label="Settings" onClick={onNavigate} />
+        <NavItem to="/admin" icon={ShieldCheckIcon} label="Admin Console" onClick={onNavigate} />
+        <NavItem to="/profile" icon={UserIcon} label="User Profile" onClick={onNavigate} />
+        <NavItem to="/wallet" icon={WalletIcon} label="Wallet" onClick={onNavigate} />
+        <NavItem to="/staking" icon={ArrowTrendingUpIcon} label="Staking" onClick={onNavigate} />
+        <NavItem to="/about" icon={ShieldCheckIcon} label="About Us" onClick={onNavigate} />
+        <NavItem to="/settings" icon={Cog6ToothIcon} label="Settings" onClick={onNavigate} />
         {user && (
           <button 
             onClick={() => {
@@ -782,13 +853,13 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Sign Out"
           >
-            <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            <ArrowRightOnRectangleIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
             <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Sign Out</span>
           </button>
         )}
       </div>
 
-      {userProfile.isVerifiedArtist && (
+      {userProfile.isVerifiedArtist ? (
         <div className="pt-2 space-y-2">
           <Link 
             to="/upload"
@@ -796,7 +867,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Upload new track"
           >
-            <Upload className="h-5 w-5" />
+            <ArrowUpTrayIcon className="h-5 w-5" />
             <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Upload Track</span>
           </Link>
           <Link 
@@ -805,8 +876,20 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Mint new NFT"
           >
-            <PlusCircle className="h-5 w-5" />
+            <PlusCircleIcon className="h-5 w-5" />
             <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
+          </Link>
+        </div>
+      ) : (
+        <div className="pt-2 space-y-2">
+          <Link 
+            to="/artist-onboarding"
+            onClick={onNavigate}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-foreground font-bold transition-all shadow-lg shadow-purple-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Become an Artist"
+          >
+            <StarIcon className="h-5 w-5" />
+            <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Become Artist</span>
           </Link>
         </div>
       )}
@@ -832,7 +915,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             <p className="text-sm font-bold text-blue-500 tracking-tighter">{parseFloat(userProfile.jamBalance || '0').toLocaleString()} JAM</p>
           </div>
           <Link to="/wallet" className="p-3 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors">
-            <PlusCircle className="h-3.5 w-3.5" />
+            <PlusCircleIcon className="h-3.5 w-3.5" />
           </Link>
         </div>
       </div>
@@ -840,7 +923,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
   </>
 );
 
-const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: LucideIcon; label: string; onClick?: () => void }) => (
+const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; onClick?: () => void }) => (
   <NavLink 
     to={to} 
     onClick={onClick}
@@ -849,12 +932,12 @@ const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: LucideI
       ${isActive ? 'bg-zinc-500/10 text-zinc-900 dark:text-blue-500 font-bold' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400 hover:bg-zinc-500/5'}
     `}
   >
-    <Icon className="h-6 w-6 stroke-[3]" />
+    <Icon className="h-6 w-6" />
     <span className="text-[12px] uppercase font-bold tracking-[0.15em]">{label}</span>
   </NavLink>
 );
 
-const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon; label: string }) => (
+const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string }) => (
   <NavLink 
     to={to} 
     aria-label={label}
@@ -864,7 +947,7 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: LucideIcon
     `}
   >
     {({ isActive }) => (
-      <Icon className={`h-7 w-7 stroke-[3] transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
+      <Icon className={`h-7 w-7 transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
     )}
   </NavLink>
 );

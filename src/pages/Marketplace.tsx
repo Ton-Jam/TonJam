@@ -219,7 +219,7 @@ const Marketplace: React.FC = () => {
               </div>
             </div>
             
-            <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2" >
+            <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2 -mx-4 px-4" >
               {topBiddedNfts.map((nft) => (
                 <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full lg:w-[calc(50%-16px)] snap-center cursor-pointer group" >
                   <div className="relative aspect-[21/9] bg-muted/50 backdrop-blur-md border border-border dark:border-transparent rounded-[16px] overflow-hidden transition-all group-hover:border-primary/40 shadow-2xl">
@@ -261,52 +261,6 @@ const Marketplace: React.FC = () => {
             </div>
 
             {/* Search and Filters */}
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <div className="flex-1 md:flex-none flex items-center gap-2 px-3 py-2 bg-muted/50 backdrop-blur-md border border-border dark:border-transparent rounded-full group focus-within:border-primary/50 transition-all">
-                <Search className="h-3 w-3 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
-                <input 
-                  type="text" 
-                  placeholder="SEARCH..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent border-none outline-none text-[10px] font-bold uppercase tracking-widest text-foreground placeholder:text-muted-foreground/10 w-full md:w-32"
-                />
-              </div>
-              
-              {/* Filter Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="rounded-full px-3 py-2 h-auto text-[10px] font-bold uppercase tracking-widest bg-muted/50 border-border">
-                    <Filter className="h-3 w-3 mr-2" />
-                    Filters
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Genre</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuRadioGroup value={genreFilter} onValueChange={setGenreFilter}>
-                        {['All', 'Electronic', 'Hip-Hop', 'Pop', 'Rock'].map(genre => (
-                          <DropdownMenuRadioItem key={genre} value={genre}>{genre}</DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Rarity</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuRadioGroup value={rarityFilter} onValueChange={setRarityFilter}>
-                        {['All', 'Unique', 'Limited', 'Standard'].map(rarity => (
-                          <DropdownMenuRadioItem key={rarity} value={rarity}>{rarity}</DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </div>
         </div>
 
@@ -323,7 +277,7 @@ const Marketplace: React.FC = () => {
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2">
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
                 {allNFTs.slice(0, 8).map((nft) => (
                   <div key={nft.id} className="flex-shrink-0 w-[200px] snap-start">
                     <NFTCard nft={nft} />
@@ -342,7 +296,7 @@ const Marketplace: React.FC = () => {
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2">
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
                 {allNFTs.sort((a,b) => (b.offers?.length || 0) - (a.offers?.length || 0)).slice(0, 8).map((nft) => (
                   <div key={nft.id} className="flex-shrink-0 w-[180px] snap-start">
                     <NFTCard nft={nft} />
@@ -362,7 +316,7 @@ const Marketplace: React.FC = () => {
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2">
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2 -mx-4 px-4">
                 {featuredArtists.map((artist) => (
                   <div key={artist.id} className="flex-shrink-0 w-[140px] snap-start">
                     <ArtistCard artist={artist} />

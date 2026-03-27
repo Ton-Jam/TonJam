@@ -62,7 +62,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           placeholder={placeholder}
-          className="flex-1 bg-transparent border-none outline-none py-6 text-xs font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="flex-1 bg-transparent border-none outline-none py-2 text-xs font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
         
         <div className="flex items-center gap-1 pr-2">
@@ -73,7 +73,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 onClick={handleClear}
-                className="p-2 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-all"
+                className="p-1 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-all"
               >
                 <X className="h-3 w-3" />
               </motion.button>
@@ -86,7 +86,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                 e.preventDefault();
                 onVoiceSearch();
               }}
-              className={`p-2 rounded-lg transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+              className={`p-1 rounded-lg transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
             >
               {isListening ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
             </button>
@@ -96,7 +96,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
         <Button 
           variant="outline" 
           aria-label="Search"
-          className="rounded-l-none border-y-0 border-r-0 border-l border-blue-500/30 h-full py-6"
+          className="rounded-l-none border-y-0 border-r-0 border-l border-blue-500/30 h-full py-2"
         >
           <SearchIcon className="h-4 w-4" />
         </Button>

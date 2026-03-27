@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { BackButton } from '@/components/BackButton';
 import { ArrowLeft, Search, Satellite, X } from 'lucide-react';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
@@ -137,12 +138,13 @@ const ExploreList: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 px-4 md:px-4 pb-4">
       {/* Sticky Header with Explicit Back Navigation */}
-      <div className="sticky top-0 left-0 right-0 z-[60] bg-background/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-4 md:px-4 pt-4 pb-4 border-b border-blue-500/30 mb-4">
+      <div className="sticky top-0 left-0 right-0 z-[60] bg-background/95 backdrop-blur-3xl -mx-4 px-4 md:-mx-4 md:px-4 pt-4 pb-4 mb-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1">
-            <button onClick={() => navigate(-1)} className="p-4 rounded-full bg-muted/50 hover:bg-muted transition-all">
-              <ArrowLeft className="h-4 w-4 text-foreground" />
-            </button>
+            <BackButton 
+              className="p-4 rounded-full bg-muted/50 hover:bg-muted transition-all"
+              iconClassName="h-4 w-4 text-foreground"
+            />
             
             {isSearchActive ? (
               <input
@@ -154,7 +156,7 @@ const ExploreList: React.FC = () => {
                 autoFocus
               />
             ) : (
-              <h1 className="text-xl md:text-[26px] font-bold tracking-tighter uppercase text-foreground leading-none">
+              <h1 className="text-base md:text-[21px] font-bold tracking-tighter uppercase text-foreground leading-none">
                 {title}
               </h1>
             )}

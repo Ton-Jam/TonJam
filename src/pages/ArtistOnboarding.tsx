@@ -29,7 +29,8 @@ const ArtistOnboarding: React.FC = () => {
     coverFile: null as File | null,
     audioFile: null as File | null,
     coverPreview: '',
-    price: '10'
+    price: '10',
+    createdTrackId: ''
   });
 
   /* Step 3: NFT State */
@@ -59,13 +60,14 @@ const ArtistOnboarding: React.FC = () => {
     setIsLoading(true);
     /* Simulate upload delay */
     setTimeout(() => {
+      const newTrackId = Date.now().toString();
       const newTrack: Track = {
-        id: Date.now().toString(),
+        id: newTrackId,
         title: trackData.title,
         artist: profileData.name,
         artistId: userProfile.id,
         coverUrl: trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track'),
-        audioUrl: '', /* In a real app, this would be the uploaded URL */
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', /* Placeholder audio */
         duration: 180, /* Mock duration */
         genre: trackData.genre,
         isNFT: false,
@@ -74,6 +76,7 @@ const ArtistOnboarding: React.FC = () => {
         releaseDate: new Date().toISOString()
       };
       addUserTrack(newTrack);
+      setTrackData(prev => ({ ...prev, createdTrackId: newTrackId }));
       addNotification("Track uploaded successfully", "success");
       setIsLoading(false);
       setStep(3);
@@ -87,7 +90,7 @@ const ArtistOnboarding: React.FC = () => {
       /* Create NFT from the track */
       const newNFT: NFTItem = {
         id: Date.now().toString(),
-        trackId: Date.now().toString(), /* Should link to the actual track ID */
+        trackId: trackData.createdTrackId || Date.now().toString(),
         title: trackData.title,
         owner: profileData.name,
         creator: profileData.name,
@@ -132,7 +135,7 @@ const ArtistOnboarding: React.FC = () => {
           </div>
         </header>
 
-        <div className="glass p-4 rounded-[10px] -white/5 shadow-2xl relative overflow-hidden">
+        <div className="glass p-4 rounded-[10px] border border-white/5 shadow-2xl relative overflow-hidden">
           {/* Background decorative elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 blur-[100px] rounded-full pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/5 blur-[100px] rounded-full pointer-events-none"></div>
@@ -143,15 +146,15 @@ const ArtistOnboarding: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Artist Name</label>
-                  <input type="text" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} className="w-full bg-muted/50 -white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:-blue-500 transition-colors" placeholder="Enter your stage name" required />
+                  <input type="text" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="Enter your stage name" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Handle (@)</label>
-                  <input type="text" value={profileData.handle} onChange={e => setProfileData({...profileData, handle: e.target.value})} className="w-full bg-muted/50 -white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:-blue-500 transition-colors" placeholder="@username" required />
+                  <input type="text" value={profileData.handle} onChange={e => setProfileData({...profileData, handle: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="@username" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Bio</label>
-                  <textarea value={profileData.bio} onChange={e => setProfileData({...profileData, bio: e.target.value})} className="w-full bg-muted/50 -white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:-blue-500 transition-colors h-32 resize-none" placeholder="Tell your story..." />
+                  <textarea value={profileData.bio} onChange={e => setProfileData({...profileData, bio: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors h-32 resize-none" placeholder="Tell your story..." />
                 </div>
               </div>
               <div className="pt-4">
@@ -167,11 +170,11 @@ const ArtistOnboarding: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Track Title</label>
-                    <input type="text" value={trackData.title} onChange={e => setTrackData({...trackData, title: e.target.value})} className="w-full bg-muted/50 -white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:-blue-500 transition-colors" placeholder="e.g. Midnight Protocol" required />
+                    <input type="text" value={trackData.title} onChange={e => setTrackData({...trackData, title: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="e.g. Midnight Protocol" required />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Genre</label>
-                    <select value={trackData.genre} onChange={e => setTrackData({...trackData, genre: e.target.value})} className="w-full bg-muted/50 -white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:-blue-500 transition-colors appearance-none" required >
+                    <select value={trackData.genre} onChange={e => setTrackData({...trackData, genre: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors appearance-none" required >
                       <option value="" disabled>Select Genre</option>
                       <option value="Electronic">Electronic</option>
                       <option value="Hip Hop">Hip Hop</option>
@@ -183,7 +186,7 @@ const ArtistOnboarding: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Audio File</label>
-                    <div onClick={() => audioInputRef.current?.click()} className="w-full h-24 -2 -dashed -white/10 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:-blue-500/50 hover:bg-muted/50 transition-all" >
+                    <div onClick={() => audioInputRef.current?.click()} className="w-full h-24 border-2 border-dashed border-white/10 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-muted/50 transition-all" >
                       <input type="file" ref={audioInputRef} onChange={(e) => handleFileChange(e, 'audio')} accept="audio/*" className="hidden" />
                       <Music className="h-6 w-6 text-muted-foreground/50 mb-4" />
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"> {trackData.audioFile ? trackData.audioFile.name : "Click to Upload Audio"} </span>
@@ -193,7 +196,7 @@ const ArtistOnboarding: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Cover Art</label>
-                    <div onClick={() => fileInputRef.current?.click()} className="w-full aspect-square -2 -dashed -white/10 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:-blue-500/50 hover:bg-muted/50 transition-all overflow-hidden relative" >
+                    <div onClick={() => fileInputRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-white/10 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-muted/50 transition-all overflow-hidden relative" >
                       <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'cover')} accept="image/*" className="hidden" />
                       {trackData.coverPreview ? (
                         <img src={trackData.coverPreview} alt="Cover" className="w-full h-full object-cover" />
@@ -207,8 +210,9 @@ const ArtistOnboarding: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex flex-col md:flex-row gap-4">
                 <button type="button" onClick={() => setStep(1)} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Back </button>
+                <button type="button" onClick={() => navigate('/artist-dashboard')} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Skip Upload </button>
                 <button type="submit" disabled={isLoading} className="flex-[2] bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4" >
                   {isLoading ? (
                     <img src={APP_LOGO} className="w-5 h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." />
@@ -224,7 +228,7 @@ const ArtistOnboarding: React.FC = () => {
             <form onSubmit={handleMintSubmit} className="space-y-4 animate-in fade-in slide-in-from-right duration-500 relative z-10">
               <h2 className="text-xl font-bold uppercase tracking-tight mb-4">Mint Genesis Asset</h2>
               <div className="flex gap-4 mb-4">
-                <div className="w-32 h-32 rounded-[10px] overflow-hidden shadow-xl -white/10 flex-shrink-0">
+                <div className="w-32 h-32 rounded-[10px] overflow-hidden shadow-xl border border-white/10 flex-shrink-0">
                   <img src={trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track')} alt="Cover" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
@@ -239,7 +243,7 @@ const ArtistOnboarding: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Listing Price (TON)</label>
-                  <input type="number" value={mintData.price} onChange={e => setMintData({...mintData, price: e.target.value})} className="w-full bg-muted/50 -white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:-blue-500 transition-colors" required />
+                  <input type="number" value={mintData.price} onChange={e => setMintData({...mintData, price: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" required />
                 </div>
               <div className="space-y-4">
                 <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Royalty Splits (%)</label>
@@ -274,15 +278,16 @@ const ArtistOnboarding: React.FC = () => {
                 </button>
               </div>
               </div>
-              <div className="p-4 bg-blue-600/10 -blue-500/20 rounded-[10px] flex items-start gap-4">
+              <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-[10px] flex items-start gap-4">
                 <Info className="h-4 w-4 text-blue-400 mt-4" />
                 <div>
                   <h4 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">Smart Contract Deployment</h4>
                   <p className="text-[10px] text-muted-foreground/80 leading-relaxed"> By confirming, you will deploy a new smart contract for this asset on the TON blockchain. This action is irreversible and requires a small gas fee (simulated). </p>
                 </div>
               </div>
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex flex-col md:flex-row gap-4">
                 <button type="button" onClick={() => setStep(2)} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Back </button>
+                <button type="button" onClick={() => navigate('/artist-dashboard')} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Skip Minting </button>
                 <button type="submit" disabled={isLoading} className="flex-[2] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4 shadow-lg shadow-blue-600/20" >
                   {isLoading ? (
                     <>

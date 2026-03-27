@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useRef, useEffect, useMemo,
 import { toast } from 'sonner';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { GoogleGenAI, Type } from '@google/genai';
-import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post, ExclusiveContent } from '@/types';
+import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post, ExclusiveContent, Task } from '@/types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
 import { supabase } from '@/lib/supabase';
@@ -99,6 +99,11 @@ interface AudioContextType {
   createPost: (post: Partial<Post>) => void;
   deletePost: (postId: string) => void;
   updatePost: (postId: string, updates: Partial<Post>) => void;
+  sponsoredPosts: Post[];
+  tasks: Task[];
+  addTask: (task: Omit<Task, 'id' | 'completed' | 'claimed' | 'progress'>) => Promise<void>;
+  updateTaskProgress: (id: string, progress: number) => Promise<void>;
+  claimTaskReward: (id: string) => Promise<void>;
   getTrendingTracks: () => Track[];
   getTopNFTTracks: () => Track[];
   getTracksByGenre: (genre: string) => Track[];
@@ -129,6 +134,14 @@ interface AudioContextType {
     rarity: string;
     priceRange: [number, number];
     sortBy: string;
+  }>>;
+  jamspaceFilters: {
+    sortOrder: 'Newest' | 'Oldest';
+    viewMode: 'list' | 'grid';
+  };
+  setJamspaceFilters: React.Dispatch<React.SetStateAction<{
+    sortOrder: 'Newest' | 'Oldest';
+    viewMode: 'list' | 'grid';
   }>>;
 }
 
@@ -204,6 +217,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     sortBy: 'Newest'
   });
 
+  const [jamspaceFilters, setJamspaceFilters] = useState<{
+    sortOrder: 'Newest' | 'Oldest';
+    viewMode: 'list' | 'grid';
+  }>({
+    sortOrder: 'Newest',
+    viewMode: 'list'
+  });
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -247,6 +268,62 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const saved = localStorage.getItem('tonjam_posts');
     return saved ? JSON.parse(saved) : MOCK_POSTS;
   });
+  const [sponsoredPosts, setSponsoredPosts] = useState<Post[]>([]);
+
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const saved = localStorage.getItem('tonjam_tasks');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', title: 'Daily Sync', description: 'Stream 5 tracks today', reward: '5 TJ', points: 50, completed: true, claimed: true, type: 'daily', progress: 5, total: 5, rarity: 'common', priority: 'medium' },
+      { id: '2', title: 'Network Supporter', description: 'Follow 3 new artists', reward: '10 TJ', points: 100, completed: false, claimed: false, type: 'daily', progress: 1, total: 3, rarity: 'common', priority: 'low' },
+      { id: '3', title: 'Collector Genesis', description: 'Purchase your first NFT', reward: '50 TJ', points: 500, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1, rarity: 'rare', priority: 'high' },
+      { id: '4', title: 'Signal Broadcaster', description: 'Share a track to JamSpace', reward: '5 TJ', points: 25, completed: false, claimed: false, type: 'daily', progress: 0, total: 1, rarity: 'common', priority: 'low' },
+      { id: '5', title: 'High Fidelity', description: 'Listen for 10 hours total', reward: '100 TJ', points: 1000, completed: true, claimed: false, type: 'milestone', progress: 10, total: 10, rarity: 'epic', priority: 'medium' },
+      { id: '6', title: 'Legend of TON', description: 'Stake 10,000 JAM for 30 days', reward: '500 TJ', points: 5000, completed: false, claimed: false, type: 'milestone', progress: 12, total: 30, rarity: 'legendary', priority: 'high' },
+      { id: '7', title: 'TON Ecosystem', description: 'Follow TON on X', reward: '20 TJ', points: 200, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1, rarity: 'rare', priority: 'high' },
+      { id: '8', title: 'Join the Jam', description: 'Follow TonJam on X', reward: '20 TJ', points: 200, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1, rarity: 'rare', priority: 'high' },
+      { id: '9', title: 'Network Expansion', description: 'Invite 3 friends to TonJam', reward: '100 TJ', points: 1000, completed: false, claimed: false, type: 'milestone', progress: 0, total: 3, rarity: 'epic', priority: 'medium' },
+    ];
+  });
+
+  const addTask = async (taskData: Omit<Task, 'id' | 'completed' | 'claimed' | 'progress'>) => {
+    setIsLoading(true);
+    try {
+      const newTask: Task = {
+        ...taskData,
+        id: Math.random().toString(36).substr(2, 9),
+        completed: false,
+        claimed: false,
+        progress: 0
+      };
+      setTasks(prev => [newTask, ...prev]);
+      addNotification(`New protocol registered: ${newTask.title}`, "success");
+    } catch (error) {
+      console.error("Failed to add task:", error);
+      addNotification("Failed to register new protocol", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateTaskProgress = async (id: string, progress: number) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const newProgress = Math.min(t.total, progress);
+        const isNowCompleted = newProgress >= t.total;
+        return { 
+          ...t, 
+          progress: newProgress,
+          completed: isNowCompleted
+        };
+      }
+      return t;
+    }));
+  };
+
+  const claimTaskReward = async (id: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, claimed: true } : t));
+    addNotification("Reward claimed successfully!", "success");
+  };
 
   const allPlaylists = useMemo(() => {
     return [...CURATED_PLAYLISTS, ...playlists];
@@ -255,6 +332,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     localStorage.setItem('tonjam_posts', JSON.stringify(posts));
   }, [posts]);
+
+  useEffect(() => {
+    localStorage.setItem('tonjam_tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   useEffect(() => {
     localStorage.setItem('tonjam_transactions', JSON.stringify(transactions));
@@ -2074,9 +2155,9 @@ Return a JSON object with the following structure:
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
       allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
-      posts, createPost, deletePost, updatePost, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
+      posts, createPost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, claimTaskReward, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
-      updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters,
+      updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters, jamspaceFilters, setJamspaceFilters,
       isLoading, deleteTrack, isHighFidelity, exclusiveContent
     }}>
       {children}

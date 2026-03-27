@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { BackButton } from '@/components/BackButton';
 import { ArrowLeft, MoreVertical, Zap, CheckCircle2, Heart, MessageCircle, Repeat2, Share2, Send, Smile, MessageSquareOff } from 'lucide-react';
 import { Post, Comment } from '@/types';
 import { MOCK_POSTS, MOCK_USER, MOCK_TRACKS, MOCK_ARTISTS, TON_LOGO, APP_LOGO } from '@/constants';
@@ -134,10 +135,12 @@ const PostDetail: React.FC = () => {
 
       <div className="max-w-3xl mx-auto relative z-10">
         {/* Back Button */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-4 text-muted-foreground hover:text-foreground transition-colors mb-4 group">
-          <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" />
+        <BackButton 
+          className="flex items-center gap-4 text-muted-foreground hover:text-foreground transition-colors mb-4 group"
+          iconClassName="h-3 w-3 group-hover:-translate-x-1 transition-transform"
+        >
           <span className="text-[10px] font-bold uppercase tracking-widest">Return to Feed</span>
-        </button>
+        </BackButton>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
