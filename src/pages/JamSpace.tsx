@@ -6,7 +6,6 @@ import {
   RssIcon, 
   FireIcon, 
   UsersIcon, 
-  PlusIcon, 
   SparklesIcon, 
   ArrowTrendingUpIcon, 
   ChevronRightIcon 
@@ -25,7 +24,6 @@ import {
 import { MOCK_POSTS, MOCK_ARTISTS, MOCK_USER, MOCK_TRACKS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
 import UserCard from '@/components/UserCard';
 import TrackCard from '@/components/TrackCard';
-import PostModal from '@/components/PostModal';
 import SocialFeed from '@/components/SocialFeed';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import { useAudio } from '@/context/AudioContext';
@@ -35,7 +33,6 @@ import { Post, Track } from '@/types';
 const JamSpace: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch, jamspaceFilters } = useAudio();
-  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'All' | 'Following' | 'Trending'>('All');
   const [filterType, setFilterType] = useState<'All' | 'Tracks' | 'NFTs'>('All');
 
@@ -115,14 +112,6 @@ const JamSpace: React.FC = () => {
   // Note: viewMode is now managed in global state, so we might not want to auto-switch it here,
   // or we need to call setJamspaceFilters from useAudio. For now, let's remove the auto-switch
   // since viewMode is controlled globally.
-
-  const handleCreatePost = (content: string, mediaUrl?: string, trackId?: string) => {
-    createPost({
-      content,
-      imageUrl: mediaUrl,
-      trackId
-    });
-  };
 
   const handleDeletePost = (id: string) => {
     deletePost(id);
@@ -335,19 +324,6 @@ const JamSpace: React.FC = () => {
           </aside>
         </div>
       </div>
-
-      {/* Mobile FAB */}
-      <button onClick={() => setIsPostModalOpen(true)} className="lg:hidden fixed bottom-28 right-6 w-16 h-16 flex items-center justify-center z-50 hover:scale-110 active:scale-90 transition-all group bg-transparent" >
-        <div className="absolute inset-0 bg-muted/40 blur-2xl rounded-full"></div>
-        <div className="w-full h-full bg-muted rounded-[10px] flex items-center justify-center shadow-2xl shadow-muted/40 relative z-10 p-4">
-          <img src={APP_LOGO} className="w-full h-full object-contain" alt="Add Post" />
-        </div>
-      </button>
-
-      {/* Post Modal */}
-      {isPostModalOpen && (
-        <PostModal onClose={() => setIsPostModalOpen(false)} onSubmit={handleCreatePost} />
-      )}
     </div>
   );
 };

@@ -24,6 +24,7 @@ import {
   ArrowRightOnRectangleIcon,
   ArrowUpTrayIcon,
   PlusCircleIcon,
+  PlusIcon,
   StarIcon
 } from '@heroicons/react/24/outline';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
@@ -36,6 +37,7 @@ import MiniAudioPlayer from './MiniAudioPlayer';
 import FullPlayer from './FullPlayer';
 import AddToPlaylistModal from './AddToPlaylistModal';
 import TrackOptionsModal from './TrackOptionsModal';
+import PostModal from './PostModal';
 // import TrackUploadModal from './TrackUploadModal';
 import { ModeToggle } from './ModeToggle';
 import CreatePlaylistModal from './CreatePlaylistModal';
@@ -86,12 +88,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     trackToAddToPlaylist,
     setTrackToAddToPlaylist,
     optionsTrack,
-    setOptionsTrack
+    setOptionsTrack,
+    createPost
   } = useAudio();
   const { user, signInWithGoogle, signOut } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
@@ -790,6 +794,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       <CreatePlaylistModal isOpen={isCreatePlaylistModalOpen} onClose={() => setIsCreatePlaylistModalOpen(false)} />
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AnimatePresence>
+        {isPostModalOpen && (
+          <PostModal 
+            onClose={() => setIsPostModalOpen(false)} 
+            onSubmit={(content, mediaUrl, trackId) => {
+              createPost({ content, imageUrl: mediaUrl, trackId });
+              setIsPostModalOpen(false);
+            }} 
+          />
+        )}
+      </AnimatePresence>
       <ScrollToTopButton />
       <AIAssistant />
 
@@ -800,8 +815,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
           <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" />
           <MobileNavItem to="/library" icon={RectangleStackIcon} label="Library" />
-          <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="NFT Market" />
+          <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="NFT" />
         </nav>
+      )}
+
+      {/* Floating Action Button for Mobile */}
+      {!isPlayer && (
+        <button 
+          onClick={() => setIsPostModalOpen(true)}
+          className={`lg:hidden fixed right-6 z-50 w-14 h-14 rounded-full bg-primary shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all ${
+            currentTrack && !isFullPlayerOpen ? 'bottom-36' : 'bottom-20'
+          }`}
+          aria-label="Create Post"
+        >
+          <img src={APP_LOGO} alt="" className="w-8 h-8 object-contain" />
+        </button>
       )}
     </div>
   );

@@ -162,7 +162,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     <>
       <div
         onClick={handleCardClick}
-        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[12px] bg-muted/50 backdrop-blur-md border border-border dark:border-transparent p-2 hover:bg-muted hover:border-border/80"
+        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[10px] bg-muted/50 backdrop-blur-md border border-border dark:border-transparent p-1.5 hover:bg-muted hover:border-border/80"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -174,7 +174,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         aria-label={`View NFT ${nft.title}`}
       >
         {/* Image Container - 1:1 Aspect Ratio */}
-        <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
+        <div className="relative aspect-square rounded-[6px] overflow-hidden bg-neutral-900 shadow-lg mb-1.5">
           <img
             src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
             loading="lazy"
@@ -247,22 +247,22 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         </div>
   
         {/* Content Below Card */}
-        <div className="px-3">
-           <div className="flex justify-between items-start gap-3">
-              <h3 className={`text-[11px] font-bold uppercase tracking-tight truncate leading-tight flex-1 ${isActive ? 'text-blue-400' : 'text-foreground'}`}>
+        <div className="px-2">
+           <div className="flex justify-between items-start gap-2">
+              <h3 className={`text-[10px] font-bold uppercase tracking-tight truncate leading-tight flex-1 ${isActive ? 'text-blue-400' : 'text-foreground'}`}>
                 {nft.title}
               </h3>
               {nft.listingType === 'auction' && (
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse mt-2 shadow-lg shadow-amber-500/50 flex-shrink-0"></div>
+                <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse mt-1.5 shadow-lg shadow-amber-500/50 flex-shrink-0"></div>
               )}
            </div>
-  
-           <div className="flex items-center gap-3 mt-3 mb-3">
+   
+           <div className="flex items-center gap-2 mt-2 mb-2">
               {MOCK_ARTISTS.find(a => a.name === nft.creator) && (
                 <img 
                   src={MOCK_ARTISTS.find(a => a.name === nft.creator)?.avatarUrl || getPlaceholderImage(`artist-${MOCK_ARTISTS.find(a => a.name === nft.creator)?.id}`)} 
                   alt={nft.creator} 
-                  className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="w-3 h-3 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   onClick={(e) => {
                     e.stopPropagation();
                     const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
@@ -283,7 +283,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               )}
               <div className="flex flex-col min-w-0">
                 <p 
-                  className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                  className="text-[7px] font-bold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
@@ -306,26 +306,26 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   @{nft.creator}
                 </p>
                 {!isOwner && ownerProfile && (
-                  <p className="text-[6px] font-bold uppercase tracking-widest text-blue-400/50 truncate">
+                  <p className="text-[5px] font-bold uppercase tracking-widest text-blue-400/50 truncate">
                     Owned by {ownerProfile.name}
                   </p>
                 )}
               </div>
               {MOCK_ARTISTS.find(a => a.name === nft.creator)?.verified && (
-                <CheckCircle2 className="h-3 w-3 text-blue-500" />
+                <CheckCircle2 className="h-2.5 w-2.5 text-blue-500" />
               )}
            </div>
-  
+   
            {/* Price and Action */}
-           <div className="flex items-center justify-between pt-2 mt-2">
-              <div className="flex items-center gap-2">
-                 <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
-                 <span className="text-xs font-bold text-foreground tracking-tighter">{nft.price}</span>
+           <div className="flex items-center justify-between pt-1.5 mt-1.5">
+              <div className="flex items-center gap-1.5">
+                 <img src={TON_LOGO} className="w-2.5 h-2.5" alt="TON" />
+                 <span className="text-[10px] font-bold text-foreground tracking-tighter">{nft.price}</span>
               </div>
               
               <button 
                 onClick={handleActionClick} 
-                className={`px-4 py-2 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
+                className={`px-3 py-1.5 rounded-full text-[7px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
                   ${isOwner 
                     ? 'bg-muted text-foreground hover:bg-muted/80' 
                     : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20'}

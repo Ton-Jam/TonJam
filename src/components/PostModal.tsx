@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { motion } from "motion/react";
 import { X, Image, Share2, Sparkles, Music, Check, Send } from "lucide-react";
 import { MOCK_USER, APP_LOGO } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
@@ -62,18 +63,33 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         className="absolute inset-0 bg-background/90 backdrop-blur-md"
         onClick={onClose}
-      ></div>
-      <div className="relative w-full max-w-sm glass border border-border bg-background rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] animate-in zoom-in-95 duration-200 overflow-hidden group focus-within:border-neutral-500/30 transition-all">
+      ></motion.div>
+      <motion.div 
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        className="relative w-full max-w-lg glass border-t sm:border border-border bg-background rounded-t-[24px] sm:rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] overflow-hidden group focus-within:border-neutral-500/30 transition-all"
+      >
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-        <header className="flex justify-between items-center p-2 border-b border-border/50">
+        
+        {/* Handle for mobile drawer */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1">
+          <div className="w-12 h-1.5 bg-muted rounded-full"></div>
+        </div>
+
+        <header className="flex justify-between items-center p-4 border-b border-border/50">
           <div className="flex items-center gap-2">
             <img src={APP_LOGO} className="w-4 h-4 object-contain" alt="" aria-hidden="true" />
             <h2 id="modal-title" className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground">
@@ -258,7 +274,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             </button>
           </div>
         </footer>
-      </div>
+      </motion.div>
     </div>
   );
 };

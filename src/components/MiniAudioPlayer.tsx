@@ -23,24 +23,15 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     progress,
     closePlayer,
     setFullPlayerOpen,
-    likedTrackIds,
-    toggleLikeTrack,
     isHighFidelity,
   } = useAudio();
   const [showOptions, setShowOptions] = useState(false);
 
   if (!currentTrack) return null;
 
-  const isLiked = likedTrackIds.includes(currentTrack.id);
-
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/artist/${currentTrack.artistId}`);
-  };
-
-  const handleLikeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toggleLikeTrack(currentTrack.id);
   };
 
   const handleOptionsClick = (e: React.MouseEvent) => {
@@ -55,7 +46,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
   return (
     <>
       <div
-        className="fixed bottom-20 lg:bottom-0 left-0 right-0 z-[45] bg-white dark:bg-black px-2 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="fixed bottom-16 lg:bottom-0 left-0 right-0 z-[45] bg-background/95 backdrop-blur-xl border-t border-border/50 px-3 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-muted/50 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onClick={() => setFullPlayerOpen(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -129,49 +120,39 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             </div>
           </div>
         </div>
-        <div
-          className="flex items-center gap-2 sm:gap-2 relative z-10"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center gap-2 sm:gap-2 mr-2">
+        <div className="flex items-center gap-2 sm:gap-3 relative z-10">
+          <div className="flex items-center gap-2 sm:gap-3 mr-1">
             <button
-              onClick={handleLikeClick}
-              className={`w-10 h-10 flex items-center justify-center transition-all hover:bg-muted rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-foreground"}`}
-              aria-label={isLiked ? "Unlike track" : "Like track"}
-            >
-              <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
-            </button>
-            <button
-              onClick={togglePlay}
-              className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
-                <Pause className="h-5 w-5 text-white fill-white" />
+                <Pause className="h-5 w-5 text-primary-foreground fill-primary-foreground" />
               ) : (
-                <Play className="h-5 w-5 text-white fill-white ml-3" />
+                <Play className="h-5 w-5 text-primary-foreground fill-primary-foreground ml-1" />
               )}
             </button>
           </div>
           
           <button
             onClick={handleOptionsClick}
-            className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all hover:bg-muted rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all hover:bg-muted rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Track options"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
           <button
-            onClick={closePlayer}
-            className="hidden sm:flex w-10 h-10 rounded-full bg-muted items-center justify-center hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            onClick={(e) => { e.stopPropagation(); closePlayer(); }}
+            className="hidden sm:flex w-9 h-9 rounded-full bg-muted items-center justify-center hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Close player"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-2 bg-muted overflow-hidden pointer-events-none z-10">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-muted/30 overflow-hidden pointer-events-none z-10">
           <div
-            className="h-full bg-blue-600 transition-all duration-300"
+            className="h-full bg-primary transition-all duration-300"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
