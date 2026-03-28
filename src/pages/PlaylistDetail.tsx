@@ -5,12 +5,12 @@ import { useAudio } from '@/context/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import { MOCK_TRACKS } from '@/constants';
 
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 
 const PlaylistDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist, reorderTrackInPlaylist } = useAudio();
+  const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist, reorderTrackInPlaylist, addNotification } = useAudio();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [isEditing, setIsEditing] = useState(false);
@@ -78,6 +78,12 @@ const PlaylistDetail: React.FC = () => {
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && playlist) {
+      const validation = validateFile(file, 'image', 5);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
+        return;
+      }
       const imageUrl = URL.createObjectURL(file);
       updatePlaylist(playlist.id, { coverUrl: imageUrl });
     }
@@ -226,7 +232,7 @@ const PlaylistDetail: React.FC = () => {
             type="file" 
             ref={fileInputRef} 
             onChange={handleCoverUpload} 
-            accept="image/*" 
+            accept={ALLOWED_IMAGE_TYPES.join(',')} 
             className="hidden" 
           />
         </div>

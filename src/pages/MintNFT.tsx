@@ -12,6 +12,7 @@ import { APP_LOGO } from '@/constants';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { TrendingUp } from 'lucide-react';
 import { uploadToIPFS, uploadJSONToIPFS } from '@/services/pinataService';
+import { validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES, ALLOWED_DOCUMENT_TYPES } from '@/lib/utils';
 
 const mintSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -97,12 +98,34 @@ const MintNFT: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (type === 'lyrics') {
+        const validation = validateFile(file, 'document', 2); // 2MB max for lyrics
+        if (!validation.isValid) {
+          addNotification(validation.error || "Invalid file", "error");
+          e.target.value = '';
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (event) => {
           setValue('lyrics', event.target?.result as string);
         };
         reader.readAsText(file);
         return;
+      }
+
+      if (type === 'audio') {
+        const validation = validateFile(file, 'audio', 50); // 50MB max for audio
+        if (!validation.isValid) {
+          addNotification(validation.error || "Invalid file", "error");
+          e.target.value = '';
+          return;
+        }
+      } else if (type === 'cover') {
+        const validation = validateFile(file, 'image', 10); // 10MB max for images
+        if (!validation.isValid) {
+          addNotification(validation.error || "Invalid file", "error");
+          e.target.value = '';
+          return;
+        }
       }
 
       const reader = new FileReader();
@@ -330,7 +353,7 @@ const MintNFT: React.FC = () => {
                   <div className="space-y-4">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Sonic Data (Audio)</label>
                     <div className="relative group">
-                      <input type="file" accept="audio/*" onChange={(e) => handleFileChange(e, 'audio')} className="hidden" id="audio-upload" />
+                      <input type="file" accept={ALLOWED_AUDIO_TYPES.join(',')} onChange={(e) => handleFileChange(e, 'audio')} className="hidden" id="audio-upload" />
                       <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-28 sm:h-32 bg-muted/50 hover:bg-muted rounded-[8px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Audio">
                         {mintData.audioPreview ? (
                           <div className="text-center">
@@ -351,7 +374,7 @@ const MintNFT: React.FC = () => {
                 <div className="space-y-4">
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Visual Matrix (Cover Art)</label>
                   <div className="relative group h-full">
-                    <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'cover')} className="hidden" id="cover-upload" />
+                    <input type="file" accept={ALLOWED_IMAGE_TYPES.join(',')} onChange={(e) => handleFileChange(e, 'cover')} className="hidden" id="cover-upload" />
                     <label htmlFor="cover-upload" className="flex flex-col items-center justify-center w-full h-full min-h-[160px] sm:min-h-[200px] bg-muted/50 hover:bg-muted rounded-[8px] transition-all cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('cover-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Cover Art">
                       {mintData.coverPreview ? (
                         <img src={mintData.coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
@@ -392,7 +415,7 @@ const MintNFT: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Lyrics / Poetry</label>
                     <div className="flex items-center gap-4">
-                      <input type="file" accept=".txt,.lrc" onChange={(e) => handleFileChange(e, 'lyrics')} className="hidden" id="lyrics-upload" />
+                      <input type="file" accept=".txt,.lrc,text/plain" onChange={(e) => handleFileChange(e, 'lyrics')} className="hidden" id="lyrics-upload" />
                       <label htmlFor="lyrics-upload" className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors cursor-pointer">
                         Upload File
                       </label>

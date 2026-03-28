@@ -41,6 +41,7 @@ import BuyNFTModal from '@/components/BuyNFTModal';
 import SellNFTModal from '@/components/SellNFTModal';
 import BidModal from '@/components/BidModal';
 import BidAcceptanceModal from '@/components/BidAcceptanceModal';
+import ManageNFTModal from '@/components/ManageNFTModal';
 import NFTCard from '@/components/NFTCard';
 import SendNFTModal from '@/components/SendNFTModal';
 import confetti from 'canvas-confetti';
@@ -69,6 +70,7 @@ const NFTDetail: React.FC = () => {
   const [showListModal, setShowListModal] = useState(false);
   const [showBidModal, setShowBidModal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
+  const [showManageModal, setShowManageModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<NFTOffer | null>(null);
 
   const loadMetadata = () => {
@@ -206,7 +208,11 @@ const NFTDetail: React.FC = () => {
 
   const handleAction = () => {
     if (isOwner) {
-      setShowListModal(true);
+      if (localNft.listingType) {
+        setShowManageModal(true);
+      } else {
+        setShowListModal(true);
+      }
     } else if (isAuction) {
       setShowBidModal(true);
     } else {
@@ -463,7 +469,7 @@ const NFTDetail: React.FC = () => {
               <div className="mt-4 flex flex-col sm:flex-row gap-4 relative z-10">
                 {isOwner ? (
                   <>
-                    <button onClick={() => setShowListModal(true)} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
+                    <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
                       {localNft.listingType ? 'Manage Listing' : 'List for Sale'}
                     </button>
                     <button onClick={() => setShowSendModal(true)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-4 border border-white/10" >
@@ -851,6 +857,7 @@ const NFTDetail: React.FC = () => {
       {showListModal && <SellNFTModal nft={localNft} onClose={() => setShowListModal(false)} />}
       {showBidModal && <BidModal nft={localNft} onClose={() => setShowBidModal(false)} />}
       {showSendModal && <SendNFTModal nft={localNft} isOpen={showSendModal} onClose={() => setShowSendModal(false)} />}
+      {showManageModal && <ManageNFTModal nft={localNft} isOpen={showManageModal} onClose={() => setShowManageModal(false)} />}
       {selectedOffer && (
         <BidAcceptanceModal nft={localNft} offer={selectedOffer} onClose={() => setSelectedOffer(null)} onAccept={onConfirmAcceptance} />
       )}

@@ -123,7 +123,17 @@ const TaskCard: React.FC<{
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       onClick={() => onClick(task)}
-      className={`relative group rounded-2xl transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer ${
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick(task);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for task: ${task.title}`}
+      className={`relative group rounded-2xl transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
         task.claimed 
           ? 'bg-neutral-900/40 opacity-50' 
           : task.completed
@@ -592,7 +602,7 @@ const Tasks: React.FC = () => {
                     task={task} 
                     onClaim={handleClaim}
                     onToggle={handleToggle}
-                    onClick={setSelectedTask}
+                    onClick={handleTaskClick}
                   />
                 ))
               ) : (

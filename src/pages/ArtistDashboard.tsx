@@ -44,7 +44,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
-import { getPlaceholderImage } from "@/lib/utils";
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from "@/lib/utils";
 import {
   MOCK_USER,
   MOCK_ARTISTS,
@@ -252,6 +252,12 @@ const ArtistDashboard: React.FC = () => {
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validation = validateFile(file, 'audio', 50);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
+        return;
+      }
       setAudioFile(file);
       analyzeAudio(file);
     }
@@ -260,6 +266,12 @@ const ArtistDashboard: React.FC = () => {
   const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validation = validateFile(file, 'image', 10);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
+        return;
+      }
       setCoverFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -1511,7 +1523,7 @@ const ArtistDashboard: React.FC = () => {
                       type="file" 
                       ref={coverInputRef} 
                       onChange={handleCoverFileChange} 
-                      accept="image/*" 
+                      accept={ALLOWED_IMAGE_TYPES.join(',')} 
                       className="hidden" 
                     />
                     {coverPreview ? (
@@ -1548,7 +1560,7 @@ const ArtistDashboard: React.FC = () => {
                       type="file" 
                       ref={audioInputRef} 
                       onChange={handleAudioFileChange} 
-                      accept="audio/*" 
+                      accept={ALLOWED_AUDIO_TYPES.join(',')} 
                       className="hidden" 
                     />
                     {audioFile ? (

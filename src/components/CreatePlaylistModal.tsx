@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { X, Upload, Image as ImageIcon, Loader2, CheckCircle2, Music, Lock, Globe, Users, Tag } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { Switch } from "@/components/ui/switch";
+import { validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 
 interface CreatePlaylistModalProps {
   isOpen: boolean;
@@ -28,8 +29,10 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        addNotification("File size too large (max 5MB)", "error");
+      const validation = validateFile(file, 'image', 5);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
         return;
       }
 
@@ -144,7 +147,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
                       type="file" 
                       ref={fileInputRef} 
                       onChange={handleFileChange} 
-                      accept="image/*" 
+                      accept={ALLOWED_IMAGE_TYPES.join(',')} 
                       className="hidden" 
                     />
                   </div>

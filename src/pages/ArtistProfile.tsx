@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_SONG_REQUESTS, TON_LOGO, TJ_COIN_ICON } from '@/constants';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import { uploadToIPFS } from '@/services/pinataService';
@@ -359,12 +359,10 @@ const ArtistProfile: React.FC = () => {
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        addNotification("Unsupported file format. Please upload a valid image file (e.g., JPG, PNG).", "error");
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        addNotification("File is too large. Please upload an image smaller than 5MB.", "error");
+      const validation = validateFile(file, 'image', 5);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
         return;
       }
       
@@ -417,7 +415,7 @@ const ArtistProfile: React.FC = () => {
             <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-background/50 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest text-foreground hover:bg-background/80 transition-all flex items-center gap-2" >
               <Camera className="h-4 w-4" /> Edit Cover
             </button>
-            <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept="image/*" className="hidden" />
+            <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
           </div>
         )}
       </div>

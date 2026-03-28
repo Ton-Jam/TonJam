@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Music, Image, Info, Box } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { Track, NFTItem } from '@/types';
 import { MOCK_USER, APP_LOGO } from '@/constants';
 
@@ -115,8 +115,20 @@ const ArtistOnboarding: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (type === 'cover') {
+        const validation = validateFile(file, 'image', 10);
+        if (!validation.isValid) {
+          addNotification(validation.error || "Invalid file", "error");
+          e.target.value = '';
+          return;
+        }
         setTrackData(prev => ({ ...prev, coverFile: file, coverPreview: URL.createObjectURL(file) }));
       } else {
+        const validation = validateFile(file, 'audio', 50);
+        if (!validation.isValid) {
+          addNotification(validation.error || "Invalid file", "error");
+          e.target.value = '';
+          return;
+        }
         setTrackData(prev => ({ ...prev, audioFile: file }));
       }
     }
@@ -187,7 +199,7 @@ const ArtistOnboarding: React.FC = () => {
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Audio File</label>
                     <div onClick={() => audioInputRef.current?.click()} className="w-full h-24 border-2 border-dashed border-white/10 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-muted/50 transition-all" >
-                      <input type="file" ref={audioInputRef} onChange={(e) => handleFileChange(e, 'audio')} accept="audio/*" className="hidden" />
+                      <input type="file" ref={audioInputRef} onChange={(e) => handleFileChange(e, 'audio')} accept={ALLOWED_AUDIO_TYPES.join(',')} className="hidden" />
                       <Music className="h-6 w-6 text-muted-foreground/50 mb-4" />
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"> {trackData.audioFile ? trackData.audioFile.name : "Click to Upload Audio"} </span>
                     </div>
@@ -197,7 +209,7 @@ const ArtistOnboarding: React.FC = () => {
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Cover Art</label>
                     <div onClick={() => fileInputRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-white/10 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-muted/50 transition-all overflow-hidden relative" >
-                      <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'cover')} accept="image/*" className="hidden" />
+                      <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'cover')} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
                       {trackData.coverPreview ? (
                         <img src={trackData.coverPreview} alt="Cover" className="w-full h-full object-cover" />
                       ) : (

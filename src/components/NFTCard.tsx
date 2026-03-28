@@ -9,6 +9,8 @@ import NFTQuickViewModal from './NFTQuickViewModal';
 import SendNFTModal from './SendNFTModal';
 import BuyNFTModal from './BuyNFTModal';
 import SkeletonCard from './SkeletonCard';
+import NFTOptionsModal from './NFTOptionsModal';
+import ManageNFTModal from './ManageNFTModal';
 
 interface NFTCardProps {
   nft: NFTItem;
@@ -23,6 +25,8 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   
   if (isLoading) {
     return <SkeletonCard variant={variant} />;
@@ -47,9 +51,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
 
   const handleOptionsClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (associatedTrack) {
-      setOptionsTrack(associatedTrack);
-    }
+    setIsOptionsOpen(true);
   };
 
   const handleQuickViewClick = (e: React.MouseEvent) => {
@@ -66,6 +68,8 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     e.stopPropagation();
     if (onAction) {
       onAction(nft);
+    } else if (isOwner && nft.listingType) {
+      setIsManageModalOpen(true);
     } else if (!isOwner && nft.listingType !== 'auction') {
       setIsBuyModalOpen(true);
     } else {
@@ -354,6 +358,24 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         <BuyNFTModal
           nft={nft}
           onClose={() => setIsBuyModalOpen(false)}
+        />
+      )}
+
+      {isOptionsOpen && (
+        <NFTOptionsModal 
+          nft={nft} 
+          onClose={() => setIsOptionsOpen(false)} 
+          onSend={() => setIsSendModalOpen(true)}
+          onBuy={() => setIsBuyModalOpen(true)}
+          onList={() => navigate(`/nft/${nft.id}`)}
+        />
+      )}
+
+      {isManageModalOpen && (
+        <ManageNFTModal
+          nft={nft}
+          isOpen={isManageModalOpen}
+          onClose={() => setIsManageModalOpen(false)}
         />
       )}
     </>

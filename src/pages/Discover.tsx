@@ -51,6 +51,75 @@ const Discover: React.FC = () => {
   const [suggestions, setSuggestions] = useState<{id: string, title: string, type: string, subtitle?: string}[]>([]);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  const handleVoiceSearch = useCallback(() => {
+    // @ts-ignore
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      addNotification("Voice search is not supported in this browser.", "error");
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      addNotification("Listening...", "info");
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('');
+      
+      setSearch(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+      if (event.error === 'not-allowed') {
+        addNotification("Microphone access denied.", "error");
+      } else if (event.error !== 'aborted') {
+        addNotification(`Voice search error: ${event.error}`, "error");
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    try {
+      recognition.start();
+    } catch (error) {
+      console.error("Failed to start speech recognition", error);
+      setIsListening(false);
+    }
+  }, [isListening, setSearch, addNotification]);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (initialSearch) {
@@ -399,21 +468,7 @@ const Discover: React.FC = () => {
     );
   };
 
-  const toggleVoiceSearch = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      addNotification("Listening for sonic signals...", "info");
-      // Simulate voice recognition
-      setTimeout(() => {
-        setIsListening(false);
-        const randomTerms = ['Synthwave', 'Neon Voyager', 'TON Top 50', 'Cyberpunk'];
-        const term = randomTerms[Math.floor(Math.random() * randomTerms.length)];
-        setSearch(term);
-        addToRecentSearches(term);
-        addNotification(`Detected: "${term}"`, "success");
-      }, 2000);
-    }
-  };
+  const toggleVoiceSearch = handleVoiceSearch;
 
   const handleSurpriseMe = () => {
     const randomGenre = GENRES[Math.floor(Math.random() * GENRES.length)].name;

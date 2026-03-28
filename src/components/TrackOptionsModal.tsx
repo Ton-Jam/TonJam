@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { ListMusic, Plus, Coins, Share2, Trash2, Heart, Info, Minus } from 'lucide-react';
+import { ListMusic, Plus, Coins, Share2, Trash2, Heart, Info, User, Gem } from 'lucide-react';
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { getPlaceholderImage } from '@/lib/utils';
 import AddToPlaylistModal from './AddToPlaylistModal';
-import { Bar, BarChart, ResponsiveContainer } from "recharts"
 import { Button } from "@/components/ui/button"
+import { motion } from 'motion/react';
 import {
   Drawer,
   DrawerClose,
@@ -16,48 +16,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-
-const data = [
-  {
-    goal: 400,
-  },
-  {
-    goal: 300,
-  },
-  {
-    goal: 200,
-  },
-  {
-    goal: 300,
-  },
-  {
-    goal: 200,
-  },
-  {
-    goal: 278,
-  },
-  {
-    goal: 189,
-  },
-  {
-    goal: 239,
-  },
-  {
-    goal: 300,
-  },
-  {
-    goal: 200,
-  },
-  {
-    goal: 278,
-  },
-  {
-    goal: 189,
-  },
-  {
-    goal: 349,
-  },
-]
 
 interface TrackOptionsModalProps {
   track: Track;
@@ -69,11 +27,6 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
   const navigate = useNavigate();
   const { addNotification, addToQueue, likedTrackIds, toggleLikeTrack } = useAudio();
   const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
-  const [goal, setGoal] = React.useState(350)
-
-  function onClick(adjustment: number) {
-    setGoal(Math.max(200, Math.min(400, goal + adjustment)))
-  }
 
   const isLiked = likedTrackIds.includes(track.id);
 
@@ -94,8 +47,18 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
         navigate(`/track/${track.id}`);
         onClose();
         break;
+      case 'artist':
+        if (track.artistId) {
+          navigate(`/artist/${track.artistId}`);
+        }
+        onClose();
+        break;
       case 'tip':
         addNotification(`Tip protocol initiated for ${track.artist}`, 'success');
+        onClose();
+        break;
+      case 'mint':
+        addNotification(`Minting process started for ${track.title}`, 'success');
         onClose();
         break;
       case 'share':
@@ -125,106 +88,56 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
     return <AddToPlaylistModal track={track} onClose={() => { setShowAddToPlaylistModal(false); onClose(); }} />;
   }
 
+  const options = [
+    { id: 'like', icon: Heart, label: isLiked ? 'Liked' : 'Like Track', color: isLiked ? 'text-red-500' : 'text-foreground', iconColor: isLiked ? 'text-red-500 fill-current' : 'text-muted-foreground group-hover:text-red-500', action: () => handleAction('like') },
+    { id: 'queue', icon: ListMusic, label: 'Add to Queue', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('queue') },
+    { id: 'playlist', icon: Plus, label: 'Add to Playlist', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('playlist') },
+    { id: 'artist', icon: User, label: 'View Artist', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('artist') },
+    { id: 'details', icon: Info, label: 'View Details', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('details') },
+    { id: 'tip', icon: Coins, label: 'Tip Artist (TON)', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-amber-400', action: () => handleAction('tip') },
+    { id: 'mint', icon: Gem, label: 'Mint as NFT', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-purple-400', action: () => handleAction('mint') },
+    { id: 'share', icon: Share2, label: 'Share Track', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('share') },
+  ];
+
+  if (onRemove) {
+    options.push({ id: 'remove', icon: Trash2, label: 'Remove from Playlist', color: 'text-red-500', iconColor: 'text-red-500/40 group-hover:text-red-500', action: async () => { onRemove(); onClose(); } });
+  }
+
   return (
     <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent>
+      <DrawerContent className="bg-background border-t border-border">
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-4 mb-2">
               <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-16 h-16 rounded-md object-cover shadow-lg" alt="" />
               <div className="text-left">
-                <DrawerTitle>{track.title}</DrawerTitle>
-                <DrawerDescription>{track.artist}</DrawerDescription>
+                <DrawerTitle className="text-lg">{track.title}</DrawerTitle>
+                <DrawerDescription className="text-sm">{track.artist}</DrawerDescription>
               </div>
             </div>
           </DrawerHeader>
           
-          <div className="p-4 pb-0">
-            <div className="flex items-center justify-center space-x-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 rounded-full"
-                onClick={() => onClick(-10)}
-                disabled={goal <= 200}
+          <div className="p-4 pt-0 space-y-1 max-h-[60vh] overflow-y-auto no-scrollbar">
+            {options.map((option, index) => (
+              <motion.button
+                key={option.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                onClick={option.action} 
+                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
-                <Minus className="h-4 w-4" />
-                <span className="sr-only">Decrease</span>
-              </Button>
-              <div className="flex-1 text-center">
-                <div className="text-7xl font-bold tracking-tighter">
-                  {goal}
+                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                  <option.icon className={`h-4 w-4 ${option.iconColor}`} />
                 </div>
-                <div className="text-[0.70rem] uppercase text-muted-foreground">
-                  Plays/day Goal
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 rounded-full"
-                onClick={() => onClick(10)}
-                disabled={goal >= 400}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="sr-only">Increase</span>
-              </Button>
-            </div>
-            <div className="mt-3 h-[120px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
-                  <Bar
-                    dataKey="goal"
-                    style={
-                      {
-                        fill: "var(--foreground)",
-                        opacity: 0.9,
-                      } as React.CSSProperties
-                    }
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="p-4 space-y-1">
-            <button onClick={() => handleAction('like')} className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-all text-left group">
-              <div className="flex items-center gap-2">
-                <Heart className={`h-5 w-5 ${isLiked ? "text-red-500 fill-current" : "text-muted-foreground group-hover:text-foreground"}`} />
-                <span className={`text-sm font-medium ${isLiked ? "text-red-500" : "text-foreground"}`}>{isLiked ? 'Liked' : 'Like Track'}</span>
-              </div>
-            </button>
-            <button onClick={() => handleAction('details')} className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-all text-left group">
-              <Info className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
-              <span className="text-sm font-medium text-foreground">View Details</span>
-            </button>
-            <button onClick={() => handleAction('queue')} className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-all text-left group">
-              <ListMusic className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
-              <span className="text-sm font-medium text-foreground">Add to Queue</span>
-            </button>
-            <button onClick={() => handleAction('playlist')} className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-all text-left group">
-              <Plus className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
-              <span className="text-sm font-medium text-foreground">Add to Playlist</span>
-            </button>
-            <button onClick={() => handleAction('tip')} className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-all text-left group">
-              <Coins className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
-              <span className="text-sm font-medium text-foreground">Tip Producer</span>
-            </button>
-            <button onClick={() => handleAction('share')} className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-all text-left group">
-              <Share2 className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
-              <span className="text-sm font-medium text-foreground">Share Track</span>
-            </button>
-            {onRemove && (
-              <button onClick={() => { onRemove(); onClose(); }} className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-all text-left group">
-                <Trash2 className="h-5 w-5 text-red-500" />
-                <span className="text-sm font-medium text-red-500">Remove from Playlist</span>
-              </button>
-            )}
+                <span className={`text-sm font-medium ${option.color}`}>{option.label}</span>
+              </motion.button>
+            ))}
           </div>
 
           <DrawerFooter>
             <DrawerClose asChild>
-              <Button variant="outline" className="w-full">Cancel</Button>
+              <Button variant="outline" className="w-full rounded-xl h-12">Cancel</Button>
             </DrawerClose>
           </DrawerFooter>
         </div>

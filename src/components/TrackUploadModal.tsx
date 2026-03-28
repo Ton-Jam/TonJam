@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Upload, Music, Image as ImageIcon, CheckCircle2, Loader2, FileAudio } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { Track } from '@/types';
 import { MOCK_USER } from '@/constants';
 import { uploadToIPFS } from '@/services/pinataService';
@@ -92,6 +92,22 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover') => {
     const file = e.target.files?.[0];
     if (file) {
+      if (type === 'audio') {
+        const validation = validateFile(file, 'audio', 50);
+        if (!validation.isValid) {
+          addNotification(validation.error || "Invalid file", "error");
+          e.target.value = '';
+          return;
+        }
+      } else {
+        const validation = validateFile(file, 'image', 10);
+        if (!validation.isValid) {
+          addNotification(validation.error || "Invalid file", "error");
+          e.target.value = '';
+          return;
+        }
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         if (type === 'audio') {
@@ -153,7 +169,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                   <div className="relative group">
                     <input 
                       type="file" 
-                      accept="audio/*" 
+                      accept={ALLOWED_AUDIO_TYPES.join(',')} 
                       onChange={(e) => handleFileChange(e, 'audio')} 
                       className="hidden" 
                       id="audio-upload-modal" 
@@ -185,7 +201,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                   <div className="relative group">
                     <input 
                       type="file" 
-                      accept="image/*" 
+                      accept={ALLOWED_IMAGE_TYPES.join(',')} 
                       onChange={(e) => handleFileChange(e, 'cover')} 
                       className="hidden" 
                       id="cover-upload-modal" 

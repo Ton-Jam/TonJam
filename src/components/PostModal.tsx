@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { X, Image, Share2, Sparkles, Music, Check, Send } from "lucide-react";
 import { MOCK_USER, APP_LOGO } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
-import { getPlaceholderImage } from "@/lib/utils";
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES } from "@/lib/utils";
 
 interface PostModalProps {
   onClose: () => void;
@@ -28,8 +28,10 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        addNotification("File too large. Max 10MB allowed.", "error");
+      const validation = validateFile(file, 'image_or_video', 10);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
         return;
       }
       const reader = new FileReader();
@@ -212,7 +214,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               id="media-upload"
               ref={fileInputRef}
               onChange={handleMediaUpload}
-              accept="image/*,video/*"
+              accept={[...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES].join(',')}
               className="hidden"
             />
             <button

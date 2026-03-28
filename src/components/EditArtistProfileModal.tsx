@@ -4,7 +4,7 @@ import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { uploadToIPFS } from '@/services/pinataService';
 import { supabase } from '@/lib/supabase';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 
 interface EditArtistProfileModalProps {
   artist: Artist;
@@ -31,8 +31,10 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        addNotification("File too large. Max 5MB allowed.", "error");
+      const validation = validateFile(file, 'image', 5);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
         return;
       }
       
@@ -54,8 +56,10 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        addNotification("Avatar too large. Max 2MB allowed.", "error");
+      const validation = validateFile(file, 'image', 2);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
         return;
       }
       
@@ -116,7 +120,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 animate-in fade-in duration-300">
       <div className="absolute inset-0 backdrop-blur-md" onClick={onClose}></div>
-      <div className="relative glass border border-neutral-500/10 w-full max-w-2xl rounded-[10px] p-2 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+      <div className="relative glass w-full max-w-2xl rounded-[10px] p-2 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-600/10 blur-3xl rounded-full"></div>
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
@@ -138,7 +142,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             {/* Banner Upload Section - Moved to top and made full-width */}
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Profile Banner</label>
-              <div className="relative w-full h-48 rounded-[10px] overflow-hidden group border border-border bg-muted/50">
+              <div className="relative w-full h-48 rounded-[10px] overflow-hidden group bg-muted/50">
                 <img src={bannerUrl || getPlaceholderImage(`banner-${artist.id}`, 1500, 500)} alt="Banner Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
@@ -156,7 +160,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                   ref={fileInputRef} 
                   onChange={handleBannerUpload} 
                   className="hidden" 
-                  accept="image/*" 
+                  accept={ALLOWED_IMAGE_TYPES.join(',')} 
                 />
               </div>
               <p className="text-[8px] text-foreground/30 ml-2">Recommended size: 1500x500px. Max 5MB.</p>
@@ -165,7 +169,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             {/* Avatar Upload Section */}
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Avatar</label>
-              <div className="relative w-24 h-24 rounded-full overflow-hidden group border border-border bg-muted/50">
+              <div className="relative w-24 h-24 rounded-full overflow-hidden group bg-muted/50">
                 <img src={avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} alt="Avatar Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
@@ -173,7 +177,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                     onClick={() => {
                       const input = document.createElement('input');
                       input.type = 'file';
-                      input.accept = 'image/*';
+                      input.accept = ALLOWED_IMAGE_TYPES.join(',');
                       input.onchange = (e) => handleAvatarUpload(e as any);
                       input.click();
                     }}

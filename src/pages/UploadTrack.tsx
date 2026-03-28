@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAudio } from '@/context/AudioContext';
 import { Track } from '@/types';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { toast } from 'sonner';
 import { GoogleGenAI, Type } from "@google/genai";
 import { uploadToIPFS } from '@/services/pinataService';
@@ -48,6 +48,12 @@ const UploadTrack: React.FC = () => {
   const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validation = validateFile(file, 'audio', 50); // 50MB max for audio
+      if (!validation.isValid) {
+        toast.error(validation.error);
+        if (audioInputRef.current) audioInputRef.current.value = '';
+        return;
+      }
       setAudioFile(file);
       analyzeAudio(file);
     }
@@ -56,6 +62,12 @@ const UploadTrack: React.FC = () => {
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validation = validateFile(file, 'image', 10); // 10MB max for images
+      if (!validation.isValid) {
+        toast.error(validation.error);
+        if (coverInputRef.current) coverInputRef.current.value = '';
+        return;
+      }
       setCoverFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -97,20 +109,22 @@ const UploadTrack: React.FC = () => {
     const file = e.dataTransfer.files?.[0];
     if (file) {
       if (type === 'audio') {
-        if (file.type.startsWith('audio/')) {
+        const validation = validateFile(file, 'audio', 50);
+        if (validation.isValid) {
           setAudioFile(file);
           analyzeAudio(file);
         } else {
-          toast.error("Invalid file type. Please upload an audio file.");
+          toast.error(validation.error);
         }
       } else {
-        if (file.type.startsWith('image/')) {
+        const validation = validateFile(file, 'image', 10);
+        if (validation.isValid) {
           setCoverFile(file);
           const reader = new FileReader();
           reader.onloadend = () => setCoverPreview(reader.result as string);
           reader.readAsDataURL(file);
         } else {
-          toast.error("Invalid file type. Please upload an image.");
+          toast.error(validation.error);
         }
       }
     }
@@ -327,7 +341,7 @@ const UploadTrack: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <input type="file" ref={coverInputRef} onChange={handleCoverChange} accept="image/*" className="hidden" />
+                  <input type="file" ref={coverInputRef} onChange={handleCoverChange} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
                 </div>
 
                 {/* Audio File */}
@@ -368,7 +382,7 @@ const UploadTrack: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <input type="file" ref={audioInputRef} onChange={handleAudioChange} accept="audio/*" className="hidden" />
+                  <input type="file" ref={audioInputRef} onChange={handleAudioChange} accept={ALLOWED_AUDIO_TYPES.join(',')} className="hidden" />
                   
                   {isAnalyzing && (
                     <div className="p-4 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-4 animate-pulse">

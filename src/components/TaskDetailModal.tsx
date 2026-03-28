@@ -18,13 +18,19 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="task-modal-title"
+    >
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
         className="absolute inset-0 bg-background/80 backdrop-blur-xl"
+        aria-hidden="true"
       />
       
       <motion.div 
@@ -39,9 +45,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
               <div className={`p-2 rounded-xl ${task.completed ? 'bg-green-500/10 text-green-500' : 'bg-blue-600/10 text-blue-500'}`}>
                 {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Zap className="w-6 h-6" />}
               </div>
-              <h2 className="text-xl font-black uppercase tracking-tight text-foreground">{task.title}</h2>
+              <h2 id="task-modal-title" className="text-xl font-black uppercase tracking-tight text-foreground">{task.title}</h2>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-muted/50 rounded-full transition-colors">
+            <button 
+              onClick={onClose} 
+              autoFocus
+              className="p-2 hover:bg-muted/50 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label="Close task details"
+            >
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>

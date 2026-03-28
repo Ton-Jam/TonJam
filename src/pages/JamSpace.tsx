@@ -273,7 +273,7 @@ const JamSpace: React.FC = () => {
           {/* Right Column: Recommendations & Live */}
           <aside className="hidden lg:block lg:col-span-3 space-y-4 sticky top-32 h-fit">
             {/* Live Now Nodes */}
-            <section className="bg-background border border-border rounded-[12px] p-4">
+            <section className="bg-background rounded-[12px] p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex flex-col">
                   <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em]">Live Nodes</h3>
@@ -293,7 +293,7 @@ const JamSpace: React.FC = () => {
             </section>
 
             {/* Recommended Nodes */}
-            <section className="bg-background border border-border rounded-[12px] p-4">
+            <section className="bg-background rounded-[12px] p-4">
               <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em] mb-4">Recommended Nodes</h3>
               <div className="space-y-4">
                 {artists.slice(0, 3).map(artist => (
@@ -304,7 +304,7 @@ const JamSpace: React.FC = () => {
             </section>
 
             {/* AI Curated Frequencies */}
-            <section className="bg-background border border-border rounded-[12px] p-4">
+            <section className="bg-background rounded-[12px] p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <SparklesIcon className="h-4 w-4 text-blue-500" />
