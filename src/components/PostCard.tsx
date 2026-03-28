@@ -4,6 +4,7 @@ import { Post, Comment } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import PostOptionsModal from '@/components/PostOptionsModal';
+import TrackOptionsModal from '@/components/TrackOptionsModal';
 import { MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn, getPlaceholderImage } from '@/lib/utils';
@@ -16,6 +17,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
   const [isReposted, setIsReposted] = useState(post.isReposted || false);
   const [repostsCount, setRepostsCount] = useState(post.reposts || 0);
   const [showOptions, setShowOptions] = useState(false);
+  const [showTrackOptions, setShowTrackOptions] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>(post.commentList || []);
   const [commentText, setCommentText] = useState('');
@@ -201,7 +203,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     <motion.div
       whileHover={{ y: -2 }}
       className={cn(
-        "relative isolate w-full overflow-hidden rounded-2xl p-3 mb-2 group",
+        "relative isolate w-full overflow-hidden rounded-none sm:rounded-2xl p-0 sm:p-3 mb-0 sm:mb-2 group",
         "bg-muted/50 dark:bg-background/90",
         "bg-linear-to-br from-black/5 to-black/[0.02] dark:from-white/5 dark:to-white/[0.02]",
         "backdrop-blur-xl backdrop-saturate-[180%]",
@@ -212,7 +214,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     >
       <div
         className={cn(
-          "relative w-full rounded-xl p-2",
+          "relative w-full rounded-none sm:rounded-xl p-2",
           "bg-linear-to-br from-black/[0.05] to-transparent dark:from-white/[0.08] dark:to-transparent",
           "backdrop-blur-md backdrop-saturate-150",
           "border border-black/[0.05] dark:border-white/[0.08]",
@@ -346,8 +348,9 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   <p className="text-[10px] font-bold text-foreground dark:text-silver-100 uppercase">{(track.streams || track.playCount || 0).toLocaleString()}</p>
                 </div>
                 <button 
+                  onClick={(e) => { e.stopPropagation(); setShowTrackOptions(true); }}
                   className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-blue-500/70 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                  aria-label="Add track to library"
+                  aria-label="Track options"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
@@ -428,7 +431,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-2 pt-2 border-t border-border/50 overflow-hidden"
+            className="mt-2 pt-2 overflow-hidden"
             id={`comments-${post.id}`}
           >
             {/* Comment Form */}
@@ -475,7 +478,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                       tabIndex={0}
                     />
                     <div className="flex-1">
-                      <div className="bg-muted/50 rounded-[10px] p-2 relative group-hover/comment:bg-foreground/[0.07] transition-colors border border-border/50">
+                      <div className="bg-muted/50 rounded-[10px] p-2 relative group-hover/comment:bg-foreground/[0.07] transition-colors">
                         <div className="flex items-center justify-between mb-2">
                           <h5 
                             className="text-[10px] font-bold text-blue-600 dark:text-silver-100 uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
@@ -570,6 +573,10 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
 
       {showOptions && (
         <PostOptionsModal post={post} onClose={() => setShowOptions(false)} isOwner={isOwnPost} onDelete={handleDelete} />
+      )}
+
+      {showTrackOptions && track && (
+        <TrackOptionsModal track={track} onClose={() => setShowTrackOptions(false)} />
       )}
 
       {/* Image Lightbox Modal */}

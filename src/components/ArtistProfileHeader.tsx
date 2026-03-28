@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { CheckCircle2 } from 'lucide-react';
 import { Artist } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
+import ArtistVerification from './ArtistVerification';
 
 interface ArtistProfileHeaderProps {
   artist: Artist;
@@ -27,9 +28,12 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist }) => 
       </div>
       
       <div className="flex flex-col items-center md:items-start text-center md:text-left">
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground leading-none mb-2">
-          {artist.name}
-        </h1>
+        <div className="flex items-center gap-3 mb-2">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground leading-none">
+            {artist.name}
+          </h1>
+          <ArtistVerification artist={artist} />
+        </div>
         <p className="text-muted-foreground font-medium text-sm"> {artist.followers.toLocaleString()} Monthly Listeners </p>
       </div>
     </motion.div>

@@ -145,12 +145,12 @@ const JamSpace: React.FC = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 relative z-10">
+      <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 mt-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Navigation & Trending */}
           <aside className="hidden lg:block lg:col-span-3 space-y-4 sticky top-32 h-fit">
             {/* Live Jam Rooms - Hardware Style */}
-            <div className="bg-background border border-border rounded-[12px] p-4 shadow-2xl relative overflow-hidden group">
+            <div className="bg-background rounded-[12px] p-4 shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-[0.03] rotate-12"><RadioIcon className="h-24 w-24" /></div>
               <div className="flex items-center justify-between mb-4 relative z-10">
                 <div className="flex flex-col">
@@ -194,7 +194,7 @@ const JamSpace: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-background border border-border rounded-[12px] p-4">
+            <div className="bg-background rounded-[12px] p-4">
               <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em] mb-4">Navigation</h3>
               <nav className="space-y-4">
                 {[
@@ -242,7 +242,7 @@ const JamSpace: React.FC = () => {
             <AutoCarousel items={carouselItems} />
 
             {/* Sticky Filters */}
-            <div className="sticky top-[var(--header-height,64px)] z-30 backdrop-blur-2xl py-2 w-full bg-background/40 px-4 transition-all duration-300 border-b border-blue-500/10">
+            <div className="sticky top-[var(--header-height,64px)] z-30 backdrop-blur-2xl py-2 w-full bg-background/40 px-0 sm:px-4 transition-all duration-300">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
                   {['All', 'Following', 'Trending'].map(tab => (

@@ -54,6 +54,7 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
 import ArtistProfileHeader from '@/components/ArtistProfileHeader';
+import ArtistVerification from '@/components/ArtistVerification';
 
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -514,31 +515,6 @@ const ArtistProfile: React.FC = () => {
       )}
 
       {/* Sticky Tab Navigation */}
-      {isOwnProfile && !artist.verified && (
-        <div className="max-w-7xl mx-auto px-4 mt-4">
-          <div className="bg-card p-5 rounded-[10px] flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="p-4 bg-blue-500/10 rounded-full text-blue-500">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Verify Your Identity</h3>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-4">
-                  Complete your verification to unlock artist features. Requirements:
-                </p>
-                <ul className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-4 space-y-4">
-                  <li className="flex items-center gap-4"><Check className="h-3 w-3 text-green-500" /> Link your X (Twitter) account</li>
-                  <li className="flex items-center gap-4"><Check className="h-3 w-3 text-green-500" /> Connect your TON wallet</li>
-                  <li className="flex items-center gap-4"><Check className="h-3 w-3 text-green-500" /> Confirm minimum followers</li>
-                </ul>
-              </div>
-            </div>
-            <button onClick={() => setShowVerifyModal(true)} className="px-4 py-4 bg-blue-600 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95 shadow-lg shadow-blue-600/20">
-              Start Verification
-            </button>
-          </div>
-        </div>
-      )}
       <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-4 mt-4 mb-4 w-full px-4 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex items-center justify-start gap-8 overflow-x-auto no-scrollbar">
           {['tracks', 'collection', 'signals', 'about', ...(isOwnProfile ? ['management'] : [])].map(tab => (
@@ -799,9 +775,12 @@ const ArtistProfile: React.FC = () => {
                         <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest mt-4">{artist.verified ? 'Confirmed Identity on TON Blockchain' : 'Identity pending verification on TON'}</p>
                       </div>
                     </div>
-                    <button className="px-4 py-4 bg-muted/50 rounded-[10px] text-[8px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all flex items-center gap-4">
-                      <ShieldAlert className="h-3 w-3" /> Report Identity
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <ArtistVerification artist={artist} />
+                      <button className="px-4 py-4 bg-muted/50 rounded-[10px] text-[8px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all flex items-center gap-4">
+                        <ShieldAlert className="h-3 w-3" /> Report Identity
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Artist } from '@/types';
-import { CheckCircle2, Link2, Loader2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 
 interface ArtistVerificationProps {
@@ -9,56 +9,45 @@ interface ArtistVerificationProps {
 
 const ArtistVerification: React.FC<ArtistVerificationProps> = ({ artist }) => {
   const [isVerifying, setIsVerifying] = useState(false);
-  const { addNotification } = useAudio();
+  const { addNotification, setArtists } = useAudio();
 
   const handleVerify = () => {
     setIsVerifying(true);
     // Simulate verification process
     setTimeout(() => {
       setIsVerifying(false);
-      addNotification("Verification request submitted. Please link your social media or wallet.", "success");
+      // Update artist verification status in local state
+      setArtists(prev => prev.map(a => a.id === artist.id ? { ...a, verified: true } : a));
+      addNotification("Identity verified successfully on the TON blockchain!", "success");
     }, 2000);
   };
 
-  return (
-    <div className="p-2 bg-muted/20 border border-border rounded-2xl space-y-2">
-      <div className="flex items-center gap-2">
-        <div className="p-2 bg-blue-600/10 rounded-xl text-blue-500">
-          <CheckCircle2 className="h-8 w-8" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-foreground">Artist Verification</h2>
-          <p className="text-sm text-muted-foreground">Verify your identity to gain the verified badge.</p>
-        </div>
+  if (artist.verified) {
+    return (
+      <div className="flex items-center gap-1 text-blue-500" title="Verified Artist">
+        <CheckCircle2 className="h-5 w-5 fill-blue-500/10" />
       </div>
+    );
+  }
 
-      {artist.verified ? (
-        <div className="flex items-center gap-2 text-emerald-500 font-bold">
-          <CheckCircle2 className="h-5 w-5" />
-          <span>Artist is already verified</span>
-        </div>
+  return (
+    <button 
+      onClick={handleVerify}
+      disabled={isVerifying}
+      className="flex items-center gap-2 px-3 py-1 bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/20 rounded-full font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+    >
+      {isVerifying ? (
+        <>
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span>Verifying...</span>
+        </>
       ) : (
-        <div className="space-y-2">
-          <div className="p-2 bg-background border border-border rounded-xl space-y-2">
-            <h3 className="font-bold text-foreground">Requirements:</h3>
-            <ul className="text-sm text-muted-foreground list-disc list-inside space-y-2">
-              <li>Link your X (Twitter) account</li>
-              <li>Connect your TON wallet</li>
-              <li>Have at least 100 followers</li>
-            </ul>
-          </div>
-          
-          <button 
-            onClick={handleVerify}
-            disabled={isVerifying}
-            className="flex items-center gap-2 px-2 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50"
-          >
-            {isVerifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-            {isVerifying ? "Submitting..." : "Start Verification"}
-          </button>
-        </div>
+        <>
+          <ShieldCheck className="h-3 w-3" />
+          <span>Start Verification</span>
+        </>
       )}
-    </div>
+    </button>
   );
 };
 

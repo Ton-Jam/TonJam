@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UserPen, X, Twitter, Send, Music, Globe, Image as ImageIcon, Upload, Loader2 } from 'lucide-react';
+import { UserPen, X, Twitter, Send, Music, Globe, Instagram, Image as ImageIcon, Upload, Loader2 } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { uploadToIPFS } from '@/services/pinataService';
@@ -200,29 +200,71 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                 <div className="space-y-2">
                   <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">X (Twitter)</label>
                   <div className="relative">
-                    <Twitter className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 h-3 w-3" />
-                    <input type="text" value={socials.x} onChange={(e) => setSocials({ ...socials, x: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-2 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://x.com/..." aria-label="X (Twitter) Link" />
+                    <a 
+                      href={socials.x || "https://x.com"} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-blue-400 transition-colors z-10"
+                    >
+                      <Twitter className="h-3 w-3" />
+                    </a>
+                    <input type="text" value={socials.x} onChange={(e) => setSocials({ ...socials, x: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://x.com/..." aria-label="X (Twitter) Link" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Telegram</label>
+                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Instagram</label>
                   <div className="relative">
-                    <Send className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 h-3 w-3" />
-                    <input type="text" value={socials.telegram} onChange={(e) => setSocials({ ...socials, telegram: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-2 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://t.me/..." aria-label="Telegram Link" />
+                    <a 
+                      href={socials.instagram || "https://instagram.com"} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-pink-500 transition-colors z-10"
+                    >
+                      <Instagram className="h-3 w-3" />
+                    </a>
+                    <input type="text" value={socials.instagram} onChange={(e) => setSocials({ ...socials, instagram: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-pink-400 transition-all text-foreground" placeholder="https://instagram.com/..." aria-label="Instagram Link" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Spotify</label>
                   <div className="relative">
-                    <Music className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 h-3 w-3" />
-                    <input type="text" value={socials.spotify} onChange={(e) => setSocials({ ...socials, spotify: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-2 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-green-400 transition-all text-foreground" placeholder="https://spotify.com/..." aria-label="Spotify Link" />
+                    <a 
+                      href={socials.spotify || "https://spotify.com"} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-green-400 transition-colors z-10"
+                    >
+                      <Music className="h-3 w-3" />
+                    </a>
+                    <input type="text" value={socials.spotify} onChange={(e) => setSocials({ ...socials, spotify: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-green-400 transition-all text-foreground" placeholder="https://spotify.com/..." aria-label="Spotify Link" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Telegram</label>
+                  <div className="relative">
+                    <a 
+                      href={socials.telegram || "https://t.me"} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-blue-400 transition-colors z-10"
+                    >
+                      <Send className="h-3 w-3" />
+                    </a>
+                    <input type="text" value={socials.telegram} onChange={(e) => setSocials({ ...socials, telegram: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://t.me/..." aria-label="Telegram Link" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Website</label>
                   <div className="relative">
-                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 h-3 w-3" />
-                    <input type="text" value={socials.website} onChange={(e) => setSocials({ ...socials, website: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-2 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." aria-label="Website Link" />
+                    <a 
+                      href={socials.website || "#"} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-blue-400 transition-colors z-10"
+                    >
+                      <Globe className="h-3 w-3" />
+                    </a>
+                    <input type="text" value={socials.website} onChange={(e) => setSocials({ ...socials, website: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." aria-label="Website Link" />
                   </div>
                 </div>
               </div>

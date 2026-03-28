@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { DrawerPreview as DrawerPrimitive } from "@base-ui/react/drawer";
+import * as React from "react";
 import { createContext, use } from "react";
 
 const DrawerContext =
@@ -22,8 +23,20 @@ function Drawer({
   );
 }
 
-function DrawerTrigger({ ...props }: DrawerPrimitive.Trigger.Props) {
-  return <DrawerPrimitive.Trigger {...props} data-slot="drawer-trigger" />;
+function DrawerTrigger({
+  asChild,
+  children,
+  ...props
+}: DrawerPrimitive.Trigger.Props & { asChild?: boolean }) {
+  return (
+    <DrawerPrimitive.Trigger
+      data-slot="drawer-trigger"
+      render={asChild ? children : undefined}
+      {...props}
+    >
+      {!asChild && children}
+    </DrawerPrimitive.Trigger>
+  );
 }
 
 function DrawerPortal({ className, ...props }: DrawerPrimitive.Portal.Props) {
@@ -36,8 +49,20 @@ function DrawerPortal({ className, ...props }: DrawerPrimitive.Portal.Props) {
   );
 }
 
-function DrawerClose({ ...props }: DrawerPrimitive.Close.Props) {
-  return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
+function DrawerClose({
+  asChild,
+  children,
+  ...props
+}: DrawerPrimitive.Close.Props & { asChild?: boolean }) {
+  return (
+    <DrawerPrimitive.Close
+      data-slot="drawer-close"
+      render={asChild ? children : undefined}
+      {...props}
+    >
+      {!asChild && children}
+    </DrawerPrimitive.Close>
+  );
 }
 
 function DrawerContent({ className, ...props }: DrawerPrimitive.Content.Props) {
@@ -71,44 +96,42 @@ function DrawerPopup({
       data-slot="drawer-popup"
       className={cn(
         "group/popup relative",
-        "[--bleed:3rem] outline-1 outline-foreground/1 bg-background text-foreground dark:outline-border overflow-y-auto overscroll-contain touch-auto data-swiping:select-none",
-        "data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]",
-        // Nested drawer stacking variables (no-ops when not nested)
-        "[--peek:1rem] [--stack-progress:clamp(0,var(--drawer-swipe-progress),1)] [--stack-step:0.05] [--stack-peek-offset:max(0px,calc((var(--nested-drawers)-var(--stack-progress))*var(--peek)))] [--scale-base:calc(max(0,1-(var(--nested-drawers)*var(--stack-step))))] [--scale:clamp(0,calc(var(--scale-base)+(var(--stack-step)*var(--stack-progress))),1)] [--shrink:calc(1-var(--scale))] [--height:max(0px,calc(var(--drawer-frontmost-height,var(--drawer-height))-var(--bleed)))]",
+        "outline-1 outline-foreground/1 bg-background text-foreground dark:outline-border overflow-y-auto overscroll-contain touch-auto data-swiping:select-none",
+        "data-ending-style:duration-300",
         // Nested drawer overlay (::after pseudo-element)
         "after:absolute after:inset-0 after:rounded-[inherit] after:bg-transparent after:pointer-events-none after:content-[''] after:transition-[background-color] after:duration-450 after:ease-[cubic-bezier(0.32,0.72,0,1)]",
         // Nested drawer states
         "data-nested-drawer-swiping:duration-0 data-nested-drawer-open:overflow-hidden data-nested-drawer-open:after:bg-background/5",
         {
           // Shared horizontal (left & right)
-          "supports-[-webkit-touch-callout:none]:[--bleed:0px] h-full w-[calc(22rem+var(--bleed))] max-w-[calc(100vw-3rem+var(--bleed))] p-2 supports-[-webkit-touch-callout:none]:w-[20rem] supports-[-webkit-touch-callout:none]:max-w-[calc(100vw-20px)] supports-[-webkit-touch-callout:none]:rounded-[10px]":
+          "supports-[-webkit-touch-callout:none]:h-full w-[22rem] max-w-[calc(100vw-3rem)] p-2 supports-[-webkit-touch-callout:none]:w-[20rem] supports-[-webkit-touch-callout:none]:max-w-[calc(100vw-20px)] supports-[-webkit-touch-callout:none]:rounded-[10px]":
             dir === "left" || dir === "right",
           // Right-only (with stacking transform + transition for box-shadow)
-          "rounded-l-2xl -mr-(--bleed) pr-[calc(1.5rem+var(--bleed))] supports-[-webkit-touch-callout:none]:mr-2 supports-[-webkit-touch-callout:none]:pr-2 shadow-[-2px_0_10px_rgb(0_0_0/0.1)] data-ending-style:shadow-[-2px_0_10px_rgb(0_0_0/0)] origin-[calc(100%-var(--bleed))_50%] transform-[translateX(calc(var(--drawer-swipe-movement-x)-var(--stack-peek-offset)-(var(--shrink)*100%)))_scale(var(--scale))] data-swiping:duration-0 [transition:transform_450ms_cubic-bezier(0.32,0.72,0,1),box-shadow_450ms_cubic-bezier(0.32,0.72,0,1)]":
+          "rounded-l-2xl pr-6 supports-[-webkit-touch-callout:none]:mr-2 supports-[-webkit-touch-callout:none]:pr-2 shadow-[-2px_0_10px_rgb(0_0_0/0.1)] data-ending-style:shadow-[-2px_0_10px_rgb(0_0_0/0)] origin-right data-swiping:duration-0 [transition:transform_450ms_cubic-bezier(0.32,0.72,0,1),box-shadow_450ms_cubic-bezier(0.32,0.72,0,1)]":
             dir === "right",
           // Left-only (with stacking transform + transition for box-shadow)
-          "rounded-r-2xl -ml-(--bleed) pl-[calc(1.5rem+var(--bleed))] supports-[-webkit-touch-callout:none]:ml-2 supports-[-webkit-touch-callout:none]:pl-2 shadow-[2px_0_10px_rgb(0_0_0/0.1)] data-ending-style:shadow-[2px_0_10px_rgb(0_0_0/0)] origin-[var(--bleed)_50%] transform-[translateX(calc(var(--drawer-swipe-movement-x)+var(--stack-peek-offset)+(var(--shrink)*100%)))_scale(var(--scale))] data-swiping:duration-0 [transition:transform_450ms_cubic-bezier(0.32,0.72,0,1),box-shadow_450ms_cubic-bezier(0.32,0.72,0,1)]":
+          "rounded-r-2xl pl-6 supports-[-webkit-touch-callout:none]:ml-2 supports-[-webkit-touch-callout:none]:pl-2 shadow-[2px_0_10px_rgb(0_0_0/0.1)] data-ending-style:shadow-[2px_0_10px_rgb(0_0_0/0)] origin-left data-swiping:duration-0 [transition:transform_450ms_cubic-bezier(0.32,0.72,0,1),box-shadow_450ms_cubic-bezier(0.32,0.72,0,1)]":
             dir === "left",
           // Right enter/exit
-          "data-ending-style:transform-[translateX(calc(100%-var(--bleed)+var(--viewport-padding)))] data-starting-style:transform-[translateX(calc(100%-var(--bleed)+var(--viewport-padding)))]":
+          "data-ending-style:translate-x-full data-starting-style:translate-x-full":
             dir === "right",
           // Left enter/exit
-          "data-ending-style:transform-[translateX(calc(-100%+var(--bleed)-var(--viewport-padding)))] data-starting-style:transform-[translateX(calc(-100%+var(--bleed)-var(--viewport-padding)))]":
+          "data-ending-style:-translate-x-full data-starting-style:-translate-x-full":
             dir === "left",
           // Shared vertical (up & down)
-          "w-full max-h-[calc(80vh+var(--bleed))] px-2":
+          "w-full max-h-[80vh] px-2":
             dir === "up" || dir === "down",
           // Down-only (with stacking transform + transitions for height & box-shadow)
-          "rounded-t-2xl -mb-(--bleed) pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+var(--bleed))] h-(--drawer-height,auto) shadow-[0_2px_10px_rgb(0_0_0/0.1)] data-ending-style:shadow-[0_2px_10px_rgb(0_0_0/0)] origin-[50%_calc(100%-var(--bleed))] transform-[translateY(calc(var(--drawer-swipe-movement-y)-var(--stack-peek-offset)-(var(--shrink)*var(--height))))_scale(var(--scale))] data-swiping:duration-0 data-nested-drawer-open:h-[calc(var(--height)+var(--bleed))] [transition:transform_450ms_cubic-bezier(0.32,0.72,0,1),height_450ms_cubic-bezier(0.32,0.72,0,1),box-shadow_450ms_cubic-bezier(0.32,0.72,0,1)]":
+          "rounded-t-2xl pt-2 pb-6 h-auto shadow-[0_2px_10px_rgb(0_0_0/0.1)] data-ending-style:shadow-[0_2px_10px_rgb(0_0_0/0)] origin-bottom data-swiping:duration-0 [transition:transform_450ms_cubic-bezier(0.32,0.72,0,1),height_450ms_cubic-bezier(0.32,0.72,0,1),box-shadow_450ms_cubic-bezier(0.32,0.72,0,1)]":
             dir === "down",
           // Up-only (with stacking transform + transitions for height & box-shadow)
-          "rounded-b-2xl -mt-(--bleed) pb-2 pt-[calc(1.5rem+env(safe-area-inset-top,0px)+var(--bleed))] h-(--drawer-height,auto) shadow-[0_-2px_10px_rgb(0_0_0/0.1)] data-ending-style:shadow-[0_-2px_10px_rgb(0_0_0/0)] origin-[50%_var(--bleed)] transform-[translateY(calc(var(--drawer-swipe-movement-y)+var(--stack-peek-offset)+(var(--shrink)*var(--height))))_scale(var(--scale))] data-swiping:duration-0 data-nested-drawer-open:h-[calc(var(--height)+var(--bleed))] [transition:transform_450ms_cubic-bezier(0.32,0.72,0,1),height_450ms_cubic-bezier(0.32,0.72,0,1),box-shadow_450ms_cubic-bezier(0.32,0.72,0,1)]":
+          "rounded-b-2xl pb-2 pt-6 h-auto shadow-[0_-2px_10px_rgb(0_0_0/0.1)] data-ending-style:shadow-[0_-2px_10px_rgb(0_0_0/0)] origin-top data-swiping:duration-0 [transition:transform_450ms_cubic-bezier(0.32,0.72,0,1),height_450ms_cubic-bezier(0.32,0.72,0,1),box-shadow_450ms_cubic-bezier(0.32,0.72,0,1)]":
             dir === "up",
           // Down enter/exit
-          "data-ending-style:transform-[translateY(calc(100%-var(--bleed)))] data-starting-style:transform-[translateY(calc(100%-var(--bleed)))]":
+          "data-ending-style:translate-y-full data-starting-style:translate-y-full":
             dir === "down",
           // Up enter/exit
-          "data-ending-style:transform-[translateY(calc(-100%+var(--bleed)))] data-starting-style:transform-[translateY(calc(-100%+var(--bleed)))]":
+          "data-ending-style:-translate-y-full data-starting-style:-translate-y-full":
             dir === "up",
         },
         className,
@@ -134,7 +157,7 @@ function DrawerViewport({
       className={cn(
         "fixed flex inset-0",
         {
-          "[--viewport-padding:0px] supports-[-webkit-touch-callout:none]:[--viewport-padding:0.625rem] items-stretch p-(--viewport-padding)":
+          "items-stretch":
             dir === "left" || dir === "right",
           "justify-end": dir === "right",
           "justify-start": dir === "left",
@@ -148,12 +171,18 @@ function DrawerViewport({
   );
 }
 
-function DrawerTitle({ className, ...props }: DrawerPrimitive.Title.Props) {
+function DrawerTitle({
+  asChild,
+  children,
+  className,
+  ...props
+}: DrawerPrimitive.Title.Props & { asChild?: boolean }) {
   const dir = use(DrawerContext);
 
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
+      render={asChild ? children : undefined}
       className={cn(
         "text-foreground text-base font-medium",
         {
@@ -162,19 +191,24 @@ function DrawerTitle({ className, ...props }: DrawerPrimitive.Title.Props) {
         className,
       )}
       {...props}
-    />
+    >
+      {!asChild && children}
+    </DrawerPrimitive.Title>
   );
 }
 
 function DrawerDescription({
+  asChild,
+  children,
   className,
   ...props
-}: DrawerPrimitive.Description.Props) {
+}: DrawerPrimitive.Description.Props & { asChild?: boolean }) {
   const dir = use(DrawerContext);
 
   return (
     <DrawerPrimitive.Description
       data-slot="drawer-description"
+      render={asChild ? children : undefined}
       className={cn(
         "mt-3 text-muted-foreground text-sm",
         {
@@ -182,6 +216,32 @@ function DrawerDescription({
         },
         className,
       )}
+      {...props}
+    >
+      {!asChild && children}
+    </DrawerPrimitive.Description>
+  );
+}
+
+function DrawerHeader({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)}
+      {...props}
+    />
+  );
+}
+
+function DrawerFooter({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
       {...props}
     />
   );
@@ -195,7 +255,7 @@ function DrawerBackdrop({
     <DrawerPrimitive.Backdrop
       data-slot="drawer-backdrop"
       className={cn(
-        "[--backdrop-opacity:0.2] [--bleed:3rem] dark:[--backdrop-opacity:0.7] fixed inset-0 min-h-dvh bg-background opacity-[calc(var(--backdrop-opacity)*(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-ending-style:opacity-0 data-starting-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] supports-[-webkit-touch-callout:none]:absolute supports-backdrop-filter:backdrop-blur-3xl",
+        "fixed inset-0 min-h-dvh bg-background opacity-20 dark:opacity-70 transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-[-webkit-touch-callout:none]:absolute supports-backdrop-filter:backdrop-blur-3xl",
         className,
       )}
       {...props}
@@ -214,5 +274,7 @@ export {
   DrawerDescription,
   DrawerBackdrop,
   DrawerClose,
+  DrawerHeader,
+  DrawerFooter,
   DrawerPrimitive,
 };

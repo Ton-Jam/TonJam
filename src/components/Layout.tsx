@@ -820,7 +820,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       {/* Floating Action Button for Mobile */}
-      {!isPlayer && (
+      {isJamspace && (
         <button 
           onClick={() => setIsPostModalOpen(true)}
           className={`lg:hidden fixed right-6 z-50 w-14 h-14 rounded-full bg-primary shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all ${

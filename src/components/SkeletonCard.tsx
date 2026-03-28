@@ -2,10 +2,22 @@ import React from 'react';
 
 interface SkeletonCardProps {
   className?: string;
-  variant?: 'default' | 'row';
+  variant?: 'default' | 'row' | 'compact';
 }
 
 const SkeletonCard: React.FC<SkeletonCardProps> = ({ className = '', variant = 'default' }) => {
+  if (variant === 'compact') {
+    return (
+      <div className={`animate-pulse flex items-center gap-3 p-2 rounded-lg bg-muted/20 w-full ${className}`}>
+        <div className="w-10 h-10 rounded-md bg-muted flex-shrink-0"></div>
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="h-2.5 bg-muted rounded w-3/4"></div>
+          <div className="h-2 bg-muted rounded w-1/2"></div>
+        </div>
+      </div>
+    );
+  }
+
   if (variant === 'row') {
     return (
       <div className={`animate-pulse flex items-center gap-2 p-2 rounded-[10px] bg-muted/50 glass w-full ${className}`}>

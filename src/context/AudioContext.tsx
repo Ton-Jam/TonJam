@@ -104,6 +104,7 @@ interface AudioContextType {
   addTask: (task: Omit<Task, 'id' | 'completed' | 'claimed' | 'progress'>) => Promise<void>;
   updateTaskProgress: (id: string, progress: number) => Promise<void>;
   claimTaskReward: (id: string) => Promise<void>;
+  updateUserRole: (userId: string, role: 'artist' | 'collector' | 'admin') => Promise<void>;
   getTrendingTracks: () => Track[];
   getTopNFTTracks: () => Track[];
   getTracksByGenre: (genre: string) => Track[];
@@ -323,6 +324,28 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const claimTaskReward = async (id: string) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, claimed: true } : t));
     addNotification("Reward claimed successfully!", "success");
+  };
+
+  const updateUserRole = async (userId: string, role: 'artist' | 'collector' | 'admin') => {
+    if (userProfile.role !== 'admin') {
+      addNotification("Only admins can update user roles", "error");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ role })
+        .eq('id', userId);
+
+      if (error) throw error;
+      addNotification(`User role updated to ${role}`, "success");
+    } catch (error) {
+      handleSupabaseError(error, 'UPDATE', `users/${userId}/role`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const allPlaylists = useMemo(() => {
@@ -2155,7 +2178,7 @@ Return a JSON object with the following structure:
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
       allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
-      posts, createPost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, claimTaskReward, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
+      posts, createPost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
       updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters, jamspaceFilters, setJamspaceFilters,
       isLoading, deleteTrack, isHighFidelity, exclusiveContent

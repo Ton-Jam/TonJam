@@ -80,16 +80,15 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-lg glass border-t sm:border border-border bg-background rounded-t-[24px] sm:rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] overflow-hidden group focus-within:border-neutral-500/30 transition-all"
+        className="relative w-full max-w-lg glass bg-background rounded-t-[24px] sm:rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] overflow-hidden group focus-within:border-neutral-500/30 transition-all"
       >
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
         
         {/* Handle for mobile drawer */}
         <div className="sm:hidden flex justify-center pt-3 pb-1">
           <div className="w-12 h-1.5 bg-muted rounded-full"></div>
         </div>
 
-        <header className="flex justify-between items-center p-4 border-b border-border/50">
+        <header className="flex justify-between items-center p-4">
           <div className="flex items-center gap-2">
             <img src={APP_LOGO} className="w-4 h-4 object-contain" alt="" aria-hidden="true" />
             <h2 id="modal-title" className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground">
@@ -171,7 +170,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
 
         {showTrackPicker && (
           <div 
-            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-background z-20 overflow-y-auto no-scrollbar border-t border-border/50 p-2 animate-in slide-in-from-bottom-4 duration-300"
+            className="absolute inset-x-0 bottom-[60px] top-[60px] bg-background z-20 overflow-y-auto no-scrollbar p-2 animate-in slide-in-from-bottom-4 duration-300"
             role="region"
             aria-label="Track picker"
           >
@@ -206,7 +205,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
           </div>
         )}
 
-        <footer className="flex items-center justify-between p-2 bg-foreground/[0.02] border-t border-border/50">
+        <footer className="flex items-center justify-between p-2 bg-foreground/[0.02]">
           <div className="flex gap-3">
             <input
               type="file"

@@ -56,7 +56,7 @@ function SnapPointsDrawer() {
       <DrawerPortal>
         <DrawerBackdrop />
         <DrawerViewport>
-          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-2 max-h-dvh flex flex-col  shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+          <DrawerPopup className="pb-6 px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
             <div className="pb-2 border-b px-2">
               <DrawerTitle>Snap points</DrawerTitle>
               <DrawerDescription>
@@ -100,7 +100,7 @@ function CommentsDrawer() {
       <DrawerPortal>
         <DrawerBackdrop />
         <DrawerViewport>
-          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+          <DrawerPopup className="pb-6 px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
             <div className="relative pb-2 border-b">
               <DrawerTitle className="text-sm">Comments</DrawerTitle>
               <DrawerDescription className="sr-only">
@@ -194,7 +194,7 @@ function ReactionsDrawer() {
       <DrawerPortal>
         <DrawerBackdrop />
         <DrawerViewport>
-          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+          <DrawerPopup className="pb-6 px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
             <div className="will-change-transform px-2 pb-2 border-b">
               <DrawerTitle className="text-sm">Reactions and plays</DrawerTitle>
               <DrawerDescription className="text-xs">
@@ -260,7 +260,7 @@ function ShareDrawer() {
       <DrawerPortal>
         <DrawerBackdrop />
         <DrawerViewport>
-          <DrawerPopup className="pb-[max(0px,calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)+var(--bleed)))]! px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+          <DrawerPopup className="pb-6 px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
             <div className="px-2 pb-2 border-b">
               <DrawerTitle className="text-sm">Share</DrawerTitle>
               <DrawerDescription className="sr-only">

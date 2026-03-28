@@ -11,7 +11,7 @@ import SkeletonCard from './SkeletonCard';
 
 interface TrackCardProps {
   track: Track;
-  variant?: 'default' | 'row';
+  variant?: 'default' | 'row' | 'compact';
   index?: number;
   onMint?: (track: Track) => void;
   className?: string;
@@ -20,7 +20,7 @@ interface TrackCardProps {
 
 const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMint, className = '', isLoading = false }) => {
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack } = useAudio();
+  const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack, artists } = useAudio();
   const [isTipping, setIsTipping] = React.useState(false);
   const [tonConnectUI] = useTonConnectUI();
   
@@ -28,7 +28,7 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
     return <SkeletonCard variant={variant} className={className} />;
   }
   const isActive = currentTrack?.id === track.id;
-  const artist = MOCK_ARTISTS.find(a => a.id === track.artistId);
+  const artist = artists.find(a => a.id === track.artistId);
 
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -162,6 +162,34 @@ const TrackCard: React.FC<TrackCardProps> = ({ track, variant = 'default', onMin
       action();
     }
   };
+
+  if (variant === 'compact') {
+    return (
+      <div 
+        className={`group flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-primary ${className}`}
+        onClick={handleCardClick}
+        onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
+        role="button"
+        tabIndex={0}
+      >
+        <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0">
+          <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
+          <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
+            <button onClick={handlePlay} className="text-white">
+              {isActive && isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className={`text-[11px] font-bold truncate ${isActive ? 'text-primary' : 'text-foreground'}`}>{track.title}</h4>
+          <p className="text-[9px] text-muted-foreground truncate">{track.artist}</p>
+        </div>
+        <button onClick={handleOptions} className="p-1 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+          <MoreVertical className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
 
   if (variant === 'row') {
     return (
