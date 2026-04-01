@@ -147,15 +147,17 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <AuthProvider>
-          <AudioProvider>
-            <Toaster theme="light" position="top-right" />
-            <Router>
-              <ScrollToTop />
-              <AppContent />
-            </Router>
-          </AudioProvider>
-        </AuthProvider>
+        <TonConnectUIProvider manifestUrl="https://tonjam.app/tonconnect-manifest.json">
+          <AuthProvider>
+            <AudioProvider>
+              <Toaster theme="light" position="top-right" />
+              <Router>
+                <ScrollToTop />
+                <AppContent />
+              </Router>
+            </AudioProvider>
+          </AuthProvider>
+        </TonConnectUIProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

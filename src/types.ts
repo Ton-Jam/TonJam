@@ -1,4 +1,12 @@
 
+export interface TokenGating {
+  enabled: boolean;
+  tokenAddress?: string; // Address of the required token or NFT collection
+  minAmount?: string; // Minimum amount required (e.g. "100" for tokens, "1" for NFT)
+  tokenSymbol?: string; // Display symbol (e.g. "JAM", "TON")
+  tokenType: 'jetton' | 'nft'; // TON specific types
+}
+
 export interface Track {
   id: string;
   title: string;
@@ -38,6 +46,7 @@ export interface Track {
   recommendationScore?: number;
   isCollaboration?: boolean;
   createdAt: string;
+  tokenGating?: TokenGating;
 }
 
 export interface NFTTrait {
@@ -104,6 +113,7 @@ export interface NFTItem {
   auctionEndDate?: string; // Alias for auctionEndTime
   startingBid?: string;
   royalty?: number;
+  tokenGating?: TokenGating;
 }
 
 export interface SongRequest {

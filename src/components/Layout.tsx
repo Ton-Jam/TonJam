@@ -98,6 +98,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [isMobileNavHidden, setIsMobileNavHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -174,6 +175,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     if (isFullPlayerOpen) {
       setIsHeaderHidden(false);
+      setIsMobileNavHidden(false);
       document.documentElement.style.setProperty('--header-height', '64px');
     }
   }, [isFullPlayerOpen]);
@@ -185,9 +187,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       const currentScrollY = window.scrollY;
       if (currentScrollY > lastScrollY && currentScrollY > 64) {
         setIsHeaderHidden(true);
+        setIsMobileNavHidden(true);
         document.documentElement.style.setProperty('--header-height', '0px');
       } else {
         setIsHeaderHidden(false);
+        setIsMobileNavHidden(false);
         document.documentElement.style.setProperty('--header-height', '64px');
       }
       setLastScrollY(currentScrollY);
@@ -289,8 +293,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                           </div>
                           <div className="space-y-2">
                             {recentSearches.length > 0 ? (
-                              recentSearches.map((item) => (
-                                <div key={item} className="group flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                              recentSearches.map((item, index) => (
+                                <div key={`${item}-${index}`} className="group flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                                   <button 
                                     onClick={() => handleSuggestionClick(item)}
                                     className="flex-1 text-left text-sm text-foreground/80 hover:text-foreground transition-colors"
@@ -327,8 +331,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trending Now</span>
                           </div>
                           <div className="space-y-2">
-                            {trendingTopics.map((topic) => (
-                              <div key={topic} className="group flex items-center justify-between p-2 rounded-lg hover:bg-primary/5 transition-colors">
+                            {trendingTopics.map((topic, index) => (
+                              <div key={`${topic}-${index}`} className="group flex items-center justify-between p-2 rounded-lg hover:bg-primary/5 transition-colors">
                                 <button 
                                   onClick={() => handleSuggestionClick(topic)}
                                   className="flex-1 text-left text-sm text-foreground/80 hover:text-primary transition-colors"
@@ -414,9 +418,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                               <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Trending</span>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
-                              {trendingTopics.map((topic) => (
+                              {trendingTopics.map((topic, index) => (
                                 <button 
-                                  key={topic}
+                                  key={`${topic}-${index}`}
                                   onClick={() => handleSuggestionClick(topic)}
                                   className="flex items-center justify-between p-2 rounded-lg bg-primary/5 text-xs text-foreground/90 text-left"
                                 >
@@ -525,9 +529,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                   value={marketplaceFilters.sortBy} 
                                   onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, sortBy: val }))}
                                 >
-                                  {['Newest', 'Oldest', 'Price: Low to High', 'Price: High to Low', 'Most Liked'].map(option => (
+                                  {['Newest', 'Oldest', 'Price: Low to High', 'Price: High to Low', 'Most Liked'].map((option, index) => (
                                     <DropdownMenuRadioItem 
-                                      key={option} 
+                                      key={`${option}-${index}`} 
                                       value={option} 
                                       className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer"
                                       onSelect={(e) => e.preventDefault()}
@@ -581,8 +585,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 {activeFilterSubMenu === 'genre' && (
                                   <DropdownMenuRadioGroup value={marketplaceFilters.genre} onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, genre: val }))}>
                                     <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Genres</DropdownMenuRadioItem>
-                                    {Array.from(new Set(MOCK_TRACKS.map(t => t.genre))).map(g => (
-                                      <DropdownMenuRadioItem key={g} value={g} className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>{g}</DropdownMenuRadioItem>
+                                    {Array.from(new Set(MOCK_TRACKS.map(t => t.genre))).map((g, index) => (
+                                      <DropdownMenuRadioItem key={`${g}-${index}`} value={g} className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>{g}</DropdownMenuRadioItem>
                                     ))}
                                   </DropdownMenuRadioGroup>
                                 )}
@@ -590,8 +594,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 {activeFilterSubMenu === 'artist' && (
                                   <DropdownMenuRadioGroup value={marketplaceFilters.artist} onValueChange={(val) => setMarketplaceFilters(prev => ({ ...prev, artist: val }))}>
                                     <DropdownMenuRadioItem value="All" className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>All Artists</DropdownMenuRadioItem>
-                                    {MOCK_ARTISTS.map(a => (
-                                      <DropdownMenuRadioItem key={a.name} value={a.name} className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>{a.name}</DropdownMenuRadioItem>
+                                    {MOCK_ARTISTS.map((a, index) => (
+                                      <DropdownMenuRadioItem key={`${a.name}-${index}`} value={a.name} className="text-[11px] font-bold uppercase tracking-widest px-2 py-2 cursor-pointer" onSelect={(e) => e.preventDefault()}>{a.name}</DropdownMenuRadioItem>
                                     ))}
                                   </DropdownMenuRadioGroup>
                                 )}
@@ -831,7 +835,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Mobile Navigation */}
       {!isPlayer && (
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-16 px-2 flex justify-around items-center shadow-2xl" aria-label="Mobile Navigation">
+        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-16 px-2 flex justify-around items-center shadow-2xl transition-transform duration-300 ${isMobileNavHidden ? 'translate-y-full' : 'translate-y-0'}`} aria-label="Mobile Navigation">
           <MobileNavItem to="/" icon={HomeIcon} label="Home" />
           <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
           <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" />

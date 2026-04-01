@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Joyride, Step } from 'react-joyride';
 import DiscoverSearchBar from '@/components/DiscoverSearchBar';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, X, Music, User, Gem, RotateCcw, Satellite, ChevronRight, Sparkles, Filter, Calendar, DollarSign, Award, Layers } from 'lucide-react';
+import { Search, X, Music, User, Gem, RotateCcw, Satellite, ChevronRight, Sparkles, Filter, Calendar, DollarSign, Award, Layers, Lock } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_NFTS, GENRES, MOODS, MOCK_USERS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
@@ -36,7 +36,7 @@ const Discover: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists' | 'Users' | 'All'>('All');
+  const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists' | 'Users' | 'Exclusive' | 'All'>('All');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('Newest');
@@ -231,6 +231,9 @@ const Discover: React.FC = () => {
 
   const filteredTracks = useMemo(() => {
     let results = [...MOCK_TRACKS];
+    if (activeFilter === 'Exclusive') {
+      results = results.filter(t => t.tokenGating?.enabled);
+    }
     if (search) {
       results = results.filter(t =>
         t.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -326,7 +329,7 @@ const Discover: React.FC = () => {
   }, [search, filters, sortBy]);
 
   const filteredResults = useMemo(() => {
-    if (activeFilter === 'Tracks') return filteredTracks;
+    if (activeFilter === 'Tracks' || activeFilter === 'Exclusive') return filteredTracks;
     if (activeFilter === 'NFTs') return filteredNFTs;
     
     let results: any[] = [];
@@ -603,7 +606,7 @@ const Discover: React.FC = () => {
                 </button>
                 
                 <div className="flex items-center gap-4">
-                  {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users'].map((filter) => (
+                  {['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users', 'Exclusive'].map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setActiveFilter(filter as any)}
@@ -613,7 +616,12 @@ const Discover: React.FC = () => {
                           : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
                       }`}
                     >
-                      {filter}
+                      {filter === 'Exclusive' ? (
+                        <div className="flex items-center gap-2">
+                          <Lock className="h-3 w-3" />
+                          Exclusive
+                        </div>
+                      ) : filter}
                     </button>
                   ))}
                 </div>
@@ -787,6 +795,16 @@ const Discover: React.FC = () => {
                   viewAllLink={`/explore/tracks?title=Search Results: Tracks&search=${search}`}
                   grid
                   isEmpty={filteredTracks.length === 0}
+                />
+
+                {/* Exclusive Section */}
+                <SearchCategorySection 
+                  title="Exclusive Content" 
+                  items={MOCK_TRACKS.filter(t => t.tokenGating?.enabled).slice(0, 5)}
+                  renderItem={(item) => <TrackCard track={item} className="border border-amber-500/30" />}
+                  viewAllLink={`/explore/tracks?title=Exclusive Content&filter=Exclusive`}
+                  grid
+                  isEmpty={!MOCK_TRACKS.some(t => t.tokenGating?.enabled)}
                 />
 
                 {/* Artists Section */}

@@ -29,28 +29,52 @@ export const getJettonBalance = async (
     const masterAddress = Address.parse(jettonMasterAddress);
 
     // 1. Get Jetton Wallet address for this user
-    const response = await client.runMethod(masterAddress, 'get_wallet_address', [
-      { type: 'slice', cell: userAddress.toRaw().toString() } as any, // This might need adjustment based on @ton/ton version
-    ]);
-    
-    // Simplification for the sake of the demo/prototype if runMethod fails or is complex
-    // In a real app, we'd parse the stack to get the wallet address, then call get_wallet_data on it.
-    
-    // For now, let's simulate the fetch if it's too complex to implement perfectly without full contract ABI
-    // but I'll try to provide a structure that looks real.
-    
-    /* 
-    const jettonWalletAddress = response.stack.readAddress();
-    const walletData = await client.runMethod(jettonWalletAddress, 'get_wallet_data');
-    const balance = walletData.stack.readBigNumber();
-    return Number(balance) / 10**9; 
-    */
-
-    // Fallback to mock for the prototype if the above is too brittle for the environment
-    return Number((Math.random() * 1000).toFixed(2));
+    try {
+      const response = await client.runMethod(masterAddress, 'get_wallet_address', [
+        { type: 'slice', cell: beginCell().storeAddress(userAddress).endCell() } as any,
+      ]);
+      
+      const jettonWalletAddress = response.stack.readAddress();
+      const walletData = await client.runMethod(jettonWalletAddress, 'get_wallet_data');
+      const balance = walletData.stack.readBigNumber();
+      return Number(balance) / 10**9; 
+    } catch (e) {
+      console.warn("Error fetching Jetton balance from contract, using mock:", e);
+      // Fallback to mock for the prototype
+      return Number((Math.random() * 1000).toFixed(2));
+    }
   } catch (error) {
     console.warn("Error fetching Jetton balance, using mock:", error);
     return Number((Math.random() * 1000).toFixed(2));
+  }
+};
+
+/**
+ * Checks if a wallet address owns at least one NFT from a specific collection
+ */
+export const checkNFTOwnership = async (
+  walletAddress: string,
+  collectionAddress: string
+): Promise<boolean> => {
+  try {
+    if (!walletAddress || !collectionAddress) return false;
+
+    // In a real app, we'd use an indexer like TonAPI or TonCenter to list NFTs for a wallet
+    // and check if any belong to the collectionAddress.
+    
+    // For the prototype, we'll simulate this.
+    // In a real implementation:
+    /*
+    const response = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/nfts?collection=${collectionAddress}`);
+    const data = await response.json();
+    return data.nft_items.length > 0;
+    */
+
+    // Simulate check: For demo purposes, assume they own it if connected
+    return true; 
+  } catch (error) {
+    console.warn("Error checking NFT ownership:", error);
+    return false;
   }
 };
 

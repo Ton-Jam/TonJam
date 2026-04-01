@@ -17,7 +17,8 @@ import {
   Users,
   Coins,
   PlusCircle,
-  Sparkles
+  Sparkles,
+  Lock
 } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -26,6 +27,8 @@ import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { useTonConnectUI } from '@tonconnect/ui-react';
+import TokenGate from '@/components/TokenGate';
+import { useTokenGating } from '@/hooks/useTokenGating';
 
 const TrackDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +43,7 @@ const TrackDetail: React.FC = () => {
   
   const isActive = currentTrack?.id === track?.id;
   const isLiked = track ? likedTrackIds.includes(track.id) : false;
+  const { hasAccess } = useTokenGating(track.tokenGating);
 
   const [activeTab, setActiveTab] = useState<'lyrics' | 'details' | 'history' | 'nfts'>('lyrics');
 
@@ -53,7 +57,13 @@ const TrackDetail: React.FC = () => {
     );
   }
 
-  const handlePlay = () => playTrack(track);
+  const handlePlay = () => {
+    if (track.tokenGating?.enabled && !hasAccess) {
+      addNotification(`This track is exclusive to ${track.tokenGating.tokenSymbol} holders.`, 'warning');
+      return;
+    }
+    playTrack(track);
+  };
 
   const handleTip = async (amount: number) => {
     setIsTipping(false);
@@ -200,6 +210,18 @@ const TrackDetail: React.FC = () => {
                   <span className="text-[9px] font-black uppercase tracking-widest text-foreground">NFT Protocol</span>
                 </div>
               )}
+
+              {track.tokenGating?.enabled && !hasAccess && (
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center">
+                  <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-600/40">
+                    <Lock className="w-8 h-8 text-foreground" />
+                  </div>
+                  <h3 className="text-xl font-black uppercase tracking-tighter text-foreground mb-2">Exclusive Content</h3>
+                  <p className="text-xs text-foreground/70 uppercase tracking-widest font-bold">
+                    Hold {track.tokenGating.minAmount} {track.tokenGating.tokenSymbol} to unlock
+                  </p>
+                </div>
+              )}
             </motion.div>
 
             <div className="flex gap-4">
@@ -341,52 +363,54 @@ const TrackDetail: React.FC = () => {
               </div>
 
               <div className="min-h-[300px]">
-                {activeTab === 'lyrics' && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="space-y-4"
-                  >
-                    {track.lyrics ? (
-                      <div className="whitespace-pre-line text-lg md:text-xl font-medium text-muted-foreground/80 leading-relaxed font-serif italic">
-                        {track.lyrics}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-4 text-muted-foreground/50">
-                        <Music2 className="h-10 w-10 mb-4 opacity-20" />
-                        <p className="text-[10px] font-bold uppercase tracking-widest">Lyrics not available for this frequency</p>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
+                <TokenGate gating={track.tokenGating}>
+                  {activeTab === 'lyrics' && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-4"
+                    >
+                      {track.lyrics ? (
+                        <div className="whitespace-pre-line text-lg md:text-xl font-medium text-muted-foreground/80 leading-relaxed font-serif italic">
+                          {track.lyrics}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-4 text-muted-foreground/50">
+                          <Music2 className="h-10 w-10 mb-4 opacity-20" />
+                          <p className="text-[10px] font-bold uppercase tracking-widest">Lyrics not available for this frequency</p>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
 
-                {activeTab === 'details' && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="space-y-4"
-                  >
-                    <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value="technical">
-                        <AccordionTrigger className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Technical Specs</AccordionTrigger>
-                        <AccordionContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <DetailItem label="BPM" value={track.bpm?.toString() || '128'} />
-                          <DetailItem label="Key" value={track.key || 'C# Minor'} />
-                          <DetailItem label="Bitrate" value={track.bitrate || 'FLAC'} />
-                          <DetailItem label="Mood" value={track.mood || 'Not Specified'} />
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="metadata">
-                        <AccordionTrigger className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Metadata</AccordionTrigger>
-                        <AccordionContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <DetailItem label="Release Date" value={track.releaseDate || '2023-10-15'} />
-                          <DetailItem label="CID" value={track.cid || 'Not Available'} isMono />
-                          <DetailItem label="Genre" value={track.genre} />
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </motion.div>
-                )}
+                  {activeTab === 'details' && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-4"
+                    >
+                      <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value="technical">
+                          <AccordionTrigger className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Technical Specs</AccordionTrigger>
+                          <AccordionContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <DetailItem label="BPM" value={track.bpm?.toString() || '128'} />
+                            <DetailItem label="Key" value={track.key || 'C# Minor'} />
+                            <DetailItem label="Bitrate" value={track.bitrate || 'FLAC'} />
+                            <DetailItem label="Mood" value={track.mood || 'Not Specified'} />
+                          </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="metadata">
+                          <AccordionTrigger className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Metadata</AccordionTrigger>
+                          <AccordionContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <DetailItem label="Release Date" value={track.releaseDate || '2023-10-15'} />
+                            <DetailItem label="CID" value={track.cid || 'Not Available'} isMono />
+                            <DetailItem label="Genre" value={track.genre} />
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+                    </motion.div>
+                  )}
+                </TokenGate>
 
                 {activeTab === 'history' && (
                   <motion.div 

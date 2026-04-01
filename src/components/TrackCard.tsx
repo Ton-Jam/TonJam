@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Headphones, Clock, CheckCircle2, Share2, Globe, Zap, Coins, ListMusic, Plus } from 'lucide-react';
+import { Play, Pause, MoreVertical, Headphones, Clock, CheckCircle2, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock } from 'lucide-react';
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_ARTISTS, TJ_COIN_ICON } from '@/constants';
@@ -8,6 +8,7 @@ import { getPlaceholderImage } from '@/lib/utils';
 import confetti from 'canvas-confetti';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import SkeletonCard from './SkeletonCard';
+import { useTokenGating } from '@/hooks/useTokenGating';
 
 interface TrackCardProps {
   track: Track;
@@ -35,6 +36,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack, artists, addToQueue, setTrackToAddToPlaylist } = useAudio();
   const [isTipping, setIsTipping] = React.useState(false);
   const [tonConnectUI] = useTonConnectUI();
+  const { hasAccess } = useTokenGating(track.tokenGating);
   
   if (isLoading) {
     return <SkeletonCard variant={variant} className={className} />;
@@ -121,6 +123,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (track.tokenGating?.enabled && !hasAccess) {
+      addNotification(`This track is exclusive to ${track.tokenGating.tokenSymbol} holders.`, 'warning');
+      return;
+    }
     playTrack(track);
   };
 
@@ -188,7 +194,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
           <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
           <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
             <button onClick={handlePlay} className="text-white">
-              {isActive && isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 fill-current" />}
+              {track.tokenGating?.enabled && !hasAccess ? (
+                <Lock className="h-5 w-5" />
+              ) : (
+                isActive && isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 fill-current" />
+              )}
             </button>
           </div>
         </div>
@@ -223,7 +233,9 @@ const TrackCard: React.FC<TrackCardProps> = ({
         >
           <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
           <div className={`absolute inset-0 flex items-center justify-center bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
-             {isActive && isPlaying ? (
+             {track.tokenGating?.enabled && !hasAccess ? (
+                <Lock className="h-4 w-4 text-foreground" />
+             ) : isActive && isPlaying ? (
                 <div className="flex items-end justify-center gap-3 h-4" aria-hidden="true">
                   <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_0ms]"></div>
                   <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_200ms]"></div>
@@ -301,7 +313,9 @@ const TrackCard: React.FC<TrackCardProps> = ({
              onClick={handlePlay}
              aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
            >
-             {isActive && isPlaying ? (
+             {track.tokenGating?.enabled && !hasAccess ? (
+               <Lock className="h-6 w-6" />
+             ) : isActive && isPlaying ? (
                <Pause className="h-7 w-7 fill-current" />
              ) : (
                <Play className="h-7 w-7 fill-current ml-1" />

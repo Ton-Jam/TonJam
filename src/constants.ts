@@ -241,6 +241,30 @@ Everything is clear in the neon light`
     releaseDate: '2024-03-01',
     createdAt: '2024-03-01T00:00:00Z'
   },
+  { 
+    id: '11', 
+    title: 'Exclusive Echoes', 
+    artist: 'Neon Voyager', 
+    artistId: 'a1', 
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Exclusive%20Echoes?width=400&height=400&nologo=true', 
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', 
+    duration: 240, 
+    genre: 'Electronic', 
+    mood: 'Focus',
+    isNFT: false, 
+    artistVerified: true, 
+    playCount: 500, 
+    likes: 120, 
+    releaseDate: '2024-03-15',
+    createdAt: '2024-03-15T00:00:00Z',
+    tokenGating: {
+      enabled: true,
+      tokenAddress: JAM_JETTON_MASTER,
+      minAmount: '100',
+      tokenSymbol: 'JAM',
+      tokenType: 'jetton'
+    }
+  },
 ];
 
 import { Zap, Moon, Waves, Sparkles, Factory, Coffee } from 'lucide-react';

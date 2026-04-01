@@ -235,6 +235,22 @@ const Library: React.FC = () => {
                     ))}
                   </div>
                 </section>
+
+                {/* Recommended for You */}
+                <section className="p-4 rounded-3xl bg-yellow-500/[0.03] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-4">
+                      <Sparkles className="h-4 w-4 text-yellow-500" />
+                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Recommended for You</h3>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                    {MOCK_TRACKS.filter(t => !likedTrackIds.includes(t.id)).slice(0, 4).map(track => (
+                      <TrackCard key={track.id} track={track} variant="row" />
+                    ))}
+                  </div>
+                </section>
               </div>
             )}
 
