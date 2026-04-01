@@ -23,12 +23,14 @@ import {
   TrendingUp,
   Satellite,
   Users,
-  User
+  User,
+  Upload
 } from 'lucide-react';
 
 import PostCard from '@/components/PostCard';
 import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS, MOCK_USERS, APP_LOGO, GENRES } from '@/constants';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
+import { uploadToIPFS } from '@/services/pinataService';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import NFTVaultSection from '@/components/NFTVaultSection';
@@ -36,12 +38,16 @@ import PlaylistCard from '@/components/PlaylistCard';
 import SocialFeed from '@/components/SocialFeed';
 import UserCard from '@/components/UserCard';
 import SellNFTModal from '@/components/SellNFTModal';
+import ManageNFTModal from '@/components/ManageNFTModal';
 import UserArtistVerificationModal from '@/components/UserArtistVerificationModal';
+import ConfirmationModal from '@/components/ConfirmationModal';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { NFTItem, UserProfile } from '@/types';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -68,14 +74,17 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [localUser, setLocalUser] = useState<UserProfile>(userProfile);
+  const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'releases' | 'sequences' | 'activity' | 'network' | 'staking' | 'feed'>('overview');
   const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
+  const [selectedNftForManaging, setSelectedNftForManaging] = useState<NFTItem | null>(null);
   const [newPostContent, setNewPostContent] = useState('');
+  const [isUnstakeModalOpen, setIsUnstakeModalOpen] = useState(false);
 
   /* Check for Spotify verification */
   const isSpotifyVerified = useMemo(() => {
-    return !!user?.user_metadata?.spotify || localUser.isVerifiedArtist;
-  }, [user, localUser.isVerifiedArtist]);
+    return !!localUser.socials?.spotify || localUser.isVerifiedArtist;
+  }, [localUser.socials?.spotify, localUser.isVerifiedArtist]);
 
   /* Staking State - Persisted */
   const [stakeAmount, setStakeAmount] = useState('');
@@ -125,9 +134,15 @@ const Profile: React.FC = () => {
       addNotification("Invalid unstake amount", "error");
       return;
     }
+    setIsUnstakeModalOpen(true);
+  };
+
+  const confirmUnstake = () => {
+    const amount = parseFloat(unstakeAmount);
     setStakedBalance(prev => prev - amount);
     setWalletBalance(prev => prev + amount);
     setUnstakeAmount('');
+    setIsUnstakeModalOpen(false);
     addNotification(`Successfully unstaked ${amount} TJ Coins`, "success");
   };
 
@@ -180,10 +195,32 @@ const Profile: React.FC = () => {
     };
   }, [localUser, allTracks, allNFTs]);
 
-  const handleSave = () => {
-    setUserProfile(localUser);
-    setIsEditing(false);
-    addNotification("Neural identity committed to chain", "success");
+  const handleSave = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      addNotification("You must be logged in to save changes", "error");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, cleanUpdateData({
+        name: localUser.name,
+        bio: localUser.bio,
+        avatar: localUser.avatar,
+        bannerUrl: localUser.bannerUrl,
+        socials: localUser.socials || {}
+      }));
+
+      setUserProfile(localUser);
+      setIsEditing(false);
+      addNotification("Neural identity committed to chain", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSocialChange = (platform: string, value: string) => {
@@ -196,7 +233,7 @@ const Profile: React.FC = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
     const file = e.target.files?.[0];
     if (file) {
       const validation = validateFile(file, 'image', 5);
@@ -205,14 +242,28 @@ const Profile: React.FC = () => {
         e.target.value = '';
         return;
       }
-      const url = URL.createObjectURL(file);
-      setLocalUser(prev => ({ ...prev, [type === 'avatar' ? 'avatar' : 'bannerUrl']: url }));
-      addNotification(`${type.toUpperCase()} protocol updated`, 'success');
+      
+      setIsUploading(true);
+      try {
+        addNotification(`Uploading ${type} to IPFS...`, 'info');
+        const { ipfsUrl } = await uploadToIPFS(file);
+        setLocalUser(prev => prev ? ({ ...prev, [type === 'avatar' ? 'avatar' : 'bannerUrl']: ipfsUrl }) : null);
+        addNotification(`${type.toUpperCase()} protocol updated via IPFS`, 'success');
+      } catch (error) {
+        console.error(`Error uploading ${type}:`, error);
+        addNotification(`Failed to upload ${type} to IPFS`, 'error');
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
   const handleNFTAction = (nft: NFTItem) => {
-    setSelectedNftForListing(nft);
+    if (nft.listingType) {
+      setSelectedNftForManaging(nft);
+    } else {
+      setSelectedNftForListing(nft);
+    }
   };
 
   const StatBlock = ({ label, value, icon, subValue, trend }: { label: string, value: string, icon?: string, subValue?: string, trend?: string }) => (
@@ -263,16 +314,29 @@ const Profile: React.FC = () => {
     </div>
   );
 
+  const themeClass = localUser.profileTheme
+    ? localUser.profileTheme === 'dark' || localUser.profileTheme === 'light' 
+      ? localUser.profileTheme 
+      : `theme-${localUser.profileTheme}`
+    : '';
+
   return (
-    <div className="animate-in fade-in duration-1000 pb-4">
+    <div className={`animate-in fade-in duration-1000 pb-4 ${themeClass}`}>
         {/* Banner Section */}
       <div className="relative h-[20vh] md:h-[30vh] w-full overflow-hidden bg-background">
         <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.id}`, 1200, 400)} className="w-full h-full object-cover opacity-60" alt="" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
         
         {isEditing && (
-          <button onClick={() => bannerInputRef.current?.click()} className="absolute inset-0 flex items-center justify-center backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity z-20">
-            <div className="bg-muted p-4 rounded-[10px]"><Camera className="text-foreground h-5 w-5" /></div>
+          <button 
+            onClick={() => bannerInputRef.current?.click()} 
+            disabled={isUploading}
+            className="absolute inset-0 flex items-center justify-center backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity z-20"
+          >
+            <div className="bg-muted p-4 rounded-[10px] flex items-center gap-2">
+              {isUploading ? <Loader2 className="text-foreground h-5 w-5 animate-spin" /> : <Camera className="text-foreground h-5 w-5" />}
+              <span className="text-[10px] font-bold uppercase tracking-widest text-foreground">{isUploading ? 'Uploading...' : 'Change Banner'}</span>
+            </div>
           </button>
         )}
         <input type="file" hidden ref={bannerInputRef} onChange={(e) => handleFileChange(e, 'banner')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
@@ -295,8 +359,15 @@ const Profile: React.FC = () => {
           )}
           {isEditing && (
             <div className="flex justify-center mt-4 gap-4">
-              <button onClick={() => avatarInputRef.current?.click()} className="px-4 py-4 bg-muted rounded-[8px] text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-muted/80 transition-all">Change</button>
-              <button onClick={() => setLocalUser({...localUser, avatar: 'https://picsum.photos/200/200?seed=default'})} className="px-4 py-4 bg-red-500/10 rounded-[8px] text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-500/20 transition-all">Remove</button>
+              <button 
+                onClick={() => avatarInputRef.current?.click()} 
+                disabled={isUploading}
+                className="px-4 py-4 bg-muted rounded-[8px] text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-muted/80 transition-all flex items-center gap-2"
+              >
+                {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                Change
+              </button>
+              <button onClick={() => setLocalUser(prev => prev ? ({...prev, avatar: 'https://picsum.photos/200/200?seed=default'}) : null)} className="px-4 py-4 bg-red-500/10 rounded-[8px] text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-500/20 transition-all">Remove</button>
             </div>
           )}
           {isEditing && (
@@ -319,15 +390,15 @@ const Profile: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-center md:justify-start gap-4">
-                    <h1 className="text-[32px] md:text-[68px] font-bold tracking-tighter text-foreground uppercase leading-none drop-shadow-2xl italic font-serif">
+                  <div className="flex items-baseline justify-center md:justify-start gap-4 flex-wrap">
+                    <h1 className="text-[32px] md:text-[68px] font-bold tracking-tighter text-foreground uppercase leading-none drop-shadow-2xl italic font-serif whitespace-nowrap">
                       {localUser.name}
                     </h1>
-                  </div>
-                  <div className="flex items-center justify-center md:justify-start gap-4">
-                    <span className="text-blue-500 font-bold text-xs md:text-sm uppercase tracking-[0.6em] bg-blue-500/10 px-3 py-2 rounded-full">
+                    <span className="text-blue-500 font-bold text-[10px] md:text-xs uppercase tracking-[0.4em] bg-blue-500/10 px-3 py-1.5 rounded-full whitespace-nowrap">
                       {localUser.handle}
                     </span>
+                  </div>
+                  <div className="flex items-center justify-center md:justify-start gap-4">
                     <div className="flex gap-4">
                       {localUser.socials?.x && (
                         <a href={localUser.socials.x} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-blue-400 transition-all">
@@ -436,8 +507,8 @@ const Profile: React.FC = () => {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <StatBlock label="Network Value" value={localUser.earnings} subValue="TON" icon="gem" trend="+12.4%" />
-                <StatBlock label="JAM Balance" value={parseFloat(userProfile.jamBalance || '0').toLocaleString()} subValue="JAM" icon="coins" trend="+5.2%" />
+                <StatBlock label="Network Value" value={(localUser.earnings || 0).toString()} subValue="TON" icon="gem" trend="+12.4%" />
+                <StatBlock label="JAM Balance" value={(userProfile?.jamBalance || 0).toLocaleString()} subValue="JAM" icon="coins" trend="+5.2%" />
               </div>
             </div>
 
@@ -489,7 +560,7 @@ const Profile: React.FC = () => {
                     <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Social_Relays</p>
                     <div className="grid grid-cols-1 gap-4">
                       {['x', 'instagram', 'telegram', 'spotify'].map(platform => (
-                        <div key={platform} className="relative group/input">
+                        <div key={`social-${platform}`} className="relative group/input">
                           <input 
                             type="text" 
                             placeholder={`${platform.toUpperCase()} URL`} 
@@ -715,7 +786,7 @@ const Profile: React.FC = () => {
                         { id: 2, type: 'NFT Resale', amount: '0.9', date: 'Yesterday', track: 'Deep Horizon #042' },
                         { id: 3, type: 'Streaming', amount: '1.1', date: 'Oct 24', track: 'Cyber Drift' }
                       ].map(tx => (
-                        <div key={tx.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-[10px] hover:bg-muted transition-colors">
+                        <div key={`tx-${tx.id}`} className="flex items-center justify-between p-3 bg-muted/50 rounded-[10px] hover:bg-muted transition-colors">
                           <div className="flex items-center gap-4">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${tx.type === 'Streaming' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
                               {tx.type === 'Streaming' ? <Disc className="h-3 w-3" /> : <Gem className="h-3 w-3" />}
@@ -1011,9 +1082,21 @@ const Profile: React.FC = () => {
       {selectedNftForListing && (
         <SellNFTModal nft={selectedNftForListing} onClose={() => setSelectedNftForListing(null)} />
       )}
+      {selectedNftForManaging && (
+        <ManageNFTModal nft={selectedNftForManaging} isOpen={true} onClose={() => setSelectedNftForManaging(null)} />
+      )}
       {isVerificationModalOpen && (
         <UserArtistVerificationModal onClose={() => setIsVerificationModalOpen(false)} />
       )}
+      {/* Unstake Confirmation */}
+      <ConfirmationModal
+        isOpen={isUnstakeModalOpen}
+        onClose={() => setIsUnstakeModalOpen(false)}
+        onConfirm={confirmUnstake}
+        title="Unstake TJ Coins?"
+        description={`Are you sure you want to unstake ${unstakeAmount} TJ Coins? This will return them to your wallet balance.`}
+        confirmText="Unstake Now"
+      />
     </div>
   );
 };

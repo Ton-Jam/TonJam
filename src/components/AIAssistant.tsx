@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 const AIAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'user' | 'model'; text: string }[]>([
-    { role: 'model', text: 'Hi! I am your TonJam AI Assistant. I can help you find music, play tracks, or answer questions about the platform. How can I help you today?' }
+    { role: 'model', text: "Yo! I'm krupy, your AI DJ and Web3 music guide. 🎧 I'm here to help you navigate the TonJam universe—whether you're looking for the hottest new tracks, want to understand how music NFTs work, or need a custom playlist for your next session. What's the vibe today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -77,12 +77,13 @@ const AIAssistant: React.FC = () => {
         },
       };
 
-      const systemInstruction = `You are the TonJam AI Assistant, a helpful AI DJ and Web3 music expert. 
-You help users discover music, understand Web3 concepts (like NFTs and Staking), and control the music player.
+      const systemInstruction = `You are krupy AI Assistant, a helpful AI DJ and Web3 music expert on the TonJam platform.
+Your mission is to help users discover music, explain Web3 concepts (NFTs, Staking, Royalties), and control the music player.
+You have deep knowledge of the current music catalog and platform features.
 Available tracks in the catalog: ${allTracks.map(t => `"${t.title}" by ${t.artist}`).join(', ')}.
-If a user asks to play a song, use the playTrack function. If they ask to find music, use the searchMusic function.
-If they ask to create a playlist or recommend music, use the createRecommendedPlaylist function.
-Keep your responses concise, friendly, and enthusiastic.`;
+Use the provided tools to interact with the app.
+Be charismatic, knowledgeable, and always ready to drop a music recommendation.
+Keep responses concise but informative.`;
 
       const chat = ai.chats.create({
         model: 'gemini-3-flash-preview',
@@ -180,7 +181,7 @@ Keep your responses concise, friendly, and enthusiastic.`;
             >
               <div className="flex items-center gap-2">
                 <Bot className="w-5 h-5" />
-                <h3 className="font-bold">TonJam AI</h3>
+                <h3 className="font-bold">krupy AI DJ</h3>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors pointer-events-auto">
                 <X className="w-5 h-5" />
@@ -190,7 +191,7 @@ Keep your responses concise, friendly, and enthusiastic.`;
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50 dark:bg-black/50">
               {messages.map((msg, idx) => (
-                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div key={`msg-${idx}`} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
                     msg.role === 'user' 
                       ? 'bg-blue-600 text-white rounded-tr-sm' 

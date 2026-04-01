@@ -1,7 +1,10 @@
+import GetFreeTokensModal from '@/components/GetFreeTokensModal';
+import CompleteProfilePrompt from '@/components/CompleteProfilePrompt';
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES } from '@/constants';
+import { Track } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
@@ -34,7 +37,7 @@ const FEATURED_TRACKS_CAROUSEL: CarouselItem[] = MOCK_TRACKS.slice(0, 3).map(tra
   cta: 'Play'
 }));
 
-const WelcomeBanner = ({ onDismiss }: { onDismiss: () => void }) => {
+const WelcomeBanner = ({ onDismiss, onGetTokens }: { onDismiss: () => void, onGetTokens: () => void }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, height: 0, marginBottom: 0 }}
@@ -66,6 +69,12 @@ const WelcomeBanner = ({ onDismiss }: { onDismiss: () => void }) => {
             >
               Start Exploring
             </button>
+            <button 
+              onClick={onGetTokens}
+              className="px-6 py-2 bg-white/20 text-white font-bold uppercase tracking-widest rounded-full text-[10px] hover:bg-white/30 transition-all shadow-lg"
+            >
+              Get Free Tokens
+            </button>
           </div>
         </div>
       </div>
@@ -88,6 +97,8 @@ const Home: React.FC = () => {
     getTrendingTracks, 
     getTopNFTTracks, 
     allPlaylists, 
+    featuredPlaylist,
+    allTracks,
     searchQuery, 
     setSearchQuery, 
     generateDiscoverWeekly, 
@@ -115,6 +126,7 @@ const Home: React.FC = () => {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'discovery'>('overview');
   const [showWelcome, setShowWelcome] = useState(false);
+  const [isTokensModalOpen, setIsTokensModalOpen] = useState(false);
 
   useEffect(() => {
     generateDiscoverWeekly();
@@ -254,6 +266,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="page-container w-full">
+      <GetFreeTokensModal isOpen={isTokensModalOpen} onClose={() => setIsTokensModalOpen(false)} />
       <AnimatePresence>
         {showWelcome && (
           <motion.div
@@ -299,6 +312,13 @@ const Home: React.FC = () => {
                 >
                   <ShoppingBag className="h-5 w-5 group-hover/btn:scale-110 transition-transform" />
                   Explore Marketplace
+                </button>
+                <button 
+                  onClick={() => setIsTokensModalOpen(true)}
+                  className="px-8 py-4 bg-white/5 hover:bg-white/10 text-foreground font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-3 text-sm"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  Get Free Tokens
                 </button>
                 <button 
                   onClick={dismissWelcome}
@@ -400,9 +420,10 @@ const Home: React.FC = () => {
             className="space-y-4"
           >
             {/* Welcome Banner */}
+            <CompleteProfilePrompt />
             <AnimatePresence>
               {showWelcome && (
-                <WelcomeBanner onDismiss={dismissWelcome} />
+                <WelcomeBanner onDismiss={dismissWelcome} onGetTokens={() => setIsTokensModalOpen(true)} />
               )}
             </AnimatePresence>
 
@@ -447,6 +468,84 @@ const Home: React.FC = () => {
                   </Link>
                 </div>
               </div>
+            </section>
+
+            {/* Featured Tracks Dynamic Playlist */}
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground mb-1">Featured Tracks</h2>
+                  <p className="text-muted-foreground text-sm">Hand-picked by TonJam AI based on network trends</p>
+                </div>
+                <Link 
+                  to={`/playlist/${featuredPlaylist.id}`}
+                  className="text-blue-500 hover:text-blue-400 text-sm font-medium transition-colors"
+                >
+                  View All
+                </Link>
+              </div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative overflow-hidden rounded-[10px] p-8 border border-muted/20 flex flex-col md:flex-row items-center gap-8 group"
+              >
+                {/* Background effects */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-transparent z-0"></div>
+                <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
+                
+                <div className="relative z-10 w-48 h-48 rounded-[10px] overflow-hidden shadow-2xl flex-shrink-0 group/cover">
+                  <img 
+                    src={featuredPlaylist.coverUrl} 
+                    alt={featuredPlaylist.title}
+                    className="w-full h-full object-cover group-hover/cover:scale-110 transition-transform duration-700"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-background/40 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        const tracks = (featuredPlaylist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
+                        playAll(tracks); 
+                      }}
+                      className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-foreground shadow-xl hover:scale-110 transition-transform"
+                    >
+                      <Play className="w-8 h-8 fill-white ml-1" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="relative z-10 flex-1 text-center md:text-left">
+                  <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
+                    <span className="px-2 py-0.5 bg-blue-600/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded border border-blue-500/30">
+                      AI Curated
+                    </span>
+                    <span className="text-muted-foreground text-xs font-bold uppercase tracking-widest">• {featuredPlaylist.trackCount} Tracks</span>
+                  </div>
+                  <h3 className="text-4xl font-black text-foreground mb-4 tracking-tighter uppercase leading-none">{featuredPlaylist.title}</h3>
+                  <p className="text-muted-foreground text-lg mb-8 max-w-2xl leading-relaxed font-medium">
+                    {featuredPlaylist.description}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-4 justify-center md:justify-start">
+                    <button 
+                      onClick={() => {
+                        const tracks = (featuredPlaylist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
+                        playAll(tracks);
+                      }}
+                      className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 group/btn text-xs"
+                    >
+                      <Play className="h-5 w-5 fill-white group-hover/btn:scale-110 transition-transform" />
+                      Play Now
+                    </button>
+                    <Link 
+                      to={`/playlist/${featuredPlaylist.id}`}
+                      className="px-8 py-3 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-2 text-xs"
+                    >
+                      Details
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
             </section>
 
             {/* Trending Now Section */}

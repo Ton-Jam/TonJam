@@ -756,6 +756,57 @@ export function dictValueParserFactoryDeploy(): DictionaryValue<FactoryDeploy> {
     }
 }
 
+export type Listing = {
+    $$type: 'Listing';
+    owner: Address;
+    price: bigint;
+}
+
+export function storeListing(src: Listing) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeAddress(src.owner);
+        b_0.storeCoins(src.price);
+    };
+}
+
+export function loadListing(slice: Slice) {
+    const sc_0 = slice;
+    const _owner = sc_0.loadAddress();
+    const _price = sc_0.loadCoins();
+    return { $$type: 'Listing' as const, owner: _owner, price: _price };
+}
+
+export function loadTupleListing(source: TupleReader) {
+    const _owner = source.readAddress();
+    const _price = source.readBigNumber();
+    return { $$type: 'Listing' as const, owner: _owner, price: _price };
+}
+
+export function loadGetterTupleListing(source: TupleReader) {
+    const _owner = source.readAddress();
+    const _price = source.readBigNumber();
+    return { $$type: 'Listing' as const, owner: _owner, price: _price };
+}
+
+export function storeTupleListing(source: Listing) {
+    const builder = new TupleBuilder();
+    builder.writeAddress(source.owner);
+    builder.writeNumber(source.price);
+    return builder.build();
+}
+
+export function dictValueParserListing(): DictionaryValue<Listing> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeListing(src)).endCell());
+        },
+        parse: (src) => {
+            return loadListing(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type ListNFT = {
     $$type: 'ListNFT';
     query_id: bigint;
@@ -921,11 +972,148 @@ export function dictValueParserCancelSale(): DictionaryValue<CancelSale> {
     }
 }
 
+export type OwnershipAssigned = {
+    $$type: 'OwnershipAssigned';
+    query_id: bigint;
+    prev_owner: Address;
+    forward_payload: Slice;
+}
+
+export function storeOwnershipAssigned(src: OwnershipAssigned) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(3788238085, 32);
+        b_0.storeUint(src.query_id, 64);
+        b_0.storeAddress(src.prev_owner);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
+    };
+}
+
+export function loadOwnershipAssigned(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 3788238085) { throw Error('Invalid prefix'); }
+    const _query_id = sc_0.loadUintBig(64);
+    const _prev_owner = sc_0.loadAddress();
+    const _forward_payload = sc_0;
+    return { $$type: 'OwnershipAssigned' as const, query_id: _query_id, prev_owner: _prev_owner, forward_payload: _forward_payload };
+}
+
+export function loadTupleOwnershipAssigned(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _prev_owner = source.readAddress();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'OwnershipAssigned' as const, query_id: _query_id, prev_owner: _prev_owner, forward_payload: _forward_payload };
+}
+
+export function loadGetterTupleOwnershipAssigned(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _prev_owner = source.readAddress();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'OwnershipAssigned' as const, query_id: _query_id, prev_owner: _prev_owner, forward_payload: _forward_payload };
+}
+
+export function storeTupleOwnershipAssigned(source: OwnershipAssigned) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.query_id);
+    builder.writeAddress(source.prev_owner);
+    builder.writeSlice(source.forward_payload.asCell());
+    return builder.build();
+}
+
+export function dictValueParserOwnershipAssigned(): DictionaryValue<OwnershipAssigned> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeOwnershipAssigned(src)).endCell());
+        },
+        parse: (src) => {
+            return loadOwnershipAssigned(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type Transfer = {
+    $$type: 'Transfer';
+    query_id: bigint;
+    new_owner: Address;
+    response_destination: Address | null;
+    custom_payload: Cell | null;
+    forward_amount: bigint;
+    forward_payload: Slice;
+}
+
+export function storeTransfer(src: Transfer) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(1312029976, 32);
+        b_0.storeUint(src.query_id, 64);
+        b_0.storeAddress(src.new_owner);
+        b_0.storeAddress(src.response_destination);
+        if (src.custom_payload !== null && src.custom_payload !== undefined) { b_0.storeBit(true).storeRef(src.custom_payload); } else { b_0.storeBit(false); }
+        b_0.storeCoins(src.forward_amount);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
+    };
+}
+
+export function loadTransfer(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1312029976) { throw Error('Invalid prefix'); }
+    const _query_id = sc_0.loadUintBig(64);
+    const _new_owner = sc_0.loadAddress();
+    const _response_destination = sc_0.loadMaybeAddress();
+    const _custom_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
+    const _forward_amount = sc_0.loadCoins();
+    const _forward_payload = sc_0;
+    return { $$type: 'Transfer' as const, query_id: _query_id, new_owner: _new_owner, response_destination: _response_destination, custom_payload: _custom_payload, forward_amount: _forward_amount, forward_payload: _forward_payload };
+}
+
+export function loadTupleTransfer(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _new_owner = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'Transfer' as const, query_id: _query_id, new_owner: _new_owner, response_destination: _response_destination, custom_payload: _custom_payload, forward_amount: _forward_amount, forward_payload: _forward_payload };
+}
+
+export function loadGetterTupleTransfer(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _new_owner = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'Transfer' as const, query_id: _query_id, new_owner: _new_owner, response_destination: _response_destination, custom_payload: _custom_payload, forward_amount: _forward_amount, forward_payload: _forward_payload };
+}
+
+export function storeTupleTransfer(source: Transfer) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.query_id);
+    builder.writeAddress(source.new_owner);
+    builder.writeAddress(source.response_destination);
+    builder.writeCell(source.custom_payload);
+    builder.writeNumber(source.forward_amount);
+    builder.writeSlice(source.forward_payload.asCell());
+    return builder.build();
+}
+
+export function dictValueParserTransfer(): DictionaryValue<Transfer> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeTransfer(src)).endCell());
+        },
+        parse: (src) => {
+            return loadTransfer(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type TonJamMarketplace$Data = {
     $$type: 'TonJamMarketplace$Data';
     owner: Address;
     fee_destination: Address;
     fee_percentage: bigint;
+    listings: Dictionary<Address, Listing>;
 }
 
 export function storeTonJamMarketplace$Data(src: TonJamMarketplace$Data) {
@@ -934,6 +1122,7 @@ export function storeTonJamMarketplace$Data(src: TonJamMarketplace$Data) {
         b_0.storeAddress(src.owner);
         b_0.storeAddress(src.fee_destination);
         b_0.storeUint(src.fee_percentage, 16);
+        b_0.storeDict(src.listings, Dictionary.Keys.Address(), dictValueParserListing());
     };
 }
 
@@ -942,21 +1131,24 @@ export function loadTonJamMarketplace$Data(slice: Slice) {
     const _owner = sc_0.loadAddress();
     const _fee_destination = sc_0.loadAddress();
     const _fee_percentage = sc_0.loadUintBig(16);
-    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage };
+    const _listings = Dictionary.load(Dictionary.Keys.Address(), dictValueParserListing(), sc_0);
+    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings };
 }
 
 export function loadTupleTonJamMarketplace$Data(source: TupleReader) {
     const _owner = source.readAddress();
     const _fee_destination = source.readAddress();
     const _fee_percentage = source.readBigNumber();
-    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage };
+    const _listings = Dictionary.loadDirect(Dictionary.Keys.Address(), dictValueParserListing(), source.readCellOpt());
+    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings };
 }
 
 export function loadGetterTupleTonJamMarketplace$Data(source: TupleReader) {
     const _owner = source.readAddress();
     const _fee_destination = source.readAddress();
     const _fee_percentage = source.readBigNumber();
-    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage };
+    const _listings = Dictionary.loadDirect(Dictionary.Keys.Address(), dictValueParserListing(), source.readCellOpt());
+    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings };
 }
 
 export function storeTupleTonJamMarketplace$Data(source: TonJamMarketplace$Data) {
@@ -964,6 +1156,7 @@ export function storeTupleTonJamMarketplace$Data(source: TonJamMarketplace$Data)
     builder.writeAddress(source.owner);
     builder.writeAddress(source.fee_destination);
     builder.writeNumber(source.fee_percentage);
+    builder.writeCell(source.listings.size > 0 ? beginCell().storeDictDirect(source.listings, Dictionary.Keys.Address(), dictValueParserListing()).endCell() : null);
     return builder.build();
 }
 
@@ -995,7 +1188,7 @@ function initTonJamMarketplace_init_args(src: TonJamMarketplace_init_args) {
 }
 
 async function TonJamMarketplace_init(owner: Address, fee_destination: Address, fee_percentage: bigint) {
-    const __code = Cell.fromHex('b5ee9c7241020701000131000114ff00f4a413f4bcf2c80b01020162020503eed001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019afa40fa40d30f55206c139efa40fa40810101d700552003d158e204925f04e002d70d1ff2e0822182101e20d98eba8e125b02c87f01ca0055205023cececb0fc9ed54e021821006b33514bae302218210530c881dbae3020103030400245b02c87f01ca0055205023cececb0fc9ed5400a88210946a98b6ba8e45d33f30c8018210aff90f5758cb1fcb3fc913f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055205023cececb0fc9ed54e05f04f2c082014fa036e1da89a1a4000335f481f481a61eaa40d8273df481f481020203ae00aa4007a2b1c5b678d863060018c823cf1622cf165210cb0fc99feb0bc1');
+    const __code = Cell.fromHex('b5ee9c72410212010004a1000114ff00f4a413f4bcf2c80b01020162020d04dcd001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019cfa40fa40d30ff40455306c149ffa40fa40810101d700552003d1586de205925f05e003d70d1ff2e082218210e1cbed05bae30221821006b33514bae302218210530c881dbae302018210946a98b6ba0306090c02fe31d33ffa40f84221d749c21f8e6d317080406d228b0826105804075520c8555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec943305a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0003e30d43300405004433fa00300181010b02c85902ce01fa02c9103612206e953059f45930944133f413e20024c87f01ca0055305034cececb0ff400c9ed5401fe31d33ffa4030f8416f2430322781010b2459f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e28200d085216eb3f2f46f228200ca2a5141be14f2f45327a8812710a9045133a1716d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f4000701fcc901fb005242716d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb007080406d228b0825105804065520c8555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec92244445a6d6d40037fc8cf85800800d0ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0081010b6dc8216e925b6d9b016f22585902ce01fa02c9e2103612206e953059f45930944133f413e24330c87f01ca0055305034cececb0ff400c9ed5401b831d33ffa4030f8416f2410235f032681010b2359f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e28200d085216eb3f2f46f22308200c2415321c70592327f945126c705e212f2f47080406d228b0825105804065520c80a01ee555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec92244445a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0081010b6dc8216e925b6d9b016f22585902ce01fa02c9e21036120b0044206e953059f45930944133f413e24330c87f01ca0055305034cececb0ff400c9ed5400a28e49d33f30c8018210aff90f5758cb1fcb3fc9443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055305034cececb0ff400c9ed54e05f05f2c0820201200e100155bcdb876a268690000ce7d207d206987fa022a98360a4ffd207d20408080eb802a9001e8ac36f16d9e3620c0f0018c824cf1623cf165220cb0fc9017bbeb9176a268690000ce7d207d206987fa022a98360a4ffd207d20408080eb802a9001e8ac36f12a81ed9e36209037491836ca37913781711037491836ef411003e81010b220259f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e2d39873a5');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initTonJamMarketplace_init_args({ $$type: 'TonJamMarketplace_init_args', owner, fee_destination, fee_percentage })(builder);
@@ -1040,6 +1233,9 @@ export const TonJamMarketplace_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
+    49729: { message: "Unauthorized" },
+    51754: { message: "Insufficient funds" },
+    53381: { message: "NFT not listed" },
 } as const
 
 export const TonJamMarketplace_errors_backward = {
@@ -1079,6 +1275,9 @@ export const TonJamMarketplace_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
+    "Unauthorized": 49729,
+    "Insufficient funds": 51754,
+    "NFT not listed": 53381,
 } as const
 
 const TonJamMarketplace_types: ABIType[] = [
@@ -1095,10 +1294,13 @@ const TonJamMarketplace_types: ABIType[] = [
     {"name":"Deploy","header":2490013878,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"DeployOk","header":2952335191,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"Listing","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"price","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"ListNFT","header":505469326,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"nft_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"price","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"BuyNFT","header":112407828,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"nft_address","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"CancelSale","header":1393330205,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"nft_address","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"TonJamMarketplace$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"fee_destination","type":{"kind":"simple","type":"address","optional":false}},{"name":"fee_percentage","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
+    {"name":"OwnershipAssigned","header":3788238085,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"prev_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"Transfer","header":1312029976,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"new_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"custom_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"forward_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"TonJamMarketplace$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"fee_destination","type":{"kind":"simple","type":"address","optional":false}},{"name":"fee_percentage","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"listings","type":{"kind":"dict","key":"address","value":"Listing","valueFormat":"ref"}}]},
 ]
 
 const TonJamMarketplace_opcodes = {
@@ -1108,18 +1310,22 @@ const TonJamMarketplace_opcodes = {
     "ListNFT": 505469326,
     "BuyNFT": 112407828,
     "CancelSale": 1393330205,
+    "OwnershipAssigned": 3788238085,
+    "Transfer": 1312029976,
 }
 
 const TonJamMarketplace_getters: ABIGetter[] = [
+    {"name":"get_listing","methodId":120610,"arguments":[{"name":"nft_address","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"Listing","optional":true}},
     {"name":"get_marketplace_data","methodId":72560,"arguments":[],"returnType":{"kind":"simple","type":"cell","optional":false}},
 ]
 
 export const TonJamMarketplace_getterMapping: { [key: string]: string } = {
+    'get_listing': 'getGetListing',
     'get_marketplace_data': 'getGetMarketplaceData',
 }
 
 const TonJamMarketplace_receivers: ABIReceiver[] = [
-    {"receiver":"internal","message":{"kind":"typed","type":"ListNFT"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"OwnershipAssigned"}},
     {"receiver":"internal","message":{"kind":"typed","type":"BuyNFT"}},
     {"receiver":"internal","message":{"kind":"typed","type":"CancelSale"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
@@ -1160,11 +1366,11 @@ export class TonJamMarketplace implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: ListNFT | BuyNFT | CancelSale | Deploy) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: OwnershipAssigned | BuyNFT | CancelSale | Deploy) {
         
         let body: Cell | null = null;
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ListNFT') {
-            body = beginCell().store(storeListNFT(message)).endCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'OwnershipAssigned') {
+            body = beginCell().store(storeOwnershipAssigned(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'BuyNFT') {
             body = beginCell().store(storeBuyNFT(message)).endCell();
@@ -1179,6 +1385,15 @@ export class TonJamMarketplace implements Contract {
         
         await provider.internal(via, { ...args, body: body });
         
+    }
+    
+    async getGetListing(provider: ContractProvider, nft_address: Address) {
+        const builder = new TupleBuilder();
+        builder.writeAddress(nft_address);
+        const source = (await provider.get('get_listing', builder.build())).stack;
+        const result_p = source.readTupleOpt();
+        const result = result_p ? loadTupleListing(result_p) : null;
+        return result;
     }
     
     async getGetMarketplaceData(provider: ContractProvider) {

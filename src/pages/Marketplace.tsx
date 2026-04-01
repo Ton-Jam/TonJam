@@ -195,7 +195,7 @@ const Marketplace: React.FC = () => {
               { label: 'ACTIVE BIDS', val: '1,242', up: true },
               { label: 'NODES', val: '8,421', up: true },
             ].map((stat, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={`stat-${i}`} className="flex items-center gap-2">
                 <span className="text-[7px] font-bold uppercase text-blue-400/50 tracking-[0.2em]">{stat.label}</span>
                 <span className="text-[9px] font-bold text-foreground tracking-tighter font-mono bg-muted/50 px-2 py-1 rounded-[4px] border border-border/50 dark:border-transparent">{stat.val}</span>
                 <TrendingUp className={`h-3 w-3 ${stat.up ? 'text-emerald-400' : 'text-rose-400 rotate-180'}`} />
@@ -214,7 +214,7 @@ const Marketplace: React.FC = () => {
               </div>
               <div className="flex gap-4">
                 {topBiddedNfts.map((_, i) => (
-                  <div key={i} className="w-1 h-1 rounded-full bg-foreground/20"></div>
+                  <div key={`indicator-${i}`} className="w-1 h-1 rounded-full bg-foreground/20"></div>
                 ))}
               </div>
             </div>

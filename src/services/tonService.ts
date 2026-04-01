@@ -65,22 +65,28 @@ export const listNFTOnMarketplace = async (
   try {
     const priceInNanotons = toNano(price);
     
-    // Construct the ListNFT message body
-    // Message structure from Tact:
-    // message ListNFT { query_id: Int as uint64; nft_address: Address; price: Int as coins; }
+    // In custodial pattern, we transfer the NFT to the marketplace
+    // and provide the price in the forward_payload.
+    // message Transfer { query_id: uint64; new_owner: Address; response_destination: Address; custom_payload: Cell; forward_amount: coins; forward_payload: Slice; }
+    const forwardPayload = beginCell().storeCoins(priceInNanotons).endCell();
+    
     const body = beginCell()
-      .storeUint(0x12345678, 32) // Opcode for ListNFT (example)
+      .storeUint(0x5fcc3d14, 32) // Opcode for Transfer
       .storeUint(0, 64) // query_id
-      .storeAddress(Address.parse(nftAddress))
-      .storeCoins(priceInNanotons)
+      .storeAddress(Address.parse(TONJAM_MARKETPLACE_ADDRESS))
+      .storeAddress(Address.parse(TONJAM_MARKETPLACE_ADDRESS)) // response_destination
+      .storeBit(false) // custom_payload (null)
+      .storeCoins(toNano('0.05')) // forward_amount (to trigger OwnershipAssigned)
+      .storeBit(true) // forward_payload (ref)
+      .storeRef(forwardPayload)
       .endCell();
 
     const transaction = {
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: TONJAM_MARKETPLACE_ADDRESS,
-          amount: toNano("0.05").toString(), // Gas for listing
+          address: nftAddress, // Send to NFT contract
+          amount: toNano('0.1').toString(),
           payload: body.toBoc().toString('base64'),
         },
       ],
@@ -109,7 +115,7 @@ export const buyNFTFromMarketplace = async (
     // Construct the BuyNFT message body
     // message BuyNFT { query_id: Int as uint64; nft_address: Address; }
     const body = beginCell()
-      .storeUint(0x87654321, 32) // Opcode for BuyNFT (example)
+      .storeUint(112407828, 32) // Opcode for BuyNFT (0x06b32314)
       .storeUint(0, 64) // query_id
       .storeAddress(Address.parse(nftAddress))
       .endCell();
@@ -144,18 +150,14 @@ export const mintTonJamNFT = async (
 ): Promise<boolean> => {
   try {
     // Construct the Mint message body
-    // message Mint { query_id: Int as uint64; receiver: Address; content: Cell; royalty_params: RoyaltyParams; }
+    // message Mint { query_id: Int as uint64; receiver: Address; content: Cell; }
     const content = beginCell().storeStringTail(metadataUrl).endCell();
     
     const body = beginCell()
-      .storeUint(0x11111111, 32) // Opcode for Mint (example)
+      .storeUint(1048761405, 32) // Opcode for Mint (0x3e7f45bd)
       .storeUint(0, 64) // query_id
       .storeAddress(Address.parse(receiverAddress))
       .storeRef(content)
-      // RoyaltyParams: numerator (uint16), denominator (uint16), destination (Address)
-      .storeUint(250, 16) // 2.5%
-      .storeUint(10000, 16)
-      .storeAddress(Address.parse(receiverAddress)) // Royalty goes to creator
       .endCell();
 
     const transaction = {
@@ -296,6 +298,31 @@ export const acceptBid = async (
     throw error;
   }
 };
+export const depositTON = async (
+  tonConnectUI: TonConnectUI,
+  amount: string
+): Promise<boolean> => {
+  try {
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60, // 60 seconds
+      messages: [
+        {
+          address: "EQB_PLATFORM_WALLET_ADDRESS", // Replace with real platform wallet
+          amount: (Number(amount) * 1e9).toString(), // Convert TON to nanoTON
+          payload: "te6cckEBAQEAAgAAAEQ=", // Optional payload (e.g., 'Deposit')
+        },
+      ],
+    };
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log("Deposit Transaction sent:", result);
+    return true;
+  } catch (error) {
+    console.error("Error depositing TON:", error);
+    throw error;
+  }
+};
+
 export const purchaseJAM = async (
   tonConnectUI: TonConnectUI,
   amount: string,

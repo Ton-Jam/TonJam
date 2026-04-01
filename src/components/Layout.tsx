@@ -30,8 +30,7 @@ import {
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
-import { TonConnectButton } from '@tonconnect/ui-react';
-import { useTonConnectUI } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence } from 'motion/react';
 import MiniAudioPlayer from './MiniAudioPlayer';
 import FullPlayer from './FullPlayer';
@@ -88,11 +87,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     trackToAddToPlaylist,
     setTrackToAddToPlaylist,
     optionsTrack,
+    optionsCallbacks,
     setOptionsTrack,
     createPost
   } = useAudio();
   const { user, signInWithGoogle, signOut } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
+  const userAddress = useTonAddress();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
@@ -171,7 +172,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    if (isFullPlayerOpen) {
+      setIsHeaderHidden(false);
+      document.documentElement.style.setProperty('--header-height', '64px');
+    }
+  }, [isFullPlayerOpen]);
+
+  useEffect(() => {
     const handleScroll = () => {
+      if (isFullPlayerOpen) return;
+
       const currentScrollY = window.scrollY;
       if (currentScrollY > lastScrollY && currentScrollY > 64) {
         setIsHeaderHidden(true);
@@ -185,7 +195,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, isFullPlayerOpen]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300 relative">
@@ -425,28 +435,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-2 ml-2">
+          <div className="flex items-center gap-1.5 ml-2">
             {/* TonJam Coin */}
             {(isHome || isTasks) && (
-              <Link to="/tasks" className="flex items-center gap-2 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full p-1" aria-label="Tasks">
+              <Link to="/tasks" className="flex items-center gap-2 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full" aria-label="Tasks">
                 <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-8 h-8 object-contain" />
               </Link>
             )}
 
-            {/* Wallet */}
-            {isHome && (
-              <button 
-                onClick={() => tonConnectUI.openModal()}
-                className="p-2 rounded-full hover:bg-muted/20 transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label="Connect Wallet"
-              >
-                <WalletIcon className="h-5 w-5 text-zinc-500 dark:text-primary" />
-              </button>
-            )}
-
             {/* Notification Icon & Marketplace Filters */}
             {(isMarketplace || isJamspace || isLibrary) && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {(isMarketplace || isLibrary) && (
                   <DropdownMenu onOpenChange={(open) => { if (!open) setActiveFilterSubMenu(null); }}>
                     <DropdownMenuTrigger asChild>
@@ -690,13 +689,31 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <BellIcon className="h-5 w-5" />
                   </button>
                 )}
-              </div>
-            
-            {/* User Avatar / Sign In */}
-            <div className="hidden sm:block">
-              <TonConnectButton />
-            </div>
-            {isDiscover && (
+
+                {/* Wallet & User Avatar / Sign In */}
+                {userAddress ? (
+                  <div className="flex items-center gap-1.5">
+                  <div className="hidden sm:block px-3 py-1.5 text-xs font-mono text-blue-600 dark:text-blue-400">
+                    {userAddress.slice(0, 4)}...{userAddress.slice(-4)}
+                  </div>
+                  <button 
+                    onClick={() => tonConnectUI.disconnect()}
+                    className="p-2 rounded-full hover:bg-destructive/10 text-destructive transition-all"
+                    title="Disconnect Wallet"
+                  >
+                    <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => tonConnectUI.openModal()}
+                  className="px-4 py-2 text-blue-600 dark:text-primary rounded-full text-sm font-bold hover:bg-muted transition-all flex items-center gap-2"
+                >
+                  <WalletIcon className="h-5 w-5" />
+                  <span className="hidden sm:inline">Connect Wallet</span>
+                </button>
+              )}
+              {isDiscover && (
               <button 
                 onClick={() => setIsDiscoverFiltersOpen(!isDiscoverFiltersOpen)}
                 className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isDiscoverFiltersOpen ? 'bg-blue-500 text-white shadow-lg' : 'hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground'}`}
@@ -706,9 +723,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
             )}
             {!isMarketplace && !isDiscover && !isJamspace && !isLibrary && (user ? (
-              <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden border border-blue-500/20 dark:border-0 hover:opacity-80 transition-all flex items-center justify-center bg-blue-500/10 dark:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
-                {user.user_metadata?.avatar_url ? (
-                  <img src={user.user_metadata.avatar_url} alt={`${user.user_metadata.full_name || 'User'} avatar`} className="w-full h-full object-cover" />
+              <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden hover:opacity-80 transition-all flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt={`${user.displayName || 'User'} avatar`} className="w-full h-full object-cover" />
                 ) : (
                   <UserIcon className="w-4 h-4 text-blue-600 dark:text-muted-foreground" />
                 )}
@@ -716,12 +733,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             ) : (
               <button 
                 onClick={() => setIsAuthModalOpen(true)}
-                className="p-3 rounded-full bg-blue-600 dark:bg-primary hover:bg-blue-500 dark:hover:bg-primary/90 text-foreground dark:text-primary-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="p-3 rounded-full hover:bg-muted text-blue-600 dark:text-primary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Sign In"
               >
                 <UserIcon className="h-5 w-5" />
               </button>
             ))}
+          </div>
         </header>
       )}
 
@@ -789,6 +807,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <TrackOptionsModal 
           track={optionsTrack} 
           onClose={() => setOptionsTrack(null)} 
+          onRemove={optionsCallbacks?.onRemove}
+          onMoveUp={optionsCallbacks?.onMoveUp}
+          onMoveDown={optionsCallbacks?.onMoveDown}
         />
       )}
 
@@ -851,15 +872,15 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       <ModeToggle />
     </div>
 
-    <nav className="flex-1 space-y-2" aria-label="Main Navigation">
+    <nav className="flex-1 space-y-3" aria-label="Main Navigation">
       <NavItem to="/" icon={HomeIcon} label="Home" onClick={onNavigate} />
       <NavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={onNavigate} />
       <NavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" onClick={onNavigate} />
       <NavItem to="/library" icon={RectangleStackIcon} label="Library" onClick={onNavigate} />
       <NavItem to="/marketplace" icon={ShoppingBagIcon} label="NFT Market" onClick={onNavigate} />
       
-      <div className="pt-2 pb-2">
-        <p className="px-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Account</p>
+      <div className="pt-4 pb-4">
+        <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Account</p>
         {userProfile.isVerifiedArtist && (
           <NavItem to={`/artist/${userProfile.id}`} icon={UserIcon} label="Artist Profile" onClick={onNavigate} />
         )}
@@ -878,7 +899,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
               signOut();
               onNavigate?.();
             }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-[12px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group mt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Sign Out"
           >
             <ArrowRightOnRectangleIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -888,11 +909,11 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       </div>
 
       {userProfile.isVerifiedArtist ? (
-        <div className="pt-2 space-y-2">
+        <div className="pt-4 space-y-3">
           <Link 
             to="/upload"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-[12px] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Upload new track"
           >
             <ArrowUpTrayIcon className="h-5 w-5" />
@@ -901,7 +922,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <Link 
             to="/mint"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-[12px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Mint new NFT"
           >
             <PlusCircleIcon className="h-5 w-5" />
@@ -909,11 +930,11 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           </Link>
         </div>
       ) : (
-        <div className="pt-2 space-y-2">
+        <div className="pt-4 space-y-3">
           <Link 
             to="/artist-onboarding"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-foreground font-bold transition-all shadow-lg shadow-purple-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-[12px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-foreground font-bold transition-all shadow-lg shadow-purple-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Become an Artist"
           >
             <StarIcon className="h-5 w-5" />
@@ -956,7 +977,7 @@ const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: React.C
     to={to} 
     onClick={onClick}
     className={({ isActive }) => `
-      flex items-center gap-3 px-4 py-3 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+      flex items-center gap-4 px-6 py-4 rounded-[12px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
       ${isActive ? 'bg-zinc-500/10 text-zinc-900 dark:text-blue-500 font-bold' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400 hover:bg-zinc-500/5'}
     `}
   >

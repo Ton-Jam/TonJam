@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useAudio } from "@/context/AudioContext";
 import { useNavigate } from "react-router-dom";
 import { Play, Pause, MoreVertical, X, Music2, SkipBack, SkipForward, Heart } from "lucide-react";
-import TrackOptionsModal from "./TrackOptionsModal";
 import { MOCK_ARTISTS } from "@/constants";
 import { getPlaceholderImage } from "@/lib/utils";
 
@@ -24,8 +23,8 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     closePlayer,
     setFullPlayerOpen,
     isHighFidelity,
+    setOptionsTrack,
   } = useAudio();
-  const [showOptions, setShowOptions] = useState(false);
 
   if (!currentTrack) return null;
 
@@ -39,14 +38,14 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     if (onOptionsClick) {
       onOptionsClick();
     } else {
-      setShowOptions(true);
+      setOptionsTrack(currentTrack);
     }
   };
 
   return (
     <>
       <div
-        className="fixed bottom-16 lg:bottom-0 left-0 right-0 z-[45] bg-background/95 backdrop-blur-xl border-t border-border/50 px-3 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-muted/50 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="fixed bottom-16 lg:bottom-0 left-0 right-0 z-[45] bg-background/95 backdrop-blur-xl px-3 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-muted/50 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         onClick={() => setFullPlayerOpen(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -157,12 +156,6 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           ></div>
         </div>
       </div>
-      {showOptions && (
-        <TrackOptionsModal
-          track={currentTrack}
-          onClose={() => setShowOptions(false)}
-        />
-      )}
     </>
   );
 };

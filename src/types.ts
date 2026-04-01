@@ -12,6 +12,8 @@ export interface Track {
   isNFT: boolean;
   artistVerified?: boolean;
   price?: string; 
+  listingType?: 'fixed' | 'auction';
+  auctionDuration?: string;
   streamingPrice?: string;
   editions?: string;
   editionType?: string;
@@ -34,6 +36,8 @@ export interface Track {
   lyrics?: string;
   recommendationReason?: string;
   recommendationScore?: number;
+  isCollaboration?: boolean;
+  createdAt: string;
 }
 
 export interface NFTTrait {
@@ -92,11 +96,14 @@ export interface NFTItem {
   exclusiveContent?: ExclusiveContent[];
   ipfsUrl?: string; // Decentralized metadata link
   cid?: string; // Content Identifier
+  createdAt?: string;
   // Auction specific fields
   listingType?: 'fixed' | 'auction';
   auctionStartTime?: string; // ISO string or timestamp
   auctionEndTime?: string; // ISO string or timestamp
+  auctionEndDate?: string; // Alias for auctionEndTime
   startingBid?: string;
+  royalty?: number;
 }
 
 export interface SongRequest {
@@ -138,6 +145,7 @@ export interface Collaboration {
 export interface Artist {
   id: string;
   name: string;
+  handle?: string;
   walletAddress?: string;
   avatarUrl: string;
   followers: number;
@@ -157,6 +165,8 @@ export interface Artist {
   royaltyConfig?: {
     streamingSplits: RoyaltySplit[];
     nftSaleSplits: RoyaltySplit[];
+    streamingPercentage?: number;
+    nftSaleShare?: number;
   };
   earnings?: {
     streaming: number;
@@ -165,6 +175,7 @@ export interface Artist {
   };
   events?: Event[];
   collaborations?: Collaboration[];
+  profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
 }
 
 export interface Comment {
@@ -177,6 +188,7 @@ export interface Comment {
   likes: number;
   reactions?: Record<string, number>;
   userReactions?: string[]; // Array of emojis the current user has reacted with
+  replies?: Comment[]; // Nested replies
 }
 
 export interface Post {
@@ -200,6 +212,20 @@ export interface Post {
   comments: number;
   commentList?: Comment[];
   timestamp: string;
+  authorId?: string;
+  authorName?: string;
+  authorAvatar?: string;
+  createdAt?: string;
+  artistId?: string;
+  title?: string;
+  subtitle?: string;
+  type?: string;
+  paymentAmount?: string;
+  paymentCurrency?: string;
+  status?: string;
+  artistName?: string;
+  link?: string;
+  targetId?: string;
 }
 
 export interface Playlist {
@@ -236,6 +262,7 @@ export interface UserProfile {
     telegram?: string;
   };
   isPremium?: boolean;
+  tonBalance?: number;
   jamBalance?: number;
   stakedJam?: number;
   pendingJamRewards?: number;
@@ -254,11 +281,12 @@ export interface UserProfile {
   anthemId?: string;
   createdAt?: string;
   role?: 'artist' | 'collector' | 'admin';
+  profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
 }
 
 export interface Transaction {
   id: string;
-  type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards' | 'sponsorship';
+  type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards' | 'sponsorship' | 'deposit';
   amount: number; // Total amount in TON or JAM
   platformFee: number; // Total platform fee
   artistShare: number; // Amount sent to artist

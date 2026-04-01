@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Gem, Heart, Zap, Gavel, UserPlus, ChevronRight, Satellite } from 'lucide-react';
 import { APP_LOGO, TJ_COIN_ICON, TON_LOGO } from '@/constants';
+import NotificationDetailModal from '@/components/NotificationDetailModal';
 
 type NotificationType = 'Social' | 'Syncs' | 'Rewards' | 'System';
 
@@ -29,6 +30,7 @@ const Notifications: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'All' | NotificationType>('All');
   const [notifications, setNotifications] = useState<NotifyItem[]>(MOCK_NOTIFICATIONS);
+  const [selectedNotification, setSelectedNotification] = useState<NotifyItem | null>(null);
 
   const filtered = activeTab === 'All' ? notifications : notifications.filter(n => n.type === activeTab);
 
@@ -38,6 +40,13 @@ const Notifications: React.FC = () => {
 
   const clearAll = () => {
     setNotifications([]);
+  };
+
+  const handleNotificationClick = (item: NotifyItem) => {
+    if (!item.isRead) {
+      setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, isRead: true } : n));
+    }
+    setSelectedNotification(item);
   };
 
   const renderIcon = (item: NotifyItem) => {
@@ -95,7 +104,14 @@ const Notifications: React.FC = () => {
       <main className="px-4 md:px-4 max-w-4xl mx-auto space-y-4">
         {filtered.length > 0 ? (
           filtered.map(item => (
-            <div key={item.id} role="button" tabIndex={0} className={`group flex items-center gap-4 p-4 rounded-[10px] transition-all cursor-pointer ${item.isRead ? 'bg-foreground/[0.02] hover:bg-muted/50' : 'bg-primary/[0.05] border border-primary/20 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]'}`}>
+            <div 
+              key={item.id} 
+              role="button" 
+              tabIndex={0} 
+              onClick={() => handleNotificationClick(item)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleNotificationClick(item); } }}
+              className={`group flex items-center gap-4 p-4 rounded-[10px] transition-all cursor-pointer ${item.isRead ? 'bg-foreground/[0.02] hover:bg-muted/50' : 'bg-primary/[0.05] border border-primary/20 shadow-[0_0_20px_rgba(var(--primary-rgb),0.05)]'}`}
+            >
               {/* Icon Container */}
               <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center relative">
                 {renderIcon(item)}
@@ -127,6 +143,11 @@ const Notifications: React.FC = () => {
           </div>
         )}
       </main>
+
+      <NotificationDetailModal 
+        notification={selectedNotification} 
+        onClose={() => setSelectedNotification(null)} 
+      />
     </div>
   );
 };

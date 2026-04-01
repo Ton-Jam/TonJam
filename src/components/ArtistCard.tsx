@@ -13,22 +13,22 @@ interface ArtistCardProps {
 
 const variantConfig = {
   default: {
-    container: 'flex flex-col items-center text-center h-full w-full p-2 rounded-[16px] bg-muted/50 backdrop-blur-md hover:bg-muted',
+    container: 'flex flex-col items-center text-center h-full w-full p-4 rounded-[20px] bg-muted/50 backdrop-blur-md hover:bg-muted transition-all',
     image: 'w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32',
-    button: 'mt-auto px-2 py-2 text-[9px]',
+    button: 'mt-auto px-4 py-2 text-[10px]',
     name: 'text-sm sm:text-base',
   },
   row: {
-    container: 'flex items-center gap-2 p-2 rounded-[10px] hover:bg-muted/50 w-full',
-    image: 'w-12 h-12',
-    button: 'px-2 py-3 text-[8px]',
-    name: 'text-xs',
+    container: 'flex items-center gap-4 p-3 rounded-[12px] hover:bg-muted/50 w-full transition-all',
+    image: 'w-14 h-14',
+    button: 'px-3 py-2 text-[9px]',
+    name: 'text-sm',
   },
   compact: {
-    container: 'flex flex-col items-center text-center p-2 rounded-[12px] bg-muted/50 backdrop-blur-md hover:bg-muted w-[130px]',
-    image: 'w-16 h-16',
-    button: 'w-full py-3 text-[8px]',
-    name: 'text-[10px]',
+    container: 'flex flex-col items-center text-center p-3 rounded-[16px] bg-muted/50 backdrop-blur-md hover:bg-muted w-[140px] transition-all',
+    image: 'w-18 h-18',
+    button: 'w-full py-2 text-[9px]',
+    name: 'text-[11px]',
   },
 };
 

@@ -72,7 +72,6 @@ root.render(
   <React.StrictMode>
     <TonConnectUIProvider 
       manifestUrl={manifestUrl}
-      enableAnalytics={false}
       actionsConfiguration={{
         twaReturnUrl: 'https://t.me/tonjam_bot'
       }}

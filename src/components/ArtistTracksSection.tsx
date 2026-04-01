@@ -87,7 +87,7 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-foreground truncate">{track.title}</h4>
+                  <h4 className="text-sm font-bold text-foreground dark:text-white truncate">{track.title}</h4>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {(track.playCount || 0).toLocaleString()}

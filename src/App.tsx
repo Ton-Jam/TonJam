@@ -31,40 +31,65 @@ import Wallet from '@/pages/Wallet';
 import Staking from '@/pages/Staking';
 import About from '@/pages/About';
 import { AudioProvider } from '@/context/AudioContext';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ArtistOnboarding from '@/pages/ArtistOnboarding';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { motion, AnimatePresence } from 'motion/react';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, limit, query } from 'firebase/firestore';
+import { seedDatabase } from '@/services/seedService';
 
 const AppContent: React.FC = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
-  const [isSupabaseReachable, setIsSupabaseReachable] = useState(true);
+  const [isBackendReachable, setIsBackendReachable] = useState(true);
+
+  const { user, userProfile } = useAuth();
 
   useEffect(() => {
-    // Test Supabase connection
-    const testConnection = async () => {
+    // Test Firebase connection
+    const initBackend = async () => {
       try {
-        const { error } = await supabase.from('tracks').select('id').limit(1);
-        if (error) throw error;
-        setIsSupabaseReachable(true);
+        // Simple connection test - just read from the test collection
+        const q = query(collection(db, 'test'), limit(1));
+        await getDocs(q);
+        setIsBackendReachable(true);
       } catch (error) {
-        console.error("Please check your Supabase configuration. The Supabase backend is currently unreachable.", error);
-        setIsSupabaseReachable(false);
+        console.error("Please check your Firebase configuration. The backend is currently unreachable.", error);
+        // If it's a permission error, it might still be reachable but rules are blocking
+        if (error instanceof Error && (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions'))) {
+          setIsBackendReachable(true);
+        } else {
+          setIsBackendReachable(false);
+        }
+      } finally {
+        setIsAppLoading(false);
       }
     };
-    testConnection();
-    setIsAppLoading(false);
+    initBackend();
   }, []);
 
-  if (!isSupabaseReachable) {
+  useEffect(() => {
+    // Seed database if empty and user is admin
+    const checkAndSeed = async () => {
+      if (user && (user.email === 'krusherkrupy@gmail.com' || userProfile?.role === 'admin')) {
+        try {
+          await seedDatabase();
+        } catch (error) {
+          console.warn("Seeding failed, likely due to permissions or existing data:", error);
+        }
+      }
+    };
+    checkAndSeed();
+  }, [user, userProfile]);
+
+  if (!isBackendReachable) {
     return (
       <div className="flex items-center justify-center h-screen bg-background text-foreground">
         <div className="text-center p-4">
           <h1 className="text-2xl font-bold mb-2">Connection Error</h1>
-          <p>The Supabase backend is currently unreachable. Please check your configuration.</p>
+          <p>The backend is currently unreachable. Please check your configuration.</p>
         </div>
       </div>
     );

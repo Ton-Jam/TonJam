@@ -3,6 +3,7 @@ import { NFTItem } from '@/types';
 import NFTCard from './NFTCard';
 import SellNFTModal from './SellNFTModal';
 import SendNFTModal from './SendNFTModal';
+import ManageNFTModal from './ManageNFTModal';
 
 interface NFTVaultSectionProps {
   nfts: NFTItem[];
@@ -11,9 +12,14 @@ interface NFTVaultSectionProps {
 const NFTVaultSection: React.FC<NFTVaultSectionProps> = ({ nfts }) => {
   const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
   const [selectedNftForSending, setSelectedNftForSending] = useState<NFTItem | null>(null);
+  const [selectedNftForManaging, setSelectedNftForManaging] = useState<NFTItem | null>(null);
 
   const handleNFTAction = (nft: NFTItem) => {
-    setSelectedNftForListing(nft);
+    if (nft.listingType) {
+      setSelectedNftForManaging(nft);
+    } else {
+      setSelectedNftForListing(nft);
+    }
   };
 
   return (
@@ -33,7 +39,10 @@ const NFTVaultSection: React.FC<NFTVaultSectionProps> = ({ nfts }) => {
         <SellNFTModal nft={selectedNftForListing} onClose={() => setSelectedNftForListing(null)} />
       )}
       {selectedNftForSending && (
-        <SendNFTModal nft={selectedNftForSending} onClose={() => setSelectedNftForSending(null)} />
+        <SendNFTModal nft={selectedNftForSending} isOpen={true} onClose={() => setSelectedNftForSending(null)} />
+      )}
+      {selectedNftForManaging && (
+        <ManageNFTModal nft={selectedNftForManaging} isOpen={true} onClose={() => setSelectedNftForManaging(null)} />
       )}
     </section>
   );

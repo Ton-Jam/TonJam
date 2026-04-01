@@ -141,7 +141,7 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
 
               <div className="space-y-2">
                 {streamingSplits.map((split, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_100px_40px] gap-2 items-end bg-foreground/[0.02] border border-border/50 p-2 rounded-[8px]">
+                  <div key={`${split.address}-${split.label || 'no-label'}-${index}`} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_100px_40px] gap-2 items-end bg-foreground/[0.02] border border-border/50 p-2 rounded-[8px]">
                     <div className="space-y-2">
                       <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Label / Role</label>
                       <div className="relative">
@@ -219,7 +219,7 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
 
               <div className="space-y-2">
                 {nftSaleSplits.map((split, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_100px_40px] gap-2 items-end bg-foreground/[0.02] border border-border/50 p-2 rounded-[8px]">
+                  <div key={`${split.address}-${split.label || 'no-label'}-${index}`} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_100px_40px] gap-2 items-end bg-foreground/[0.02] border border-border/50 p-2 rounded-[8px]">
                     <div className="space-y-2">
                       <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Label / Role</label>
                       <div className="relative">

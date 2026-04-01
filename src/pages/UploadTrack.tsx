@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Loader2, CheckCircle2, FileAudio, ArrowLeft, Plus, Music, Info, Sparkles, Trash2 } from 'lucide-react';
+import { Upload, Loader2, CheckCircle2, FileAudio, ArrowLeft, Plus, Music, Info, Sparkles, Trash2, Tag, Gavel } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAudio } from '@/context/AudioContext';
@@ -36,6 +36,8 @@ const UploadTrack: React.FC = () => {
     rarity: 'Common',
     totalRoyalty: '10',
     isNFT: false,
+    listingType: 'fixed' as 'fixed' | 'auction',
+    auctionDuration: '7',
     royaltySplits: [{ address: '', percentage: 100 }]
   });
 
@@ -198,9 +200,74 @@ const UploadTrack: React.FC = () => {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!audioFile || !coverFile || !formData.title) {
-      toast.error("Please fill in all required fields and upload files.");
+    
+    // 1. Basic Presence Validation
+    if (!audioFile) {
+      toast.error("Audio artifact required for transmission.");
       return;
+    }
+    if (!coverFile) {
+      toast.error("Cover art required for visual synchronization.");
+      return;
+    }
+    if (!formData.title.trim()) {
+      toast.error("Protocol name (title) is mandatory.");
+      return;
+    }
+
+    // 2. File Constraint Validation (Double Check)
+    const audioValidation = validateFile(audioFile, 'audio', 50);
+    if (!audioValidation.isValid) {
+      toast.error(`Audio Error: ${audioValidation.error}`);
+      return;
+    }
+
+    const coverValidation = validateFile(coverFile, 'image', 10);
+    if (!coverValidation.isValid) {
+      toast.error(`Cover Error: ${coverValidation.error}`);
+      return;
+    }
+
+    // 3. Metadata Validation
+    if (formData.bpm && (isNaN(parseInt(formData.bpm)) || parseInt(formData.bpm) < 0)) {
+      toast.error("BPM must be a positive integer.");
+      return;
+    }
+
+    if (isNaN(parseFloat(formData.streamingPrice)) || parseFloat(formData.streamingPrice) < 0) {
+      toast.error("Streaming price must be a non-negative value.");
+      return;
+    }
+
+    // 4. NFT-Specific Validation
+    if (formData.isNFT) {
+      if (isNaN(parseFloat(formData.price)) || parseFloat(formData.price) < 0) {
+        toast.error("NFT listing price must be a valid number.");
+        return;
+      }
+      if (isNaN(parseInt(formData.editions)) || parseInt(formData.editions) <= 0) {
+        toast.error("Total editions must be at least 1.");
+        return;
+      }
+      
+      const totalRoyalty = parseFloat(formData.totalRoyalty);
+      if (isNaN(totalRoyalty) || totalRoyalty < 0 || totalRoyalty > 100) {
+        toast.error("Total royalty must be between 0 and 100%.");
+        return;
+      }
+
+      // Royalty Splits Validation
+      const totalSplitPercentage = formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0);
+      if (totalSplitPercentage !== 100) {
+        toast.error(`Royalty splits must total 100% (currently ${totalSplitPercentage}%).`);
+        return;
+      }
+
+      const invalidSplit = formData.royaltySplits.find(s => !s.address.trim() || s.percentage < 0);
+      if (invalidSplit) {
+        toast.error("All royalty splits must have a valid address and non-negative percentage.");
+        return;
+      }
     }
 
     setIsUploading(true);
@@ -210,10 +277,18 @@ const UploadTrack: React.FC = () => {
       // 1. Upload files to IPFS via Pinata
       toast.info("Uploading artifacts to IPFS...");
       
+      let audioProgress = 0;
+      let coverProgress = 0;
+
+      const updateProgress = () => {
+        const totalProgress = Math.round((audioProgress + coverProgress) / 2);
+        setUploadProgress(totalProgress);
+      };
+
       // We'll upload audio and cover in parallel
       const [audioRes, coverRes] = await Promise.all([
-        uploadToIPFS(audioFile),
-        uploadToIPFS(coverFile)
+        uploadToIPFS(audioFile, (p) => { audioProgress = p; updateProgress(); }),
+        uploadToIPFS(coverFile, (p) => { coverProgress = p; updateProgress(); })
       ]);
 
       const audioUrl = audioRes.ipfsUrl;
@@ -242,6 +317,8 @@ const UploadTrack: React.FC = () => {
         key: formData.key,
         isNFT: formData.isNFT,
         price: formData.isNFT ? formData.price : undefined,
+        listingType: formData.isNFT ? formData.listingType as 'fixed' | 'auction' : undefined,
+        auctionDuration: formData.isNFT ? formData.auctionDuration : undefined,
         editions: formData.isNFT ? formData.editions : undefined,
         editionType: formData.isNFT ? formData.editionType : undefined,
         rarity: formData.isNFT ? formData.rarity : undefined,
@@ -251,6 +328,7 @@ const UploadTrack: React.FC = () => {
         playCount: 0,
         likes: 0,
         releaseDate: new Date().toISOString().split('T')[0],
+        createdAt: new Date().toISOString(),
       };
       
       if (formData.isNFT) {
@@ -493,9 +571,33 @@ const UploadTrack: React.FC = () => {
 
                 {formData.isNFT && (
                   <div className="space-y-6 pt-4 border-t border-amber-500/20 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Listing Protocol</label>
+                      <div className="flex gap-4">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({...formData, listingType: 'fixed'})}
+                          className={`flex-1 py-4 rounded-[10px] border transition-all flex items-center justify-center gap-4 ${formData.listingType === 'fixed' ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted'}`}
+                        >
+                          <Tag className="h-4 w-4" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Fixed Price</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({...formData, listingType: 'auction'})}
+                          className={`flex-1 py-4 rounded-[10px] border transition-all flex items-center justify-center gap-4 ${formData.listingType === 'auction' ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted'}`}
+                        >
+                          <Gavel className="h-4 w-4" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Auction</span>
+                        </button>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Listing Price (TON)</label>
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                          {formData.listingType === 'fixed' ? 'Listing Price (TON)' : 'Starting Bid (TON)'}
+                        </label>
                         <input 
                           type="number"
                           step="0.1"
@@ -505,6 +607,22 @@ const UploadTrack: React.FC = () => {
                           placeholder="1.0"
                         />
                       </div>
+                      {formData.listingType === 'auction' && (
+                        <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
+                          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Auction Duration (Days)</label>
+                          <select 
+                            value={formData.auctionDuration}
+                            onChange={(e) => setFormData({...formData, auctionDuration: e.target.value})}
+                            className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors appearance-none"
+                          >
+                            <option value="1">1 Day</option>
+                            <option value="3">3 Days</option>
+                            <option value="7">7 Days</option>
+                            <option value="14">14 Days</option>
+                            <option value="30">30 Days</option>
+                          </select>
+                        </div>
+                      )}
                       <div className="space-y-4">
                         <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Editions</label>
                         <input 

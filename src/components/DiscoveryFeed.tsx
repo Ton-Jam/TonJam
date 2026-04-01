@@ -42,7 +42,7 @@ const DiscoveryFeed: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           {recommendedTracks.slice(0, 6).map((track, idx) => (
             <div 
-              key={track.id} 
+              key={`rec-track-${track.id}-${idx}`} 
               className="animate-in fade-in slide-in-from-bottom-4 duration-500"
               style={{ animationDelay: `${idx * 100}ms` }}
             >
@@ -75,7 +75,7 @@ const DiscoveryFeed: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
           {recommendedNFTs.slice(0, 5).map((nft, idx) => (
             <div 
-              key={nft.id} 
+              key={`rec-nft-${nft.id}-${idx}`} 
               className="animate-in fade-in slide-in-from-bottom-4 duration-500"
               style={{ animationDelay: `${idx * 100 + 300}ms` }}
             >

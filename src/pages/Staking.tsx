@@ -3,6 +3,7 @@ import { Lock, Unlock, Zap, TrendingUp, Coins, Info, ArrowUpRight, History, Spar
 import { useAudio } from '@/context/AudioContext';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { JAM_PRICE_USD } from '@/constants';
+import ConfirmationModal from '@/components/ConfirmationModal';
 
 const Staking: React.FC = () => {
   const { userProfile, stakeJam, unstakeJam, claimJamRewards, transactions } = useAudio();
@@ -13,10 +14,11 @@ const Staking: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [filterType, setFilterType] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
+  const [isUnstakeModalOpen, setIsUnstakeModalOpen] = useState(false);
 
-  const staked = parseFloat(userProfile.stakedJam || '0');
-  const pending = parseFloat(userProfile.pendingJamRewards || '0');
-  const balance = parseFloat(userProfile.jamBalance || '0');
+  const staked = userProfile.stakedJam || 0;
+  const pending = userProfile.pendingJamRewards || 0;
+  const balance = userProfile.jamBalance || 0;
 
   const filteredTransactions = useMemo(() => {
     let filtered = safeTransactions.filter(tx => ['stake', 'unstake', 'claim_rewards'].includes(tx.type));
@@ -45,8 +47,13 @@ const Staking: React.FC = () => {
     }
   };
 
-  const handleUnstake = async () => {
+  const handleUnstake = () => {
     if (!unstakeAmount || isNaN(parseFloat(unstakeAmount))) return;
+    setIsUnstakeModalOpen(true);
+  };
+
+  const confirmUnstake = async () => {
+    setIsUnstakeModalOpen(false);
     setIsProcessing(true);
     try {
       await unstakeJam(unstakeAmount);
@@ -344,7 +351,7 @@ const Staking: React.FC = () => {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-4">
-                        <span className="text-[11px] font-bold text-foreground tracking-tighter">JAM</span>
+                        <span className="text-[11px] font-bold text-foreground tracking-tighter">{tx.amount > 0 ? tx.amount.toLocaleString() : (tx.trackTitle?.match(/[\d.]+/)?.[0] || '0')} JAM</span>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-right">
@@ -369,6 +376,15 @@ const Staking: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <ConfirmationModal
+        isOpen={isUnstakeModalOpen}
+        onClose={() => setIsUnstakeModalOpen(false)}
+        onConfirm={confirmUnstake}
+        title="Unstake JAM Tokens?"
+        description={`Are you sure you want to unstake ${unstakeAmount} JAM? This will return your tokens to your available balance and they will no longer earn rewards.`}
+        confirmText="Unstake Now"
+      />
     </div>
   );
 };

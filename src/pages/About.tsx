@@ -32,7 +32,7 @@ const About: React.FC = () => {
             { icon: Zap, title: 'Instant', desc: 'Fast transactions on the TON network.' },
             { icon: Music2, title: 'Immersive', desc: 'A new way to experience music.' },
           ].map((item, idx) => (
-            <div key={idx} className="p-4 rounded-2xl bg-muted/50 border border-border/50 flex items-start gap-4">
+            <div key={`feature-${idx}`} className="p-4 rounded-2xl bg-muted/50 border border-border/50 flex items-start gap-4">
               <item.icon className="h-8 w-8 text-blue-500 flex-shrink-0" />
               <div>
                 <h3 className="font-bold text-lg mb-4">{item.title}</h3>

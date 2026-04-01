@@ -3,8 +3,10 @@ import { UserPen, X, Twitter, Send, Music, Globe, Instagram, Image as ImageIcon,
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { uploadToIPFS } from '@/services/pinataService';
-import { supabase } from '@/lib/supabase';
+import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
+import { cleanUpdateData } from '@/lib/firebase';
 
 interface EditArtistProfileModalProps {
   artist: Artist;
@@ -92,28 +94,23 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         socials
       } : a));
 
-      // Persist to Supabase if it's the current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && user.id === artist.id) {
-        const { error } = await supabase
-          .from('users')
-          .update({
-            name,
-            bio,
-            bannerUrl: bannerUrl || artist.bannerUrl || '',
-            avatar: avatarUrl || artist.avatarUrl || '',
-            socials
-          })
-          .eq('id', user.id);
-        
-        if (error) throw error;
+      // Persist to Firebase if it's the current user
+      const user = auth.currentUser;
+      if (user && user.uid === artist.id) {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, cleanUpdateData({
+          name,
+          bio,
+          bannerUrl: bannerUrl || artist.bannerUrl || '',
+          avatar: avatarUrl || artist.avatarUrl || '',
+          socials
+        }));
       }
 
       addNotification("Neural profile updated successfully.", "success");
       onClose();
     } catch (error) {
-      console.error("Error updating profile:", error);
-      addNotification("Failed to update profile in database.", "error");
+      handleFirestoreError(error, OperationType.UPDATE, `users/${artist.id}`);
     }
   };
 

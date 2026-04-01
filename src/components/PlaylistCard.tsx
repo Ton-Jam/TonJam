@@ -1,10 +1,11 @@
-import React from 'react';
-import { Play, Music } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Music, Sparkles } from 'lucide-react';
 import { Playlist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
+import PlaylistCoverGenerator from './PlaylistCoverGenerator';
 
 interface PlaylistCardProps {
   playlist: Playlist;
@@ -15,6 +16,9 @@ interface PlaylistCardProps {
 const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'default', onClick }) => {
   const { allTracks } = useAudio();
   const navigate = useNavigate();
+  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+
+  const isOwner = playlist.creator === MOCK_USER.name;
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,7 +69,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       <div className={`${sizeClass} grid grid-cols-2 gap-3 group-hover:scale-105 transition-transform duration-700 bg-neutral-800`}>
         {playlistTracks.map((track, i) => (
           <img 
-            key={i}
+            key={`${track?.id || 'empty'}-${i}`}
             src={track?.coverUrl || getPlaceholderImage(`track-${track?.id}`)} 
             className="w-full h-full object-cover" 
             alt="" 
@@ -107,15 +111,33 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
         {renderCover()}
-        <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center">
+        <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center gap-3">
           <button 
             onClick={handlePlay}
-            className="w-7 h-7 rounded-full bg-muted backdrop-blur-md border border-blue-500/30 flex items-center justify-center shadow-xl group-hover:bg-blue-600 group-hover:border-blue-500/40 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+            className="w-10 h-10 rounded-full bg-blue-600 border border-blue-500/30 flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300"
           >
-            <Play className="h-3 w-3 text-foreground fill-white ml-3" />
+            <Play className="h-4 w-4 text-white fill-white ml-0.5" />
           </button>
+          
+          {isOwner && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsGeneratorOpen(true); }}
+              className="w-10 h-10 rounded-full bg-neutral-800/80 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300 delay-75 hover:bg-neutral-700"
+              title="Generate Cover"
+            >
+              <Sparkles className="h-4 w-4 text-blue-400" />
+            </button>
+          )}
         </div>
       </div>
+      
+      {/* Generator Modal */}
+      <PlaylistCoverGenerator 
+        isOpen={isGeneratorOpen}
+        onClose={() => setIsGeneratorOpen(false)}
+        playlist={playlist}
+        tracks={playlistTracks.filter((t): t is NonNullable<typeof t> => !!t)}
+      />
       
       {/* Content Below Card */}
       <div className="px-3">

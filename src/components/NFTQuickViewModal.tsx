@@ -128,8 +128,8 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                     <Layers className="h-3 w-3" /> Traits
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
-                    {nft.traits.slice(0, 4).map((trait, idx) => (
-                      <div key={idx} className="bg-muted/50 rounded-[5px] p-2 border border-border/50">
+                    {nft.traits.slice(0, 4).map((trait) => (
+                      <div key={trait.trait_type} className="bg-muted/50 rounded-[5px] p-2 border border-border/50">
                         <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest mb-3">{trait.trait_type}</p>
                         <p className="text-[10px] font-bold text-foreground uppercase truncate">{trait.value}</p>
                       </div>
@@ -150,12 +150,28 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                   </div>
                 </div>
 
-                <button 
-                  onClick={handleViewFullDetails}
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                >
-                  View Full Details <ExternalLink className="h-3 w-3" />
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={handleViewFullDetails}
+                    className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border border-white/10"
+                  >
+                    View Details <ExternalLink className="h-3 w-3" />
+                  </button>
+                  {nft.owner === MOCK_USER.walletAddress && !nft.listingType && (
+                    <button 
+                      onClick={() => {
+                        onClose();
+                        // Assuming the parent component will handle this if we pass an onSell action, 
+                        // or we can just navigate to the NFT detail page and open it there.
+                        // Actually, let's just navigate to the NFT page with a query param.
+                        navigate(`/nft/${nft.id}?action=sell`);
+                      }}
+                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
+                      Sell NFT
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </>

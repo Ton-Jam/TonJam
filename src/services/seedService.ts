@@ -1,10 +1,8 @@
-// import { collection, getDocs, addDoc, serverTimestamp, query, limit } from 'firebase/firestore';
-// import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { collection, getDocs, addDoc, serverTimestamp, query, limit } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '../constants';
 
 export const seedDatabase = async () => {
-  console.log('Database seeding skipped (Firebase removed).');
-  /*
   try {
     // Check if tracks collection is empty
     const tracksQuery = query(collection(db, 'tracks'), limit(1));
@@ -13,8 +11,10 @@ export const seedDatabase = async () => {
     if (tracksSnapshot.empty) {
       console.log('Seeding tracks...');
       for (const track of MOCK_TRACKS) {
+        const { artist, ...rest } = track;
         await addDoc(collection(db, 'tracks'), {
-          ...track,
+          ...rest,
+          artistName: artist,
           createdAt: serverTimestamp(),
         });
       }
@@ -27,8 +27,12 @@ export const seedDatabase = async () => {
     if (nftsSnapshot.empty) {
       console.log('Seeding nfts...');
       for (const nft of MOCK_NFTS) {
+        const { owner, ...rest } = nft;
         await addDoc(collection(db, 'nfts'), {
-          ...nft,
+          ...rest,
+          ownerName: owner,
+          ownerId: 'system', // Default owner for seeded NFTs
+          isListed: true,
           createdAt: serverTimestamp(),
         });
       }
@@ -41,8 +45,26 @@ export const seedDatabase = async () => {
     if (postsSnapshot.empty) {
       console.log('Seeding posts...');
       for (const post of MOCK_POSTS) {
+        const { userId, userName, userAvatar, ...rest } = post;
         await addDoc(collection(db, 'posts'), {
-          ...post,
+          ...rest,
+          authorId: userId,
+          authorName: userName,
+          authorPhoto: userAvatar,
+          createdAt: serverTimestamp(),
+        });
+      }
+    }
+
+    // Check if artists collection is empty
+    const artistsQuery = query(collection(db, 'artists'), limit(1));
+    const artistsSnapshot = await getDocs(artistsQuery);
+
+    if (artistsSnapshot.empty) {
+      console.log('Seeding artists...');
+      for (const artist of MOCK_ARTISTS) {
+        await addDoc(collection(db, 'artists'), {
+          ...artist,
           createdAt: serverTimestamp(),
         });
       }
@@ -52,5 +74,4 @@ export const seedDatabase = async () => {
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'seeding');
   }
-  */
 };

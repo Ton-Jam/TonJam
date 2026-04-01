@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { BackButton } from '@/components/BackButton';
 import { 
   ArrowLeft, 
@@ -44,6 +44,7 @@ import BidAcceptanceModal from '@/components/BidAcceptanceModal';
 import ManageNFTModal from '@/components/ManageNFTModal';
 import NFTCard from '@/components/NFTCard';
 import SendNFTModal from '@/components/SendNFTModal';
+import ConfirmationModal from '@/components/ConfirmationModal';
 import confetti from 'canvas-confetti';
 import { getPlaceholderImage } from '@/lib/utils';
 
@@ -54,6 +55,8 @@ const NFTDetail: React.FC = () => {
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isTipping, setIsTipping] = useState(false);
+  const [inlineBidAmount, setInlineBidAmount] = useState<string>('');
+  const [isPlacingBid, setIsPlacingBid] = useState(false);
   
   const localNft = useMemo(() => {
     return allNFTs.find(n => n.id === id) || null;
@@ -64,14 +67,34 @@ const NFTDetail: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
+  const [dynamicMetadata, setDynamicMetadata] = useState<NFTItem | null>(null);
 
   /* Modal states */
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
   const [showBidModal, setShowBidModal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const isOwner = useMemo(() => {
+    if (!localNft) return false;
+    const currentWallet = userAddress || userProfile.walletAddress;
+    return localNft.owner === currentWallet;
+  }, [localNft, userAddress, userProfile.walletAddress]);
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'sell' && isOwner && !localNft?.listingType) {
+      setShowListModal(true);
+      // Clean up the URL
+      setSearchParams({});
+    }
+  }, [searchParams, isOwner, localNft, setSearchParams]);
   const [showManageModal, setShowManageModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<NFTOffer | null>(null);
+  const [isCancelListingConfirmOpen, setIsCancelListingConfirmOpen] = useState(false);
+  const [offerToDecline, setOfferToDecline] = useState<string | null>(null);
+  const [offerToAccept, setOfferToAccept] = useState<NFTOffer | null>(null);
+  const [isCancelBidConfirmOpen, setIsCancelBidConfirmOpen] = useState(false);
 
   const loadMetadata = () => {
     if (localNft?.contractAddress) {
@@ -80,8 +103,7 @@ const NFTDetail: React.FC = () => {
       fetchNFTMetadata(localNft.contractAddress)
         .then(metadata => {
           if (!metadata) return;
-          // Note: We don't update state here directly because localNft is derived from allNFTs
-          // In a real app, we'd trigger an updateNFT call if metadata changed significantly
+          setDynamicMetadata(metadata);
         })
         .catch(err => {
           console.error("Failed to fetch metadata", err);
@@ -129,11 +151,6 @@ const NFTDetail: React.FC = () => {
   }, [localNft]);
 
   const isActive = useMemo(() => currentTrack?.id === localNft?.trackId, [currentTrack, localNft]);
-  const isOwner = useMemo(() => {
-    if (!localNft) return false;
-    const currentWallet = userAddress || userProfile.walletAddress;
-    return localNft.owner === currentWallet;
-  }, [localNft, userAddress]);
 
   const isAuction = useMemo(() => {
     return localNft?.listingType === 'auction';
@@ -144,15 +161,21 @@ const NFTDetail: React.FC = () => {
     return (parseFloat(localNft.price) * 1.05).toFixed(2);
   }, [localNft]);
 
+  const userOffer = useMemo(() => {
+    if (!localNft || !userAddress) return null;
+    return localNft.offers?.find(o => o.offerer === userAddress) || null;
+  }, [localNft, userAddress]);
+
+  const highestOfferPrice = useMemo(() => {
+    if (!localNft?.offers || localNft.offers.length === 0) return 0;
+    return localNft.offers.reduce((max, o) => Math.max(max, parseFloat(o.price)), 0);
+  }, [localNft]);
+
   const handleTip = (amount: number) => {
     setIsTipping(false);
     
     // Simulate transaction
-    addNotification({
-      title: 'Processing Tip',
-      message: `Sending ${amount} TON to ${localNft?.creator}...`,
-      type: 'info'
-    });
+    addNotification(`Sending ${amount} TON to ${localNft?.creator}...`, 'info');
 
     setTimeout(() => {
       confetti({
@@ -162,11 +185,7 @@ const NFTDetail: React.FC = () => {
         colors: ['#3b82f6', '#ffffff', '#60a5fa']
       });
 
-      addNotification({
-        title: 'Tip Successful',
-        message: `You sent ${amount} TON to ${localNft?.creator}. Thank you for supporting the artist!`,
-        type: 'success'
-      });
+      addNotification(`You sent ${amount} TON to ${localNft?.creator}. Thank you for supporting the artist!`, 'success');
     }, 1500);
   };
 
@@ -182,11 +201,6 @@ const NFTDetail: React.FC = () => {
       .map(t => t.id);
     return allNFTs.filter(n => relatedTrackIds.includes(n.trackId) && n.id !== localNft.id).slice(0, 4);
   }, [localNft, associatedTrack, allNFTs]);
-
-  const highestOfferPrice = useMemo(() => {
-    if (!localNft?.offers || localNft.offers.length === 0) return 0;
-    return Math.max(...localNft.offers.map(o => parseFloat(o.price)));
-  }, [localNft]);
 
   if (allNFTs.length === 0) return <div className="min-h-screen flex items-center justify-center text-foreground">Loading assets...</div>;
   if (!localNft) {
@@ -220,6 +234,51 @@ const NFTDetail: React.FC = () => {
     }
   };
 
+  const handleInlineBid = async () => {
+    if (!userAddress) {
+      addNotification("Connect wallet to place bid.", "warning");
+      tonConnectUI.openModal();
+      return;
+    }
+    
+    const bidValue = parseFloat(inlineBidAmount);
+    const minBidValue = parseFloat(minNextBid);
+    
+    if (isNaN(bidValue) || bidValue < minBidValue) {
+      addNotification(`Minimum bid is ${minNextBid} TON`, "warning");
+      return;
+    }
+
+    setIsPlacingBid(true);
+    addNotification("Broadcasting bid to neural relay...", "info");
+    
+    try {
+      // Simulate transaction delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newOffer = {
+        id: `offer-${Date.now()}`,
+        offerer: userAddress,
+        price: bidValue.toString(),
+        timestamp: 'Just now',
+        duration: '24h'
+      };
+      
+      updateNFT(localNft.id, { 
+        price: bidValue.toString(), 
+        offers: [newOffer, ...(localNft.offers || [])] 
+      });
+      
+      addNotification(`Bid of ${bidValue} TON placed!`, "success");
+      setInlineBidAmount('');
+    } catch (e) {
+      console.error(e);
+      addNotification("Bid broadcast failed.", "error");
+    } finally {
+      setIsPlacingBid(false);
+    }
+  };
+
   const handlePlayClick = () => {
     if (associatedTrack) playTrack(associatedTrack);
   };
@@ -229,33 +288,74 @@ const NFTDetail: React.FC = () => {
   };
 
   const onConfirmAcceptance = () => {
-    if (!selectedOffer || !localNft) return;
-    /* Update NFT ownership and clear listing */
-    updateNFT(localNft.id, {
-      owner: selectedOffer.offerer,
-      listingType: undefined,
-      price: selectedOffer.price,
-      offers: []
-    });
-    addNotification("Asset ownership transfer protocol complete.", "success");
+    if (selectedOffer) {
+      setOfferToAccept(selectedOffer);
+      setSelectedOffer(null);
+    }
+  };
+
+  const confirmAcceptOffer = async () => {
+    if (!offerToAccept || !localNft) return;
+    
+    addNotification(`Accepting offer from ${offerToAccept.offerer}...`, "info");
+    
+    // Simulate blockchain delay
     setTimeout(() => {
-      navigate('/profile');
-    }, 1000);
+      // Update NFT owner and clear listing
+      updateNFT(localNft.id, { 
+        owner: offerToAccept.offerer,
+        listingType: undefined,
+        price: offerToAccept.price,
+        offers: [] // Clear offers after sale
+      });
+      
+      addNotification("Asset ownership transfer protocol complete.", "success");
+      setOfferToAccept(null);
+      setTimeout(() => {
+        navigate('/profile');
+      }, 1000);
+    }, 1500);
   };
 
   const handleDeclineOffer = (offerer: string) => {
-    if (!localNft) return;
+    setOfferToDecline(offerer);
+  };
+
+  const confirmDeclineOffer = () => {
+    if (!localNft || !offerToDecline) return;
     /* Remove the offer */
-    const newOffers = localNft.offers?.filter(o => o.offerer !== offerer) || [];
+    const newOffers = localNft.offers?.filter(o => o.offerer !== offerToDecline) || [];
     updateNFT(localNft.id, { offers: newOffers });
-    addNotification(`Offer from ${offerer} rejected.`, "info");
+    addNotification(`Offer from ${offerToDecline} rejected.`, "info");
+    setOfferToDecline(null);
   };
 
   const handleCancelListing = () => {
+    setIsCancelListingConfirmOpen(true);
+  };
+
+  const confirmCancelListing = () => {
     addNotification("Initiating listing cancellation protocol...", "info");
     setTimeout(() => {
       updateNFT(localNft.id, { listingType: undefined });
       addNotification("Listing cancelled. Asset returned to vault.", "success");
+    }, 1500);
+  };
+
+  const handleCancelBid = () => {
+    setIsCancelBidConfirmOpen(true);
+  };
+
+  const confirmCancelBid = () => {
+    if (!localNft || !userAddress) return;
+    
+    addNotification("Initiating bid withdrawal protocol...", "info");
+    
+    setTimeout(() => {
+      const newOffers = localNft.offers?.filter(o => o.offerer !== userAddress) || [];
+      updateNFT(localNft.id, { offers: newOffers });
+      addNotification("Bid signal withdrawn from the relay.", "success");
+      setIsCancelBidConfirmOpen(false);
     }, 1500);
   };
 
@@ -348,11 +448,19 @@ const NFTDetail: React.FC = () => {
                 {/* Live Auction Badge */}
                 {isAuction && (
                   <div className="absolute bottom-6 left-6 right-6">
-                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-4 py-4 rounded-[12px] flex justify-between items-center shadow-2xl">
+                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-4 py-4 rounded-[12px] flex justify-between items-center shadow-2xl flex-wrap gap-4">
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-bold text-amber-500 uppercase tracking-[0.4em] mb-4">Time Remaining</span>
+                        <span className="text-[8px] font-bold text-amber-500 uppercase tracking-[0.4em] mb-2">Time Remaining</span>
                         <span className="text-xl font-bold text-foreground tracking-tighter font-mono">{timeLeft}</span>
                       </div>
+                      {localNft.auctionEndTime && (
+                        <div className="flex flex-col">
+                          <span className="text-[8px] font-bold text-amber-500/70 uppercase tracking-[0.4em] mb-2">Ends On</span>
+                          <span className="text-sm font-bold text-foreground/80 tracking-tighter font-mono">
+                            {new Date(localNft.auctionEndTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-4 px-4 py-4 bg-amber-500/10 rounded-full border border-neutral-500/20">
                         <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
                         <span className="text-[8px] font-bold text-amber-500 uppercase tracking-widest">Active Bid</span>
@@ -370,8 +478,8 @@ const NFTDetail: React.FC = () => {
                 { label: 'KEY', val: associatedTrack?.key || 'C#m', color: 'text-purple-500' },
                 { label: 'BIT', val: associatedTrack?.bitrate || 'FLAC', color: 'text-emerald-500' },
                 { label: 'REL', val: associatedTrack?.releaseDate?.split('-')[0] || '2024', color: 'text-amber-500' }
-              ].map((stat, i) => (
-                <div key={i} className="bg-white/5 backdrop-blur-md p-4 rounded-[16px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20">
+              ].map((stat) => (
+                <div key={stat.label} className="bg-white/5 backdrop-blur-md p-4 rounded-[16px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20">
                   <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-40`}></div>
                   <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.3em] mb-4">{stat.label}</p>
                   <p className="text-base font-bold text-foreground tracking-tighter font-mono">{stat.val}</p>
@@ -446,11 +554,13 @@ const NFTDetail: React.FC = () => {
                   <div className="flex items-center gap-4">
                     <div className={`w-2 h-2 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`}></div>
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">
-                      {isAuction ? 'Current High Signal' : 'Fixed Valuation Protocol'}
+                      {isAuction ? 'Current Highest Bid' : 'Fixed Valuation Protocol'}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-4">
-                    <span className="text-[68px] font-bold text-foreground tracking-tighter leading-none">{localNft.price}</span>
+                    <span className="text-[68px] font-bold text-foreground tracking-tighter leading-none">
+                      {isAuction ? (highestOfferPrice > 0 ? highestOfferPrice : (localNft.startingBid || localNft.price)) : localNft.price}
+                    </span>
                     <span className="text-[20px] font-bold text-blue-500 uppercase tracking-tighter">TON</span>
                   </div>
                   <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
@@ -470,7 +580,7 @@ const NFTDetail: React.FC = () => {
                 {isOwner ? (
                   <>
                     <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
-                      {localNft.listingType ? 'Manage Listing' : 'List for Sale'}
+                      {localNft.listingType ? 'Manage Listing' : 'Sell NFT'}
                     </button>
                     <button onClick={() => setShowSendModal(true)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-4 border border-white/10" >
                       <Send className="h-4 w-4" /> Send Asset
@@ -483,12 +593,36 @@ const NFTDetail: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <button onClick={handleAction} className={`flex-[2] py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border ${isAuction ? 'bg-amber-500 hover:bg-amber-400 text-background shadow-amber-500/20 border-amber-400/30' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30 border-blue-400/30'}`} >
-                      {isAuction ? 'Place Bid Signal' : 'Acquire Asset Now'}
-                    </button>
+                    {isAuction ? (
+                      <div className="flex-[2] flex gap-2">
+                        <input
+                          type="number"
+                          value={inlineBidAmount}
+                          onChange={(e) => setInlineBidAmount(e.target.value)}
+                          placeholder={`Min: ${minNextBid}`}
+                          className="w-1/3 bg-white/5 border border-white/10 rounded-[12px] px-4 text-white font-bold outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-all text-sm"
+                        />
+                        <button 
+                          onClick={handleInlineBid} 
+                          disabled={isPlacingBid}
+                          className="flex-1 py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-amber-500 hover:bg-amber-400 text-background shadow-amber-500/20 border-amber-400/30 disabled:opacity-50 flex items-center justify-center gap-2" 
+                        >
+                          {isPlacingBid ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Place Bid Signal'}
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={handleAction} className="flex-[2] py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30 border-blue-400/30" >
+                        Acquire Asset Now
+                      </button>
+                    )}
                     {!isAuction && (
                       <button onClick={() => setShowBidModal(true)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
                         Make Offer
+                      </button>
+                    )}
+                    {userOffer && (
+                      <button onClick={handleCancelBid} className="flex-1 py-4 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 hover:border-red-500/20" >
+                        Withdraw Bid
                       </button>
                     )}
                     <button 
@@ -597,6 +731,23 @@ const NFTDetail: React.FC = () => {
                       </div>
                     )}
                     
+                    {dynamicMetadata && dynamicMetadata.traits && (
+                      <div className="col-span-1 md:col-span-2 p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[20px]">
+                        <h4 className="text-[5px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
+                          <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                          On-Chain Traits
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {dynamicMetadata.traits.map((trait) => (
+                            <div key={trait.trait_type} className="flex flex-col gap-2">
+                              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">{trait.trait_type}</span>
+                              <span className="text-sm font-bold text-foreground tracking-tight">{trait.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     {associatedTrack && (
                       <div className="col-span-1 md:col-span-2 p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[20px]">
                         <h4 className="text-[5px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
@@ -609,8 +760,8 @@ const NFTDetail: React.FC = () => {
                             { label: 'KEY', val: associatedTrack.key || 'N/A' },
                             { label: 'BITRATE', val: associatedTrack.bitrate || 'N/A' },
                             { label: 'DURATION', val: `${Math.floor(associatedTrack.duration / 60)}:${String(associatedTrack.duration % 60).padStart(2, '0')}` }
-                          ].map((item, i) => (
-                            <div key={i} className="flex flex-col gap-4">
+                          ].map((item) => (
+                            <div key={item.label} className="flex flex-col gap-4">
                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">{item.label}</span>
                               <span className="text-lg font-bold text-foreground tracking-tight font-mono">{item.val}</span>
                             </div>
@@ -619,8 +770,8 @@ const NFTDetail: React.FC = () => {
                       </div>
                     )}
   
-                    {localNft.traits?.map((trait, i) => (
-                      <div key={i} className="p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[16px] flex justify-between items-center group transition-all hover:bg-white/10 hover:border-white/20">
+                    {localNft.traits?.map((trait) => (
+                      <div key={trait.trait_type} className="p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[16px] flex justify-between items-center group transition-all hover:bg-white/10 hover:border-white/20">
                         <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest group-hover:text-muted-foreground transition-colors">{trait.trait_type}</span>
                         <span className="text-sm font-bold text-foreground tracking-tight">{trait.value}</span>
                       </div>
@@ -644,8 +795,8 @@ const NFTDetail: React.FC = () => {
                     exit={{ opacity: 0, y: -10 }}
                     className="space-y-4"
                   >
-                    {localNft.history?.map((h, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 bg-card border border-border rounded-[12px] hover:bg-foreground/[0.02] transition-all group">
+                    {localNft.history?.map((h) => (
+                      <div key={`history-${h.event}-${h.date}-${h.from}-${h.to}-${h.price}`} className="flex items-center justify-between p-4 bg-card border border-border rounded-[12px] hover:bg-foreground/[0.02] transition-all group">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-[10px] bg-muted/50 flex items-center justify-center border border-blue-500/30 group-hover:border-blue-500/50 transition-all">
                             {h.event === 'Minted' ? (
@@ -677,10 +828,10 @@ const NFTDetail: React.FC = () => {
                     className="space-y-4"
                   >
                     {localNft.offers && localNft.offers.length > 0 ? (
-                      localNft.offers.map((o, i) => {
+                      localNft.offers.map((o) => {
                         const isTopBid = parseFloat(o.price) === highestOfferPrice;
                         return (
-                          <div key={i} className={`group p-4 bg-card border rounded-[16px] transition-all flex flex-col md:flex-row items-center justify-between gap-4 hover:shadow-2xl ${isTopBid ? (isAuction ? 'border-border bg-amber-500/[0.02]' : 'border-border bg-blue-500/[0.02]') : 'border-border opacity-70 hover:opacity-100'}`} >
+                          <div key={o.id} className={`group p-4 bg-card border rounded-[16px] transition-all flex flex-col md:flex-row items-center justify-between gap-4 hover:shadow-2xl ${isTopBid ? (isAuction ? 'border-border bg-amber-500/[0.02]' : 'border-border bg-blue-500/[0.02]') : 'border-border opacity-70 hover:opacity-100'}`} >
                             <div className="flex items-center gap-4 w-full md:w-auto">
                               <div className="relative">
                                 <div className={`w-16 h-16 rounded-full bg-background border border-blue-500/30 flex items-center justify-center overflow-hidden`}>
@@ -861,6 +1012,46 @@ const NFTDetail: React.FC = () => {
       {selectedOffer && (
         <BidAcceptanceModal nft={localNft} offer={selectedOffer} onClose={() => setSelectedOffer(null)} onAccept={onConfirmAcceptance} />
       )}
+
+      {/* Confirmation Modals */}
+      <ConfirmationModal
+        isOpen={isCancelListingConfirmOpen}
+        onClose={() => setIsCancelListingConfirmOpen(false)}
+        onConfirm={confirmCancelListing}
+        title="Cancel Listing?"
+        description="Are you sure you want to cancel this listing? The asset will be returned to your vault."
+        confirmText="Cancel Listing"
+        variant="destructive"
+      />
+
+      <ConfirmationModal
+        isOpen={!!offerToDecline}
+        onClose={() => setOfferToDecline(null)}
+        onConfirm={confirmDeclineOffer}
+        title="Decline Offer?"
+        description={`Are you sure you want to decline the offer from ${offerToDecline}?`}
+        confirmText="Decline Offer"
+        variant="destructive"
+      />
+
+      <ConfirmationModal
+        isOpen={!!offerToAccept}
+        onClose={() => setOfferToAccept(null)}
+        onConfirm={confirmAcceptOffer}
+        title="Accept Offer?"
+        description={`Are you sure you want to accept the offer of ${offerToAccept?.price} TON from ${offerToAccept?.offerer}? This will transfer ownership of the NFT.`}
+        confirmText="Accept Offer"
+      />
+
+      <ConfirmationModal
+        isOpen={isCancelBidConfirmOpen}
+        onClose={() => setIsCancelBidConfirmOpen(false)}
+        onConfirm={confirmCancelBid}
+        title="Withdraw Bid?"
+        description={`Are you sure you want to withdraw your bid for "${localNft?.title}"? This will remove your signal from the relay network.`}
+        confirmText="Withdraw Bid"
+        variant="destructive"
+      />
     </div>
   );
 };

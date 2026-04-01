@@ -1,8 +1,10 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Music2, Play, Shuffle, Trash2, MinusCircle, Camera, Pencil, Check, X, GripVertical, ChevronUp, ChevronDown, CheckSquare, Square, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Music2, Play, Shuffle, Trash2, MinusCircle, Camera, Pencil, Check, X, GripVertical, ChevronUp, ChevronDown, CheckSquare, Square, AlertTriangle, Sparkles } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import TrackCard from '@/components/TrackCard';
+import ConfirmationModal from '@/components/ConfirmationModal';
+import PlaylistCoverGenerator from '@/components/PlaylistCoverGenerator';
 import { MOCK_TRACKS } from '@/constants';
 
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
@@ -17,7 +19,10 @@ const PlaylistDetail: React.FC = () => {
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([]);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
+  const [isBulkRemoveModalOpen, setIsBulkRemoveModalOpen] = useState(false);
+  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [trackToRemove, setTrackToRemove] = useState<string | null>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [filterGenre, setFilterGenre] = useState<string>('All');
   const [filterMood, setFilterMood] = useState<string>('All');
@@ -62,16 +67,25 @@ const PlaylistDetail: React.FC = () => {
   };
 
   const handleDeletePlaylist = () => {
-    if (window.confirm("Are you sure you want to delete this playlist?")) {
-      deletePlaylist(playlist!.id);
+    setIsDeletePlaylistModalOpen(true);
+  };
+
+  const confirmDeletePlaylist = () => {
+    if (playlist) {
+      deletePlaylist(playlist.id);
       navigate('/library');
     }
   };
 
   const handleRemoveTrack = (e: React.MouseEvent, trackId: string) => {
     e.stopPropagation();
-    if (window.confirm("Remove this track from playlist?")) {
-      removeTrackFromPlaylist(playlist!.id, trackId);
+    setTrackToRemove(trackId);
+  };
+
+  const confirmRemoveTrack = () => {
+    if (playlist && trackToRemove) {
+      removeTrackFromPlaylist(playlist.id, trackToRemove);
+      setTrackToRemove(null);
     }
   };
 
@@ -175,7 +189,7 @@ const PlaylistDetail: React.FC = () => {
       });
       setSelectedTrackIds([]);
       setIsSelectionMode(false);
-      setShowConfirmModal(false);
+      setIsBulkRemoveModalOpen(false);
     }
   };
 
@@ -207,7 +221,7 @@ const PlaylistDetail: React.FC = () => {
           ) : (
             <div className="w-full h-full grid grid-cols-2 gap-4 bg-neutral-800">
               {coverImages.slice(0, 4).map((img, idx) => (
-                <div key={idx} className="w-full h-full relative bg-neutral-900 flex items-center justify-center overflow-hidden">
+                <div key={`cover-${idx}`} className="w-full h-full relative bg-neutral-900 flex items-center justify-center overflow-hidden">
                   {img ? (
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -223,10 +237,24 @@ const PlaylistDetail: React.FC = () => {
           {/* Upload Overlay */}
           <div 
             className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm" 
-            onClick={() => fileInputRef.current?.click()}
           >
-            <Camera className="h-8 w-8 text-foreground mb-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300" />
-            <span className="text-[10px] font-bold text-foreground uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">Change Cover</span>
+            <div className="flex flex-col gap-4 items-center">
+              <button 
+                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                className="flex flex-col items-center gap-2 hover:scale-110 transition-transform"
+              >
+                <Camera className="h-8 w-8 text-foreground" />
+                <span className="text-[8px] font-bold text-foreground uppercase tracking-widest">Upload</span>
+              </button>
+              <div className="w-8 h-[1px] bg-white/20"></div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setIsGeneratorOpen(true); }}
+                className="flex flex-col items-center gap-2 hover:scale-110 transition-transform"
+              >
+                <Sparkles className="h-8 w-8 text-blue-400" />
+                <span className="text-[8px] font-bold text-blue-400 uppercase tracking-widest">AI Generate</span>
+              </button>
+            </div>
           </div>
           <input 
             type="file" 
@@ -324,7 +352,7 @@ const PlaylistDetail: React.FC = () => {
           </div>
           
           <button 
-            onClick={() => setShowConfirmModal(true)}
+            onClick={() => setIsBulkRemoveModalOpen(true)}
             className="flex items-center gap-4 px-4 py-4 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-full font-bold text-[8px] uppercase tracking-widest transition-all"
           >
             <Trash2 className="h-3 w-3" /> Remove
@@ -355,18 +383,18 @@ const PlaylistDetail: React.FC = () => {
       )}
 
       {/* Track List Header */}
-      <div className="flex items-center gap-4 px-4 py-4 text-neutral-400 text-xs uppercase tracking-wider border-b border-white/10 mb-4">
-        <div className="w-10 text-center">#</div>
-        <div className="flex-1">Title</div>
-        <div className="w-24 text-right hidden sm:block">Duration</div>
-        <div className="w-16"></div>
+      <div className="flex items-center gap-4 px-4 py-4 text-neutral-400 text-[10px] font-bold uppercase tracking-[0.2em] border-b border-white/5 mb-4">
+        <div className="w-10 text-center opacity-50">#</div>
+        <div className="flex-1">Track_Protocol</div>
+        <div className="w-24 text-right hidden sm:block opacity-50">Duration</div>
+        <div className="w-10"></div>
       </div>
 
-      <div className="flex flex-col gap-4 pb-4">
+      <div className="flex flex-col gap-1 pb-4">
         {playlistTracks.map((track, index) => (
           <div 
             key={track.id} 
-            className={`w-full flex items-center gap-4 group rounded-[10px] pr-4 transition-all border ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/30' : 'hover:bg-muted/50 border-blue-500/30'}`}
+            className={`w-full flex items-center gap-4 group rounded-[12px] transition-all border border-transparent ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/20' : 'hover:bg-white/5'}`}
             onClick={() => handleTrackClick(track.id)}
             onMouseDown={() => handleTouchStart(track.id)}
             onMouseUp={handleTouchEnd}
@@ -377,42 +405,24 @@ const PlaylistDetail: React.FC = () => {
             <div className="flex items-center justify-center w-10 h-10 flex-shrink-0 cursor-pointer">
               {isSelectionMode ? (
                 selectedTrackIds.includes(track.id) ? (
-                  <CheckSquare className="h-3 w-3 text-blue-500" />
+                  <CheckSquare className="h-3.5 w-3.5 text-blue-500" />
                 ) : (
-                  <Square className="h-3 w-3 text-muted-foreground/50" />
+                  <Square className="h-3.5 w-3.5 text-muted-foreground/30" />
                 )
               ) : (
-                <span className="text-muted-foreground font-mono text-xs">{index + 1}</span>
+                <span className="text-[10px] font-bold text-muted-foreground/40 font-mono">{String(index + 1).padStart(2, '0')}</span>
               )}
             </div>
             
-            <div className="flex-1 min-w-0 pointer-events-none">
-              <TrackCard track={track} variant="row" />
-            </div>
-            
-            <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="flex flex-col gap-4">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); handleMoveTrack(e, track.id, 'up'); }} 
-                  disabled={index === 0}
-                  className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground transition-all"
-                  title="Move Up"
-                >
-                  <ChevronUp className="h-4 w-4" />
-                </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); handleMoveTrack(e, track.id, 'down'); }} 
-                  disabled={index === playlistTracks.length - 1}
-                  className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground transition-all"
-                  title="Move Down"
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </div>
-              
-              <button onClick={(e) => { e.stopPropagation(); handleRemoveTrack(e, track.id); }} className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all" title="Remove from playlist">
-                <MinusCircle className="h-4 w-4" />
-              </button>
+            <div className="flex-1 min-w-0">
+              <TrackCard 
+                track={track} 
+                variant="row" 
+                onRemove={() => handleRemoveTrack(null as any, track.id)}
+                onMoveUp={index > 0 ? () => handleMoveTrack(null as any, track.id, 'up') : undefined}
+                onMoveDown={index < playlistTracks.length - 1 ? () => handleMoveTrack(null as any, track.id, 'down') : undefined}
+                className="bg-transparent border-none shadow-none hover:bg-transparent p-0"
+              />
             </div>
           </div>
         ))}
@@ -421,37 +431,43 @@ const PlaylistDetail: React.FC = () => {
         )}
       </div>
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={() => setShowConfirmModal(false)}></div>
-          <div className="relative bg-background border border-border w-full max-w-sm rounded-2xl p-4 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4">
-                <AlertTriangle className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 uppercase tracking-tighter">Remove Tracks?</h3>
-              <p className="text-muted-foreground/80 text-sm mb-4">
-                Are you sure you want to remove <span className="text-foreground font-bold">{selectedTrackIds.length}</span> selected tracks from this playlist? This action cannot be undone.
-              </p>
-              <div className="flex flex-col w-full gap-4">
-                <button 
-                  onClick={handleBulkRemove}
-                  className="w-full py-4 bg-red-600 hover:bg-red-500 text-foreground rounded-full font-bold text-xs uppercase tracking-widest transition-all"
-                >
-                  Yes, Remove Tracks
-                </button>
-                <button 
-                  onClick={() => setShowConfirmModal(false)}
-                  className="w-full py-4 bg-muted/50 hover:bg-muted text-foreground rounded-full font-bold text-xs uppercase tracking-widest transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Confirmation Modals */}
+      <ConfirmationModal
+        isOpen={isDeletePlaylistModalOpen}
+        onClose={() => setIsDeletePlaylistModalOpen(false)}
+        onConfirm={confirmDeletePlaylist}
+        title="Delete Playlist?"
+        description="Are you sure you want to delete this playlist? This action cannot be undone and all track associations will be lost."
+        confirmText="Delete Playlist"
+        variant="destructive"
+      />
+
+      <ConfirmationModal
+        isOpen={!!trackToRemove}
+        onClose={() => setTrackToRemove(null)}
+        onConfirm={confirmRemoveTrack}
+        title="Remove Track?"
+        description="Are you sure you want to remove this track from the playlist?"
+        confirmText="Remove Track"
+        variant="destructive"
+      />
+
+      <ConfirmationModal
+        isOpen={isBulkRemoveModalOpen}
+        onClose={() => setIsBulkRemoveModalOpen(false)}
+        onConfirm={handleBulkRemove}
+        title="Remove Multiple Tracks?"
+        description={`Are you sure you want to remove ${selectedTrackIds.length} selected tracks from this playlist?`}
+        confirmText="Remove Tracks"
+        variant="destructive"
+      />
+
+      <PlaylistCoverGenerator 
+        isOpen={isGeneratorOpen}
+        onClose={() => setIsGeneratorOpen(false)}
+        playlist={playlist}
+        tracks={playlistTracks}
+      />
     </div>
   );
 };

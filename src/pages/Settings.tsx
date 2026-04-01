@@ -40,6 +40,30 @@ const Settings: React.FC = () => {
       </div>
 
       <div className="space-y-4">
+        <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em] mb-4">Recommended Updates</h2>
+        
+        <SettingItem 
+          icon={Shield} 
+          label="Enable 2FA" 
+          description="Add an extra layer of security"
+        >
+          <button className="px-4 py-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all">
+            Enable
+          </button>
+        </SettingItem>
+
+        <SettingItem 
+          icon={User} 
+          label="Complete Bio" 
+          description="Your profile is 80% complete"
+        >
+          <button className="px-4 py-4 bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all">
+            Update
+          </button>
+        </SettingItem>
+      </div>
+
+      <div className="space-y-4">
         <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em] mb-4">Account Protocols</h2>
         
         <SettingItem 
@@ -58,7 +82,7 @@ const Settings: React.FC = () => {
         <SettingItem 
           icon={Wallet} 
           label="Wallet Connection" 
-          description={user?.id ? "Connected to TON Mainnet" : "No wallet detected"}
+          description={user?.uid ? "Connected to TON Mainnet" : "No wallet detected"}
         >
           <button 
             onClick={() => navigate('/wallet')}

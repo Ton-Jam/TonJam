@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Joyride, Step } from 'react-joyride';
 import DiscoverSearchBar from '@/components/DiscoverSearchBar';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, Music, User, Gem, RotateCcw, Satellite, ChevronRight, Sparkles, Filter, Calendar, DollarSign, Award, Layers } from 'lucide-react';
-import { MOCK_TRACKS, MOCK_NFTS, GENRES, MOCK_USERS, APP_LOGO } from '@/constants';
+import { MOCK_TRACKS, MOCK_NFTS, GENRES, MOODS, MOCK_USERS, APP_LOGO } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import UserCard from '@/components/UserCard';
 import NFTCard from '@/components/NFTCard';
@@ -27,12 +28,17 @@ const Discover: React.FC = () => {
   const initialSearch = queryParams.get('search') || '';
 
   useEffect(() => {
+    const hasRunTour = localStorage.getItem('tonjam_discover_tour_run');
+    if (!hasRunTour) {
+      setRunTour(true);
+    }
     generateDiscoverWeekly();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [activeFilter, setActiveFilter] = useState<'Artists' | 'Tracks' | 'NFTs' | 'Playlists' | 'Users' | 'All'>('All');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('Newest');
   const [filters, setFilters] = useState({
     minPrice: '',
@@ -44,6 +50,7 @@ const Discover: React.FC = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
+  const [runTour, setRunTour] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
     return saved ? JSON.parse(saved) : [];
@@ -186,14 +193,14 @@ const Discover: React.FC = () => {
     setSuggestions(newSuggestions.slice(0, 5));
   }, [search, artists]);
 
-  const addToRecentSearches = (term: string) => {
+  const addToRecentSearches = useCallback((term: string) => {
     const trimmed = term.trim();
     if (!trimmed || trimmed.length < 2) return;
     setRecentSearches(prev => {
       const filtered = prev.filter(t => t.toLowerCase() !== trimmed.toLowerCase());
       return [trimmed, ...filtered].slice(0, 5);
     });
-  };
+  }, []);
 
   const removeRecentSearch = (e: React.MouseEvent, term: string) => {
     e.stopPropagation();
@@ -232,6 +239,9 @@ const Discover: React.FC = () => {
     }
     if (selectedGenre) {
       results = results.filter(t => t.genre.toLowerCase() === selectedGenre.toLowerCase());
+    }
+    if (selectedMood) {
+      results = results.filter(t => t.mood?.toLowerCase() === selectedMood.toLowerCase());
     }
     
     // Advanced Filters for Tracks
@@ -337,6 +347,42 @@ const Discover: React.FC = () => {
     return results;
   }, [search, activeFilter, selectedGenre, sortBy, artists, allPlaylists]);
 
+  const availableGenres = useMemo(() => {
+    const genres = new Set<string>();
+    MOCK_TRACKS.forEach(t => {
+      if (t.genre) genres.add(t.genre);
+    });
+    return Array.from(genres);
+  }, []);
+
+  const availableMoods = useMemo(() => {
+    const moods = new Set<string>();
+    MOCK_TRACKS.forEach(t => {
+      if (t.mood) moods.add(t.mood);
+    });
+    return Array.from(moods);
+  }, []);
+
+  const handleGenreToggle = useCallback((genre: string) => {
+    setDisplayLimit(INITIAL_LIMIT);
+    if (selectedGenre === genre) {
+      setSelectedGenre(null);
+    } else {
+      setSelectedGenre(genre);
+      addToRecentSearches(genre);
+    }
+  }, [selectedGenre, addToRecentSearches]);
+
+  const handleMoodToggle = useCallback((mood: string) => {
+    setDisplayLimit(INITIAL_LIMIT);
+    if (selectedMood === mood) {
+      setSelectedMood(null);
+    } else {
+      setSelectedMood(mood);
+      addToRecentSearches(mood);
+    }
+  }, [selectedMood, addToRecentSearches]);
+
   const searchActions = useMemo(() => {
     const actions: any[] = [];
     if (!search) return [];
@@ -387,29 +433,35 @@ const Discover: React.FC = () => {
       });
     });
 
+    // Genres
+    GENRES.filter(g => g.name.toLowerCase().includes(search.toLowerCase())).slice(0, 3).forEach(g => {
+      actions.push({
+        id: `genre-${g.id}`,
+        label: g.name,
+        icon: <g.icon className="h-4 w-4 text-yellow-500" />,
+        description: "Genre",
+        end: "Genre",
+        onClick: () => {
+          handleGenreToggle(g.name);
+          addToRecentSearches(search);
+        }
+      });
+    });
+
     return actions;
-  }, [search, artists, playTrack, navigate]);
+  }, [search, artists, playTrack, navigate, handleGenreToggle, addToRecentSearches]);
 
   const visibleResults = useMemo(() => {
     return filteredResults.slice(0, displayLimit);
   }, [filteredResults, displayLimit]);
 
-  const handleGenreToggle = (genre: string) => {
-    setDisplayLimit(INITIAL_LIMIT);
-    if (selectedGenre === genre) {
-      setSelectedGenre(null);
-    } else {
-      setSelectedGenre(genre);
-      addToRecentSearches(genre);
-    }
-  };
-
   const clearInput = () => {
     setSearch('');
     setSelectedGenre(null);
+    setSelectedMood(null);
   };
 
-  const FilterSortBar = ({ activeFilter, selectedGenre, sortBy, setSelectedGenre, setSortBy }: any) => {
+  const FilterSortBar = ({ activeFilter, selectedGenre, selectedMood, sortBy, setSelectedGenre, setSelectedMood, setSortBy }: any) => {
     const sortOptions: Record<string, string[]> = {
       Tracks: ['Newest', 'Popularity', 'Most Liked'],
       Artists: ['Newest', 'Popularity'],
@@ -419,32 +471,59 @@ const Discover: React.FC = () => {
     const currentSortOptions = sortOptions[activeFilter as keyof typeof sortOptions] || [];
 
     return (
-      <div className="flex items-center gap-4 py-4 filter-section">
-        {activeFilter !== 'NFTs' && activeFilter !== 'Playlists' && activeFilter !== 'Users' && (
-          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
-            <button
-              onClick={() => setSelectedGenre(null)}
-              className={`flex-shrink-0 px-[4px] py-[0px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
-                selectedGenre === null 
-                  ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
-                  : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
-              }`}
-            >
-              All Genres
-            </button>
-            {GENRES.map(g => (
+      <div className="flex flex-col gap-4 py-4 filter-section">
+        {activeFilter === 'Tracks' && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
               <button
-                key={g.id}
-                onClick={() => setSelectedGenre(g.name)}
+                onClick={() => setSelectedGenre(null)}
                 className={`flex-shrink-0 px-[4px] py-[0px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
-                  selectedGenre === g.name 
+                  selectedGenre === null 
                     ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
                     : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
                 }`}
               >
-                {g.name}
+                All Genres
               </button>
-            ))}
+              {availableGenres.map(genre => (
+                <button
+                  key={genre}
+                  onClick={() => setSelectedGenre(genre)}
+                  className={`flex-shrink-0 px-[4px] py-[0px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                    selectedGenre === genre 
+                      ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
+                      : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-foreground border-silver-300 dark:border-blue-500/30 hover:text-blue-600 dark:hover:text-blue-400 inactive-pill'
+                  }`}
+                >
+                  {genre}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
+              <button
+                onClick={() => setSelectedMood(null)}
+                className={`flex-shrink-0 px-[4px] py-[0px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                  selectedMood === null 
+                    ? 'bg-purple-500 text-white border-purple-500 shadow-lg' 
+                    : 'bg-white dark:bg-muted/50 text-purple-500 dark:text-foreground border-silver-300 dark:border-purple-500/30 hover:text-purple-600 dark:hover:text-purple-400 inactive-pill'
+                }`}
+              >
+                All Moods
+              </button>
+              {availableMoods.map(mood => (
+                <button
+                  key={mood}
+                  onClick={() => setSelectedMood(mood)}
+                  className={`flex-shrink-0 px-[4px] py-[0px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                    selectedMood === mood 
+                      ? 'bg-purple-500 text-white border-purple-500 shadow-lg' 
+                      : 'bg-white dark:bg-muted/50 text-purple-500 dark:text-foreground border-silver-300 dark:border-purple-500/30 hover:text-purple-600 dark:hover:text-purple-400 inactive-pill'
+                  }`}
+                >
+                  {mood}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {currentSortOptions.length > 0 && (
@@ -470,6 +549,21 @@ const Discover: React.FC = () => {
 
   const toggleVoiceSearch = handleVoiceSearch;
 
+  const steps: Step[] = [
+    {
+      target: '.discover-search-bar',
+      content: 'Use the search bar to find your favorite tracks, artists, or NFTs.',
+    },
+    {
+      target: '.filter-section',
+      content: 'Filter by genre or sort by popularity and date.',
+    },
+    {
+      target: '.surprise-me-button',
+      content: 'Click here to discover something new and random!',
+    },
+  ];
+
   const handleSurpriseMe = () => {
     const randomGenre = GENRES[Math.floor(Math.random() * GENRES.length)].name;
     handleGenreToggle(randomGenre);
@@ -478,13 +572,17 @@ const Discover: React.FC = () => {
 
   return (
     <div className="w-full pb-4">
+      <Joyride
+        steps={steps}
+        run={runTour}
+      />
       {/* Search Section */}
       <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-50 w-full bg-background/95 backdrop-blur-xl transition-all duration-300" ref={searchContainerRef}>
         <div className="max-w-7xl mx-auto px-4 lg:px-4 py-4">
           <div className="flex flex-col items-center justify-center gap-4">
-            <div className="w-full flex flex-col md:flex-row items-center gap-4">
+            <div className="w-full flex flex-col md:flex-row items-center gap-4 sticky top-0 z-50 bg-background/95 backdrop-blur-xl py-2">
               <div className="flex-1 relative group w-full flex items-center gap-4">
-                <div className="relative flex-1">
+                <div className="relative flex-1 bg-white rounded-full">
                   <DiscoverSearchBar 
                     onSearch={(q) => setSearch(q)}
                     placeholder="Search tracks, artists, or NFTs..."
@@ -495,10 +593,10 @@ const Discover: React.FC = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto no-scrollbar pb-4 md:pb-4 sticky top-[80px] z-40 bg-background/95 backdrop-blur-xl pt-2">
+              <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto no-scrollbar pb-4 md:pb-4 pt-2">
                 <button 
                   onClick={handleSurpriseMe}
-                  className="flex-shrink-0 px-[10px] py-[6px] bg-white dark:bg-muted/50 border border-silver-300 dark:border-blue-500/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-blue-500 dark:text-foreground hover:bg-blue-500/10 hover:border-blue-500/60 transition-all flex items-center gap-4 group/surprise inactive-pill"
+                  className="flex-shrink-0 px-[10px] py-[6px] bg-white dark:bg-muted/50 border border-silver-300 dark:border-blue-500/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-blue-500 dark:text-foreground hover:bg-blue-500/10 hover:border-blue-500/60 transition-all flex items-center gap-4 group/surprise inactive-pill surprise-me-button"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-amber-500 group-hover/surprise:animate-spin" />
                   Surprise Me
@@ -675,7 +773,7 @@ const Discover: React.FC = () => {
                 </div>
               </div>
               {activeFilter !== 'All' && (
-                <FilterSortBar activeFilter={activeFilter} selectedGenre={selectedGenre} sortBy={sortBy} setSelectedGenre={setSelectedGenre} setSortBy={setSortBy} />
+                <FilterSortBar activeFilter={activeFilter} selectedGenre={selectedGenre} selectedMood={selectedMood} sortBy={sortBy} setSelectedGenre={setSelectedGenre} setSelectedMood={setSelectedMood} setSortBy={setSortBy} />
               )}
             </div>
             
@@ -811,7 +909,7 @@ const SearchCategorySection = ({
       </div>
       <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
         {items.map((item, idx) => (
-          <div key={item.id || idx} className={`flex-shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300 ${grid ? 'w-[200px] sm:w-[240px]' : 'w-full max-w-[400px]'}`} style={{ animationDelay: `${idx * 50}ms` }}>
+          <div key={item.id} className={`flex-shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300 ${grid ? 'w-[200px] sm:w-[240px]' : 'w-full max-w-[400px]'}`} style={{ animationDelay: `${idx * 50}ms` }}>
             {renderItem(item)}
           </div>
         ))}

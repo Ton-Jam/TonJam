@@ -44,6 +44,7 @@ import RoyaltyDashboard from '@/components/RoyaltyDashboard';
 import EditArtistProfileModal from '@/components/EditArtistProfileModal';
 import NFTMetadataManager from '@/components/NFTMetadataManager';
 import SellNFTModal from '@/components/SellNFTModal';
+import ManageNFTModal from '@/components/ManageNFTModal';
 import { useAudio } from '@/context/AudioContext';
 import ArtistTracksSection from '@/components/ArtistTracksSection';
 import ArtistNFTsSection from '@/components/ArtistNFTsSection';
@@ -73,6 +74,15 @@ const ArtistProfile: React.FC = () => {
 
   const [selectedTrackForMint, setSelectedTrackForMint] = useState<Track | null>(null);
   const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
+  const [selectedNftForManaging, setSelectedNftForManaging] = useState<NFTItem | null>(null);
+
+  const handleNFTAction = (nft: NFTItem) => {
+    if (nft.listingType) {
+      setSelectedNftForManaging(nft);
+    } else {
+      setSelectedNftForListing(nft);
+    }
+  };
 
   // Metadata Management State
   const [editingTrackId, setEditingTrackId] = useState<string | null>(null);
@@ -399,8 +409,14 @@ const ArtistProfile: React.FC = () => {
     </div>
   );
 
+  const themeClass = artist.profileTheme
+    ? artist.profileTheme === 'dark' || artist.profileTheme === 'light' 
+      ? artist.profileTheme 
+      : `theme-${artist.profileTheme}`
+    : '';
+
   return (
-    <div className="animate-in fade-in duration-1000 pb-4 min-h-screen font-sans">
+    <div className={`animate-in fade-in duration-1000 pb-4 min-h-screen font-sans ${themeClass}`}>
       {/* 1. COMPACT CINEMATIC BANNER */}
       <div className="relative h-[30vh] md:h-[35vh] overflow-hidden">
         <div 
@@ -425,23 +441,23 @@ const ArtistProfile: React.FC = () => {
         <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between gap-6 pb-8">
           <ArtistProfileHeader artist={artist} />
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
             {isOwnProfile && (
-              <button onClick={() => setShowEditProfileModal(true)} className="px-6 py-2 bg-muted text-foreground rounded-full font-bold text-xs uppercase tracking-widest hover:bg-muted/80 transition-all" >
+              <button onClick={() => setShowEditProfileModal(true)} className="px-6 py-3 bg-muted text-foreground rounded-full font-bold text-xs uppercase tracking-widest hover:bg-muted/80 transition-all" >
                 Edit Profile
               </button>
             )}
-            <button onClick={() => playAll(artistTracks)} className="px-6 py-2 bg-primary text-primary-foreground rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2" >
+            <button onClick={() => playAll(artistTracks)} className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2" >
               <Play className="h-4 w-4 fill-current" /> Play
             </button>
             {!isOwnProfile && (
-              <button onClick={() => setActiveTab('requests')} className="px-4 py-1.5 bg-purple-600 text-white rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-purple-700 transition-all flex items-center gap-2" >
+              <button onClick={() => setActiveTab('requests')} className="px-6 py-3 bg-purple-600 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-purple-700 transition-all flex items-center gap-2" >
                 Request Song
               </button>
             )}
             <button 
               onClick={handleFollow} 
-              className={`px-6 py-2 rounded-full flex items-center justify-center gap-2 transition-all text-xs font-bold uppercase tracking-widest
+              className={`px-6 py-3 rounded-full flex items-center justify-center gap-2 transition-all text-xs font-bold uppercase tracking-widest
                 ${isFollowing 
                   ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
                   : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -469,7 +485,7 @@ const ArtistProfile: React.FC = () => {
                     </button>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-foreground truncate leading-tight mb-1">{track.title}</h3>
+                    <h3 className="text-sm font-bold text-foreground dark:text-white truncate leading-tight mb-1">{track.title}</h3>
                     <p className="text-xs text-muted-foreground">{(track.playCount || 0).toLocaleString()} streams</p>
                   </div>
                 </div>
@@ -498,7 +514,7 @@ const ArtistProfile: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-foreground truncate">{track.title}</h4>
+                  <h4 className="text-sm font-bold text-foreground dark:text-white truncate">{track.title}</h4>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {(track.playCount || 0).toLocaleString()}
@@ -626,7 +642,7 @@ const ArtistProfile: React.FC = () => {
                 <ArtistNFTsSection 
                   artistNFTs={artistNFTs}
                   isOwnProfile={isOwnProfile}
-                  setSelectedNftForListing={setSelectedNftForListing}
+                  onNFTAction={handleNFTAction}
                 />
               )}
 
@@ -635,150 +651,80 @@ const ArtistProfile: React.FC = () => {
               )}
 
               {activeTab === 'about' && (
-                <div className="space-y-4 animate-in fade-in duration-700">
+                <div className="space-y-8 animate-in fade-in duration-700">
                   {/* Bio Section */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className="lg:col-span-2 space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
-                        <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">Biographical Record</h2>
-                      </div>
-                      <div className="glass border border-blue-500/30 bg-foreground/[0.01] p-5 rounded-[12px] relative group">
-                        {isEditingBio ? (
-                          <div className="space-y-4">
-                            <textarea 
-                              value={editedBio}
-                              onChange={(e) => setEditedBio(e.target.value)}
-                              className="w-full bg-background/40 border border-blue-500/40 rounded-[10px] p-4 text-sm text-muted-foreground/90 outline-none focus:border-blue-500/50 transition-all resize-none min-h-[150px]"
-                              placeholder="Enter artist biography..."
-                            />
-                            <div className="flex justify-end gap-4">
-                              <button onClick={() => setIsEditingBio(false)} className="px-4 py-4 text-[8px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Cancel</button>
-                              <button onClick={handleSaveBio} className="px-4 py-4 bg-blue-600 text-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all">Save Bio</button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <p className="text-sm text-foreground/70 leading-relaxed font-medium">
-                              {artist.bio || "No biographical data synchronized for this architect."}
-                            </p>
-                            {isOwnProfile && (
-                              <button 
-                                onClick={() => {
-                                  setEditedBio(artist.bio || "");
-                                  setIsEditingBio(true);
-                                }}
-                                className="absolute top-4 right-4 p-4 rounded-full bg-muted/50 text-muted-foreground/50 hover:text-foreground hover:bg-muted transition-all opacity-0 group-hover:opacity-100"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </button>
-                            )}
-                          </>
-                        )}
-                      </div>
+                  <section className="glass border border-blue-500/30 bg-foreground/[0.01] p-6 rounded-[12px]">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                      <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Biography</h2>
                     </div>
+                    <p className="text-sm text-foreground/70 leading-relaxed font-medium">
+                      {artist.bio || "No biographical data synchronized for this architect."}
+                    </p>
+                  </section>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-1 h-4 bg-purple-500 rounded-full"></div>
-                        <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">Network Stats</h2>
-                      </div>
-                      <div className="glass border border-blue-500/30 bg-foreground/[0.01] p-5 rounded-[12px] space-y-4">
-                        <div className="flex justify-between items-center py-4 border-b border-blue-500/30">
-                          <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Genre</span>
-                          <span className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">{artist.genre}</span>
-                        </div>
-                        <div className="flex justify-between items-center py-4 border-b border-blue-500/30">
-                          <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Joined</span>
-                          <span className="text-[10px] font-bold text-foreground uppercase tracking-tighter">OCT 2023</span>
-                        </div>
-                        <div className="flex justify-between items-center py-4 border-b border-blue-500/30">
-                          <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Location</span>
-                          <span className="text-[10px] font-bold text-foreground uppercase tracking-tighter">Digital Frontier</span>
-                        </div>
-                        <div className="flex justify-between items-center py-4">
-                          <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Status</span>
-                          <div className="flex items-center gap-4">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                            <span className="text-[10px] font-bold text-green-500 uppercase tracking-tighter">Online</span>
-                          </div>
-                        </div>
-                      </div>
+                  {/* Network Stats */}
+                  <section className="glass border border-blue-500/30 bg-foreground/[0.01] p-6 rounded-[12px]">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                      <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Network Stats</h2>
                     </div>
-                  </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {[
+                        { label: 'Genre', value: artist.genre },
+                        { label: 'Joined', value: 'OCT 2023' },
+                        { label: 'Location', value: 'Digital Frontier' },
+                        { label: 'Status', value: 'Online' }
+                      ].map(stat => (
+                        <div key={`stat-${stat.label}`} className="p-4 bg-muted/30 rounded-[8px]">
+                          <div className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{stat.label}</div>
+                          <div className="text-sm font-bold text-foreground">{stat.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
 
-                  {/* Events Section */}
-                  {artist.events && artist.events.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-1 h-4 bg-amber-500 rounded-full"></div>
-                        <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">Upcoming Transmissions</h2>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {artist.events.map((event) => (
-                          <div key={event.id} className="glass border border-blue-500/30 bg-foreground/[0.01] p-5 rounded-[12px] flex items-center justify-between group hover:border-blue-500/40 transition-all">
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-center justify-center w-14 h-14 bg-amber-500/10 rounded-[10px] border border-blue-500/30">
-                                <span className="text-[8px] font-bold text-amber-500 uppercase">{event.date.split('-')[1]}</span>
-                                <span className="text-xl font-bold text-foreground tracking-tighter">{event.date.split('-')[2]}</span>
-                              </div>
+                  {/* Events & Collaborations */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {artist.events && artist.events.length > 0 && (
+                      <section>
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
+                          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Upcoming Events</h2>
+                        </div>
+                        <div className="space-y-4">
+                          {artist.events.map(event => (
+                            <div key={event.id} className="p-4 rounded-[10px] bg-muted/50 border border-blue-500/40 flex justify-between items-center">
                               <div>
-                                <h4 className="text-sm font-bold text-foreground uppercase tracking-tight group-hover:text-amber-400 transition-colors">{event.title}</h4>
-                                <p className="text-[9px] font-bold text-foreground/30 uppercase tracking-widest mt-4">{event.venue} • {event.location}</p>
+                                <h4 className="text-sm font-bold text-foreground">{event.title}</h4>
+                                <p className="text-[10px] text-muted-foreground">{event.date} @ {event.time} • {event.venue}</p>
                               </div>
+                              {event.ticketUrl && (
+                                <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-[6px] text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all">Tickets</a>
+                              )}
                             </div>
-                            {event.ticketUrl && (
-                              <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-4 bg-amber-500 text-background rounded-[8px] text-[8px] font-bold uppercase tracking-widest hover:bg-amber-400 transition-all active:scale-95 shadow-lg shadow-amber-500/20">
-                                Get Access
-                              </a>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                          ))}
+                        </div>
+                      </section>
+                    )}
 
-                  {/* Collaborations Section */}
-                  {artist.collaborations && artist.collaborations.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-1 h-4 bg-pink-500 rounded-full"></div>
-                        <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">Neural Collaborations</h2>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {artist.collaborations.map((collab) => (
-                          <div key={collab.id} className="group cursor-pointer">
-                            <div className="relative aspect-square rounded-[12px] overflow-hidden mb-4">
-                              <img src={collab.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
-                              <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Play className="h-5 w-5 text-foreground fill-current" />
-                              </div>
+                    {artist.collaborations && artist.collaborations.length > 0 && (
+                      <section>
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="w-1 h-6 bg-pink-500 rounded-full"></div>
+                          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Collaborations</h2>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          {artist.collaborations.map(collab => (
+                            <div key={collab.id} className="p-4 rounded-[10px] bg-muted/50 border border-blue-500/40 flex flex-col items-center text-center">
+                              <img src={collab.coverUrl} alt={collab.trackTitle} className="w-12 h-12 rounded-[6px] mb-2 object-cover" />
+                              <h4 className="text-[10px] font-bold text-foreground truncate w-full">{collab.trackTitle}</h4>
+                              <p className="text-[8px] text-muted-foreground">w/ {collab.artistName}</p>
                             </div>
-                            <h4 className="text-[10px] font-bold text-foreground uppercase tracking-tight truncate">{collab.trackTitle}</h4>
-                            <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest truncate mt-4">w/ {collab.artistName}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Verification Block */}
-                  <div className={`p-5 rounded-[10px] border flex flex-col md:flex-row items-center justify-between gap-4 ${artist.verified ? 'bg-neutral-600/5 border-blue-500/20' : 'bg-muted/50 border-blue-500/40'}`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center shadow-lg ${artist.verified ? 'bg-blue-500' : 'bg-muted'}`}>
-                        {artist.verified ? <ShieldCheck className="text-foreground h-6 w-6" /> : <Info className="text-muted-foreground h-6 w-6" />}
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-bold text-foreground uppercase tracking-tighter">{artist.verified ? 'Verified Architect' : 'Unverified Identity'}</h4>
-                        <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest mt-4">{artist.verified ? 'Confirmed Identity on TON Blockchain' : 'Identity pending verification on TON'}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArtistVerification artist={artist} />
-                      <button className="px-4 py-4 bg-muted/50 rounded-[10px] text-[8px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all flex items-center gap-4">
-                        <ShieldAlert className="h-3 w-3" /> Report Identity
-                      </button>
-                    </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
                   </div>
                 </div>
               )}
@@ -822,7 +768,7 @@ const ArtistProfile: React.FC = () => {
                                 <div className="flex items-center gap-4 flex-1 min-w-0">
                                   <img src={track.coverUrl} className="w-12 h-12 rounded-[8px] object-cover shadow-lg" alt="" />
                                   <div className="min-w-0">
-                                    <h4 className="text-sm font-bold text-foreground truncate uppercase tracking-tight">{track.title}</h4>
+                                    <h4 className="text-sm font-bold text-foreground dark:text-white truncate uppercase tracking-tight">{track.title}</h4>
                                     <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{track.genre} • {track.isNFT ? 'NFT Protocol Active' : 'Standard Stream'}</p>
                                   </div>
                                 </div>
@@ -979,7 +925,7 @@ const ArtistProfile: React.FC = () => {
                                     
                                     <div className="space-y-4">
                                       {currentMetadata.royaltySplits?.map((split: any, index: number) => (
-                                        <div key={index} className="grid grid-cols-12 gap-4 items-center">
+                                        <div key={`split-${index}`} className="grid grid-cols-12 gap-4 items-center">
                                           <div className="col-span-5">
                                             <input 
                                               type="text"
@@ -1268,6 +1214,13 @@ const ArtistProfile: React.FC = () => {
         <SellNFTModal 
           nft={selectedNftForListing} 
           onClose={() => setSelectedNftForListing(null)} 
+        />
+      )}
+      {selectedNftForManaging && (
+        <ManageNFTModal 
+          nft={selectedNftForManaging} 
+          isOpen={true}
+          onClose={() => setSelectedNftForManaging(null)} 
         />
       )}
     </div>

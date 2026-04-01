@@ -43,7 +43,17 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <div className={`p-2 rounded-xl ${task.completed ? 'bg-green-500/10 text-green-500' : 'bg-blue-600/10 text-blue-500'}`}>
-                {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Zap className="w-6 h-6" />}
+                {task.completed ? (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  >
+                    <CheckCircle2 className="w-6 h-6" />
+                  </motion.div>
+                ) : (
+                  <Zap className="w-6 h-6" />
+                )}
               </div>
               <h2 id="task-modal-title" className="text-xl font-black uppercase tracking-tight text-foreground">{task.title}</h2>
             </div>

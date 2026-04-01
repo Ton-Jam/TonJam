@@ -41,7 +41,7 @@ const PlaylistListItem: React.FC<PlaylistListItemProps> = ({ playlist, onClick }
       <div className="w-full h-full grid grid-cols-2 gap-3 bg-neutral-800">
         {playlistTracks.map((track, i) => (
           <img 
-            key={i}
+            key={`${track?.id || 'empty'}-${i}`}
             src={track?.coverUrl || getPlaceholderImage(`track-${track?.id}`)} 
             className="w-full h-full object-cover" 
             alt="" 

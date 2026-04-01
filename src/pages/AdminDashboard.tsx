@@ -78,8 +78,8 @@ const AdminDashboard: React.FC = () => {
   };
 
   const platformStats = useMemo(() => {
-    const totalVolume = safeTransactions.reduce((acc, tx) => acc + parseFloat(tx.amount), 0);
-    const totalFees = safeTransactions.reduce((acc, tx) => acc + parseFloat(tx.platformFee), 0);
+    const totalVolume = safeTransactions.reduce((acc, tx) => acc + tx.amount, 0);
+    const totalFees = safeTransactions.reduce((acc, tx) => acc + tx.platformFee, 0);
     const streamCount = safeTransactions.filter(tx => tx.type === 'stream').length;
     const saleCount = safeTransactions.filter(tx => tx.type === 'nft_sale').length;
 

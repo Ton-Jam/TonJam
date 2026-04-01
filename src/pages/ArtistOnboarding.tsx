@@ -1,16 +1,23 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Music, Image, Info, Box } from 'lucide-react';
+import { Music, Image, Info, Box, Upload, Loader2, Camera, Image as ImageIcon } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
+import { uploadToIPFS } from '@/services/pinataService';
 import { Track, NFTItem } from '@/types';
 import { MOCK_USER, APP_LOGO } from '@/constants';
+import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 
 const ArtistOnboarding: React.FC = () => {
   const navigate = useNavigate();
   const { userProfile, setUserProfile, addUserTrack, addUserNFT, addNotification } = useAudio();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   /* Step 1: Profile State */
   const [profileData, setProfileData] = useState({
@@ -44,11 +51,59 @@ const ArtistOnboarding: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleProfileFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validation = validateFile(file, 'image', 5);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
+        return;
+      }
+      
+      setIsUploading(true);
+      try {
+        addNotification(`Uploading ${type} to IPFS...`, 'info');
+        const { ipfsUrl } = await uploadToIPFS(file);
+        setProfileData(prev => ({ ...prev, [type === 'avatar' ? 'avatar' : 'bannerUrl']: ipfsUrl }));
+        addNotification(`${type.toUpperCase()} uploaded to IPFS`, 'success');
+      } catch (error) {
+        console.error(`Error uploading ${type}:`, error);
+        addNotification(`Failed to upload ${type} to IPFS`, 'error');
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUserProfile({ ...userProfile, ...profileData, isVerifiedArtist: true /* Upgrade user to artist */ });
-    addNotification("Artist profile initialized", "success");
-    setStep(2);
+    
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        setIsLoading(true);
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, cleanUpdateData({
+          ...profileData,
+          isVerifiedArtist: true,
+          role: 'artist'
+        }));
+        
+        setUserProfile({ ...userProfile, ...profileData, isVerifiedArtist: true, role: 'artist' });
+        addNotification("Artist profile initialized", "success");
+        setStep(2);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Fallback for non-logged in users (shouldn't happen with onboarding)
+      setUserProfile({ ...userProfile, ...profileData, isVerifiedArtist: true });
+      addNotification("Artist profile initialized (local)", "success");
+      setStep(2);
+    }
   };
 
   const handleTrackSubmit = async (e: React.FormEvent) => {
@@ -58,6 +113,25 @@ const ArtistOnboarding: React.FC = () => {
       return;
     }
     setIsLoading(true);
+
+    // 0. Double check validation
+    if (trackData.audioFile) {
+      const audioValidation = validateFile(trackData.audioFile, 'audio', 50);
+      if (!audioValidation.isValid) {
+        addNotification(audioValidation.error, "error");
+        setIsLoading(false);
+        return;
+      }
+    }
+    if (trackData.coverFile) {
+      const coverValidation = validateFile(trackData.coverFile, 'image', 10);
+      if (!coverValidation.isValid) {
+        addNotification(coverValidation.error, "error");
+        setIsLoading(false);
+        return;
+      }
+    }
+
     /* Simulate upload delay */
     setTimeout(() => {
       const newTrackId = Date.now().toString();
@@ -73,7 +147,8 @@ const ArtistOnboarding: React.FC = () => {
         isNFT: false,
         artistVerified: true,
         price: trackData.price,
-        releaseDate: new Date().toISOString()
+        releaseDate: new Date().toISOString(),
+        createdAt: new Date().toISOString()
       };
       addUserTrack(newTrack);
       setTrackData(prev => ({ ...prev, createdTrackId: newTrackId }));
@@ -153,8 +228,57 @@ const ArtistOnboarding: React.FC = () => {
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/5 blur-[100px] rounded-full pointer-events-none"></div>
 
           {step === 1 && (
-            <form onSubmit={handleProfileSubmit} className="space-y-4 animate-in fade-in slide-in-from-right duration-500 relative z-10">
+            <form onSubmit={handleProfileSubmit} className="space-y-6 animate-in fade-in slide-in-from-right duration-500 relative z-10">
               <h2 className="text-xl font-bold uppercase tracking-tight mb-4">Identity Configuration</h2>
+              
+              {/* Image Uploads */}
+              <div className="space-y-6">
+                <div className="relative h-32 w-full rounded-[10px] overflow-hidden bg-muted/50 group">
+                  <img 
+                    src={profileData.bannerUrl || getPlaceholderImage('banner-onboarding', 1200, 400)} 
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" 
+                    alt="Banner" 
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      type="button"
+                      onClick={() => bannerInputRef.current?.click()}
+                      disabled={isUploading}
+                      className="px-4 py-2 bg-blue-600 rounded-full text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2"
+                    >
+                      {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />}
+                      Change Banner
+                    </button>
+                  </div>
+                  <input type="file" hidden ref={bannerInputRef} onChange={(e) => handleProfileFileChange(e, 'banner')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <div className="relative w-20 h-20 rounded-full overflow-hidden bg-muted/50 group flex-shrink-0">
+                    <img 
+                      src={profileData.avatar || getPlaceholderImage('avatar-onboarding')} 
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" 
+                      alt="Avatar" 
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        type="button"
+                        onClick={() => avatarInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="p-2 bg-blue-600 rounded-full text-white"
+                      >
+                        {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />}
+                      </button>
+                    </div>
+                    <input type="file" hidden ref={avatarInputRef} onChange={(e) => handleProfileFileChange(e, 'avatar')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold uppercase tracking-tight">Profile Visuals</h3>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Upload your artist avatar and banner</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Artist Name</label>

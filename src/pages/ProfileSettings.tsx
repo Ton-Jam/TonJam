@@ -1,22 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { UserCircleIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { useAudio } from '@/context/AudioContext';
 import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react';
 import { GoogleGenAI } from '@google/genai';
-import { Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Loader2, Upload } from 'lucide-react';
+import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import { uploadToIPFS } from '@/services/pinataService';
+import { validateFile } from '@/lib/utils';
 
 export default function ProfileSettings() {
   const { userProfile, addNotification } = useAudio();
   const tonAddress = useTonAddress();
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [profile, setProfile] = useState({
     name: '',
     handle: '',
     bio: '',
     avatar: '',
+    profileTheme: 'dark',
   });
 
   useEffect(() => {
@@ -26,13 +32,45 @@ export default function ProfileSettings() {
         handle: userProfile.handle || '',
         bio: userProfile.bio || '',
         avatar: userProfile.avatar || '',
+        profileTheme: userProfile.profileTheme || 'dark',
       });
     }
   }, [userProfile]);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const validation = validateFile(file, 'image', 5);
+    if (!validation.isValid) {
+      addNotification(validation.error || "Invalid file", "error");
+      e.target.value = '';
+      return;
+    }
+    
+    const user = auth.currentUser;
+    if (!user) {
+      addNotification('You must be logged in to upload an avatar.', 'error');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      addNotification('Uploading avatar to IPFS...', 'info');
+      const { ipfsUrl } = await uploadToIPFS(file);
+      setProfile(prev => ({ ...prev, avatar: ipfsUrl }));
+      addNotification('Avatar uploaded to IPFS successfully!', 'success');
+    } catch (error) {
+      console.error("Upload error:", error);
+      addNotification('Failed to upload avatar to IPFS.', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = auth.currentUser;
     if (!user) {
       addNotification('You must be logged in to update your profile.', 'error');
       return;
@@ -40,21 +78,18 @@ export default function ProfileSettings() {
 
     try {
       setLoading(true);
-      const { error } = await supabase
-        .from('users')
-        .update({
-          name: profile.name,
-          handle: profile.handle,
-          bio: profile.bio,
-          avatar: profile.avatar,
-        })
-        .eq('id', user.id);
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, cleanUpdateData({
+        name: profile.name,
+        handle: profile.handle,
+        bio: profile.bio,
+        avatar: profile.avatar,
+        profileTheme: profile.profileTheme,
+      }));
       
-      if (error) throw error;
       addNotification('Profile updated successfully!', 'success');
     } catch (error) {
-      console.error('Error updating profile:', error);
-      addNotification('Error updating profile.', 'error');
+      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
     } finally {
       setLoading(false);
     }
@@ -189,7 +224,7 @@ Return ONLY the bio text, nothing else.`;
 
               <div className="col-span-full">
                 <label htmlFor="avatar" className="block text-sm font-medium text-foreground">
-                  Avatar URL
+                  Avatar
                 </label>
                 <div className="mt-2 flex items-center gap-x-4">
                   {profile.avatar ? (
@@ -198,15 +233,44 @@ Return ONLY the bio text, nothing else.`;
                     <UserCircleIcon aria-hidden="true" className="h-12 w-12 text-muted-foreground" />
                   )}
                   <input
-                    id="avatar"
-                    name="avatar"
-                    type="text"
-                    placeholder="https://example.com/avatar.png"
-                    value={profile.avatar}
-                    onChange={(e) => setProfile({ ...profile, avatar: e.target.value })}
-                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
                   />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="rounded-xl bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-all flex items-center gap-2"
+                  >
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {uploading ? 'Uploading...' : 'Change Avatar'}
+                  </button>
                 </div>
+              </div>
+
+              <div className="col-span-full">
+                <label htmlFor="profileTheme" className="block text-sm font-medium text-foreground">
+                  Profile Theme
+                </label>
+                <div className="mt-2">
+                  <select
+                    id="profileTheme"
+                    name="profileTheme"
+                    value={profile.profileTheme}
+                    onChange={(e) => setProfile({ ...profile, profileTheme: e.target.value })}
+                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
+                  >
+                    <option value="dark">Dark (Default)</option>
+                    <option value="light">Light</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                    <option value="ocean">Ocean</option>
+                    <option value="neon">Neon</option>
+                  </select>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">Customize the look of your public profile page.</p>
               </div>
 
             </div>
@@ -222,6 +286,7 @@ Return ONLY the bio text, nothing else.`;
                   handle: userProfile?.handle || '',
                   bio: userProfile?.bio || '',
                   avatar: userProfile?.avatar || '',
+                  profileTheme: userProfile?.profileTheme || 'dark',
                 });
               }}
             >

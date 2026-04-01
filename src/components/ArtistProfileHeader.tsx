@@ -28,10 +28,15 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist }) => 
       </div>
       
       <div className="flex flex-col items-center md:items-start text-center md:text-left">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3 mb-2 flex-wrap justify-center md:justify-start">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground leading-none">
             {artist.name}
           </h1>
+          {artist.handle && (
+            <span className="text-blue-500 font-bold text-[10px] md:text-xs uppercase tracking-[0.4em] bg-blue-500/10 px-3 py-1.5 rounded-full whitespace-nowrap">
+              {artist.handle}
+            </span>
+          )}
           <ArtistVerification artist={artist} />
         </div>
         <p className="text-muted-foreground font-medium text-sm"> {artist.followers.toLocaleString()} Monthly Listeners </p>

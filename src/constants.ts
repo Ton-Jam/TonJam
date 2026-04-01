@@ -9,6 +9,14 @@ export const TON_LOGO = "https://i.postimg.cc/jj7HksNw/ton-symbol.png";
 export const JAM_PRICE_USD = 0.052;
 export const JAM_JETTON_MASTER = "EQCxE6mNZ_9MvS_88888888888888888888888888888"; // Placeholder JAM Master Address
 
+export const MOODS = [
+  { id: 'chill', name: 'Chill' },
+  { id: 'energetic', name: 'Energetic' },
+  { id: 'focus', name: 'Focus' },
+  { id: 'happy', name: 'Happy' },
+  { id: 'melancholic', name: 'Melancholic' },
+];
+
 export const MOCK_TRACKS: Track[] = [
   { 
     id: '1', 
@@ -19,6 +27,7 @@ export const MOCK_TRACKS: Track[] = [
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 
     duration: 210, 
     genre: 'Electronic', 
+    mood: 'Energetic',
     isNFT: true, 
     artistVerified: true, 
     price: '2.5', 
@@ -28,6 +37,7 @@ export const MOCK_TRACKS: Track[] = [
     playCount: 12500, 
     likes: 840, 
     releaseDate: '2023-10-15',
+    createdAt: '2023-10-15T00:00:00Z',
     cid: 'QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
     ipfsUrl: 'ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
     lyrics: `[Verse 1]
@@ -63,6 +73,7 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', 
     duration: 185, 
     genre: 'Synthwave', 
+    mood: 'Energetic',
     isNFT: false, 
     artistVerified: true, 
     bpm: 110, 
@@ -71,6 +82,7 @@ Everything is clear in the neon light`
     playCount: 8400, 
     likes: 420, 
     releaseDate: '2023-11-02',
+    createdAt: '2023-11-02T00:00:00Z',
     cid: 'QmZ4tjBvTfH2fX9y1_X9y1_X9y1_X9y1_X9y1_X9y1_X9y1',
     ipfsUrl: 'ipfs://QmZ4tjBvTfH2fX9y1_X9y1_X9y1_X9y1_X9y1_X9y1_X9y1'
   },
@@ -83,6 +95,7 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', 
     duration: 245, 
     genre: 'Ambient', 
+    mood: 'Chill',
     isNFT: true, 
     artistVerified: false, 
     price: '5.0', 
@@ -92,6 +105,7 @@ Everything is clear in the neon light`
     playCount: 15600, 
     likes: 1200, 
     releaseDate: '2023-09-20',
+    createdAt: '2023-09-20T00:00:00Z',
     cid: 'QmT7y1_X9y1_X9y1_X9y1_X9y1_X9y1_X9y1_X9y1_X9y1',
     ipfsUrl: 'ipfs://QmT7y1_X9y1_X9y1_X9y1_X9y1_X9y1_X9y1_X9y1_X9y1'
   },
@@ -104,6 +118,7 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', 
     duration: 195, 
     genre: 'Pop', 
+    mood: 'Happy',
     isNFT: false, 
     artistVerified: true, 
     bpm: 120, 
@@ -111,7 +126,8 @@ Everything is clear in the neon light`
     bitrate: '320kbps', 
     playCount: 22000, 
     likes: 3100, 
-    releaseDate: '2023-12-01' 
+    releaseDate: '2023-12-01',
+    createdAt: '2023-12-01T00:00:00Z'
   },
   { 
     id: '5', 
@@ -122,6 +138,7 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', 
     duration: 220, 
     genre: 'Electronic', 
+    mood: 'Energetic',
     isNFT: true, 
     artistVerified: false, 
     price: '1.2', 
@@ -130,7 +147,8 @@ Everything is clear in the neon light`
     bitrate: '320kbps', 
     playCount: 5400, 
     likes: 210, 
-    releaseDate: '2023-11-28' 
+    releaseDate: '2023-11-28',
+    createdAt: '2023-11-28T00:00:00Z'
   },
   { 
     id: '6', 
@@ -141,6 +159,7 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3', 
     duration: 205, 
     genre: 'Techno', 
+    mood: 'Energetic',
     isNFT: true, 
     artistVerified: true, 
     price: '3.0', 
@@ -149,7 +168,8 @@ Everything is clear in the neon light`
     bitrate: 'FLAC', 
     playCount: 9800, 
     likes: 650, 
-    releaseDate: '2023-10-30' 
+    releaseDate: '2023-10-30',
+    createdAt: '2023-10-30T00:00:00Z'
   },
   { 
     id: '7', 
@@ -160,11 +180,13 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3', 
     duration: 190, 
     genre: 'Synthwave', 
+    mood: 'Chill',
     isNFT: false, 
     artistVerified: true, 
     playCount: 4500, 
     likes: 320, 
-    releaseDate: '2024-01-15' 
+    releaseDate: '2024-01-15',
+    createdAt: '2024-01-15T00:00:00Z'
   },
   { 
     id: '8', 
@@ -175,12 +197,14 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3', 
     duration: 230, 
     genre: 'Ambient', 
+    mood: 'Chill',
     isNFT: true, 
     artistVerified: true, 
     price: '4.5', 
     playCount: 12000, 
     likes: 950, 
-    releaseDate: '2024-02-10' 
+    releaseDate: '2024-02-10',
+    createdAt: '2024-02-10T00:00:00Z'
   },
   { 
     id: '9', 
@@ -191,11 +215,13 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3', 
     duration: 175, 
     genre: 'Electronic', 
+    mood: 'Energetic',
     isNFT: false, 
     artistVerified: true, 
     playCount: 6700, 
     likes: 480, 
-    releaseDate: '2024-02-28' 
+    releaseDate: '2024-02-28',
+    createdAt: '2024-02-28T00:00:00Z'
   },
   { 
     id: '10', 
@@ -206,12 +232,14 @@ Everything is clear in the neon light`
     audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3', 
     duration: 300, 
     genre: 'Ambient', 
+    mood: 'Melancholic',
     isNFT: true, 
     artistVerified: false, 
     price: '10.0', 
     playCount: 3400, 
     likes: 150, 
-    releaseDate: '2024-03-01' 
+    releaseDate: '2024-03-01',
+    createdAt: '2024-03-01T00:00:00Z'
   },
 ];
 
@@ -268,6 +296,10 @@ export const MOCK_USER: UserProfile = {
   following: 562,
   earnings: 124.5,
   isVerifiedArtist: true,
+  jamBalance: 10000,
+  stakedJam: 0,
+  pendingJamRewards: 0,
+  lastStakingUpdate: new Date().toISOString(),
   streamingEarnings: 45.2,
   nftEarnings: 79.3,
   followedArtists: ['a1', 'a2', 'a4'],
@@ -422,6 +454,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a1', 
     name: 'Neon Voyager', 
+    handle: '@neon_voyager',
     walletAddress: 'UQCc_NeonVoyager_x9y1_v8s2_m5n6_z2w3',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Neon%20Voyager?width=200&height=200&nologo=true', 
     followers: 12400, 
@@ -448,6 +481,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a2', 
     name: 'Byte Beat', 
+    handle: '@byte_beat',
     walletAddress: 'UQByteBeat_n7m2_k9p4_j8h3_f5g6',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Byte%20Beat?width=200&height=200&nologo=true', 
     followers: 8900, 
@@ -474,6 +508,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a3', 
     name: 'Echo Phase', 
+    handle: '@echo_phase',
     walletAddress: 'UQEchoPhase_v8s1_m5n6_k9p4_j8h3',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Echo%20Phase?width=200&height=200&nologo=true', 
     followers: 5600, 
@@ -492,6 +527,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a4', 
     name: 'Luna Ray', 
+    handle: '@lunaray',
     walletAddress: 'UQLunaRay_p3q9_r7t8_w2x4_b1c2',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Luna%20Ray?width=200&height=200&nologo=true', 
     followers: 15200, 
@@ -510,6 +546,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a5', 
     name: 'City Ghost', 
+    handle: '@city_ghost',
     walletAddress: 'UQCityGhost_w2x4_b1c2_d5f6_g7h8',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20City%20Ghost?width=200&height=200&nologo=true', 
     followers: 4300, 
@@ -528,6 +565,7 @@ export const MOCK_ARTISTS: Artist[] = [
   { 
     id: 'a6', 
     name: 'Prism Core', 
+    handle: '@prism_core',
     walletAddress: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Prism%20Core?width=200&height=200&nologo=true', 
     followers: 7800, 

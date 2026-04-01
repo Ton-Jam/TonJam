@@ -5,14 +5,12 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post, ExclusiveContent, Task } from '@/types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
-import { supabase } from '@/lib/supabase';
+import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
+import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { getPlaceholderImage } from '@/lib/utils';
 
-// Helper for Supabase errors
-const handleSupabaseError = (error: any, operation: string, path: string) => {
-  console.error(`Supabase Error [${operation}] at ${path}:`, error);
-  toast.error(`Database error: ${error.message || 'Unknown error'}`);
-};
+// Helper for Firestore errors (already imported from firebase.ts)
 
 interface Notification {
   id: string;
@@ -36,6 +34,11 @@ interface AudioContextType {
   followedUserIds: string[];
   trackToAddToPlaylist: Track | null;
   optionsTrack: Track | null;
+  optionsCallbacks: {
+    onRemove?: () => void;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+  } | null;
   activePlaylistId: string | null;
   userProfile: UserProfile;
   genesisContractAddress: string | null;
@@ -45,7 +48,10 @@ interface AudioContextType {
   isHighFidelity: boolean;
   exclusiveContent: ExclusiveContent[] | null;
   communityPosts: Post[];
-  addCommunityPost: (post: Post) => void;
+  addCommunityPost: (post: Partial<Post>) => Promise<void>;
+  resetProtocol: () => void;
+  submitSponsorship: (data: any) => Promise<void>;
+  userAddress: string | null;
   playTrack: (track: Track) => Promise<void>;
   togglePlay: () => Promise<void>;
   nextTrack: () => void;
@@ -63,7 +69,7 @@ interface AudioContextType {
   toggleRepeat: () => void;
   addNotification: (message: string, type?: 'success' | 'info' | 'error' | 'warning', duration?: number) => void;
   setTrackToAddToPlaylist: (track: Track | null) => void;
-  setOptionsTrack: (track: Track | null) => void;
+  setOptionsTrack: (track: Track | null, callbacks?: { onRemove?: () => void, onMoveUp?: () => void, onMoveDown?: () => void }) => void;
   setActivePlaylistId: (id: string | null) => void;
   addTrackToPlaylist: (playlistId: string, track: Track) => void;
   removeTrackFromPlaylist: (playlistId: string, trackId: string) => void;
@@ -87,6 +93,8 @@ interface AudioContextType {
   addUserNFT: (nft: NFTItem, silent?: boolean) => void;
   updateNFT: (nftId: string, updates: Partial<NFTItem>, silent?: boolean) => void;
   recordTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp' | 'status'>) => void;
+  depositTON: (amount: string) => Promise<void>;
+  withdrawTON: (amount: string, address: string) => Promise<void>;
   purchaseJAM: (amount: string, jamAmount: string) => Promise<void>;
   subscribePremium: (amount: string) => Promise<void>;
   stakeJam: (amount: string) => Promise<void>;
@@ -121,6 +129,7 @@ interface AudioContextType {
   setIsDiscoverFiltersOpen: (isOpen: boolean) => void;
   isCreatePlaylistModalOpen: boolean;
   setIsCreatePlaylistModalOpen: (isOpen: boolean) => void;
+  featuredPlaylist: Playlist;
   updateRoyaltyConfig: (artistId: string, config: Artist['royaltyConfig']) => void;
   marketplaceFilters: {
     genre: string;
@@ -197,7 +206,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isRepeat, setIsRepeat] = useState(() => localStorage.getItem(STORAGE_KEYS.REPEAT) === 'true');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [trackToAddToPlaylist, setTrackToAddToPlaylist] = useState<Track | null>(null);
-  const [optionsTrack, setOptionsTrack] = useState<Track | null>(null);
+  const [optionsTrack, setOptionsTrackState] = useState<Track | null>(null);
+  const [optionsCallbacks, setOptionsCallbacks] = useState<{
+    onRemove?: () => void;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+  } | null>(null);
+
+  const setOptionsTrack = useCallback((track: Track | null, callbacks?: { onRemove?: () => void, onMoveUp?: () => void, onMoveDown?: () => void }) => {
+    setOptionsTrackState(track);
+    setOptionsCallbacks(callbacks || null);
+  }, []);
+
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
 
   const [activeJamRoom, setActiveJamRoom] = useState<{ id: string, name: string, listeners: number, currentTrack: Track | null } | null>(null);
@@ -326,6 +346,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addNotification("Reward claimed successfully!", "success");
   };
 
+  const cleanObject = <T extends object>(obj: T): T => {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([_, v]) => v !== undefined)
+    ) as T;
+  };
+
   const updateUserRole = async (userId: string, role: 'artist' | 'collector' | 'admin') => {
     if (userProfile.role !== 'admin') {
       addNotification("Only admins can update user roles", "error");
@@ -334,23 +360,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ role })
-        .eq('id', userId);
-
-      if (error) throw error;
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, { role });
       addNotification(`User role updated to ${role}`, "success");
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `users/${userId}/role`);
+      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}/role`);
     } finally {
       setIsLoading(false);
     }
   };
-
-  const allPlaylists = useMemo(() => {
-    return [...CURATED_PLAYLISTS, ...playlists];
-  }, [playlists]);
 
   useEffect(() => {
     localStorage.setItem('tonjam_posts', JSON.stringify(posts));
@@ -366,7 +384,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = auth.currentUser;
       if (isPlaying && currentTrack && user) {
         const streamPaymentTimeout = setTimeout(() => {
           // Simulate a micro-payment for the stream
@@ -412,97 +430,98 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [userTracks, setUserTracks] = useState<Track[]>([]);
   const [userNFTs, setUserNFTs] = useState<NFTItem[]>([]);
-  const [supabasePlaylists, setSupabasePlaylists] = useState<Playlist[]>([]);
-  const [supabaseTransactions, setSupabaseTransactions] = useState<Transaction[]>([]);
-  const [supabasePosts, setSupabasePosts] = useState<Post[]>([]);
-  const [supabaseUsers, setSupabaseUsers] = useState<UserProfile[]>([]);
-  const [supabaseTracks, setSupabaseTracks] = useState<Track[]>([]);
-  const [supabaseNFTs, setSupabaseNFTs] = useState<NFTItem[]>([]);
+  const [firestorePlaylists, setFirestorePlaylists] = useState<Playlist[]>([]);
+  const [firestoreTransactions, setFirestoreTransactions] = useState<Transaction[]>([]);
+  const [firestorePosts, setFirestorePosts] = useState<Post[]>([]);
+  const [firestoreUsers, setFirestoreUsers] = useState<UserProfile[]>([]);
+  const [firestoreTracks, setFirestoreTracks] = useState<Track[]>([]);
+  const [firestoreNFTs, setFirestoreNFTs] = useState<NFTItem[]>([]);
 
-  // Sync with Supabase
+  // Sync with Firebase
   useEffect(() => {
     // Public listeners
-    const tracksSubscription = supabase
-      .channel('tracks')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tracks' }, (payload) => {
-        // Handle changes
-      })
-      .subscribe();
+    const tracksUnsubscribe = onSnapshot(collection(db, 'tracks'), (snapshot) => {
+      const tracks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Track));
+      setFirestoreTracks(tracks);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'tracks', false));
 
-    const nftsSubscription = supabase
-      .channel('nfts')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'nfts' }, (payload) => {
-        // Handle changes
-      })
-      .subscribe();
+    const nftsUnsubscribe = onSnapshot(collection(db, 'nfts'), (snapshot) => {
+      const nfts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NFTItem));
+      setFirestoreNFTs(nfts);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'nfts', false));
 
-    const playlistsSubscription = supabase
-      .channel('playlists')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'playlists' }, (payload) => {
-        // Handle changes
-      })
-      .subscribe();
-
-    const postsSubscription = supabase
-      .channel('posts')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, (payload) => {
-        // Handle changes
-      })
-      .subscribe();
+    const postsUnsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
+      const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post));
+      setFirestorePosts(posts);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'posts', false));
 
     return () => {
-      supabase.removeChannel(tracksSubscription);
-      supabase.removeChannel(nftsSubscription);
-      supabase.removeChannel(playlistsSubscription);
-      supabase.removeChannel(postsSubscription);
+      tracksUnsubscribe();
+      nftsUnsubscribe();
+      postsUnsubscribe();
     };
   }, []);
 
   // Auth-dependent listeners
   useEffect(() => {
-    let usersSubscription: any = null;
-    let transactionsSubscription: any = null;
-    let userDocSubscription: any = null;
+    let usersUnsubscribe: any = null;
+    let transactionsUnsubscribe: any = null;
+    let playlistsUnsubscribe: any = null;
+    let userDocUnsubscribe: any = null;
 
-    const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      // Cleanup previous listeners
+      if (usersUnsubscribe) usersUnsubscribe();
+      if (transactionsUnsubscribe) transactionsUnsubscribe();
+      if (playlistsUnsubscribe) playlistsUnsubscribe();
+      if (userDocUnsubscribe) userDocUnsubscribe();
 
       if (user) {
         // 1. Start protected collection listeners
-        usersSubscription = supabase
-          .channel('users-channel')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, (payload) => {
-            // Fetch all users again or update local state based on payload
-            supabase.from('users').select('*').then(({ data }) => setSupabaseUsers(data || []));
-          })
-          .subscribe();
+        usersUnsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
+          const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
+          setFirestoreUsers(users);
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'users', false));
 
-        transactionsSubscription = supabase
-          .channel('transactions-channel')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, (payload) => {
-            // Fetch all transactions again or update local state based on payload
-            supabase.from('transactions').select('*').order('timestamp', { ascending: false }).then(({ data }) => setSupabaseTransactions(data || []));
-          })
-          .subscribe();
+        const transactionsQuery = query(
+          collection(db, 'transactions'), 
+          or(
+            where('senderAddress', '==', user.uid),
+            where('recipientAddress', '==', user.uid)
+          ),
+          orderBy('timestamp', 'desc')
+        );
+        transactionsUnsubscribe = onSnapshot(transactionsQuery, (snapshot) => {
+          const txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+          setFirestoreTransactions(txs);
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'transactions', false));
+
+        const playlistsQuery = query(
+          collection(db, 'playlists'),
+          or(
+            where('isPrivate', '==', false),
+            where('creator', '==', user.uid)
+          )
+        );
+        playlistsUnsubscribe = onSnapshot(playlistsQuery, (snapshot) => {
+          const playlists = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Playlist));
+          setFirestorePlaylists(playlists);
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'playlists', false));
 
         // 2. Initial fetch and setup listener for current user profile
         try {
-          const { data: userProfile, error: userError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
 
-          if (userError && userError.code === 'PGRST116') {
+          if (!userSnap.exists()) {
             // Profile doesn't exist, create it
             const newProfile: UserProfile = {
               ...MOCK_USER,
-              id: user.id,
-              name: user.user_metadata.full_name || 'Anonymous',
-              avatar: user.user_metadata.avatar_url || getPlaceholderImage(`user-${user.id}`, 200, 200),
+              id: user.uid,
+              name: user.displayName || 'Anonymous',
+              avatar: user.photoURL || getPlaceholderImage(`user-${user.uid}`, 200, 200),
               walletAddress: '',
-              handle: user.email?.split('@')[0] || `user_${user.id.slice(0, 5)}`,
+              handle: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
               followers: 0,
               following: 0,
               earnings: 0,
@@ -515,66 +534,71 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               followedUserIds: [],
               createdAt: new Date().toISOString()
             };
-            await supabase.from('users').upsert(newProfile);
+            await setDoc(userRef, newProfile);
             setUserProfile(newProfile);
-          } else if (userProfile) {
-            setUserProfile(userProfile as UserProfile);
+          } else {
+            setUserProfile(userSnap.data() as UserProfile);
           }
+
+          // Real-time listener for current user profile
+          userDocUnsubscribe = onSnapshot(userRef, (snapshot) => {
+            if (snapshot.exists()) {
+              setUserProfile(snapshot.data() as UserProfile);
+            }
+          }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`, false));
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }
-
-        // Real-time listener for current user profile
-        userDocSubscription = supabase
-          .channel('user-profile-channel')
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${user.id}` }, (payload) => {
-            setUserProfile(payload.new as UserProfile);
-          })
-          .subscribe();
       } else {
-        setSupabaseUsers([]);
-        setSupabaseTransactions([]);
+        setFirestoreUsers([]);
+        setFirestoreTransactions([]);
         setUserProfile(MOCK_USER);
+        if (usersUnsubscribe) usersUnsubscribe();
+        if (transactionsUnsubscribe) transactionsUnsubscribe();
+        if (userDocUnsubscribe) userDocUnsubscribe();
+        if (playlistsUnsubscribe) playlistsUnsubscribe();
+
+        // Public playlists for unauthenticated users
+        const playlistsQuery = query(collection(db, 'playlists'), where('isPrivate', '==', false));
+        playlistsUnsubscribe = onSnapshot(playlistsQuery, (snapshot) => {
+          const playlists = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Playlist));
+          setFirestorePlaylists(playlists);
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'playlists', false));
       }
-    };
-
-    initAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      initAuth();
     });
 
     return () => {
-      subscription.unsubscribe();
-      if (usersSubscription) supabase.removeChannel(usersSubscription);
-      if (transactionsSubscription) supabase.removeChannel(transactionsSubscription);
-      if (userDocSubscription) supabase.removeChannel(userDocSubscription);
+      unsubscribeAuth();
+      if (usersUnsubscribe) usersUnsubscribe();
+      if (transactionsUnsubscribe) transactionsUnsubscribe();
+      if (playlistsUnsubscribe) playlistsUnsubscribe();
+      if (userDocUnsubscribe) userDocUnsubscribe();
     };
   }, []);
 
-  // Update local state when supabase data changes
+  // Update local state when firestore data changes
   useEffect(() => {
-    if (supabasePlaylists.length > 0) {
-      setPlaylists(supabasePlaylists);
+    if (firestorePlaylists.length > 0) {
+      setPlaylists(firestorePlaylists);
     }
-  }, [supabasePlaylists]);
+  }, [firestorePlaylists]);
 
   useEffect(() => {
-    if (supabaseTransactions.length > 0) {
-      setTransactions(supabaseTransactions);
+    if (firestoreTransactions.length > 0) {
+      setTransactions(firestoreTransactions);
     }
-  }, [supabaseTransactions]);
+  }, [firestoreTransactions]);
 
   useEffect(() => {
-    if (supabasePosts.length > 0) {
-      setPosts(supabasePosts);
+    if (firestorePosts.length > 0) {
+      setPosts(firestorePosts);
     }
-  }, [supabasePosts]);
+  }, [firestorePosts]);
 
   useEffect(() => {
-    if (supabaseUsers.length > 0) {
-      // Sync artists with supabaseUsers who are verified artists
-      const supabaseArtists = supabaseUsers
+    if (firestoreUsers.length > 0) {
+      // Sync artists with firestoreUsers who are verified artists
+      const firestoreArtists = firestoreUsers
         .filter(u => u.isVerifiedArtist)
         .map(u => ({
           id: u.id,
@@ -595,25 +619,63 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
         } as Artist));
       
-      if (supabaseArtists.length > 0) {
-        setArtists(supabaseArtists);
+      if (firestoreArtists.length > 0) {
+        setArtists(firestoreArtists);
       }
     }
-  }, [supabaseUsers]);
+  }, [firestoreUsers]);
 
   const allTracks = React.useMemo(() => {
-    const combined = [...supabaseTracks, ...MOCK_TRACKS];
+    const combined = [...firestoreTracks, ...MOCK_TRACKS];
     // De-duplicate by ID
     const unique = Array.from(new Map(combined.map(t => [t.id, t])).values());
     return unique;
-  }, [supabaseTracks]);
+  }, [firestoreTracks]);
+
+  const featuredPlaylist = useMemo(() => {
+    // Logic to get featured tracks: mix of popular and newest
+    const popular = [...allTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 6);
+    const newest = [...allTracks].sort((a, b) => new Date(b.releaseDate || 0).getTime() - new Date(a.releaseDate || 0).getTime()).slice(0, 6);
+    
+    // Combine and de-duplicate, ensuring variety of artists
+    const combined = [...popular, ...newest];
+    const uniqueTrackIds = new Set<string>();
+    const artistCount = new Map<string, number>();
+    
+    const featuredTracks: string[] = [];
+    
+    combined.forEach(track => {
+      if (!uniqueTrackIds.has(track.id)) {
+        const count = artistCount.get(track.artist) || 0;
+        if (count < 2) { // Max 2 tracks per artist in featured
+          featuredTracks.push(track.id);
+          uniqueTrackIds.add(track.id);
+          artistCount.set(track.artist, count + 1);
+        }
+      }
+    });
+
+    return {
+      id: 'featured-tracks',
+      title: 'Featured Tracks',
+      coverUrl: 'https://image.pollinations.ai/prompt/playlist%20cover%20Featured%20Tracks%20dynamic%20music%20vibrant?width=600&height=600&nologo=true',
+      trackCount: featuredTracks.length,
+      creator: 'TonJam AI',
+      description: 'Dynamically updated with popular hits and fresh releases from across the TON ecosystem.',
+      trackIds: featuredTracks
+    };
+  }, [allTracks]);
+
+  const allPlaylists = useMemo(() => {
+    return [featuredPlaylist, ...CURATED_PLAYLISTS, ...playlists];
+  }, [playlists, featuredPlaylist]);
 
   const allNFTs = React.useMemo(() => {
-    const combined = [...supabaseNFTs, ...MOCK_NFTS];
+    const combined = [...firestoreNFTs, ...MOCK_NFTS];
     // De-duplicate by ID
     const unique = Array.from(new Map(combined.map(n => [n.id, n])).values());
     return unique;
-  }, [supabaseNFTs]);
+  }, [firestoreNFTs]);
 
   const getTrendingTracks = useCallback(() => {
     return [...allTracks].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 10);
@@ -763,10 +825,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     if (userProfile.id) {
-      setUserTracks(supabaseTracks.filter(t => t.artistId === userProfile.id));
-      setUserNFTs(supabaseNFTs.filter(n => n.artistId === userProfile.id || n.owner === userProfile.walletAddress));
+      setUserTracks(firestoreTracks.filter(t => t.artistId === userProfile.id));
+      setUserNFTs(firestoreNFTs.filter(n => n.artistId === userProfile.id || n.owner === userProfile.walletAddress));
     }
-  }, [supabaseTracks, supabaseNFTs, userProfile]);
+  }, [firestoreTracks, firestoreNFTs, userProfile]);
 
   const updateNFT = async (nftId: string, updates: Partial<NFTItem>, silent: boolean = false) => {
     setIsLoading(true);
@@ -774,14 +836,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const cleanUpdates = Object.fromEntries(
         Object.entries(updates).filter(([_, v]) => v !== undefined)
       );
-      const { error } = await supabase
-        .from('nfts')
-        .update(cleanUpdates)
-        .eq('id', nftId);
-      if (error) throw error;
+      await updateDoc(doc(db, 'nfts', nftId), cleanUpdates);
       if (!silent) addNotification("Asset protocol updated", "success");
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `nfts/${nftId}`);
+      handleFirestoreError(error, OperationType.UPDATE, `nfts/${nftId}`);
     } finally {
       setIsLoading(false);
     }
@@ -790,13 +848,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addUserTrack = async (track: Track) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('tracks')
-        .insert(track);
-      if (error) throw error;
+      const cleanTrack = cleanObject(track);
+      await setDoc(doc(db, 'tracks', track.id), cleanTrack);
       addNotification(`Track "${track.title}" uploaded`, "success");
     } catch (error) {
-      handleSupabaseError(error, 'INSERT', `tracks/${track.id}`);
+      handleFirestoreError(error, OperationType.CREATE, `tracks/${track.id}`);
     } finally {
       setIsLoading(false);
     }
@@ -805,14 +861,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const deleteTrack = async (trackId: string) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('tracks')
-        .delete()
-        .eq('id', trackId);
-      if (error) throw error;
+      await deleteDoc(doc(db, 'tracks', trackId));
       addNotification("Track deleted successfully", "success");
     } catch (error) {
-      handleSupabaseError(error, 'DELETE', `tracks/${trackId}`);
+      handleFirestoreError(error, OperationType.DELETE, `tracks/${trackId}`);
     } finally {
       setIsLoading(false);
     }
@@ -821,13 +873,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addUserNFT = async (nft: NFTItem, silent: boolean = false) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('nfts')
-        .insert(nft);
-      if (error) throw error;
+      const cleanNFT = cleanObject(nft);
+      await setDoc(doc(db, 'nfts', nft.id), cleanNFT);
       if (!silent) addNotification(`NFT "${nft.title}" minted`, "success");
     } catch (error) {
-      handleSupabaseError(error, 'INSERT', `nfts/${nft.id}`);
+      handleFirestoreError(error, OperationType.CREATE, `nfts/${nft.id}`);
     } finally {
       setIsLoading(false);
     }
@@ -842,14 +892,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         anthemId: nftId || undefined
       }));
 
-      // Update Supabase if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { error } = await supabase
-          .from('users')
-          .update({ anthemId: nftId })
-          .eq('id', user.id);
-        if (error) throw error;
+      // Update Firestore if user is logged in
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), { anthemId: nftId });
       }
 
       if (nftId) {
@@ -911,25 +956,57 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearInterval(interval);
   }, [userProfile.walletAddress]);
 
-  // Staking Reward Accumulation
+  const syncStakingRewards = useCallback(async () => {
+    if (!auth.currentUser || !userProfile.stakedJam || userProfile.stakedJam <= 0) return;
+
+    const lastUpdate = userProfile.lastStakingUpdate ? new Date(userProfile.lastStakingUpdate).getTime() : Date.now();
+    const now = Date.now();
+    const secondsPassed = (now - lastUpdate) / 1000;
+
+    if (secondsPassed < 5) return; // Only sync if at least 5 seconds passed
+
+    const staked = Number(userProfile.stakedJam);
+    const apr = 0.15; // 15%
+    const rewardRatePerSecond = apr / (365 * 24 * 60 * 60);
+    const reward = staked * rewardRatePerSecond * secondsPassed;
+
+    if (reward > 0.000001) { // Only sync if reward is meaningful
+      try {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          pendingJamRewards: increment(reward),
+          lastStakingUpdate: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error syncing staking rewards:', error);
+      }
+    }
+  }, [userProfile.stakedJam, userProfile.lastStakingUpdate]);
+
+  // Staking Reward Accumulation (Local UI updates)
   useEffect(() => {
+    if (!userProfile.stakedJam || userProfile.stakedJam <= 0) return;
+
     const interval = setInterval(() => {
-      const staked = parseFloat(userProfile.stakedJam || '0');
+      const staked = Number(userProfile.stakedJam || 0);
       if (staked > 0) {
-        // 15% APR roughly
-        // 0.15 / (365 * 24 * 60 * 6) -> rewards per 10 seconds
         const rewardRate = 0.15 / (365 * 24 * 60 * 6); 
         const reward = staked * rewardRate;
         
         setUserProfile(prev => ({
           ...prev,
-          pendingJamRewards: (parseFloat(prev.pendingJamRewards || '0') + reward).toString()
+          pendingJamRewards: (prev.pendingJamRewards || 0) + reward
         }));
       }
-    }, 10000); // Every 10 seconds
+    }, 10000);
 
-    return () => clearInterval(interval);
-  }, [userProfile.stakedJam]);
+    // Periodic sync to Firestore (every 2 minutes)
+    const syncInterval = setInterval(syncStakingRewards, 120000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(syncInterval);
+    };
+  }, [userProfile.stakedJam, syncStakingRewards]);
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -995,13 +1072,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const syncWallet = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (tonAddress && user && userProfile.walletAddress !== tonAddress) {
+      if (tonAddress && auth.currentUser && userProfile.walletAddress !== tonAddress) {
         try {
-          await supabase
-            .from('users')
-            .update({ walletAddress: tonAddress })
-            .eq('id', user.id);
+          await updateDoc(doc(db, 'users', auth.currentUser.uid), { walletAddress: tonAddress });
           setUserProfile(prev => ({ ...prev, walletAddress: tonAddress }));
           addNotification("Wallet address synced with profile", "success");
         } catch (error) {
@@ -1024,9 +1097,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('transactions').insert(newTx);
+      const cleanTx = cleanObject(newTx);
+      if (auth.currentUser) {
+        await setDoc(doc(db, 'transactions', txId), cleanTx);
       }
       setTransactions(prev => [newTx, ...prev]);
       
@@ -1035,45 +1108,131 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const share = Number(txData.artistShare);
         
         // If the recipient is the current user, update their profile earnings
-        if (txData.recipientAddress === userProfile.walletAddress && user) {
-          const { data: currentUser } = await supabase.from('users').select('earnings, streamingEarnings, nftEarnings').eq('id', userProfile.id).single();
-          if (currentUser) {
+        if (txData.recipientAddress === userProfile.walletAddress && auth.currentUser) {
+          const userRef = doc(db, 'users', userProfile.id);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const currentUser = userSnap.data() as UserProfile;
             const updateFields: any = {
-              earnings: currentUser.earnings + share
+              earnings: increment(share)
             };
             if (txData.type === 'stream') {
-              updateFields.streamingEarnings = currentUser.streamingEarnings + share;
+              updateFields.streamingEarnings = increment(share);
             } else if (txData.type === 'nft_sale') {
-              updateFields.nftEarnings = currentUser.nftEarnings + share;
+              updateFields.nftEarnings = increment(share);
             }
-            await supabase.from('users').update(updateFields).eq('id', userProfile.id);
+            await updateDoc(userRef, updateFields);
           }
         }
         
-        // Update the artist's earnings in Supabase if they are a registered user
+        // Update the artist's earnings in Firestore if they are a registered user
         const artistId = txData.trackId 
           ? allTracks.find(t => t.id === txData.trackId)?.artistId 
           : txData.nftId 
             ? allNFTs.find(n => n.id === txData.nftId)?.artistId 
             : null;
 
-        if (artistId && user) {
-          const { data: artistUser } = await supabase.from('users').select('earnings, streamingEarnings, nftEarnings').eq('id', artistId).single();
-          if (artistUser) {
+        if (artistId && auth.currentUser) {
+          const artistRef = doc(db, 'users', artistId);
+          const artistSnap = await getDoc(artistRef);
+          if (artistSnap.exists()) {
             const updateFields: any = {
-              earnings: artistUser.earnings + share
+              earnings: increment(share)
             };
             if (txData.type === 'stream') {
-              updateFields.streamingEarnings = artistUser.streamingEarnings + share;
+              updateFields.streamingEarnings = increment(share);
             } else if (txData.type === 'nft_sale') {
-              updateFields.nftEarnings = artistUser.nftEarnings + share;
+              updateFields.nftEarnings = increment(share);
             }
-            await supabase.from('users').update(updateFields).eq('id', artistId);
+            await updateDoc(artistRef, updateFields);
           }
         }
       }
     } catch (error) {
-      handleSupabaseError(error, 'CREATE', `transactions/${txId}`);
+      handleFirestoreError(error, OperationType.CREATE, `transactions/${txId}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const depositTON = async (amount: string) => {
+    setIsLoading(true);
+    try {
+      if (!tonConnectUI.connected) {
+        addNotification("Please connect your wallet first", "error");
+        return;
+      }
+
+      // Simulate a deposit transaction
+      // In a real app, this would call a smart contract to deposit TON
+      const success = await tonService.depositTON(tonConnectUI, amount);
+      
+      if (success) {
+        recordTransaction({
+          type: 'deposit',
+          amount: Number(amount),
+          platformFee: 0,
+          artistShare: 0,
+          recipientAddress: 'PLATFORM_WALLET',
+          senderAddress: userProfile.walletAddress,
+          txHash: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        });
+
+        setUserProfile(prev => ({
+          ...prev,
+          tonBalance: (prev.tonBalance || 0) + Number(amount)
+        }));
+
+        addNotification(`Successfully deposited ${amount} TON`, "success");
+      }
+    } catch (error) {
+      console.error("Deposit error:", error);
+      addNotification("Failed to deposit TON", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const withdrawTON = async (amount: string, address: string) => {
+    setIsLoading(true);
+    try {
+      if (!tonConnectUI.connected) {
+        addNotification("Please connect your wallet first", "error");
+        return;
+      }
+
+      if ((userProfile.tonBalance || 0) < Number(amount)) {
+        addNotification("Insufficient TON balance", "error");
+        return;
+      }
+
+      // Simulate a withdrawal transaction
+      // In a real app, this would call a backend service to send TON from the platform wallet to the user
+      // We'll simulate success here
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const success = true;
+      
+      if (success) {
+        recordTransaction({
+          type: 'withdrawal',
+          amount: Number(amount),
+          platformFee: 0,
+          artistShare: 0,
+          recipientAddress: address,
+          senderAddress: 'PLATFORM_WALLET',
+          txHash: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        });
+
+        setUserProfile(prev => ({
+          ...prev,
+          tonBalance: Math.max(0, (prev.tonBalance || 0) - Number(amount))
+        }));
+
+        addNotification(`Successfully withdrew ${amount} TON`, "success");
+      }
+    } catch (error) {
+      console.error("Withdrawal error:", error);
+      addNotification("Failed to withdraw TON", "error");
     } finally {
       setIsLoading(false);
     }
@@ -1100,12 +1259,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           trackTitle: `Purchased ${jamAmount} JAM`
         });
         
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: currentUser } = await supabase.from('users').select('jamBalance').eq('id', user.id).single();
-          if (currentUser) {
-            await supabase.from('users').update({ jamBalance: currentUser.jamBalance + Number(jamAmount) }).eq('id', user.id);
-          }
+        if (auth.currentUser) {
+          const userRef = doc(db, 'users', auth.currentUser.uid);
+          await updateDoc(userRef, { jamBalance: increment(Number(jamAmount)) });
         }
         
         addNotification(`Successfully purchased ${jamAmount} JAM!`, 'success');
@@ -1138,12 +1294,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           trackTitle: 'Premium Subscription'
         });
         
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase
-            .from('users')
-            .update({ isPremium: true })
-            .eq('id', user.id);
+        if (auth.currentUser) {
+          await updateDoc(doc(db, 'users', auth.currentUser.uid), { isPremium: true });
         }
         
         addNotification('Welcome to TonJam Premium!', 'success');
@@ -1158,7 +1310,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const stakeJam = async (amount: string) => {
     setIsLoading(true);
     try {
-      const currentBalance = parseFloat(userProfile.jamBalance || '0');
+      await syncStakingRewards(); // Sync rewards before changing stake amount
+      const currentBalance = Number(userProfile.jamBalance || 0);
       const stakeAmount = parseFloat(amount);
 
       if (stakeAmount <= 0) {
@@ -1174,16 +1327,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Simulate blockchain delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('users')
-          .update({
-            jamBalance: supabase.rpc('increment', { amount: -stakeAmount }),
-            stakedJam: supabase.rpc('increment', { amount: stakeAmount }),
-            lastStakingUpdate: new Date().toISOString()
-          })
-          .eq('id', user.id);
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          jamBalance: increment(-stakeAmount),
+          stakedJam: increment(stakeAmount),
+          lastStakingUpdate: new Date().toISOString()
+        });
       }
 
       recordTransaction({
@@ -1207,7 +1356,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const unstakeJam = async (amount: string) => {
     setIsLoading(true);
     try {
-      const currentStaked = parseFloat(userProfile.stakedJam || '0');
+      await syncStakingRewards(); // Sync rewards before changing stake amount
+      const currentStaked = Number(userProfile.stakedJam || 0);
       const unstakeAmount = parseFloat(amount);
 
       if (unstakeAmount <= 0) {
@@ -1223,16 +1373,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Simulate blockchain delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('users')
-          .update({
-            stakedJam: supabase.rpc('increment', { amount: -unstakeAmount }),
-            jamBalance: supabase.rpc('increment', { amount: unstakeAmount }),
-            lastStakingUpdate: new Date().toISOString()
-          })
-          .eq('id', user.id);
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          stakedJam: increment(-unstakeAmount),
+          jamBalance: increment(unstakeAmount),
+          lastStakingUpdate: new Date().toISOString()
+        });
       }
 
       recordTransaction({
@@ -1256,7 +1402,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const claimJamRewards = async () => {
     setIsLoading(true);
     try {
-      const pendingRewards = parseFloat(userProfile.pendingJamRewards || '0');
+      await syncStakingRewards(); // Sync rewards before claiming
+      const pendingRewards = Number(userProfile.pendingJamRewards || 0);
 
       if (pendingRewards <= 0) {
         addNotification("No rewards to claim", "info");
@@ -1266,16 +1413,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Simulate blockchain delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('users')
-          .update({
-            pendingJamRewards: 0,
-            jamBalance: supabase.rpc('increment', { amount: pendingRewards }),
-            lastStakingUpdate: new Date().toISOString()
-          })
-          .eq('id', user.id);
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          pendingJamRewards: 0,
+          jamBalance: increment(pendingRewards),
+          lastStakingUpdate: new Date().toISOString()
+        });
       }
 
       recordTransaction({
@@ -1314,10 +1457,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     
     try {
-      await supabase.from('posts').insert(newPost);
+      // Filter out undefined values to prevent Firestore errors
+      const cleanPost = Object.fromEntries(
+        Object.entries(newPost).filter(([_, v]) => v !== undefined)
+      ) as Post;
+      
+      await setDoc(doc(db, 'posts', postId), cleanPost);
       setPosts(prev => [newPost, ...prev]);
     } catch (error) {
-      handleSupabaseError(error, 'CREATE', `posts/${postId}`);
+      handleFirestoreError(error, OperationType.CREATE, `posts/${postId}`);
     } finally {
       setIsLoading(false);
     }
@@ -1327,30 +1475,33 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsLoading(true);
     try {
       if (postId.startsWith('post-')) {
-        await supabase.from('posts').delete().eq('id', postId);
+        await deleteDoc(doc(db, 'posts', postId));
       }
       setPosts(prev => prev.filter(p => p.id !== postId));
       addNotification("Post deleted", "success");
     } catch (error) {
-      handleSupabaseError(error, 'DELETE', `posts/${postId}`);
+      handleFirestoreError(error, OperationType.DELETE, `posts/${postId}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   const updatePost = async (postId: string, updates: Partial<Post>) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    if (!auth.currentUser) {
       addNotification("Please log in to perform this action", "error");
       return;
     }
     try {
       if (postId.startsWith('post-')) {
-        await supabase.from('posts').update(updates).eq('id', postId);
+        // Filter out undefined values to prevent Firestore errors
+        const cleanUpdates = Object.fromEntries(
+          Object.entries(updates).filter(([_, v]) => v !== undefined)
+        );
+        await updateDoc(doc(db, 'posts', postId), cleanUpdates);
       }
       setPosts(prev => prev.map(p => p.id === postId ? { ...p, ...updates } : p));
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `posts/${postId}`);
+      handleFirestoreError(error, OperationType.UPDATE, `posts/${postId}`);
     }
   };
 
@@ -1368,12 +1519,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Simulate blockchain delay
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('users')
-          .update({ jamBalance: supabase.rpc('increment', { amount: -jamCost }) })
-          .eq('id', user.id);
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          jamBalance: increment(-jamCost)
+        });
       }
 
       setPosts(prev => prev.map(p => {
@@ -1423,17 +1572,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         artist.id === artistId ? { ...artist, royaltyConfig: config } : artist
       ));
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('users')
-          .update({ royaltyConfig: config })
-          .eq('id', artistId);
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', artistId), { royaltyConfig: config });
       }
 
       addNotification("Royalty protocol updated", "success");
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `users/${artistId}`);
+      handleFirestoreError(error, OperationType.UPDATE, `users/${artistId}`);
     } finally {
       setIsLoading(false);
     }
@@ -1668,17 +1813,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       setLikedTrackIds(newLikedTrackIds);
       
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('users')
-          .update({ likedTrackIds: newLikedTrackIds })
-          .eq('id', user.id);
+      if (auth.currentUser) {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, { likedTrackIds: newLikedTrackIds });
 
-        await supabase
-          .from('tracks')
-          .update({ likes: supabase.rpc('increment', { amount: isLiked ? -1 : 1 }) })
-          .eq('id', trackId);
+        const trackRef = doc(db, 'tracks', trackId);
+        await updateDoc(trackRef, { likes: increment(isLiked ? -1 : 1) });
       }
       
       if (isLiked) {
@@ -1687,7 +1827,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addNotification("Track added to favorites", "success");
       }
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `tracks/${trackId}`);
+      handleFirestoreError(error, OperationType.UPDATE, `tracks/${trackId}`);
     } finally {
       setIsLoading(false);
     }
@@ -1728,20 +1868,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }));
 
       // Update Firebase if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('users')
-          .update({
-            followedUserIds: newFollowedUserIds,
-            following: newFollowedUserIds.length
-          })
-          .eq('id', user.id);
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          followedUserIds: newFollowedUserIds,
+          following: newFollowedUserIds.length
+        });
 
-        await supabase
-          .from('users')
-          .update({ followers: supabase.rpc('increment', { amount: isFollowing ? -1 : 1 }) })
-          .eq('id', userId);
+        await updateDoc(doc(db, 'users', userId), { 
+          followers: increment(isFollowing ? -1 : 1) 
+        });
       }
 
       if (isFollowing) {
@@ -1750,7 +1885,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addNotification("Followed user", "success");
       }
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `users/${userId}`);
+      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}`);
     } finally {
       setIsLoading(false);
     }
@@ -1790,7 +1925,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     try {
-      await supabase.from('playlists').insert(newPlaylist);
+      const cleanPlaylist = cleanObject(newPlaylist);
+      await setDoc(doc(db, 'playlists', playlistId), cleanPlaylist);
       setPlaylists(prev => [newPlaylist, ...prev]);
       if (initialTrack) {
         addNotification(`Created "${name}" and added "${initialTrack.title}"`, 'success');
@@ -1798,7 +1934,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addNotification(`Created playlist "${name}"`, 'success');
       }
     } catch (error) {
-      handleSupabaseError(error, 'CREATE', `playlists/${playlistId}`);
+      handleFirestoreError(error, OperationType.CREATE, `playlists/${playlistId}`);
     } finally {
       setIsLoading(false);
     }
@@ -1807,11 +1943,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const deletePlaylist = async (playlistId: string) => {
     setIsLoading(true);
     try {
-      await supabase.from('playlists').delete().eq('id', playlistId);
+      await deleteDoc(doc(db, 'playlists', playlistId));
       setPlaylists(prev => prev.filter(pl => pl.id !== playlistId));
       addNotification("Playlist deleted", "info");
     } catch (error) {
-      handleSupabaseError(error, 'DELETE', `playlists/${playlistId}`);
+      handleFirestoreError(error, OperationType.DELETE, `playlists/${playlistId}`);
     } finally {
       setIsLoading(false);
     }
@@ -1821,11 +1957,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsLoading(true);
     try {
       const updated = { ...updates, updatedAt: new Date().toISOString() };
-      await supabase.from('playlists').update(updated).eq('id', playlistId);
+      const cleanUpdates = cleanObject(updated);
+      await updateDoc(doc(db, 'playlists', playlistId), cleanUpdates);
       setPlaylists(prev => prev.map(pl => pl.id === playlistId ? { ...pl, ...updated } : pl));
       addNotification("Playlist updated", "success");
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `playlists/${playlistId}`);
+      handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
     } finally {
       setIsLoading(false);
     }
@@ -1904,9 +2041,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       };
       
       // Update Firebase if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('playlists').upsert(newPlaylist);
+      if (auth.currentUser) {
+        await setDoc(doc(db, 'playlists', playlistId), newPlaylist);
       }
       
       setPlaylists(prev => {
@@ -1920,7 +2056,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       addNotification('Your Discover Weekly playlist has been updated!', 'success');
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', 'playlists/discover-weekly');
+      handleFirestoreError(error, OperationType.UPDATE, 'playlists/discover-weekly');
     } finally {
       setIsLoading(false);
     }
@@ -1954,9 +2090,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           updatedAt: new Date().toISOString()
         };
 
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from('playlists').insert(newPlaylist);
+        if (auth.currentUser) {
+          await setDoc(doc(db, 'playlists', playlistId), newPlaylist);
         }
 
         setPlaylists(prev => [newPlaylist, ...prev]);
@@ -2034,9 +2169,8 @@ Return a JSON object with the following structure:
         updatedAt: new Date().toISOString()
       };
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('playlists').insert(newPlaylist);
+      if (auth.currentUser) {
+        await setDoc(doc(db, 'playlists', playlistId), newPlaylist);
       }
 
       setPlaylists(prev => [newPlaylist, ...prev]);
@@ -2075,11 +2209,7 @@ Return a JSON object with the following structure:
     };
 
     try {
-      const { error } = await supabase
-        .from('playlists')
-        .update(updates)
-        .eq('id', playlistId);
-      if (error) throw error;
+      await updateDoc(doc(db, 'playlists', playlistId), updates);
       setPlaylists(prev => prev.map(pl => {
         if (pl.id === playlistId) {
           return { ...pl, ...updates };
@@ -2088,7 +2218,7 @@ Return a JSON object with the following structure:
       }));
       addNotification(`Added "${track.title}" to ${playlist.title}`);
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `playlists/${playlistId}`);
+      handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
     } finally {
       setIsLoading(false);
     }
@@ -2107,11 +2237,7 @@ Return a JSON object with the following structure:
     };
 
     try {
-      const { error } = await supabase
-        .from('playlists')
-        .update(updates)
-        .eq('id', playlistId);
-      if (error) throw error;
+      await updateDoc(doc(db, 'playlists', playlistId), updates);
       setPlaylists(prev => prev.map(pl => {
         if (pl.id === playlistId) {
           return { ...pl, ...updates };
@@ -2120,7 +2246,7 @@ Return a JSON object with the following structure:
       }));
       addNotification("Track removed from playlist", "info");
     } catch (error) {
-      handleSupabaseError(error, 'UPDATE', `playlists/${playlistId}`);
+      handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
     } finally {
       setIsLoading(false);
     }
@@ -2148,11 +2274,7 @@ Return a JSON object with the following structure:
       };
 
       try {
-        const { error } = await supabase
-          .from('playlists')
-          .update(updates)
-          .eq('id', playlistId);
-        if (error) throw error;
+        await updateDoc(doc(db, 'playlists', playlistId), updates);
         setPlaylists(prev => prev.map(pl => {
           if (pl.id === playlistId) {
             return { ...pl, ...updates };
@@ -2160,10 +2282,26 @@ Return a JSON object with the following structure:
           return pl;
         }));
       } catch (error) {
-        handleSupabaseError(error, 'UPDATE', `playlists/${playlistId}`);
+        handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+
+  const submitSponsorship = async (data: any) => {
+    setIsLoading(true);
+    try {
+      await addDoc(collection(db, 'sponsorships'), {
+        ...data,
+        createdAt: serverTimestamp(),
+        status: 'pending'
+      });
+      addNotification("Sponsorship request submitted", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'sponsorships');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -2171,17 +2309,23 @@ Return a JSON object with the following structure:
     <AudioContext.Provider value={{
       currentTrack, isPlaying, queue, progress, isFullPlayerOpen, isShuffle, isRepeat,
       notifications, playlists, recentlyPlayed, likedTrackIds, followedUserIds, trackToAddToPlaylist,
-      optionsTrack, activePlaylistId, userProfile, genesisContractAddress, volume, isMuted,
+      optionsTrack, optionsCallbacks, activePlaylistId, userProfile, genesisContractAddress, volume, isMuted,
       playTrack, togglePlay, nextTrack, prevTrack, addToQueue, playAll, seek, setVolume, toggleMute,
       toggleLikeTrack, toggleFollowUser, closePlayer, setFullPlayerOpen, toggleShuffle, toggleRepeat,
       addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist,
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
-      allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
+      allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, depositTON, withdrawTON, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
       posts, createPost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
+      featuredPlaylist,
       updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters, jamspaceFilters, setJamspaceFilters,
-      isLoading, deleteTrack, isHighFidelity, exclusiveContent
+      isLoading, deleteTrack, isHighFidelity, exclusiveContent,
+      communityPosts: posts,
+      addCommunityPost: createPost,
+      resetProtocol,
+      submitSponsorship,
+      userAddress: tonAddress
     }}>
       {children}
       {isLoading && (

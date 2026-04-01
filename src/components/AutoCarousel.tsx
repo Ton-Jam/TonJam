@@ -54,13 +54,11 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
         onScroll={handleScroll}
         className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar"
       >
-        {items.map((item) => (
-          <div key={item.id} className="w-full flex-shrink-0 snap-center px-2 lg:px-2">
-            <div className="block relative w-full aspect-[21/9] sm:aspect-[3/1] lg:aspect-[4/1] rounded-[10px] overflow-hidden group border border-blue-500/50">
-              <Link to={item.link} className="absolute inset-0">
-                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-              </Link>
+        {items.map((item, idx) => (
+          <div key={item.id || `carousel-item-${idx}`} className="w-full flex-shrink-0 snap-center px-2 lg:px-2">
+            <Link to={item.link} className="block relative w-full aspect-[21/9] sm:aspect-[3/1] lg:aspect-[4/1] rounded-[10px] overflow-hidden group border border-blue-500/50">
+              <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
               
               <div className="absolute top-4 left-4 bg-blue-500 text-white text-[8px] font-bold uppercase tracking-widest px-2 py-2 rounded-[5px] shadow-lg">
                 Featured
@@ -73,18 +71,22 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
                 </div>
                 {onCtaClick ? (
                   <button 
-                    onClick={() => onCtaClick(item)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onCtaClick(item);
+                    }}
                     className="hidden sm:flex items-center gap-2 bg-muted backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border"
                   >
                     {item.cta} <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <Link to={item.link} className="hidden sm:flex items-center gap-2 bg-muted backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border">
+                  <div className="hidden sm:flex items-center gap-2 bg-muted backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border">
                     {item.cta} <ChevronRight className="w-4 h-4" />
-                  </Link>
+                  </div>
                 )}
               </div>
-            </div>
+            </Link>
           </div>
         ))}
       </div>
@@ -93,7 +95,7 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
       <div className="flex justify-center gap-2 mt-2">
         {items.map((_, idx) => (
           <button 
-            key={idx}
+            key={`indicator-${idx}`}
             onClick={() => {
               if (scrollRef.current) {
                 scrollRef.current.scrollTo({

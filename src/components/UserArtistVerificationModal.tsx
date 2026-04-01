@@ -55,8 +55,8 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose}></div>
       
-      <div className="relative w-full max-w-md bg-background border border-border rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="p-2 border-b border-border/50 flex items-center justify-between">
+      <div className="relative w-full max-w-md bg-background rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="p-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-500">
               <ShieldCheck className="h-5 w-5" />
@@ -80,7 +80,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
 
           <div className="space-y-2">
             {/* X (Twitter) Link */}
-            <div className="flex items-center justify-between p-2 bg-muted/30 border border-border rounded-2xl">
+            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-2xl">
               <div className="flex items-center gap-2">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${linkedAccounts.x ? 'bg-blue-500/20 text-blue-400' : 'bg-muted text-muted-foreground'}`}>
                   <Twitter className="h-5 w-5" />
@@ -107,7 +107,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
             </div>
 
             {/* Spotify Link */}
-            <div className="flex items-center justify-between p-2 bg-muted/30 border border-border rounded-2xl">
+            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-2xl">
               <div className="flex items-center gap-2">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${linkedAccounts.spotify ? 'bg-[#1DB954]/20 text-[#1DB954]' : 'bg-muted text-muted-foreground'}`}>
                   <Music className="h-5 w-5" />
@@ -134,7 +134,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
             </div>
 
             {/* TON Wallet Link */}
-            <div className="flex items-center justify-between p-2 bg-muted/30 border border-border rounded-2xl">
+            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-2xl">
               <div className="flex items-center gap-2">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${linkedAccounts.wallet ? 'bg-blue-500/20 text-blue-400' : 'bg-muted text-muted-foreground'}`}>
                   <Wallet className="h-5 w-5" />
@@ -161,7 +161,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
             </div>
           </div>
 
-          <div className="pt-2 border-t border-border/50">
+          <div className="pt-2">
             <button 
               onClick={handleCompleteVerification}
               disabled={!canVerify || isVerifying}

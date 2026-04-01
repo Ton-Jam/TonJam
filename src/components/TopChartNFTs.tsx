@@ -28,7 +28,7 @@ const TopChartNFTs: React.FC<TopChartNFTsProps> = ({ nfts, title }) => {
       
       <div className="space-y-2 relative z-10">
         {top4.map((nft, idx) => (
-          <ChartNFTCard key={nft.id} nft={nft} rank={idx + 1} />
+          <ChartNFTCard key={`${nft.id}-${idx}`} nft={nft} rank={idx + 1} />
         ))}
       </div>
       

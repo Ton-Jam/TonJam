@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { 
   Plus, 
   ChartLine, 
@@ -26,7 +27,8 @@ import {
   Upload,
   Trash2,
   Megaphone,
-  XCircle
+  XCircle,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { GoogleGenAI, Type } from "@google/genai";
@@ -64,11 +66,12 @@ import { ChartRevenue } from "@/components/ChartRevenue";
 import RoyaltyConfigModal from "@/components/RoyaltyConfigModal";
 import ProtocolForge from "@/components/ProtocolForge";
 import ArtistVerification from "@/components/ArtistVerification";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery, addUserTrack, userTracks, userNFTs, deleteTrack, posts, createPost, sponsoredPosts, submitSponsorship, allTracks, allNFTs, userAddress } = useAudio();
+  const { addNotification, userProfile, transactions, artists, addUserNFT, searchQuery, addUserTrack, userTracks, userNFTs, deleteTrack, posts, createPost, sponsoredPosts, submitSponsorship, allTracks, allNFTs, userAddress, withdrawTON } = useAudio();
   
   useEffect(() => {
     if (userProfile.role !== 'artist' && !userProfile.isVerifiedArtist) {
@@ -145,6 +148,26 @@ const ArtistDashboard: React.FC = () => {
     durationDays: 7
   });
 
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  const handleWithdraw = async () => {
+    if (!artistData.earnings?.total || Number(artistData.earnings.total) <= 0) {
+      addNotification("No earnings available to withdraw", "error");
+      return;
+    }
+    
+    setIsWithdrawing(true);
+    try {
+      // Assuming we withdraw the total earnings to the connected wallet
+      await withdrawTON(artistData.earnings.total.toString(), userAddress || '');
+      setIsWithdrawModalOpen(false);
+    } catch (error) {
+      console.error("Withdrawal failed:", error);
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
+
   const handleSponsorshipSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -171,6 +194,7 @@ const ArtistDashboard: React.FC = () => {
   };
   const [isRoyaltyModalOpen, setIsRoyaltyModalOpen] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [trackToDelete, setTrackToDelete] = useState<Track | null>(null);
   
   /* Form states */ const [newTrack, setNewTrack] = useState({
     title: "",
@@ -183,7 +207,8 @@ const ArtistDashboard: React.FC = () => {
     key: "",
     editions: "100",
     royalty: "10",
-    royaltySplits: [{ address: "", percentage: 100 }]
+    royaltySplits: [{ address: "", percentage: 100 }],
+    createdAt: new Date().toISOString()
   });
 
   const analyzeAudio = async (file: File) => {
@@ -297,6 +322,16 @@ const ArtistDashboard: React.FC = () => {
     setUploadProgress(0);
 
     try {
+      // 0. Double check validation
+      const audioValidation = validateFile(audioFile, 'audio', 50);
+      if (!audioValidation.isValid) {
+        throw new Error(audioValidation.error);
+      }
+      const coverValidation = validateFile(coverFile, 'image', 10);
+      if (!coverValidation.isValid) {
+        throw new Error(coverValidation.error);
+      }
+
       // 1. Upload to IPFS
       addNotification("Uploading artifacts to IPFS...", "info");
       
@@ -335,6 +370,7 @@ const ArtistDashboard: React.FC = () => {
         playCount: 0,
         likes: 0,
         releaseDate: new Date().toISOString().split("T")[0],
+        createdAt: newTrack.createdAt
       };
 
       // 3. Save to Firestore
@@ -362,7 +398,8 @@ const ArtistDashboard: React.FC = () => {
         key: "",
         editions: "100",
         royalty: "10",
-        royaltySplits: [{ address: "", percentage: 100 }]
+        royaltySplits: [{ address: "", percentage: 100 }],
+        createdAt: new Date().toISOString()
       });
       addNotification("Track broadcasted to the network.", "success");
     } catch (error: any) {
@@ -465,11 +502,12 @@ const ArtistDashboard: React.FC = () => {
           <div className="flex items-center gap-4">
             {" "}
             <button
-              onClick={() => setIsUploading(true)}
-              className="px-4 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-4 shadow-lg shadow-neutral-600/20"
+              onClick={handleUploadTrack}
+              disabled={isUploading}
+              className="px-4 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-4 shadow-lg shadow-neutral-600/20 disabled:opacity-50"
             >
-              {" "}
-              <Plus className="h-4 w-4" /> Upload Track{" "}
+              {isUploading ? <LoadingSpinner size={16} /> : <Plus className="h-4 w-4" />}
+              {isUploading ? 'Uploading...' : 'Upload Track'}
             </button>{" "}
             <button
               onClick={() => navigate(`/artist/${artistData.id}`)}
@@ -546,7 +584,7 @@ const ArtistDashboard: React.FC = () => {
                 <div className="min-w-[240px] flex-1">
                   <StatCard
                     label="NFT Sales"
-                    value={artistData.earnings?.nftSales || "0"}
+                    value={String(artistData.earnings?.nftSales || "0")}
                     icon="fa-gem"
                   />
                 </div>
@@ -714,19 +752,7 @@ const ArtistDashboard: React.FC = () => {
                               </button>
                             )}
                             <button 
-                              onClick={() => {
-                                toast(`Delete "${track.title}"?`, {
-                                  description: "This action cannot be undone.",
-                                  action: {
-                                    label: "Delete",
-                                    onClick: () => deleteTrack(track.id),
-                                  },
-                                  cancel: {
-                                    label: "Cancel",
-                                    onClick: () => {},
-                                  },
-                                });
-                              }}
+                              onClick={() => setTrackToDelete(track)}
                               className="text-muted-foreground/50 hover:text-red-500 transition-colors"
                               title="Delete Track"
                             >
@@ -873,8 +899,8 @@ const ArtistDashboard: React.FC = () => {
                         { title: 'Top Placement', desc: 'Appear in the main auto-scrolling carousel on the homepage.' },
                         { title: 'Targeted Reach', desc: 'Reach users interested in your specific genre and style.' },
                         { title: 'NFT Visibility', desc: 'Boost your NFT drops to potential collectors and traders.' }
-                      ].map((item, i) => (
-                        <li key={i} className="flex gap-4">
+                      ].map((item) => (
+                        <li key={item.title} className="flex gap-4">
                           <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
                             <CheckCircle2 className="h-3 w-3 text-blue-500" />
                           </div>
@@ -1053,7 +1079,7 @@ const ArtistDashboard: React.FC = () => {
                   <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-[10px] p-4 relative overflow-hidden shadow-2xl shadow-neutral-600/20">
                     {" "}
                     <div className="absolute top-0 right-0 p-4 opacity-10">
-                      <Coins className="h-24 w-24" />
+                      <img src={TJ_COIN_ICON} className="h-32 w-32" />
                     </div>{" "}
                     <div className="relative z-10">
                       {" "}
@@ -1089,8 +1115,8 @@ const ArtistDashboard: React.FC = () => {
                         <>
                           <div className="space-y-4">
                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-4">Streaming Splits</span>
-                            {artistData.royaltyConfig.streamingSplits.map((split, i) => (
-                              <div key={i} className="flex justify-between items-center bg-muted/50 p-4 rounded-[6px]">
+                            {artistData.royaltyConfig.streamingSplits.map((split) => (
+                              <div key={`${split.address}-${split.label || 'no-label'}`} className="flex justify-between items-center bg-muted/50 p-4 rounded-[6px]">
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-bold text-foreground uppercase">{split.label || 'Recipient'}</span>
                                   <span className="text-[7px] font-mono text-muted-foreground/50">{split.address.slice(0, 12)}...</span>
@@ -1101,8 +1127,8 @@ const ArtistDashboard: React.FC = () => {
                           </div>
                           <div className="space-y-4 pt-4">
                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-4">NFT Secondary Splits</span>
-                            {artistData.royaltyConfig.nftSaleSplits.map((split, i) => (
-                              <div key={i} className="flex justify-between items-center bg-muted/50 p-4 rounded-[6px]">
+                            {artistData.royaltyConfig.nftSaleSplits.map((split) => (
+                              <div key={`${split.address}-${split.label || 'no-label'}`} className="flex justify-between items-center bg-muted/50 p-4 rounded-[6px]">
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-bold text-foreground uppercase">{split.label || 'Recipient'}</span>
                                   <span className="text-[7px] font-mono text-muted-foreground/50">{split.address.slice(0, 12)}...</span>
@@ -1386,7 +1412,7 @@ const ArtistDashboard: React.FC = () => {
                         content: textarea.value,
                         createdAt: new Date().toISOString(),
                         likes: 0,
-                        comments: [],
+                        comments: 0,
                         reposts: 0
                       });
                       addNotification("Announcement posted successfully!", "success");
@@ -1475,19 +1501,18 @@ const ArtistDashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsWithdrawModalOpen(false)}
-                className="flex-1 py-4 bg-muted/50 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all"
+                disabled={isWithdrawing}
+                className="flex-1 py-4 bg-muted/50 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  addNotification("Withdrawal successful! Funds are on the way.", "success");
-                  setIsWithdrawModalOpen(false);
-                }}
-                className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+                onClick={handleWithdraw}
+                disabled={isWithdrawing || !artistData.earnings?.total || Number(artistData.earnings.total) <= 0}
+                className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20"
               >
-                Confirm & Withdraw
+                {isWithdrawing ? 'Processing...' : 'Confirm & Withdraw'}
               </button>
             </div>
           </div>
@@ -1607,7 +1632,7 @@ const ArtistDashboard: React.FC = () => {
 
               {isAnalyzing && (
                 <div className="p-4 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-4 animate-pulse">
-                  <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                  <LoadingSpinner size={20} />
                   <div>
                     <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">Analyzing Frequency...</p>
                     <p className="text-[8px] text-muted-foreground uppercase tracking-widest">Detecting Genre, BPM, and Key via Neural Engine</p>
@@ -1877,6 +1902,22 @@ const ArtistDashboard: React.FC = () => {
         isOpen={isRoyaltyModalOpen}
         onClose={() => setIsRoyaltyModalOpen(false)}
         artist={artistData}
+      />
+
+      <ConfirmationModal
+        isOpen={!!trackToDelete}
+        onClose={() => setTrackToDelete(null)}
+        onConfirm={() => {
+          if (trackToDelete) {
+            deleteTrack(trackToDelete.id);
+            addNotification(`Track "${trackToDelete.title}" deleted.`, "success");
+            setTrackToDelete(null);
+          }
+        }}
+        title="Delete Track?"
+        description={`Are you sure you want to delete "${trackToDelete?.title}"? This action cannot be undone and will remove the track from all playlists and the global catalog.`}
+        confirmText="Delete Track"
+        variant="destructive"
       />
     </div>
   );

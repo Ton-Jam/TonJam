@@ -73,8 +73,14 @@ const UserProfile: React.FC = () => {
 
   if (!user) return null;
 
+  const themeClass = user.profileTheme
+    ? user.profileTheme === 'dark' || user.profileTheme === 'light' 
+      ? user.profileTheme 
+      : `theme-${user.profileTheme}`
+    : '';
+
   return (
-    <div className="animate-in fade-in duration-1000 pb-4">
+    <div className={`animate-in fade-in duration-1000 pb-4 ${themeClass}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-4 pt-8">
         <ProfileCard
           name={user.name}

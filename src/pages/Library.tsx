@@ -55,8 +55,8 @@ const Library: React.FC = () => {
     if (!searchQuery) return base;
     const query = searchQuery.toLowerCase();
     return base.filter(nft => 
-      nft.name.toLowerCase().includes(query) || 
-      nft.artist.toLowerCase().includes(query)
+      nft.title.toLowerCase().includes(query) || 
+      nft.artist?.toLowerCase().includes(query)
     );
   }, [allNFTs, userProfile, userNFTs, searchQuery]);
 
@@ -82,7 +82,7 @@ const Library: React.FC = () => {
     if (!searchQuery) return playlists;
     const query = searchQuery.toLowerCase();
     return playlists.filter(p => 
-      p.name.toLowerCase().includes(query) || 
+      p.title.toLowerCase().includes(query) || 
       (p.description && p.description.toLowerCase().includes(query))
     );
   }, [playlists, searchQuery]);
@@ -120,19 +120,19 @@ const Library: React.FC = () => {
             </h1>
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <button 
               onClick={() => setIsCreatePlaylistModalOpen(true)}
-              className="flex items-center gap-4 px-4 py-4 bg-blue-600 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 md:gap-4 px-3 md:px-4 py-3 md:py-4 bg-blue-600 text-white rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3 w-3 md:h-4 md:h-4" />
               New Playlist
             </button>
             <button 
               onClick={createRecommendedPlaylist}
-              className="flex items-center gap-4 px-4 py-4 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest hover:bg-neutral-100 transition-all active:scale-95"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 md:gap-4 px-3 md:px-4 py-3 md:py-4 bg-white text-black rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-neutral-100 transition-all active:scale-95 whitespace-nowrap"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-3 w-3 md:h-4 md:h-4" />
               AI Generation
             </button>
           </div>

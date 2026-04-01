@@ -17,6 +17,10 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
   const [listingType, setListingType] = useState<'fixed' | 'auction'>('fixed');
   const [price, setPrice] = useState(nft.price || '5');
   const [duration, setDuration] = useState('7');
+  const [newEndDate, setNewEndDate] = useState(() => {
+    const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    return date.toISOString().slice(0, 16);
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,12 +36,16 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
     // Simulate transaction delay for listing
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const durationDays = parseInt(duration) || 7;
+    const auctionEnd = newEndDate 
+      ? new Date(newEndDate).toISOString() 
+      : new Date(Date.now() + parseInt(duration || '7') * 24 * 60 * 60 * 1000).toISOString();
+
     updateNFT(nft.id, {
       listingType: listingType,
       isAuction: listingType === 'auction',
       price: price,
-      auctionEndTime: listingType === 'auction' ? new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString() : undefined
+      auctionEndTime: listingType === 'auction' ? auctionEnd : undefined,
+      auctionEndDate: listingType === 'auction' ? auctionEnd : undefined
     });
     addNotification(`Asset listed for ${listingType === 'auction' ? 'auction' : 'fixed price'}.`, "success");
     setIsSubmitting(false);
@@ -109,13 +117,27 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
 
             {listingType === 'auction' && (
               <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-2">Duration (Days)</label>
+                <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-2">Auction End Date</label>
+                <input 
+                  type="datetime-local" 
+                  value={newEndDate} 
+                  onChange={(e) => {
+                    setNewEndDate(e.target.value);
+                    setDuration(''); // Clear duration buttons when custom date is picked
+                  }}
+                  className="w-full bg-white/5 border border-white/10 rounded-[12px] py-2 px-2 text-white font-bold outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-all text-sm mb-2"
+                  aria-label="Auction End Date"
+                />
                 <div className="flex gap-2 mb-2">
                   {['1', '3', '7', '14'].map((d) => (
                     <button
                       key={d}
                       type="button"
-                      onClick={() => setDuration(d)}
+                      onClick={() => {
+                        setDuration(d);
+                        const date = new Date(Date.now() + parseInt(d) * 24 * 60 * 60 * 1000);
+                        setNewEndDate(date.toISOString().slice(0, 16));
+                      }}
                       className={`flex-1 py-3 rounded-[8px] text-[9px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${duration === d ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                       aria-pressed={duration === d}
                     >
@@ -123,17 +145,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
                     </button>
                   ))}
                 </div>
-                <input 
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-[12px] py-2 px-2 text-white font-bold outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-all text-sm"
-                  placeholder="Enter custom days..."
-                  aria-label="Auction Duration in Days"
-                />
-                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest px-2 mt-2">Protocol will automatically finalize after {duration} days.</p>
+                <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest px-2 mt-2">Protocol will automatically finalize on the selected date.</p>
               </div>
             )}
           </div>

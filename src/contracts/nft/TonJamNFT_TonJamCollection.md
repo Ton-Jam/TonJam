@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: TonJamCollection
-BoC Size: 1061 bytes
+BoC Size: 1452 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 19
+Total structures: 26
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -69,17 +69,45 @@ Signature: `GetRoyaltyParams{query_id:uint64}`
 TL-B: `report_royalty_params#a8981987 query_id:uint64 numerator:uint16 denominator:uint16 destination:address = ReportRoyaltyParams`
 Signature: `ReportRoyaltyParams{query_id:uint64,numerator:uint16,denominator:uint16,destination:address}`
 
+### Transfer
+TL-B: `transfer#5fcc3d14 query_id:uint64 new_owner:address response_destination:address custom_payload:Maybe ^cell forward_amount:coins forward_payload:remainder<slice> = Transfer`
+Signature: `Transfer{query_id:uint64,new_owner:address,response_destination:address,custom_payload:Maybe ^cell,forward_amount:coins,forward_payload:remainder<slice>}`
+
+### OwnershipAssigned
+TL-B: `ownership_assigned#05138d91 query_id:uint64 prev_owner:address forward_payload:remainder<slice> = OwnershipAssigned`
+Signature: `OwnershipAssigned{query_id:uint64,prev_owner:address,forward_payload:remainder<slice>}`
+
+### Excesses
+TL-B: `excesses#d53276db query_id:uint64 = Excesses`
+Signature: `Excesses{query_id:uint64}`
+
+### GetStaticData
+TL-B: `get_static_data#2fcb26a2 query_id:uint64 = GetStaticData`
+Signature: `GetStaticData{query_id:uint64}`
+
+### ReportStaticData
+TL-B: `report_static_data#8b771345 query_id:uint64 index_id:uint256 collection:address = ReportStaticData`
+Signature: `ReportStaticData{query_id:uint64,index_id:uint256,collection:address}`
+
 ### Mint
-TL-B: `mint#7d969c0b query_id:uint64 receiver:address content:^cell royalty_params:RoyaltyParams{numerator:uint16,denominator:uint16,destination:address} = Mint`
-Signature: `Mint{query_id:uint64,receiver:address,content:^cell,royalty_params:RoyaltyParams{numerator:uint16,denominator:uint16,destination:address}}`
+TL-B: `mint#3e82d43d query_id:uint64 receiver:address content:^cell = Mint`
+Signature: `Mint{query_id:uint64,receiver:address,content:^cell}`
+
+### CollectionData
+TL-B: `_ next_item_index:int257 collection_content:^cell owner_address:address = CollectionData`
+Signature: `CollectionData{next_item_index:int257,collection_content:^cell,owner_address:address}`
+
+### GetNftData
+TL-B: `_ is_initialized:bool index:int257 collection_address:address owner_address:address individual_content:^cell = GetNftData`
+Signature: `GetNftData{is_initialized:bool,index:int257,collection_address:address,owner_address:address,individual_content:^cell}`
 
 ### TonJamCollection$Data
 TL-B: `_ owner:address next_item_index:uint64 content:^cell royalty_params:RoyaltyParams{numerator:uint16,denominator:uint16,destination:address} = TonJamCollection`
 Signature: `TonJamCollection{owner:address,next_item_index:uint64,content:^cell,royalty_params:RoyaltyParams{numerator:uint16,denominator:uint16,destination:address}}`
 
 ### TonJamNFTItem$Data
-TL-B: `_ owner:address collection_address:address item_index:uint64 content:^cell = TonJamNFTItem`
-Signature: `TonJamNFTItem{owner:address,collection_address:address,item_index:uint64,content:^cell}`
+TL-B: `_ owner:address collection_address:address item_index:uint64 content:^cell is_initialized:bool = TonJamNFTItem`
+Signature: `TonJamNFTItem{owner:address,collection_address:address,item_index:uint64,content:^cell,is_initialized:bool}`
 
 ## Get methods
 Total get methods: 3
@@ -130,6 +158,8 @@ No arguments
 * 135: Code of a contract was not found
 * 136: Invalid standard address
 * 138: Not a basechain address
+* 12308: Only collection can initialize
+* 36952: Only owner can transfer
 * 57579: Only owner can mint
 
 ## Trait inheritance diagram

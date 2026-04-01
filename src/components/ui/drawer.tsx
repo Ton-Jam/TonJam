@@ -31,7 +31,7 @@ function DrawerTrigger({
   return (
     <DrawerPrimitive.Trigger
       data-slot="drawer-trigger"
-      render={asChild ? children : undefined}
+      render={asChild ? (children as React.ReactElement) : undefined}
       {...props}
     >
       {!asChild && children}
@@ -43,7 +43,7 @@ function DrawerPortal({ className, ...props }: DrawerPrimitive.Portal.Props) {
   return (
     <DrawerPrimitive.Portal
       data-slot="drawer-portal"
-      className={cn("z-50", className)}
+      className={cn("z-[9999]", className)}
       {...props}
     />
   );
@@ -57,7 +57,7 @@ function DrawerClose({
   return (
     <DrawerPrimitive.Close
       data-slot="drawer-close"
-      render={asChild ? children : undefined}
+      render={asChild ? (children as React.ReactElement) : undefined}
       {...props}
     >
       {!asChild && children}
@@ -155,7 +155,7 @@ function DrawerViewport({
     <DrawerPrimitive.Viewport
       data-slot="drawer-viewport"
       className={cn(
-        "fixed flex inset-0",
+        "fixed flex inset-0 z-[9999]",
         {
           "items-stretch":
             dir === "left" || dir === "right",
@@ -182,7 +182,7 @@ function DrawerTitle({
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      render={asChild ? children : undefined}
+      render={asChild ? (children as React.ReactElement) : undefined}
       className={cn(
         "text-foreground text-base font-medium",
         {
@@ -208,7 +208,7 @@ function DrawerDescription({
   return (
     <DrawerPrimitive.Description
       data-slot="drawer-description"
-      render={asChild ? children : undefined}
+      render={asChild ? (children as React.ReactElement) : undefined}
       className={cn(
         "mt-3 text-muted-foreground text-sm",
         {
@@ -255,7 +255,7 @@ function DrawerBackdrop({
     <DrawerPrimitive.Backdrop
       data-slot="drawer-backdrop"
       className={cn(
-        "fixed inset-0 min-h-dvh bg-background opacity-20 dark:opacity-70 transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-[-webkit-touch-callout:none]:absolute supports-backdrop-filter:backdrop-blur-3xl",
+        "fixed inset-0 min-h-dvh bg-black/80 backdrop-blur-sm transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-[-webkit-touch-callout:none]:absolute z-[9998]",
         className,
       )}
       {...props}

@@ -248,14 +248,14 @@ const TaskCard: React.FC<{
 };
 
 const Tasks: React.FC = () => {
-  const { addNotification, tasks, updateTaskProgress, claimTaskReward } = useAudio();
+  const { addNotification, tasks, updateTaskProgress, claimTaskReward, userProfile } = useAudio();
   const safeTasks = tasks || [];
   const [activeTab, setActiveTab] = useState<TaskTab>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [userBalance, setUserBalance] = useState(1240);
+  const userBalance = userProfile.jamBalance || 0;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleTaskClick = (task: Task) => {
@@ -361,12 +361,10 @@ const Tasks: React.FC = () => {
 
 
   const handleStake = (amount: number) => {
-    setUserBalance(prev => prev - amount);
-    addNotification(`Successfully staked ${amount} JAM protocols.`, "success");
+    // Staking is handled by StakingPanel calling stakeJam from context
   };
 
   const handleBuySuccess = (amount: number) => {
-    setUserBalance(prev => prev + amount);
     addNotification(`Successfully forged ${amount} JAM using TON.`, "success");
   };
 

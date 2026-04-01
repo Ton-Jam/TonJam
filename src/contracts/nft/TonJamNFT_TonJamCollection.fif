@@ -1,5 +1,6 @@
 // automatically generated from `@stdlib/std/stdlib.fc` `/app/applet/src/contracts/nft/TonJamNFT_TonJamCollection.fc` 
 PROGRAM{
+  DECLPROC __tact_store_address_opt
   DECLPROC __tact_context_get
   DECLPROC __tact_context_get_sender
   DECLPROC $DeployOk$_store
@@ -8,10 +9,13 @@ PROGRAM{
   DECLPROC $RoyaltyParams$_load
   DECLPROC $ReportRoyaltyParams$_store
   DECLPROC $ReportRoyaltyParams$_store_cell
+  DECLPROC $Transfer$_store
+  DECLPROC $Transfer$_store_cell
   DECLPROC $TonJamCollection$_store
   DECLPROC $TonJamCollection$_load
   DECLPROC $Context$_get_value
   DECLPROC $RoyaltyParams$_to_external
+  DECLPROC $CollectionData$_to_external
   DECLPROC $TonJamCollection$init$_load
   DECLPROC $TonJamNFTItem$init$_store
   DECLPROC $TonJamCollection$_contract_init
@@ -21,6 +25,7 @@ PROGRAM{
   DECLPROC $global_newAddress
   DECLPROC $global_contractAddressExt
   DECLPROC $global_contractAddress
+  DECLPROC $CollectionData$_constructor_next_item_index_collection_content_owner_address
   DECLPROC $TonJamCollection$_fun_get_collection_data
   DECLPROC $TonJamNFTItem$_init_child
   DECLPROC $TonJamCollection$_fun_getNftItemInit
@@ -29,6 +34,7 @@ PROGRAM{
   DECLPROC $MessageParameters$_constructor_bounce_to_value_mode_body
   DECLPROC $TonJamCollection$_fun_notify
   DECLPROC $SendParameters$_constructor_to_value_bounce_mode_body_code_data
+  DECLPROC $Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload
   DECLPROC $SendParameters$_constructor_to_value_mode_body
   DECLPROC $ReportRoyaltyParams$_constructor_query_id_numerator_denominator_destination
   DECLPROC $DeployOk$_constructor_queryId
@@ -40,6 +46,17 @@ PROGRAM{
   DECLGLOBVAR __tact_context_sender
   DECLGLOBVAR __tact_child_contract_codes
   DECLGLOBVAR __tact_randomized
+  __tact_store_address_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      b{00} STSLICECONST
+    }>ELSE<{
+      SWAP
+      STSLICE
+    }>
+  }>
   __tact_context_get PROCINLINE:<{
     __tact_context GETGLOB
     4 UNTUPLE
@@ -85,6 +102,26 @@ PROGRAM{
     $ReportRoyaltyParams$_store INLINECALLDICT
     ENDC
   }>
+  $Transfer$_store PROCINLINE:<{
+    1607220500 PUSHINT
+    s0 s7 XCHG2
+    32 STU
+    s1 s5 XCHG
+    64 STU
+    s1 s3 XCHG
+    STSLICE
+    SWAP
+    __tact_store_address_opt INLINECALLDICT
+    STOPTREF
+    SWAP
+    STVARUINT16
+    STSLICE
+  }>
+  $Transfer$_store_cell PROCINLINE:<{
+    6 -ROLL
+    $Transfer$_store INLINECALLDICT
+    ENDC
+  }>
   $TonJamCollection$_store PROCINLINE:<{
     s5 s6 XCHG2
     STSLICE
@@ -108,6 +145,8 @@ PROGRAM{
     3 BLKDROP
   }>
   $RoyaltyParams$_to_external PROCINLINE:<{
+  }>
+  $CollectionData$_to_external PROCINLINE:<{
   }>
   $TonJamCollection$init$_load PROCINLINE:<{
     LDMSGADDR
@@ -192,18 +231,14 @@ PROGRAM{
     -ROT
     $global_contractAddressExt INLINECALLDICT
   }>
+  $CollectionData$_constructor_next_item_index_collection_content_owner_address PROCINLINE:<{
+  }>
   $TonJamCollection$_fun_get_collection_data PROCREF:<{
-        NEWC
-    s5 s(-1) PUXC
-    64 STU
-    s4 s(-1) PUXC
-        STREF
-    s6 PUSH
-        STSLICER
-        ENDC
+    s4 s3 s5 PUSH3
+    $CollectionData$_constructor_next_item_index_collection_content_owner_address INLINECALLDICT
   }>
   $TonJamNFTItem$_init_child PROCREF:<{
-        B{b5ee9c720101050100ac000114ff00f4a413f4bcf2c80b01020162020300aad030d072d721d200d200fa4021103450556f04f86101f862ed44d0d200019bfa40fa40d33fd455306c148e10fa40fa40810101d700d4553004d15502e204925f04e05502c87f01ca0055305034cececb3fccc9ed540157a11f9fda89a1a4000337f481f481a67fa8aa60d8291c21f481f481020203ae01a8aa6009a2aa05c5b678d8830400247fc8ca005220cb3f23cf1624cf165210ccc9} B>boc PUSHREF
+        B{b5ee9c720102090100022b000114ff00f4a413f4bcf2c80b01020162020302cad001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019dfa40fa40d33fd4d20055406c158e11fa40fa40810101d700d4553004d1550270e206925f06e004d70d1ff2e0822182105fcc3d14bae3020182102fcb26a2bae3025f06f2c0820405015da11f9fda89a1a400033bf481f481a67fa9a400aa80d82b1c23f481f481020203ae01a8aa6009a2aa04e1c5b678d8ab0802c631d33ffa40d72c01916d93fa4001e201f40431fa00f8416f2410235f032a9c20820090580ac70519f2f4239e38398130145376c705f2f47f5193e222c2009410386c41e30d246eb3923430e30d4034c87f01ca0055405045ce12cecb3fccca00c9ed54060700dad33f30f842708040543345c8552082108b7713455004cb1f12cb3fcbffcec941305a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405045ce12cecb3fccca00c9ed5400a2715446a3c85520821005138d915004cb1f12cb3fcecec91034185a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0004009870804003c8018210d53276db58cb1fcb3fc9103641605a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00000a5470235374} B>boc PUSHREF
     NEWC
     FALSE
     SWAP
@@ -213,8 +248,9 @@ PROGRAM{
     ENDC
   }>
   $TonJamCollection$_fun_getNftItemInit PROCREF:<{
-    s6 s0 s(-2) PU2XC
-    s6 PUSH
+        MYADDR
+    s7 PUSH
+    s2 s6 XCPU
     $TonJamNFTItem$_init_child INLINECALLDICT
   }>
   $TonJamCollection$_fun_get_nft_address_by_index PROCREF:<{
@@ -259,6 +295,8 @@ PROGRAM{
     s5 s3 s3 XCHG3
     s0 s4 XCHG
   }>
+  $Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload PROCINLINE:<{
+  }>
   $SendParameters$_constructor_to_value_mode_body PROCINLINE:<{
     2SWAP
     PUSHNULL
@@ -273,7 +311,8 @@ PROGRAM{
   %get_collection_data PROC:<{
     $TonJamCollection$_contract_load INLINECALLDICT
     $TonJamCollection$_fun_get_collection_data INLINECALLDICT
-    6 1 BLKDROP2
+    6 3 BLKDROP2
+    $CollectionData$_to_external INLINECALLDICT
   }>
   %get_nft_address_by_index PROC:<{
     $TonJamCollection$_contract_load INLINECALLDICT
@@ -310,7 +349,7 @@ PROGRAM{
     s0 s5 XCHG
     32 LDUQ 130 THROWIFNOT
     OVER
-    2107022347 PUSHINT
+    1048761405 PUSHINT
     EQUAL
     IFJMP:<{
       NIP
@@ -331,29 +370,20 @@ PROGRAM{
       0 PUSHINT
       FALSE
       64 PUSHINT
-      FALSE
-      FALSE
-          NEWC
-      1607220500 PUSHINT
-      SWAP
-      32 STU
-      s1 s15 XCHG
-      64 STU
-      s0 s15 XCHG2
-          STSLICER
-      s12 PUSH
-          STSLICER
-      s1 s13 XCHG
-          1 STI
-      s2 PUSH
-          STVARUINT16
-      s1 s13 XCHG
-          1 STI
-          ENDC
+          <b b> PUSHREF // Pure Fift: "<b" creates a builder, "b>" turns it into a cell at compile time
+      s3 PUSH
+          b{} PUSHSLICE
+      s4 s15 XCHG
+      s3 16 s() XCHG
+      s14 PUSH
+      3 -ROLL
+      $Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload INLINECALLDICT
+      NEWC
+      $Transfer$_store_cell INLINECALLDICT
       s6 s5 s0 XCHG3
-      s4 s12 XCHG
-      s3 s11 XCHG
-      s0 s12 s11 XCHG3
+      s4 s11 XCHG
+      s3 s12 XCHG
+      s0 s11 s12 XCHG3
       $SendParameters$_constructor_to_value_bounce_mode_body_code_data INLINECALLDICT
           NEWC
           b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
@@ -424,8 +454,7 @@ PROGRAM{
       s0 s2 XCHG
       INC
       s3 s5 XCHG
-      s4 s4 XCHG2
-      s0 s3 XCHG
+      s3 s4 XCHG2
       $TonJamCollection$_contract_store INLINECALLDICT
     }>
     OVER

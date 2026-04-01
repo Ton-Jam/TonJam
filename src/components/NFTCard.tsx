@@ -8,6 +8,7 @@ import { getPlaceholderImage } from '@/lib/utils';
 import NFTQuickViewModal from './NFTQuickViewModal';
 import SendNFTModal from './SendNFTModal';
 import BuyNFTModal from './BuyNFTModal';
+import SellNFTModal from './SellNFTModal';
 import SkeletonCard from './SkeletonCard';
 import NFTOptionsModal from './NFTOptionsModal';
 import ManageNFTModal from './ManageNFTModal';
@@ -27,6 +28,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isSellModalOpen, setIsSellModalOpen] = useState(false);
   
   if (isLoading) {
     return <SkeletonCard variant={variant} />;
@@ -70,6 +72,8 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       onAction(nft);
     } else if (isOwner && nft.listingType) {
       setIsManageModalOpen(true);
+    } else if (isOwner && !nft.listingType) {
+      setIsSellModalOpen(true);
     } else if (!isOwner && nft.listingType !== 'auction') {
       setIsBuyModalOpen(true);
     } else {
@@ -367,7 +371,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           onClose={() => setIsOptionsOpen(false)} 
           onSend={() => setIsSendModalOpen(true)}
           onBuy={() => setIsBuyModalOpen(true)}
-          onList={() => navigate(`/nft/${nft.id}`)}
+          onList={() => setIsSellModalOpen(true)}
         />
       )}
 
@@ -376,6 +380,13 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           nft={nft}
           isOpen={isManageModalOpen}
           onClose={() => setIsManageModalOpen(false)}
+        />
+      )}
+
+      {isSellModalOpen && (
+        <SellNFTModal
+          nft={nft}
+          onClose={() => setIsSellModalOpen(false)}
         />
       )}
     </>

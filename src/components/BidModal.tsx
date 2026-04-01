@@ -5,6 +5,7 @@ import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { placeBid } from '@/services/tonService';
+import ConfirmationModal from './ConfirmationModal';
 
 interface BidModalProps {
   nft: NFTItem;
@@ -19,6 +20,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
   const currentBid = parseFloat(nft.price) || 0;
   const minBid = (currentBid * 1.05).toFixed(2); /* 5% minimum increase */
   const [bidAmount, setBidAmount] = useState(minBid);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const handlePlaceBid = async () => {
     if (!userAddress) {
@@ -29,6 +31,11 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
       addNotification(`Minimum bid is ${minBid} TON`, "warning");
       return;
     }
+    setIsConfirmOpen(true);
+  };
+
+  const confirmBid = async () => {
+    setIsConfirmOpen(false);
     setIsProcessing(true);
     addNotification("Broadcasting bid to neural relay...", "info");
     
@@ -104,6 +111,15 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
           </button>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={confirmBid}
+        title="Place Bid?"
+        description={`Are you sure you want to place a bid of ${bidAmount} TON for "${nft.title}"? This action will broadcast your bid to the network.`}
+        confirmText="Place Bid"
+      />
     </div>
   );
 };

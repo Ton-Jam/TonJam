@@ -4,7 +4,8 @@ import { Post } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button"
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+import ConfirmationModal from './ConfirmationModal';
 import {
   Drawer,
   DrawerClose,
@@ -14,7 +15,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import TrackOptionsModal from './TrackOptionsModal';
 import NFTOptionsModal from './NFTOptionsModal';
 import { MOCK_TRACKS } from '@/constants';
 
@@ -27,9 +27,9 @@ interface PostOptionsModalProps {
 
 const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOwner = false, onDelete }) => {
   const navigate = useNavigate();
-  const { addNotification, allNFTs } = useAudio();
-  const [showTrackOptions, setShowTrackOptions] = useState(false);
+  const { addNotification, allNFTs, setOptionsTrack } = useAudio();
   const [showNFTOptions, setShowNFTOptions] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   const track = post.track || (post.trackId ? MOCK_TRACKS.find(t => t.id === post.trackId) : undefined);
   const nft = post.nft || (post.nftId ? allNFTs.find(n => n.id === post.nftId) : undefined);
@@ -62,25 +62,17 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOw
         onClose();
         break;
       case 'delete':
-        if (onDelete) {
-          onDelete();
-        } else {
-          addNotification("Signal purged from the TON network", "error");
-        }
-        onClose();
+        setIsDeleteConfirmOpen(true);
         break;
       case 'track':
-        setShowTrackOptions(true);
+        onClose();
+        setOptionsTrack(track || null);
         break;
       case 'nft':
         setShowNFTOptions(true);
         break;
     }
   };
-
-  if (showTrackOptions && track) {
-    return <TrackOptionsModal track={track} onClose={() => { setShowTrackOptions(false); onClose(); }} />;
-  }
 
   if (showNFTOptions && nft) {
     return <NFTOptionsModal nft={nft} onClose={() => { setShowNFTOptions(false); onClose(); }} />;
@@ -113,58 +105,121 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOw
   }
 
   return (
-    <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="bg-background border-t border-border">
-        <div className="mx-auto w-full max-w-sm">
-          <DrawerHeader>
-            <DrawerTitle className="text-lg">Signal Options</DrawerTitle>
-            <DrawerDescription className="text-sm">Manage this signal on the network.</DrawerDescription>
-          </DrawerHeader>
-          
-          <div className="p-4 pt-0 space-y-1 max-h-[60vh] overflow-y-auto no-scrollbar">
-            {options.map((option, index) => (
-              <motion.button
-                key={option.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                onClick={option.action} 
-                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              >
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                  <option.icon className={`h-4 w-4 ${option.iconColor}`} />
-                </div>
-                <span className={`text-sm font-medium ${option.color}`}>{option.label}</span>
-              </motion.button>
-            ))}
-            
-            <div className="h-px bg-white/10 my-2"></div>
-            
-            {destructiveOptions.map((option, index) => (
-              <motion.button
-                key={option.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: (options.length + index) * 0.05 }}
-                onClick={option.action} 
-                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              >
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                  <option.icon className={`h-4 w-4 ${option.iconColor}`} />
-                </div>
-                <span className={`text-sm font-medium ${option.color}`}>{option.label}</span>
-              </motion.button>
-            ))}
+    <>
+      <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
+      <DrawerContent className="bg-[#0A0A0A] border-t border-white/10 shadow-[0_-8px_40px_rgba(0,0,0,0.9)] backdrop-blur-2xl">
+        {/* Hardware style scanline */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
+        
+        <div className="mx-auto w-full max-md relative z-10">
+          <div className="flex justify-center pt-2 pb-1">
+            <div className="w-12 h-1 rounded-full bg-white/10" />
           </div>
 
-          <DrawerFooter>
+          <DrawerHeader className="border-b border-white/5 pb-6 pt-4">
+            <div className="flex items-center gap-5">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden shadow-2xl border border-white/10 flex-shrink-0">
+                <img 
+                  src={post.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userId}`} 
+                  className="w-full h-full object-cover" 
+                  alt={post.userName} 
+                />
+              </div>
+              <div className="text-left flex-1 min-w-0">
+                <DrawerTitle className="text-2xl font-bold tracking-tighter text-white truncate leading-none uppercase">
+                  Signal_Options
+                </DrawerTitle>
+                <DrawerDescription className="text-[10px] text-blue-500 font-bold mt-2 uppercase tracking-[0.2em]">
+                  Origin: {post.userName}
+                </DrawerDescription>
+              </div>
+            </div>
+          </DrawerHeader>
+          
+          <div className="p-4 pt-4 space-y-1 max-h-[60vh] overflow-y-auto no-scrollbar pb-8">
+            <div className="grid grid-cols-1 gap-1">
+              {options.map((option, index) => (
+                <motion.button
+                  key={option.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.03, ease: "easeOut" }}
+                  onClick={option.action} 
+                  className="w-full flex items-center gap-4 p-3 rounded-[12px] hover:bg-white/5 active:bg-white/10 active:scale-[0.98] transition-all text-left group focus-visible:outline-none border border-transparent hover:border-white/5"
+                >
+                  <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center group-hover:bg-blue-500/10 group-active:scale-90 transition-all border border-white/5 group-hover:border-blue-500/20">
+                    <option.icon className={`h-4 w-4 ${option.iconColor} transition-transform group-hover:scale-110`} />
+                  </div>
+                  <div className="flex-1">
+                    <span className={`text-[10px] font-bold uppercase tracking-[0.3em] ${option.color}`}>
+                      {option.label}
+                    </span>
+                  </div>
+                  <div className="w-4 h-4 rounded-full border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-1 h-1 rounded-full bg-blue-500" />
+                  </div>
+                </motion.button>
+              ))}
+              
+              <div className="h-px bg-white/5 my-3 mx-4"></div>
+              
+              {destructiveOptions.map((option, index) => (
+                <motion.button
+                  key={option.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: (options.length + index) * 0.03, ease: "easeOut" }}
+                  onClick={option.action} 
+                  className="w-full flex items-center gap-4 p-3 rounded-[12px] hover:bg-white/5 active:bg-white/10 active:scale-[0.98] transition-all text-left group focus-visible:outline-none border border-transparent hover:border-white/5"
+                >
+                  <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center group-hover:bg-red-500/10 group-active:scale-90 transition-all border border-white/5 group-hover:border-red-500/20">
+                    <option.icon className={`h-4 w-4 ${option.iconColor} transition-transform group-hover:scale-110`} />
+                  </div>
+                  <div className="flex-1">
+                    <span className={`text-[10px] font-bold uppercase tracking-[0.3em] ${option.color}`}>
+                      {option.label}
+                    </span>
+                  </div>
+                  <div className="w-4 h-4 rounded-full border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-1 h-1 rounded-full bg-red-500" />
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-4 pt-0 pb-8">
             <DrawerClose asChild>
-              <Button variant="outline" className="w-full rounded-xl h-12">Cancel</Button>
+              <Button 
+                variant="secondary" 
+                className="w-full rounded-[12px] h-12 font-bold text-[10px] uppercase tracking-[0.4em] bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all active:scale-[0.98]"
+              >
+                Close_Interface
+              </Button>
             </DrawerClose>
-          </DrawerFooter>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>
+
+      <ConfirmationModal
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={() => {
+          if (onDelete) {
+            onDelete();
+          } else {
+            addNotification("Signal purged from the TON network", "error");
+          }
+          setIsDeleteConfirmOpen(false);
+          onClose();
+        }}
+        title="Delete Signal?"
+        description="Are you sure you want to delete this signal? This action cannot be undone."
+        confirmText="Delete Signal"
+        variant="destructive"
+      />
+    </>
   );
 };
 

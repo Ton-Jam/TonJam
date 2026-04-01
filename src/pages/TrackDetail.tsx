@@ -16,7 +16,8 @@ import {
   ExternalLink,
   Users,
   Coins,
-  PlusCircle
+  PlusCircle,
+  Sparkles
 } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -35,12 +36,12 @@ const TrackDetail: React.FC = () => {
   
   const track = useMemo(() => MOCK_TRACKS.find(t => t.id === id), [id]);
   const artist = useMemo(() => MOCK_ARTISTS.find(a => a.id === track?.artistId), [track]);
-  const nft = useMemo(() => MOCK_NFTS.find(n => n.trackId === id), [id]);
+  const associatedNFTs = useMemo(() => MOCK_NFTS.filter(n => n.trackId === id), [id]);
   
   const isActive = currentTrack?.id === track?.id;
   const isLiked = track ? likedTrackIds.includes(track.id) : false;
 
-  const [activeTab, setActiveTab] = useState<'lyrics' | 'details' | 'history'>('lyrics');
+  const [activeTab, setActiveTab] = useState<'lyrics' | 'details' | 'history' | 'nfts'>('lyrics');
 
   if (!track) {
     return (
@@ -241,7 +242,7 @@ const TrackDetail: React.FC = () => {
                       <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-4 py-4 mb-4">Select Tip Amount</p>
                       {[0.1, 0.5, 1, 5].map((amount) => (
                         <button
-                          key={amount}
+                          key={`tip-${amount}`}
                           onClick={() => handleTip(amount)}
                           className="px-4 py-4 hover:bg-muted rounded-xl text-xs font-bold text-foreground transition-all flex items-center justify-between group/tip"
                         >
@@ -313,17 +314,23 @@ const TrackDetail: React.FC = () => {
                   <Music2 className="h-4 w-4 text-muted-foreground/50" />
                   <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">{track.genre}</span>
                 </div>
+                {track.mood && (
+                  <div className="flex items-center gap-4">
+                    <Sparkles className="h-4 w-4 text-muted-foreground/50" />
+                    <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">{track.mood}</span>
+                  </div>
+                )}
               </div>
             </header>
 
             {/* Content Tabs */}
             <div className="space-y-4">
-              <div className="flex gap-4 pb-4">
-                {(['lyrics', 'details', 'history'] as const).map((tab) => (
+              <div className="flex gap-4 pb-4 overflow-x-auto no-scrollbar">
+                {(['lyrics', 'details', 'history', 'nfts'] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative ${activeTab === tab ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
+                    className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
                   >
                     {tab}
                     {activeTab === tab && (
@@ -366,6 +373,7 @@ const TrackDetail: React.FC = () => {
                           <DetailItem label="BPM" value={track.bpm?.toString() || '128'} />
                           <DetailItem label="Key" value={track.key || 'C# Minor'} />
                           <DetailItem label="Bitrate" value={track.bitrate || 'FLAC'} />
+                          <DetailItem label="Mood" value={track.mood || 'Not Specified'} />
                         </AccordionContent>
                       </AccordionItem>
                       <AccordionItem value="metadata">
@@ -386,9 +394,9 @@ const TrackDetail: React.FC = () => {
                     animate={{ opacity: 1 }}
                     className="space-y-4"
                   >
-                    {nft?.history ? (
-                      nft.history.map((event, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
+                    {associatedNFTs.some(n => n.history && n.history.length > 0) ? (
+                      associatedNFTs.flatMap(n => n.history || []).map((event, idx) => (
+                        <div key={`history-${idx}`} className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
                           <div className="flex items-center gap-4">
                             <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
                               <Activity className="h-4 w-4 text-muted-foreground" />
@@ -408,6 +416,46 @@ const TrackDetail: React.FC = () => {
                       <div className="flex flex-col items-center justify-center py-4 text-muted-foreground/50">
                         <Activity className="h-10 w-10 mb-4 opacity-20" />
                         <p className="text-[10px] font-bold uppercase tracking-widest">No protocol history recorded</p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {activeTab === 'nfts' && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  >
+                    {associatedNFTs.length > 0 ? (
+                      associatedNFTs.map((nft) => (
+                        <div 
+                          key={nft.id} 
+                          className="p-4 rounded-xl bg-muted/50 border border-border/50 hover:border-blue-500/50 transition-all cursor-pointer group/nft"
+                          onClick={() => navigate(`/nft/${nft.id}`)}
+                        >
+                          <div className="flex items-center gap-4 mb-4">
+                            <img src={nft.imageUrl} className="w-12 h-12 rounded-lg object-cover" alt="" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] font-bold text-foreground uppercase tracking-tight truncate">{nft.title}</p>
+                              <p className="text-[8px] text-muted-foreground uppercase tracking-widest">{nft.edition}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <img src={TJ_COIN_ICON} className="w-3 h-3" alt="" />
+                              <span className="text-xs font-bold text-foreground">{nft.price} TON</span>
+                            </div>
+                            <button className="px-4 py-4 bg-blue-600 text-foreground rounded-lg text-[8px] font-bold uppercase tracking-widest opacity-0 group-hover/nft:opacity-100 transition-opacity">
+                              View NFT
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full flex flex-col items-center justify-center py-4 text-muted-foreground/50">
+                        <Zap className="h-10 w-10 mb-4 opacity-20" />
+                        <p className="text-[10px] font-bold uppercase tracking-widest">No associated artifacts found</p>
                       </div>
                     )}
                   </motion.div>

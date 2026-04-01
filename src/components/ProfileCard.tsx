@@ -32,9 +32,11 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
       <div className="mx-auto w-32 h-32 relative -mt-16 rounded-full overflow-hidden bg-muted">
         <img className="object-cover object-center h-32 w-32" src={avatarUrl} alt={name} />
       </div>
-      <div className="text-center mt-2">
-        <h2 className="font-semibold text-lg">{name}</h2>
-        <p className="text-muted-foreground">{title}</p>
+      <div className="flex flex-col items-center mt-2 px-4">
+        <div className="flex items-center gap-2 flex-wrap justify-center">
+          <h2 className="font-semibold text-lg">{name}</h2>
+          <span className="text-xs font-bold text-blue-500/70 bg-blue-500/5 px-2 py-0.5 rounded-full uppercase tracking-wider">{title}</span>
+        </div>
       </div>
       <ul className="py-4 mt-2 text-muted-foreground flex items-center justify-around">
         <li className="flex flex-col items-center justify-around gap-1">

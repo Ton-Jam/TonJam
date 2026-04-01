@@ -45,9 +45,9 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
       // Record the transaction for royalty distribution
       recordTransaction({
         type: 'nft_sale',
-        amount: price.toString(),
-        platformFee: totalPlatformFee.toFixed(4),
-        artistShare: artistShare,
+        amount: price,
+        platformFee: totalPlatformFee,
+        artistShare: parseFloat(artistShare),
         recipientAddress: nft.owner, // Current owner gets the share
         senderAddress: userAddress,
         nftId: nft.id,

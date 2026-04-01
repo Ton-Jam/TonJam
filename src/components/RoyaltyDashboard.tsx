@@ -8,8 +8,10 @@ interface RoyaltyDashboardProps {
 }
 
 const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
-  const earnings = artist.earnings || { streaming: '0.0', nftSales: '0.0', total: '0.0' };
-  const config = artist.royaltyConfig || { streamingPercentage: 0.05, nftSaleShare: 0.10 };
+  const earnings = artist.earnings || { streaming: 0, nftSales: 0, total: 0 };
+  const config = artist.royaltyConfig;
+  const streamingPercentage = config?.streamingPercentage ?? 0.05;
+  const nftSaleShare = config?.nftSaleShare ?? 0.10;
 
   return (
     <div className="space-y-2 animate-in fade-in duration-700">
@@ -24,7 +26,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
             <span className="text-[26px] font-bold text-blue-400 tracking-tighter">{earnings.streaming}</span>
             <span className="text-[10px] font-bold text-blue-500 uppercase">TON</span>
           </div>
-          <p className="text-[8px] text-blue-400/70 uppercase tracking-widest mt-2">Based on {(config.streamingPercentage * 100).toFixed(1)}% share</p>
+          <p className="text-[8px] text-blue-400/70 uppercase tracking-widest mt-2">Based on {(streamingPercentage * 100).toFixed(1)}% share</p>
         </div>
 
         <div className="glass border border-neutral-500/10 p-2 rounded-[10px] bg-foreground/[0.02] relative overflow-hidden group">
@@ -36,7 +38,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
             <span className="text-[26px] font-bold text-blue-400 tracking-tighter">{earnings.nftSales}</span>
             <span className="text-[10px] font-bold text-amber-500 uppercase">TON</span>
           </div>
-          <p className="text-[8px] text-blue-400/70 uppercase tracking-widest mt-2">Based on {(config.nftSaleShare * 100).toFixed(1)}% share</p>
+          <p className="text-[8px] text-blue-400/70 uppercase tracking-widest mt-2">Based on {(nftSaleShare * 100).toFixed(1)}% share</p>
         </div>
 
         <div className="glass border border-neutral-500/10 p-2 rounded-[10px] bg-blue-600/5 relative overflow-hidden group">
@@ -69,10 +71,10 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
             <div>
               <div className="flex justify-between mb-2">
                 <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Streaming Share</label>
-                <span className="text-[9px] font-bold text-blue-500">{(config.streamingPercentage * 100).toFixed(1)}%</span>
+                <span className="text-[9px] font-bold text-blue-500">{(streamingPercentage * 100).toFixed(1)}%</span>
               </div>
               <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600" style={{ width: `${config.streamingPercentage * 100}%` }}></div>
+                <div className="h-full bg-blue-600" style={{ width: `${streamingPercentage * 100}%` }}></div>
               </div>
               <p className="text-[8px] text-muted-foreground/50 mt-2 leading-relaxed">Percentage of platform-wide streaming pool allocated to your broadcasted frequencies.</p>
             </div>
@@ -80,10 +82,10 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
             <div>
               <div className="flex justify-between mb-2">
                 <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">NFT Secondary Share</label>
-                <span className="text-[9px] font-bold text-amber-500">{(config.nftSaleShare * 100).toFixed(1)}%</span>
+                <span className="text-[9px] font-bold text-amber-500">{(nftSaleShare * 100).toFixed(1)}%</span>
               </div>
               <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500" style={{ width: `${config.nftSaleShare * 100}%` }}></div>
+                <div className="h-full bg-amber-500" style={{ width: `${nftSaleShare * 100}%` }}></div>
               </div>
               <p className="text-[8px] text-muted-foreground/50 mt-2 leading-relaxed">Defined share from every secondary market sale of your minted NFT assets.</p>
             </div>

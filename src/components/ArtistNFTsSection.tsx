@@ -5,13 +5,13 @@ import NFTCard from '@/components/NFTCard';
 interface ArtistNFTsSectionProps {
   artistNFTs: NFTItem[];
   isOwnProfile: boolean;
-  setSelectedNftForListing: (nft: NFTItem) => void;
+  onNFTAction: (nft: NFTItem) => void;
 }
 
 const ArtistNFTsSection: React.FC<ArtistNFTsSectionProps> = ({
   artistNFTs,
   isOwnProfile,
-  setSelectedNftForListing,
+  onNFTAction,
 }) => {
   return (
     <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar animate-in slide-in-from-right-4 duration-500">
@@ -19,7 +19,7 @@ const ArtistNFTsSection: React.FC<ArtistNFTsSectionProps> = ({
         <div key={n.id} className="min-w-[280px] sm:min-w-[320px]">
           <NFTCard 
             nft={n} 
-            onAction={isOwnProfile ? (nft) => setSelectedNftForListing(nft) : undefined}
+            onAction={isOwnProfile ? onNFTAction : undefined}
           />
         </div>
       ))}

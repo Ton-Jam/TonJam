@@ -334,7 +334,13 @@ const FullAudioPlayer: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                <h2 className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-foreground leading-none truncate px-2 flex items-center justify-center gap-2">
+                <h2 
+                  className="text-[18px] font-bold mb-2 tracking-tighter uppercase text-foreground leading-none truncate px-2 flex items-center justify-center gap-2 cursor-pointer hover:text-blue-500 transition-colors"
+                  onClick={() => {
+                    setFullPlayerOpen(false);
+                    navigate(`/track/${currentTrack.id}`);
+                  }}
+                >
                   {currentTrack.title}
                   {isHighFidelity && (
                     <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[10px] px-2 py-0.5 rounded-full tracking-widest uppercase">

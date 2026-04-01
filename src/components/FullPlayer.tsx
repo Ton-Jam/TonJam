@@ -141,7 +141,7 @@ const LyricsView: React.FC<{ lyrics: string }> = ({ lyrics }) => {
     <div className="w-full h-[400px] overflow-y-auto no-scrollbar py-2 px-2 space-y-2 text-left mask-image-gradient">
       {lines.map((line, i) => (
         <motion.p 
-          key={i}
+          key={`${line.substring(0, 10)}-${i}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}

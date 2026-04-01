@@ -1,7 +1,16 @@
-import { supabase } from './supabase';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, increment, serverTimestamp, getDoc, getDocs, query, where, orderBy, limit, onSnapshot, getDocFromServer, or } from 'firebase/firestore';
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
+import firebaseConfig from '../../firebase-applet-config.json';
 
-export const db = supabase;
-export const auth = supabase.auth;
+console.log("Firebase Config:", firebaseConfig);
+
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const auth = getAuth(app);
+export const storage = getStorage(app);
+export const googleProvider = new GoogleAuthProvider();
 
 export enum OperationType {
   CREATE = 'create',
@@ -32,9 +41,54 @@ export interface FirestoreErrorInfo {
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, shouldThrow: boolean = true) {
-  // This is a placeholder for Supabase error handling
-  console.error('Database Error: ', error);
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
   if (shouldThrow) {
-    throw new Error(String(error));
+    throw new Error(JSON.stringify(errInfo));
   }
 }
+
+/**
+ * Removes undefined values from an object before passing it to Firestore.
+ */
+export function cleanUpdateData(data: Record<string, any>) {
+  const cleaned: Record<string, any> = {};
+  Object.keys(data).forEach(key => {
+    if (data[key] !== undefined) {
+      cleaned[key] = data[key];
+    }
+  });
+  return cleaned;
+}
+
+// Test connection
+async function testConnection() {
+  try {
+    await getDocFromServer(doc(db, 'test', 'connection'));
+    console.log("Firestore connection successful.");
+  } catch (error) {
+    if(error instanceof Error && error.message.includes('the client is offline')) {
+      console.error("Please check your Firebase configuration. The backend is currently unreachable.");
+    } else {
+      console.warn("Firestore connection test warning:", error);
+    }
+  }
+}
+testConnection();

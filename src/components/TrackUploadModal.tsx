@@ -23,6 +23,9 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     isNFT: false,
     price: '1.0',
     streamingPrice: '0.01',
+    listingType: 'fixed' as 'fixed' | 'auction',
+    auctionDuration: '7',
+    editions: '1',
   });
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -42,6 +45,16 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     setIsUploading(true);
     
     try {
+      // 0. Double check validation
+      const audioValidation = validateFile(audioFile, 'audio', 50);
+      if (!audioValidation.isValid) {
+        throw new Error(audioValidation.error);
+      }
+      const coverValidation = validateFile(coverFile, 'image', 10);
+      if (!coverValidation.isValid) {
+        throw new Error(coverValidation.error);
+      }
+
       // 1. Upload to IPFS
       addNotification("Uploading artifacts to IPFS...", "info");
       
@@ -75,6 +88,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         playCount: 0,
         likes: 0,
         releaseDate: new Date().toISOString().split('T')[0],
+        createdAt: new Date().toISOString(),
         artistVerified: true
       };
 
@@ -130,6 +144,10 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
       description: '',
       isNFT: false,
       price: '1.0',
+      streamingPrice: '0.01',
+      listingType: 'fixed',
+      auctionDuration: '7',
+      editions: '1',
     });
     setAudioFile(null);
     setCoverFile(null);
@@ -301,16 +319,67 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                   </div>
 
                   {formData.isNFT && (
-                    <div className="space-y-2 animate-in slide-in-from-top-2">
-                      <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Mint Price (TON)</label>
-                      <input 
-                        type="number" 
-                        id="mint-price"
-                        step="0.1"
-                        value={formData.price}
-                        onChange={(e) => setFormData({...formData, price: e.target.value})}
-                        className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
-                      />
+                    <div className="space-y-4 animate-in slide-in-from-top-2">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Listing Type</label>
+                        <div className="grid grid-cols-2 gap-2 bg-foreground/[0.03] p-1 rounded-[5px]">
+                          <button
+                            type="button"
+                            onClick={() => setFormData({...formData, listingType: 'fixed'})}
+                            className={`py-1.5 text-[10px] font-bold rounded-[4px] transition-all ${formData.listingType === 'fixed' ? 'bg-blue-500 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                          >
+                            Fixed Price
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormData({...formData, listingType: 'auction'})}
+                            className={`py-1.5 text-[10px] font-bold rounded-[4px] transition-all ${formData.listingType === 'auction' ? 'bg-amber-500 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                          >
+                            Auction
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                            {formData.listingType === 'auction' ? 'Starting Bid (TON)' : 'Mint Price (TON)'}
+                          </label>
+                          <input 
+                            type="number" 
+                            step="0.1"
+                            value={formData.price}
+                            onChange={(e) => setFormData({...formData, price: e.target.value})}
+                            className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                          />
+                        </div>
+
+                        {formData.listingType === 'auction' ? (
+                          <div className="space-y-2">
+                            <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Duration (Days)</label>
+                            <select 
+                              value={formData.auctionDuration || '7'}
+                              onChange={(e) => setFormData({...formData, auctionDuration: e.target.value})}
+                              className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                            >
+                              <option value="1">1 Day</option>
+                              <option value="3">3 Days</option>
+                              <option value="7">7 Days</option>
+                              <option value="14">14 Days</option>
+                            </select>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Editions</label>
+                            <input 
+                              type="number" 
+                              value={formData.editions}
+                              onChange={(e) => setFormData({...formData, editions: e.target.value})}
+                              className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

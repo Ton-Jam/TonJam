@@ -12,6 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { TJ_COIN_ICON, TON_LOGO } from '@/constants';
+import { useAudio } from '@/context/AudioContext';
 
 interface StakingPanelProps {
   balance: number;
@@ -20,21 +21,29 @@ interface StakingPanelProps {
 }
 
 const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }) => {
+  const { userProfile, stakeJam, claimJamRewards } = useAudio();
   const [stakeAmount, setStakeAmount] = useState('');
   const [isStaking, setIsStaking] = useState(false);
-  const [stakedBalance, setStakedBalance] = useState(5000);
-  const [rewards, setRewards] = useState(124.5);
+  
+  const stakedBalance = userProfile.stakedJam || 0;
+  const rewards = userProfile.pendingJamRewards || 0;
 
   const handleStake = async () => {
     const amount = parseFloat(stakeAmount);
     if (isNaN(amount) || amount <= 0 || amount > balance) return;
     
     setIsStaking(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setStakedBalance(prev => prev + amount);
-    onStake(amount);
-    setStakeAmount('');
-    setIsStaking(false);
+    try {
+      await stakeJam(stakeAmount);
+      setStakeAmount('');
+    } finally {
+      setIsStaking(false);
+    }
+  };
+
+  const handleClaim = async () => {
+    if (rewards <= 0) return;
+    await claimJamRewards();
   };
 
   return (
@@ -85,7 +94,11 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
               <img src={TJ_COIN_ICON} className="w-8 h-8 object-contain" alt="" />
               <p className="text-[26px] font-black text-amber-500 tracking-tighter">{rewards.toFixed(1)} JAM</p>
             </div>
-            <button className="mt-2 text-[10px] font-black text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-2">
+            <button 
+              onClick={handleClaim}
+              disabled={rewards <= 0}
+              className="mt-2 text-[10px] font-black text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors flex items-center gap-2 disabled:opacity-30"
+            >
               Claim Rewards <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>

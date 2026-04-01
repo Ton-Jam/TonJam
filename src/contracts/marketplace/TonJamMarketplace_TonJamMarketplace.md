@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: TonJamMarketplace
-BoC Size: 317 bytes
+BoC Size: 1197 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 17
+Total structures: 20
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -57,6 +57,10 @@ Signature: `DeployOk{queryId:uint64}`
 TL-B: `factory_deploy#6d0ff13b queryId:uint64 cashback:address = FactoryDeploy`
 Signature: `FactoryDeploy{queryId:uint64,cashback:address}`
 
+### Listing
+TL-B: `_ owner:address price:coins = Listing`
+Signature: `Listing{owner:address,price:coins}`
+
 ### ListNFT
 TL-B: `list_nft#1e20d98e query_id:uint64 nft_address:address price:coins = ListNFT`
 Signature: `ListNFT{query_id:uint64,nft_address:address,price:coins}`
@@ -69,12 +73,23 @@ Signature: `BuyNFT{query_id:uint64,nft_address:address}`
 TL-B: `cancel_sale#530c881d query_id:uint64 nft_address:address = CancelSale`
 Signature: `CancelSale{query_id:uint64,nft_address:address}`
 
+### OwnershipAssigned
+TL-B: `ownership_assigned#e1cbed05 query_id:uint64 prev_owner:address forward_payload:remainder<slice> = OwnershipAssigned`
+Signature: `OwnershipAssigned{query_id:uint64,prev_owner:address,forward_payload:remainder<slice>}`
+
+### Transfer
+TL-B: `transfer#4e33fd18 query_id:uint64 new_owner:address response_destination:address custom_payload:Maybe ^cell forward_amount:coins forward_payload:remainder<slice> = Transfer`
+Signature: `Transfer{query_id:uint64,new_owner:address,response_destination:address,custom_payload:Maybe ^cell,forward_amount:coins,forward_payload:remainder<slice>}`
+
 ### TonJamMarketplace$Data
-TL-B: `_ owner:address fee_destination:address fee_percentage:uint16 = TonJamMarketplace`
-Signature: `TonJamMarketplace{owner:address,fee_destination:address,fee_percentage:uint16}`
+TL-B: `_ owner:address fee_destination:address fee_percentage:uint16 listings:dict<address, ^Listing{owner:address,price:coins}> = TonJamMarketplace`
+Signature: `TonJamMarketplace{owner:address,fee_destination:address,fee_percentage:uint16,listings:dict<address, ^Listing{owner:address,price:coins}>}`
 
 ## Get methods
-Total get methods: 1
+Total get methods: 2
+
+## get_listing
+Argument: nft_address
 
 ## get_marketplace_data
 No arguments
@@ -116,6 +131,9 @@ No arguments
 * 135: Code of a contract was not found
 * 136: Invalid standard address
 * 138: Not a basechain address
+* 49729: Unauthorized
+* 51754: Insufficient funds
+* 53381: NFT not listed
 
 ## Trait inheritance diagram
 

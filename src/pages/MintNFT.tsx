@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BackButton } from '@/components/BackButton';
-import { Hammer, FileAudio, CloudUpload, Image, Rocket, Check, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { Hammer, FileAudio, CloudUpload, Image, Rocket, Check, Plus, Trash2, ArrowLeft, Tag, Gavel } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -159,6 +159,20 @@ const MintNFT: React.FC = () => {
     }
     setLoading(true);
     try {
+      // 0. Double check validation if files are being uploaded
+      if (data.audioFile instanceof File) {
+        const audioValidation = validateFile(data.audioFile, 'audio', 50);
+        if (!audioValidation.isValid) {
+          throw new Error(audioValidation.error);
+        }
+      }
+      if (data.coverFile instanceof File) {
+        const coverValidation = validateFile(data.coverFile, 'image', 10);
+        if (!coverValidation.isValid) {
+          throw new Error(coverValidation.error);
+        }
+      }
+
       // 1. Upload files to IPFS if they are new
       let audioUrl = data.audioPreview;
       let coverUrl = data.coverPreview;
@@ -230,7 +244,6 @@ const MintNFT: React.FC = () => {
         description: data.description || '',
         audioUrl: audioUrl,
         ipfsUrl: ipfsUrl,
-        isAuction: false,
         attributes: [
           ...data.traits,
           { trait_type: 'Edition Type', value: data.editionType },
@@ -261,7 +274,8 @@ const MintNFT: React.FC = () => {
           likes: 0,
           genre: data.genre,
           lyrics: data.lyrics,
-          isNFT: true
+          isNFT: true,
+          createdAt: new Date().toISOString()
         };
         await addUserTrack(newTrack);
       }
@@ -615,7 +629,7 @@ const MintNFT: React.FC = () => {
               </div>
               <div className="flex gap-4 sm:gap-4 pt-4 sm:pt-4">
                 <button onClick={() => setStep(2)} className="w-1/3 py-4 sm:py-4 bg-muted/50 text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > BACK </button>
-                <button onClick={handleMint} disabled={loading} className="w-2/3 py-4 sm:py-4 bg-green-600 text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-green-600/20 hover:bg-green-500 transition-all flex items-center justify-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" >
+                <button onClick={handleSubmit(handleMint)} disabled={loading} className="w-2/3 py-4 sm:py-4 bg-green-600 text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-green-600/20 hover:bg-green-500 transition-all flex items-center justify-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" >
                   {loading ? (
                     <>
                       <img src={APP_LOGO} className="w-4 h-4 sm:w-5 sm:h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80 mr-4 inline-block" alt="Loading..." referrerPolicy="no-referrer" /> DEPLOYING_PROTOCOL...

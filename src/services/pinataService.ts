@@ -10,7 +10,7 @@ export interface PinataUploadResponse {
  * @param file The file to upload
  * @returns The IPFS hash and gateway URL
  */
-export const uploadToIPFS = async (file: File): Promise<PinataUploadResponse> => {
+export const uploadToIPFS = async (file: File, onProgress?: (progress: number) => void): Promise<PinataUploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -18,6 +18,12 @@ export const uploadToIPFS = async (file: File): Promise<PinataUploadResponse> =>
     const response = await axios.post('/api/pinata/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percentCompleted);
+        }
       },
     });
 

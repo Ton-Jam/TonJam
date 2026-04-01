@@ -925,49 +925,333 @@ export function dictValueParserReportRoyaltyParams(): DictionaryValue<ReportRoya
     }
 }
 
+export type Transfer = {
+    $$type: 'Transfer';
+    query_id: bigint;
+    new_owner: Address;
+    response_destination: Address | null;
+    custom_payload: Cell | null;
+    forward_amount: bigint;
+    forward_payload: Slice;
+}
+
+export function storeTransfer(src: Transfer) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(1607220500, 32);
+        b_0.storeUint(src.query_id, 64);
+        b_0.storeAddress(src.new_owner);
+        b_0.storeAddress(src.response_destination);
+        if (src.custom_payload !== null && src.custom_payload !== undefined) { b_0.storeBit(true).storeRef(src.custom_payload); } else { b_0.storeBit(false); }
+        b_0.storeCoins(src.forward_amount);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
+    };
+}
+
+export function loadTransfer(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1607220500) { throw Error('Invalid prefix'); }
+    const _query_id = sc_0.loadUintBig(64);
+    const _new_owner = sc_0.loadAddress();
+    const _response_destination = sc_0.loadMaybeAddress();
+    const _custom_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
+    const _forward_amount = sc_0.loadCoins();
+    const _forward_payload = sc_0;
+    return { $$type: 'Transfer' as const, query_id: _query_id, new_owner: _new_owner, response_destination: _response_destination, custom_payload: _custom_payload, forward_amount: _forward_amount, forward_payload: _forward_payload };
+}
+
+export function loadTupleTransfer(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _new_owner = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'Transfer' as const, query_id: _query_id, new_owner: _new_owner, response_destination: _response_destination, custom_payload: _custom_payload, forward_amount: _forward_amount, forward_payload: _forward_payload };
+}
+
+export function loadGetterTupleTransfer(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _new_owner = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'Transfer' as const, query_id: _query_id, new_owner: _new_owner, response_destination: _response_destination, custom_payload: _custom_payload, forward_amount: _forward_amount, forward_payload: _forward_payload };
+}
+
+export function storeTupleTransfer(source: Transfer) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.query_id);
+    builder.writeAddress(source.new_owner);
+    builder.writeAddress(source.response_destination);
+    builder.writeCell(source.custom_payload);
+    builder.writeNumber(source.forward_amount);
+    builder.writeSlice(source.forward_payload.asCell());
+    return builder.build();
+}
+
+export function dictValueParserTransfer(): DictionaryValue<Transfer> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeTransfer(src)).endCell());
+        },
+        parse: (src) => {
+            return loadTransfer(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type OwnershipAssigned = {
+    $$type: 'OwnershipAssigned';
+    query_id: bigint;
+    prev_owner: Address;
+    forward_payload: Slice;
+}
+
+export function storeOwnershipAssigned(src: OwnershipAssigned) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(85167505, 32);
+        b_0.storeUint(src.query_id, 64);
+        b_0.storeAddress(src.prev_owner);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
+    };
+}
+
+export function loadOwnershipAssigned(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 85167505) { throw Error('Invalid prefix'); }
+    const _query_id = sc_0.loadUintBig(64);
+    const _prev_owner = sc_0.loadAddress();
+    const _forward_payload = sc_0;
+    return { $$type: 'OwnershipAssigned' as const, query_id: _query_id, prev_owner: _prev_owner, forward_payload: _forward_payload };
+}
+
+export function loadTupleOwnershipAssigned(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _prev_owner = source.readAddress();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'OwnershipAssigned' as const, query_id: _query_id, prev_owner: _prev_owner, forward_payload: _forward_payload };
+}
+
+export function loadGetterTupleOwnershipAssigned(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _prev_owner = source.readAddress();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'OwnershipAssigned' as const, query_id: _query_id, prev_owner: _prev_owner, forward_payload: _forward_payload };
+}
+
+export function storeTupleOwnershipAssigned(source: OwnershipAssigned) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.query_id);
+    builder.writeAddress(source.prev_owner);
+    builder.writeSlice(source.forward_payload.asCell());
+    return builder.build();
+}
+
+export function dictValueParserOwnershipAssigned(): DictionaryValue<OwnershipAssigned> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeOwnershipAssigned(src)).endCell());
+        },
+        parse: (src) => {
+            return loadOwnershipAssigned(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type Excesses = {
+    $$type: 'Excesses';
+    query_id: bigint;
+}
+
+export function storeExcesses(src: Excesses) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(3576854235, 32);
+        b_0.storeUint(src.query_id, 64);
+    };
+}
+
+export function loadExcesses(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 3576854235) { throw Error('Invalid prefix'); }
+    const _query_id = sc_0.loadUintBig(64);
+    return { $$type: 'Excesses' as const, query_id: _query_id };
+}
+
+export function loadTupleExcesses(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    return { $$type: 'Excesses' as const, query_id: _query_id };
+}
+
+export function loadGetterTupleExcesses(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    return { $$type: 'Excesses' as const, query_id: _query_id };
+}
+
+export function storeTupleExcesses(source: Excesses) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.query_id);
+    return builder.build();
+}
+
+export function dictValueParserExcesses(): DictionaryValue<Excesses> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeExcesses(src)).endCell());
+        },
+        parse: (src) => {
+            return loadExcesses(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type GetStaticData = {
+    $$type: 'GetStaticData';
+    query_id: bigint;
+}
+
+export function storeGetStaticData(src: GetStaticData) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(801842850, 32);
+        b_0.storeUint(src.query_id, 64);
+    };
+}
+
+export function loadGetStaticData(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 801842850) { throw Error('Invalid prefix'); }
+    const _query_id = sc_0.loadUintBig(64);
+    return { $$type: 'GetStaticData' as const, query_id: _query_id };
+}
+
+export function loadTupleGetStaticData(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    return { $$type: 'GetStaticData' as const, query_id: _query_id };
+}
+
+export function loadGetterTupleGetStaticData(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    return { $$type: 'GetStaticData' as const, query_id: _query_id };
+}
+
+export function storeTupleGetStaticData(source: GetStaticData) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.query_id);
+    return builder.build();
+}
+
+export function dictValueParserGetStaticData(): DictionaryValue<GetStaticData> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeGetStaticData(src)).endCell());
+        },
+        parse: (src) => {
+            return loadGetStaticData(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type ReportStaticData = {
+    $$type: 'ReportStaticData';
+    query_id: bigint;
+    index_id: bigint;
+    collection: Address;
+}
+
+export function storeReportStaticData(src: ReportStaticData) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(2339836741, 32);
+        b_0.storeUint(src.query_id, 64);
+        b_0.storeUint(src.index_id, 256);
+        b_0.storeAddress(src.collection);
+    };
+}
+
+export function loadReportStaticData(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2339836741) { throw Error('Invalid prefix'); }
+    const _query_id = sc_0.loadUintBig(64);
+    const _index_id = sc_0.loadUintBig(256);
+    const _collection = sc_0.loadAddress();
+    return { $$type: 'ReportStaticData' as const, query_id: _query_id, index_id: _index_id, collection: _collection };
+}
+
+export function loadTupleReportStaticData(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _index_id = source.readBigNumber();
+    const _collection = source.readAddress();
+    return { $$type: 'ReportStaticData' as const, query_id: _query_id, index_id: _index_id, collection: _collection };
+}
+
+export function loadGetterTupleReportStaticData(source: TupleReader) {
+    const _query_id = source.readBigNumber();
+    const _index_id = source.readBigNumber();
+    const _collection = source.readAddress();
+    return { $$type: 'ReportStaticData' as const, query_id: _query_id, index_id: _index_id, collection: _collection };
+}
+
+export function storeTupleReportStaticData(source: ReportStaticData) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.query_id);
+    builder.writeNumber(source.index_id);
+    builder.writeAddress(source.collection);
+    return builder.build();
+}
+
+export function dictValueParserReportStaticData(): DictionaryValue<ReportStaticData> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeReportStaticData(src)).endCell());
+        },
+        parse: (src) => {
+            return loadReportStaticData(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type Mint = {
     $$type: 'Mint';
     query_id: bigint;
     receiver: Address;
     content: Cell;
-    royalty_params: RoyaltyParams;
 }
 
 export function storeMint(src: Mint) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(2107022347, 32);
+        b_0.storeUint(1048761405, 32);
         b_0.storeUint(src.query_id, 64);
         b_0.storeAddress(src.receiver);
         b_0.storeRef(src.content);
-        b_0.store(storeRoyaltyParams(src.royalty_params));
     };
 }
 
 export function loadMint(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2107022347) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 1048761405) { throw Error('Invalid prefix'); }
     const _query_id = sc_0.loadUintBig(64);
     const _receiver = sc_0.loadAddress();
     const _content = sc_0.loadRef();
-    const _royalty_params = loadRoyaltyParams(sc_0);
-    return { $$type: 'Mint' as const, query_id: _query_id, receiver: _receiver, content: _content, royalty_params: _royalty_params };
+    return { $$type: 'Mint' as const, query_id: _query_id, receiver: _receiver, content: _content };
 }
 
 export function loadTupleMint(source: TupleReader) {
     const _query_id = source.readBigNumber();
     const _receiver = source.readAddress();
     const _content = source.readCell();
-    const _royalty_params = loadTupleRoyaltyParams(source);
-    return { $$type: 'Mint' as const, query_id: _query_id, receiver: _receiver, content: _content, royalty_params: _royalty_params };
+    return { $$type: 'Mint' as const, query_id: _query_id, receiver: _receiver, content: _content };
 }
 
 export function loadGetterTupleMint(source: TupleReader) {
     const _query_id = source.readBigNumber();
     const _receiver = source.readAddress();
     const _content = source.readCell();
-    const _royalty_params = loadGetterTupleRoyaltyParams(source);
-    return { $$type: 'Mint' as const, query_id: _query_id, receiver: _receiver, content: _content, royalty_params: _royalty_params };
+    return { $$type: 'Mint' as const, query_id: _query_id, receiver: _receiver, content: _content };
 }
 
 export function storeTupleMint(source: Mint) {
@@ -975,7 +1259,6 @@ export function storeTupleMint(source: Mint) {
     builder.writeNumber(source.query_id);
     builder.writeAddress(source.receiver);
     builder.writeCell(source.content);
-    builder.writeTuple(storeTupleRoyaltyParams(source.royalty_params));
     return builder.build();
 }
 
@@ -986,6 +1269,132 @@ export function dictValueParserMint(): DictionaryValue<Mint> {
         },
         parse: (src) => {
             return loadMint(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type CollectionData = {
+    $$type: 'CollectionData';
+    next_item_index: bigint;
+    collection_content: Cell;
+    owner_address: Address;
+}
+
+export function storeCollectionData(src: CollectionData) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeInt(src.next_item_index, 257);
+        b_0.storeRef(src.collection_content);
+        b_0.storeAddress(src.owner_address);
+    };
+}
+
+export function loadCollectionData(slice: Slice) {
+    const sc_0 = slice;
+    const _next_item_index = sc_0.loadIntBig(257);
+    const _collection_content = sc_0.loadRef();
+    const _owner_address = sc_0.loadAddress();
+    return { $$type: 'CollectionData' as const, next_item_index: _next_item_index, collection_content: _collection_content, owner_address: _owner_address };
+}
+
+export function loadTupleCollectionData(source: TupleReader) {
+    const _next_item_index = source.readBigNumber();
+    const _collection_content = source.readCell();
+    const _owner_address = source.readAddress();
+    return { $$type: 'CollectionData' as const, next_item_index: _next_item_index, collection_content: _collection_content, owner_address: _owner_address };
+}
+
+export function loadGetterTupleCollectionData(source: TupleReader) {
+    const _next_item_index = source.readBigNumber();
+    const _collection_content = source.readCell();
+    const _owner_address = source.readAddress();
+    return { $$type: 'CollectionData' as const, next_item_index: _next_item_index, collection_content: _collection_content, owner_address: _owner_address };
+}
+
+export function storeTupleCollectionData(source: CollectionData) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.next_item_index);
+    builder.writeCell(source.collection_content);
+    builder.writeAddress(source.owner_address);
+    return builder.build();
+}
+
+export function dictValueParserCollectionData(): DictionaryValue<CollectionData> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeCollectionData(src)).endCell());
+        },
+        parse: (src) => {
+            return loadCollectionData(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type GetNftData = {
+    $$type: 'GetNftData';
+    is_initialized: boolean;
+    index: bigint;
+    collection_address: Address;
+    owner_address: Address;
+    individual_content: Cell;
+}
+
+export function storeGetNftData(src: GetNftData) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeBit(src.is_initialized);
+        b_0.storeInt(src.index, 257);
+        b_0.storeAddress(src.collection_address);
+        b_0.storeAddress(src.owner_address);
+        b_0.storeRef(src.individual_content);
+    };
+}
+
+export function loadGetNftData(slice: Slice) {
+    const sc_0 = slice;
+    const _is_initialized = sc_0.loadBit();
+    const _index = sc_0.loadIntBig(257);
+    const _collection_address = sc_0.loadAddress();
+    const _owner_address = sc_0.loadAddress();
+    const _individual_content = sc_0.loadRef();
+    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content };
+}
+
+export function loadTupleGetNftData(source: TupleReader) {
+    const _is_initialized = source.readBoolean();
+    const _index = source.readBigNumber();
+    const _collection_address = source.readAddress();
+    const _owner_address = source.readAddress();
+    const _individual_content = source.readCell();
+    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content };
+}
+
+export function loadGetterTupleGetNftData(source: TupleReader) {
+    const _is_initialized = source.readBoolean();
+    const _index = source.readBigNumber();
+    const _collection_address = source.readAddress();
+    const _owner_address = source.readAddress();
+    const _individual_content = source.readCell();
+    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content };
+}
+
+export function storeTupleGetNftData(source: GetNftData) {
+    const builder = new TupleBuilder();
+    builder.writeBoolean(source.is_initialized);
+    builder.writeNumber(source.index);
+    builder.writeAddress(source.collection_address);
+    builder.writeAddress(source.owner_address);
+    builder.writeCell(source.individual_content);
+    return builder.build();
+}
+
+export function dictValueParserGetNftData(): DictionaryValue<GetNftData> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeGetNftData(src)).endCell());
+        },
+        parse: (src) => {
+            return loadGetNftData(src.loadRef().beginParse());
         }
     }
 }
@@ -1059,6 +1468,7 @@ export type TonJamNFTItem$Data = {
     collection_address: Address;
     item_index: bigint;
     content: Cell;
+    is_initialized: boolean;
 }
 
 export function storeTonJamNFTItem$Data(src: TonJamNFTItem$Data) {
@@ -1068,6 +1478,7 @@ export function storeTonJamNFTItem$Data(src: TonJamNFTItem$Data) {
         b_0.storeAddress(src.collection_address);
         b_0.storeUint(src.item_index, 64);
         b_0.storeRef(src.content);
+        b_0.storeBit(src.is_initialized);
     };
 }
 
@@ -1077,7 +1488,8 @@ export function loadTonJamNFTItem$Data(slice: Slice) {
     const _collection_address = sc_0.loadAddress();
     const _item_index = sc_0.loadUintBig(64);
     const _content = sc_0.loadRef();
-    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content };
+    const _is_initialized = sc_0.loadBit();
+    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
 }
 
 export function loadTupleTonJamNFTItem$Data(source: TupleReader) {
@@ -1085,7 +1497,8 @@ export function loadTupleTonJamNFTItem$Data(source: TupleReader) {
     const _collection_address = source.readAddress();
     const _item_index = source.readBigNumber();
     const _content = source.readCell();
-    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content };
+    const _is_initialized = source.readBoolean();
+    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
 }
 
 export function loadGetterTupleTonJamNFTItem$Data(source: TupleReader) {
@@ -1093,7 +1506,8 @@ export function loadGetterTupleTonJamNFTItem$Data(source: TupleReader) {
     const _collection_address = source.readAddress();
     const _item_index = source.readBigNumber();
     const _content = source.readCell();
-    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content };
+    const _is_initialized = source.readBoolean();
+    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
 }
 
 export function storeTupleTonJamNFTItem$Data(source: TonJamNFTItem$Data) {
@@ -1102,6 +1516,7 @@ export function storeTupleTonJamNFTItem$Data(source: TonJamNFTItem$Data) {
     builder.writeAddress(source.collection_address);
     builder.writeNumber(source.item_index);
     builder.writeCell(source.content);
+    builder.writeBoolean(source.is_initialized);
     return builder.build();
 }
 
@@ -1135,7 +1550,7 @@ function initTonJamNFTItem_init_args(src: TonJamNFTItem_init_args) {
 }
 
 async function TonJamNFTItem_init(owner: Address, collection_address: Address, item_index: bigint, content: Cell) {
-    const __code = Cell.fromHex('b5ee9c724101050100ac000114ff00f4a413f4bcf2c80b01020162020300aad030d072d721d200d200fa4021103450556f04f86101f862ed44d0d200019bfa40fa40d33fd455306c148e10fa40fa40810101d700d4553004d15502e204925f04e05502c87f01ca0055305034cececb3fccc9ed540157a11f9fda89a1a4000337f481f481a67fa8aa60d8291c21f481f481020203ae01a8aa6009a2aa05c5b678d8830400247fc8ca005220cb3f23cf1624cf165210ccc92e50b575');
+    const __code = Cell.fromHex('b5ee9c724102090100022b000114ff00f4a413f4bcf2c80b01020162020702cad001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019dfa40fa40d33fd4d20055406c158e11fa40fa40810101d700d4553004d1550270e206925f06e004d70d1ff2e0822182105fcc3d14bae3020182102fcb26a2bae3025f06f2c082030602c631d33ffa40d72c01916d93fa4001e201f40431fa00f8416f2410235f032a9c20820090580ac70519f2f4239e38398130145376c705f2f47f5193e222c2009410386c41e30d246eb3923430e30d4034c87f01ca0055405045ce12cecb3fccca00c9ed54040500a2715446a3c85520821005138d915004cb1f12cb3fcecec91034185a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0004009870804003c8018210d53276db58cb1fcb3fc9103641605a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0000dad33f30f842708040543345c8552082108b7713455004cb1f12cb3fcbffcec941305a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405045ce12cecb3fccca00c9ed54015da11f9fda89a1a400033bf481f481a67fa9a400aa80d82b1c23f481f481020203ae01a8aa6009a2aa04e1c5b678d8ab08000a5470235374eae18d70');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initTonJamNFTItem_init_args({ $$type: 'TonJamNFTItem_init_args', owner, collection_address, item_index, content })(builder);
@@ -1180,6 +1595,8 @@ export const TonJamNFTItem_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
+    12308: { message: "Only collection can initialize" },
+    36952: { message: "Only owner can transfer" },
     57579: { message: "Only owner can mint" },
 } as const
 
@@ -1220,6 +1637,8 @@ export const TonJamNFTItem_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
+    "Only collection can initialize": 12308,
+    "Only owner can transfer": 36952,
     "Only owner can mint": 57579,
 } as const
 
@@ -1240,9 +1659,16 @@ const TonJamNFTItem_types: ABIType[] = [
     {"name":"RoyaltyParams","header":null,"fields":[{"name":"numerator","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"denominator","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"destination","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"GetRoyaltyParams","header":1765620048,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"ReportRoyaltyParams","header":2828540295,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"numerator","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"denominator","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"destination","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"Mint","header":2107022347,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"royalty_params","type":{"kind":"simple","type":"RoyaltyParams","optional":false}}]},
+    {"name":"Transfer","header":1607220500,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"new_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"custom_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"forward_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"OwnershipAssigned","header":85167505,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"prev_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"Excesses","header":3576854235,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"GetStaticData","header":801842850,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"ReportStaticData","header":2339836741,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"index_id","type":{"kind":"simple","type":"uint","optional":false,"format":256}},{"name":"collection","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"Mint","header":1048761405,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"CollectionData","header":null,"fields":[{"name":"next_item_index","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"collection_content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"owner_address","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"GetNftData","header":null,"fields":[{"name":"is_initialized","type":{"kind":"simple","type":"bool","optional":false}},{"name":"index","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"collection_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"individual_content","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"TonJamCollection$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"next_item_index","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"royalty_params","type":{"kind":"simple","type":"RoyaltyParams","optional":false}}]},
-    {"name":"TonJamNFTItem$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"collection_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"item_index","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"TonJamNFTItem$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"collection_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"item_index","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"is_initialized","type":{"kind":"simple","type":"bool","optional":false}}]},
 ]
 
 const TonJamNFTItem_opcodes = {
@@ -1251,11 +1677,16 @@ const TonJamNFTItem_opcodes = {
     "FactoryDeploy": 1829761339,
     "GetRoyaltyParams": 1765620048,
     "ReportRoyaltyParams": 2828540295,
-    "Mint": 2107022347,
+    "Transfer": 1607220500,
+    "OwnershipAssigned": 85167505,
+    "Excesses": 3576854235,
+    "GetStaticData": 801842850,
+    "ReportStaticData": 2339836741,
+    "Mint": 1048761405,
 }
 
 const TonJamNFTItem_getters: ABIGetter[] = [
-    {"name":"get_nft_data","methodId":102351,"arguments":[],"returnType":{"kind":"simple","type":"cell","optional":false}},
+    {"name":"get_nft_data","methodId":102351,"arguments":[],"returnType":{"kind":"simple","type":"GetNftData","optional":false}},
 ]
 
 export const TonJamNFTItem_getterMapping: { [key: string]: string } = {
@@ -1263,7 +1694,8 @@ export const TonJamNFTItem_getterMapping: { [key: string]: string } = {
 }
 
 const TonJamNFTItem_receivers: ABIReceiver[] = [
-    {"receiver":"internal","message":{"kind":"any"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"Transfer"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"GetStaticData"}},
 ]
 
 
@@ -1301,11 +1733,14 @@ export class TonJamNFTItem implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Slice) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Transfer | GetStaticData) {
         
         let body: Cell | null = null;
-        if (message && typeof message === 'object' && message instanceof Slice) {
-            body = message.asCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Transfer') {
+            body = beginCell().store(storeTransfer(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'GetStaticData') {
+            body = beginCell().store(storeGetStaticData(message)).endCell();
         }
         if (body === null) { throw new Error('Invalid message type'); }
         
@@ -1316,7 +1751,7 @@ export class TonJamNFTItem implements Contract {
     async getGetNftData(provider: ContractProvider) {
         const builder = new TupleBuilder();
         const source = (await provider.get('get_nft_data', builder.build())).stack;
-        const result = source.readCell();
+        const result = loadGetterTupleGetNftData(source);
         return result;
     }
     
