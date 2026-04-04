@@ -8,9 +8,23 @@ import {
   UsersIcon, 
   SparklesIcon, 
   ArrowTrendingUpIcon, 
-  ChevronRightIcon 
+  ChevronRightIcon,
+  HomeIcon,
+  HashtagIcon,
+  BellIcon,
+  EnvelopeIcon,
+  BookmarkIcon,
+  UserIcon,
+  PhotoIcon,
+  GifIcon,
+  ListBulletIcon,
+  FaceSmileIcon,
+  CalendarIcon,
+  MapPinIcon
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
 import { ButtonGroupInput } from '@/components/ButtonGroupInput';
 import { 
   DropdownMenu, 
@@ -27,14 +41,38 @@ import TrackCard from '@/components/TrackCard';
 import SocialFeed from '@/components/SocialFeed';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import { useAudio } from '@/context/AudioContext';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, cn } from '@/lib/utils';
 import { Post, Track } from '@/types';
 
 const JamSpace: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch, jamspaceFilters } = useAudio();
-  const [activeTab, setActiveTab] = useState<'All' | 'Following' | 'Trending'>('All');
-  const [filterType, setFilterType] = useState<'All' | 'Tracks' | 'NFTs'>('All');
+  const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch, jamspaceFilters, userProfile } = useAudio();
+  const [activeTab, setActiveTab] = useState<'For You' | 'Following'>('For You');
+  const [postContent, setPostContent] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+  const [filterType, setFilterType] = useState('all');
+
+  const handleCreatePost = () => {
+    if (!postContent.trim()) return;
+    setIsPosting(true);
+    // Simulate API call
+    setTimeout(() => {
+      createPost({
+        content: postContent,
+        userId: userProfile.uid,
+        userName: userProfile.name,
+        userAvatar: userProfile.avatar,
+        timestamp: new Date().toISOString(),
+        likes: 0,
+        reposts: 0,
+        comments: 0,
+        isVerified: true
+      });
+      setPostContent('');
+      setIsPosting(false);
+      addNotification('Post shared successfully', 'success');
+    }, 1000);
+  };
 
   const carouselItems: CarouselItem[] = [
     {
@@ -80,8 +118,6 @@ const JamSpace: React.FC = () => {
     // 1. Tab Filtering
     if (activeTab === 'Following') {
       basePosts = basePosts.filter(p => followedUserIds.includes(p.userId));
-    } else if (activeTab === 'Trending') {
-      basePosts = basePosts.sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
     }
 
     // 2. Type Filtering
@@ -126,7 +162,7 @@ const JamSpace: React.FC = () => {
       </div>
 
       {/* Live Signal Ticker */}
-      <div className="bg-background border-b border-blue-500/30 py-4 px-4 overflow-hidden whitespace-nowrap relative z-50">
+      <div className="bg-background py-4 px-4 overflow-hidden whitespace-nowrap relative z-50">
         <div className="flex items-center gap-4 animate-marquee">
           {[1,2,3,4,5].map(i => (
             <div key={i} className="flex items-center gap-4">
@@ -145,182 +181,195 @@ const JamSpace: React.FC = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 mt-4 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Navigation & Trending */}
-          <aside className="hidden lg:block lg:col-span-3 space-y-4 sticky top-32 h-fit">
-            {/* Live Jam Rooms - Hardware Style */}
-            <div className="bg-background rounded-[12px] p-4 shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-[0.03] rotate-12"><RadioIcon className="h-24 w-24" /></div>
-              <div className="flex items-center justify-between mb-4 relative z-10">
-                <div className="flex flex-col">
-                  <h3 className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.5em]">Live Jam Rooms</h3>
-                  <span className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4">Active Audio Relays</span>
-                </div>
-                <div className="flex items-center gap-4 px-4 py-4 bg-blue-500/10 rounded-full border border-blue-500/20">
-                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
-                  <span className="text-[7px] font-bold text-orange-500 uppercase tracking-widest">Live</span>
-                </div>
+      <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 mt-0 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 sm:gap-6">
+          {/* Left Column: X-style Navigation */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-2 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto no-scrollbar pr-4">
+            <div className="flex flex-col gap-1">
+              {[
+                { id: 'home', label: 'Home', icon: HomeIcon, path: '/home' },
+                { id: 'explore', label: 'Explore', icon: HashtagIcon, path: '/discover' },
+                { id: 'notifications', label: 'Notifications', icon: BellIcon, path: '/notifications' },
+                { id: 'messages', label: 'Messages', icon: EnvelopeIcon, path: '/messages' },
+                { id: 'bookmarks', label: 'Bookmarks', icon: BookmarkIcon, path: '/bookmarks' },
+                { id: 'profile', label: 'Profile', icon: UserIcon, path: '/profile' },
+              ].map(item => (
+                <button 
+                  key={item.id} 
+                  onClick={() => navigate(item.path)}
+                  className="flex items-center gap-4 px-4 py-3 rounded-full hover:bg-foreground/10 transition-all group w-fit"
+                >
+                  <item.icon className="h-7 w-7 text-foreground stroke-[2px]" />
+                  <span className="text-xl font-bold pr-4">{item.label}</span>
+                </button>
+              ))}
+              <Button className="mt-4 w-full rounded-full py-7 text-lg font-bold bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 border-none">
+                Post
+              </Button>
+            </div>
+
+            {/* Live Jam Rooms - Refined */}
+            <div className="mt-8 bg-muted/30 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold">Live Jam Rooms</h3>
+                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
               </div>
-              <div className="space-y-4 relative z-10">
+              <div className="space-y-3">
                 {[
-                  { id: 'genesis', name: 'Genesis Node', listeners: 124, icon: RadioIcon, freq: '44.1kHz' },
-                  { id: 'drift', name: 'Cyber Drift', listeners: 89, icon: SpeakerWaveIcon, freq: '48.0kHz' }
+                  { id: 'genesis', name: 'Genesis Node', listeners: 124, icon: RadioIcon },
+                  { id: 'drift', name: 'Cyber Drift', listeners: 89, icon: SpeakerWaveIcon }
                 ].map(room => (
-                  <button 
+                  <div 
                     key={room.id}
                     onClick={() => activeJamRoom?.id === room.id ? leaveJamRoom() : joinJamRoom(room.id)}
-                    className={`w-full p-4 rounded-[8px] border transition-all text-left group relative overflow-hidden ${activeJamRoom?.id === room.id ? 'bg-blue-600 border-blue-400 shadow-xl shadow-blue-500/20' : 'bg-foreground/[0.02] border-blue-500/30 hover:border-blue-500/50 hover:bg-muted/50'}`}
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-foreground/5 cursor-pointer transition-all"
                   >
-                    <div className="flex items-center gap-4 relative z-10">
-                      <div className={`w-12 h-12 rounded-[6px] flex items-center justify-center transition-all ${activeJamRoom?.id === room.id ? 'bg-muted/80 scale-105' : 'bg-muted/50 group-hover:bg-orange-500/20'}`}>
-                        <room.icon className={`h-5 w-5 ${activeJamRoom?.id === room.id ? 'text-foreground' : 'text-muted-foreground group-hover:text-orange-500'}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-4">
-                          <p className={`text-[11px] font-bold uppercase tracking-tight truncate ${activeJamRoom?.id === room.id ? 'text-foreground' : 'text-muted-foreground/90'}`}>{room.name}</p>
-                          <span className={`text-[7px] font-mono ${activeJamRoom?.id === room.id ? 'text-muted-foreground/80' : 'text-muted-foreground/50'}`}>{room.freq}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className={`flex gap-4 ${activeJamRoom?.id === room.id ? 'text-muted-foreground' : 'text-muted-foreground/30'}`}>
-                            {[1,2,3,4].map(i => <div key={i} className={`w-0.5 h-2 rounded-full bg-current ${activeJamRoom?.id === room.id ? 'animate-pulse' : ''}`} style={{ animationDelay: `${i * 100}ms` }}></div>)}
-                          </div>
-                          <p className={`text-[8px] font-bold uppercase tracking-widest ${activeJamRoom?.id === room.id ? 'text-muted-foreground/80' : 'text-muted-foreground/50'}`}>{room.listeners} Listening</p>
-                        </div>
-                      </div>
+                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                      <room.icon className="h-5 w-5 text-orange-500" />
                     </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-background rounded-[12px] p-4">
-              <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em] mb-4">Navigation</h3>
-              <nav className="space-y-4">
-                {[
-                  { id: 'All', label: 'Global Feed', icon: RssIcon },
-                  { id: 'Following', label: 'Following', icon: UsersIcon },
-                  { id: 'Trending', label: 'Trending', icon: FireIcon }
-                ].map(item => (
-                  <button 
-                    key={item.id} 
-                    onClick={() => setActiveTab(item.id as any)}
-                    className={`w-full flex items-center gap-4 px-4 py-4 rounded-[10px] transition-all group ${activeTab === item.id ? 'bg-blue-500/10 text-blue-500 border border-blue-500/30' : 'text-neutral-500 hover:text-neutral-400 hover:bg-muted/50 border border-transparent'}`} 
-                  >
-                    <item.icon className={`h-4 w-4 ${activeTab === item.id ? 'text-blue-500' : 'text-neutral-500 group-hover:text-neutral-400'}`} />
-                    <span className="text-[11px] font-bold uppercase tracking-widest">{item.label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            <div className="bg-background rounded-[12px] p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.5em]">Trending Ledger</h3>
-                <ArrowTrendingUpIcon className="h-3 w-3 text-muted-foreground/30" />
-              </div>
-              <div className="space-y-4">
-                {trendingTopics.map((topic, idx) => (
-                  <div key={topic.tag} className="flex items-center justify-between group cursor-pointer" onClick={() => setSearch(topic.tag)}>
-                    <div className="flex items-center gap-4">
-                      <span className="text-[11px] font-mono text-blue-500/40 w-5 italic">0{idx + 1}</span>
-                      <div>
-                        <p className="text-sm font-bold text-muted-foreground/90 group-hover:text-blue-400 transition-colors tracking-tight font-mono">{topic.tag}</p>
-                        <p className="text-[8px] text-muted-foreground/50 font-bold uppercase tracking-widest mt-4">{topic.count} Signals</p>
-                      </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold truncate">{room.name}</p>
+                      <p className="text-xs text-muted-foreground">{room.listeners} listening</p>
                     </div>
-                    <ChevronRightIcon className="h-3 w-3 text-foreground/5 group-hover:text-blue-400 transition-all group-hover:translate-x-1" />
                   </div>
                 ))}
               </div>
             </div>
           </aside>
 
-          {/* Center Column: Main Feed */}
-          <main className="lg:col-span-6 space-y-4">
-            {/* Auto Carousel at the top */}
-            <AutoCarousel items={carouselItems} />
-
-            {/* Sticky Filters */}
-            <div className="sticky top-[var(--header-height,64px)] z-30 backdrop-blur-2xl py-2 w-full bg-background/40 px-0 sm:px-4 transition-all duration-300">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                  {['All', 'Following', 'Trending'].map(tab => (
-                    <button key={tab} onClick={() => setActiveTab(tab as any)} className={`px-[10px] py-[6px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex-shrink-0 border ${ activeTab === tab ? 'bg-blue-500 text-white border-blue-500 shadow-xl shadow-blue-500/20 active-pill' : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-border hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill' }`} >
+          {/* Center Column: Main Feed (X-style) */}
+          <main className="lg:col-span-6 min-h-screen">
+            {/* Header Tabs & Filters */}
+            <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
+              <div className="flex">
+                {['For You', 'Following'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab as any)}
+                    className="flex-1 py-3 text-center hover:bg-foreground/5 transition-all relative"
+                  >
+                    <span className={cn(
+                      "text-xs font-bold",
+                      activeTab === tab ? "text-foreground" : "text-muted-foreground"
+                    )}>
                       {tab}
-                    </button>
-                  ))}
-                  <div className="w-px h-4 bg-blue-500/20 mx-2 flex-shrink-0" />
-                  {['All', 'Tracks', 'NFTs'].map(type => (
-                    <button 
-                      key={type} 
-                      onClick={() => setFilterType(type as any)}
-                      className={`px-[10px] py-[6px] rounded-[8px] text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${filterType === type ? 'bg-blue-500 text-white border-blue-500 shadow-lg active-pill' : 'bg-white dark:bg-transparent text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-transparent hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill'}`}
-                    >
-                      {type}
-                    </button>
-                  ))}
+                    </span>
+                    {activeTab === tab && (
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-blue-500 rounded-full" />
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2 p-2 overflow-x-auto no-scrollbar">
+                {['All', 'Tracks', 'NFTs', 'Trending'].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setFilterType(filter)}
+                    className={cn(
+                      "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap",
+                      filterType === filter ? "bg-blue-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    )}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Composer */}
+            <div className="p-3 flex gap-3">
+              <Avatar className="h-8 w-8 ring-1 ring-border">
+                <AvatarImage src={userProfile.avatar} />
+                <AvatarFallback>{userProfile.name?.[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <Textarea 
+                  placeholder="What is happening?!" 
+                  className="border-none bg-transparent text-sm resize-none focus-visible:ring-0 p-0 min-h-[40px] placeholder:text-muted-foreground/60 font-medium"
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                />
+                <div className="flex items-center justify-between pt-2 mt-1">
+                  <div className="flex items-center gap-1 text-blue-500">
+                    <button className="p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><PhotoIcon className="h-4 w-4 stroke-[2px]" /></button>
+                    <button className="p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><GifIcon className="h-4 w-4 stroke-[2px]" /></button>
+                    <button className="p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><ListBulletIcon className="h-4 w-4 stroke-[2px]" /></button>
+                    <button className="p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><FaceSmileIcon className="h-4 w-4 stroke-[2px]" /></button>
+                  </div>
+                  <Button 
+                    disabled={!postContent.trim() || isPosting}
+                    onClick={handleCreatePost}
+                    className="rounded-full px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold h-8 text-xs border-none"
+                  >
+                    {isPosting ? 'Posting...' : 'Post'}
+                  </Button>
                 </div>
               </div>
             </div>
 
             {/* Main Feed */}
-            <div className="bg-transparent space-y-4">
-              <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." layout={jamspaceFilters.viewMode} />
+            <div className="">
+              <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." />
             </div>
           </main>
 
-          {/* Right Column: Recommendations & Live */}
-          <aside className="hidden lg:block lg:col-span-3 space-y-4 sticky top-32 h-fit">
-            {/* Live Now Nodes */}
-            <section className="bg-background rounded-[12px] p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex flex-col">
-                  <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em]">Live Nodes</h3>
-                  <span className="text-[7px] font-bold text-green-500 uppercase tracking-widest mt-4">Active Broadcasts</span>
-                </div>
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+          {/* Right Column: Search & Trending */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-4 sticky top-20 h-fit pl-4">
+            {/* Search Bar */}
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <SparklesIcon className="h-5 w-5 text-muted-foreground group-focus-within:text-blue-500" />
               </div>
-              <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-                {artists.slice(0, 8).map(artist => (
-                  <div key={artist.id} className="relative group cursor-pointer flex-shrink-0 w-16" onClick={() => navigate(`/artist/${artist.id}`)} title={artist.name} >
-                    <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full scale-0 group-hover:scale-125 transition-transform duration-500"></div>
-                    <img src={artist.avatarUrl} className="w-full aspect-square rounded-full transition-all relative z-10 grayscale group-hover:grayscale-0 object-cover border border-blue-500/30 group-hover:border-blue-500/50" alt="" />
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full z-20 border-2 border-background"></div>
+              <input 
+                type="text"
+                placeholder="Search JamSpace"
+                className="w-full bg-muted/50 border-none rounded-full py-3 pl-12 pr-4 focus:ring-1 focus:ring-blue-500 transition-all"
+              />
+            </div>
+
+            {/* Trending Section */}
+            <div className="bg-muted/30 rounded-2xl overflow-hidden">
+              <h3 className="text-xl font-bold p-4">What's happening</h3>
+              <div className="">
+                {trendingTopics.map((topic) => (
+                  <div key={topic.tag} className="p-4 hover:bg-foreground/5 cursor-pointer transition-all">
+                    <p className="text-xs text-muted-foreground">Trending in Music</p>
+                    <p className="text-base font-bold">{topic.tag}</p>
+                    <p className="text-xs text-muted-foreground">{topic.count} posts</p>
                   </div>
                 ))}
               </div>
-            </section>
+              <button className="w-full p-4 text-left text-blue-500 hover:bg-foreground/5 transition-all text-sm">
+                Show more
+              </button>
+            </div>
 
-            {/* Recommended Nodes */}
-            <section className="bg-background rounded-[12px] p-4">
-              <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em] mb-4">Recommended Nodes</h3>
-              <div className="space-y-4">
+            {/* Who to follow */}
+            <div className="bg-muted/30 rounded-2xl overflow-hidden">
+              <h3 className="text-xl font-bold p-4">Who to follow</h3>
+              <div className="">
                 {artists.slice(0, 3).map(artist => (
-                  <UserCard key={artist.id} user={artist} variant="compact" />
+                  <div key={artist.uid} className="p-4 flex items-center justify-between hover:bg-foreground/5 transition-all">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={artist.avatarUrl} />
+                        <AvatarFallback>{artist.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold truncate">{artist.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">@{ (artist.name || 'user').toLowerCase().replace(/\s+/g, '')}</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="rounded-full bg-foreground text-background hover:bg-foreground/90 border-none px-4 py-1 h-8 text-xs font-bold">
+                      Follow
+                    </Button>
+                  </div>
                 ))}
               </div>
-              <button onClick={() => navigate('/explore/artists?title=Recommended Nodes&filter=recommended')} className="w-full mt-4 py-4 text-[9px] font-bold uppercase text-blue-500 tracking-[0.2em] hover:text-blue-600 dark:hover:text-foreground hover:bg-blue-600/10 border border-blue-500/30 rounded-[8px] transition-all active:scale-95"> Discover More Nodes </button>
-            </section>
-
-            {/* AI Curated Frequencies */}
-            <section className="bg-background rounded-[12px] p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <SparklesIcon className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-[0.5em]">AI Frequencies</h3>
-                </div>
-                <div className="flex gap-4">
-                  {[1,2,3].map(i => <div key={i} className="w-1 h-1 rounded-full bg-blue-500/20"></div>)}
-                </div>
-              </div>
-              <div className="space-y-4">
-                {aiRecommendedTracks.slice(0, 3).map(track => (
-                  <TrackCard key={track.id} track={track} variant="row" />
-                ))}
-              </div>
-              <button onClick={() => navigate('/explore/tracks?title=AI Frequencies&filter=recommended')} className="w-full mt-4 py-4 text-[8px] font-bold uppercase text-blue-500/50 dark:text-muted-foreground/50 tracking-widest hover:text-blue-600 dark:hover:text-foreground transition-colors"> View All </button>
-            </section>
+              <button className="w-full p-4 text-left text-blue-500 hover:bg-foreground/5 transition-all text-sm">
+                Show more
+              </button>
+            </div>
           </aside>
         </div>
       </div>

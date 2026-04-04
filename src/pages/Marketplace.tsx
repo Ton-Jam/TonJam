@@ -318,7 +318,7 @@ const Marketplace: React.FC = () => {
               </div>
               <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2 -mx-4 px-4">
                 {featuredArtists.map((artist) => (
-                  <div key={artist.id} className="flex-shrink-0 w-[140px] snap-start">
+                  <div key={artist.uid} className="flex-shrink-0 w-[140px] snap-start">
                     <ArtistCard artist={artist} />
                   </div>
                 ))}

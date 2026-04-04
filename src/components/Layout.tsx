@@ -39,6 +39,7 @@ import TrackOptionsModal from './TrackOptionsModal';
 import PostModal from './PostModal';
 // import TrackUploadModal from './TrackUploadModal';
 import { ModeToggle } from './ModeToggle';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import CreatePlaylistModal from './CreatePlaylistModal';
 import AuthModal from './AuthModal';
 import ScrollToTopButton from './ScrollToTopButton';
@@ -130,6 +131,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isLibrary = location.pathname.startsWith('/library');
   const isExplore = location.pathname.startsWith('/explore');
   const isDiscover = location.pathname === '/discover';
+  const isSearch = location.pathname === '/search' || location.pathname === '/discover';
   const isArtistProfile = location.pathname.startsWith('/artist/');
   const isUserProfile = location.pathname.startsWith('/user/') || location.pathname === '/profile';
   const isPlayer = location.pathname === '/player';
@@ -214,10 +216,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isPlayer && !isExplore && (
+      {!isPlayer && !isExplore && !isSearch && (
         <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between lg:left-64 transition-transform duration-300 border-b-0 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
           <div className="flex items-center gap-2 flex-1">
-            {(isHome || isTasks) ? (
+            {(isHome) ? (
               <button 
                 onClick={() => setIsMobileSidebarOpen(true)}
                 className="lg:hidden p-3 rounded-full hover:bg-muted transition-all"
@@ -227,7 +229,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   layoutId="app-logo"
                   src={APP_LOGO} 
                   alt="TonJam Logo" 
-                  className="w-8 h-8 object-contain" 
+                  className="w-[36px] h-[36px] object-contain" 
                 />
               </button>
             ) : (
@@ -249,7 +251,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     />
                   ) : (
                     <span className="font-bold text-sm tracking-tight text-foreground uppercase truncate max-w-[100px]">
-                      {isJamspace ? 'JamSpace' : location.pathname.split('/')[1].replace('-', ' ')}
+                      {isJamspace ? 'JamSpace' : (location.pathname.split('/')[1] || '').replace('-', ' ')}
                     </span>
                   )}
                 </div>
@@ -265,7 +267,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </span>
                   </div>
                 )}
-                <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'} ${(isJamspace || isLibrary || isMarketplace) && !isHeaderSearchOpen ? '!hidden' : ''}`} ref={searchRef}>
+                <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`} ref={searchRef}>
                   <ButtonGroupInput 
                   placeholder={getSearchPlaceholder()} 
                   value={searchQuery}
@@ -273,7 +275,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onFocus={() => setIsSearchOpen(true)}
                   onKeyDown={handleSearch}
                   className="w-full"
-                  inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
+                  inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2.5 pl-5 pr-10 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                 />
 
                 {/* Desktop Search Dropdown */}
@@ -441,16 +443,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           <div className="flex items-center gap-1.5 ml-2">
             {/* TonJam Coin */}
-            {(isHome || isTasks) && (
+            {isHome && (
               <Link to="/tasks" className="flex items-center gap-2 hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full" aria-label="Tasks">
-                <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-8 h-8 object-contain" />
+                <img src={TJ_COIN_ICON} alt="JAM Coin" className="w-[36px] h-[36px] object-contain" />
               </Link>
             )}
 
             {/* Notification Icon & Marketplace Filters */}
             {(isMarketplace || isJamspace || isLibrary) && (
               <div className="flex items-center gap-1.5">
-                {(isMarketplace || isLibrary) && (
+                {(isMarketplace) && (
                   <DropdownMenu onOpenChange={(open) => { if (!open) setActiveFilterSubMenu(null); }}>
                     <DropdownMenuTrigger asChild>
                       <button 
@@ -656,7 +658,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <MagnifyingGlassIcon className="h-6 w-6" strokeWidth={2.5} />
                   </button>
                 )}
-                {isJamspace && (
+                {isLibrary && (
+                  <button 
+                    onClick={() => setIsCreatePlaylistModalOpen(true)}
+                    className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label="Create Playlist"
+                  >
+                    <PlusIcon className="h-6 w-6" strokeWidth={2.5} />
+                  </button>
+                )}
+                {(isJamspace) && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button 
@@ -694,29 +705,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </button>
                 )}
 
-                {/* Wallet & User Avatar / Sign In */}
-                {userAddress ? (
-                  <div className="flex items-center gap-1.5">
-                  <div className="hidden sm:block px-3 py-1.5 text-xs font-mono text-blue-600 dark:text-blue-400">
-                    {userAddress.slice(0, 4)}...{userAddress.slice(-4)}
-                  </div>
-                  <button 
-                    onClick={() => tonConnectUI.disconnect()}
-                    className="p-2 rounded-full hover:bg-destructive/10 text-destructive transition-all"
-                    title="Disconnect Wallet"
-                  >
-                    <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                  </button>
+            {/* Wallet & User Avatar / Sign In */}
+            {userAddress && !isLibrary ? (
+              <div className="flex items-center gap-1.5">
+                <div className="hidden sm:block px-3 py-1.5 text-xs font-mono text-blue-600 dark:text-blue-400">
+                  {userAddress.slice(0, 4)}...{userAddress.slice(-4)}
                 </div>
-              ) : (
                 <button 
-                  onClick={() => tonConnectUI.openModal()}
-                  className="px-4 py-2 text-blue-600 dark:text-primary rounded-full text-sm font-bold hover:bg-muted transition-all flex items-center gap-2"
+                  onClick={() => tonConnectUI.disconnect()}
+                  className="p-2 rounded-full hover:bg-destructive/10 text-destructive transition-all"
+                  title="Disconnect Wallet"
                 >
-                  <WalletIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">Connect Wallet</span>
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
                 </button>
-              )}
+              </div>
+            ) : (!isLibrary && !userAddress) ? (
+              <button 
+                onClick={() => tonConnectUI.openModal()}
+                className="px-4 py-2 text-blue-600 dark:text-primary rounded-full text-sm font-bold hover:bg-muted transition-all flex items-center gap-2"
+              >
+                <WalletIcon className="h-5 w-5" />
+                <span className="hidden sm:inline">Connect Wallet</span>
+              </button>
+            ) : null}
               {isDiscover && (
               <button 
                 onClick={() => setIsDiscoverFiltersOpen(!isDiscoverFiltersOpen)}
@@ -727,12 +738,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
             )}
             {!isMarketplace && !isDiscover && !isJamspace && !isLibrary && (user ? (
-              <Link to="/profile" className="w-9 h-9 rounded-full overflow-hidden hover:opacity-80 transition-all flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="View Profile">
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt={`${user.displayName || 'User'} avatar`} className="w-full h-full object-cover" />
-                ) : (
-                  <UserIcon className="w-4 h-4 text-blue-600 dark:text-muted-foreground" />
-                )}
+              <Link to="/profile" className="hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full" aria-label="View Profile">
+                <Avatar className="w-9 h-9">
+                  <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                  <AvatarFallback>{user.displayName ? user.displayName.slice(0, 2).toUpperCase() : <UserIcon className="w-4 h-4" />}</AvatarFallback>
+                </Avatar>
               </Link>
             ) : (
               <button 
@@ -795,7 +805,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
 
       {/* Audio Player */}
-      {currentTrack && !isFullPlayerOpen && <MiniAudioPlayer />}
+      {currentTrack && !isFullPlayerOpen && <MiniAudioPlayer isMobileNavHidden={isMobileNavHidden} />}
       <AnimatePresence>
         {isFullPlayerOpen && <FullPlayer />}
       </AnimatePresence>
@@ -835,7 +845,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Mobile Navigation */}
       {!isPlayer && (
-        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-16 px-2 flex justify-around items-center shadow-2xl transition-transform duration-300 ${isMobileNavHidden ? 'translate-y-full' : 'translate-y-0'}`} aria-label="Mobile Navigation">
+        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-[61px] px-2 flex justify-around items-center shadow-2xl transition-transform duration-300 ${isMobileNavHidden ? 'translate-y-full' : 'translate-y-0'}`} aria-label="Mobile Navigation">
           <MobileNavItem to="/" icon={HomeIcon} label="Home" />
           <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
           <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" />
@@ -868,7 +878,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           layoutId="app-logo"
           src={APP_LOGO} 
           alt="" 
-          className="w-10 h-10 object-contain" 
+          className="w-[44px] h-[44px] object-contain" 
           aria-hidden="true" 
         />
         <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">Discover</span>
@@ -951,7 +961,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       <div className="mt-2 p-2 rounded-[5px] bg-muted/50 border-0 space-y-2" role="complementary" aria-label="Token Price Info">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={TJ_COIN_ICON} alt="JAM Token" className="w-6 h-6 object-contain" />
+            <img src={TJ_COIN_ICON} alt="JAM Token" className="w-[26px] h-[26px] object-contain" />
             <div>
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">JAM Price</p>
               <p className="text-sm font-bold text-foreground tracking-tighter">${JAM_PRICE_USD.toFixed(3)}</p>
@@ -976,7 +986,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
   </>
 );
 
-const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; onClick?: () => void }) => (
+const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; label: string; onClick?: () => void }) => (
   <NavLink 
     to={to} 
     onClick={onClick}
@@ -985,12 +995,12 @@ const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: React.C
       ${isActive ? 'bg-zinc-500/10 text-zinc-900 dark:text-blue-500 font-bold' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400 hover:bg-zinc-500/5'}
     `}
   >
-    <Icon className="h-6 w-6" />
+    <Icon className="h-6 w-6" strokeWidth={3.5} />
     <span className="text-[12px] uppercase font-bold tracking-[0.15em]">{label}</span>
   </NavLink>
 );
 
-const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string }) => (
+const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; label: string }) => (
   <NavLink 
     to={to} 
     aria-label={label}
@@ -1000,7 +1010,7 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: React.Comp
     `}
   >
     {({ isActive }) => (
-      <Icon className={`h-7 w-7 transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
+      <Icon className={`h-[22px] w-[22px] transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} strokeWidth={2.5} />
     )}
   </NavLink>
 );

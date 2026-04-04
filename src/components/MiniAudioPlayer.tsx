@@ -7,10 +7,12 @@ import { getPlaceholderImage } from "@/lib/utils";
 
 interface MiniAudioPlayerProps {
   onOptionsClick?: () => void;
+  isMobileNavHidden?: boolean;
 }
 
 const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
   onOptionsClick,
+  isMobileNavHidden,
 }) => {
   const navigate = useNavigate();
   const {
@@ -45,7 +47,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
   return (
     <>
       <div
-        className="fixed bottom-16 lg:bottom-0 left-0 right-0 z-[45] bg-background/95 backdrop-blur-xl px-3 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-muted/50 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className={`fixed ${isMobileNavHidden ? 'bottom-0' : 'bottom-16'} lg:bottom-0 left-0 right-0 z-[45] bg-background/95 backdrop-blur-xl px-3 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-muted/50 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
         onClick={() => setFullPlayerOpen(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -84,9 +86,9 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               )}
             </h4>
             <div className="flex items-center gap-3 mt-3">
-              {MOCK_ARTISTS.find(a => a.id === currentTrack.artistId) && (
+              {MOCK_ARTISTS.find(a => a.uid === currentTrack.artistId) && (
                 <img 
-                  src={MOCK_ARTISTS.find(a => a.id === currentTrack.artistId)?.avatarUrl || getPlaceholderImage(`artist-${currentTrack.artistId}`)} 
+                  src={MOCK_ARTISTS.find(a => a.uid === currentTrack.artistId)?.avatarUrl || getPlaceholderImage(`artist-${currentTrack.artistId}`)} 
                   alt={currentTrack.artist} 
                   className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   onClick={handleArtistClick}

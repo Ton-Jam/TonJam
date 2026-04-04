@@ -392,7 +392,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const platformFee = streamPrice * 0.10;
           const artistShare = streamPrice - platformFee;
           
-          const artist = artists.find(a => a.id === currentTrack.artistId || a.name === currentTrack.artist);
+          const artist = artists.find(a => a.uid === currentTrack.artistId || a.name === currentTrack.artist);
           
           recordTransaction({
             type: 'stream',
@@ -479,7 +479,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (user) {
         // 1. Start protected collection listeners
         usersUnsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
-          const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
+          const users = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
           setFirestoreUsers(users);
         }, (error) => handleFirestoreError(error, OperationType.LIST, 'users', false));
 
@@ -517,11 +517,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             // Profile doesn't exist, create it
             const newProfile: UserProfile = {
               ...MOCK_USER,
-              id: user.uid,
+              uid: user.uid,
               name: user.displayName || 'Anonymous',
               avatar: user.photoURL || getPlaceholderImage(`user-${user.uid}`, 200, 200),
               walletAddress: '',
-              handle: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
+              username: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
               followers: 0,
               following: 0,
               earnings: 0,
@@ -601,7 +601,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const firestoreArtists = firestoreUsers
         .filter(u => u.isVerifiedArtist)
         .map(u => ({
-          id: u.id,
+          uid: u.uid,
           name: u.name,
           walletAddress: u.walletAddress,
           avatarUrl: u.avatar,
@@ -824,9 +824,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [recentlyPlayed, likedTrackIds, userNFTs, userProfile.favoriteGenres, allTracks, allNFTs, posts, followedUserIds, getTrendingTracks]);
 
   useEffect(() => {
-    if (userProfile.id) {
-      setUserTracks(firestoreTracks.filter(t => t.artistId === userProfile.id));
-      setUserNFTs(firestoreNFTs.filter(n => n.artistId === userProfile.id || n.owner === userProfile.walletAddress));
+    if (userProfile.uid) {
+      setUserTracks(firestoreTracks.filter(t => t.artistId === userProfile.uid));
+      setUserNFTs(firestoreNFTs.filter(n => n.artistId === userProfile.uid || n.owner === userProfile.walletAddress));
     }
   }, [firestoreTracks, firestoreNFTs, userProfile]);
 
@@ -848,7 +848,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addUserTrack = async (track: Track) => {
     setIsLoading(true);
     try {
-      const cleanTrack = cleanObject(track);
+      // Ensure songId is present
+      const trackWithId = {
+        ...track,
+        songId: track.songId || `song-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+      const cleanTrack = cleanObject(trackWithId);
       await setDoc(doc(db, 'tracks', track.id), cleanTrack);
       addNotification(`Track "${track.title}" uploaded`, "success");
     } catch (error) {
@@ -1109,7 +1114,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         
         // If the recipient is the current user, update their profile earnings
         if (txData.recipientAddress === userProfile.walletAddress && auth.currentUser) {
-          const userRef = doc(db, 'users', userProfile.id);
+          const userRef = doc(db, 'users', userProfile.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const currentUser = userSnap.data() as UserProfile;
@@ -1444,10 +1449,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const postId = `post-${Date.now()}`;
     const newPost: Post = {
       id: postId,
-      userId: userProfile.id,
+      userId: userProfile.uid,
       userName: userProfile.name,
       userAvatar: userProfile.avatar,
-      userHandle: userProfile.handle,
+      username: userProfile.username,
       content: '',
       likes: 0,
       comments: 0,
@@ -1569,7 +1574,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsLoading(true);
     try {
       setArtists(prev => prev.map(artist => 
-        artist.id === artistId ? { ...artist, royaltyConfig: config } : artist
+        artist.uid === artistId ? { ...artist, royaltyConfig: config } : artist
       ));
 
       if (auth.currentUser) {
@@ -1848,7 +1853,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Update artist follower count locally
       setArtists(currentArtists => 
         currentArtists.map(artist => {
-          if (artist.id === userId) {
+          if (artist.uid === userId) {
             return {
               ...artist,
               followers: isFollowing ? Math.max(0, artist.followers - 1) : artist.followers + 1

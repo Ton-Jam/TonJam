@@ -45,10 +45,10 @@ const PostDetail: React.FC = () => {
   }
 
   const isFollowing = followedUserIds.includes(post.userId);
-  const isMe = post.userId === MOCK_USER.id;
+  const isMe = post.userId === MOCK_USER.uid;
   const track = post.trackId ? allTracks.find(t => t.id === post.trackId) : post.track;
   const nft = post.nftId ? allNFTs.find(n => n.id === post.nftId) : post.nft;
-  const artist = MOCK_ARTISTS.find(a => a.name === post.userName || a.id === post.userId);
+  const artist = MOCK_ARTISTS.find(a => a.name === post.userName || a.uid === post.userId);
 
   const handleLike = () => {
     if (liked) {
@@ -73,7 +73,7 @@ const PostDetail: React.FC = () => {
     if (!commentText.trim()) return;
     const newComment: Comment = {
       id: Date.now().toString(),
-      userId: MOCK_USER.id,
+      userId: MOCK_USER.uid,
       userName: MOCK_USER.name,
       userAvatar: MOCK_USER.avatar,
       content: commentText,
@@ -111,9 +111,9 @@ const PostDetail: React.FC = () => {
 
   const handleCommentProfileClick = (e: React.MouseEvent, commentUserId: string) => {
     e.stopPropagation();
-    if (commentUserId === MOCK_USER.id) {
+    if (commentUserId === MOCK_USER.uid) {
       navigate('/profile');
-    } else if (MOCK_ARTISTS.some(a => a.id === commentUserId)) {
+    } else if (MOCK_ARTISTS.some(a => a.uid === commentUserId)) {
       navigate(`/artist/${commentUserId}`);
     } else {
       navigate(`/user/${commentUserId}`);
@@ -157,7 +157,7 @@ const PostDetail: React.FC = () => {
 
           {/* User Identity Section */}
           <div className="flex items-center gap-4 mb-4">
-            <div className="relative flex-shrink-0 cursor-pointer group/avatar" onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : navigate(`/user/${post.userId}`)}>
+            <div className="relative flex-shrink-0 cursor-pointer group/avatar" onClick={() => artist ? navigate(`/artist/${artist.uid}`) : post.userId === MOCK_USER.uid ? navigate('/profile') : navigate(`/user/${post.userId}`)}>
               <img src={post.userAvatar} className="w-16 h-16 rounded-full group-hover/avatar:-blue-500 transition-all object-cover shadow-2xl" alt={post.userName} />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full -black flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.6)]">
                 <Zap className="h-3 w-3 text-foreground fill-current" />
@@ -167,7 +167,7 @@ const PostDetail: React.FC = () => {
               <div className="flex items-center gap-4 mb-4">
                 <h4 
                   className="font-bold text-lg text-foreground uppercase tracking-tight truncate cursor-pointer hover:text-blue-400 hover:underline inline-block"
-                  onClick={() => artist ? navigate(`/artist/${artist.id}`) : post.userId === MOCK_USER.id ? navigate('/profile') : navigate(`/user/${post.userId}`)}
+                  onClick={() => artist ? navigate(`/artist/${artist.uid}`) : post.userId === MOCK_USER.uid ? navigate('/profile') : navigate(`/user/${post.userId}`)}
                 > 
                   {post.userName} 
                 </h4>
@@ -221,7 +221,7 @@ const PostDetail: React.FC = () => {
                         <p className="text-xl font-bold text-foreground uppercase tracking-tighter">{track.price || '15.0'} TON</p>
                       </div>
                     </div>
-                    <button onClick={() => addNotification('Neural transaction initiated...', 'info')} className="w-full md:w-auto px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
+                    <button onClick={() => addNotification('Transaction initiated...', 'info')} className="w-full md:w-auto px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
                       Buy NFT Now
                     </button>
                   </div>

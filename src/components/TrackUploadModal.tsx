@@ -4,7 +4,7 @@ import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { Track } from '@/types';
 import { MOCK_USER } from '@/constants';
-import { uploadToIPFS } from '@/services/pinataService';
+import { uploadAudio, uploadCover } from '@/services/storageService';
 
 interface TrackUploadModalProps {
   isOpen: boolean;
@@ -12,8 +12,10 @@ interface TrackUploadModalProps {
 }
 
 const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) => {
-  const { addUserTrack, addNotification } = useAudio();
+  const { addUserTrack, addNotification, userProfile } = useAudio();
   const [isUploading, setIsUploading] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [coverProgress, setCoverProgress] = useState(0);
   const [step, setStep] = useState(1);
   
   const [formData, setFormData] = useState({
@@ -43,6 +45,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     }
 
     setIsUploading(true);
+    setAudioProgress(0);
+    setCoverProgress(0);
     
     try {
       // 0. Double check validation
@@ -55,26 +59,28 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         throw new Error(coverValidation.error);
       }
 
-      // 1. Upload to IPFS
-      addNotification("Uploading artifacts to IPFS...", "info");
+      // 1. Upload to Firebase Storage
+      addNotification("Adding track files...", "info");
       
       const [audioRes, coverRes] = await Promise.all([
-        uploadToIPFS(audioFile),
-        uploadToIPFS(coverFile)
+        uploadAudio(audioFile, setAudioProgress),
+        uploadCover(coverFile, setCoverProgress)
       ]);
 
-      if (!audioRes?.ipfsUrl || !coverRes?.ipfsUrl) {
-        throw new Error("Upload failed: IPFS URLs missing from response");
+      if (!audioRes?.downloadUrl || !coverRes?.downloadUrl) {
+        throw new Error("Upload failed: Download URLs missing from response");
       }
 
-      const audioUrl = audioRes.ipfsUrl;
-      const coverUrl = coverRes.ipfsUrl;
+      const audioUrl = audioRes.downloadUrl;
+      const coverUrl = coverRes.downloadUrl;
       
+      const trackId = `u-${Date.now()}`;
       const newTrack: Track = {
-        id: `u-${Date.now()}`,
+        id: trackId,
+        songId: `song-${trackId}`,
         title: formData.title,
-        artist: MOCK_USER.name,
-        artistId: 'u-1', // Mock user ID
+        artist: userProfile?.name || MOCK_USER.name,
+        artistId: userProfile?.uid || MOCK_USER.uid,
         coverUrl: coverUrl,
         audioUrl: audioUrl,
         audioIpfsUrl: audioUrl,
@@ -93,7 +99,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
       };
 
       addUserTrack(newTrack);
-      addNotification("Track uploaded and broadcasted successfully!", "success");
+      addNotification("Track added successfully", "success");
       setStep(3); // Success step
     } catch (error) {
       console.error("Upload failed:", error);
@@ -439,30 +445,42 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
               </div>
 
               <div className="flex gap-2">
-                <button 
-                  onClick={() => setStep(1)}
-                  disabled={isUploading}
-                  className="flex-1 py-2 bg-muted/50 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                >
-                  Back
-                </button>
-                <button 
-                  onClick={handleUpload}
-                  disabled={isUploading}
-                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Broadcasting...
-                    </>
-                  ) : (
-                    <>
+                {isUploading ? (
+                  <div className="w-full space-y-2">
+                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                      <span className="text-muted-foreground">Uploading Audio</span>
+                      <span className="text-blue-500">{Math.round(audioProgress)}%</span>
+                    </div>
+                    <div className="w-full h-1 bg-muted/50 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${audioProgress}%` }} />
+                    </div>
+                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mt-2">
+                      <span className="text-muted-foreground">Uploading Cover</span>
+                      <span className="text-blue-500">{Math.round(coverProgress)}%</span>
+                    </div>
+                    <div className="w-full h-1 bg-muted/50 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${coverProgress}%` }} />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => setStep(1)}
+                      disabled={isUploading}
+                      className="flex-1 py-2 bg-muted/50 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
+                      Back
+                    </button>
+                    <button 
+                      onClick={handleUpload}
+                      disabled={isUploading}
+                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
                       <Upload className="h-4 w-4" />
                       Confirm & Broadcast
-                    </>
-                  )}
-                </button>
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}

@@ -67,7 +67,7 @@ const RoyaltyConfigModal: React.FC<RoyaltyConfigModalProps> = ({ isOpen, onClose
       return;
     }
 
-    updateRoyaltyConfig(artist.id, {
+    updateRoyaltyConfig(artist.uid, {
       streamingSplits,
       nftSaleSplits
     });

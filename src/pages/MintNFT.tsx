@@ -11,7 +11,7 @@ import { NFTItem, Track, NFTTrait } from '@/types';
 import { APP_LOGO } from '@/constants';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { TrendingUp } from 'lucide-react';
-import { uploadToIPFS, uploadJSONToIPFS } from '@/services/pinataService';
+import { uploadAudio, uploadCover, uploadMetadata } from '@/services/storageService';
 import { validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES, ALLOWED_DOCUMENT_TYPES } from '@/lib/utils';
 
 const mintSchema = z.object({
@@ -151,6 +151,8 @@ const MintNFT: React.FC = () => {
   const handleAddExclusive = () => appendExclusive({ title: '', type: 'video', url: '' });
   const handleRemoveExclusive = (index: number) => removeExclusive(index);
 
+  const [uploadProgress, setUploadProgress] = useState(0);
+
   const handleMint = async (data: MintFormData) => {
     if (!userAddress) {
       addNotification("Please connect your wallet to mint", "warning");
@@ -158,6 +160,7 @@ const MintNFT: React.FC = () => {
       return;
     }
     setLoading(true);
+    setUploadProgress(0);
     try {
       // 0. Double check validation if files are being uploaded
       if (data.audioFile instanceof File) {
@@ -177,25 +180,37 @@ const MintNFT: React.FC = () => {
       let audioUrl = data.audioPreview;
       let coverUrl = data.coverPreview;
 
+      let audioProg = 0;
+      let coverProg = 0;
+      const updateOverallProgress = () => {
+        setUploadProgress(Math.round((audioProg + coverProg) / 2));
+      };
+
       if (data.audioFile instanceof File) {
-        addNotification("Uploading audio to IPFS...", "info");
-        const audioRes = await uploadToIPFS(data.audioFile);
-        if (!audioRes?.ipfsUrl) {
-          throw new Error("Audio upload failed: IPFS URL missing from response");
+        addNotification("Adding audio file...", "info");
+        const audioRes = await uploadAudio(data.audioFile, (p) => { audioProg = p; updateOverallProgress(); });
+        if (!audioRes?.downloadUrl) {
+          throw new Error("Audio upload failed: Download URL missing from response");
         }
-        audioUrl = audioRes.ipfsUrl;
+        audioUrl = audioRes.downloadUrl;
+      } else {
+        audioProg = 100;
+        updateOverallProgress();
       }
 
       if (data.coverFile instanceof File) {
-        addNotification("Uploading cover art to IPFS...", "info");
-        const coverRes = await uploadToIPFS(data.coverFile);
-        if (!coverRes?.ipfsUrl) {
-          throw new Error("Cover art upload failed: IPFS URL missing from response");
+        addNotification("Adding cover image...", "info");
+        const coverRes = await uploadCover(data.coverFile, (p) => { coverProg = p; updateOverallProgress(); });
+        if (!coverRes?.downloadUrl) {
+          throw new Error("Cover art upload failed: Download URL missing from response");
         }
-        coverUrl = coverRes.ipfsUrl;
+        coverUrl = coverRes.downloadUrl;
+      } else {
+        coverProg = 100;
+        updateOverallProgress();
       }
 
-      // 2. Prepare Metadata for IPFS
+      // 2. Prepare Metadata for Firebase Storage
       const metadata = {
         name: data.title,
         description: data.description,
@@ -206,12 +221,12 @@ const MintNFT: React.FC = () => {
         exclusive_content: data.exclusiveContent
       };
 
-      addNotification("Uploading metadata to IPFS...", "info");
-      const metadataRes = await uploadJSONToIPFS(metadata);
-      if (!metadataRes?.ipfsUrl) {
-        throw new Error("Metadata upload failed: IPFS URL missing from response");
+      addNotification("Synchronizing metadata...", "info");
+      const metadataRes = await uploadMetadata(metadata);
+      if (!metadataRes?.downloadUrl) {
+        throw new Error("Metadata upload failed: Download URL missing from response");
       }
-      const ipfsUrl = metadataRes.ipfsUrl;
+      const ipfsUrl = metadataRes.downloadUrl;
 
       // 3. Real TON transaction for minting fee
       const transaction = {
@@ -231,10 +246,10 @@ const MintNFT: React.FC = () => {
         id: `nft-${Date.now()}`,
         trackId: track ? track.id : `track-nft-${Date.now()}`,
         title: data.title,
-        owner: userProfile.walletAddress || userProfile.id,
+        owner: userProfile.walletAddress || userProfile.uid,
         creator: userProfile.name,
         artist: userProfile.name,
-        artistId: userProfile.id,
+        artistId: userProfile.uid,
         imageUrl: coverUrl,
         coverUrl: coverUrl,
         price: data.price,
@@ -261,11 +276,13 @@ const MintNFT: React.FC = () => {
         const updatedTrack = { ...track, isNFT: true, price: data.price, genre: data.genre, lyrics: data.lyrics };
         await addUserTrack(updatedTrack);
       } else {
+        const trackId = newNFT.trackId;
         const newTrack: Track = {
-          id: newNFT.trackId,
+          id: trackId,
+          songId: `song-${trackId}`,
           title: data.title,
           artist: userProfile.name,
-          artistId: userProfile.id,
+          artistId: userProfile.uid,
           coverUrl: newNFT.imageUrl,
           audioUrl: newNFT.audioUrl || '',
           duration: 180,
@@ -281,7 +298,7 @@ const MintNFT: React.FC = () => {
       }
       
       await addUserNFT(newNFT);
-      addNotification("NFT Protocol successfully deployed to TON", "success");
+      addNotification("NFT added successfully", "success");
       setStep(4);
     } catch (err) {
       console.error("Minting failed:", err);
@@ -632,7 +649,8 @@ const MintNFT: React.FC = () => {
                 <button onClick={handleSubmit(handleMint)} disabled={loading} className="w-2/3 py-4 sm:py-4 bg-green-600 text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-green-600/20 hover:bg-green-500 transition-all flex items-center justify-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" >
                   {loading ? (
                     <>
-                      <img src={APP_LOGO} className="w-4 h-4 sm:w-5 sm:h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80 mr-4 inline-block" alt="Loading..." referrerPolicy="no-referrer" /> DEPLOYING_PROTOCOL...
+                      <img src={APP_LOGO} className="w-4 h-4 sm:w-5 sm:h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80 mr-4 inline-block" alt="Loading..." referrerPolicy="no-referrer" /> 
+                      {uploadProgress > 0 && uploadProgress < 100 ? `UPLOADING... ${uploadProgress}%` : 'DEPLOYING_PROTOCOL...'}
                     </>
                   ) : (
                     <>

@@ -109,7 +109,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
           <div className="flex gap-2">
             <div className="flex-shrink-0">
               <img
-                src={MOCK_USER.avatar || getPlaceholderImage(`user-${MOCK_USER.id}`)}
+                src={MOCK_USER.avatar || getPlaceholderImage(`user-${MOCK_USER.uid}`)}
                 className="w-8 h-8 rounded-full object-cover border border-border"
                 alt="Your avatar"
               />

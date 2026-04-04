@@ -88,7 +88,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                         e.stopPropagation();
                         const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
                         if (artist) {
-                          navigate(`/artist/${artist.id}`);
+                          navigate(`/artist/${artist.uid}`);
                           onClose();
                         } else if (nft.creator === MOCK_USER.name) {
                           navigate('/profile');
@@ -101,7 +101,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                           e.stopPropagation();
                           const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
                           if (artist) {
-                            navigate(`/artist/${artist.id}`);
+                            navigate(`/artist/${artist.uid}`);
                             onClose();
                           } else if (nft.creator === MOCK_USER.name) {
                             navigate('/profile');

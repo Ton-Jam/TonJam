@@ -79,16 +79,18 @@ export function cleanUpdateData(data: Record<string, any>) {
 }
 
 // Test connection
-async function testConnection() {
+export async function testConnection() {
   try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
+    const q = query(collection(db, 'users'), limit(1));
+    await getDocs(q);
     console.log("Firestore connection successful.");
-  } catch (error) {
-    if(error instanceof Error && error.message.includes('the client is offline')) {
+    return true;
+  } catch (error: any) {
+    console.error("Firestore connection test failed:", error);
+    if (error.code === 'unavailable' || (error instanceof Error && error.message.includes('the client is offline'))) {
       console.error("Please check your Firebase configuration. The backend is currently unreachable.");
-    } else {
-      console.warn("Firestore connection test warning:", error);
     }
+    return false;
   }
 }
 testConnection();

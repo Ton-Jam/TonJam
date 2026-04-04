@@ -206,7 +206,7 @@ const FullPlayer: React.FC = () => {
   };
 
   const isLiked = likedTrackIds.includes(currentTrack.id);
-  const artistData = MOCK_ARTISTS.find(a => a.id === currentTrack.artistId);
+  const artistData = MOCK_ARTISTS.find(a => a.uid === currentTrack.artistId);
 
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/#/track/${currentTrack.id}`;
@@ -254,7 +254,7 @@ const FullPlayer: React.FC = () => {
 
       <div className="relative z-10 flex flex-col min-h-full">
         {/* Header */}
-        <div className="sticky top-0 z-30 flex items-center justify-between p-4 bg-background/10 backdrop-blur-md">
+        <div className="z-30 flex items-center justify-between p-4 bg-background/10 backdrop-blur-md">
           <button 
             onClick={() => setFullPlayerOpen(false)}
             className="p-2 -ml-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
@@ -414,12 +414,46 @@ const FullPlayer: React.FC = () => {
               </div>
               
               <div className="flex gap-4">
-                <button 
-                  className="p-2 text-foreground/50 hover:text-amber-500 transition-all rounded-full"
-                  aria-label="Mint NFT"
-                >
-                  <SparklesIcon className="h-6 w-6" />
-                </button>
+                {!currentTrack.isNFT ? (
+                  <button 
+                    onClick={() => {
+                      setFullPlayerOpen(false);
+                      navigate(`/mint?trackId=${currentTrack.id}`);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-foreground rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all"
+                    aria-label="Mint NFT"
+                  >
+                    <SparklesIcon className="h-4 w-4" />
+                    Mint NFT
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      addNotification(`Purchase of ${currentTrack.title} initiated...`, "info");
+                      setTimeout(() => {
+                        addNotification(`Successfully purchased edition of ${currentTrack.title}!`, "success");
+                      }, 2000);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-full text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-all"
+                    aria-label="Buy NFT"
+                  >
+                    <PlusCircleIcon className="h-4 w-4" />
+                    Buy Edition
+                  </button>
+                )}
+                {currentTrack.isNFT && (
+                  <button 
+                    onClick={() => {
+                      setFullPlayerOpen(false);
+                      navigate(`/player/${currentTrack.id}`);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-foreground/10 text-foreground rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-foreground/20 transition-all"
+                    aria-label="View Editions"
+                  >
+                    <ListBulletIcon className="h-4 w-4" />
+                    Editions
+                  </button>
+                )}
               </div>
             </div>
 
@@ -463,7 +497,7 @@ const FullPlayer: React.FC = () => {
               <div className="bg-foreground/5 p-6 rounded-2xl space-y-4">
                 <div className="flex items-center gap-4">
                   <img 
-                    src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.id}`)} 
+                    src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.uid}`)} 
                     className="w-20 h-20 rounded-full object-cover border-2 border-background shadow-xl" 
                     alt={artistData.name} 
                   />
@@ -484,7 +518,7 @@ const FullPlayer: React.FC = () => {
                 <button 
                   onClick={() => {
                     setFullPlayerOpen(false);
-                    navigate(`/artist/${artistData.id}`);
+                    navigate(`/artist/${artistData.uid}`);
                   }}
                   className="text-xs font-bold text-blue-500 uppercase tracking-widest hover:underline"
                 >
@@ -515,7 +549,7 @@ const FullPlayer: React.FC = () => {
             </div>
             <div className="bg-foreground/5 p-6 rounded-2xl space-y-6">
               <div className="flex gap-3">
-                <img src={userProfile.avatar || getPlaceholderImage(`user-${userProfile.id}`)} className="w-10 h-10 rounded-full object-cover" alt="" />
+                <img src={userProfile.avatar || getPlaceholderImage(`user-${userProfile.uid}`)} className="w-10 h-10 rounded-full object-cover" alt="" />
                 <div className="flex-1 relative">
                   <input 
                     type="text" 

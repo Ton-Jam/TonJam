@@ -16,8 +16,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser, userProfile } = useAudio();
 
-  const isFollowing = followedUserIds.includes(user.id);
-  const isOwnProfile = user.id === userProfile.id;
+  const isFollowing = followedUserIds.includes(user.uid);
+  const isOwnProfile = user.uid === userProfile.uid;
 
   const handleClick = (e: React.MouseEvent) => {
     // Prevent navigation if clicking the follow button
@@ -25,21 +25,21 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     
     if (isOwnProfile) {
       navigate('/profile');
-    } else if (MOCK_ARTISTS.some(a => a.id === user.id)) {
-      navigate(`/artist/${user.id}`);
+    } else if (MOCK_ARTISTS.some(a => a.uid === user.uid)) {
+      navigate(`/artist/${user.uid}`);
     } else {
-      navigate(`/user/${user.id}`);
+      navigate(`/user/${user.uid}`);
     }
   };
 
   const handleFollow = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleFollowUser(user.id);
+    toggleFollowUser(user.uid);
   };
 
   const avatarUrl = 'avatarUrl' in user ? user.avatarUrl : user.avatar;
   const verified = 'verified' in user ? user.verified : user.isVerifiedArtist;
-  const genre = 'genre' in user ? user.genre : ('handle' in user ? user.handle : 'Artist');
+  const genre = 'genre' in user ? user.genre : ('username' in user ? user.username : 'Artist');
 
   if (variant === 'compact') {
     return (
@@ -57,7 +57,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         aria-label={`View profile of ${user.name}`}
       >
         <div className="relative w-10 h-10 rounded-[5px] overflow-hidden">
-          <img src={avatarUrl || getPlaceholderImage(`user-${user.id}`)} alt={user.name} className="w-full h-full object-cover" />
+          <img src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} alt={user.name} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       >
         <div className="flex items-center gap-2">
           <div className="relative w-12 h-12 rounded-[5px] overflow-hidden">
-            <img src={avatarUrl || getPlaceholderImage(`user-${user.id}`)} alt={user.name} className="w-full h-full object-cover" />
+            <img src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} alt={user.name} className="w-full h-full object-cover" />
           </div>
           <div>
             <div className="flex items-center gap-3">
@@ -141,7 +141,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     >
       <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-[5px] overflow-hidden border border-blue-500/30 group-hover:border-neutral-500/50 transition-all mb-2">
         <img 
-          src={avatarUrl || getPlaceholderImage(`user-${user.id}`)} 
+          src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} 
           alt={user.name} 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
         />

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Music, Image, Info, Box, Upload, Loader2, Camera, Image as ImageIcon } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
-import { uploadToIPFS } from '@/services/pinataService';
+import { uploadFile, uploadAudio, uploadCover } from '@/services/storageService';
 import { Track, NFTItem } from '@/types';
 import { MOCK_USER, APP_LOGO } from '@/constants';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
@@ -22,7 +22,7 @@ const ArtistOnboarding: React.FC = () => {
   /* Step 1: Profile State */
   const [profileData, setProfileData] = useState({
     name: userProfile.name || '',
-    handle: userProfile.handle || '',
+    username: userProfile.username || '',
     bio: userProfile.bio || '',
     avatar: userProfile.avatar || '',
     bannerUrl: userProfile.bannerUrl || ''
@@ -63,13 +63,14 @@ const ArtistOnboarding: React.FC = () => {
       
       setIsUploading(true);
       try {
-        addNotification(`Uploading ${type} to IPFS...`, 'info');
-        const { ipfsUrl } = await uploadToIPFS(file);
-        setProfileData(prev => ({ ...prev, [type === 'avatar' ? 'avatar' : 'bannerUrl']: ipfsUrl }));
-        addNotification(`${type.toUpperCase()} uploaded to IPFS`, 'success');
+        addNotification(`Adding ${type === 'avatar' ? 'profile' : 'banner'} image...`, 'info');
+        const storagePath = `profiles/${auth.currentUser?.uid}/${type === 'avatar' ? 'avatar' : 'banner'}.png`;
+        const { downloadUrl } = await uploadFile(file, storagePath);
+        setProfileData(prev => ({ ...prev, [type === 'avatar' ? 'avatar' : 'bannerUrl']: downloadUrl }));
+        addNotification(`${type === 'avatar' ? 'Profile' : 'Banner'} image added successfully`, 'success');
       } catch (error) {
         console.error(`Error uploading ${type}:`, error);
-        addNotification(`Failed to upload ${type} to IPFS`, 'error');
+        addNotification(`Failed to upload ${type} to storage`, 'error');
       } finally {
         setIsUploading(false);
       }
@@ -114,34 +115,33 @@ const ArtistOnboarding: React.FC = () => {
     }
     setIsLoading(true);
 
-    // 0. Double check validation
-    if (trackData.audioFile) {
-      const audioValidation = validateFile(trackData.audioFile, 'audio', 50);
-      if (!audioValidation.isValid) {
-        addNotification(audioValidation.error, "error");
-        setIsLoading(false);
-        return;
-      }
-    }
-    if (trackData.coverFile) {
-      const coverValidation = validateFile(trackData.coverFile, 'image', 10);
-      if (!coverValidation.isValid) {
-        addNotification(coverValidation.error, "error");
-        setIsLoading(false);
-        return;
-      }
-    }
+    try {
+      let audioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+      let coverUrl = trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track');
 
-    /* Simulate upload delay */
-    setTimeout(() => {
+      if (trackData.audioFile) {
+        addNotification("Adding audio file...", "info");
+        const { downloadUrl } = await uploadAudio(trackData.audioFile);
+        audioUrl = downloadUrl;
+        addNotification("Audio file added successfully", "success");
+      }
+
+      if (trackData.coverFile) {
+        addNotification("Adding cover image...", "info");
+        const { downloadUrl } = await uploadCover(trackData.coverFile);
+        coverUrl = downloadUrl;
+        addNotification("Cover image added successfully", "success");
+      }
+
       const newTrackId = Date.now().toString();
       const newTrack: Track = {
         id: newTrackId,
+        songId: `song-${newTrackId}`,
         title: trackData.title,
         artist: profileData.name,
-        artistId: userProfile.id,
-        coverUrl: trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track'),
-        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', /* Placeholder audio */
+        artistId: userProfile.uid,
+        coverUrl,
+        audioUrl,
         duration: 180, /* Mock duration */
         genre: trackData.genre,
         isNFT: false,
@@ -151,11 +151,15 @@ const ArtistOnboarding: React.FC = () => {
         createdAt: new Date().toISOString()
       };
       addUserTrack(newTrack);
-      setTrackData(prev => ({ ...prev, createdTrackId: newTrackId }));
-      addNotification("Track uploaded successfully", "success");
-      setIsLoading(false);
+      setTrackData(prev => ({ ...prev, createdTrackId: newTrackId, coverPreview: coverUrl }));
+      addNotification("Track added successfully", "success");
       setStep(3);
-    }, 1500);
+    } catch (error) {
+      console.error("Track upload failed:", error);
+      addNotification("Failed to upload track assets", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleMintSubmit = (e: React.FormEvent) => {
@@ -285,8 +289,8 @@ const ArtistOnboarding: React.FC = () => {
                   <input type="text" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="Enter your stage name" required />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Handle (@)</label>
-                  <input type="text" value={profileData.handle} onChange={e => setProfileData({...profileData, handle: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="@username" required />
+                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Username (@)</label>
+                  <input type="text" value={profileData.username} onChange={e => setProfileData({...profileData, username: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="@username" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Bio</label>

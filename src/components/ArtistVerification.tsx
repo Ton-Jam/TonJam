@@ -17,7 +17,7 @@ const ArtistVerification: React.FC<ArtistVerificationProps> = ({ artist }) => {
     setTimeout(() => {
       setIsVerifying(false);
       // Update artist verification status in local state
-      setArtists(prev => prev.map(a => a.id === artist.id ? { ...a, verified: true } : a));
+      setArtists(prev => prev.map(a => a.uid === artist.uid ? { ...a, verified: true } : a));
       addNotification("Identity verified successfully on the TON blockchain!", "success");
     }, 2000);
   };

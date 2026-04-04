@@ -35,16 +35,16 @@ const variantConfig = {
 const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', className = '' }) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser } = useAudio();
-  const isFollowing = followedUserIds.includes(artist.id);
+  const isFollowing = followedUserIds.includes(artist.uid);
   const config = variantConfig[variant];
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleFollowUser(artist.id);
+    toggleFollowUser(artist.uid);
   };
 
   const handleCardClick = () => {
-    navigate(`/artist/${artist.id}`);
+    navigate(`/artist/${artist.uid}`);
   };
 
   return (
@@ -64,7 +64,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
       <div className={`relative mb-2 ${config.image}`}>
         <div className="w-full h-full rounded-full overflow-hidden shadow-2xl group-hover:scale-105 transition-transform duration-300">
           <img 
-            src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} 
+            src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
             alt={artist.name} 
             className="w-full h-full object-cover"
           />

@@ -114,12 +114,12 @@ function CommentsDrawer() {
                     <Avatar className="size-8">
                       <AvatarImage src={comment.avatar} alt={comment.author} />
                       <AvatarFallback>
-                        {comment.handle.slice(0, 2).toUpperCase()}
+                        {comment.username.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px]">
-                        <span className="font-semibold">{comment.handle}</span>
+                        <span className="font-semibold">{comment.username}</span>
                         <span className="text-muted-foreground text-xs ml-2">
                           {comment.time}
                         </span>
@@ -218,12 +218,12 @@ function ReactionsDrawer() {
                     <Avatar className="size-10">
                       <AvatarImage src={liker.avatar} alt={liker.name} />
                       <AvatarFallback>
-                        {liker.handle.slice(0, 2).toUpperCase()}
+                        {liker.username.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-semibold truncate">
-                        {liker.handle}
+                        {liker.username}
                       </p>
                       <p className="text-[12px] text-muted-foreground truncate">
                         {liker.name}
@@ -294,7 +294,7 @@ function ShareDrawer() {
                           {contact.isGroup ? (
                             <UsersIcon className="size-5" />
                           ) : (
-                            contact.handle.slice(0, 2).toUpperCase()
+                            contact.username.slice(0, 2).toUpperCase()
                           )}
                         </AvatarFallback>
                       </Avatar>
@@ -340,7 +340,7 @@ const comments = [
     id: 1,
     avatar: "https://github.com/shadcn.png",
     author: "shadcn",
-    handle: "shadcn",
+    username: "shadcn",
     time: "2h",
     text: "This is exactly the kind of component composition I love to see.",
     likes: 128,
@@ -350,7 +350,7 @@ const comments = [
     id: 2,
     avatar: "https://github.com/leerob.png",
     author: "Lee Robinson",
-    handle: "leerob",
+    username: "leerob",
     time: "5h",
     text: "The snap points feel super native. Would love to see this on nextjs.org.",
     likes: 94,
@@ -360,7 +360,7 @@ const comments = [
     id: 3,
     avatar: "https://github.com/rauchg.png",
     author: "Guillermo Rauch",
-    handle: "rauchg",
+    username: "rauchg",
     time: "8h",
     text: "Ship it.",
     likes: 256,
@@ -370,7 +370,7 @@ const comments = [
     id: 4,
     avatar: "https://github.com/dan-abramov.png",
     author: "Dan Abramov",
-    handle: "dan_abramov",
+    username: "dan_abramov",
     time: "1d",
     text: "Nice touch with the overscroll containment. Small details matter.",
     likes: 87,
@@ -378,9 +378,9 @@ const comments = [
   },
   {
     id: 5,
-    avatar: "https://github.com/kentcdodds.png",
+    avatar: "https://github. Kentcdodds.png",
     author: "Kent C. Dodds",
-    handle: "kentcdodds",
+    username: "kentcdodds",
     time: "1d",
     text: "Great accessibility defaults here. The focus management is solid.",
     likes: 63,
@@ -390,7 +390,7 @@ const comments = [
     id: 6,
     avatar: "https://github.com/t3dotgg.png",
     author: "Theo Browne",
-    handle: "t3dotgg",
+    username: "t3dotgg",
     time: "2d",
     text: "Base UI + Tailwind is such a good combo. This proves it.",
     likes: 112,
@@ -400,7 +400,7 @@ const comments = [
     id: 7,
     avatar: "https://github.com/sindresorhus.png",
     author: "Sindre Sorhus",
-    handle: "sindresorhus",
+    username: "sindresorhus",
     time: "3d",
     text: "Clean implementation. The animation feels buttery smooth.",
     likes: 45,
@@ -410,7 +410,7 @@ const comments = [
     id: 8,
     avatar: "https://github.com/timneutkens.png",
     author: "Tim Neutkens",
-    handle: "timneutkens",
+    username: "timneutkens",
     time: "3d",
     text: "Works great with the App Router. Nice work!",
     likes: 72,
@@ -423,70 +423,70 @@ const likers = [
     id: 1,
     avatar: "https://github.com/shadcn.png",
     name: "shadcn",
-    handle: "shadcn",
+    username: "shadcn",
     isFollowing: true,
   },
   {
     id: 2,
     avatar: "https://github.com/leerob.png",
     name: "Lee Robinson",
-    handle: "leerob",
+    username: "leerob",
     isFollowing: true,
   },
   {
     id: 3,
     avatar: "https://github.com/rauchg.png",
     name: "Guillermo Rauch",
-    handle: "rauchg",
+    username: "rauchg",
     isFollowing: false,
   },
   {
     id: 4,
     avatar: "https://github.com/dan-abramov.png",
     name: "Dan Abramov",
-    handle: "dan_abramov",
+    username: "dan_abramov",
     isFollowing: false,
   },
   {
     id: 5,
     avatar: "https://github.com/kentcdodds.png",
     name: "Kent C. Dodds",
-    handle: "kentcdodds",
+    username: "kentcdodds",
     isFollowing: true,
   },
   {
     id: 6,
     avatar: "https://github.com/t3dotgg.png",
     name: "Theo Browne",
-    handle: "t3dotgg",
+    username: "t3dotgg",
     isFollowing: false,
   },
   {
     id: 7,
     avatar: "https://github.com/sindresorhus.png",
     name: "Sindre Sorhus",
-    handle: "sindresorhus",
+    username: "sindresorhus",
     isFollowing: true,
   },
   {
     id: 8,
     avatar: "https://github.com/timneutkens.png",
     name: "Tim Neutkens",
-    handle: "timneutkens",
+    username: "timneutkens",
     isFollowing: false,
   },
   {
     id: 9,
     avatar: "https://github.com/devongovett.png",
     name: "Devon Govett",
-    handle: "devongovett",
+    username: "devongovett",
     isFollowing: false,
   },
   {
     id: 10,
     avatar: "https://github.com/maboroshi.png",
     name: "Colm Tuite",
-    handle: "colmtuite",
+    username: "colmtuite",
     isFollowing: true,
   },
 ];
@@ -496,126 +496,126 @@ const shareContacts = [
     id: 1,
     avatar: "https://github.com/shadcn.png",
     name: "shadcn",
-    handle: "shadcn",
+    username: "shadcn",
     isGroup: false,
   },
   {
     id: 2,
     avatar: "https://github.com/leerob.png",
     name: "Lee Robinson",
-    handle: "leerob",
+    username: "leerob",
     isGroup: false,
   },
   {
     id: 3,
     avatar: "https://github.com/rauchg.png",
     name: "Guillermo",
-    handle: "rauchg",
+    username: "rauchg",
     isGroup: false,
   },
   {
     id: 4,
     avatar: "",
     name: "Design Team",
-    handle: "design",
+    username: "design",
     isGroup: true,
   },
   {
     id: 5,
     avatar: "https://github.com/kentcdodds.png",
     name: "Kent C. Dodds",
-    handle: "kentcdodds",
+    username: "kentcdodds",
     isGroup: false,
   },
   {
     id: 6,
     avatar: "https://github.com/t3dotgg.png",
     name: "Theo Browne",
-    handle: "t3dotgg",
+    username: "t3dotgg",
     isGroup: false,
   },
   {
     id: 7,
     avatar: "",
     name: "Engineering",
-    handle: "engineering",
+    username: "engineering",
     isGroup: true,
   },
   {
     id: 8,
     avatar: "https://github.com/dan-abramov.png",
     name: "Dan Abramov",
-    handle: "dan_abramov",
+    username: "dan_abramov",
     isGroup: false,
   },
   {
     id: 9,
     avatar: "https://github.com/sindresorhus.png",
     name: "Sindre Sorhus",
-    handle: "sindresorhus",
+    username: "sindresorhus",
     isGroup: false,
   },
   {
     id: 10,
     avatar: "https://github.com/timneutkens.png",
     name: "Tim Neutkens",
-    handle: "timneutkens",
+    username: "timneutkens",
     isGroup: false,
   },
   {
     id: 11,
     avatar: "",
     name: "Frontend",
-    handle: "frontend",
+    username: "frontend",
     isGroup: true,
   },
   {
     id: 12,
     avatar: "https://github.com/devongovett.png",
     name: "Devon Govett",
-    handle: "devongovett",
+    username: "devongovett",
     isGroup: false,
   },
   {
     id: 13,
     avatar: "https://github.com/shuding.png",
     name: "Shu Ding",
-    handle: "shuding",
+    username: "shuding",
     isGroup: false,
   },
   {
     id: 14,
     avatar: "",
     name: "Open Source",
-    handle: "opensource",
+    username: "opensource",
     isGroup: true,
   },
   {
     id: 15,
     avatar: "https://github.com/rickhanlonii.png",
     name: "Rick Hanlon",
-    handle: "rickhanlonii",
+    username: "rickhanlonii",
     isGroup: false,
   },
   {
     id: 16,
     avatar: "https://github.com/sophiebits.png",
     name: "Sophie Alpert",
-    handle: "sophiebits",
+    username: "sophiebits",
     isGroup: false,
   },
   {
     id: 17,
     avatar: "",
     name: "React Core",
-    handle: "reactcore",
+    username: "reactcore",
     isGroup: true,
   },
   {
     id: 18,
     avatar: "https://github.com/lydiahallie.png",
     name: "Lydia Hallie",
-    handle: "lydiahallie",
+    username: "lydiahallie",
     isGroup: false,
   },
 ];

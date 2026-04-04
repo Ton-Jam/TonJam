@@ -185,7 +185,7 @@ const FullAudioPlayer: React.FC = () => {
   const isLiked = currentTrack
     ? likedTrackIds.includes(currentTrack.id)
     : false;
-  const artistData = MOCK_ARTISTS.find((a) => a.id === currentTrack?.artistId);
+  const artistData = MOCK_ARTISTS.find((a) => a.uid === currentTrack?.artistId);
 
   if (!currentTrack) return null;
 

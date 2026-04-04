@@ -16,27 +16,29 @@ import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import ArtistListItem from '@/components/ArtistListItem';
 import SocialFeed from '@/components/SocialFeed';
+import PlaylistCard from '@/components/PlaylistCard';
 import { useAudio } from '@/context/AudioContext';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, cn } from '@/lib/utils';
 import { ProfileCard } from '@/components/ProfileCard';
 import { UserProfile as UserProfileType } from '@/types';
+import { motion, AnimatePresence } from 'motion/react';
 
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { allTracks, allNFTs, userProfile, toggleFollowUser, followedUserIds, addNotification } = useAudio();
+  const { allTracks, allNFTs, userProfile, toggleFollowUser, followedUserIds, addNotification, playlists } = useAudio();
   
   const [user, setUser] = useState<UserProfileType | null>(null);
-  const [activeTab, setActiveTab] = useState<'inventory' | 'activity' | 'network'>('inventory');
+  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'activity' | 'network'>('overview');
 
   useEffect(() => {
     // If the ID matches the current user, redirect to their profile
-    if (id === userProfile.id) {
+    if (id === userProfile.uid) {
       navigate('/profile');
       return;
     }
 
-    const foundUser = MOCK_USERS.find(u => u.id === id);
+    const foundUser = MOCK_USERS.find(u => u.uid === id);
     if (foundUser) {
       setUser(foundUser);
     } else {
@@ -44,7 +46,7 @@ const UserProfile: React.FC = () => {
       navigate('/');
     }
     window.scrollTo(0, 0);
-  }, [id, userProfile.id, navigate]);
+  }, [id, userProfile.uid, navigate]);
 
   const isFollowing = useMemo(() => {
     return followedUserIds.includes(id || '');
@@ -58,7 +60,7 @@ const UserProfile: React.FC = () => {
 
   const userPosts = useMemo(() => {
     if (!user) return [];
-    return MOCK_POSTS.filter(p => p.userId === user.id);
+    return MOCK_POSTS.filter(p => p.userId === user.uid);
   }, [user]);
 
   const ownedNfts = useMemo(() => {
@@ -68,8 +70,13 @@ const UserProfile: React.FC = () => {
 
   const uploadedTracks = useMemo(() => {
     if (!user) return [];
-    return allTracks.filter(t => t.artistId === user.id);
+    return allTracks.filter(t => t.artistId === user.uid);
   }, [user, allTracks]);
+
+  const userPlaylists = useMemo(() => {
+    if (!user) return [];
+    return playlists.filter(p => p.creator === user.name || p.creator === user.username);
+  }, [user, playlists]);
 
   if (!user) return null;
 
@@ -80,155 +87,272 @@ const UserProfile: React.FC = () => {
     : '';
 
   return (
-    <div className={`animate-in fade-in duration-1000 pb-4 ${themeClass}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-4 pt-8">
-        <ProfileCard
-          name={user.name}
-          title={user.handle}
-          bannerUrl={user.bannerUrl || getPlaceholderImage(`user-banner-${user.id}`, 1200, 400)}
-          avatarUrl={user.avatar}
-          stats={{
-            followers: user.followers.toLocaleString(),
-            following: user.following.toLocaleString(),
-            assets: ownedNfts.length.toString()
-          }}
-          onFollow={handleFollow}
+    <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background`}>
+      {/* 1. CINEMATIC BANNER (Audiomack Style) */}
+      <div className="relative h-[250px] md:h-[350px] overflow-hidden group">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+          style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
         />
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-transparent"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-4 mt-8 relative z-10">
-        {/* Navigation Tabs */}
-        <div className="flex gap-2 mt-8 mb-6 overflow-x-auto no-scrollbar">
-          {[
-            { id: 'inventory', label: 'Inventory', icon: Box },
-            { id: 'activity', label: 'Activity', icon: Layers },
-            { id: 'network', label: 'Network', icon: Users }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] transition-all whitespace-nowrap rounded-full ${
-                activeTab === tab.id 
-                  ? 'bg-foreground text-background' 
-                  : 'bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground'
-              }`}
-            >
-              <tab.icon className="w-3 h-3" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="mt-4">
-          {activeTab === 'inventory' && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {/* Owned NFTs */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-4">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                    Digital Assets
-                  </h3>
-                </div>
-                
-                {ownedNfts.length > 0 ? (
-                  <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-                    {ownedNfts.map(nft => (
-                      <div key={nft.id} className="min-w-[280px] sm:min-w-[320px]">
-                        <NFTCard nft={nft} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-muted/20 p-8 rounded-2xl text-center flex flex-col items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                      <Gem className="w-8 h-8 text-muted-foreground/50" />
+      {/* 2. IDENTITY & ACTIONS (Audiomack Style) */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-30">
+        <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 -mt-24 md:-mt-32 pb-8">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 w-full">
+            {/* Profile Picture (Overlapping) */}
+            <div className="relative">
+              <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-[6px] border-background shadow-2xl bg-muted ring-1 ring-white/10">
+                <img 
+                  src={user.avatar || getPlaceholderImage(`user-${user.uid}`)} 
+                  className="w-full h-full object-cover" 
+                  alt={user.name} 
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
+              <div className="flex flex-col gap-1 mb-4">
+                <div className="flex items-center gap-2 justify-center md:justify-start">
+                  <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-lg">
+                    {user.name}
+                  </h1>
+                  {user.isVerified && (
+                    <div className="bg-orange-500 rounded-full p-1 shadow-lg">
+                      <CheckCircle className="h-4 w-4 text-white" />
                     </div>
-                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No assets acquired yet</p>
-                  </div>
-                )}
+                  )}
+                </div>
+                <span className="text-white/80 font-bold text-sm md:text-base drop-shadow-md">
+                  @{user.username || (user.name || 'user').toLowerCase().replace(/\s+/g, '')}
+                </span>
               </div>
+              
+              <div className="flex items-center gap-8 mb-4">
+                <div className="flex flex-col items-center md:items-start">
+                  <span className="text-xl font-black text-white drop-shadow-md">{(user.followers || 0).toLocaleString()}</span>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-black">Followers</span>
+                </div>
+                <div className="flex flex-col items-center md:items-start border-l border-white/10 pl-8">
+                  <span className="text-xl font-black text-white drop-shadow-md">{(user.following || 0).toLocaleString()}</span>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-black">Following</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3 pb-2">
+            <button 
+              onClick={handleFollow} 
+              className={cn(
+                "px-10 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all shadow-xl",
+                isFollowing 
+                  ? "bg-white/10 text-white border border-white/20 backdrop-blur-md hover:bg-white/20" 
+                  : "bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/30"
+              )}
+            >
+              {isFollowing ? 'Following' : 'Follow'}
+            </button>
+            <button 
+              onClick={() => {
+                navigator.share?.({ title: user.name, url: window.location.href })
+                  .catch(() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    addNotification("Link copied", "success");
+                  });
+              }}
+              className="p-3 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all border border-white/20 backdrop-blur-md"
+            >
+              <Share2 className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
 
-              {/* Uploaded Tracks (if any) */}
-              {uploadedTracks.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xs font-bold text-foreground uppercase tracking-[0.2em] flex items-center gap-4">
-                      Uploaded Tracks
-                    </h3>
-                  </div>
-                  
-                  <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-                    {uploadedTracks.map((track, index) => (
-                      <div key={track.id} className="min-w-[280px] sm:min-w-[320px]">
-                        <TrackCard track={track} index={index} />
+      {/* 3. TABS NAVIGATION */}
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl border-b border-border mb-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+            {['overview', 'inventory', 'activity', 'network'].map(tab => (
+              <button 
+                key={tab} 
+                onClick={() => setActiveTab(tab as any)} 
+                className={cn(
+                  "py-4 text-sm font-bold transition-all relative whitespace-nowrap",
+                  activeTab === tab ? "text-orange-500" : "text-muted-foreground hover:text-foreground"
+                )} 
+              >
+                {tab === 'inventory' ? 'Collection' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {activeTab === tab && (
+                  <motion.div 
+                    layoutId="activeTabUser"
+                    className="absolute bottom-0 left-0 right-0 h-1 bg-orange-500 rounded-t-full" 
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Content */}
+          <div className="lg:col-span-8">
+            <div className="min-h-[500px]">
+              {activeTab === 'overview' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {/* My Activity (Recent Posts) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-black">Activity</h3>
+                      <button onClick={() => setActiveTab('activity')} className="text-xs font-bold text-orange-500 hover:text-orange-400 uppercase tracking-widest">View All</button>
+                    </div>
+                    {userPosts.length > 0 ? (
+                      <SocialFeed posts={userPosts.slice(0, 3)} />
+                    ) : (
+                      <div className="bg-muted/20 p-8 rounded-2xl text-center">
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No recent activity</p>
                       </div>
-                    ))}
+                    )}
+                  </div>
+
+                  {/* Followed Artists */}
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-black">Followed Artists</h3>
+                      <button onClick={() => setActiveTab('network')} className="text-xs font-bold text-orange-500 hover:text-orange-400 uppercase tracking-widest">View All</button>
+                    </div>
+                    {user.followedArtists && user.followedArtists.length > 0 ? (
+                      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                        {user.followedArtists.slice(0, 5).map(artistId => {
+                          const artist = MOCK_ARTISTS.find(a => a.uid === artistId);
+                          if (!artist) return null;
+                          return <div key={artist.uid} className="flex-shrink-0 w-40 sm:w-48"><ArtistListItem artist={artist} /></div>;
+                        })}
+                      </div>
+                    ) : (
+                      <div className="bg-muted/20 p-8 rounded-2xl text-center">
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Not following any artists</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Created Playlists */}
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-black">Created Playlists</h3>
+                    </div>
+                    {userPlaylists.length > 0 ? (
+                      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                        {userPlaylists.slice(0, 5).map(pl => (
+                          <div key={pl.id} className="flex-shrink-0 w-40 sm:w-48">
+                            <PlaylistCard playlist={pl} onClick={() => navigate(`/playlist/${pl.id}`)} />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-muted/20 p-8 rounded-2xl text-center">
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No playlists created</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'inventory' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {/* Owned NFTs */}
+                  <div>
+                    <h3 className="text-xl font-black mb-6">Digital Assets</h3>
+                    {ownedNfts.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {ownedNfts.map(nft => (
+                          <NFTCard key={nft.id} nft={nft} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-muted/20 p-12 rounded-2xl text-center flex flex-col items-center justify-center">
+                        <Gem className="w-12 h-12 text-muted-foreground/30 mb-4" />
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No assets acquired yet</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Uploaded Tracks (if any) */}
+                  {uploadedTracks.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-black mb-6">Uploaded Tracks</h3>
+                      <div className="space-y-1">
+                        {uploadedTracks.map((track, index) => (
+                          <div 
+                            key={track.id} 
+                            className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 transition-all cursor-pointer group"
+                          >
+                            <span className="w-6 text-xs font-bold text-muted-foreground text-center">{index + 1}</span>
+                            <div className="w-12 h-12 rounded overflow-hidden flex-shrink-0">
+                              <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt="" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold truncate">{track.title}</h4>
+                              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">{track.genre}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'activity' && (
+                <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {userPosts.length > 0 ? (
+                    <SocialFeed posts={userPosts} />
+                  ) : (
+                    <div className="bg-muted/20 p-12 rounded-2xl text-center flex flex-col items-center justify-center">
+                      <Layers className="w-12 h-12 text-muted-foreground/30 mb-4" />
+                      <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No recent activity</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'network' && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+                  {/* Followed Artists */}
+                  <div>
+                    <h3 className="text-xl font-black mb-6">Followed Artists</h3>
+                    {user.followedArtists && user.followedArtists.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                         {user.followedArtists.map(artistId => {
+                            const artist = MOCK_ARTISTS.find(a => a.uid === artistId);
+                            if (!artist) return null;
+                            return <ArtistListItem key={artist.uid} artist={artist} />;
+                         })}
+                      </div>
+                    ) : (
+                      <div className="bg-muted/20 p-12 rounded-2xl text-center">
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Not following any artists</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
             </div>
-          )}
+          </div>
 
-          {activeTab === 'activity' && (
-            <div className="max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {userPosts.length > 0 ? (
-                <SocialFeed posts={userPosts} />
-              ) : (
-                <div className="bg-muted/20 p-8 rounded-2xl text-center flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                    <Layers className="w-8 h-8 text-muted-foreground/50" />
-                  </div>
-                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No recent activity</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'network' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
-              {/* Followed Artists */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-4">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                    Followed Artists
-                  </h3>
-                </div>
-                
-                {user.followedArtists && user.followedArtists.length > 0 ? (
-                  <div className="flex flex-col gap-4">
-                     {user.followedArtists.map(artistId => {
-                        const artist = MOCK_ARTISTS.find(a => a.id === artistId);
-                        if (!artist) return null;
-                        return <ArtistListItem key={artist.id} artist={artist} />;
-                     })}
-                  </div>
-                ) : (
-                  <div className="bg-muted/20 p-8 rounded-2xl text-center">
-                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Not following any artists</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Friends / Network */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.5em] flex items-center gap-4">
-                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                    Network Connections
-                  </h3>
-                </div>
-                 <div className="bg-muted/20 p-8 rounded-2xl text-center flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                    <Users className="w-8 h-8 text-muted-foreground/50" />
-                  </div>
-                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Network data encrypted</p>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
+            <section className="bg-muted/20 p-6 rounded-2xl">
+              <h3 className="text-sm font-black uppercase tracking-wider mb-4">About</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {user.bio || "No biography available."}
+              </p>
+            </section>
+          </div>
         </div>
       </div>
     </div>

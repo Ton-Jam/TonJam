@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { GoogleGenAI, Type } from "@google/genai";
-import { uploadToIPFS } from "@/services/pinataService";
+import { uploadAudio, uploadCover } from "@/services/storageService";
 import {
   LineChart,
   Line,
@@ -88,11 +88,11 @@ const ArtistDashboard: React.FC = () => {
   const artistData = currentArtist;
 
   const artistPosts = useMemo(() => {
-    return posts.filter(p => p.authorId === artistData.id).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [posts, artistData.id]);
+    return posts.filter(p => p.authorId === artistData.uid).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [posts, artistData.uid]);
 
   const allArtistTracks = useMemo(() => {
-    const mockTracks = MOCK_TRACKS.filter((t) => t.artistId === artistData.id);
+    const mockTracks = MOCK_TRACKS.filter((t) => t.artistId === artistData.uid);
     // Filter out mock tracks that might have been "replaced" by real ones if we had a way to identify them
     // For now, just combine them, but prioritize userTracks (real ones)
     const combined = [...userTracks];
@@ -102,7 +102,7 @@ const ArtistDashboard: React.FC = () => {
       }
     });
     return combined;
-  }, [userTracks, artistData.id]);
+  }, [userTracks, artistData.uid]);
 
   const filteredTracks = useMemo(() => {
     if (!searchQuery) return allArtistTracks;
@@ -172,7 +172,7 @@ const ArtistDashboard: React.FC = () => {
     e.preventDefault();
     try {
       await submitSponsorship({
-        artistId: artistData.id,
+        artistId: artistData.uid,
         ...sponsorshipForm
       });
       setIsSponsorshipModalOpen(false);
@@ -332,27 +332,35 @@ const ArtistDashboard: React.FC = () => {
         throw new Error(coverValidation.error);
       }
 
-      // 1. Upload to IPFS
-      addNotification("Uploading artifacts to IPFS...", "info");
+      // 1. Upload to Firebase Storage
+      addNotification("Adding track files...", "info");
       
+      let audioProg = 0;
+      let coverProg = 0;
+      const updateOverallProgress = () => {
+        setUploadProgress(Math.round((audioProg + coverProg) / 2));
+      };
+
       const [audioRes, coverRes] = await Promise.all([
-        uploadToIPFS(audioFile),
-        uploadToIPFS(coverFile)
+        uploadAudio(audioFile, (p) => { audioProg = p; updateOverallProgress(); }),
+        uploadCover(coverFile, (p) => { coverProg = p; updateOverallProgress(); })
       ]);
 
-      if (!audioRes?.ipfsUrl || !coverRes?.ipfsUrl) {
-        throw new Error("Upload failed: IPFS URLs missing from response");
+      if (!audioRes?.downloadUrl || !coverRes?.downloadUrl) {
+        throw new Error("Upload failed: Download URLs missing from response");
       }
 
-      const audioUrl = audioRes.ipfsUrl;
-      const coverUrl = coverRes.ipfsUrl;
+      const audioUrl = audioRes.downloadUrl;
+      const coverUrl = coverRes.downloadUrl;
 
       // 2. Create track object
+      const trackId = `t-${Date.now()}`;
       const track: Track = {
-        id: `t-${Date.now()}`,
+        id: trackId,
+        songId: `song-${trackId}`,
         title: newTrack.title,
         artist: artistData.name,
-        artistId: artistData.id,
+        artistId: artistData.uid,
         coverUrl: coverUrl || getPlaceholderImage(`track-${Date.now()}`),
         audioUrl: audioUrl,
         audioIpfsUrl: audioUrl,
@@ -401,7 +409,7 @@ const ArtistDashboard: React.FC = () => {
         royaltySplits: [{ address: "", percentage: 100 }],
         createdAt: new Date().toISOString()
       });
-      addNotification("Track broadcasted to the network.", "success");
+      addNotification("Track added successfully", "success");
     } catch (error: any) {
       console.error("Upload failed:", error);
       addNotification("Upload failed: " + (error.response?.data?.error || error.message), "error");
@@ -510,7 +518,7 @@ const ArtistDashboard: React.FC = () => {
               {isUploading ? 'Uploading...' : 'Upload Track'}
             </button>{" "}
             <button
-              onClick={() => navigate(`/artist/${artistData.id}`)}
+              onClick={() => navigate(`/artist/${artistData.uid}`)}
               className="px-4 py-4 bg-muted/50 hover:bg-muted text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all"
             >
               {" "}
@@ -803,7 +811,7 @@ const ArtistDashboard: React.FC = () => {
                   <tbody>
                     {transactions.filter(tx => tx.recipientAddress === artistData.walletAddress || tx.senderAddress === artistData.walletAddress).map((tx) => (
                       <tr key={tx.id} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
-                        <td scope="row" className="p-4 text-[10px] font-bold text-foreground uppercase tracking-widest">{tx.type.replace('_', ' ')}</td>
+                        <td scope="row" className="p-4 text-[10px] font-bold text-foreground uppercase tracking-widest">{(tx.type || 'transaction').replace('_', ' ')}</td>
                         <td className="p-4 text-[10px] font-mono text-foreground">{tx.amount} TON</td>
                         <td className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                           {new Date(tx.timestamp).toLocaleDateString()}
@@ -848,7 +856,7 @@ const ArtistDashboard: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {sponsoredPosts.filter(sp => sp.artistId === artistData.id).map((sp) => (
+                        {sponsoredPosts.filter(sp => sp.artistId === artistData.uid).map((sp) => (
                           <tr key={sp.id} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
                             <td className="p-4">
                               <div className="flex items-center gap-4">
@@ -879,7 +887,7 @@ const ArtistDashboard: React.FC = () => {
                             </td>
                           </tr>
                         ))}
-                        {sponsoredPosts.filter(sp => sp.artistId === artistData.id).length === 0 && (
+                        {sponsoredPosts.filter(sp => sp.artistId === artistData.uid).length === 0 && (
                           <tr>
                             <td colSpan={5} className="p-8 text-center opacity-30">
                               <p className="text-[8px] font-bold uppercase tracking-widest">No active or past campaigns</p>
@@ -1119,7 +1127,7 @@ const ArtistDashboard: React.FC = () => {
                               <div key={`${split.address}-${split.label || 'no-label'}`} className="flex justify-between items-center bg-muted/50 p-4 rounded-[6px]">
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-bold text-foreground uppercase">{split.label || 'Recipient'}</span>
-                                  <span className="text-[7px] font-mono text-muted-foreground/50">{split.address.slice(0, 12)}...</span>
+                                  <span className="text-[7px] font-mono text-muted-foreground/50">{split.address ? `${split.address.slice(0, 12)}...` : 'Unknown'}</span>
                                 </div>
                                 <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{(split.percentage * 100).toFixed(1)}%</span>
                               </div>
@@ -1131,7 +1139,7 @@ const ArtistDashboard: React.FC = () => {
                               <div key={`${split.address}-${split.label || 'no-label'}`} className="flex justify-between items-center bg-muted/50 p-4 rounded-[6px]">
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-bold text-foreground uppercase">{split.label || 'Recipient'}</span>
-                                  <span className="text-[7px] font-mono text-muted-foreground/50">{split.address.slice(0, 12)}...</span>
+                                  <span className="text-[7px] font-mono text-muted-foreground/50">{split.address ? `${split.address.slice(0, 12)}...` : 'Unknown'}</span>
                                 </div>
                                 <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{(split.percentage * 100).toFixed(1)}%</span>
                               </div>
@@ -1228,7 +1236,7 @@ const ArtistDashboard: React.FC = () => {
                               <tr key={tx.id} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
                                 <td className="py-4">
                                   <span className={`text-[8px] font-bold uppercase px-4 py-4 rounded-[5px] ${tx.type === 'stream' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                                    {tx.type.replace('_', ' ')}
+                                    {(tx.type || 'transaction').replace('_', ' ')}
                                   </span>
                                 </td>
                                 <td className="py-4">
@@ -1406,7 +1414,7 @@ const ArtistDashboard: React.FC = () => {
                     if (textarea && textarea.value.trim()) {
                       createPost({
                         id: `post-${Date.now()}`,
-                        authorId: artistData.id,
+                        authorId: artistData.uid,
                         authorName: artistData.name,
                         authorAvatar: artistData.avatarUrl,
                         content: textarea.value,

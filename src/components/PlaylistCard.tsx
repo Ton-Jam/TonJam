@@ -109,7 +109,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       className="group relative cursor-pointer glass p-2 rounded-[10px] bg-foreground/[0.02]"
     >
       {/* Image Container - 1:1 Aspect Ratio */}
-      <div className="relative aspect-square rounded-[10px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
+      <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
         {renderCover()}
         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center gap-3">
           <button 
@@ -150,7 +150,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
             e.stopPropagation();
             const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
             if (artist) {
-              navigate(`/artist/${artist.id}`);
+              navigate(`/artist/${artist.uid}`);
             } else if (playlist.creator === MOCK_USER.name) {
               navigate('/profile');
             }

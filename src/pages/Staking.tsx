@@ -342,7 +342,7 @@ const Staking: React.FC = () => {
                            tx.type === 'unstake' ? <Unlock className="h-3 w-3" /> :
                            <Zap className="h-3 w-3" />}
                         </div>
-                        <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">{tx.type.replace('_', ' ')}</span>
+                        <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">{(tx.type || 'transaction').replace('_', ' ')}</span>
                       </div>
                     </td>
                     <td className="px-4 py-4">

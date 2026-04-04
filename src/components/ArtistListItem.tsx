@@ -12,15 +12,15 @@ interface ArtistListItemProps {
 const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser } = useAudio();
-  const isFollowing = followedUserIds.includes(artist.id);
+  const isFollowing = followedUserIds.includes(artist.uid);
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleFollowUser(artist.id);
+    toggleFollowUser(artist.uid);
   };
 
   const handleCardClick = () => {
-    navigate(`/artist/${artist.id}`);
+    navigate(`/artist/${artist.uid}`);
   };
 
   return (
@@ -29,7 +29,7 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
       className="group flex items-center gap-2 p-2 rounded-[10px] bg-foreground/[0.02] hover:bg-muted/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
     >
       <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 shadow-lg">
-        <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+        <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
       </div>
       
       <div className="flex-1 min-w-0">

@@ -38,7 +38,7 @@ const TrackDetail: React.FC = () => {
   const [tonConnectUI] = useTonConnectUI();
   
   const track = useMemo(() => MOCK_TRACKS.find(t => t.id === id), [id]);
-  const artist = useMemo(() => MOCK_ARTISTS.find(a => a.id === track?.artistId), [track]);
+  const artist = useMemo(() => MOCK_ARTISTS.find(a => a.uid === track?.artistId), [track]);
   const associatedNFTs = useMemo(() => MOCK_NFTS.filter(n => n.trackId === id), [id]);
   
   const isActive = currentTrack?.id === track?.id;
@@ -225,12 +225,25 @@ const TrackDetail: React.FC = () => {
             </motion.div>
 
             <div className="flex gap-4">
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handlePlay} 
-                className="p-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] active:scale-95 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center"
+                className="p-4 bg-blue-600 hover:bg-blue-500 text-foreground rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center"
                 aria-label={isActive && isPlaying ? 'Pause Frequency' : 'Initialize Playback'}
               >
-                {isActive && isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
+                {isActive && isPlaying ? (
+                  <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}><Pause className="h-5 w-5 fill-current" /></motion.div>
+                ) : (
+                  <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}><Play className="h-5 w-5 fill-current" /></motion.div>
+                )}
+              </motion.button>
+              <button 
+                onClick={() => navigate(`/player/${track.id}`)}
+                className="p-4 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all active:scale-95"
+                aria-label="Open in Player"
+              >
+                <Sparkles className="h-5 w-5" />
               </button>
               <button 
                 onClick={() => toggleLikeTrack(track.id)}
@@ -453,8 +466,10 @@ const TrackDetail: React.FC = () => {
                   >
                     {associatedNFTs.length > 0 ? (
                       associatedNFTs.map((nft) => (
-                        <div 
+                        <motion.div 
                           key={nft.id} 
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                           className="p-4 rounded-xl bg-muted/50 border border-border/50 hover:border-blue-500/50 transition-all cursor-pointer group/nft"
                           onClick={() => navigate(`/nft/${nft.id}`)}
                         >
@@ -474,7 +489,7 @@ const TrackDetail: React.FC = () => {
                               View NFT
                             </button>
                           </div>
-                        </div>
+                        </motion.div>
                       ))
                     ) : (
                       <div className="col-span-full flex flex-col items-center justify-center py-4 text-muted-foreground/50">

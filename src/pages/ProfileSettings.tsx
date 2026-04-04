@@ -6,7 +6,7 @@ import { GoogleGenAI } from '@google/genai';
 import { Loader2, Upload } from 'lucide-react';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { uploadToIPFS } from '@/services/pinataService';
+import { uploadFile } from '@/services/storageService';
 import { validateFile } from '@/lib/utils';
 
 export default function ProfileSettings() {
@@ -19,20 +19,26 @@ export default function ProfileSettings() {
   
   const [profile, setProfile] = useState({
     name: '',
-    handle: '',
+    username: '',
     bio: '',
     avatar: '',
     profileTheme: 'dark',
+    twitter: '',
+    instagram: '',
+    website: '',
   });
 
   useEffect(() => {
     if (userProfile) {
       setProfile({
         name: userProfile.name || '',
-        handle: userProfile.handle || '',
+        username: userProfile.username || '',
         bio: userProfile.bio || '',
         avatar: userProfile.avatar || '',
         profileTheme: userProfile.profileTheme || 'dark',
+        twitter: userProfile.socials?.x || '',
+        instagram: userProfile.socials?.instagram || '',
+        website: userProfile.socials?.website || '',
       });
     }
   }, [userProfile]);
@@ -56,13 +62,14 @@ export default function ProfileSettings() {
 
     try {
       setUploading(true);
-      addNotification('Uploading avatar to IPFS...', 'info');
-      const { ipfsUrl } = await uploadToIPFS(file);
-      setProfile(prev => ({ ...prev, avatar: ipfsUrl }));
-      addNotification('Avatar uploaded to IPFS successfully!', 'success');
+      addNotification('Adding profile image...', 'info');
+      const storagePath = `profiles/${user.uid}/avatar.png`;
+      const { downloadUrl } = await uploadFile(file, storagePath);
+      setProfile(prev => ({ ...prev, avatar: downloadUrl }));
+      addNotification('Profile image added successfully', 'success');
     } catch (error) {
       console.error("Upload error:", error);
-      addNotification('Failed to upload avatar to IPFS.', 'error');
+      addNotification('Failed to upload avatar to storage.', 'error');
     } finally {
       setUploading(false);
     }
@@ -81,10 +88,15 @@ export default function ProfileSettings() {
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, cleanUpdateData({
         name: profile.name,
-        handle: profile.handle,
+        username: profile.username,
         bio: profile.bio,
         avatar: profile.avatar,
         profileTheme: profile.profileTheme,
+        socials: {
+          x: profile.twitter,
+          instagram: profile.instagram,
+          website: profile.website,
+        }
       }));
       
       addNotification('Profile updated successfully!', 'success');
@@ -108,7 +120,7 @@ export default function ProfileSettings() {
       const prompt = `
 You are an expert Web3 and music profile bio generator.
 Generate a short, catchy, and creative bio (max 150 characters) for a user on a Web3 music streaming platform called TonJam.
-The user's name is "${profile.name || 'Anonymous'}" and their handle is "@${profile.handle || 'user'}".
+The user's name is "${profile.name || 'Anonymous'}" and their username is "@${profile.username || 'user'}".
 Make it sound cool, crypto-native, and passionate about music.
 Return ONLY the bio text, nothing else.`;
 
@@ -152,7 +164,7 @@ Return ONLY the bio text, nothing else.`;
                   <p className="text-sm text-muted-foreground mt-1">
                     Connect your TON wallet to mint NFTs, stake JAM, and earn rewards.
                   </p>
-                  {tonAddress && (
+                  {tonAddress && tonAddress.length >= 10 && (
                     <p className="text-xs font-mono text-blue-500 mt-2 bg-blue-500/10 px-2 py-1 rounded inline-block">
                       {tonAddress.slice(0, 6)}...{tonAddress.slice(-4)}
                     </p>
@@ -178,17 +190,17 @@ Return ONLY the bio text, nothing else.`;
               </div>
 
               <div className="sm:col-span-3">
-                <label htmlFor="handle" className="block text-sm font-medium text-foreground">
-                  Handle
+                <label htmlFor="username" className="block text-sm font-medium text-foreground">
+                  Username
                 </label>
                 <div className="mt-2 flex rounded-xl bg-muted/20 focus-within:ring-2 focus-within:ring-foreground transition-all">
                   <span className="flex select-none items-center pl-4 text-muted-foreground sm:text-sm">@</span>
                   <input
-                    id="handle"
-                    name="handle"
+                    id="username"
+                    name="username"
                     type="text"
-                    value={profile.handle}
-                    onChange={(e) => setProfile({ ...profile, handle: e.target.value })}
+                    value={profile.username}
+                    onChange={(e) => setProfile({ ...profile, username: e.target.value })}
                     className="block w-full min-w-0 grow bg-transparent py-3 pl-1 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-sm"
                   />
                 </div>
@@ -246,7 +258,7 @@ Return ONLY the bio text, nothing else.`;
                     className="rounded-xl bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-all flex items-center gap-2"
                   >
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    {uploading ? 'Uploading...' : 'Change Avatar'}
+                    {uploading ? 'Adding...' : 'Change Avatar'}
                   </button>
                 </div>
               </div>
@@ -273,6 +285,57 @@ Return ONLY the bio text, nothing else.`;
                 <p className="mt-2 text-xs text-muted-foreground">Customize the look of your public profile page.</p>
               </div>
 
+              <div className="sm:col-span-2">
+                <label htmlFor="twitter" className="block text-sm font-medium text-foreground">
+                  Twitter
+                </label>
+                <div className="mt-2 flex rounded-xl bg-muted/20 focus-within:ring-2 focus-within:ring-foreground transition-all">
+                  <span className="flex select-none items-center pl-4 text-muted-foreground sm:text-sm">@</span>
+                  <input
+                    id="twitter"
+                    name="twitter"
+                    type="text"
+                    value={profile.twitter}
+                    onChange={(e) => setProfile({ ...profile, twitter: e.target.value })}
+                    className="block w-full min-w-0 grow bg-transparent py-3 pl-1 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label htmlFor="instagram" className="block text-sm font-medium text-foreground">
+                  Instagram
+                </label>
+                <div className="mt-2 flex rounded-xl bg-muted/20 focus-within:ring-2 focus-within:ring-foreground transition-all">
+                  <span className="flex select-none items-center pl-4 text-muted-foreground sm:text-sm">@</span>
+                  <input
+                    id="instagram"
+                    name="instagram"
+                    type="text"
+                    value={profile.instagram}
+                    onChange={(e) => setProfile({ ...profile, instagram: e.target.value })}
+                    className="block w-full min-w-0 grow bg-transparent py-3 pl-1 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label htmlFor="website" className="block text-sm font-medium text-foreground">
+                  Website
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="website"
+                    name="website"
+                    type="url"
+                    placeholder="https://"
+                    value={profile.website}
+                    onChange={(e) => setProfile({ ...profile, website: e.target.value })}
+                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
+                  />
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -283,10 +346,13 @@ Return ONLY the bio text, nothing else.`;
               onClick={() => {
                 setProfile({
                   name: userProfile?.name || '',
-                  handle: userProfile?.handle || '',
+                  username: userProfile?.username || '',
                   bio: userProfile?.bio || '',
                   avatar: userProfile?.avatar || '',
                   profileTheme: userProfile?.profileTheme || 'dark',
+                  twitter: userProfile?.socials?.x || '',
+                  instagram: userProfile?.socials?.instagram || '',
+                  website: userProfile?.socials?.website || '',
                 });
               }}
             >

@@ -43,7 +43,7 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
         break;
       case 'creator':
         if (artist) {
-          navigate(`/artist/${artist.id}`);
+          navigate(`/artist/${artist.uid}`);
         }
         onClose();
         break;

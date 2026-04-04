@@ -46,7 +46,7 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
             onClick={(e) => {
               e.stopPropagation();
               if (artist) {
-                navigate(`/artist/${artist.id}`);
+                navigate(`/artist/${artist.uid}`);
               } else if (nft.creator === MOCK_USER.name) {
                 navigate('/profile');
               }

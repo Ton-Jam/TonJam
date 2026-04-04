@@ -68,12 +68,12 @@ const ExploreList: React.FC = () => {
       }
     } else if (type === 'artists') {
       if (filter === 'followed') {
-        initialData = artists.filter(a => followedUserIds.includes(a.id));
+        initialData = artists.filter(a => followedUserIds.includes(a.uid));
       } else if (filter === 'friends') {
         // Mock friends logic
-        initialData = artists.filter(a => userProfile.friends?.includes(a.id));
+        initialData = artists.filter(a => userProfile.friends?.includes(a.uid));
       } else if (filter === 'recommended') {
-        initialData = artists.filter(a => !followedUserIds.includes(a.id)).slice(0, 10);
+        initialData = artists.filter(a => !followedUserIds.includes(a.uid)).slice(0, 10);
       } else if (filter === 'rising') {
         initialData = artists.slice(0, 5);
       } else {
@@ -177,7 +177,7 @@ const ExploreList: React.FC = () => {
             : 'grid-cols-1'
       }`}>
         {filteredItems.map((item, idx) => (
-          <div key={`${item.id}-${idx}`} className="animate-in fade-in duration-500 slide-in-from-bottom-2">
+          <div key={`${item.uid || item.id}-${idx}`} className="animate-in fade-in duration-500 slide-in-from-bottom-2">
             {type === 'tracks' && <TrackCard track={item} variant="row" />}
             {type === 'nfts' && <NFTCard nft={item} />}
             {type === 'artists' && <ArtistListItem artist={item} />}

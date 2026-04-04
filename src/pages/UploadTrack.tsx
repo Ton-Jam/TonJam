@@ -1,824 +1,656 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Loader2, CheckCircle2, FileAudio, ArrowLeft, Plus, Music, Info, Sparkles, Trash2, Tag, Gavel } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { useAudio } from '@/context/AudioContext';
-import { Track } from '@/types';
-import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
-import { toast } from 'sonner';
-import { GoogleGenAI, Type } from "@google/genai";
-import { uploadToIPFS } from '@/services/pinataService';
+import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTonConnectUI } from "@tonconnect/ui-react";
+import { 
+  Upload, 
+  Music, 
+  Image as ImageIcon, 
+  Type, 
+  FileText, 
+  Coins, 
+  Layers, 
+  Percent,
+  ArrowLeft,
+  Loader2,
+  CheckCircle2,
+  Sparkles
+} from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { useAudio } from "@/context/AudioContext";
+import { uploadAudio, uploadCover, uploadMetadata } from "@/services/storageService";
+import { mintTonJamNFT } from "@/services/tonService";
+import { validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from "@/lib/utils";
+import { BackButton } from "@/components/BackButton";
 
-const UploadTrack: React.FC = () => {
-  const { addUserTrack, userProfile } = useAudio();
+export default function UploadTrackScreen() {
   const navigate = useNavigate();
+  const { addNotification, addUserTrack, userProfile } = useAudio();
+
+  const [mode, setMode] = useState<'single' | 'batch'>('single');
   
-  const [isUploading, setIsUploading] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [step, setStep] = useState(1);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  
+  // Single Mode State
+  const [title, setTitle] = useState("");
+  const [genre, setGenre] = useState("");
+  const [description, setDescription] = useState("");
+  const [lyrics, setLyrics] = useState("");
+  const [price, setPrice] = useState("5");
+  const [royalty, setRoyalty] = useState("10");
+  const [editions, setEditions] = useState("100");
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  
-  const [formData, setFormData] = useState({
-    title: '',
-    artist: '',
-    genre: 'Electronic',
-    description: '',
-    bpm: '',
-    key: '',
-    price: '1.0',
-    streamingPrice: '0.01',
-    editions: '100',
-    editionType: 'Standard',
-    rarity: 'Common',
-    totalRoyalty: '10',
-    isNFT: false,
-    listingType: 'fixed' as 'fixed' | 'auction',
-    auctionDuration: '7',
-    royaltySplits: [{ address: '', percentage: 100 }]
-  });
 
-  const [isDraggingAudio, setIsDraggingAudio] = useState(false);
-  const [isDraggingCover, setIsDraggingCover] = useState(false);
+  // Batch Mode State
+  const [batchTracks, setBatchTracks] = useState<Array<{
+    id: string;
+    title: string;
+    genre: string;
+    audioFile: File;
+    coverFile: File | null;
+    coverPreview: string | null;
+  }>>([]);
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStep, setUploadStep] = useState<'idle' | 'uploading' | 'success'>('idle');
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const batchAudioInputRef = useRef<HTMLInputElement>(null);
 
   const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const validation = validateFile(file, 'audio', 50); // 50MB max for audio
+      const validation = validateFile(file, 'audio', 50);
       if (!validation.isValid) {
-        toast.error(validation.error);
-        if (audioInputRef.current) audioInputRef.current.value = '';
+        addNotification(validation.error || "Invalid audio file", "error");
         return;
       }
       setAudioFile(file);
-      analyzeAudio(file);
+      if (!title) setTitle(file.name.replace(/\.[^/.]+$/, ""));
+      addNotification("Audio file added successfully", "success");
     }
+  };
+
+  const handleBatchAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const validFiles = files.filter(file => {
+        const validation = validateFile(file, 'audio', 50);
+        return validation.isValid;
+      });
+
+      if (validFiles.length < files.length) {
+        addNotification(`${files.length - validFiles.length} files were invalid and skipped`, "warning");
+      }
+
+      const newTracks = validFiles.map(file => ({
+        id: Math.random().toString(36).substr(2, 9),
+        title: file.name.replace(/\.[^/.]+$/, ""),
+        genre: genre || "Electronic",
+        audioFile: file,
+        coverFile: coverFile, // Default to current cover if exists
+        coverPreview: coverPreview
+      }));
+
+      setBatchTracks(prev => [...prev, ...newTracks]);
+      addNotification(`${validFiles.length} tracks added to batch`, "success");
+    }
+  };
+
+  const removeBatchTrack = (id: string) => {
+    setBatchTracks(prev => prev.filter(t => t.id !== id));
+  };
+
+  const updateBatchTrack = (id: string, updates: Partial<typeof batchTracks[0]>) => {
+    setBatchTracks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
   };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const validation = validateFile(file, 'image', 10); // 10MB max for images
+      const validation = validateFile(file, 'image', 10);
       if (!validation.isValid) {
-        toast.error(validation.error);
-        if (coverInputRef.current) coverInputRef.current.value = '';
+        addNotification(validation.error || "Invalid image file", "error");
         return;
       }
       setCoverFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverPreview(reader.result as string);
+        const preview = reader.result as string;
+        setCoverPreview(preview);
+        // If in batch mode and no individual covers set, maybe suggest applying to all?
+        // For now just update the state
       };
       reader.readAsDataURL(file);
+      addNotification("Cover image added successfully", "success");
     }
   };
 
-  const clearAudio = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setAudioFile(null);
-    if (audioInputRef.current) audioInputRef.current.value = '';
-    toast.info("Audio artifact cleared");
-  };
-
-  const clearCover = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setCoverFile(null);
-    setCoverPreview(null);
-    if (coverInputRef.current) coverInputRef.current.value = '';
-    toast.info("Cover art cleared");
-  };
-
-  const handleDragOver = (e: React.DragEvent, type: 'audio' | 'cover') => {
-    e.preventDefault();
-    if (type === 'audio') setIsDraggingAudio(true);
-    else setIsDraggingCover(true);
-  };
-
-  const handleDragLeave = (type: 'audio' | 'cover') => {
-    if (type === 'audio') setIsDraggingAudio(false);
-    else setIsDraggingCover(false);
-  };
-
-  const handleDrop = (e: React.DragEvent, type: 'audio' | 'cover') => {
-    e.preventDefault();
-    handleDragLeave(type);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      if (type === 'audio') {
-        const validation = validateFile(file, 'audio', 50);
-        if (validation.isValid) {
-          setAudioFile(file);
-          analyzeAudio(file);
-        } else {
-          toast.error(validation.error);
-        }
-      } else {
-        const validation = validateFile(file, 'image', 10);
-        if (validation.isValid) {
-          setCoverFile(file);
-          const reader = new FileReader();
-          reader.onloadend = () => setCoverPreview(reader.result as string);
-          reader.readAsDataURL(file);
-        } else {
-          toast.error(validation.error);
-        }
-      }
-    }
-  };
-
-  const analyzeAudio = async (file: File) => {
-    setIsAnalyzing(true);
-    try {
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
-        reader.onload = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          resolve(base64);
-        };
-      });
-      reader.readAsDataURL(file);
-      const base64Data = await base64Promise;
-
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                inlineData: {
-                  mimeType: file.type,
-                  data: base64Data,
-                },
-              },
-              {
-                text: "Analyze this audio file and provide the genre, BPM (beats per minute), and musical key. Return the result in JSON format with keys: genre, bpm, key.",
-              },
-            ],
-          },
-        ],
-        config: {
-          tools: [{ googleSearch: {} }],
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              genre: { type: Type.STRING },
-              bpm: { type: Type.NUMBER },
-              key: { type: Type.STRING },
-            },
-            required: ["genre", "bpm", "key"],
-          },
-        },
-      });
-
-      const result = JSON.parse(response.text || '{}');
-      setFormData(prev => ({
-        ...prev,
-        genre: result.genre || prev.genre,
-        bpm: result.bpm?.toString() || prev.bpm,
-        key: result.key || prev.key,
-      }));
-      toast.success("Audio analysis complete!", {
-        description: `Detected ${result.genre} at ${result.bpm} BPM in ${result.key}`,
-        icon: <Sparkles className="h-4 w-4 text-blue-500" />
-      });
-    } catch (error) {
-      console.error("Audio analysis failed:", error);
-      toast.error("Failed to analyze audio. Please enter details manually.");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // 1. Basic Presence Validation
-    if (!audioFile) {
-      toast.error("Audio artifact required for transmission.");
-      return;
-    }
-    if (!coverFile) {
-      toast.error("Cover art required for visual synchronization.");
-      return;
-    }
-    if (!formData.title.trim()) {
-      toast.error("Protocol name (title) is mandatory.");
-      return;
-    }
-
-    // 2. File Constraint Validation (Double Check)
-    const audioValidation = validateFile(audioFile, 'audio', 50);
-    if (!audioValidation.isValid) {
-      toast.error(`Audio Error: ${audioValidation.error}`);
-      return;
-    }
-
-    const coverValidation = validateFile(coverFile, 'image', 10);
-    if (!coverValidation.isValid) {
-      toast.error(`Cover Error: ${coverValidation.error}`);
-      return;
-    }
-
-    // 3. Metadata Validation
-    if (formData.bpm && (isNaN(parseInt(formData.bpm)) || parseInt(formData.bpm) < 0)) {
-      toast.error("BPM must be a positive integer.");
-      return;
-    }
-
-    if (isNaN(parseFloat(formData.streamingPrice)) || parseFloat(formData.streamingPrice) < 0) {
-      toast.error("Streaming price must be a non-negative value.");
-      return;
-    }
-
-    // 4. NFT-Specific Validation
-    if (formData.isNFT) {
-      if (isNaN(parseFloat(formData.price)) || parseFloat(formData.price) < 0) {
-        toast.error("NFT listing price must be a valid number.");
+  const handleUpload = async () => {
+    if (mode === 'single') {
+      if (!audioFile || !coverFile) {
+        addNotification("Please upload both audio and cover image", "warning");
         return;
       }
-      if (isNaN(parseInt(formData.editions)) || parseInt(formData.editions) <= 0) {
-        toast.error("Total editions must be at least 1.");
+      if (!title.trim()) {
+        addNotification("Track title is required", "warning");
         return;
       }
-      
-      const totalRoyalty = parseFloat(formData.totalRoyalty);
-      if (isNaN(totalRoyalty) || totalRoyalty < 0 || totalRoyalty > 100) {
-        toast.error("Total royalty must be between 0 and 100%.");
+    } else {
+      if (batchTracks.length === 0) {
+        addNotification("Please add at least one track to the batch", "warning");
         return;
       }
-
-      // Royalty Splits Validation
-      const totalSplitPercentage = formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0);
-      if (totalSplitPercentage !== 100) {
-        toast.error(`Royalty splits must total 100% (currently ${totalSplitPercentage}%).`);
-        return;
-      }
-
-      const invalidSplit = formData.royaltySplits.find(s => !s.address.trim() || s.percentage < 0);
-      if (invalidSplit) {
-        toast.error("All royalty splits must have a valid address and non-negative percentage.");
+      const missingCover = batchTracks.find(t => !t.coverFile && !coverFile);
+      if (missingCover) {
+        addNotification("All tracks must have a cover image", "warning");
         return;
       }
     }
 
     setIsUploading(true);
+    setUploadStep('uploading');
     setUploadProgress(0);
 
     try {
-      // 1. Upload files to IPFS via Pinata
-      toast.info("Uploading artifacts to IPFS...");
+      if (mode === 'single') {
+        let audioProg = 0;
+        let coverProg = 0;
+        const updateOverallProgress = () => {
+          setUploadProgress(Math.round((audioProg + coverProg) / 2));
+        };
+
+        const [audioRes, coverRes] = await Promise.all([
+          uploadAudio(audioFile!, (p) => { audioProg = p; updateOverallProgress(); }),
+          uploadCover(coverFile!, (p) => { coverProg = p; updateOverallProgress(); })
+        ]);
+
+        const trackId = `track-${Date.now()}`;
+        const newTrack = {
+          id: trackId,
+          songId: `song-${trackId}`,
+          title,
+          artist: userProfile.name || "Unknown Artist",
+          artistId: userProfile.uid,
+          coverUrl: coverRes.downloadUrl,
+          audioUrl: audioRes.downloadUrl,
+          duration: 180,
+          playCount: 0,
+          streams: 0,
+          likes: 0,
+          genre,
+          description,
+          lyrics,
+          isNFT: false,
+          createdAt: new Date().toISOString()
+        };
+
+        await addUserTrack(newTrack);
+      } else {
+        // Batch Upload
+        for (let i = 0; i < batchTracks.length; i++) {
+          const track = batchTracks[i];
+          setUploadProgress(Math.round((i / batchTracks.length) * 100));
+          
+          const trackCover = track.coverFile || coverFile;
+          if (!trackCover) continue;
+
+          const [audioRes, coverRes] = await Promise.all([
+            uploadAudio(track.audioFile),
+            uploadCover(trackCover)
+          ]);
+
+          const trackId = `track-${Date.now()}-${i}`;
+          const newTrack = {
+            id: trackId,
+            songId: `song-${trackId}`,
+            title: track.title,
+            artist: userProfile.name || "Unknown Artist",
+            artistId: userProfile.uid,
+            coverUrl: coverRes.downloadUrl,
+            audioUrl: audioRes.downloadUrl,
+            duration: 180,
+            playCount: 0,
+            streams: 0,
+            likes: 0,
+            genre: track.genre,
+            description: description,
+            isNFT: false,
+            createdAt: new Date().toISOString()
+          };
+
+          await addUserTrack(newTrack);
+        }
+      }
+
+      setUploadStep('success');
+      addNotification(mode === 'single' ? "Track added successfully" : "Batch upload complete", "success");
       
-      let audioProgress = 0;
-      let coverProgress = 0;
+      setTimeout(() => {
+        navigate('/profile');
+      }, 2000);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      addNotification("Upload failed. Please try again.", "error");
+      setUploadStep('idle');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
-      const updateProgress = () => {
-        const totalProgress = Math.round((audioProgress + coverProgress) / 2);
-        setUploadProgress(totalProgress);
-      };
+  const [tonConnectUI] = useTonConnectUI();
+  // ... (existing state)
 
-      // We'll upload audio and cover in parallel
+  const handleMint = async () => {
+    if (!audioFile || !coverFile || !title) {
+      addNotification("Please fill in basic track info first", "warning");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadStep('uploading');
+
+    try {
+      // 1. Upload files (Using Firebase Storage as a proxy for IPFS for now)
       const [audioRes, coverRes] = await Promise.all([
-        uploadToIPFS(audioFile, (p) => { audioProgress = p; updateProgress(); }),
-        uploadToIPFS(coverFile, (p) => { coverProgress = p; updateProgress(); })
+        uploadAudio(audioFile),
+        uploadCover(coverFile)
       ]);
 
-      const audioUrl = audioRes.ipfsUrl;
-      const coverUrl = coverRes.ipfsUrl;
-
-      if (!audioUrl) {
-        throw new Error("Audio upload failed: IPFS URL is missing");
-      }
-      if (!coverUrl) {
-        throw new Error("Cover art upload failed: IPFS URL is missing");
-      }
-
-      // 2. Create the track object with IPFS URLs
-      const newTrack: Track = {
-        id: `track-${Date.now()}`,
-        title: formData.title,
-        artist: formData.artist || userProfile.name || 'Unknown Artist',
-        artistId: userProfile.id || 'user-artist',
-        coverUrl: coverUrl || getPlaceholderImage(formData.title || 'default-track'),
-        audioUrl: audioUrl,
-        audioIpfsUrl: audioUrl,
-        coverIpfsUrl: coverUrl,
-        duration: 180, // We could calculate this from the audio file if needed
-        genre: formData.genre,
-        bpm: parseInt(formData.bpm) || 0,
-        key: formData.key,
-        isNFT: formData.isNFT,
-        price: formData.isNFT ? formData.price : undefined,
-        listingType: formData.isNFT ? formData.listingType as 'fixed' | 'auction' : undefined,
-        auctionDuration: formData.isNFT ? formData.auctionDuration : undefined,
-        editions: formData.isNFT ? formData.editions : undefined,
-        editionType: formData.isNFT ? formData.editionType : undefined,
-        rarity: formData.isNFT ? formData.rarity : undefined,
-        royalty: formData.isNFT ? formData.totalRoyalty : undefined,
-        royaltySplits: formData.isNFT ? formData.royaltySplits : undefined,
-        streamingPrice: formData.streamingPrice,
-        playCount: 0,
-        likes: 0,
-        releaseDate: new Date().toISOString().split('T')[0],
-        createdAt: new Date().toISOString(),
+      // 2. Create and upload metadata
+      const metadata = {
+        name: title,
+        description: description,
+        image: coverRes.downloadUrl,
+        animation_url: audioRes.downloadUrl,
+        attributes: [
+          { trait_type: "Genre", value: genre },
+          { trait_type: "Royalty", value: royalty },
+          { trait_type: "Editions", value: editions }
+        ]
       };
-      
-      if (formData.isNFT) {
+      const metadataRes = await uploadMetadata(metadata);
+
+      // 3. Mint NFT on TON
+      const wallet = tonConnectUI.wallet?.account.address;
+      if (!wallet) {
+        addNotification("Please connect your TON wallet first", "warning");
         setIsUploading(false);
-        navigate('/mint', { state: { track: newTrack } });
         return;
       }
 
-      // 4. Persist to Firestore via context
-      await addUserTrack(newTrack);
+      await mintTonJamNFT(tonConnectUI, wallet, metadataRes.downloadUrl);
+
+      setUploadStep('success');
+      addNotification("NFT minted successfully!", "success");
       
-      setIsUploading(false);
-      setStep(2);
-      toast.success("Track successfully broadcasted to the network!");
-    } catch (error: any) {
-      console.error("Upload failed:", error);
-      toast.error("Upload failed: " + (error.response?.data?.error || error.message));
+      setTimeout(() => {
+        navigate('/profile');
+      }, 2000);
+    } catch (error) {
+      console.error("Minting failed:", error);
+      addNotification("Minting failed. Please try again.", "error");
+      setUploadStep('idle');
+    } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <div className="w-full px-4 sm:px-4 lg:px-4 py-4 sm:py-4 animate-in fade-in duration-700">
-      <div className="px-4 sm:px-4 py-4 sm:py-4 mb-4 sm:mb-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-4 text-muted-foreground hover:text-foreground transition-colors group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Back to Hub</span>
-        </button>
+    <div className="min-h-screen bg-[#0B0F14] text-white pb-24 relative overflow-x-hidden">
+      {/* Background Glow */}
+      <div className="fixed inset-0 opacity-10 blur-[120px] pointer-events-none z-0">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 rounded-full translate-y-1/2 -translate-x-1/2" />
       </div>
 
-      <div className="glass border-y sm:border border-border bg-white sm:rounded-[10px] overflow-hidden shadow-2xl">
-        <div className="p-4 sm:p-4 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-[26px] sm:text-[32px] font-bold text-black tracking-tighter uppercase italic">
-              {step === 2 ? 'Upload Complete' : 'Forge New Protocol'}
-            </h1>
-            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.3em] mt-4">
-              {step === 1 ? 'Sequence Audio Artifact & Metadata' : 'Frequency Synchronized'}
-            </p>
-          </div>
-          {step === 1 && (
-            <div className="flex items-center gap-4 px-4 py-4 rounded-full bg-blue-500/10 border border-neutral-500/20">
-              <Sparkles className="h-3.5 w-3.5 text-blue-500" />
-              <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">AI Analysis Enabled</span>
-            </div>
-          )}
+      {/* Header */}
+      <div className="relative z-10 p-4 flex items-center justify-between border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0">
+        <BackButton className="p-2 text-white/70 hover:text-white transition-colors" />
+        <h1 className="text-sm font-black uppercase tracking-[0.3em]">Forge Protocol</h1>
+        <div className="w-10" />
+      </div>
+
+      <div className="relative z-10 max-w-2xl mx-auto p-6 space-y-8">
+        
+        {/* Mode Toggle */}
+        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
+          <button 
+            onClick={() => setMode('single')}
+            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'single' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-white/40 hover:text-white'}`}
+          >
+            Single Track
+          </button>
+          <button 
+            onClick={() => setMode('batch')}
+            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'batch' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' : 'text-white/40 hover:text-white'}`}
+          >
+            Batch Upload
+          </button>
         </div>
 
-        <div className="p-4 sm:p-4">
-          {step === 1 && (
-            <form onSubmit={handleUpload} className="space-y-4">
-              {/* File Upload Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Cover Art */}
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-4">
-                    <Info className="h-3 w-3" /> Cover Art (1:1 Ratio)
-                  </label>
-                  <div 
-                    onClick={() => !coverFile && coverInputRef.current?.click()}
-                    onDragOver={(e) => handleDragOver(e, 'cover')}
-                    onDragLeave={() => handleDragLeave('cover')}
-                    onDrop={(e) => handleDrop(e, 'cover')}
-                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-muted/30 flex flex-col items-center justify-center p-4 cursor-pointer transition-all group relative overflow-hidden ${coverFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingCover ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
-                  >
-                    {coverPreview ? (
-                      <>
-                        <img src={coverPreview} className="w-full h-full object-cover rounded-[8px]" alt="Cover Preview" referrerPolicy="no-referrer" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button 
-                            type="button"
-                            onClick={clearCover}
-                            className="px-4 py-4 bg-red-500 text-white text-[10px] font-bold uppercase rounded-[5px] hover:bg-red-600 transition-colors"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Plus className="h-6 w-6 text-muted-foreground/50" />
-                        </div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Select Image</span>
-                      </div>
-                    )}
-                  </div>
-                  <input type="file" ref={coverInputRef} onChange={handleCoverChange} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
+        {/* Global Cover Upload (Used for Single or as Default for Batch) */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+            <ImageIcon className="w-3 h-3" /> {mode === 'single' ? 'Cover Image' : 'Default Cover (for all tracks)'}
+          </label>
+          <div 
+            onClick={() => coverInputRef.current?.click()}
+            className="aspect-video sm:aspect-[21/9] rounded-3xl bg-white/5 border-2 border-dashed border-white/10 hover:border-cyan-500/50 transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center group relative"
+          >
+            {coverPreview ? (
+              <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Upload className="w-6 h-6 text-white/20" />
                 </div>
+                <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Artwork</p>
+              </>
+            )}
+            <input 
+              type="file" 
+              ref={coverInputRef} 
+              onChange={handleCoverChange} 
+              accept={ALLOWED_IMAGE_TYPES.join(',')} 
+              className="hidden" 
+            />
+          </div>
+        </div>
 
-                {/* Audio File */}
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-4">
-                    <Music className="h-3 w-3" /> Audio Artifact (MP3/WAV)
-                  </label>
-                  <div 
-                    onClick={() => !audioFile && audioInputRef.current?.click()}
-                    onDragOver={(e) => handleDragOver(e, 'audio')}
-                    onDragLeave={() => handleDragLeave('audio')}
-                    onDrop={(e) => handleDrop(e, 'audio')}
-                    className={`w-full aspect-square rounded-[10px] border-2 border-dashed bg-muted/30 flex flex-col items-center justify-center p-4 cursor-pointer transition-all group relative ${audioFile ? 'border-neutral-500/50' : 'border-border'} ${isDraggingAudio ? 'border-neutral-500/50 bg-blue-500/5 scale-[1.02]' : 'hover:border-neutral-500/50'}`}
-                  >
-                    {audioFile ? (
-                      <div className="flex flex-col items-center text-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 animate-pulse">
-                          <FileAudio className="h-8 w-8" />
-                        </div>
-                        <div className="space-y-4">
-                          <p className="text-xs font-bold text-foreground uppercase tracking-widest line-clamp-1">{audioFile.name}</p>
-                          <p className="text-[10px] text-muted-foreground">{(audioFile.size / (1024 * 1024)).toFixed(2)} MB</p>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={clearAudio}
-                          className="px-4 py-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all text-[10px] font-bold uppercase rounded-[5px]"
-                        >
-                          Clear File
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Upload className="h-6 w-6 text-muted-foreground/50" />
-                        </div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Select Audio</span>
-                      </div>
-                    )}
-                  </div>
-                  <input type="file" ref={audioInputRef} onChange={handleAudioChange} accept={ALLOWED_AUDIO_TYPES.join(',')} className="hidden" />
-                  
-                  {isAnalyzing && (
-                    <div className="p-4 bg-blue-500/10 border border-neutral-500/20 rounded-[10px] flex items-center gap-4 animate-pulse">
-                      <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
-                      <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">AI Analyzing Frequency...</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              {uploadProgress > 0 && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Uploading Artifact</span>
-                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">{uploadProgress}%</span>
-                  </div>
-                  <div className="w-full bg-muted/30 rounded-full h-1.5 overflow-hidden">
-                    <div 
-                      className="bg-blue-500 h-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Metadata Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Track Title</label>
-                  <input 
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                    placeholder="PROTOCOL_NAME"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Artist Name</label>
-                  <input 
-                    type="text"
-                    value={formData.artist}
-                    onChange={(e) => setFormData({...formData, artist: e.target.value})}
-                    className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                    placeholder="OPERATOR_ID"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Genre</label>
-                  <select 
-                    value={formData.genre}
-                    onChange={(e) => setFormData({...formData, genre: e.target.value})}
-                    className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors appearance-none"
-                  >
-                    <option value="Electronic">Electronic</option>
-                    <option value="Hip-Hop">Hip-Hop</option>
-                    <option value="Afrobeats">Afrobeats</option>
-                    <option value="Techno">Techno</option>
-                    <option value="House">House</option>
-                    <option value="Ambient">Ambient</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">BPM</label>
-                    <input 
-                      type="number"
-                      value={formData.bpm}
-                      onChange={(e) => setFormData({...formData, bpm: e.target.value})}
-                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                      placeholder="128"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Key</label>
-                    <input 
-                      type="text"
-                      value={formData.key}
-                      onChange={(e) => setFormData({...formData, key: e.target.value})}
-                      className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                      placeholder="Am"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* NFT Toggle Section - Moved Higher */}
-              <div className={`p-6 rounded-[10px] border transition-all duration-500 ${formData.isNFT ? 'bg-amber-500/5 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]' : 'bg-muted/20 border-border/50'}`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${formData.isNFT ? 'bg-amber-500 text-white' : 'bg-muted text-muted-foreground'}`}>
-                      <Sparkles className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-[11px] font-bold text-foreground uppercase tracking-widest">Mint as NFT Protocol</h3>
-                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider mt-1">Enable ownership & marketplace trading</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({...formData, isNFT: !formData.isNFT})}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${formData.isNFT ? 'bg-amber-500' : 'bg-muted-foreground/30'}`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isNFT ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
-                </div>
-
-                {formData.isNFT && (
-                  <div className="space-y-6 pt-4 border-t border-amber-500/20 animate-in fade-in slide-in-from-top-2 duration-500">
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Listing Protocol</label>
-                      <div className="flex gap-4">
-                        <button
-                          type="button"
-                          onClick={() => setFormData({...formData, listingType: 'fixed'})}
-                          className={`flex-1 py-4 rounded-[10px] border transition-all flex items-center justify-center gap-4 ${formData.listingType === 'fixed' ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted'}`}
-                        >
-                          <Tag className="h-4 w-4" />
-                          <span className="text-[10px] font-bold uppercase tracking-widest">Fixed Price</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({...formData, listingType: 'auction'})}
-                          className={`flex-1 py-4 rounded-[10px] border transition-all flex items-center justify-center gap-4 ${formData.listingType === 'auction' ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted'}`}
-                        >
-                          <Gavel className="h-4 w-4" />
-                          <span className="text-[10px] font-bold uppercase tracking-widest">Auction</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                          {formData.listingType === 'fixed' ? 'Listing Price (TON)' : 'Starting Bid (TON)'}
-                        </label>
-                        <input 
-                          type="number"
-                          step="0.1"
-                          value={formData.price}
-                          onChange={(e) => setFormData({...formData, price: e.target.value})}
-                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors"
-                          placeholder="1.0"
-                        />
-                      </div>
-                      {formData.listingType === 'auction' && (
-                        <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
-                          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Auction Duration (Days)</label>
-                          <select 
-                            value={formData.auctionDuration}
-                            onChange={(e) => setFormData({...formData, auctionDuration: e.target.value})}
-                            className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors appearance-none"
-                          >
-                            <option value="1">1 Day</option>
-                            <option value="3">3 Days</option>
-                            <option value="7">7 Days</option>
-                            <option value="14">14 Days</option>
-                            <option value="30">30 Days</option>
-                          </select>
-                        </div>
-                      )}
-                      <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Editions</label>
-                        <input 
-                          type="number"
-                          value={formData.editions}
-                          onChange={(e) => setFormData({...formData, editions: e.target.value})}
-                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors"
-                          placeholder="100"
-                        />
-                      </div>
-                      <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Edition Type</label>
-                        <select 
-                          value={formData.editionType}
-                          onChange={(e) => setFormData({...formData, editionType: e.target.value})}
-                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors appearance-none"
-                        >
-                          <option value="Standard">Standard</option>
-                          <option value="Limited">Limited</option>
-                          <option value="Unique">Unique (1/1)</option>
-                        </select>
-                      </div>
-                      <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rarity Label</label>
-                        <input 
-                          type="text"
-                          value={formData.rarity}
-                          onChange={(e) => setFormData({...formData, rarity: e.target.value})}
-                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors"
-                          placeholder="Common"
-                        />
-                      </div>
-                      <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Royalty (%)</label>
-                        <input 
-                          type="number"
-                          max="100"
-                          value={formData.totalRoyalty}
-                          onChange={(e) => setFormData({...formData, totalRoyalty: e.target.value})}
-                          className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-amber-500/50 transition-colors"
-                          placeholder="10"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Royalty Splits</label>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({
-                            ...formData,
-                            royaltySplits: [...formData.royaltySplits, { address: '', percentage: 0 }]
-                          })}
-                          className="text-[9px] font-bold text-amber-500 uppercase tracking-widest hover:text-amber-400 transition-colors flex items-center gap-1"
-                        >
-                          <Plus className="h-3 w-3" /> Add Split
-                        </button>
-                      </div>
-
-                      <div className="space-y-3">
-                        {formData.royaltySplits.map((split, index) => (
-                          <div key={index} className="flex gap-2 items-start">
-                            <div className="flex-1">
-                              <input
-                                type="text"
-                                placeholder="TON Wallet Address"
-                                value={split.address}
-                                onChange={(e) => {
-                                  const newSplits = [...formData.royaltySplits];
-                                  newSplits[index].address = e.target.value;
-                                  setFormData({ ...formData, royaltySplits: newSplits });
-                                }}
-                                className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-3 text-[11px] text-foreground outline-none focus:border-amber-500/50 transition-colors"
-                              />
-                            </div>
-                            <div className="w-24">
-                              <div className="relative">
-                                <input
-                                  type="number"
-                                  placeholder="%"
-                                  value={split.percentage}
-                                  onChange={(e) => {
-                                    const newSplits = [...formData.royaltySplits];
-                                    newSplits[index].percentage = parseInt(e.target.value) || 0;
-                                    setFormData({ ...formData, royaltySplits: newSplits });
-                                  }}
-                                  className="w-full bg-background/50 border border-amber-500/20 rounded-[5px] p-3 pr-8 text-[11px] text-foreground outline-none focus:border-amber-500/50 transition-colors"
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">%</span>
-                              </div>
-                            </div>
-                            {formData.royaltySplits.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newSplits = formData.royaltySplits.filter((_, i) => i !== index);
-                                  setFormData({ ...formData, royaltySplits: newSplits });
-                                }}
-                                className="p-3 text-red-500/50 hover:text-red-500 transition-colors"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex justify-between items-center px-1">
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Split Total</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                          formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0) === 100 
-                            ? "text-green-500" 
-                            : "text-amber-500"
-                        }`}>
-                          {formData.royaltySplits.reduce((sum, s) => sum + s.percentage, 0)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Description</label>
-                <textarea 
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors h-32 resize-none"
-                  placeholder="Enter track transmission details..."
-                />
-              </div>
-
-              <div className="space-y-4">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Streaming Price (TON)</label>
-                <input 
-                  type="number"
-                  step="0.01"
-                  value={formData.streamingPrice}
-                  onChange={(e) => setFormData({...formData, streamingPrice: e.target.value})}
-                  className="w-full bg-muted/30 border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-neutral-500/50 transition-colors"
-                  placeholder="0.01"
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={isUploading || isAnalyzing}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[5px] font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed group"
+        {mode === 'single' ? (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Audio Upload */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                <Music className="w-3 h-3" /> Audio Artifact
+              </label>
+              <div 
+                onClick={() => audioInputRef.current?.click()}
+                className="w-full rounded-3xl bg-white/5 border-2 border-dashed border-white/10 hover:border-purple-500/50 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative"
               >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Transmitting...
-                  </>
+                {audioFile ? (
+                  <div className="text-center">
+                    <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                      <Music className="w-8 h-8 text-purple-400" />
+                    </div>
+                    <p className="text-[11px] font-bold text-white truncate max-w-[250px]">{audioFile.name}</p>
+                    <p className="text-[9px] text-white/40 mt-1 uppercase font-black">{(audioFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                  </div>
                 ) : (
                   <>
-                    <Upload className="h-5 w-5 group-hover:-translate-y-1 transition-transform" />
-                    Forge Track
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Upload className="w-6 h-6 text-white/20" />
+                    </div>
+                    <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Audio</p>
                   </>
                 )}
-              </button>
-            </form>
-          )}
+                <input 
+                  type="file" 
+                  ref={audioInputRef} 
+                  onChange={handleAudioChange} 
+                  accept={ALLOWED_AUDIO_TYPES.join(',')} 
+                  className="hidden" 
+                />
+              </div>
+            </div>
 
-          {step === 2 && (
-            <div className="py-4 flex flex-col items-center text-center space-y-4 animate-in zoom-in duration-500">
-              <div className="w-24 h-24 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mb-4 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
-                <CheckCircle2 className="h-12 w-12" />
+            {/* Form Fields */}
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <Type className="w-3 h-3" /> Track Title
+                </label>
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10"
+                  placeholder="Enter track title..."
+                />
               </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <Sparkles className="w-3 h-3" /> Genre
+                </label>
+                <select
+                  value={genre}
+                  onChange={(e) => setGenre(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold text-white"
+                >
+                  <option value="" disabled>Select a genre</option>
+                  {['Electronic', 'Hip-hop', 'Ambient', 'Synthwave', 'Pop', 'Techno'].map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <FileText className="w-3 h-3" /> Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10 h-32 resize-none"
+                  placeholder="Describe your sonic artifact..."
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <FileText className="w-3 h-3" /> Lyrics
+                </label>
+                <textarea
+                  value={lyrics}
+                  onChange={(e) => setLyrics(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10 h-48 resize-none"
+                  placeholder="Add your lyrics here..."
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    <Coins className="w-3 h-3" /> Mint Price (TON)
+                  </label>
+                  <input
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10"
+                    placeholder="5"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    <Layers className="w-3 h-3" /> Edition Supply
+                  </label>
+                  <input
+                    value={editions}
+                    onChange={(e) => setEditions(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10"
+                    placeholder="100"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    <Percent className="w-3 h-3" /> Royalty %
+                  </label>
+                  <input
+                    value={royalty}
+                    onChange={(e) => setRoyalty(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10"
+                    placeholder="10"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Batch Audio Upload */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                <Music className="w-3 h-3" /> Batch Audio Artifacts
+              </label>
+              <div 
+                onClick={() => batchAudioInputRef.current?.click()}
+                className="w-full rounded-3xl bg-white/5 border-2 border-dashed border-white/10 hover:border-purple-500/50 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Upload className="w-6 h-6 text-white/20" />
+                </div>
+                <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Multiple Audio Files</p>
+                <input 
+                  type="file" 
+                  ref={batchAudioInputRef} 
+                  onChange={handleBatchAudioChange} 
+                  accept={ALLOWED_AUDIO_TYPES.join(',')} 
+                  multiple
+                  className="hidden" 
+                />
+              </div>
+            </div>
+
+            {/* Batch Track List */}
+            {batchTracks.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-[26px] font-bold text-foreground tracking-tighter uppercase italic">Protocol Established</h3>
-                <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.4em] max-w-sm mx-auto leading-relaxed">
-                  "{formData.title}" has been successfully broadcasted to the network.
-                </p>
+                <div className="flex justify-between items-center px-2">
+                  <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest">Queue ({batchTracks.length})</h3>
+                  <button 
+                    onClick={() => setBatchTracks([])}
+                    className="text-[9px] font-bold text-red-400 uppercase tracking-widest hover:text-red-300"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {batchTracks.map((track, index) => (
+                    <motion.div 
+                      key={track.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4 group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                        <Music className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <input 
+                          value={track.title}
+                          onChange={(e) => updateBatchTrack(track.id, { title: e.target.value })}
+                          className="w-full bg-transparent border-none outline-none text-xs font-bold text-white placeholder:text-white/20 p-0"
+                          placeholder="Track Title"
+                        />
+                        <input 
+                          value={track.genre}
+                          onChange={(e) => updateBatchTrack(track.id, { genre: e.target.value })}
+                          className="w-full bg-transparent border-none outline-none text-[10px] font-bold text-white/40 placeholder:text-white/10 p-0"
+                          placeholder="Genre"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => removeBatchTrack(track.id)}
+                        className="p-2 text-white/20 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <CheckCircle2 className="w-4 h-4 rotate-45" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-                <button 
-                  onClick={() => navigate('/artist-dashboard')}
-                  className="flex-1 py-4 bg-foreground text-background rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all"
-                >
-                  View Dashboard
-                </button>
-                <button 
-                  onClick={() => { setStep(1); setFormData({ ...formData, title: '', isNFT: false }); setAudioFile(null); setCoverFile(null); setCoverPreview(null); setUploadProgress(0); }}
-                  className="flex-1 py-4 bg-muted/50 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all"
-                >
-                  Upload Another
-                </button>
+            )}
+
+            {/* Common Description */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-3 h-3" /> Common Description (Optional)
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10 h-24 resize-none"
+                placeholder="Description for all tracks in this batch..."
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="pt-8 space-y-4">
+          {isUploading && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                <span className="text-white/40">Transmission Progress</span>
+                <span className="text-cyan-500">{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                <div 
+                  className="bg-cyan-500 h-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(8,145,178,0.5)]" 
+                  style={{ width: `${uploadProgress}%` }}
+                />
               </div>
             </div>
           )}
+          <button
+            onClick={handleUpload}
+            disabled={isUploading || (mode === 'batch' && batchTracks.length === 0)}
+            className="w-full bg-[#0891b2] text-black font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(8,145,178,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Transmitting {uploadProgress}%
+              </>
+            ) : (
+              <>
+                <Upload className="w-5 h-5" />
+                {mode === 'single' ? 'Upload Track' : `Upload ${batchTracks.length} Tracks`}
+              </>
+            )}
+          </button>
+
+          {mode === 'single' && (
+            <button
+              onClick={handleMint}
+              className="w-full bg-purple-600 text-white font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(147,51,234,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+            >
+              <Sparkles className="w-5 h-5 fill-current" />
+              Mint NFT Protocol
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Success Overlay */}
+      <AnimatePresence>
+        {uploadStep === 'success' && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="text-center space-y-6"
+            >
+              <div className="w-24 h-24 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-12 h-12 text-cyan-400" />
+              </div>
+              <h2 className="text-3xl font-black uppercase tracking-tighter italic">Transmission Complete</h2>
+              <p className="text-white/40 text-sm font-bold uppercase tracking-widest">
+                {mode === 'single' ? 'Your sonic artifact is now live.' : `${batchTracks.length} artifacts synchronized successfully.`}
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-};
-
-export default UploadTrack;
+}

@@ -51,8 +51,9 @@ const AppContent: React.FC = () => {
     // Test Firebase connection
     const initBackend = async () => {
       try {
-        // Simple connection test - just read from the test collection
-        const q = query(collection(db, 'test'), limit(1));
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Simple connection test - just read from the users collection
+        const q = query(collection(db, 'users'), limit(1));
         await getDocs(q);
         setIsBackendReachable(true);
       } catch (error) {
@@ -126,6 +127,7 @@ const AppContent: React.FC = () => {
               <Route path="/staking" element={<Staking />} />
               <Route path="/playlist/:id" element={<PlaylistDetail />} />
               <Route path="/track/:id" element={<TrackDetail />} />
+              <Route path="/player/:id" element={<TrackPlayerScreen />} />
               <Route path="/player" element={<TrackPlayerScreen />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/profile-settings" element={<ProfileSettings />} />

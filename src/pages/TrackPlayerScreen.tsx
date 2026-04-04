@@ -1,12 +1,11 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { BackButton } from '@/components/BackButton';
 import { 
   Heart, 
   Share2, 
   Play, 
   Pause, 
-  ArrowLeft, 
   Diamond, 
   Coins,
   MessageSquare,
@@ -14,235 +13,235 @@ import {
   User,
   Music,
   ListMusic,
-  ThumbsUp
+  ThumbsUp,
+  MoreVertical,
+  SkipBack,
+  SkipForward,
+  Repeat,
+  Shuffle,
+  Send
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+import { useAudio } from "@/context/AudioContext";
+import { MOCK_TRACKS, MOCK_ARTISTS } from "@/constants";
+import { getPlaceholderImage } from "@/lib/utils";
 
 export default function TrackPlayerScreen() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const { 
+    playTrack, 
+    currentTrack, 
+    isPlaying, 
+    togglePlay, 
+    likedTrackIds, 
+    toggleLikeTrack,
+    addNotification
+  } = useAudio();
 
-  const track = {
-    title: "Afro Night",
-    artist: "DJ Ton",
-    cover: "https://picsum.photos/seed/afro/800/800",
-    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    price: "5 TON",
-    editions: "100",
-    likes: 1200
-  };
+  const [comment, setComment] = useState("");
+  const [showEditions, setShowEditions] = useState(false);
 
-  const togglePlay = () => {
-    if (!audioRef.current) return;
+  // Find track by ID or use current playing track or default to first mock track
+  const track = useMemo(() => {
+    if (id) return MOCK_TRACKS.find(t => t.id === id);
+    if (currentTrack) return currentTrack;
+    return MOCK_TRACKS[0];
+  }, [id, currentTrack]);
 
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+  const artist = useMemo(() => 
+    MOCK_ARTISTS.find(a => a.uid === track?.artistId) || MOCK_ARTISTS[0]
+  , [track]);
+
+  const isLiked = track ? likedTrackIds.includes(track.id) : false;
+
+  const handlePlay = () => {
+    if (track) {
+      if (currentTrack?.id === track.id) {
+        togglePlay();
+      } else {
+        playTrack(track);
+      }
     }
-
-    setIsPlaying(!isPlaying);
   };
+
+  const handleShare = () => {
+    const shareData = {
+      title: track?.title,
+      text: `Check out ${track?.title} by ${track?.artist} on TonJam!`,
+      url: window.location.href
+    };
+    if (navigator.share) {
+      navigator.share(shareData).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      addNotification("Link copied to clipboard", "success");
+    }
+  };
+
+  const handleMint = () => {
+    navigate(`/mint?trackId=${track?.id}`, { state: { track } });
+  };
+
+  const handleBuy = () => {
+    addNotification(`Purchase of ${track?.title} initiated...`, "info");
+    setTimeout(() => {
+      addNotification(`Successfully purchased edition of ${track?.title}!`, "success");
+    }, 2000);
+  };
+
+  const handlePostComment = () => {
+    if (!comment.trim()) return;
+    addNotification("Comment posted successfully", "success");
+    setComment("");
+  };
+
+  if (!track) return null;
 
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-white pb-4">
+    <div className="min-h-screen bg-[#0B0F14] text-white pb-24 relative overflow-x-hidden">
+      {/* Background Blur */}
+      <div 
+        className="fixed inset-0 opacity-20 blur-[120px] pointer-events-none z-0"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, #3b82f6 0%, transparent 50%)`
+        }}
+      />
+
       {/* Header */}
-      <div className="p-4 flex items-center justify-between">
+      <div className="relative z-10 p-4 flex items-center justify-between">
         <BackButton 
-          className="p-4 transition-colors text-white/70 hover:text-white"
+          className="p-2 transition-colors text-white/70 hover:text-white bg-white/5 rounded-full"
           iconClassName="w-5 h-5"
         />
-        <div /> {/* Spacer */}
-        <button className="p-4 transition-colors text-white/70 hover:text-white">
+        <div className="text-center">
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Now Playing</p>
+          <p className="text-[11px] font-black uppercase tracking-widest text-cyan-400">Protocol 0.1</p>
+        </div>
+        <button 
+          onClick={handleShare}
+          className="p-2 transition-colors text-white/70 hover:text-white bg-white/5 rounded-full"
+        >
           <Share2 className="w-5 h-5" />
         </button>
       </div>
 
       {/* Cover Section */}
-      <div className="px-4 py-4">
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl shadow-black/50"
-        >
-          <img
-            src={track.cover}
-            className="w-full h-full object-cover"
-            alt={track.title}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        </motion.div>
+      <div className="p-5 relative z-10">
+        <img
+          src={track.coverUrl || "/Artist9.png"}
+          className="w-full rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+          alt={track.title}
+        />
       </div>
 
       {/* Track Info */}
-      <div className="px-4 mt-4 flex justify-between items-end">
+      <div className="px-5 relative z-10 flex justify-between items-start">
         <div>
-          <h1 className="text-[20px] font-black tracking-tighter uppercase italic">
+          <h1 className="text-xl font-semibold">
             {track.title}
           </h1>
-          <p className="text-cyan-400 text-xs font-bold uppercase tracking-widest mt-4">
+          <p className="text-gray-400 mt-1 cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => navigate(`/artist/${track.artistId}`)}>
             {track.artist}
           </p>
         </div>
-        <button className="p-4 text-pink-500 hover:scale-110 transition-transform">
-          <Heart className="w-5 h-5" />
+        <button 
+          onClick={() => toggleLikeTrack(track.id)}
+          className={`p-2 transition-all active:scale-90 ${isLiked ? 'text-pink-500' : 'text-white/20 hover:text-white'}`}
+        >
+          <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
         </button>
       </div>
 
       {/* Player Controls */}
-      <div className="flex flex-col items-center mt-4 px-4">
-        {/* Progress Bar (Mock) */}
-        <div className="w-full h-1 bg-white/10 rounded-full mb-4 relative overflow-hidden">
-          <div className="absolute top-0 left-0 h-full w-1/3 bg-cyan-400" />
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button className="text-white/40 hover:text-white transition-colors">
-            <Zap className="w-6 h-6" />
-          </button>
-          
-          <button
-            onClick={togglePlay}
-            className="text-cyan-400 w-20 h-20 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
-          >
-            {isPlaying ? (
-              <Pause className="w-10 h-10 fill-current" />
-            ) : (
-              <Play className="w-10 h-10 fill-current ml-4" />
-            )}
-          </button>
-
-          <button className="text-white/40 hover:text-white transition-colors">
-            <MessageSquare className="w-6 h-6" />
-          </button>
-        </div>
-
-        <audio 
-          ref={audioRef} 
-          src={track.audio}
-          onEnded={() => setIsPlaying(false)}
-        />
+      <div className="flex justify-center mt-6 relative z-10">
+        <button
+          onClick={handlePlay}
+          className="bg-cyan-400 text-black w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(56,189,248,0.3)]"
+        >
+          {isPlaying && currentTrack?.id === track.id ? (
+            <Pause className="w-8 h-8 fill-current" />
+          ) : (
+            <Play className="w-8 h-8 fill-current ml-1" />
+          )}
+        </button>
       </div>
 
       {/* Track Stats */}
-      <div className="grid grid-cols-3 gap-4 px-4 mt-4">
-        <div className="flex flex-col items-center gap-4">
-          <Heart className="w-4 h-4 text-pink-500" />
-          <span className="text-xs font-bold">{track.likes}</span>
-          <span className="text-[8px] text-muted-foreground uppercase tracking-widest">Likes</span>
+      <div className="flex justify-around mt-6 text-sm text-gray-400 relative z-10">
+        <div className="flex items-center gap-2">
+          <span>❤️</span> {track.likes || 1200}
         </div>
-
-        <div className="flex flex-col items-center gap-4">
-          <Diamond className="w-4 h-4 text-blue-400" />
-          <span className="text-xs font-bold">{track.editions}</span>
-          <span className="text-[8px] text-muted-foreground uppercase tracking-widest">Editions</span>
+        <div className="flex items-center gap-2">
+          <span>💎</span> 100 Editions
         </div>
-
-        <div className="flex flex-col items-center gap-4">
-          <Coins className="w-4 h-4 text-yellow-500" />
-          <span className="text-xs font-bold">{track.price}</span>
-          <span className="text-[8px] text-muted-foreground uppercase tracking-widest">Price</span>
+        <div className="flex items-center gap-2">
+          <span>💰</span> {track.price || '5'} TON
         </div>
       </div>
 
       {/* Actions */}
-      <div className="p-4 space-y-4 mt-4">
-        <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-[0.2em] shadow-lg shadow-purple-600/20 hover:opacity-90 transition-all">
-          Mint NFT Protocol
+      <div className="p-5 space-y-3 relative z-10">
+        <button 
+          onClick={handleMint}
+          className="w-full bg-purple-500 hover:bg-purple-600 transition-colors py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
+        >
+          <Zap className="w-4 h-4 fill-current" />
+          Mint NFT
         </button>
-
-        <div className="grid grid-cols-2 gap-4">
-          <button className="bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-neutral-500/20 transition-all">
-            Buy Edition
-          </button>
-          <button className="bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-neutral-500/20 transition-all">
-            Share Track
-          </button>
-        </div>
+        <button 
+          onClick={handleBuy}
+          className="w-full bg-[#121821] hover:bg-[#1a2332] transition-colors py-3 rounded-xl flex items-center justify-center gap-2"
+        >
+          <Coins className="w-4 h-4" />
+          Buy Edition
+        </button>
+        <button 
+          onClick={handleShare}
+          className="w-full bg-[#121821] hover:bg-[#1a2332] transition-colors py-3 rounded-xl flex items-center justify-center gap-2"
+        >
+          <Share2 className="w-4 h-4" />
+          Share Track
+        </button>
       </div>
 
       {/* Comments Section */}
-      <div className="px-4 mt-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-4">
-            <MessageSquare className="w-4 h-4 text-cyan-400" /> Comments
-          </h2>
-          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">24 Comments</span>
-        </div>
-
-        <div className="space-y-4">
-          <div className="border-l-2 border-neutral-500/20 pl-4">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-5 h-5 rounded-full bg-blue-500/20" />
-              <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">CryptoKrupy</span>
-            </div>
-            <p className="text-xs text-gray-300 leading-relaxed">
-              🔥 This track is amazing! The bassline is pure energy.
-            </p>
-          </div>
-
-          <div className="border-l-2 border-neutral-500/20 pl-4">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-5 h-5 rounded-full bg-purple-500/20" />
-              <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">NeonRider</span>
-            </div>
-            <p className="text-xs text-gray-300 leading-relaxed">
-              I’m minting this one 💎 absolute protocol classic.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Artist Card */}
-      <div className="px-4 mt-8">
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-          <User className="w-4 h-4 text-cyan-400" /> Artist
+      <div className="px-5 pb-20 relative z-10">
+        <h2 className="text-lg font-semibold mb-3">
+          Comments
         </h2>
-        <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 border border-white/5">
-          <img src="https://picsum.photos/seed/djton/200/200" className="w-12 h-12 rounded-full" alt="Artist" />
-          <div>
-            <h3 className="font-bold text-sm">DJ Ton</h3>
-            <p className="text-xs text-muted-foreground">12.5k followers</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Featured Playlist */}
-      <div className="px-4 mt-8">
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-          <ListMusic className="w-4 h-4 text-cyan-400" /> Featured Playlist
-        </h2>
-        <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 border border-white/5">
-          <img src="https://picsum.photos/seed/playlist/400/400" className="w-12 h-12 rounded-lg" alt="Playlist" />
-          <h3 className="font-bold text-sm">Afro-Electronic Gems</h3>
+        {/* Comment Input */}
+        <div className="relative mb-4">
+          <input 
+            type="text" 
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Add a comment..."
+            className="w-full bg-[#121821] border border-white/5 rounded-xl py-3 px-4 pr-12 text-sm focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-white/30"
+          />
+          <button 
+            onClick={handlePostComment}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-cyan-400 hover:scale-110 transition-transform"
+          >
+            <Send className="w-4 h-4" />
+          </button>
         </div>
-      </div>
 
-      {/* Similar & Recommended Tracks */}
-      <div className="px-4 mt-8 pb-8">
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-          <Music className="w-4 h-4 text-cyan-400" /> Similar & Recommended
-        </h2>
         <div className="space-y-3">
-          {[
-            { title: "Night Drive", artist: "DJ Afro" },
-            { title: "Bass Pulse", artist: "BeatMaster" },
-            { title: "Deep Sea", artist: "Oceanic" },
-            { title: "Sky High", artist: "Cloud9" }
-          ].map((track, i) => (
-            <div key={i} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5">
-              <div>
-                <h4 className="text-xs font-bold">{track.title}</h4>
-                <p className="text-[10px] text-muted-foreground">{track.artist}</p>
-              </div>
-              <button className="text-white/40 hover:text-cyan-400">
-                <ThumbsUp className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
+          <div className="bg-[#121821] p-3 rounded-xl">
+            <p className="text-sm text-gray-300">
+              🔥 This track is amazing!
+            </p>
+          </div>
+          <div className="bg-[#121821] p-3 rounded-xl">
+            <p className="text-sm text-gray-300">
+              I’m minting this one 💎
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

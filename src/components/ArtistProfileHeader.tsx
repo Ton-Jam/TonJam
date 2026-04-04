@@ -7,39 +7,52 @@ import ArtistVerification from './ArtistVerification';
 
 interface ArtistProfileHeaderProps {
   artist: Artist;
+  onTip: () => void;
 }
 
-const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist }) => {
+const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip }) => {
   return (
     <motion.div 
-      whileHover={{ scale: 1.02 }}
-      whileFocus={{ scale: 1.02 }}
-      className="flex flex-col md:flex-row items-center md:items-end gap-6 cursor-default"
-      tabIndex={0}
+      className="flex flex-col md:flex-row items-center md:items-end gap-6 cursor-default w-full"
     >
       {/* Profile Picture */}
-      <div className="relative">
-        <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-background shadow-xl" alt={artist.name} />
+      <div className="relative -mt-20 md:-mt-24">
+        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-background shadow-2xl bg-muted">
+          <img 
+            src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
+            className="w-full h-full object-cover" 
+            alt={artist.name} 
+          />
+        </div>
         {artist.verified && (
-          <div className="absolute bottom-2 right-2 z-10">
-            <CheckCircle2 className="w-8 h-8 text-blue-500 fill-background" />
+          <div className="absolute bottom-2 right-2 z-10 bg-background rounded-full p-1 shadow-lg">
+            <CheckCircle2 className="w-6 h-6 md:w-8 md:h-8 text-orange-500 fill-current" />
           </div>
         )}
       </div>
       
-      <div className="flex flex-col items-center md:items-start text-center md:text-left">
-        <div className="flex items-center gap-3 mb-2 flex-wrap justify-center md:justify-start">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground leading-none">
+      <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
+        <div className="flex flex-col gap-1 mb-4">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
             {artist.name}
           </h1>
-          {artist.handle && (
-            <span className="text-blue-500 font-bold text-[10px] md:text-xs uppercase tracking-[0.4em] bg-blue-500/10 px-3 py-1.5 rounded-full whitespace-nowrap">
-              {artist.handle}
+          {artist.username && (
+            <span className="text-muted-foreground font-medium text-sm md:text-base">
+              @{artist.username.replace('@', '')}
             </span>
           )}
-          <ArtistVerification artist={artist} />
         </div>
-        <p className="text-muted-foreground font-medium text-sm"> {artist.followers.toLocaleString()} Monthly Listeners </p>
+        
+        <div className="flex items-center gap-6 mb-4">
+          <div className="flex flex-col items-center md:items-start">
+            <span className="text-xl font-bold text-foreground">{(artist.followers || 0).toLocaleString()}</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Followers</span>
+          </div>
+          <div className="flex flex-col items-center md:items-start border-l border-border pl-6">
+            <span className="text-xl font-bold text-foreground">{(artist.playCount || 0).toLocaleString()}</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Total Plays</span>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UserPen, X, Twitter, Send, Music, Globe, Instagram, Image as ImageIcon, Upload, Loader2 } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
-import { uploadToIPFS } from '@/services/pinataService';
+import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
@@ -42,13 +42,14 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
       
       setIsUploading(true);
       try {
-        addNotification("Uploading banner to IPFS...", "info");
-        const { ipfsUrl } = await uploadToIPFS(file);
-        setBannerUrl(ipfsUrl);
-        addNotification("Banner uploaded to IPFS.", "success");
+        addNotification("Adding banner image...", "info");
+        const storagePath = `profiles/${artist.uid}/banner.png`;
+        const { downloadUrl } = await uploadFile(file, storagePath);
+        setBannerUrl(downloadUrl);
+        addNotification("Banner image added successfully", "success");
       } catch (error: any) {
         console.error("Banner upload failed:", error);
-        addNotification("Failed to upload banner to IPFS.", "error");
+        addNotification("Failed to upload banner to storage.", "error");
       } finally {
         setIsUploading(false);
       }
@@ -67,13 +68,14 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
       
       setIsAvatarUploading(true);
       try {
-        addNotification("Uploading avatar to IPFS...", "info");
-        const { ipfsUrl } = await uploadToIPFS(file);
-        setAvatarUrl(ipfsUrl);
-        addNotification("Avatar uploaded to IPFS.", "success");
+        addNotification("Adding profile image...", "info");
+        const storagePath = `profiles/${artist.uid}/avatar.png`;
+        const { downloadUrl } = await uploadFile(file, storagePath);
+        setAvatarUrl(downloadUrl);
+        addNotification("Profile image added successfully", "success");
       } catch (error: any) {
         console.error("Avatar upload failed:", error);
-        addNotification("Failed to upload avatar to IPFS.", "error");
+        addNotification("Failed to upload avatar to storage.", "error");
       } finally {
         setIsAvatarUploading(false);
       }
@@ -85,7 +87,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
     
     try {
       // Update local state
-      setArtists(prev => prev.map(a => a.id === artist.id ? {
+      setArtists(prev => prev.map(a => a.uid === artist.uid ? {
         ...a,
         name,
         bio,
@@ -96,7 +98,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
 
       // Persist to Firebase if it's the current user
       const user = auth.currentUser;
-      if (user && user.uid === artist.id) {
+      if (user && user.uid === artist.uid) {
         const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, cleanUpdateData({
           name,
@@ -107,10 +109,10 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         }));
       }
 
-      addNotification("Neural profile updated successfully.", "success");
+      addNotification("Profile updated successfully.", "success");
       onClose();
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${artist.id}`);
+      handleFirestoreError(error, OperationType.UPDATE, `users/${artist.uid}`);
     }
   };
 
@@ -140,7 +142,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Profile Banner</label>
               <div className="relative w-full h-48 rounded-[10px] overflow-hidden group bg-muted/50">
-                <img src={bannerUrl || getPlaceholderImage(`banner-${artist.id}`, 1500, 500)} alt="Banner Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
+                <img src={bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1500, 500)} alt="Banner Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
                     type="button"
@@ -167,7 +169,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Avatar</label>
               <div className="relative w-24 h-24 rounded-full overflow-hidden group bg-muted/50">
-                <img src={avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} alt="Avatar Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
+                <img src={avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt="Avatar Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
                     type="button"

@@ -9,6 +9,7 @@ export interface TokenGating {
 
 export interface Track {
   id: string;
+  songId: string;
   title: string;
   artist: string;
   artistId: string;
@@ -153,9 +154,9 @@ export interface Collaboration {
 }
 
 export interface Artist {
-  id: string;
+  uid: string;
   name: string;
-  handle?: string;
+  username?: string;
   walletAddress?: string;
   avatarUrl: string;
   followers: number;
@@ -186,12 +187,15 @@ export interface Artist {
   events?: Event[];
   collaborations?: Collaboration[];
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
+  playCount?: number;
+  location?: string;
 }
 
 export interface Comment {
   id: string;
   userId: string;
   userName: string;
+  username?: string;
   userAvatar: string;
   content: string;
   timestamp: string;
@@ -205,7 +209,7 @@ export interface Post {
   id: string;
   userId: string;
   userName: string;
-  userHandle?: string;
+  username?: string;
   userAvatar: string;
   isVerified?: boolean;
   content: string;
@@ -253,9 +257,9 @@ export interface Playlist {
 }
 
 export interface UserProfile {
-  id: string;
+  uid: string;
   name: string;
-  handle: string;
+  username: string;
   avatar: string;
   bannerUrl?: string;
   bio?: string;
@@ -292,6 +296,16 @@ export interface UserProfile {
   createdAt?: string;
   role?: 'artist' | 'collector' | 'admin';
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
+  isVerified?: boolean;
+}
+
+export interface User {
+  uid: string;
+  username: string;
+  name: string;
+  avatar?: string;
+  verified?: boolean;
+  followers: number;
 }
 
 export interface Transaction {

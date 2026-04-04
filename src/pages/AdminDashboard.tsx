@@ -326,7 +326,7 @@ const AdminDashboard: React.FC = () => {
                       </td>
                       <td className="py-4">
                         <span className={`text-[7px] font-bold uppercase px-4 py-4 rounded-[4px] ${tx.type === 'stream' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                          {tx.type.replace('_', ' ')}
+                          {(tx.type || 'transaction').replace('_', ' ')}
                         </span>
                       </td>
                       <td className="py-4">
@@ -336,7 +336,7 @@ const AdminDashboard: React.FC = () => {
                       <td className="py-4 text-[9px] font-mono text-amber-500">+{tx.platformFee}</td>
                       <td className="py-4 text-[9px] font-mono text-green-400">+{tx.artistShare}</td>
                       <td className="py-4">
-                        <p className="text-[7px] font-mono text-muted-foreground">{tx.recipientAddress.slice(0, 6)}...{tx.recipientAddress.slice(-4)}</p>
+                        <p className="text-[7px] font-mono text-muted-foreground">{tx.recipientAddress ? `${tx.recipientAddress.slice(0, 6)}...${tx.recipientAddress.slice(-4)}` : 'Unknown'}</p>
                       </td>
                       <td className="py-4 text-right">
                         <button className="p-4 bg-muted/50 rounded-[4px] text-muted-foreground/50 hover:text-blue-400 transition-all">

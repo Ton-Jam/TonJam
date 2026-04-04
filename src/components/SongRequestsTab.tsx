@@ -41,7 +41,7 @@ const SongRequestsTab: React.FC<SongRequestsTabProps> = ({ artistId, isOwnProfil
       const request: SongRequest = {
         id: `req_${Date.now()}`,
         artistId,
-        requesterId: userProfile.id,
+        requesterId: userProfile.uid,
         requesterName: userProfile.name,
         songTitle: newRequest.title,
         description: newRequest.description,
@@ -175,7 +175,7 @@ const SongRequestsTab: React.FC<SongRequestsTabProps> = ({ artistId, isOwnProfil
                     </button>
                   )}
 
-                  {!isOwnProfile && request.status === 'fulfilled' && request.requesterId === userProfile.id && !request.hasTipped && (
+                  {!isOwnProfile && request.status === 'fulfilled' && request.requesterId === userProfile.uid && !request.hasTipped && (
                     <button 
                       onClick={() => handleTip(request.id, request.tipAmount)}
                       className="w-full sm:w-auto px-4 py-2 bg-purple-500/20 text-purple-500 hover:bg-purple-500/30 rounded-[6px] text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"

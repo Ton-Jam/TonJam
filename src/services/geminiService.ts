@@ -144,5 +144,5 @@ export const analyzeRelatedArtists = async (artistName: string, allArtists: Arti
 };
 
 export const findRelatedArtists = async (artist: Artist, tracks: Track[], allArtists: Artist[]) => {
-  return analyzeRelatedArtists(artist.name, allArtists).then(artists => artists.map(a => a.id));
+  return analyzeRelatedArtists(artist.name, allArtists).then(artists => artists.map(a => a.uid));
 };

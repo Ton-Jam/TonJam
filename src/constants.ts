@@ -20,6 +20,7 @@ export const MOODS = [
 export const MOCK_TRACKS: Track[] = [
   { 
     id: '1', 
+    songId: 'song-1',
     title: 'Solar Pulse', 
     artist: 'Neon Voyager', 
     artistId: 'a1', 
@@ -66,6 +67,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '2', 
+    songId: 'song-2',
     title: 'Cyber Drift', 
     artist: 'Byte Beat', 
     artistId: 'a2', 
@@ -88,6 +90,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '3', 
+    songId: 'song-3',
     title: 'Deep Horizon', 
     artist: 'Echo Phase', 
     artistId: 'a3', 
@@ -111,6 +114,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '4', 
+    songId: 'song-4',
     title: 'Velvet Sky', 
     artist: 'Luna Ray', 
     artistId: 'a4', 
@@ -131,6 +135,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '5', 
+    songId: 'song-5',
     title: 'Neon Nights', 
     artist: 'City Ghost', 
     artistId: 'a5', 
@@ -152,6 +157,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '6', 
+    songId: 'song-6',
     title: 'Prism Shift', 
     artist: 'Prism Core', 
     artistId: 'a6', 
@@ -173,6 +179,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '7', 
+    songId: 'song-7',
     title: 'Midnight Drive', 
     artist: 'Neon Voyager', 
     artistId: 'a1', 
@@ -190,6 +197,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '8', 
+    songId: 'song-8',
     title: 'Ocean Breeze', 
     artist: 'Luna Ray', 
     artistId: 'a4', 
@@ -208,6 +216,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '9', 
+    songId: 'song-9',
     title: 'Glitch City', 
     artist: 'Byte Beat', 
     artistId: 'a2', 
@@ -225,6 +234,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '10', 
+    songId: 'song-10',
     title: 'Static Void', 
     artist: 'Echo Phase', 
     artistId: 'a3', 
@@ -243,6 +253,7 @@ Everything is clear in the neon light`
   },
   { 
     id: '11', 
+    songId: 'song-11',
     title: 'Exclusive Echoes', 
     artist: 'Neon Voyager', 
     artistId: 'a1', 
@@ -267,15 +278,19 @@ Everything is clear in the neon light`
   },
 ];
 
-import { Zap, Moon, Waves, Sparkles, Factory, Coffee } from 'lucide-react';
+import { Zap, Moon, Waves, Sparkles, Factory, Coffee, Headphones, Guitar, Music, Piano } from 'lucide-react';
 
 export const GENRES = [
   { id: 'electronic', name: 'Electronic', icon: Zap, color: 'from-blue-500 to-cyan-500' },
-  { id: 'synthwave', name: 'Synthwave', icon: Moon, color: 'from-pink-500 to-purple-500' },
-  { id: 'ambient', name: 'Ambient', icon: Waves, color: 'from-emerald-500 to-teal-500' },
-  { id: 'pop', name: 'Pop', icon: Sparkles, color: 'from-yellow-400 to-orange-500' },
-  { id: 'techno', name: 'Techno', icon: Factory, color: 'from-red-500 to-rose-600' },
-  { id: 'lofi', name: 'Lo-Fi', icon: Coffee, color: 'from-stone-500 to-neutral-600' },
+  { id: 'synthwave', name: 'Synthwave', icon: Moon, color: 'from-purple-500 to-pink-500' },
+  { id: 'ambient', name: 'Ambient', icon: Waves, color: 'from-teal-500 to-emerald-500' },
+  { id: 'pop', name: 'Pop', icon: Sparkles, color: 'from-rose-500 to-orange-500' },
+  { id: 'techno', name: 'Techno', icon: Factory, color: 'from-indigo-500 to-purple-500' },
+  { id: 'lofi', name: 'Lo-Fi', icon: Coffee, color: 'from-amber-500 to-yellow-500' },
+  { id: 'hiphop', name: 'Hip Hop', icon: Headphones, color: 'from-red-500 to-rose-500' },
+  { id: 'rock', name: 'Rock', icon: Guitar, color: 'from-slate-600 to-slate-800' },
+  { id: 'jazz', name: 'Jazz', icon: Music, color: 'from-fuchsia-500 to-pink-500' },
+  { id: 'classical', name: 'Classical', icon: Piano, color: 'from-sky-500 to-blue-500' },
 ];
 
 export const CURATED_PLAYLISTS: Playlist[] = [
@@ -309,9 +324,9 @@ export const CURATED_PLAYLISTS: Playlist[] = [
 ];
 
 export const MOCK_USER: UserProfile = {
-  id: 'u1',
+  uid: 'u1',
   name: 'CryptoPioneer',
-  handle: '@pioneer_ton',
+  username: '@pioneer_ton',
   avatar: 'https://image.pollinations.ai/prompt/user%20avatar%20CryptoPioneer?width=200&height=200&nologo=true',
   bannerUrl: 'https://image.pollinations.ai/prompt/user%20profile%20banner%20abstract%20digital%20art?width=1200&height=400&nologo=true',
   bio: 'Exploring the intersection of TON blockchain and underground electronic beats. Collector of rare synthwave NFTs.',
@@ -476,9 +491,9 @@ export const MOCK_NFTS: NFTItem[] = [
 
 export const MOCK_ARTISTS: Artist[] = [
   { 
-    id: 'a1', 
-    name: 'Neon Voyager', 
-    handle: '@neon_voyager',
+    uid: 'a1', 
+    name: 'Cosmic Echo', 
+    username: '@neon_voyager',
     walletAddress: 'UQCc_NeonVoyager_x9y1_v8s2_m5n6_z2w3',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Neon%20Voyager?width=200&height=200&nologo=true', 
     followers: 12400, 
@@ -503,9 +518,9 @@ export const MOCK_ARTISTS: Artist[] = [
     ]
   },
   { 
-    id: 'a2', 
+    uid: 'a2', 
     name: 'Byte Beat', 
-    handle: '@byte_beat',
+    username: '@byte_beat',
     walletAddress: 'UQByteBeat_n7m2_k9p4_j8h3_f5g6',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Byte%20Beat?width=200&height=200&nologo=true', 
     followers: 8900, 
@@ -530,9 +545,9 @@ export const MOCK_ARTISTS: Artist[] = [
     ]
   },
   { 
-    id: 'a3', 
+    uid: 'a3', 
     name: 'Echo Phase', 
-    handle: '@echo_phase',
+    username: '@echo_phase',
     walletAddress: 'UQEchoPhase_v8s1_m5n6_k9p4_j8h3',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Echo%20Phase?width=200&height=200&nologo=true', 
     followers: 5600, 
@@ -549,9 +564,9 @@ export const MOCK_ARTISTS: Artist[] = [
     earnings: { streaming: 2.1, nftSales: 8.5, total: 10.6 }
   },
   { 
-    id: 'a4', 
+    uid: 'a4', 
     name: 'Luna Ray', 
-    handle: '@lunaray',
+    username: '@lunaray',
     walletAddress: 'UQLunaRay_p3q9_r7t8_w2x4_b1c2',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Luna%20Ray?width=200&height=200&nologo=true', 
     followers: 15200, 
@@ -568,9 +583,9 @@ export const MOCK_ARTISTS: Artist[] = [
     earnings: { streaming: 18.5, nftSales: 32.1, total: 50.6 }
   },
   { 
-    id: 'a5', 
+    uid: 'a5', 
     name: 'City Ghost', 
-    handle: '@city_ghost',
+    username: '@city_ghost',
     walletAddress: 'UQCityGhost_w2x4_b1c2_d5f6_g7h8',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20City%20Ghost?width=200&height=200&nologo=true', 
     followers: 4300, 
@@ -587,9 +602,9 @@ export const MOCK_ARTISTS: Artist[] = [
     earnings: { streaming: 1.2, nftSales: 4.3, total: 5.5 }
   },
   { 
-    id: 'a6', 
+    uid: 'a6', 
     name: 'Prism Core', 
-    handle: '@prism_core',
+    username: '@prism_core',
     walletAddress: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2',
     avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Prism%20Core?width=200&height=200&nologo=true', 
     followers: 7800, 
@@ -669,7 +684,7 @@ export const MOCK_POSTS: Post[] = [
     isLiked: true,
     isReposted: false,
     comments: 2, 
-    timestamp: '2h ago',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
     commentList: [
       {
         id: 'c1',
@@ -677,7 +692,7 @@ export const MOCK_POSTS: Post[] = [
         userName: 'Sarah Jenkins',
         userAvatar: 'https://image.pollinations.ai/prompt/user%20avatar%20Sarah%20Jenkins?width=100&height=100&nologo=true',
         content: 'This is fire! 🔥',
-        timestamp: '1h ago',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 1).toISOString(),
         likes: 12,
         reactions: { '🔥': 5 },
         userReactions: ['🔥']
@@ -688,7 +703,7 @@ export const MOCK_POSTS: Post[] = [
         userName: 'Neon Voyager',
         userAvatar: 'https://image.pollinations.ai/prompt/user%20avatar%20Neon%20Voyager?width=200&height=200&nologo=true',
         content: 'Great work on the production here.',
-        timestamp: '30m ago',
+        timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
         likes: 8,
         reactions: { '🚀': 3 },
         userReactions: []
@@ -707,7 +722,7 @@ export const MOCK_POSTS: Post[] = [
     isLiked: false,
     isReposted: true,
     comments: 1, 
-    timestamp: '4h ago',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
     commentList: [
       {
         id: 'c3',
@@ -715,7 +730,7 @@ export const MOCK_POSTS: Post[] = [
         userName: 'CryptoPioneer',
         userAvatar: 'https://image.pollinations.ai/prompt/user%20avatar%20CryptoPioneer?width=200&height=200&nologo=true',
         content: 'Nice grab! That one is a classic.',
-        timestamp: '2h ago',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
         likes: 4
       }
     ]
@@ -730,7 +745,7 @@ export const MOCK_POSTS: Post[] = [
     likes: 892,
     reposts: 145,
     comments: 34,
-    timestamp: '8h ago'
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString()
   },
   {
     id: 'p4',
@@ -741,16 +756,16 @@ export const MOCK_POSTS: Post[] = [
     likes: 45,
     reposts: 5,
     comments: 3,
-    timestamp: '12h ago'
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString()
   }
 ];
 
 export const MOCK_USERS: UserProfile[] = [
   MOCK_USER,
   {
-    id: 'u2',
+    uid: 'u2',
     name: 'Sarah Jenkins',
-    handle: '@sarahj',
+    username: '@sarahj',
     avatar: 'https://image.pollinations.ai/prompt/user%20avatar%20Sarah%20Jenkins?width=100&height=100&nologo=true',
     bannerUrl: 'https://image.pollinations.ai/prompt/user%20profile%20banner%20digital%20art?width=1200&height=400&nologo=true',
     bio: 'Digital art enthusiast and music lover.',
@@ -761,9 +776,9 @@ export const MOCK_USERS: UserProfile[] = [
     friends: ['u1']
   },
   {
-    id: 'u3',
+    uid: 'u3',
     name: 'Alex Rivera',
-    handle: '@arivera',
+    username: '@arivera',
     avatar: 'https://image.pollinations.ai/prompt/user%20avatar%20Alex%20Rivera?width=100&height=100&nologo=true',
     bannerUrl: 'https://image.pollinations.ai/prompt/user%20profile%20banner%20future%20sound?width=1200&height=400&nologo=true',
     bio: 'Creating the future of sound.',

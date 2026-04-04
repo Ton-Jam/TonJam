@@ -27,7 +27,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
       // Update user profile with mock data
       const updates: any = {};
       if (platform === 'x') {
-        updates.socials = { ...userProfile.socials, x: `https://x.com/${userProfile.handle}` };
+        updates.socials = { ...userProfile.socials, x: `https://x.com/${userProfile.username}` };
       } else if (platform === 'spotify') {
         updates.socials = { ...userProfile.socials, spotify: `https://open.spotify.com/artist/mock` };
       } else if (platform === 'wallet') {

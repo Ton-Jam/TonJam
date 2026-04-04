@@ -16,17 +16,17 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser, playTrack, currentTrack, isPlaying, togglePlay } = useAudio();
   const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
-  const isFollowing = followedUserIds.includes(artist.id);
+  const isFollowing = followedUserIds.includes(artist.uid);
 
   const artistTracks = useMemo(() => {
     return MOCK_TRACKS
-      .filter(t => t.artistId === artist.id || t.artist === artist.name)
+      .filter(t => t.artistId === artist.uid || t.artist === artist.name)
       .sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
   }, [artist]);
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleFollowUser(artist.id);
+    toggleFollowUser(artist.uid);
   };
 
   const handlePlayTrack = (track: Track) => {
@@ -39,7 +39,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
 
   const handleViewFullProfile = () => {
     onClose();
-    navigate(`/artist/${artist.id}`);
+    navigate(`/artist/${artist.uid}`);
   };
 
   return (
@@ -52,7 +52,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
         <div className="relative h-48 sm:h-64">
           <div className="absolute inset-0">
             <img 
-              src={artist.bannerUrl || artist.avatarUrl || getPlaceholderImage(`artist-banner-${artist.id}`)} 
+              src={artist.bannerUrl || artist.avatarUrl || getPlaceholderImage(`artist-banner-${artist.uid}`)} 
               alt={artist.name} 
               className="w-full h-full object-cover opacity-60"
             />
@@ -69,7 +69,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
           <div className="absolute bottom-0 left-0 right-0 p-2 flex items-end gap-2">
             <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden shrink-0">
               <img 
-                src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.id}`)} 
+                src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
                 alt={artist.name} 
                 className="w-full h-full object-cover"
               />

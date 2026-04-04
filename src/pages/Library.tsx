@@ -2,362 +2,242 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
-  Sparkles, 
-  Antenna, 
-  Music2, 
-  Disc, 
-  Users, 
-  History, 
-  Zap, 
-  ShieldCheck,
-  LayoutGrid,
-  List,
   Search,
-  ArrowUpRight,
-  X,
-  SearchIcon
+  List,
+  LayoutGrid,
+  Heart,
+  Music2,
+  Users,
+  Disc,
+  History,
+  Zap,
+  ArrowUpDown,
+  MoreHorizontal,
+  Play
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
-import { MOCK_TRACKS, MOCK_ARTISTS, APP_LOGO } from '@/constants';
-import TrackCard from '@/components/TrackCard';
-import NFTCard from '@/components/NFTCard';
-import PlaylistListItem from '@/components/PlaylistListItem';
-import ArtistListItem from '@/components/ArtistListItem';
-import { ButtonGroupInput } from '@/components/ButtonGroupInput';
+import { MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { motion, AnimatePresence } from 'motion/react';
+import { getPlaceholderImage } from '@/lib/utils';
+
+type LibraryFilter = 'all' | 'playlists' | 'artists' | 'albums' | 'nfts';
+type SortOption = 'recents' | 'recently-added' | 'alphabetical';
 
 const Library: React.FC = () => {
   const navigate = useNavigate();
   const { 
     playlists, 
-    createRecommendedPlaylist, 
-    recentlyPlayed, 
-    clearRecentlyPlayed, 
     likedTrackIds, 
     followedUserIds, 
     userNFTs, 
     allNFTs, 
     userTracks, 
     userProfile, 
-    artists, 
+    artists,
     setIsCreatePlaylistModalOpen,
-    searchQuery
+    recentlyPlayed
   } = useAudio();
 
-  const [activeTab, setActiveTab] = useState<'collection' | 'playlists' | 'activity'>('collection');
+  const [filter, setFilter] = useState<LibraryFilter>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState<SortOption>('recents');
 
-  const myCollection = useMemo(() => {
-    const base = allNFTs.filter(nft => 
-      (nft.owner === userProfile.walletAddress) || 
-      (nft.owner === userProfile.name) ||
-      userNFTs.some(un => un.id === nft.id)
+  // Data processing
+  const likedTracksCount = likedTrackIds.length;
+
+  const libraryItems = useMemo(() => {
+    let items: any[] = [];
+
+    if (filter === 'all' || filter === 'playlists') {
+      items = [...items, ...playlists.map(p => ({ ...p, type: 'playlist' }))];
+    }
+
+    if (filter === 'all' || filter === 'artists') {
+      const followedArtists = artists.filter(a => followedUserIds.includes(a.uid));
+      items = [...items, ...followedArtists.map(a => ({ ...a, type: 'artist' }))];
+    }
+
+    if (filter === 'all' || filter === 'nfts') {
+      const myNFTs = allNFTs.filter(nft => 
+        (nft.owner === userProfile.walletAddress) || 
+        (nft.owner === userProfile.name) ||
+        userNFTs.some(un => un.id === nft.id)
+      );
+      items = [...items, ...myNFTs.map(n => ({ ...n, type: 'nft' }))];
+    }
+
+    // Filter by search query (using global searchQuery if needed, but here we'll just show all items)
+    // The user specifically asked to remove the search bar from the library screen
+
+    // Sort items
+    if (sortBy === 'alphabetical') {
+      items.sort((a, b) => (a.title || a.name || '').localeCompare(b.title || b.name || ''));
+    } else if (sortBy === 'recently-added') {
+      items.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    }
+    // 'recents' would ideally use a separate history, but we'll use createdAt for now
+
+    return items;
+  }, [filter, playlists, artists, followedUserIds, allNFTs, userProfile, userNFTs, sortBy]);
+
+  const renderLibraryItem = (item: any) => {
+    const isArtist = item.type === 'artist';
+    const title = item.title || item.name;
+    const subtitle = item.type === 'artist' ? 'Artist' : 
+                    item.type === 'playlist' ? `Playlist • ${item.creator || 'You'}` :
+                    item.type === 'nft' ? `NFT • ${item.artist}` : 'Track';
+    
+    const imageUrl = item.coverUrl || item.avatarUrl || item.imageUrl || getPlaceholderImage(title);
+
+    if (viewMode === 'list') {
+      return (
+        <motion.div
+          layout
+          key={`${item.type}-${item.id || item.uid}`}
+          onClick={() => navigate(item.type === 'artist' ? `/artist/${item.uid}` : item.type === 'playlist' ? `/playlist/${item.id}` : `/nft/${item.id}`)}
+          className="flex items-center gap-3 p-2 rounded-md hover:bg-white/10 transition-colors cursor-pointer group"
+        >
+          <div className={`relative w-12 h-12 flex-shrink-0 overflow-hidden ${isArtist ? 'rounded-full' : 'rounded-md'}`}>
+            <img src={imageUrl} alt={title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Play className="w-5 h-5 text-white fill-white" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm font-medium text-foreground truncate">{title}</h4>
+            <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+          </div>
+        </motion.div>
+      );
+    }
+
+    return (
+      <motion.div
+        layout
+        key={`${item.type}-${item.id || item.uid}`}
+        onClick={() => navigate(item.type === 'artist' ? `/artist/${item.uid}` : item.type === 'playlist' ? `/playlist/${item.id}` : `/nft/${item.id}`)}
+        className="p-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer group flex flex-col gap-3"
+      >
+        <div className={`relative aspect-square w-full overflow-hidden shadow-lg ${isArtist ? 'rounded-full' : 'rounded-xl'}`}>
+          <img src={imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+          <div className="absolute bottom-2 right-2 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all shadow-xl">
+            <Play className="w-5 h-5 text-white fill-white ml-1" />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <h4 className="text-sm font-bold text-foreground truncate">{title}</h4>
+          <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+        </div>
+      </motion.div>
     );
-    if (!searchQuery) return base;
-    const query = searchQuery.toLowerCase();
-    return base.filter(nft => 
-      nft.title.toLowerCase().includes(query) || 
-      nft.artist?.toLowerCase().includes(query)
-    );
-  }, [allNFTs, userProfile, userNFTs, searchQuery]);
-
-  const likedTracks = useMemo(() => {
-    const allTracks = [...userTracks, ...MOCK_TRACKS];
-    const base = allTracks.filter(t => likedTrackIds.includes(t.id));
-    if (!searchQuery) return base;
-    const query = searchQuery.toLowerCase();
-    return base.filter(t => 
-      t.title.toLowerCase().includes(query) || 
-      t.artist.toLowerCase().includes(query)
-    );
-  }, [likedTrackIds, userTracks, searchQuery]);
-
-  const followedArtists = useMemo(() => {
-    const base = artists.filter(a => followedUserIds.includes(a.id));
-    if (!searchQuery) return base;
-    const query = searchQuery.toLowerCase();
-    return base.filter(a => a.name.toLowerCase().includes(query));
-  }, [followedUserIds, artists, searchQuery]);
-
-  const filteredPlaylists = useMemo(() => {
-    if (!searchQuery) return playlists;
-    const query = searchQuery.toLowerCase();
-    return playlists.filter(p => 
-      p.title.toLowerCase().includes(query) || 
-      (p.description && p.description.toLowerCase().includes(query))
-    );
-  }, [playlists, searchQuery]);
-
-  const filteredRecentlyPlayed = useMemo(() => {
-    if (!searchQuery) return recentlyPlayed;
-    const query = searchQuery.toLowerCase();
-    return recentlyPlayed.filter(t => 
-      t.title.toLowerCase().includes(query) || 
-      t.artist.toLowerCase().includes(query)
-    );
-  }, [recentlyPlayed, searchQuery]);
-
-  const stats = [
-    { label: 'NFTs', value: likedTracks.length, icon: Music2 },
-    { label: 'Artifacts', value: myCollection.length, icon: Zap },
-    { label: 'Artists', value: followedArtists.length, icon: Users },
-    { label: 'Playlists', value: playlists.length, icon: List },
-  ];
+  };
 
   return (
-    <div className="min-h-screen pb-4 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/5 blur-[100px] rounded-full" />
+    <div className="min-h-screen bg-background text-foreground pb-20">
+      {/* Spotify-style Header */}
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md px-4 py-4 border-b border-white/5">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+              <span className="text-xs font-bold">{userProfile.name?.charAt(0).toUpperCase()}</span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">Your Library</h1>
+          </div>
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+          {(['all', 'playlists', 'artists', 'nfts'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                filter === f 
+                  ? 'bg-white text-black' 
+                  : 'bg-white/10 text-white hover:bg-white/20'
+              }`}
+            >
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-4">
-        {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 bg-gradient-to-b from-blue-900/20 to-background p-4 rounded-3xl mt-4">
-          <div className="space-y-4">
-            <h1 className="text-[32px] md:text-[56px] font-black tracking-tighter uppercase text-white leading-none">
-              Library
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-2 md:gap-4">
-            <button 
-              onClick={() => setIsCreatePlaylistModalOpen(true)}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 md:gap-4 px-3 md:px-4 py-3 md:py-4 bg-blue-600 text-white rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
-            >
-              <Plus className="h-3 w-3 md:h-4 md:h-4" />
-              New Playlist
-            </button>
-            <button 
-              onClick={createRecommendedPlaylist}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 md:gap-4 px-3 md:px-4 py-3 md:py-4 bg-white text-black rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest hover:bg-neutral-100 transition-all active:scale-95 whitespace-nowrap"
-            >
-              <Sparkles className="h-3 w-3 md:h-4 md:h-4" />
-              AI Generation
-            </button>
-          </div>
-        </header>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          {stats.map((stat, idx) => (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              key={stat.label} 
-              className="p-4 rounded-2xl bg-muted/50 backdrop-blur-xl group hover:bg-foreground/[0.08] transition-all"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <stat.icon className="h-5 w-5 text-muted-foreground/50 group-hover:text-blue-500 transition-colors" />
-                <ArrowUpRight className="h-3 w-3 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-all" />
-              </div>
-              <p className="text-[20px] font-black text-foreground tracking-tighter mb-4">{stat.value}</p>
-              <p className="text-[9px] font-bold text-foreground/30 uppercase tracking-widest">{stat.label}</p>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex gap-4 mb-4 overflow-x-auto no-scrollbar pb-4">
-          {(['collection', 'playlists', 'activity'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-[7px] py-[7px] rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${activeTab === tab ? 'bg-blue-500 text-white border-blue-500 shadow-lg active-pill' : 'bg-white dark:bg-muted/50 text-blue-500 dark:text-neutral-500 border-silver-300 dark:border-border hover:text-blue-600 dark:hover:text-neutral-400 inactive-pill'}`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            {activeTab === 'collection' && (
-              <div className="space-y-4">
-                {/* NFT Artifacts */}
-                <section className="p-4 rounded-3xl bg-blue-500/[0.03] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <Zap className="h-4 w-4 text-blue-500" />
-                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Digital Artifacts</h3>
-                    </div>
-                    <button onClick={() => navigate('/explore/nfts?title=My Collection&filter=my_nfts')} className="text-[9px] font-bold text-muted-foreground/50 hover:text-foreground transition-colors uppercase tracking-widest">View All</button>
-                  </div>
-                  {myCollection.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 relative z-10">
-                      {myCollection.slice(0, 10).map(nft => (
-                        <NFTCard key={nft.id} nft={nft} />
-                      ))}
-                    </div>
-                  ) : (
-                    <EmptyState icon={Zap} message="No artifacts detected in vault" />
-                  )}
-                </section>
-
-                {/* Liked Tracks */}
-                <section className="p-4 rounded-3xl bg-emerald-500/[0.03] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <Music2 className="h-4 w-4 text-emerald-500" />
-                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Stored Frequencies</h3>
-                    </div>
-                    <button onClick={() => navigate('/explore/tracks?title=Favorite Tracks&filter=favorites')} className="text-[9px] font-bold text-muted-foreground/50 hover:text-foreground transition-colors uppercase tracking-widest">View All</button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-                    {likedTracks.slice(0, 10).map(track => (
-                      <TrackCard key={track.id} track={track} variant="row" />
-                    ))}
-                  </div>
-                </section>
-
-                {/* My Tracks */}
-                <section className="p-4 rounded-3xl bg-purple-500/[0.03] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <Music2 className="h-4 w-4 text-purple-500" />
-                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">My Uploaded Tracks</h3>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-                    {userTracks.slice(0, 10).map(track => (
-                      <TrackCard key={track.id} track={track} variant="row" />
-                    ))}
-                  </div>
-                </section>
-
-                {/* Recommended for You */}
-                <section className="p-4 rounded-3xl bg-yellow-500/[0.03] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <Sparkles className="h-4 w-4 text-yellow-500" />
-                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Recommended for You</h3>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-                    {MOCK_TRACKS.filter(t => !likedTrackIds.includes(t.id)).slice(0, 4).map(track => (
-                      <TrackCard key={track.id} track={track} variant="row" />
-                    ))}
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {activeTab === 'playlists' && (
-              <div className="space-y-4">
-                <section className="p-4 rounded-3xl bg-violet-600/[0.03] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <List className="h-4 w-4 text-violet-500" />
-                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Active Playlists</h3>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-4 relative z-10">
-                    {filteredPlaylists.length > 0 ? (
-                      filteredPlaylists.map(playlist => (
-                        <PlaylistListItem 
-                          key={playlist.id} 
-                          playlist={playlist} 
-                          onClick={() => navigate(`/playlist/${playlist.id}`)} 
-                        />
-                      ))
-                    ) : (
-                      <EmptyState icon={List} message={searchQuery ? "No matching playlists found" : "No active playlists"} />
-                    )}
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {activeTab === 'activity' && (
-              <div className="space-y-4">
-                {/* Recently Played */}
-                <section>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <History className="h-4 w-4 text-blue-500" />
-                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Recent Activity</h3>
-                    </div>
-                    <button onClick={clearRecentlyPlayed} className="text-[9px] font-bold text-red-500/50 hover:text-red-500 transition-colors uppercase tracking-widest">Purge History</button>
-                  </div>
-                  <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-                    {filteredRecentlyPlayed.length > 0 ? (
-                      filteredRecentlyPlayed.map(track => (
-                        <div key={track.id} className="w-48 flex-shrink-0">
-                          <TrackCard track={track} />
-                        </div>
-                      ))
-                    ) : (
-                      <div className="w-full">
-                        <EmptyState icon={History} message={searchQuery ? "No matching activity found" : "No recent activity"} />
-                      </div>
-                    )}
-                  </div>
-                </section>
-
-                {/* Followed Artists */}
-                <section className="p-4 rounded-3xl bg-orange-500/[0.03] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <Users className="h-4 w-4 text-orange-500" />
-                      <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Followed Artists</h3>
-                    </div>
-                    <button onClick={() => navigate('/explore/artists?title=Followed Artists&filter=followed')} className="text-[9px] font-bold text-muted-foreground/50 hover:text-foreground transition-colors uppercase tracking-widest">View All</button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-                    {followedArtists.map(artist => (
-                      <ArtistListItem key={artist.id} artist={artist} />
-                    ))}
-                  </div>
-                </section>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Security Footer */}
-        <footer className="mt-4 pt-4 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="px-4 py-4">
+        {/* Sort Bar */}
+        <div className="flex items-center justify-end mb-4">
           <div className="flex items-center gap-4">
-            <ShieldCheck className="h-8 w-8 text-blue-500/20" />
-            <div>
-              <p className="text-[10px] font-bold text-foreground uppercase tracking-widest mb-4">Decentralized Vault v2.4</p>
-              <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest">All assets secured by TON Blockchain NFTs</p>
-            </div>
+            <button 
+              onClick={() => setSortBy(sortBy === 'recents' ? 'alphabetical' : sortBy === 'alphabetical' ? 'recently-added' : 'recents')}
+              className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-white transition-colors"
+            >
+              <span>{sortBy === 'recents' ? 'Recents' : sortBy === 'alphabetical' ? 'Alphabetical' : 'Recently Added'}</span>
+              <ArrowUpDown className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              className="p-2 rounded-full hover:bg-white/10 transition-colors text-muted-foreground hover:text-white"
+            >
+              {viewMode === 'grid' ? <List className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
+            </button>
           </div>
-          <div className="flex gap-4">
-            <div className="text-right">
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Network Status</p>
-              <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Operational</p>
+        </div>
+
+        {/* Content Grid/List */}
+        <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2" : "flex flex-col gap-1"}>
+          {/* Special Liked Songs Card (only in grid view and when filter is 'all' or 'playlists') */}
+          {viewMode === 'grid' && (filter === 'all' || filter === 'playlists') && (
+            <motion.div
+              layout
+              onClick={() => navigate('/explore/tracks?title=Liked Songs&filter=favorites')}
+              className="col-span-2 p-5 rounded-xl bg-gradient-to-br from-indigo-700 via-purple-700 to-blue-600 flex flex-col justify-end gap-4 cursor-pointer group relative overflow-hidden h-full min-h-[160px]"
+            >
+              <div className="absolute top-4 right-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                <Heart className="w-24 h-24 fill-white text-white" />
+              </div>
+              <div className="relative z-10">
+                <h2 className="text-2xl font-bold text-white tracking-tight">Liked Songs</h2>
+                <p className="text-sm font-medium text-white/80">{likedTracksCount} songs</p>
+              </div>
+              <div className="absolute bottom-4 right-4 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all shadow-2xl">
+                <Play className="w-6 h-6 text-white fill-white ml-1" />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Liked Songs List Item */}
+          {viewMode === 'list' && (filter === 'all' || filter === 'playlists') && (
+            <motion.div
+              layout
+              onClick={() => navigate('/explore/tracks?title=Liked Songs&filter=favorites')}
+              className="flex items-center gap-3 p-2 rounded-md hover:bg-white/10 transition-colors cursor-pointer group"
+            >
+              <div className="w-12 h-12 rounded-md bg-gradient-to-br from-indigo-700 to-blue-600 flex items-center justify-center shadow-lg">
+                <Heart className="w-5 h-5 fill-white text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-medium text-foreground truncate">Liked Songs</h4>
+                <p className="text-xs text-muted-foreground truncate">Playlist • {likedTracksCount} songs</p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Library Items */}
+          <AnimatePresence>
+            {libraryItems.map(item => renderLibraryItem(item))}
+          </AnimatePresence>
+
+          {libraryItems.length === 0 && (
+            <div className="col-span-full py-20 text-center">
+              <History className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+              <h3 className="text-lg font-bold mb-2">No items found</h3>
+              <p className="text-sm text-muted-foreground">Try adjusting your filters or search query.</p>
             </div>
-            <div className="text-right">
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Last Update</p>
-              <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">Just Now</p>
-            </div>
-          </div>
-        </footer>
+          )}
+        </div>
       </div>
     </div>
   );
 };
-
-const EmptyState = ({ icon: Icon, message }: { icon: any, message: string }) => (
-  <div className="py-4 text-center flex flex-col items-center justify-center bg-foreground/[0.02] border border-dashed border-blue-500/30 rounded-3xl">
-    <Icon className="h-12 w-12 text-foreground/5 mb-4" />
-    <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">{message}</p>
-  </div>
-);
 
 export default Library;

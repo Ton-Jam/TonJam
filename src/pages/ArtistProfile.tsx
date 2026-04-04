@@ -30,14 +30,16 @@ import {
   Share2,
   Satellite,
   MapPin,
-  Clock
+  Clock,
+  MoreHorizontal,
+  MessageCircle
 } from 'lucide-react';
 
 import { MOCK_ARTISTS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_SONG_REQUESTS, TON_LOGO, TJ_COIN_ICON } from '@/constants';
-import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, cn } from '@/lib/utils';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
-import { uploadToIPFS } from '@/services/pinataService';
+import { uploadFile } from '@/services/storageService';
 import SocialFeed from '@/components/SocialFeed';
 import VerifyArtistModal from '@/components/VerifyArtistModal';
 import RoyaltyDashboard from '@/components/RoyaltyDashboard';
@@ -60,8 +62,8 @@ import ArtistVerification from '@/components/ArtistVerification';
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification, playAll, currentTrack, isPlaying, followedUserIds, toggleFollowUser, userProfile, artists, setArtists, updateNFT, allNFTs } = useAudio();
-  const [activeTab, setActiveTab] = useState<'tracks' | 'collection' | 'signals' | 'about' | 'requests' | 'management'>('tracks');
+  const { addNotification, playAll, playTrack, currentTrack, isPlaying, followedUserIds, toggleFollowUser, userProfile, artists, setArtists, updateNFT, allNFTs } = useAudio();
+  const [activeTab, setActiveTab] = useState<'tracks' | 'collection' | 'signals' | 'about' | 'collaborations' | 'requests' | 'management'>('tracks');
   const isFollowing = useMemo(() => id ? followedUserIds.includes(id) : false, [id, followedUserIds]);
   const [customBanner, setCustomBanner] = useState<string | null>(null);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -287,8 +289,8 @@ const ArtistProfile: React.FC = () => {
     }
   };
 
-  const isOwnProfile = useMemo(() => id === userProfile.id, [id, userProfile.id]);
-  const artist = useMemo(() => artists.find(a => a.id === id) || MOCK_ARTISTS.find(a => a.id === id), [id, artists]);
+  const isOwnProfile = useMemo(() => id === userProfile.uid, [id, userProfile.uid]);
+  const artist = useMemo(() => artists.find(a => a.uid === id) || MOCK_ARTISTS.find(a => a.uid === id), [id, artists]);
   const artistTracks = useMemo(() => MOCK_TRACKS.filter(t => t.artistId === id), [id]);
   const artistNFTs = useMemo(() => {
     return allNFTs.filter(nft => nft.creator === artist?.name);
@@ -332,7 +334,7 @@ const ArtistProfile: React.FC = () => {
 
   const handleSaveBio = () => {
     if (!artist) return;
-    setArtists(prev => prev.map(a => a.id === artist.id ? { ...a, bio: editedBio } : a));
+    setArtists(prev => prev.map(a => a.uid === artist.uid ? { ...a, bio: editedBio } : a));
     setIsEditingBio(false);
     addNotification("Biographical record synchronized.", "success");
   };
@@ -377,10 +379,11 @@ const ArtistProfile: React.FC = () => {
       }
       
       try {
-        addNotification("Uploading banner to IPFS...", "info");
-        const { ipfsUrl } = await uploadToIPFS(file);
-        setCustomBanner(ipfsUrl);
-        addNotification("Banner protocol updated successfully on IPFS.", "success");
+        addNotification("Adding banner image...", "info");
+        const storagePath = `profiles/${id}/banner.png`;
+        const { downloadUrl } = await uploadFile(file, storagePath);
+        setCustomBanner(downloadUrl);
+        addNotification("Banner image added successfully", "success");
       } catch (error: any) {
         console.error("Banner upload failed:", error);
         addNotification(`Banner upload failed: ${error.message}`, "error");
@@ -415,152 +418,158 @@ const ArtistProfile: React.FC = () => {
       : `theme-${artist.profileTheme}`
     : '';
 
+  const handleTip = async () => {
+    if (!tonConnectUI.connected) {
+      await tonConnectUI.openModal();
+      return;
+    }
+    if (!artist.walletAddress) {
+      addNotification("Artist does not have a wallet address set.", "error");
+      return;
+    }
+    const transaction = {
+      messages: [
+        {
+          address: artist.walletAddress,
+          amount: '1000000000', // 1 TON
+        },
+      ],
+      validUntil: Math.floor(Date.now() / 1000) + 600, // 10 minutes from now
+    };
+    try {
+      await tonConnectUI.sendTransaction(transaction);
+      addNotification(`Tip sent successfully!`, "success");
+    } catch (error) {
+      console.error(error);
+      addNotification(`Failed to send tip.`, "error");
+    }
+  };
+
   return (
-    <div className={`animate-in fade-in duration-1000 pb-4 min-h-screen font-sans ${themeClass}`}>
-      {/* 1. COMPACT CINEMATIC BANNER */}
-      <div className="relative h-[30vh] md:h-[35vh] overflow-hidden">
+    <>
+      <div className={cn("animate-in fade-in duration-1000 pb-20 min-h-screen font-sans bg-background", themeClass)}>
+      {/* 1. CINEMATIC BANNER */}
+      <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || getPlaceholderImage(`banner-${artist.id}`, 1200, 400)})` }}
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
+          style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1200, 400)})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
         
         {/* Banner Upload Trigger */}
         {isOwnProfile && (
           <div className="absolute top-6 right-6 z-40">
-            <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-background/50 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest text-foreground hover:bg-background/80 transition-all flex items-center gap-2" >
-              <Camera className="h-4 w-4" /> Edit Cover
+            <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-all shadow-lg border border-white/10" >
+              <Camera className="h-5 w-5" />
             </button>
             <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
           </div>
         )}
       </div>
 
-      {/* 2. INTEGRATED IDENTITY & ACTION HUB */}
-      <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-30">
-        <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between gap-6 pb-8">
-          <ArtistProfileHeader artist={artist} />
+      {/* 2. IDENTITY & ACTIONS */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-30">
+        <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-8 pb-10">
+          <ArtistProfileHeader artist={artist} onTip={handleTip} />
           
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+          <div className="flex items-center gap-4 pb-4">
+            {!isOwnProfile && (
+              <>
+                <button 
+                  onClick={handleFollow} 
+                  className={cn(
+                    "px-10 py-3 rounded-full font-bold text-sm transition-all shadow-lg",
+                    isFollowing 
+                      ? "bg-muted text-foreground border border-border" 
+                      : "bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20"
+                  )}
+                >
+                  {isFollowing ? 'Following' : 'Follow'}
+                </button>
+                <button 
+                  onClick={() => {
+                    navigator.share?.({ title: artist.name, url: window.location.href })
+                      .catch(() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        addNotification("Link copied", "success");
+                      });
+                  }}
+                  className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-all border border-border shadow-sm"
+                >
+                  <Share2 className="h-5 w-5" />
+                </button>
+              </>
+            )}
             {isOwnProfile && (
-              <button onClick={() => setShowEditProfileModal(true)} className="px-6 py-3 bg-muted text-foreground rounded-full font-bold text-xs uppercase tracking-widest hover:bg-muted/80 transition-all" >
+              <button onClick={() => setShowEditProfileModal(true)} className="px-8 py-3 bg-muted text-foreground rounded-full font-bold text-sm hover:bg-muted/80 transition-all border border-border shadow-sm" >
                 Edit Profile
               </button>
             )}
-            <button onClick={() => playAll(artistTracks)} className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2" >
-              <Play className="h-4 w-4 fill-current" /> Play
-            </button>
-            {!isOwnProfile && (
-              <button onClick={() => setActiveTab('requests')} className="px-6 py-3 bg-purple-600 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-purple-700 transition-all flex items-center gap-2" >
-                Request Song
-              </button>
-            )}
-            <button 
-              onClick={handleFollow} 
-              className={`px-6 py-3 rounded-full flex items-center justify-center gap-2 transition-all text-xs font-bold uppercase tracking-widest
-                ${isFollowing 
-                  ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                }
-              `}
-            >
-              {isFollowing ? 'Following' : 'Follow'}
-            </button>
           </div>
         </div>
       </div>
 
-              {/* Trending Tracks Relay */}
-      {trendingTracks.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 mt-4 animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
-          <h2 className="text-xl font-bold text-foreground mb-4">Trending</h2>
-          <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
-            {trendingTracks.map((track, idx) => (
-              <div key={`trending-${track.id}`} className="min-w-[280px] sm:min-w-[320px] group relative" >
-                <div className="p-4 rounded-[10px] transition-all bg-card flex items-center gap-4">
-                  <div className="relative w-16 h-16 flex-shrink-0 rounded-[10px] overflow-hidden shadow-lg">
-                    <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
-                    <button onClick={() => playAll([track])} className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" >
-                      <Play className="text-white h-6 w-6 fill-white" />
-                    </button>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-foreground dark:text-white truncate leading-tight mb-1">{track.title}</h3>
-                    <p className="text-xs text-muted-foreground">{(track.playCount || 0).toLocaleString()} streams</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Top Tracks Section */}
-      {topTracks.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 mt-8">
-          <h2 className="text-xl font-bold text-foreground mb-6">Popular</h2>
-          <div className="space-y-2">
-            {topTracks.map((track, idx) => (
-              <div 
-                key={`top-${track.id}`} 
-                className="group flex items-center gap-4 p-2 rounded-[8px] hover:bg-muted/50 transition-all cursor-pointer"
-                onClick={() => playAll([track])}
+      {/* 3. TABS NAVIGATION */}
+      <div className="sticky top-[var(--header-height,64px)] z-40 bg-background/95 backdrop-blur-xl border-b border-border mb-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-center gap-10 overflow-x-auto no-scrollbar">
+            {['tracks', 'collection', 'signals', 'about', 'collaborations', ...(isOwnProfile ? ['management'] : [])].map(tab => (
+              <button 
+                key={tab} 
+                onClick={() => setActiveTab(tab as any)} 
+                className={cn(
+                  "py-5 text-sm font-bold transition-all relative whitespace-nowrap uppercase tracking-widest",
+                  activeTab === tab ? "text-orange-500" : "text-muted-foreground hover:text-foreground"
+                )} 
               >
-                <span className="w-8 text-sm font-medium text-muted-foreground text-center">{idx + 1}</span>
-                <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0">
-                  <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt="" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Play className="h-4 w-4 text-white fill-white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-foreground dark:text-white truncate">{track.title}</h4>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {(track.playCount || 0).toLocaleString()}
-                </div>
-                <div className="text-sm text-muted-foreground w-16 text-right">
-                  {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
-                </div>
-              </div>
+                {tab === 'signals' ? 'Feed' : tab === 'collection' ? 'NFTs' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {activeTab === tab && (
+                  <motion.div 
+                    layoutId="activeTabArtist"
+                    className="absolute bottom-0 left-0 right-0 h-1 bg-orange-500 rounded-t-full" 
+                  />
+                )}
+              </button>
             ))}
           </div>
         </div>
-      )}
-
-      {/* Sticky Tab Navigation */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl py-4 mt-4 mb-4 w-full px-4 transition-all duration-300">
-        <div className="max-w-7xl mx-auto flex items-center justify-start gap-8 overflow-x-auto no-scrollbar">
-          {['tracks', 'collection', 'signals', 'about', ...(isOwnProfile ? ['management'] : [])].map(tab => (
-            <button 
-              key={tab} 
-              onClick={() => setActiveTab(tab as any)} 
-              className={`pb-4 text-xs font-bold uppercase tracking-widest transition-all relative whitespace-nowrap flex-shrink-0 ${activeTab === tab ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`} 
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              {activeTab === tab && <div className="absolute -bottom-4 left-0 right-0 h-0.5 bg-primary rounded-full"></div>}
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-          {/* Left: Intelligence Sidebar */}
-          <div className="lg:col-span-4 space-y-4">
-            {/* Biography */}
-            <section className="p-5 bg-card rounded-[10px] group/bio">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Origin Narrative</h3>
-                {isOwnProfile && !isEditingBio && (
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Left Sidebar: Stats & Bio */}
+          <div className="lg:col-span-4 space-y-10 order-2 lg:order-1">
+            <section className="bg-muted/30 rounded-3xl p-8 border border-border/50 backdrop-blur-sm">
+              <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-8">Artist Stats</h3>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-1">
+                  <p className="text-2xl font-black text-foreground tabular-nums">{(artist.playCount || 0).toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Plays</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-2xl font-black text-foreground tabular-nums">{(artist.monthlyListeners || 0).toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Monthly</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-2xl font-black text-foreground tabular-nums">{artist.followers.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Followers</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-2xl font-black text-foreground tabular-nums">{artistNFTs.length}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">NFTs</p>
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-muted/30 rounded-3xl p-8 border border-border/50 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Biography</h3>
+                {isOwnProfile && (
                   <button 
-                    onClick={() => {
-                      setIsEditingBio(true);
-                      setEditedBio(artist.bio || "");
-                    }}
-                    className="text-[8px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors"
+                    onClick={() => setIsEditingBio(!isEditingBio)}
+                    className="text-[10px] font-bold text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors"
                   >
-                    Edit
+                    {isEditingBio ? 'Cancel' : 'Edit'}
                   </button>
                 )}
               </div>
@@ -570,98 +579,171 @@ const ArtistProfile: React.FC = () => {
                   <textarea
                     value={editedBio}
                     onChange={(e) => setEditedBio(e.target.value)}
-                    className="w-full bg-muted/50 border border-blue-500/40 rounded-[10px] p-5 text-xs text-muted-foreground/90 leading-relaxed outline-none focus:border-blue-500/50 transition-all min-h-[120px] resize-none"
-                    placeholder="Enter artist biography..."
+                    className="w-full bg-background/50 border border-border rounded-2xl p-4 text-sm text-foreground focus:ring-2 focus:ring-orange-500/20 outline-none transition-all min-h-[150px] resize-none"
+                    placeholder="Tell your story..."
                   />
-                  <div className="flex gap-4 justify-end">
-                    <button 
-                      onClick={() => setIsEditingBio(false)}
-                      className="px-4 py-4 bg-muted/50 text-muted-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest hover:bg-muted transition-all"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      onClick={handleSaveBio}
-                      className="px-4 py-4 bg-blue-600 text-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
-                    >
-                      Save Protocol
-                    </button>
-                  </div>
+                  <button 
+                    onClick={handleSaveBio}
+                    className="w-full py-3 bg-orange-500 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                  >
+                    Save Biography
+                  </button>
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground leading-relaxed">{artist.bio || "No biographical record in neural archive."}</p>
+                <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                  {artist.bio || "No biography provided yet."}
+                </p>
               )}
             </section>
 
-            {/* Upcoming Events */}
-            {artist.events && artist.events.length > 0 && (
-              <ArtistEvents events={artist.events} />
-            )}
-
-            {/* Market Insights */}
-            {marketStats && (
-              <section className="bg-card p-5 rounded-[10px] relative">
-                <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full"></div>
-                <h3 className="text-[7px] font-bold text-amber-500/60 uppercase tracking-[0.4em] mb-4 relative z-10">Market Ledger</h3>
-                <div className="space-y-4 relative z-10">
-                  <div className="flex justify-between items-center group/stat">
-                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase group-hover/stat:text-muted-foreground transition-colors">Floor</span>
-                    <span className="text-xs font-bold text-foreground group-hover:text-amber-500 transition-colors">{marketStats.floor} TON</span>
-                  </div>
-                  <div className="flex justify-between items-center group/stat">
-                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase group-hover/stat:text-muted-foreground transition-colors">Volume</span>
-                    <span className="text-xs font-bold text-foreground group-hover:text-amber-500 transition-colors">{marketStats.volume} TON</span>
-                  </div>
-                  <div className="flex justify-between items-center group/stat">
-                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase group-hover/stat:text-muted-foreground transition-colors">Holders</span>
-                    <span className="text-xs font-bold text-foreground group-hover:text-amber-500 transition-colors">{marketStats.holders}</span>
-                  </div>
-                  <button onClick={() => navigate('/marketplace')} className="w-full py-4 bg-amber-500/10 border border-blue-500/30 rounded-[10px] text-[7px] font-bold text-amber-500 uppercase tracking-widest hover:bg-amber-500 hover:text-background transition-all mt-4 shadow-lg shadow-amber-500/5">Trade Assets</button>
-                </div>
-              </section>
-            )}
+            {/* Social Links */}
+            <section className="bg-muted/30 rounded-3xl p-8 border border-border/50 backdrop-blur-sm">
+              <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-6">Connect</h3>
+              <div className="flex flex-wrap gap-4">
+                {Object.entries(artist.socials || {}).map(([platform, url]) => (
+                  <a 
+                    key={platform}
+                    href={url as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 bg-background/50 rounded-2xl hover:bg-orange-500 hover:text-white transition-all border border-border group"
+                  >
+                    <Globe className="h-5 w-5 opacity-70 group-hover:opacity-100" />
+                  </a>
+                ))}
+              </div>
+            </section>
           </div>
 
-          {/* Right: Content Feed */}
-          <div className="lg:col-span-8">
-            <div className="min-h-[500px]">
-              {activeTab === 'tracks' && (
-                <ArtistTracksSection 
-                  artistTracks={artistTracks}
-                  isOwnProfile={isOwnProfile}
-                  playAll={playAll}
-                  featuredNFT={featuredNFT}
-                  topTracks={topTracks}
-                  trackFilter={trackFilter}
-                  setTrackFilter={setTrackFilter}
-                  artist={artist}
-                />
-              )}
+          {/* Right Content: Tabs Content */}
+          <div className="lg:col-span-8 order-1 lg:order-2 min-h-[600px]">
+            {activeTab === 'tracks' && (
+              <div className="space-y-12">
+                {/* Popular Tracks */}
+                <section>
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-xl font-black text-foreground tracking-tight">Popular Releases</h3>
+                    <button onClick={() => playAll(artistTracks)} className="flex items-center gap-2 text-xs font-bold text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors">
+                      <Play className="h-4 w-4 fill-current" /> Play All
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    {artistTracks.slice(0, 5).map((track, idx) => (
+                      <div key={track.id} className="group flex items-center gap-6 p-4 rounded-2xl hover:bg-muted/50 transition-all border border-transparent hover:border-border/50">
+                        <span className="text-xs font-black text-muted-foreground/50 w-4">{idx + 1}</span>
+                        <div className="relative w-14 h-14 rounded-xl overflow-hidden shadow-md">
+                          <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
+                          <button 
+                            onClick={() => playTrack(track)}
+                            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Play className="h-6 w-6 text-white fill-current" />
+                          </button>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-foreground truncate">{track.title}</h4>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{track.genre}</p>
+                        </div>
+                        <div className="hidden md:flex items-center gap-8 text-xs font-bold text-muted-foreground tabular-nums">
+                          <span>{(track.playCount || 0).toLocaleString()}</span>
+                          <span>{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                        </div>
+                        <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                          <MoreHorizontal className="h-5 w-5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </section>
 
-              {activeTab === 'collection' && (
-                <ArtistNFTsSection 
-                  artistNFTs={artistNFTs}
-                  isOwnProfile={isOwnProfile}
-                  onNFTAction={handleNFTAction}
-                />
-              )}
+                {/* All Tracks */}
+                <section>
+                  <h3 className="text-xl font-black text-foreground tracking-tight mb-8">All Tracks</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {artistTracks.map(track => (
+                      <TrackCard key={track.id} track={track} />
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
 
-              {activeTab === 'signals' && (
-                <ArtistActivitySection artistPosts={artistPosts} />
-              )}
+            {activeTab === 'collection' && (
+              <div className="space-y-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-black text-foreground tracking-tight">Digital Collectibles</h3>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{artistNFTs.length} Items</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {artistNFTs.map(nft => (
+                    <NFTCard key={nft.id} nft={nft} />
+                  ))}
+                </div>
+              </div>
+            )}
 
-              {activeTab === 'about' && (
-                <div className="space-y-8 animate-in fade-in duration-700">
-                  {/* Bio Section */}
-                  <section className="glass border border-blue-500/30 bg-foreground/[0.01] p-6 rounded-[12px]">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-                      <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Biography</h2>
+            {activeTab === 'signals' && (
+              <div className="max-w-2xl mx-auto space-y-8">
+                <h3 className="text-xl font-black text-foreground tracking-tight mb-8">Artist Feed</h3>
+                {artistPosts.map(post => (
+                  <div key={post.id} className="bg-muted/30 rounded-3xl p-8 border border-border/50 backdrop-blur-sm space-y-6">
+                    <div className="flex items-center gap-4">
+                      <img src={artist.avatarUrl} className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-500/20" alt="" />
+                      <div>
+                        <h4 className="text-sm font-bold text-foreground">{artist.name}</h4>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{post.timestamp}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-foreground/70 leading-relaxed font-medium">
-                      {artist.bio || "No biographical data synchronized for this architect."}
+                    <p className="text-sm leading-relaxed text-foreground/90">{post.content}</p>
+                    {post.imageUrl && (
+                      <div className="rounded-2xl overflow-hidden border border-border shadow-lg">
+                        <img src={post.imageUrl} className="w-full h-auto" alt="" />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-8 pt-4 border-t border-border/50">
+                      <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-orange-500 transition-colors">
+                        <Heart className="h-4 w-4" /> {post.likes}
+                      </button>
+                      <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-orange-500 transition-colors">
+                        <MessageCircle className="h-4 w-4" /> {post.comments}
+                      </button>
+                      <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-orange-500 transition-colors">
+                        <Share2 className="h-4 w-4" /> Share
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'about' && (
+              <div className="space-y-12">
+                <section>
+                  <h3 className="text-xl font-black text-foreground tracking-tight mb-8">About {artist.name}</h3>
+                  <div className="bg-muted/30 rounded-3xl p-10 border border-border/50 backdrop-blur-sm">
+                    <p className="text-base leading-relaxed text-muted-foreground whitespace-pre-wrap mb-10">
+                      {artist.bio || "No biography provided yet."}
                     </p>
-                  </section>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pt-10 border-t border-border/50">
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Location</p>
+                        <p className="text-sm font-bold text-foreground">{artist.location || 'Global'}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Joined</p>
+                        <p className="text-sm font-bold text-foreground">March 2024</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Genre</p>
+                        <p className="text-sm font-bold text-foreground">{artist.genre || 'Electronic'}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Verified</p>
+                        <p className="text-sm font-bold text-orange-500">Yes</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
 
                   {/* Network Stats */}
                   <section className="glass border border-blue-500/30 bg-foreground/[0.01] p-6 rounded-[12px]">
@@ -684,49 +766,53 @@ const ArtistProfile: React.FC = () => {
                     </div>
                   </section>
 
-                  {/* Events & Collaborations */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {artist.events && artist.events.length > 0 && (
-                      <section>
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
-                          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Upcoming Events</h2>
-                        </div>
-                        <div className="space-y-4">
-                          {artist.events.map(event => (
-                            <div key={event.id} className="p-4 rounded-[10px] bg-muted/50 border border-blue-500/40 flex justify-between items-center">
-                              <div>
-                                <h4 className="text-sm font-bold text-foreground">{event.title}</h4>
-                                <p className="text-[10px] text-muted-foreground">{event.date} @ {event.time} • {event.venue}</p>
-                              </div>
-                              {event.ticketUrl && (
-                                <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-[6px] text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all">Tickets</a>
-                              )}
+                  {/* Events */}
+                  {artist.events && artist.events.length > 0 && (
+                    <section>
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
+                        <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Upcoming Events</h2>
+                      </div>
+                      <div className="space-y-4">
+                        {artist.events.map(event => (
+                          <div key={event.id} className="p-4 rounded-[10px] bg-muted/50 border border-blue-500/40 flex justify-between items-center">
+                            <div>
+                              <h4 className="text-sm font-bold text-foreground">{event.title}</h4>
+                              <p className="text-[10px] text-muted-foreground">{event.date} @ {event.time} • {event.venue}</p>
                             </div>
-                          ))}
-                        </div>
-                      </section>
-                    )}
-
-                    {artist.collaborations && artist.collaborations.length > 0 && (
-                      <section>
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="w-1 h-6 bg-pink-500 rounded-full"></div>
-                          <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Collaborations</h2>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          {artist.collaborations.map(collab => (
-                            <div key={collab.id} className="p-4 rounded-[10px] bg-muted/50 border border-blue-500/40 flex flex-col items-center text-center">
-                              <img src={collab.coverUrl} alt={collab.trackTitle} className="w-12 h-12 rounded-[6px] mb-2 object-cover" />
-                              <h4 className="text-[10px] font-bold text-foreground truncate w-full">{collab.trackTitle}</h4>
-                              <p className="text-[8px] text-muted-foreground">w/ {collab.artistName}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </section>
-                    )}
-                  </div>
+                            {event.ticketUrl && (
+                              <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-[6px] text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all">Tickets</a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
                 </div>
+              )}
+
+              {activeTab === 'collaborations' && (
+                <section className="glass border border-blue-500/30 bg-foreground/[0.01] p-6 rounded-[12px] animate-in fade-in duration-700">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-1 h-6 bg-pink-500 rounded-full"></div>
+                    <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Collaborations</h2>
+                  </div>
+                  {artist.collaborations && artist.collaborations.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {artist.collaborations.map(collab => (
+                        <div key={collab.id} className="p-4 rounded-[10px] bg-muted/50 border border-blue-500/40 flex items-center gap-4">
+                          <img src={collab.coverUrl} alt={collab.trackTitle} className="w-12 h-12 rounded-[6px] object-cover" />
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-bold text-foreground truncate">{collab.trackTitle}</h4>
+                            <p className="text-xs text-muted-foreground">w/ {collab.artistName}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No collaborations found.</p>
+                  )}
+                </section>
               )}
 
 
@@ -996,7 +1082,7 @@ const ArtistProfile: React.FC = () => {
                           <div className="relative w-full h-48 rounded-[10px] overflow-hidden group border border-blue-500/40 bg-muted/50">
                             <div 
                               className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-40 transition-opacity"
-                              style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || getPlaceholderImage(`banner-${artist.id}`, 1200, 400)})` }}
+                              style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1200, 400)})` }}
                             />
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                               <button 
@@ -1223,7 +1309,7 @@ const ArtistProfile: React.FC = () => {
           onClose={() => setSelectedNftForManaging(null)} 
         />
       )}
-    </div>
+    </>
   );
 };
 

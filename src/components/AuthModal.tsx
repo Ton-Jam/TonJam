@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { X, Mail, Lock, User, Github, Chrome, ArrowRight, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Mail, Lock, User, Github, Chrome, ArrowRight, Loader2, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -23,7 +24,9 @@ interface AuthModalProps {
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle, sendPasswordReset } = useAuth();
+  const { signInWithEmail, signUpWithEmail, signInWithGoogle, sendPasswordReset, signInWithWallet } = useAuth();
+  const walletAddress = useTonAddress();
+  const wallet = useTonWallet();
 
   const {
     register,
@@ -35,13 +38,37 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     resolver: zodResolver(authSchema),
   });
 
+  useEffect(() => {
+    if (walletAddress && wallet && isOpen) {
+      handleWalletLogin(walletAddress, wallet.device.appName);
+    }
+  }, [walletAddress, wallet, isOpen]);
+
+  const handleWalletLogin = async (address: string, appName: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await signInWithWallet(address, appName);
+      if (error) throw error;
+      toast.success('Wallet Connected', {
+        description: 'Neural link established via Web3.',
+      });
+      onClose();
+    } catch (error: any) {
+      toast.error('Wallet Connection Failed', {
+        description: getErrorMessage(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getErrorMessage = (error: any) => {
     const code = error.code || error.message || '';
     if (code.includes('auth/invalid-credential')) {
-      return 'Invalid email or password. Please check your credentials and try again.';
+      return 'Incorrect email or password. Please try again or initialize a new node if you haven\'t already.';
     }
     if (code.includes('auth/user-not-found')) {
-      return 'No account found with this email. Would you like to register?';
+      return 'No account found with this email. Would you like to initialize a new node?';
     }
     if (code.includes('auth/wrong-password')) {
       return 'Incorrect password. Please try again.';
@@ -95,10 +122,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         const { error } = await signUpWithEmail(data.email, data.password, { username: data.username });
         if (error) throw error;
         toast.success('Protocol Initialized', {
-          description: 'Check your email to verify your identity.',
+          description: 'Neural link established. Welcome to TonJam.',
         });
-        setIsLogin(true);
-        reset();
+        onClose();
       }
     } catch (error: any) {
       toast.error('Authentication Failed', {
@@ -126,30 +152,30 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-background border border-border rounded-[16px] overflow-hidden shadow-2xl"
+          className="relative w-full max-w-md bg-background rounded-[24px] overflow-hidden shadow-2xl"
         >
-          {/* Hardware Header */}
-          <div className="bg-foreground/[0.02] border-b border-border/50 p-4 flex items-center justify-between">
+          {/* Header */}
+          <div className="p-6 pb-0 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-              <h2 className="text-[12px] font-bold text-foreground uppercase tracking-[0.4em]">
-                {isLogin ? 'Auth_Protocol: Login' : 'Auth_Protocol: Register'}
+              <h2 className="text-[10px] font-bold text-foreground/50 uppercase tracking-[0.4em]">
+                {isLogin ? 'Login' : 'Register'}
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="p-3 rounded-full hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
+              className="p-2 rounded-full hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="p-6">
-            <div className="mb-6">
-              <h1 className="text-[32px] font-bold text-foreground tracking-tighter uppercase mb-2">
+          <div className="p-8 pt-6">
+            <div className="mb-8">
+              <h1 className="text-[36px] font-bold text-foreground tracking-tighter uppercase leading-none mb-3">
                 {isLogin ? 'Welcome Back' : 'Join the Network'}
               </h1>
-              <p className="text-[12px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+              <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-widest">
                 {isLogin ? 'Synchronizing neural frequencies...' : 'Initialize your sonic identity on TON.'}
               </p>
             </div>
@@ -164,7 +190,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       {...register('username')}
                       type="text"
                       placeholder="TON_VOYAGER"
-                      className="w-full bg-muted/50 border border-border rounded-[12px] py-3 pl-12 pr-4 text-base text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/30"
+                      className="w-full bg-muted/30 rounded-[14px] py-4 pl-12 pr-4 text-base text-foreground outline-none focus:bg-muted/50 transition-all placeholder:text-muted-foreground/30"
                     />
                     {errors.username && <p className="text-[10px] text-red-500 mt-1">{errors.username.message}</p>}
                   </div>
@@ -179,7 +205,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     {...register('email')}
                     type="email"
                     placeholder="SIGNAL@TONJAM.COM"
-                    className="w-full bg-muted/50 border border-border rounded-[12px] py-3 pl-12 pr-4 text-base text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/30"
+                    className="w-full bg-muted/30 rounded-[14px] py-4 pl-12 pr-4 text-base text-foreground outline-none focus:bg-muted/50 transition-all placeholder:text-muted-foreground/30"
                   />
                   {errors.email && <p className="text-[10px] text-red-500 mt-1">{errors.email.message}</p>}
                 </div>
@@ -204,7 +230,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     {...register('password')}
                     type="password"
                     placeholder="••••••••"
-                    className="w-full bg-muted/50 border border-border rounded-[12px] py-3 pl-12 pr-4 text-base text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/30"
+                    className="w-full bg-muted/30 rounded-[14px] py-4 pl-12 pr-4 text-base text-foreground outline-none focus:bg-muted/50 transition-all placeholder:text-muted-foreground/30"
                   />
                   {errors.password && <p className="text-[10px] text-red-500 mt-1">{errors.password.message}</p>}
                 </div>
@@ -213,7 +239,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-[12px] font-bold text-[12px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-[14px] font-bold text-[12px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group"
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -227,55 +253,60 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </form>
             {/* ... rest of the component ... */}
 
-            <div className="mt-2 relative">
+            <div className="mt-8 relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/50"></div>
+                <div className="w-full border-t border-border/20"></div>
               </div>
-              <div className="relative flex justify-center text-[8px] font-bold uppercase tracking-widest">
-                <span className="bg-white px-2 text-muted-foreground/50">Social Relay</span>
+              <div className="relative flex justify-center text-[8px] font-bold uppercase tracking-[0.3em]">
+                <span className="bg-background px-4 text-muted-foreground/30">Web3 / Social Relay</span>
               </div>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => signInWithGoogle()}
-                className="flex items-center justify-center gap-2 py-2 bg-muted/50 border border-border rounded-[8px] hover:bg-muted transition-all group"
-              >
-                <Chrome className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                <span className="text-[9px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">Google</span>
-              </button>
-              <button
-                className="flex items-center justify-center gap-2 py-2 bg-muted/50 border border-border rounded-[8px] hover:bg-muted transition-all group"
-              >
-                <Github className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                <span className="text-[9px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">GitHub</span>
-              </button>
+            <div className="mt-6 flex flex-col gap-3">
+              <div className="flex justify-center w-full">
+                <TonConnectButton className="w-full [&>button]:w-full [&>button]:py-3 [&>button]:rounded-[12px] [&>button]:bg-blue-500/10 [&>button]:text-blue-500 [&>button]:hover:bg-blue-500/20 [&>button]:transition-all [&>button]:font-bold [&>button]:text-[12px] [&>button]:uppercase [&>button]:tracking-[0.2em]" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => signInWithGoogle()}
+                  className="flex items-center justify-center gap-2 py-3 bg-muted/30 rounded-[12px] hover:bg-muted/50 transition-all group"
+                >
+                  <Chrome className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <span className="text-[9px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">Google</span>
+                </button>
+                <button
+                  className="flex items-center justify-center gap-2 py-3 bg-muted/30 rounded-[12px] hover:bg-muted/50 transition-all group"
+                >
+                  <Github className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <span className="text-[9px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">GitHub</span>
+                </button>
+              </div>
             </div>
 
-            <div className="mt-2 text-center">
+            <div className="mt-8 text-center">
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 type="button"
-                className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors"
+                className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] hover:text-foreground transition-colors"
               >
                 {isLogin ? (
-                  <>Don't have a node? <span className="text-blue-500 ml-2">Initialize one</span></>
+                  <>Don't have a node? <span className="text-blue-500 ml-1">Initialize one</span></>
                 ) : (
-                  <>Already have a node? <span className="text-blue-500 ml-2">Establish link</span></>
+                  <>Already have a node? <span className="text-blue-500 ml-1">Establish link</span></>
                 )}
               </button>
             </div>
           </div>
 
           {/* Hardware Footer Deco */}
-          <div className="bg-foreground/[0.02] border-t border-border/50 p-2 flex justify-center gap-2">
+          <div className="bg-foreground/[0.01] p-4 flex justify-center gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-muted"></div>
-              <span className="text-[6px] font-mono text-muted-foreground/30 uppercase tracking-widest">AES-256 Encryption Active</span>
+              <div className="w-1 h-1 rounded-full bg-blue-500/20"></div>
+              <span className="text-[6px] font-mono text-muted-foreground/20 uppercase tracking-widest">AES-256 Encryption Active</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-muted"></div>
-              <span className="text-[6px] font-mono text-muted-foreground/30 uppercase tracking-widest">Neural Link Secure</span>
+              <div className="w-1 h-1 rounded-full bg-blue-500/20"></div>
+              <span className="text-[6px] font-mono text-muted-foreground/20 uppercase tracking-widest">Neural Link Secure</span>
             </div>
           </div>
         </motion.div>

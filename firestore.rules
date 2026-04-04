@@ -8,9 +8,9 @@ service cloud.firestore {
     // Collection: users
     // Document ID: userId (UID)
     // Fields:
-    //   - id: string (required, immutable)
+    //   - uid: string (required, immutable)
     //   - name: string (required, < 100 chars)
-    //   - handle: string (required, < 100 chars)
+    //   - username: string (required, < 100 chars)
     //   - avatar: string (required, URL format)
     //   - bannerUrl: string (optional, URL format)
     //   - bio: string (optional, < 1000 chars)
@@ -149,7 +149,7 @@ service cloud.firestore {
     //   - id: string (required, immutable)
     //   - userId: string (required, immutable)
     //   - userName: string (required, < 100 chars)
-    //   - userHandle: string (optional)
+    //   - username: string (optional)
     //   - userAvatar: string (required, URL format)
     //   - isVerified: bool (optional)
     //   - content: string (required, < 2000 chars)
@@ -270,6 +270,27 @@ service cloud.firestore {
     //
     // ===============================================================
     //
+    // Collection: artists
+    // Document ID: artistId
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - name: string (required, < 100 chars)
+    //   - username: string (optional)
+    //   - walletAddress: string (optional)
+    //   - avatarUrl: string (required, URL format)
+    //   - followers: int (required, >= 0)
+    //   - verified: bool (required)
+    //   - isVerifiedArtist: bool (optional)
+    //   - genre: string (optional)
+    //   - bio: string (optional)
+    //   - bannerUrl: string (optional)
+    //   - socials: map (optional)
+    //   - royaltyConfig: map (optional)
+    //   - earnings: map (optional)
+    //   - events: list (optional)
+    //   - collaborations: list (optional)
+    //   - createdAt: string (required, ISO format, immutable)
+    //
     // Collection: test
     // Document ID: connection
     // Fields:
@@ -289,10 +310,12 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isAuthenticated() &&
-        ((exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
-          (request.auth.token.email == "krusherkrupy@gmail.com" && request.auth.token.email_verified == true));
+      return isAuthenticated() && (
+        request.auth.token.email == "krusherkrupy@gmail.com" ||
+        request.auth.uid == "YkuiSLSACgQ0mVglwwmlcDNzJum1" ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
     }
 
     function isValidEmail(email) {
@@ -316,11 +339,11 @@ service cloud.firestore {
     }
 
     function uidUnchanged() {
-      return !('id' in request.resource.data) || request.resource.data.id == resource.data.id;
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
     }
 
     function uidNotModified() {
-      return !('id' in request.resource.data) || request.resource.data.id == resource.data.id;
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
     }
 
     // ===============================================================
@@ -328,17 +351,16 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidUserForCreate(data) {
-      return hasRequiredFields(['id', 'name', 'handle', 'avatar', 'role', 'createdAt']) &&
+      return hasRequiredFields(['uid', 'username', 'avatar', 'role', 'createdAt']) &&
         hasOnlyAllowedFields([
-          'id', 'name', 'handle', 'avatar', 'bannerUrl', 'bio', 'walletAddress', 'role', 
+          'uid', 'username', 'avatar', 'bannerUrl', 'bio', 'walletAddress', 'role', 
           'followers', 'following', 'earnings', 'isVerifiedArtist', 'socials', 'isPremium', 
           'jamBalance', 'stakedJam', 'pendingJamRewards', 'lastStakingUpdate', 
           'streamingEarnings', 'nftEarnings', 'followedArtists', 'followedUserIds', 
-          'likedTrackIds', 'friends', 'favoriteGenres', 'anthemId', 'royaltyConfig', 'createdAt'
+          'likedTrackIds', 'friends', 'favoriteGenres', 'anthemId', 'royaltyConfig', 'createdAt', 'name'
         ]) &&
-        data.id == request.auth.uid &&
-        data.name is string && data.name.size() < 100 &&
-        data.handle is string && data.handle.size() < 100 &&
+        data.uid == request.auth.uid &&
+        data.username is string && data.username.size() < 100 &&
         isValidUrl(data.avatar) &&
         data.role in ['artist', 'collector', 'admin'] &&
         isValidDateString(data.createdAt);
@@ -346,18 +368,17 @@ service cloud.firestore {
 
     function isValidUserForUpdate(data) {
       return hasOnlyAllowedFields([
-          'id', 'name', 'handle', 'avatar', 'bannerUrl', 'bio', 'walletAddress', 'role', 
+          'uid', 'username', 'avatar', 'bannerUrl', 'bio', 'walletAddress', 'role', 
           'followers', 'following', 'earnings', 'isVerifiedArtist', 'socials', 'isPremium', 
           'jamBalance', 'stakedJam', 'pendingJamRewards', 'lastStakingUpdate', 
           'streamingEarnings', 'nftEarnings', 'followedArtists', 'followedUserIds', 
-          'likedTrackIds', 'friends', 'favoriteGenres', 'anthemId', 'royaltyConfig', 'createdAt'
+          'likedTrackIds', 'friends', 'favoriteGenres', 'anthemId', 'royaltyConfig', 'createdAt', 'name'
         ]) &&
-        (!('name' in data) || (data.name is string && data.name.size() < 100)) &&
-        (!('handle' in data) || (data.handle is string && data.handle.size() < 100)) &&
+        (!('username' in data) || (data.username is string && data.username.size() < 100)) &&
         (!('avatar' in data) || isValidUrl(data.avatar)) &&
         (!('role' in data) || data.role in ['artist', 'collector', 'admin']) &&
-        (!('followers' in data) || data.followers is int) &&
-        (!('following' in data) || data.following is int);
+        (!('followers' in data) || data.followers is number) &&
+        (!('following' in data) || data.following is number);
     }
 
     function isValidPlaylist(data) {
@@ -365,7 +386,7 @@ service cloud.firestore {
         hasOnlyAllowedFields(['id', 'title', 'coverUrl', 'trackCount', 'creator', 'description', 'trackIds', 'isPrivate', 'isCollaborative', 'tags', 'updatedAt']) &&
         data.id is string &&
         data.title is string && data.title.size() < 100 &&
-        data.trackCount is int &&
+        data.trackCount is number &&
         data.creator is string &&
         isValidDateString(data.updatedAt);
     }
@@ -384,9 +405,9 @@ service cloud.firestore {
         data.status in ['pending', 'completed', 'failed'];
     }
 
-    function isValidTrack(data) {
+    function isValidTrackForCreate(data) {
       return hasRequiredFields(['id', 'title', 'artist', 'artistId', 'coverUrl', 'audioUrl', 'genre', 'isNFT', 'createdAt']) &&
-        hasOnlyAllowedFields(['id', 'title', 'artist', 'artistId', 'coverUrl', 'audioUrl', 'duration', 'genre', 'mood', 'isNFT', 'artistVerified', 'price', 'streamingPrice', 'editions', 'editionType', 'rarity', 'royalty', 'bpm', 'key', 'bitrate', 'playCount', 'streams', 'likes', 'jamScore', 'releaseDate', 'ipfsUrl', 'cid', 'description', 'audioIpfsUrl', 'coverIpfsUrl', 'royaltySplits', 'lyrics', 'isCollaboration', 'createdAt']) &&
+        hasOnlyAllowedFields(['id', 'songId', 'title', 'artist', 'artistName', 'artistId', 'coverUrl', 'audioUrl', 'duration', 'genre', 'mood', 'isNFT', 'artistVerified', 'price', 'streamingPrice', 'editions', 'editionType', 'rarity', 'royalty', 'bpm', 'key', 'bitrate', 'playCount', 'streams', 'likes', 'jamScore', 'releaseDate', 'ipfsUrl', 'cid', 'description', 'audioIpfsUrl', 'coverIpfsUrl', 'royaltySplits', 'lyrics', 'isCollaboration', 'createdAt', 'tokenGating']) &&
         data.id is string &&
         data.title is string && data.title.size() < 100 &&
         data.artistId is string &&
@@ -397,9 +418,17 @@ service cloud.firestore {
         isValidDateString(data.createdAt);
     }
 
+    function isValidTrackForUpdate(data) {
+      return hasOnlyAllowedFields(['id', 'songId', 'title', 'artist', 'artistName', 'artistId', 'coverUrl', 'audioUrl', 'duration', 'genre', 'mood', 'isNFT', 'artistVerified', 'price', 'streamingPrice', 'editions', 'editionType', 'rarity', 'royalty', 'bpm', 'key', 'bitrate', 'playCount', 'streams', 'likes', 'jamScore', 'releaseDate', 'ipfsUrl', 'cid', 'description', 'audioIpfsUrl', 'coverIpfsUrl', 'royaltySplits', 'lyrics', 'isCollaboration', 'createdAt', 'tokenGating']) &&
+        (!('title' in data) || (data.title is string && data.title.size() < 100)) &&
+        (!('coverUrl' in data) || isValidUrl(data.coverUrl)) &&
+        (!('audioUrl' in data) || isValidUrl(data.audioUrl)) &&
+        (!('genre' in data) || data.genre is string);
+    }
+
     function isValidNFT(data) {
       return hasRequiredFields(['id', 'trackId', 'title', 'owner', 'creator', 'price', 'imageUrl', 'edition', 'createdAt']) &&
-        hasOnlyAllowedFields(['id', 'trackId', 'title', 'owner', 'creator', 'artist', 'artistId', 'price', 'imageUrl', 'coverUrl', 'audioUrl', 'edition', 'supply', 'minted', 'isAuction', 'contractAddress', 'royaltySplits', 'stems_available', 'description', 'traits', 'attributes', 'history', 'offers', 'exclusiveContent', 'ipfsUrl', 'cid', 'listingType', 'auctionStartTime', 'auctionEndTime', 'startingBid', 'royalty', 'createdAt']) &&
+        hasOnlyAllowedFields(['id', 'trackId', 'title', 'owner', 'ownerName', 'ownerId', 'creator', 'artist', 'artistId', 'price', 'imageUrl', 'coverUrl', 'audioUrl', 'edition', 'supply', 'minted', 'isAuction', 'isListed', 'contractAddress', 'royaltySplits', 'stems_available', 'description', 'traits', 'attributes', 'history', 'offers', 'exclusiveContent', 'ipfsUrl', 'cid', 'listingType', 'auctionStartTime', 'auctionEndTime', 'startingBid', 'royalty', 'createdAt', 'tokenGating']) &&
         data.id is string &&
         data.trackId is string &&
         data.title is string && data.title.size() < 100 &&
@@ -413,7 +442,7 @@ service cloud.firestore {
 
     function isValidPost(data) {
       return hasRequiredFields(['id', 'userId', 'userName', 'userAvatar', 'content', 'likes', 'comments', 'timestamp']) &&
-        hasOnlyAllowedFields(['id', 'userId', 'userName', 'userHandle', 'userAvatar', 'isVerified', 'content', 'imageUrl', 'video', 'trackId', 'track', 'nftId', 'nft', 'likes', 'isLiked', 'reposts', 'isReposted', 'comments', 'commentList', 'timestamp', 'authorId', 'authorName', 'authorAvatar', 'createdAt', 'artistId', 'title', 'subtitle', 'type', 'paymentAmount', 'paymentCurrency', 'status', 'artistName', 'link', 'targetId']) &&
+        hasOnlyAllowedFields(['id', 'userId', 'userName', 'username', 'userAvatar', 'isVerified', 'content', 'imageUrl', 'video', 'trackId', 'track', 'nftId', 'nft', 'likes', 'isLiked', 'reposts', 'isReposted', 'comments', 'commentList', 'timestamp', 'authorId', 'authorName', 'authorAvatar', 'createdAt', 'artistId', 'title', 'subtitle', 'type', 'paymentAmount', 'paymentCurrency', 'status', 'artistName', 'link', 'targetId']) &&
         data.id is string &&
         data.userId is string &&
         data.userName is string && data.userName.size() < 100 &&
@@ -463,12 +492,53 @@ service cloud.firestore {
       return hasRequiredFields(['id', 'title', 'description', 'reward', 'points', 'completed', 'claimed', 'type', 'progress', 'total']) &&
         hasOnlyAllowedFields(['id', 'title', 'description', 'reward', 'points', 'completed', 'claimed', 'type', 'progress', 'total', 'dueDate', 'rarity', 'priority']) &&
         data.id is string &&
-        data.points is int &&
+        data.points is number &&
         data.completed is bool &&
         data.claimed is bool &&
         data.type in ['daily', 'achievement', 'milestone', 'seasonal'] &&
-        data.progress is int &&
-        data.total is int;
+        data.progress is number &&
+        data.total is number;
+    }
+
+    function isValidMessage(data) {
+      return hasRequiredFields(['id', 'senderId', 'receiverId', 'content', 'timestamp']) &&
+        hasOnlyAllowedFields(['id', 'senderId', 'receiverId', 'content', 'timestamp', 'read']) &&
+        data.id is string &&
+        data.senderId is string &&
+        data.receiverId is string &&
+        data.content is string && data.content.size() < 2000 &&
+        isValidDateString(data.timestamp);
+    }
+
+    function isValidCommunity(data) {
+      return hasRequiredFields(['id', 'artistId', 'title', 'accessType']) &&
+        hasOnlyAllowedFields(['id', 'artistId', 'title', 'description', 'accessType', 'nftId', 'subscriptionPrice', 'members']) &&
+        data.id is string &&
+        data.artistId is string &&
+        data.title is string && data.title.size() < 100 &&
+        data.accessType in ['nft', 'subscription'];
+    }
+
+    function isValidSubscription(data) {
+      return hasRequiredFields(['id', 'userId', 'artistId', 'status', 'startDate']) &&
+        hasOnlyAllowedFields(['id', 'userId', 'artistId', 'status', 'startDate', 'endDate']) &&
+        data.id is string &&
+        data.userId is string &&
+        data.artistId is string &&
+        data.status in ['active', 'cancelled'] &&
+        isValidDateString(data.startDate);
+    }
+
+    function isValidArtist(data) {
+      return hasRequiredFields(['id', 'uid', 'name', 'avatarUrl', 'followers', 'verified', 'createdAt']) &&
+        hasOnlyAllowedFields(['id', 'uid', 'name', 'username', 'walletAddress', 'avatarUrl', 'followers', 'verified', 'isVerifiedArtist', 'genre', 'monthlyListeners', 'bio', 'bannerUrl', 'socials', 'royaltyConfig', 'earnings', 'events', 'collaborations', 'profileTheme', 'createdAt']) &&
+        data.id is string &&
+        data.uid is string &&
+        data.name is string && data.name.size() < 100 &&
+        isValidUrl(data.avatarUrl) &&
+        data.followers is number &&
+        data.verified is bool &&
+        isValidDateString(data.createdAt);
     }
 
     function isValidBid(data) {
@@ -512,12 +582,52 @@ service cloud.firestore {
              (!('lastWithdrawal' in data) || data.lastWithdrawal is string);
     }
 
+    function isValidNFTMint(data) {
+      return hasRequiredFields(['id', 'track_id', 'owner_id']) &&
+             hasOnlyAllowedFields(['id', 'track_id', 'owner_id', 'edition', 'tx_hash']) &&
+             data.id is string &&
+             data.track_id is string &&
+             data.owner_id is string;
+    }
+
+    function isValidNFTCollection(data) {
+      return hasRequiredFields(['id', 'artistId', 'name']) &&
+             hasOnlyAllowedFields(['id', 'artistId', 'contractAddress', 'name', 'description', 'createdAt']) &&
+             data.id is string && data.artistId is string && data.name is string;
+    }
+
+    function isValidNFTSale(data) {
+      return hasRequiredFields(['id', 'nftId', 'sellerId', 'buyerId', 'price']) &&
+             hasOnlyAllowedFields(['id', 'nftId', 'sellerId', 'buyerId', 'price', 'royaltyPaid', 'txHash', 'createdAt']) &&
+             data.id is string && data.nftId is string && data.sellerId is string && data.buyerId is string &&
+             data.price is number && (!('royaltyPaid' in data) || data.royaltyPaid is number);
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
 
     match /test/{docId} {
       allow read: if true;
+    }
+
+    match /nftMints/{mintId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.owner_id == request.auth.uid && isValidNFTMint(request.resource.data);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /nftCollections/{collectionId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated() && (request.resource.data.artistId == request.auth.uid || isAdmin()) && isValidNFTCollection(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /nftSales/{saleId} {
+      allow read: if isAuthenticated() && (resource.data.sellerId == request.auth.uid || resource.data.buyerId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.sellerId == request.auth.uid || isAdmin()) && isValidNFTSale(request.resource.data);
+      allow update, delete: if isAdmin();
     }
 
     match /users/{userId} {
@@ -564,8 +674,8 @@ service cloud.firestore {
 
     match /tracks/{trackId} {
       allow read: if true;
-      allow create: if isAuthenticated() && (request.resource.data.artistId == request.auth.uid || isAdmin()) && isValidTrack(request.resource.data);
-      allow update: if isAuthenticated() && (resource.data.artistId == request.auth.uid || isAdmin()) && isValidTrack(request.resource.data);
+      allow create: if isAuthenticated() && (request.resource.data.artistId == request.auth.uid || isAdmin()) && isValidTrackForCreate(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.artistId == request.auth.uid || isAdmin()) && isValidTrackForUpdate(request.resource.data);
       allow delete: if isAdmin();
     }
 
@@ -584,7 +694,7 @@ service cloud.firestore {
 
     match /posts/{postId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidPost(request.resource.data);
+      allow create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isAdmin()) && isValidPost(request.resource.data);
       allow update: if isAuthenticated() && (
         isOwner(resource.data.userId) || 
         isAdmin() ||
@@ -642,10 +752,41 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    match /messages/{messageId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid && isValidMessage(request.resource.data);
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId || isAdmin()) && isValidMessage(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /communities/{communityId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && (request.resource.data.artistId == request.auth.uid || isAdmin()) && isValidCommunity(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.artistId == request.auth.uid || isAdmin()) && isValidCommunity(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /subscriptions/{subscriptionId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || request.auth.uid == resource.data.artistId || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidSubscription(request.resource.data);
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin()) && isValidSubscription(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
     match /royalties/{artistId} {
       allow read: if isAuthenticated() && (isOwner(artistId) || isAdmin());
       allow create, update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    match /artists/{artistId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidArtist(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /seeding/{docId} {
+      allow write: if isAdmin();
     }
 
     // Default deny

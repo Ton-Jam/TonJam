@@ -494,7 +494,7 @@ const NFTDetail: React.FC = () => {
               <div className="flex flex-wrap items-center gap-4 mb-4">
                 <div className="flex items-center gap-4 cursor-pointer group/creator" onClick={() => {
                   const artist = MOCK_ARTISTS.find(a => a.name === localNft.creator);
-                  if (artist) navigate(`/artist/${artist.id}`);
+                  if (artist) navigate(`/artist/${artist.uid}`);
                 }} >
                   <div className="relative w-10 h-10">
                     <img src={MOCK_ARTISTS.find(a => a.name === localNft.creator)?.avatarUrl || getPlaceholderImage(`artist-${localNft.creator}`)} className="w-full h-full rounded-full object-cover" alt="" />
@@ -515,7 +515,7 @@ const NFTDetail: React.FC = () => {
                     navigate('/profile');
                   } else {
                     const artist = MOCK_ARTISTS.find(a => a.name === localNft.owner);
-                    if (artist) navigate(`/artist/${artist.id}`);
+                    if (artist) navigate(`/artist/${artist.uid}`);
                   }
                 }} >
                   <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center transition-all">
@@ -524,7 +524,7 @@ const NFTDetail: React.FC = () => {
                   <div className="flex flex-col">
                     <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Current Owner</span>
                     <span className="text-xs font-bold text-muted-foreground/80 uppercase tracking-tight group-hover:text-foreground transition-colors">
-                      {isOwner ? 'You (Vault)' : `${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}`}
+                      {isOwner ? 'You (Vault)' : localNft.owner ? `${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}` : 'Unknown'}
                     </span>
                   </div>
                 </div>
