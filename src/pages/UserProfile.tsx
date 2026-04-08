@@ -8,7 +8,8 @@ import {
   Box, 
   ArrowLeft,
   Gem,
-  Share2
+  Share2,
+  Camera
 } from 'lucide-react';
 
 import { MOCK_USERS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '@/constants';
@@ -18,10 +19,11 @@ import ArtistListItem from '@/components/ArtistListItem';
 import SocialFeed from '@/components/SocialFeed';
 import PlaylistCard from '@/components/PlaylistCard';
 import { useAudio } from '@/context/AudioContext';
-import { getPlaceholderImage, cn } from '@/lib/utils';
+import { getPlaceholderImage, cn, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 import { ProfileCard } from '@/components/ProfileCard';
 import { UserProfile as UserProfileType } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
+import { uploadFile } from '@/services/storageService';
 
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -57,6 +59,31 @@ const UserProfile: React.FC = () => {
       toggleFollowUser(id);
     }
   };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validation = validateFile(file, 'image', 5);
+      if (!validation.isValid) {
+        addNotification(validation.error || "Invalid file", "error");
+        e.target.value = '';
+        return;
+      }
+      
+      try {
+        addNotification("Adding banner image...", "info");
+        const storagePath = `profiles/${userProfile.uid}/banner.png`;
+        const { downloadUrl } = await uploadFile(file, storagePath);
+        setUser(prev => prev ? { ...prev, bannerUrl: downloadUrl } : null);
+        addNotification("Banner image added successfully", "success");
+      } catch (error: any) {
+        console.error("Banner upload failed:", error);
+        addNotification(`Banner upload failed: ${error.message}`, "error");
+      }
+    }
+  };
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const userPosts = useMemo(() => {
     if (!user) return [];
@@ -96,12 +123,22 @@ const UserProfile: React.FC = () => {
         />
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-transparent"></div>
+        
+        {/* Banner Upload Trigger */}
+        {id === userProfile.uid && (
+          <div className="absolute top-6 right-6 z-40">
+            <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-all shadow-lg border border-white/10 hover:scale-110 active:scale-90" >
+              <Camera className="h-5 w-5" />
+            </button>
+            <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
+          </div>
+        )}
       </div>
 
       {/* 2. IDENTITY & ACTIONS (Audiomack Style) */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-30">
-        <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 -mt-24 md:-mt-32 pb-8">
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 w-full">
+        <div className="flex flex-row items-end justify-between gap-6 -mt-16 md:-mt-24 pb-8">
+          <div className="flex flex-row items-end gap-6 w-full">
             {/* Profile Picture (Overlapping) */}
             <div className="relative">
               <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-[6px] border-background shadow-2xl bg-muted ring-1 ring-white/10">
@@ -113,9 +150,9 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
+            <div className="flex flex-col items-start text-left flex-1 pb-2">
               <div className="flex flex-col gap-1 mb-4">
-                <div className="flex items-center gap-2 justify-center md:justify-start">
+                <div className="flex items-center gap-2 justify-start">
                   <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-lg">
                     {user.name}
                   </h1>
@@ -131,11 +168,11 @@ const UserProfile: React.FC = () => {
               </div>
               
               <div className="flex items-center gap-8 mb-4">
-                <div className="flex flex-col items-center md:items-start">
+                <div className="flex flex-col items-start">
                   <span className="text-xl font-black text-white drop-shadow-md">{(user.followers || 0).toLocaleString()}</span>
                   <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-black">Followers</span>
                 </div>
-                <div className="flex flex-col items-center md:items-start border-l border-white/10 pl-8">
+                <div className="flex flex-col items-start border-l border-white/10 pl-8">
                   <span className="text-xl font-black text-white drop-shadow-md">{(user.following || 0).toLocaleString()}</span>
                   <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-black">Following</span>
                 </div>

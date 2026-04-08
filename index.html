@@ -75,7 +75,7 @@
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: none;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
@@ -89,7 +89,7 @@
         html.light .glass {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-color: rgba(37, 99, 235, 0.1);
+            border: none;
         }
 
         /* Modal Backdrops & Solid Backgrounds */
@@ -130,7 +130,7 @@
         html.light .modal-content,
         html.light [role="dialog"] {
             background-color: #ffffff !important;
-            border-color: rgba(37, 99, 235, 0.1) !important;
+            border: none !important;
         }
 
         /* Text Overrides - Force Blue in Light Mode by default */
@@ -416,11 +416,17 @@
           --tc-bg-color: #111111;
         }
 
-        .snap-x {
+        .scroll-row {
+          display: flex;
+          overflow-x: auto;
+          gap: 1rem;
+          padding-bottom: 1rem;
           scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
         }
-        .snap-center {
-          scroll-snap-align: center;
+
+        .scroll-row > * {
+          scroll-snap-align: start;
         }
     </style>
 <script type="importmap">

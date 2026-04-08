@@ -20,7 +20,8 @@ import {
   ListBulletIcon,
   FaceSmileIcon,
   CalendarIcon,
-  MapPinIcon
+  MapPinIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -277,8 +278,8 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Composer */}
-            <div className="p-3 flex gap-3">
-              <Avatar className="h-8 w-8 ring-1 ring-border">
+            <div className="p-2 sm:p-3 flex gap-2 sm:gap-3">
+              <Avatar className="h-8 w-8">
                 <AvatarImage src={userProfile.avatar} />
                 <AvatarFallback>{userProfile.name?.[0]}</AvatarFallback>
               </Avatar>
@@ -289,17 +290,17 @@ const JamSpace: React.FC = () => {
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                 />
-                <div className="flex items-center justify-between pt-2 mt-1">
-                  <div className="flex items-center gap-1 text-blue-500">
-                    <button className="p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><PhotoIcon className="h-4 w-4 stroke-[2px]" /></button>
-                    <button className="p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><GifIcon className="h-4 w-4 stroke-[2px]" /></button>
-                    <button className="p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><ListBulletIcon className="h-4 w-4 stroke-[2px]" /></button>
-                    <button className="p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><FaceSmileIcon className="h-4 w-4 stroke-[2px]" /></button>
+                <div className="flex items-center justify-between pt-1 sm:pt-2 mt-1">
+                  <div className="flex items-center gap-0.5 sm:gap-1 text-blue-500">
+                    <button className="p-1 sm:p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><PhotoIcon className="h-4 w-4 stroke-[2px]" /></button>
+                    <button className="p-1 sm:p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><GifIcon className="h-4 w-4 stroke-[2px]" /></button>
+                    <button className="p-1 sm:p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><ListBulletIcon className="h-4 w-4 stroke-[2px]" /></button>
+                    <button className="p-1 sm:p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><FaceSmileIcon className="h-4 w-4 stroke-[2px]" /></button>
                   </div>
                   <Button 
                     disabled={!postContent.trim() || isPosting}
                     onClick={handleCreatePost}
-                    className="rounded-full px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold h-8 text-xs border-none"
+                    className="rounded-full px-3 sm:px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold h-7 sm:h-8 text-[10px] sm:text-xs border-none"
                   >
                     {isPosting ? 'Posting...' : 'Post'}
                   </Button>
@@ -373,6 +374,15 @@ const JamSpace: React.FC = () => {
           </aside>
         </div>
       </div>
+
+      {/* Floating Action Button (Mobile) */}
+      <button 
+        className="fixed bottom-24 right-4 sm:right-8 z-50 w-14 h-14 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:hidden"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Create Post"
+      >
+        <PlusIcon className="w-7 h-7" strokeWidth={2.5} />
+      </button>
     </div>
   );
 };

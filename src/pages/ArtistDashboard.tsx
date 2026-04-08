@@ -67,6 +67,7 @@ import RoyaltyConfigModal from "@/components/RoyaltyConfigModal";
 import ProtocolForge from "@/components/ProtocolForge";
 import ArtistVerification from "@/components/ArtistVerification";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import SongRequests from "@/components/SongRequests";
 
 const ArtistDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -112,12 +113,12 @@ const ArtistDashboard: React.FC = () => {
     );
   }, [allArtistTracks, searchQuery]);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification" | "transactions" | "community" | "sponsorship">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "tracks" | "royalties" | "profile" | "forge" | "collection" | "verification" | "transactions" | "community" | "sponsorship" | "requests">("overview");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab && ['overview', 'tracks', 'royalties', 'profile', 'forge', 'collection', 'verification', 'transactions', 'community', 'sponsorship'].includes(tab)) {
+    if (tab && ['overview', 'tracks', 'royalties', 'profile', 'forge', 'collection', 'verification', 'transactions', 'community', 'sponsorship', 'requests'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [location.search]);
@@ -540,6 +541,7 @@ const ArtistDashboard: React.FC = () => {
             { id: "profile", label: "Profile Settings", icon: <UserPen className="h-4 w-4" /> },
             { id: "community", label: "Community", icon: <Users className="h-4 w-4" /> },
             { id: "sponsorship", label: "Sponsorship", icon: <Megaphone className="h-4 w-4" /> },
+            { id: "requests", label: "Song Requests", icon: <Music2 className="h-4 w-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -824,6 +826,12 @@ const ArtistDashboard: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {activeTab === "requests" && (
+            <div className="animate-in fade-in duration-500">
+              <SongRequests artistId={artistData.uid} />
             </div>
           )}
 
@@ -1401,79 +1409,100 @@ const ArtistDashboard: React.FC = () => {
             </div>
           )}{" "}
           {activeTab === "community" && (
-            <div className="max-w-2xl mx-auto space-y-4">
-              <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
-                  Post Announcement
-                </h3>
-                <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const form = e.target as HTMLFormElement;
-                    const textarea = form.querySelector('textarea');
-                    if (textarea && textarea.value.trim()) {
-                      createPost({
-                        id: `post-${Date.now()}`,
-                        authorId: artistData.uid,
-                        authorName: artistData.name,
-                        authorAvatar: artistData.avatarUrl,
-                        content: textarea.value,
-                        createdAt: new Date().toISOString(),
-                        likes: 0,
-                        comments: 0,
-                        reposts: 0
-                      });
-                      addNotification("Announcement posted successfully!", "success");
-                      form.reset();
-                    }
-                  }} 
-                  className="space-y-4"
-                >
-                  <textarea
-                    className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500/50 transition-all min-h-[100px]"
-                    placeholder="Share updates, exclusive content, or announcements with your followers..."
-                    required
-                  />
-                  <div className="flex justify-between items-center">
-                    <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
-                      <Upload className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
-                    >
-                      Post
-                    </button>
-                  </div>
-                </form>
+            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2 space-y-4">
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
+                    Post Announcement
+                  </h3>
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const form = e.target as HTMLFormElement;
+                      const textarea = form.querySelector('textarea');
+                      if (textarea && textarea.value.trim()) {
+                        createPost({
+                          id: `post-${Date.now()}`,
+                          authorId: artistData.uid,
+                          authorName: artistData.name,
+                          authorAvatar: artistData.avatarUrl,
+                          content: textarea.value,
+                          createdAt: new Date().toISOString(),
+                          likes: 0,
+                          comments: 0,
+                          reposts: 0
+                        });
+                        addNotification("Announcement posted successfully!", "success");
+                        form.reset();
+                      }
+                    }} 
+                    className="space-y-4"
+                  >
+                    <textarea
+                      className="w-full bg-foreground/[0.03] rounded-[10px] p-4 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500/50 transition-all min-h-[100px]"
+                      placeholder="Share updates, exclusive content, or announcements with your followers..."
+                      required
+                    />
+                    <div className="flex justify-between items-center">
+                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                        <Upload className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+                      >
+                        Post
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
+                    Recent Posts
+                  </h3>
+                  {artistPosts.length > 0 ? (
+                    <div className="space-y-4">
+                      {artistPosts.map(post => (
+                        <div key={post.id} className="p-4 bg-foreground/[0.03] rounded-[10px] border border-border/50">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-2">
+                              <img src={post.authorAvatar || artistData.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
+                              <span className="text-xs font-bold text-foreground uppercase">{post.authorName || artistData.name}</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                              {new Date(post.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-foreground/80 whitespace-pre-wrap">{post.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-xs">No recent announcements.</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-4">
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">
-                  Recent Posts
+                  Direct Messages
                 </h3>
-                {artistPosts.length > 0 ? (
-                  <div className="space-y-4">
-                    {artistPosts.map(post => (
-                      <div key={post.id} className="p-4 bg-foreground/[0.03] rounded-[10px] border border-border/50">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex items-center gap-2">
-                            <img src={post.authorAvatar || artistData.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
-                            <span className="text-xs font-bold text-foreground uppercase">{post.authorName || artistData.name}</span>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                            {new Date(post.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-sm text-foreground/80 whitespace-pre-wrap">{post.content}</p>
-                      </div>
-                    ))}
+                <div className="space-y-2">
+                  <div className="p-3 bg-blue-600/10 rounded-[8px] border border-blue-600/20 cursor-pointer">
+                    <p className="text-xs font-bold text-foreground">Fan_123</p>
+                    <p className="text-[10px] text-muted-foreground truncate">Loved the new track!</p>
                   </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p className="text-xs">No recent announcements.</p>
+                  <div className="p-3 bg-muted/30 rounded-[8px] border border-border/50 cursor-pointer hover:bg-muted/50">
+                    <p className="text-xs font-bold text-foreground">Collector_99</p>
+                    <p className="text-[10px] text-muted-foreground truncate">When is the next NFT drop?</p>
                   </div>
-                )}
+                </div>
+                <button className="w-full mt-4 py-2 text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400">
+                  View All Messages
+                </button>
               </div>
             </div>
           )}

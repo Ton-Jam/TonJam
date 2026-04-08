@@ -189,6 +189,23 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     }
   };
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Post by ${post.userName}`,
+          text: post.content,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      addNotification("Share link copied to clipboard", "success");
+    }
+  };
+
   const handlePlayTrack = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (track) {
@@ -241,7 +258,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     <motion.div
       whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.02)" }}
       className={cn(
-        "w-full p-3 border-b border-border/30 transition-colors cursor-pointer",
+        "w-full p-3 border-none transition-colors cursor-pointer",
         "bg-background"
       )}
       onClick={() => navigate(`/post/${post.id}`)}
@@ -371,11 +388,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
               <span className="text-xs text-white">{likesCount}</span>
             </button>
             <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(window.location.origin + `/post/${post.id}`);
-                addNotification("Link copied to clipboard", "success");
-              }}
+              onClick={handleShare}
               className="flex items-center text-white hover:text-blue-500 transition-all group"
             >
               <div className="p-2 rounded-full group-hover:bg-blue-500/10">

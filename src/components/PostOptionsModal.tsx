@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link2, Share2, Bookmark, Trash2, Flag, Music, Coins, User, Gem } from 'lucide-react';
+import { Link2, Share2, Bookmark, Trash2, Flag, Music, Coins, User, Gem, UserMinus, VolumeX, Ban } from 'lucide-react';
 import { Post } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -71,6 +71,22 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOw
       case 'nft':
         setShowNFTOptions(true);
         break;
+      case 'unfollow':
+        addNotification(`Unfollowed @${post.username || post.userName}`, "success");
+        onClose();
+        break;
+      case 'mute':
+        addNotification(`Muted @${post.username || post.userName}`, "success");
+        onClose();
+        break;
+      case 'block':
+        addNotification(`Blocked @${post.username || post.userName}`, "success");
+        onClose();
+        break;
+      case 'not_interested':
+        addNotification("We'll show you less of this", "success");
+        onClose();
+        break;
     }
   };
 
@@ -78,10 +94,17 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOw
     return <NFTOptionsModal nft={nft} onClose={() => { setShowNFTOptions(false); onClose(); }} />;
   }
 
-  const options = [
+  const options = [];
+
+  if (!isOwner) {
+    options.push({ id: 'not_interested', icon: Ban, label: 'Not interested in this post', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('not_interested') });
+    options.push({ id: 'unfollow', icon: UserMinus, label: `Unfollow @${post.username || post.userName}`, color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('unfollow') });
+  }
+
+  options.push(
     { id: 'profile', icon: User, label: 'View Profile', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('profile') },
-    { id: 'tip', icon: Coins, label: 'Tip Creator (TON)', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-amber-400', action: () => handleAction('tip') },
-  ];
+    { id: 'tip', icon: Coins, label: 'Tip Creator (TON)', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-amber-400', action: () => handleAction('tip') }
+  );
 
   if (track) {
     options.push({ id: 'track', icon: Music, label: 'Track Options', color: 'text-foreground', iconColor: 'text-blue-500 group-hover:text-blue-400', action: () => handleAction('track') });
@@ -101,7 +124,11 @@ const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, isOw
   if (isOwner) {
     destructiveOptions.push({ id: 'delete', icon: Trash2, label: 'Delete Signal', color: 'text-red-500', iconColor: 'text-red-500/40 group-hover:text-red-500', action: () => handleAction('delete') });
   } else {
-    destructiveOptions.push({ id: 'report', icon: Flag, label: 'Report Signal', color: 'text-amber-500', iconColor: 'text-amber-500/40 group-hover:text-amber-500', action: () => handleAction('report') });
+    destructiveOptions.push(
+      { id: 'mute', icon: VolumeX, label: `Mute @${post.username || post.userName}`, color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('mute') },
+      { id: 'block', icon: Ban, label: `Block @${post.username || post.userName}`, color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('block') },
+      { id: 'report', icon: Flag, label: 'Report Signal', color: 'text-amber-500', iconColor: 'text-amber-500/40 group-hover:text-amber-500', action: () => handleAction('report') }
+    );
   }
 
   return (

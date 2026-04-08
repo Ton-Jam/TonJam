@@ -13,10 +13,10 @@ interface ArtistProfileHeaderProps {
 const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip }) => {
   return (
     <motion.div 
-      className="flex flex-col md:flex-row items-center md:items-end gap-6 cursor-default w-full"
+      className="flex flex-row items-end gap-6 cursor-default w-full"
     >
       {/* Profile Picture */}
-      <div className="relative -mt-20 md:-mt-24">
+      <div className="relative -mt-16 md:-mt-24">
         <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-background shadow-2xl bg-muted">
           <img 
             src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
@@ -31,7 +31,7 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
         )}
       </div>
       
-      <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
+      <div className="flex flex-col items-start text-left flex-1 pb-2">
         <div className="flex flex-col gap-1 mb-4">
           <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
             {artist.name}
@@ -44,11 +44,11 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
         </div>
         
         <div className="flex items-center gap-6 mb-4">
-          <div className="flex flex-col items-center md:items-start">
+          <div className="flex flex-col items-start">
             <span className="text-xl font-bold text-foreground">{(artist.followers || 0).toLocaleString()}</span>
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Followers</span>
           </div>
-          <div className="flex flex-col items-center md:items-start border-l border-border pl-6">
+          <div className="flex flex-col items-start border-l border-border pl-6">
             <span className="text-xl font-bold text-foreground">{(artist.playCount || 0).toLocaleString()}</span>
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Total Plays</span>
           </div>

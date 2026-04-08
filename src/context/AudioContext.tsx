@@ -88,8 +88,10 @@ interface AudioContextType {
   allTracks: Track[];
   allNFTs: NFTItem[];
   artists: Artist[];
+  firestoreUsers: UserProfile[];
   setArtists: React.Dispatch<React.SetStateAction<Artist[]>>;
   addUserTrack: (track: Track) => void;
+  updateTrack: (trackId: string, updates: Partial<Track>) => Promise<void>;
   addUserNFT: (nft: NFTItem, silent?: boolean) => void;
   updateNFT: (nftId: string, updates: Partial<NFTItem>, silent?: boolean) => void;
   recordTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp' | 'status'>) => void;
@@ -303,6 +305,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       { id: '7', title: 'TON Ecosystem', description: 'Follow TON on X', reward: '20 TJ', points: 200, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1, rarity: 'rare', priority: 'high' },
       { id: '8', title: 'Join the Jam', description: 'Follow TonJam on X', reward: '20 TJ', points: 200, completed: false, claimed: false, type: 'achievement', progress: 0, total: 1, rarity: 'rare', priority: 'high' },
       { id: '9', title: 'Network Expansion', description: 'Invite 3 friends to TonJam', reward: '100 TJ', points: 1000, completed: false, claimed: false, type: 'milestone', progress: 0, total: 3, rarity: 'epic', priority: 'medium' },
+      { id: '10', title: 'Follow TonJam on X', description: 'Follow TonJam on X', reward: '50 TJ', points: 500, completed: false, claimed: false, type: 'social', progress: 0, total: 1, rarity: 'common', priority: 'medium', link: 'https://x.com/tonjam' },
     ];
   });
 
@@ -509,46 +512,54 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }, (error) => handleFirestoreError(error, OperationType.LIST, 'playlists', false));
 
         // 2. Initial fetch and setup listener for current user profile
-        try {
-          const userRef = doc(db, 'users', user.uid);
-          const userSnap = await getDoc(userRef);
+        const fetchUserProfile = async (retries = 3): Promise<void> => {
+          try {
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
 
-          if (!userSnap.exists()) {
-            // Profile doesn't exist, create it
-            const newProfile: UserProfile = {
-              ...MOCK_USER,
-              uid: user.uid,
-              name: user.displayName || 'Anonymous',
-              avatar: user.photoURL || getPlaceholderImage(`user-${user.uid}`, 200, 200),
-              walletAddress: '',
-              username: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
-              followers: 0,
-              following: 0,
-              earnings: 0,
-              streamingEarnings: 0,
-              nftEarnings: 0,
-              jamBalance: 100, // Welcome bonus
-              stakedJam: 0,
-              pendingJamRewards: 0,
-              likedTrackIds: [],
-              followedUserIds: [],
-              createdAt: new Date().toISOString()
-            };
-            await setDoc(userRef, newProfile);
-            setUserProfile(newProfile);
-          } else {
-            setUserProfile(userSnap.data() as UserProfile);
-          }
-
-          // Real-time listener for current user profile
-          userDocUnsubscribe = onSnapshot(userRef, (snapshot) => {
-            if (snapshot.exists()) {
-              setUserProfile(snapshot.data() as UserProfile);
+            if (!userSnap.exists()) {
+              // Profile doesn't exist, create it
+              const newProfile: UserProfile = {
+                ...MOCK_USER,
+                uid: user.uid,
+                name: user.displayName || 'Anonymous',
+                avatar: user.photoURL || getPlaceholderImage(`user-${user.uid}`, 200, 200),
+                walletAddress: '',
+                username: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
+                followers: 0,
+                following: 0,
+                earnings: 0,
+                streamingEarnings: 0,
+                nftEarnings: 0,
+                jamBalance: 100, // Welcome bonus
+                stakedJam: 0,
+                pendingJamRewards: 0,
+                likedTrackIds: [],
+                followedUserIds: [],
+                createdAt: new Date().toISOString()
+              };
+              await setDoc(userRef, newProfile);
+              setUserProfile(newProfile);
+            } else {
+              setUserProfile(userSnap.data() as UserProfile);
             }
-          }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`, false));
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-        }
+
+            // Real-time listener for current user profile
+            userDocUnsubscribe = onSnapshot(userRef, (snapshot) => {
+              if (snapshot.exists()) {
+                setUserProfile(snapshot.data() as UserProfile);
+              }
+            }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`, false));
+          } catch (error) {
+            if (retries > 0 && (error instanceof Error && error.message.includes('offline'))) {
+              console.warn(`Retrying user profile fetch... (${retries} retries left)`);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              return fetchUserProfile(retries - 1);
+            }
+            console.error('Error fetching user profile:', error);
+          }
+        };
+        await fetchUserProfile();
       } else {
         setFirestoreUsers([]);
         setFirestoreTransactions([]);
@@ -858,6 +869,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addNotification(`Track "${track.title}" uploaded`, "success");
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, `tracks/${track.id}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateTrack = async (trackId: string, updates: Partial<Track>) => {
+    setIsLoading(true);
+    try {
+      const cleanUpdates = cleanObject(updates);
+      await updateDoc(doc(db, 'tracks', trackId), cleanUpdates);
+      if (currentTrack?.id === trackId) {
+        setCurrentTrack(prev => prev ? { ...prev, ...updates } : null);
+      }
+      addNotification("Track updated successfully", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `tracks/${trackId}`);
     } finally {
       setIsLoading(false);
     }
@@ -2320,7 +2347,7 @@ Return a JSON object with the following structure:
       addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist,
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
-      allTracks, allNFTs, artists, setArtists, addUserTrack, addUserNFT, updateNFT, recordTransaction, depositTON, withdrawTON, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
+      allTracks, allNFTs, artists, firestoreUsers, setArtists, addUserTrack, updateTrack, addUserNFT, updateNFT, recordTransaction, depositTON, withdrawTON, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
       posts, createPost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
       featuredPlaylist,

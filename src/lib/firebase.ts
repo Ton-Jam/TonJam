@@ -93,4 +93,4 @@ export async function testConnection() {
     return false;
   }
 }
-testConnection();
+// testConnection();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import Layout from '@/components/Layout';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -41,31 +41,56 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, limit, query } from 'firebase/firestore';
 import { seedDatabase } from '@/services/seedService';
 
+const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, x: 10 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -10 }}
+    transition={{ duration: 0.3 }}
+  >
+    {children}
+  </motion.div>
+);
+
 const AppContent: React.FC = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [isBackendReachable, setIsBackendReachable] = useState(true);
+  const location = useLocation();
 
   const { user, userProfile } = useAuth();
 
   useEffect(() => {
     // Test Firebase connection
-    const initBackend = async () => {
+    const initBackend = async (retries = 3) => {
       try {
         await new Promise(resolve => setTimeout(resolve, 2000));
         // Simple connection test - just read from the users collection
         const q = query(collection(db, 'users'), limit(1));
         await getDocs(q);
         setIsBackendReachable(true);
-      } catch (error) {
-        console.error("Please check your Firebase configuration. The backend is currently unreachable.", error);
-        // If it's a permission error, it might still be reachable but rules are blocking
-        if (error instanceof Error && (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions'))) {
-          setIsBackendReachable(true);
-        } else {
-          setIsBackendReachable(false);
+      } catch (error: any) {
+        const isPermissionError = error instanceof Error && (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions'));
+        
+        if (!isPermissionError) {
+          console.error(`Backend connection attempt failed (${4 - retries}/3):`, error);
         }
+        
+        // If it's a permission error, it might still be reachable but rules are blocking
+        if (isPermissionError) {
+          setIsBackendReachable(true);
+          return;
+        }
+
+        if (retries > 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          return initBackend(retries - 1);
+        }
+        
+        setIsBackendReachable(false);
       } finally {
-        setIsAppLoading(false);
+        if (retries === 1 || isBackendReachable) {
+          setIsAppLoading(false);
+        }
       }
     };
     initBackend();
@@ -97,49 +122,44 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isAppLoading ? (
         <LoadingScreen key="loading" />
       ) : (
-        <motion.div
-          key="app"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/jamspace" element={<JamSpace />} />
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/nft/:id" element={<NFTDetail />} />
-              <Route path="/explore/:type" element={<ExploreList />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/user/:id" element={<UserProfile />} />
-              <Route path="/artist/:id" element={<ArtistProfile />} />
-              <Route path="/artist-dashboard" element={<ArtistDashboard />} />
-              <Route path="/artist-onboarding" element={<ArtistOnboarding />} />
-              <Route path="/upload" element={<UploadTrack />} />
-              <Route path="/mint" element={<MintNFT />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/wallet" element={<Wallet />} />
-              <Route path="/staking" element={<Staking />} />
-              <Route path="/playlist/:id" element={<PlaylistDetail />} />
-              <Route path="/track/:id" element={<TrackDetail />} />
-              <Route path="/player/:id" element={<TrackPlayerScreen />} />
-              <Route path="/player" element={<TrackPlayerScreen />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/profile-settings" element={<ProfileSettings />} />
-              <Route path="/tasks" element={<Tasks />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/post/:id" element={<PostDetail />} />
-              <Route path="/social" element={<SocialFeedPage />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/about" element={<About />} />
+        <Layout key="app">
+          <AnimatePresence mode="wait">
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
+              <Route path="/discover" element={<PageWrapper><Discover /></PageWrapper>} />
+              <Route path="/jamspace" element={<PageWrapper><JamSpace /></PageWrapper>} />
+              <Route path="/marketplace" element={<PageWrapper><Marketplace /></PageWrapper>} />
+              <Route path="/nft/:id" element={<PageWrapper><NFTDetail /></PageWrapper>} />
+              <Route path="/explore/:type" element={<PageWrapper><ExploreList /></PageWrapper>} />
+              <Route path="/profile" element={<PageWrapper><Profile /></PageWrapper>} />
+              <Route path="/user/:id" element={<PageWrapper><UserProfile /></PageWrapper>} />
+              <Route path="/artist/:id" element={<PageWrapper><ArtistProfile /></PageWrapper>} />
+              <Route path="/artist-dashboard" element={<PageWrapper><ArtistDashboard /></PageWrapper>} />
+              <Route path="/artist-onboarding" element={<PageWrapper><ArtistOnboarding /></PageWrapper>} />
+              <Route path="/upload" element={<PageWrapper><UploadTrack /></PageWrapper>} />
+              <Route path="/mint" element={<PageWrapper><MintNFT /></PageWrapper>} />
+              <Route path="/library" element={<PageWrapper><Library /></PageWrapper>} />
+              <Route path="/wallet" element={<PageWrapper><Wallet /></PageWrapper>} />
+              <Route path="/staking" element={<PageWrapper><Staking /></PageWrapper>} />
+              <Route path="/playlist/:id" element={<PageWrapper><PlaylistDetail /></PageWrapper>} />
+              <Route path="/track/:id" element={<PageWrapper><TrackDetail /></PageWrapper>} />
+              <Route path="/player/:id" element={<PageWrapper><TrackPlayerScreen /></PageWrapper>} />
+              <Route path="/player" element={<PageWrapper><TrackPlayerScreen /></PageWrapper>} />
+              <Route path="/settings" element={<PageWrapper><Settings /></PageWrapper>} />
+              <Route path="/profile-settings" element={<PageWrapper><ProfileSettings /></PageWrapper>} />
+              <Route path="/tasks" element={<PageWrapper><Tasks /></PageWrapper>} />
+              <Route path="/notifications" element={<PageWrapper><Notifications /></PageWrapper>} />
+              <Route path="/post/:id" element={<PageWrapper><PostDetail /></PageWrapper>} />
+              <Route path="/social" element={<PageWrapper><SocialFeedPage /></PageWrapper>} />
+              <Route path="/admin" element={<PageWrapper><AdminDashboard /></PageWrapper>} />
+              <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
             </Routes>
-          </Layout>
-        </motion.div>
+          </AnimatePresence>
+        </Layout>
       )}
     </AnimatePresence>
   );

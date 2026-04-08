@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAudio } from "@/context/AudioContext";
 import { useNavigate } from "react-router-dom";
-import { Play, Pause, MoreVertical, X, Music2, SkipBack, SkipForward, Heart } from "lucide-react";
+import { Play, Pause, MoreVertical, X, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX } from "lucide-react";
 import { MOCK_ARTISTS } from "@/constants";
 import { getPlaceholderImage } from "@/lib/utils";
 
@@ -26,6 +26,14 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     setFullPlayerOpen,
     isHighFidelity,
     setOptionsTrack,
+    isShuffle,
+    toggleShuffle,
+    isRepeat,
+    toggleRepeat,
+    volume,
+    setVolume,
+    isMuted,
+    toggleMute
   } = useAudio();
 
   if (!currentTrack) return null;
@@ -122,6 +130,15 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 relative z-10">
+          <div className="hidden sm:flex items-center gap-2">
+            <button onClick={toggleShuffle} className={`p-1.5 rounded-full ${isShuffle ? 'text-blue-500' : 'text-muted-foreground'}`}>
+              <Shuffle className="h-4 w-4" />
+            </button>
+            <button onClick={prevTrack} className="p-1.5 text-foreground">
+              <SkipBack className="h-4 w-4" />
+            </button>
+          </div>
+          
           <div className="flex items-center gap-2 sm:gap-3 mr-1">
             <button
               onClick={(e) => { e.stopPropagation(); togglePlay(); }}
@@ -134,6 +151,29 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 <Play className="h-5 w-5 text-primary-foreground fill-primary-foreground ml-1" />
               )}
             </button>
+          </div>
+          
+          <div className="hidden sm:flex items-center gap-2">
+            <button onClick={nextTrack} className="p-1.5 text-foreground">
+              <SkipForward className="h-4 w-4" />
+            </button>
+            <button onClick={toggleRepeat} className={`p-1.5 rounded-full ${isRepeat ? 'text-blue-500' : 'text-muted-foreground'}`}>
+              <Repeat className="h-4 w-4" />
+            </button>
+            <div className="flex items-center gap-1 w-20">
+              <button onClick={toggleMute} className="text-muted-foreground">
+                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={isMuted ? 0 : volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-full h-1 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
+              />
+            </div>
           </div>
           
           <button

@@ -58,6 +58,7 @@ import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
 import ArtistProfileHeader from '@/components/ArtistProfileHeader';
 import ArtistVerification from '@/components/ArtistVerification';
+import RequestSongModal from '@/components/RequestSongModal';
 
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -69,6 +70,7 @@ const ArtistProfile: React.FC = () => {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [editedBio, setEditedBio] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -459,7 +461,7 @@ const ArtistProfile: React.FC = () => {
         {/* Banner Upload Trigger */}
         {isOwnProfile && (
           <div className="absolute top-6 right-6 z-40">
-            <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-all shadow-lg border border-white/10" >
+            <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-all shadow-lg border border-white/10 hover:scale-110 active:scale-90" >
               <Camera className="h-5 w-5" />
             </button>
             <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
@@ -478,7 +480,7 @@ const ArtistProfile: React.FC = () => {
                 <button 
                   onClick={handleFollow} 
                   className={cn(
-                    "px-10 py-3 rounded-full font-bold text-sm transition-all shadow-lg",
+                    "px-10 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:scale-105 active:scale-95",
                     isFollowing 
                       ? "bg-muted text-foreground border border-border" 
                       : "bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20"
@@ -494,7 +496,7 @@ const ArtistProfile: React.FC = () => {
                         addNotification("Link copied", "success");
                       });
                   }}
-                  className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-all border border-border shadow-sm"
+                  className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-all border border-border shadow-sm hover:scale-105 active:scale-95"
                 >
                   <Share2 className="h-5 w-5" />
                 </button>
@@ -513,7 +515,7 @@ const ArtistProfile: React.FC = () => {
       <div className="sticky top-[var(--header-height,64px)] z-40 bg-background/95 backdrop-blur-xl border-b border-border mb-8">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-center gap-10 overflow-x-auto no-scrollbar">
-            {['tracks', 'collection', 'signals', 'about', 'collaborations', ...(isOwnProfile ? ['management'] : [])].map(tab => (
+            {['tracks', 'collection', 'signals', 'about', 'collaborations', 'requests', ...(isOwnProfile ? ['management'] : [])].map(tab => (
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab as any)} 
@@ -579,12 +581,12 @@ const ArtistProfile: React.FC = () => {
                   <textarea
                     value={editedBio}
                     onChange={(e) => setEditedBio(e.target.value)}
-                    className="w-full bg-background/50 border border-border rounded-2xl p-4 text-sm text-foreground focus:ring-2 focus:ring-orange-500/20 outline-none transition-all min-h-[150px] resize-none"
+                    className="w-full bg-background/50 border border-border rounded-2xl p-4 text-sm text-foreground focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all min-h-[150px] resize-none"
                     placeholder="Tell your story..."
                   />
                   <button 
                     onClick={handleSaveBio}
-                    className="w-full py-3 bg-orange-500 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                    className="w-full py-3 bg-orange-500 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 hover:scale-105 active:scale-95"
                   >
                     Save Biography
                   </button>
@@ -812,6 +814,18 @@ const ArtistProfile: React.FC = () => {
                   ) : (
                     <p className="text-sm text-muted-foreground">No collaborations found.</p>
                   )}
+                </section>
+              )}
+
+              {activeTab === 'requests' && (
+                <section className="glass border border-blue-500/30 bg-foreground/[0.01] p-6 rounded-[12px] animate-in fade-in duration-700">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                      <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Song Requests</h2>
+                    </div>
+                    <button onClick={() => setIsRequestModalOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Request a Song</button>
+                  </div>
                 </section>
               )}
 
@@ -1295,6 +1309,7 @@ const ArtistProfile: React.FC = () => {
       <div className="h-32"></div>
       {showVerifyModal && artist && <VerifyArtistModal onClose={() => setShowVerifyModal(false)} artistName={artist.name} />}
       {showEditProfileModal && <EditArtistProfileModal artist={artist} onClose={() => setShowEditProfileModal(false)} />}
+      {isRequestModalOpen && <RequestSongModal artistId={artist.uid} artistName={artist.name} onClose={() => setIsRequestModalOpen(false)} />}
       
       {selectedNftForListing && (
         <SellNFTModal 

@@ -181,11 +181,15 @@ const FullPlayer: React.FC = () => {
     userProfile,
     addNotification,
     allTracks,
-    setTrackToAddToPlaylist
+    setTrackToAddToPlaylist,
+    updateTrack
   } = useAudio();
 
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'playlist'>('player');
   const [showQueue, setShowQueue] = useState(false);
+  const [showAddLyricsModal, setShowAddLyricsModal] = useState(false);
+  const [newLyrics, setNewLyrics] = useState('');
+  const [isUpdatingLyrics, setIsUpdatingLyrics] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   if (!isFullPlayerOpen || !currentTrack) return null;
@@ -229,6 +233,23 @@ const FullPlayer: React.FC = () => {
         console.error('Error sharing:', err);
         addNotification('Failed to share track.', 'error');
       }
+    }
+  };
+
+  const handleAddLyrics = async () => {
+    if (!newLyrics.trim()) {
+      addNotification("Lyrics cannot be empty.", "error");
+      return;
+    }
+    setIsUpdatingLyrics(true);
+    try {
+      await updateTrack(currentTrack.id, { lyrics: newLyrics });
+      setShowAddLyricsModal(false);
+      setNewLyrics('');
+    } catch (error) {
+      console.error("Failed to add lyrics", error);
+    } finally {
+      setIsUpdatingLyrics(false);
     }
   };
 
@@ -387,6 +408,22 @@ const FullPlayer: React.FC = () => {
               </button>
             </div>
 
+            {/* Volume Control */}
+            <div className="w-full flex items-center gap-4 mb-8 px-4">
+              <button onClick={toggleMute} className="text-foreground/50 hover:text-foreground">
+                {isMuted ? <SpeakerXMarkIcon className="h-6 w-6" /> : <SpeakerWaveIcon className="h-6 w-6" />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={isMuted ? 0 : volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-full h-1.5 bg-foreground/10 rounded-full appearance-none cursor-pointer accent-foreground"
+              />
+            </div>
+
             {/* Quick Actions Row */}
             <div className="flex items-center justify-between bg-foreground/5 p-4 rounded-2xl">
               <div className="flex gap-4">
@@ -529,15 +566,42 @@ const FullPlayer: React.FC = () => {
           </section>
 
           {/* 4. Lyrics Section (If available) */}
-          {currentTrack.lyrics && (
+          {(currentTrack.lyrics || currentTrack.artistId === userProfile.uid) && (
             <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <MicrophoneIcon className="h-5 w-5 text-blue-500" />
-                <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Lyrics</h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MicrophoneIcon className="h-5 w-5 text-blue-500" />
+                  <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Lyrics</h3>
+                </div>
+                {currentTrack.artistId === userProfile.uid && !currentTrack.lyrics && (
+                  <button 
+                    onClick={() => setShowAddLyricsModal(true)}
+                    className="text-xs font-bold text-blue-500 uppercase tracking-widest hover:underline"
+                  >
+                    Add Lyrics
+                  </button>
+                )}
+                {currentTrack.artistId === userProfile.uid && currentTrack.lyrics && (
+                  <button 
+                    onClick={() => {
+                      setNewLyrics(currentTrack.lyrics || '');
+                      setShowAddLyricsModal(true);
+                    }}
+                    className="text-xs font-bold text-blue-500 uppercase tracking-widest hover:underline"
+                  >
+                    Edit Lyrics
+                  </button>
+                )}
               </div>
-              <div className="bg-foreground/5 p-6 rounded-2xl">
-                <LyricsView lyrics={currentTrack.lyrics} />
-              </div>
+              {currentTrack.lyrics ? (
+                <div className="bg-foreground/5 p-6 rounded-2xl">
+                  <LyricsView lyrics={currentTrack.lyrics} />
+                </div>
+              ) : (
+                <div className="bg-foreground/5 p-6 rounded-2xl text-center text-muted-foreground">
+                  <p className="text-sm">No lyrics available for this track.</p>
+                </div>
+              )}
             </section>
           )}
 
@@ -707,6 +771,58 @@ const FullPlayer: React.FC = () => {
                 </div>
               )}
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Lyrics Modal */}
+      <AnimatePresence>
+        {showAddLyricsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-card w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-border flex flex-col max-h-[90vh]"
+            >
+              <div className="p-6 border-b border-border flex items-center justify-between">
+                <h3 className="text-xl font-bold text-foreground">Add Lyrics</h3>
+                <button 
+                  onClick={() => setShowAddLyricsModal(false)}
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full"
+                >
+                  <SpeakerXMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+              <div className="p-6 flex-1 overflow-y-auto">
+                <textarea
+                  value={newLyrics}
+                  onChange={(e) => setNewLyrics(e.target.value)}
+                  placeholder="Paste your lyrics here..."
+                  className="w-full h-64 bg-background/50 rounded-xl p-4 text-sm text-foreground outline-none border border-border focus:border-blue-500/50 transition-all resize-none"
+                />
+              </div>
+              <div className="p-6 border-t border-border flex justify-end gap-4">
+                <button
+                  onClick={() => setShowAddLyricsModal(false)}
+                  className="px-6 py-2 rounded-full text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddLyrics}
+                  disabled={isUpdatingLyrics}
+                  className="px-6 py-2 rounded-full bg-blue-600 text-foreground text-sm font-bold hover:bg-blue-500 transition-colors disabled:opacity-50"
+                >
+                  {isUpdatingLyrics ? 'Saving...' : 'Save Lyrics'}
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { BackButton } from '@/components/BackButton';
 import { 
@@ -37,7 +37,7 @@ import FullPlayer from './FullPlayer';
 import AddToPlaylistModal from './AddToPlaylistModal';
 import TrackOptionsModal from './TrackOptionsModal';
 import PostModal from './PostModal';
-// import TrackUploadModal from './TrackUploadModal';
+import { SearchBar } from './SearchBar';
 import { ModeToggle } from './ModeToggle';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import CreatePlaylistModal from './CreatePlaylistModal';
@@ -77,6 +77,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     userProfile, 
     searchQuery, 
     setSearchQuery, 
+    allTracks, 
+    allNFTs, 
+    artists, 
+    firestoreUsers,
+    playTrack,
     isCreatePlaylistModalOpen, 
     setIsCreatePlaylistModalOpen, 
     isDiscoverFiltersOpen, 
@@ -98,6 +103,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
+  const filteredResults = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+
+    const query = searchQuery.toLowerCase();
+    const tracks = allTracks.filter(t => 
+      t.title.toLowerCase().includes(query) || 
+      t.artist.toLowerCase().includes(query)
+    ).slice(0, 5);
+    const nfts = allNFTs.filter(n => 
+      n.title.toLowerCase().includes(query) || 
+      n.artist?.toLowerCase().includes(query)
+    ).slice(0, 5);
+    const filteredArtists = artists.filter(a => 
+      a.name.toLowerCase().includes(query)
+    ).slice(0, 5);
+    const users = firestoreUsers.filter(u => 
+      u.name.toLowerCase().includes(query) ||
+      u.username.toLowerCase().includes(query)
+    ).slice(0, 5);
+
+    return { tracks, nfts, artists: filteredArtists, users };
+  }, [searchQuery, allTracks, allNFTs, artists, firestoreUsers]);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [isMobileNavHidden, setIsMobileNavHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -109,7 +137,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return saved ? JSON.parse(saved) : ['Lo-fi hip hop', 'Cyberpunk Beats', 'Phonk Vibes'];
   });
   const trendingTopics = ['TON Blockchain', 'NFT Drops', 'Jam Sessions', 'Web3 Music', 'Artist Dashboard'];
-  const searchRef = useRef<HTMLDivElement>(null);
 
   const saveRecentSearch = (query: string) => {
     if (!query.trim()) return;
@@ -162,17 +189,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate(`/discover?search=${encodeURIComponent(query)}`);
     setIsSearchOpen(false);
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   useEffect(() => {
     if (isFullPlayerOpen) {
@@ -267,95 +283,68 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </span>
                   </div>
                 )}
-                <div className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`} ref={searchRef}>
-                  <ButtonGroupInput 
-                  placeholder={getSearchPlaceholder()} 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchOpen(true)}
-                  onKeyDown={handleSearch}
-                  className="w-full"
+                <SearchBar
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  isSearchOpen={isSearchOpen}
+                  setIsSearchOpen={setIsSearchOpen}
+                  handleSearch={handleSearch}
+                  handleSuggestionClick={handleSuggestionClick}
+                  recentSearches={recentSearches}
+                  removeRecentSearch={removeRecentSearch}
+                  trendingTopics={trendingTopics}
+                  placeholder={getSearchPlaceholder()}
+                  className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`}
                   inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2.5 pl-5 pr-10 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
-                />
-
-                {/* Desktop Search Dropdown */}
-                <AnimatePresence>
-                  {isSearchOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-xl border border-blue-500/20 rounded-2xl shadow-2xl overflow-hidden z-50 p-2"
-                    >
-                      <div className="grid grid-cols-2 gap-2">
+                >
+                  {filteredResults && (
+                    <div className="p-4 space-y-4">
+                      {filteredResults.tracks.length > 0 && (
                         <div>
-                          <div className="flex items-center gap-2 mb-2 px-2">
-                            <ClockIcon className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Recent Searches</span>
-                          </div>
-                          <div className="space-y-2">
-                            {recentSearches.length > 0 ? (
-                              recentSearches.map((item, index) => (
-                                <div key={`${item}-${index}`} className="group flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                                  <button 
-                                    onClick={() => handleSuggestionClick(item)}
-                                    className="flex-1 text-left text-sm text-foreground/80 hover:text-foreground transition-colors"
-                                  >
-                                    {item}
-                                  </button>
-                                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button 
-                                      onClick={() => handleSuggestionClick(item)}
-                                      className="p-3 rounded-md hover:bg-primary/20 text-primary transition-colors"
-                                      title="Search"
-                                    >
-                                      <ArrowRightIcon className="h-3 w-3" />
-                                    </button>
-                                    <button 
-                                      onClick={() => removeRecentSearch(item)}
-                                      className="p-3 rounded-md hover:bg-destructive/10 text-destructive/70 hover:text-destructive transition-colors"
-                                      title="Remove"
-                                    >
-                                      <XMarkIcon className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="px-2 text-xs text-muted-foreground italic">No recent searches</p>
-                            )}
-                          </div>
+                          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Tracks</h3>
+                          {filteredResults.tracks.map(track => (
+                            <div key={track.id} className="text-sm p-2 hover:bg-white/5 rounded cursor-pointer" onClick={() => { playTrack(track); setIsSearchOpen(false); }}>
+                              {track.title} - {track.artist}
+                            </div>
+                          ))}
                         </div>
-
+                      )}
+                      {filteredResults.artists.length > 0 && (
                         <div>
-                          <div className="flex items-center gap-2 mb-2 px-2">
-                            <ArrowTrendingUpIcon className="h-3 w-3 text-zinc-500 dark:text-primary" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trending Now</span>
-                          </div>
-                          <div className="space-y-2">
-                            {trendingTopics.map((topic, index) => (
-                              <div key={`${topic}-${index}`} className="group flex items-center justify-between p-2 rounded-lg hover:bg-primary/5 transition-colors">
-                                <button 
-                                  onClick={() => handleSuggestionClick(topic)}
-                                  className="flex-1 text-left text-sm text-foreground/80 hover:text-primary transition-colors"
-                                >
-                                  {topic}
-                                </button>
-                                <button 
-                                  onClick={() => handleSuggestionClick(topic)}
-                                  className="opacity-0 group-hover:opacity-100 p-3 rounded-md bg-primary/10 text-primary transition-all"
-                                >
-                                  <ArrowTrendingUpIcon className="h-3 w-3" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
+                          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Artists</h3>
+                          {filteredResults.artists.map(artist => (
+                            <div key={artist.uid} className="text-sm p-2 hover:bg-white/5 rounded cursor-pointer" onClick={() => { navigate(`/artist/${artist.uid}`); setIsSearchOpen(false); }}>
+                              {artist.name}
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                    </motion.div>
+                      )}
+                      {filteredResults.nfts.length > 0 && (
+                        <div>
+                          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">NFTs</h3>
+                          {filteredResults.nfts.map(nft => (
+                            <div key={nft.id} className="text-sm p-2 hover:bg-white/5 rounded cursor-pointer" onClick={() => { navigate(`/nft/${nft.id}`); setIsSearchOpen(false); }}>
+                              {nft.title}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {filteredResults.users.length > 0 && (
+                        <div>
+                          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Users</h3>
+                          {filteredResults.users.map(user => (
+                            <div key={user.uid} className="text-sm p-2 hover:bg-white/5 rounded cursor-pointer" onClick={() => { navigate(`/user/${user.uid}`); setIsSearchOpen(false); }}>
+                              {user.name} (@{user.username})
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {(!filteredResults.tracks.length && !filteredResults.artists.length && !filteredResults.nfts.length && !filteredResults.users.length) && (
+                        <p className="text-sm text-muted-foreground p-2">No results found.</p>
+                      )}
+                    </div>
                   )}
-                </AnimatePresence>
-              </div>
+                </SearchBar>
               </>
             )}
 
@@ -368,74 +357,69 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {!isHome && !isDiscover && (
               <div className="lg:hidden flex-1 flex justify-end">
                 {isSearchOpen ? (
-                  <div className="flex-1 relative" ref={searchRef}>
-                    <ButtonGroupInput 
-                      placeholder="Search..." 
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={handleSearch}
-                      className="w-full"
-                      inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
-                    />
-
-                    {/* Mobile Search Dropdown */}
-                    <AnimatePresence>
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-background border border-blue-500/20 rounded-xl shadow-2xl overflow-hidden z-50 p-2 max-h-[60vh] overflow-y-auto"
-                      >
-                        <div className="space-y-2">
-                          <div>
-                            <div className="flex items-center gap-2 mb-2 px-2">
-                              <ClockIcon className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Recent</span>
-                            </div>
-                            <div className="space-y-2">
-                              {recentSearches.map((item) => (
-                                <div key={item} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-                                  <button 
-                                    onClick={() => handleSuggestionClick(item)}
-                                    className="flex-1 text-left text-xs text-foreground/90"
-                                  >
-                                    {item}
-                                  </button>
-                                  <div className="flex items-center gap-2">
-                                    <button onClick={() => handleSuggestionClick(item)} className="p-2 text-primary">
-                                      <ArrowRightIcon className="h-3.5 w-3.5" />
-                                    </button>
-                                    <button onClick={() => removeRecentSearch(item)} className="p-2 text-destructive/60">
-                                      <XMarkIcon className="h-3.5 w-3.5" />
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div>
-                            <div className="flex items-center gap-2 mb-2 px-2">
-                              <ArrowTrendingUpIcon className="h-3 w-3 text-zinc-500 dark:text-primary" />
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Trending</span>
-                            </div>
-                            <div className="grid grid-cols-1 gap-2">
-                              {trendingTopics.map((topic, index) => (
-                                <button 
-                                  key={`${topic}-${index}`}
-                                  onClick={() => handleSuggestionClick(topic)}
-                                  className="flex items-center justify-between p-2 rounded-lg bg-primary/5 text-xs text-foreground/90 text-left"
-                                >
-                                  <span>{topic}</span>
-                                  <ArrowTrendingUpIcon className="h-3 w-3 text-primary/60" />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                  <SearchBar
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    isSearchOpen={isSearchOpen}
+                    setIsSearchOpen={setIsSearchOpen}
+                    handleSearch={handleSearch}
+                    handleSuggestionClick={handleSuggestionClick}
+                    recentSearches={recentSearches}
+                    removeRecentSearch={removeRecentSearch}
+                    trendingTopics={trendingTopics}
+                    placeholder="Search..."
+                    className="flex-1 relative"
+                    inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
+                    dropdownClassName="absolute top-full left-0 right-0 mt-2 bg-background border border-blue-500/20 rounded-xl shadow-2xl overflow-hidden z-50 p-2 max-h-[60vh] overflow-y-auto"
+                  >
+                    <div className="space-y-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 px-2">
+                          <ClockIcon className="h-3 w-3 text-zinc-400 dark:text-muted-foreground" />
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Recent</span>
                         </div>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
+                        <div className="space-y-2">
+                          {recentSearches.map((item) => (
+                            <div key={item} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                              <button 
+                                onClick={() => handleSuggestionClick(item)}
+                                className="flex-1 text-left text-xs text-foreground/90"
+                              >
+                                {item}
+                              </button>
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => handleSuggestionClick(item)} className="p-2 text-primary">
+                                  <ArrowRightIcon className="h-3.5 w-3.5" />
+                                </button>
+                                <button onClick={() => removeRecentSearch(item)} className="p-2 text-destructive/60">
+                                  <XMarkIcon className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 px-2">
+                          <ArrowTrendingUpIcon className="h-3 w-3 text-zinc-500 dark:text-primary" />
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Trending</span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                          {trendingTopics.map((topic, index) => (
+                            <button 
+                              key={`${topic}-${index}`}
+                              onClick={() => handleSuggestionClick(topic)}
+                              className="flex items-center justify-between p-2 rounded-lg bg-primary/5 text-xs text-foreground/90 text-left"
+                            >
+                              <span>{topic}</span>
+                              <ArrowTrendingUpIcon className="h-3 w-3 text-primary/60" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </SearchBar>
                 ) : null}
               </div>
             )}
@@ -667,32 +651,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <PlusIcon className="h-6 w-6" strokeWidth={2.5} />
                   </button>
                 )}
-                {(isJamspace) && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button 
-                        className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                        aria-label="Filters"
-                      >
-                        <AdjustmentsHorizontalIcon className="h-6 w-6" strokeWidth={2.5} />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 bg-background border-none shadow-2xl">
-                      <DropdownMenuLabel>Sort & View</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup value={jamspaceFilters.sortOrder} onValueChange={(val) => setJamspaceFilters(prev => ({ ...prev, sortOrder: val as any }))}>
-                        <DropdownMenuRadioItem value="Newest">Newest</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="Oldest">Oldest</DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel>View Mode</DropdownMenuLabel>
-                      <DropdownMenuRadioGroup value={jamspaceFilters.viewMode} onValueChange={(val) => setJamspaceFilters(prev => ({ ...prev, viewMode: val as any }))}>
-                        <DropdownMenuRadioItem value="list">List</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
               </div>
             )}
                 {!isJamspace && !isLibrary && !isMarketplace && (
@@ -706,7 +664,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
 
             {/* Wallet & User Avatar / Sign In */}
-            {userAddress && !isLibrary ? (
+            {userAddress && !isLibrary && !isJamspace ? (
               <div className="flex items-center gap-1.5">
                 <div className="hidden sm:block px-3 py-1.5 text-xs font-mono text-blue-600 dark:text-blue-400">
                   {userAddress.slice(0, 4)}...{userAddress.slice(-4)}
@@ -719,7 +677,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <ArrowRightOnRectangleIcon className="h-5 w-5" />
                 </button>
               </div>
-            ) : (!isLibrary && !userAddress) ? (
+            ) : (!isLibrary && !isJamspace && !userAddress) ? (
               <button 
                 onClick={() => tonConnectUI.openModal()}
                 className="px-4 py-2 text-blue-600 dark:text-primary rounded-full text-sm font-bold hover:bg-muted transition-all flex items-center gap-2"
@@ -737,7 +695,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <FunnelIcon className="h-5 w-5" />
               </button>
             )}
-            {!isMarketplace && !isDiscover && !isJamspace && !isLibrary && (user ? (
+            {!isMarketplace && !isDiscover && !isLibrary && (user ? (
               <Link to="/profile" className="hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full" aria-label="View Profile">
                 <Avatar className="w-9 h-9">
                   <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
@@ -841,7 +799,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         )}
       </AnimatePresence>
       <ScrollToTopButton />
-      <AIAssistant />
+      {!isJamspace && <AIAssistant />}
 
       {/* Mobile Navigation */}
       {!isPlayer && (

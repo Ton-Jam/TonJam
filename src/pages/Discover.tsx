@@ -27,6 +27,14 @@ const Discover: React.FC = () => {
   });
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const searchParam = params.get('search');
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+  }, [setSearchQuery]);
+
+  useEffect(() => {
     const tourShown = localStorage.getItem('tonjam_discover_tour_shown');
     if (!tourShown) {
       setIsTourOpen(true);
@@ -149,23 +157,21 @@ const Discover: React.FC = () => {
             </button>
           </form>
 
-          {searchQuery && (
-            <div className="flex items-center gap-2 mt-4 overflow-x-auto no-scrollbar">
-              {(['all', 'tracks', 'nfts', 'artists', 'playlists', 'users'] as const).map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                    activeFilter === filter 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-white/10 text-foreground hover:bg-white/20'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-2 mt-4 overflow-x-auto no-scrollbar">
+            {(['all', 'tracks', 'nfts', 'artists', 'playlists', 'users'] as const).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+                  activeFilter === filter 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-white/10 text-foreground hover:bg-white/20'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
         </div>
 
         {!searchQuery ? (
@@ -263,9 +269,9 @@ const Discover: React.FC = () => {
                   <section>
                     <h2 className="text-xl font-bold tracking-tight mb-4">Songs</h2>
                     <div className="space-y-1">
-                      {filteredResults.tracks.slice(0, activeFilter === 'all' ? 4 : undefined).map((track) => (
+                      {filteredResults.tracks.slice(0, activeFilter === 'all' ? 4 : undefined).map((track, idx) => (
                         <div 
-                          key={track.id}
+                          key={`${track.id}-${idx}`}
                           onClick={() => playTrack(track)}
                           className="flex items-center gap-4 p-2 hover:bg-white/5 rounded-md cursor-pointer group transition-colors"
                         >

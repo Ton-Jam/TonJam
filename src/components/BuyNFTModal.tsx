@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, Loader2, CheckCircle2, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
@@ -16,6 +17,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   const { addNotification, updateNFT, addUserNFT, recordTransaction, createPost } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
+  const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const price = parseFloat(nft.price) || 0;
   const platformFeeFromBuyer = price * 0.05;
@@ -23,7 +25,11 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   const totalPlatformFee = platformFeeFromBuyer + platformFeeFromSeller;
   const gasFee = 0.05;
   const total = (price + platformFeeFromBuyer + gasFee).toFixed(2);
-  const artistShare = (price - platformFeeFromSeller).toFixed(2);
+  
+  // Calculate royalty splits
+  const royaltySplits = nft.royaltySplits || [];
+  const royaltyTotal = royaltySplits.reduce((sum, split) => sum + (split.percentage * price), 0);
+  const artistShare = (price - platformFeeFromSeller - royaltyTotal).toFixed(2);
 
   const handlePurchase = async () => {
     if (!userAddress) {
@@ -87,9 +93,18 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
         <div className="p-2 relative z-10">
           <header className="flex justify-between items-center mb-2">
             <h2 className="text-xl font-bold uppercase tracking-tighter text-white">Purchase Asset</h2>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors border border-white/10">
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => { navigate(`/nft/${nft.id}`); onClose(); }} 
+                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors border border-white/10"
+                title="View Details"
+              >
+                <Info className="h-4 w-4" />
+              </button>
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors border border-white/10">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </header>
           <div className="flex items-center gap-2 mb-2 p-2 bg-white/5 border border-white/10 rounded-[16px]">
             <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-16 h-16 rounded-[12px] object-cover border border-white/10" alt="" />
@@ -118,8 +133,19 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
                 <span className="text-[20px] font-bold text-white tracking-tighter">{total}</span>
               </div>
             </div>
-            <div className="pt-2 flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/20">
-              <span>Artist Receive (Price - 5% Fee)</span>
+            {royaltySplits.length > 0 && (
+              <div className="pt-2 border-t border-white/10 space-y-1">
+                <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Royalty Distribution</span>
+                {royaltySplits.map((split, i) => (
+                  <div key={i} className="flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/60">
+                    <span>{split.label || 'Collaborator'} ({ (split.percentage * 100).toFixed(0) }%)</span>
+                    <span>{(split.percentage * price).toFixed(2)} TON</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="pt-2 border-t border-white/10 flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/20">
+              <span>Artist Receive (Price - 5% Fee - Royalties)</span>
               <span>{artistShare} TON</span>
             </div>
           </div>

@@ -63,6 +63,7 @@ const TrackDetail: React.FC = () => {
       return;
     }
     playTrack(track);
+    navigate(`/player/${track.id}`);
   };
 
   const handleTip = async (amount: number) => {
@@ -348,6 +349,15 @@ const TrackDetail: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <Music2 className="h-4 w-4 text-muted-foreground/50" />
                   <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">{track.genre}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">BPM: {track.bpm || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">Key: {track.key || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">Bitrate: {track.bitrate || 'N/A'}</span>
                 </div>
                 {track.mood && (
                   <div className="flex items-center gap-4">

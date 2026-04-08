@@ -209,12 +209,6 @@ const NFTDetail: React.FC = () => {
         <div className="text-center">
           <h2 className="text-[20px] font-bold mb-4">Asset Not Found</h2>
           <p className="text-muted-foreground/80">The requested NFT could not be located.</p>
-          <BackButton 
-            className="mt-4 text-blue-500 hover:underline p-0"
-            ariaLabel="Go Back"
-          >
-            Go Back
-          </BackButton>
         </div>
       </div>
     );
@@ -280,7 +274,10 @@ const NFTDetail: React.FC = () => {
   };
 
   const handlePlayClick = () => {
-    if (associatedTrack) playTrack(associatedTrack);
+    if (associatedTrack) {
+      playTrack(associatedTrack);
+      navigate(`/player/${associatedTrack.id}`);
+    }
   };
 
   const handleAcceptOffer = (offer: NFTOffer) => {
@@ -780,10 +777,22 @@ const NFTDetail: React.FC = () => {
                       <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Asset Class</span>
                       <span className="text-sm font-bold text-blue-500 tracking-tight">{localNft.edition}</span>
                     </div>
-                    <div className="p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[16px] flex justify-between items-center">
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Royalties</span>
-                      <span className="text-sm font-bold text-emerald-500 tracking-tight">{localNft.royalty}%</span>
-                    </div>
+                    {localNft.royaltySplits && localNft.royaltySplits.length > 0 && (
+                      <div className="col-span-1 md:col-span-2 p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[20px]">
+                        <h4 className="text-[5px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
+                          <div className="w-1 h-3 bg-emerald-500 rounded-full" />
+                          Royalty Distribution
+                        </h4>
+                        <div className="space-y-2">
+                          {localNft.royaltySplits.map((split, i) => (
+                            <div key={i} className="flex justify-between items-center text-xs font-bold text-foreground uppercase tracking-widest">
+                              <span>{split.label || 'Collaborator'}</span>
+                              <span className="text-emerald-500">{(split.percentage * 100).toFixed(0)}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 )}
   
@@ -872,7 +881,7 @@ const NFTDetail: React.FC = () => {
                                 <div className="flex gap-4">
                                   {o.offerer !== localNft.owner && (
                                     <button onClick={() => handleAcceptOffer(o)} className={`px-4 py-4 text-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-4 ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`} >
-                                      <Check className="h-4 w-4" /> Accept
+                                      <Check className="h-4 w-4" /> {isTopBid ? 'Accept Top Bid' : 'Accept'}
                                     </button>
                                   )}
                                   <button onClick={() => handleDeclineOffer(o.offerer)} className="px-4 py-4 bg-muted/50 text-muted-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center gap-4" >

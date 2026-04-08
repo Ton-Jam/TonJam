@@ -43,7 +43,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ posts, onDeletePost, emptyMessa
 
   if (posts.length === 0) {
     return (
-      <div className="py-2 text-center flex flex-col items-center justify-center bg-muted/50 border border-border rounded-3xl">
+      <div className="py-2 text-center flex flex-col items-center justify-center bg-muted/50 border-none rounded-3xl">
         <p className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.4em]">{emptyMessage}</p>
       </div>
     );

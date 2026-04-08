@@ -97,7 +97,7 @@ const Leaderboard: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-foreground tracking-tight group-hover:text-blue-400 transition-colors uppercase">{entry.name}</h4>
+                  <h4 className="text-xs font-black text-foreground tracking-tight group-hover:text-blue-400 transition-colors uppercase">{entry.name}</h4>
                   <div className="flex items-center gap-3">
                     <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                       {entry.isPartner ? 'Verified Partner' : 'Sonic Architect'}

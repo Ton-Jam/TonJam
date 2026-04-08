@@ -677,13 +677,13 @@ const Profile: React.FC = () => {
                   ].sort((a, b) => (b as any).id.localeCompare((a as any).id)).map((item, idx) => {
                     if (item.type === 'post') {
                       return (
-                        <div key={item.id} className="mb-4">
+                        <div key={`feed-post-${item.id}`} className="mb-4">
                           <PostCard post={item as any} />
                         </div>
                       );
                     }
                     return (
-                    <div key={item.id} className="bg-background p-4 rounded-2xl border border-border flex items-center gap-4 group hover:bg-muted/30 transition-all mb-4 shadow-sm">
+                    <div key={`feed-${item.type}-${item.id}`} className="bg-background p-4 rounded-2xl border border-border flex items-center gap-4 group hover:bg-muted/30 transition-all mb-4 shadow-sm">
                       <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
                         <img src={(item as any).coverUrl || (item as any).imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                       </div>

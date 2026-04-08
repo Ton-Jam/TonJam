@@ -244,8 +244,8 @@ const Home: React.FC = () => {
         {/* Home Sections */}
         <div className="space-y-10">
           <HomeSection title="Made For You" icon={Sparkles} link="/explore/tracks?title=Recommended&filter=recommended">
-            {recommendedTracks.map(track => (
-              <div key={`rec-${track.id}`} className="flex-shrink-0 w-48 lg:w-56 snap-start">
+            {recommendedTracks.map((track, idx) => (
+              <div key={`rec-${track.id}-${idx}`} className="flex-shrink-0 w-56 lg:w-64 snap-start">
                 <TrackCard track={track} />
               </div>
             ))}
@@ -253,8 +253,8 @@ const Home: React.FC = () => {
 
           {recentlyPlayed.length > 0 && (
             <HomeSection title="Recently Played" icon={Clock} link="/explore/tracks?title=Recently Played&filter=recent">
-              {recentlyPlayed.map(track => (
-                <div key={`recent-${track.id}`} className="flex-shrink-0 w-48 lg:w-56 snap-start">
+              {recentlyPlayed.map((track, idx) => (
+                <div key={`recent-${track.id}-${idx}`} className="flex-shrink-0 w-56 lg:w-64 snap-start">
                   <TrackCard track={track} />
                 </div>
               ))}
@@ -262,16 +262,40 @@ const Home: React.FC = () => {
           )}
 
           <HomeSection title="Trending Now" icon={Flame} link="/explore/tracks?title=Trending&filter=trending">
-            {trendingTracks.map(track => (
-              <div key={`trend-${track.id}`} className="flex-shrink-0 w-48 lg:w-56 snap-start">
+            {trendingTracks.map((track, idx) => (
+              <div key={`trend-${track.id}-${idx}`} className="flex-shrink-0 w-56 lg:w-64 snap-start">
                 <TrackCard track={track} />
               </div>
             ))}
           </HomeSection>
 
+          <HomeSection title="Trending NFTs" icon={Activity} link="/marketplace">
+            {allNFTs.slice(0, 5).map((nft, idx) => (
+              <div key={`nft-trend-${nft.id}-${idx}`} className="flex-shrink-0 w-56 lg:w-64 snap-start">
+                <NFTCard nft={nft} />
+              </div>
+            ))}
+          </HomeSection>
+
+          <HomeSection title="Trending Artists" icon={UserCheck} link="/artists">
+            {artists.slice(0, 5).map((artist, idx) => (
+              <div key={`artist-trend-${artist.uid}-${idx}`} className="flex-shrink-0 w-48 lg:w-56 snap-start">
+                <ArtistCard artist={artist} />
+              </div>
+            ))}
+          </HomeSection>
+
+          <HomeSection title="Top Chart NFTs" icon={Gavel} link="/marketplace">
+            {allNFTs.sort((a, b) => parseFloat(b.price) - parseFloat(a.price)).slice(0, 5).map((nft, idx) => (
+              <div key={`nft-top-${nft.id}-${idx}`} className="flex-shrink-0 w-56 lg:w-64 snap-start">
+                <NFTCard nft={nft} />
+              </div>
+            ))}
+          </HomeSection>
+
           <HomeSection title="New Releases" icon={Zap} link="/explore/tracks?title=New Releases&filter=new">
-            {newReleases.map(track => (
-              <div key={`new-${track.id}`} className="flex-shrink-0 w-48 lg:w-56 snap-start">
+            {newReleases.map((track, idx) => (
+              <div key={`new-${track.id}-${idx}`} className="flex-shrink-0 w-56 lg:w-64 snap-start">
                 <TrackCard track={track} />
               </div>
             ))}
@@ -279,7 +303,7 @@ const Home: React.FC = () => {
 
           <HomeSection title="Your Playlists" icon={ListMusic} link="/library">
             {allPlaylists.slice(0, 8).map(playlist => (
-              <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-48 lg:w-56 snap-start">
+              <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-56 lg:w-64 snap-start">
                 <PlaylistCard playlist={playlist} onClick={() => navigate(`/playlist/${playlist.id}`)} />
               </div>
             ))}
@@ -297,7 +321,7 @@ const Home: React.FC = () => {
         </section>
 
         {/* Decentralized Footer Info */}
-        <section className="pt-8 flex flex-col items-center text-center space-y-2 border-t border-border">
+        <section className="pt-8 flex flex-col items-center text-center space-y-2 border-none">
           <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
             <Globe className="h-3 w-3" />
             Secured by TON Blockchain

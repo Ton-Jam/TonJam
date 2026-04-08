@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { BackButton } from '@/components/BackButton';
 import { 
   Heart, 
   Share2, 
@@ -110,10 +109,6 @@ export default function TrackPlayerScreen() {
 
       {/* Header */}
       <div className="relative z-10 p-4 flex items-center justify-between">
-        <BackButton 
-          className="p-2 transition-colors text-white/70 hover:text-white bg-white/5 rounded-full"
-          iconClassName="w-5 h-5"
-        />
         <div className="text-center">
           <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Now Playing</p>
           <p className="text-[11px] font-black uppercase tracking-widest text-cyan-400">Protocol 0.1</p>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BackButton } from '@/components/BackButton';
-import { ArrowLeft, MoreVertical, Zap, CheckCircle2, Heart, MessageCircle, Repeat2, Share2, Send, Smile, MessageSquareOff } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Zap, CheckCircle2, Heart, MessageCircle, Repeat2, Share2, Send, Smile, MessageSquareOff, Bookmark } from 'lucide-react';
 import { Post, Comment } from '@/types';
 import { MOCK_POSTS, MOCK_USER, MOCK_TRACKS, MOCK_ARTISTS, TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -154,143 +154,123 @@ const PostDetail: React.FC = () => {
               <MoreVertical className="h-5 w-5" />
             </button>
           </div>
-
-          {/* User Identity Section */}
-          <div className="flex items-center gap-4 mb-4">
+              {/* User Identity Section */}
+          <div className="flex items-center gap-3 mb-3">
             <div className="relative flex-shrink-0 cursor-pointer group/avatar" onClick={() => artist ? navigate(`/artist/${artist.uid}`) : post.userId === MOCK_USER.uid ? navigate('/profile') : navigate(`/user/${post.userId}`)}>
-              <img src={post.userAvatar} className="w-16 h-16 rounded-full group-hover/avatar:-blue-500 transition-all object-cover shadow-2xl" alt={post.userName} />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full -black flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.6)]">
-                <Zap className="h-3 w-3 text-foreground fill-current" />
-              </div>
+              <img src={post.userAvatar} className="w-12 h-12 rounded-full group-hover/avatar:opacity-90 transition-all object-cover" alt={post.userName} />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-4 mb-4">
+            <div className="flex-1 min-w-0 flex flex-col">
+              <div className="flex items-center gap-1">
                 <h4 
-                  className="font-bold text-lg text-foreground uppercase tracking-tight truncate cursor-pointer hover:text-blue-400 hover:underline inline-block"
+                  className="font-bold text-base text-foreground truncate cursor-pointer hover:underline inline-block"
                   onClick={() => artist ? navigate(`/artist/${artist.uid}`) : post.userId === MOCK_USER.uid ? navigate('/profile') : navigate(`/user/${post.userId}`)}
                 > 
                   {post.userName} 
                 </h4>
-                {artist?.verified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
-                {!isMe && (
-                  <button onClick={() => toggleFollowUser(post.userId)} className={`text-[9px] font-bold uppercase tracking-widest transition-all px-4 py-4 rounded-full ${isFollowing ? 'text-blue-500 -blue-500/20 bg-blue-500/5' : 'text-muted-foreground hover:text-blue-400 hover:-blue-400/20 bg-muted/50'}`}>
-                    {isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                )}
+                {artist?.verified && <CheckCircle2 className="h-4 w-4 text-blue-500" />}
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-[10px] text-foreground/30 uppercase tracking-[0.3em] font-bold"> {post.timestamp} </span>
-                <div className="w-1 h-1 rounded-full bg-blue-500/20"></div>
-                <span className="text-[8px] text-blue-500/40 uppercase font-bold tracking-widest">Neural Sync Active</span>
-              </div>
+              <span className="text-[15px] text-muted-foreground truncate">@{post.username || post.userName.toLowerCase().replace(/\s+/g, '')}</span>
             </div>
+            {!isMe && (
+              <button 
+                onClick={() => toggleFollowUser(post.userId)} 
+                className={`text-sm font-bold transition-all px-4 py-1.5 rounded-full ${isFollowing ? 'border border-border text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive' : 'bg-foreground text-background hover:bg-foreground/90'}`}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </button>
+            )}
           </div>
 
           {/* Content */}
-          <p className="text-foreground/90 leading-relaxed mb-4 text-lg font-medium border-l border-blue-500/20 pl-4">
+          <p className="text-foreground leading-normal mb-4 text-[17px] whitespace-pre-wrap">
             {post.content}
           </p>
 
           {post.imageUrl && (
-            <div className="mb-4 rounded-[10px] overflow-hidden shadow-2xl">
+            <div className="mb-4 rounded-2xl overflow-hidden border border-border/50">
               {post.imageUrl.startsWith('data:video') ? (
-                <video src={post.imageUrl} controls className="w-full max-h-[600px] object-cover" />
+                <video src={post.imageUrl} controls className="w-full max-h-[512px] object-cover" />
               ) : (
-                <img src={post.imageUrl} className="w-full max-h-[600px] object-cover" alt="Post media" />
+                <img src={post.imageUrl} className="w-full max-h-[512px] object-cover" alt="Post media" />
               )}
             </div>
           )}
 
           {track && (
-            <div className="mb-4 p-4 rounded-[10px] glass border border-border bg-muted/30 relative group/track overflow-hidden">
-              <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/track:opacity-100 transition-opacity"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[8px] font-bold text-blue-500 uppercase tracking-[0.3em]">Sonic Attachment Detected</span>
-                  <div className="px-4 py-4 bg-blue-500/10 border-blue-500/20 rounded text-[7px] font-bold text-blue-500 uppercase tracking-widest">Alpha Signal</div>
-                </div>
-                <TrackCard track={track} variant="row" />
-                {track.isNFT && (
-                  <div className="mt-4 pt-4 border-t flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-[10px] bg-blue-500/10 flex items-center justify-center border-blue-500/20">
-                        <img src={TON_LOGO} className="w-6 h-6" alt="TON" />
-                      </div>
-                      <div>
-                        <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Current Price</p>
-                        <p className="text-xl font-bold text-foreground uppercase tracking-tighter">{track.price || '15.0'} TON</p>
-                      </div>
-                    </div>
-                    <button onClick={() => addNotification('Transaction initiated...', 'info')} className="w-full md:w-auto px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-[10px] shadow-2xl shadow-blue-600/20 transition-all active:scale-95">
-                      Buy NFT Now
-                    </button>
-                  </div>
-                )}
-              </div>
+            <div className="mb-4">
+              <TrackCard track={track} />
             </div>
           )}
 
           {nft && (
-            <div className="mb-4 p-4 rounded-[10px] glass border border-border bg-gradient-to-br from-blue-500/5 to-purple-500/5 relative group/nft overflow-hidden cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
-              <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/nft:opacity-100 transition-opacity"></div>
-              <div className="relative z-10 flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative w-40 h-40 rounded-[10px] overflow-hidden shadow-2xl flex-shrink-0">
-                  <img src={nft.imageUrl} className="w-full h-full object-cover" alt={nft.title} />
-                  <div className="absolute top-2 right-2">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                      <Zap className="h-3 w-3 text-white fill-current" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.4em]">Sonic Artifact Acquired</span>
-                  </div>
-                  <h3 className="text-[20px] font-bold text-foreground uppercase tracking-tighter mb-4">{nft.title}</h3>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Creator: {nft.creator}</p>
-                  
-                  <div className="flex items-center justify-center md:justify-start gap-4">
-                    <div>
-                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Valuation</p>
-                      <div className="flex items-center gap-4">
-                        <span className="text-[20px] font-bold text-foreground tracking-tighter">{nft.price}</span>
-                        <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">TON</span>
-                      </div>
-                    </div>
-                    <div className="w-px h-10 bg-muted"></div>
-                    <div>
-                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Rarity</p>
-                      <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Legendary</p>
-                    </div>
-                  </div>
-                </div>
+            <div className="mb-4 rounded-2xl overflow-hidden border border-border/50">
+              <img src={nft.imageUrl} alt={nft.title} className="w-full aspect-square object-cover" />
+              <div className="p-4 bg-muted/30">
+                <h4 className="font-bold text-lg">{nft.title}</h4>
+                <p className="text-sm text-muted-foreground">{nft.edition}</p>
               </div>
             </div>
           )}
 
-          {/* Interaction Bar */}
-          <div className="flex items-center gap-4 pt-4 border-t border-border mb-4">
-            <button onClick={handleLike} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 group/like ${liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-400'}`}>
-              <div className="relative">
-                {liked && <div className="absolute inset-0 bg-red-500/40 blur-md rounded-full animate-ping"></div>}
-                <Heart className={`h-5 w-5 relative z-10 group-hover/like:scale-110 transition-transform ${liked ? 'fill-current' : ''}`} />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-widest">{likesCount}</span>
-            </button>
-            <div className="flex items-center gap-4 text-blue-500">
-              <MessageCircle className="h-5 w-5" />
-              <span className="text-xs font-bold uppercase tracking-widest">{comments.length}</span>
+          {/* Timestamp and Views */}
+          <div className="flex items-center gap-1 text-[15px] text-muted-foreground mb-4">
+            <span>{new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            <span>·</span>
+            <span>{new Date(post.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            <span>·</span>
+            <span className="font-bold text-foreground">{(Math.random() * 10000).toFixed(0)}</span> Views
+          </div>
+
+          <div className="h-px bg-border/50 w-full mb-1"></div>
+
+          {/* Stats Row */}
+          <div className="flex items-center gap-4 py-3 text-[15px] text-muted-foreground">
+            <div className="flex gap-1">
+              <span className="font-bold text-foreground">{repostsCount}</span> Reposts
             </div>
-            <button onClick={handleRepost} className={`flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 ${reposted ? 'text-green-500' : 'text-muted-foreground hover:text-green-400'}`}>
-              <Repeat2 className="h-5 w-5" />
-              <span className="text-xs font-bold uppercase tracking-widest">{repostsCount}</span>
-            </button>
-            <div className="flex-1 flex justify-end">
-              <button onClick={handleShare} className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-blue-500 transition-all active:scale-90 rounded-full hover:bg-muted/50">
-                <Share2 className="h-5 w-5" />
-              </button>
+            <div className="flex gap-1">
+              <span className="font-bold text-foreground">{Math.floor(repostsCount * 0.3)}</span> Quotes
+            </div>
+            <div className="flex gap-1">
+              <span className="font-bold text-foreground">{likesCount}</span> Likes
+            </div>
+            <div className="flex gap-1">
+              <span className="font-bold text-foreground">{Math.floor(likesCount * 0.1)}</span> Bookmarks
             </div>
           </div>
+
+          <div className="h-px bg-border/50 w-full mb-1"></div>
+
+          {/* Interaction Bar */}
+          <div className="flex items-center justify-around py-1 mb-4">
+            <button className="flex items-center gap-2 text-muted-foreground hover:text-blue-500 transition-all group">
+              <div className="p-2 rounded-full group-hover:bg-blue-500/10">
+                <MessageCircle className="h-5 w-5" />
+              </div>
+            </button>
+            <button onClick={handleRepost} className={`flex items-center gap-2 transition-all group ${reposted ? 'text-green-500' : 'text-muted-foreground hover:text-green-500'}`}>
+              <div className="p-2 rounded-full group-hover:bg-green-500/10">
+                <Repeat2 className="h-5 w-5" />
+              </div>
+            </button>
+            <button onClick={handleLike} className={`flex items-center gap-2 transition-all group ${liked ? 'text-pink-500' : 'text-muted-foreground hover:text-pink-500'}`}>
+              <div className="p-2 rounded-full group-hover:bg-pink-500/10">
+                <Heart className={`h-5 w-5 ${liked ? 'fill-current' : ''}`} />
+              </div>
+            </button>
+            <button className="flex items-center gap-2 text-muted-foreground hover:text-blue-500 transition-all group">
+              <div className="p-2 rounded-full group-hover:bg-blue-500/10">
+                <Bookmark className="h-5 w-5" />
+              </div>
+            </button>
+            <button onClick={handleShare} className="flex items-center gap-2 text-muted-foreground hover:text-blue-500 transition-all group">
+              <div className="p-2 rounded-full group-hover:bg-blue-500/10">
+                <Share2 className="h-5 w-5" />
+              </div>
+            </button>
+          </div>
+
+          <div className="h-px bg-border/50 w-full mb-4"></div>
 
           {/* Comments Section */}
           <div className="space-y-4">

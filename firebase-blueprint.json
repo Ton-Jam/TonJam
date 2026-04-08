@@ -83,9 +83,11 @@
         "price": { "type": "string", "description": "Base price in TON" },
         "streamingPrice": { "type": "string" },
         "editions": { "type": "string" },
+        "minted": { "type": "integer", "description": "Number of editions minted" },
         "editionType": { "type": "string" },
         "rarity": { "type": "string" },
         "royaltyPercentage": { "type": "number", "description": "Royalty percentage" },
+        "metadataUrl": { "type": "string", "description": "IPFS metadata URL" },
         "bpm": { "type": "integer", "description": "Beats per minute" },
         "key": { "type": "string", "description": "Musical key" },
         "bitrate": { "type": "string" },
@@ -327,9 +329,23 @@
         "total": { "type": "integer" },
         "dueDate": { "type": "string" },
         "rarity": { "type": "string", "enum": ["common", "rare", "epic", "legendary"] },
-        "priority": { "type": "string", "enum": ["high", "medium", "low"] }
+        "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+        "link": { "type": "string", "description": "Optional task link" }
       },
       "required": ["id", "title", "type", "completed"]
+    },
+    "TaskCompletion": {
+      "title": "Task Completion",
+      "description": "Records when a user completes a task.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "taskId", "completed"]
     },
     "RoyaltySplit": {
       "type": "object",
@@ -382,12 +398,14 @@
       "type": "object",
       "properties": {
         "id": { "type": "string", "description": "Unique mint ID" },
-        "track_id": { "type": "string", "description": "ID of the track" },
-        "owner_id": { "type": "string", "description": "UID of the owner" },
-        "edition": { "type": "string", "description": "Edition number" },
-        "tx_hash": { "type": "string", "description": "Transaction hash" }
+        "trackId": { "type": "string", "description": "ID of the track" },
+        "ownerId": { "type": "string", "description": "UID of the owner" },
+        "edition": { "type": "integer", "description": "Edition number" },
+        "txHash": { "type": "string", "description": "Transaction hash" },
+        "price": { "type": "number", "description": "Mint price" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Minting timestamp" }
       },
-      "required": ["id", "track_id", "owner_id"]
+      "required": ["id", "trackId", "ownerId"]
     },
     "NFTCollection": {
       "title": "NFT Collection",
@@ -480,6 +498,10 @@
     "/users/{userId}/tasks/{taskId}": {
       "schema": "Task",
       "description": "User specific tasks and achievements."
+    },
+    "/taskCompletions/{completionId}": {
+      "schema": "TaskCompletion",
+      "description": "Global log of task completions."
     },
     "/messages/{messageId}": {
       "schema": "Message",

@@ -96,7 +96,7 @@ export interface NFTItem {
   minted?: number;
   isAuction?: boolean;
   contractAddress?: string;
-  royaltySplits?: { address: string, percentage: number }[];
+  royaltySplits?: RoyaltySplit[];
   stems_available?: boolean;
   description?: string;
   traits?: NFTTrait[];
@@ -367,4 +367,13 @@ export interface Task {
   dueDate?: string;
   rarity?: 'common' | 'rare' | 'epic' | 'legendary';
   priority?: 'high' | 'medium' | 'low';
+  link?: string;
+}
+
+export interface TaskCompletion {
+  id?: string;
+  userId: string;
+  taskId: string;
+  completed: boolean;
+  completedAt?: string;
 }

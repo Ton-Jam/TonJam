@@ -170,7 +170,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
     if (track.isNFT) {
       navigate(`/nft/${track.id}`);
     } else {
-      navigate(`/player/${track.id}`);
+      navigate(`/track/${track.id}`);
     }
   };
 

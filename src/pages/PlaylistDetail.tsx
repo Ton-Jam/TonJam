@@ -393,7 +393,7 @@ const PlaylistDetail: React.FC = () => {
       <div className="flex flex-col gap-1 pb-4">
         {playlistTracks.map((track, index) => (
           <div 
-            key={track.id} 
+            key={`${track.id}-${index}`} 
             className={`w-full flex items-center gap-4 group rounded-[12px] transition-all border border-transparent ${selectedTrackIds.includes(track.id) ? 'bg-blue-500/10 border-blue-500/20' : 'hover:bg-white/5'}`}
             onClick={() => handleTrackClick(track.id)}
             onMouseDown={() => handleTouchStart(track.id)}
