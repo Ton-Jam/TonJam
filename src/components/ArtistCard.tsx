@@ -4,39 +4,55 @@ import { CheckCircle2, UserPlus, UserCheck } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ArtistCardProps {
-  artist: Artist;
+  artist?: Artist;
   variant?: 'default' | 'row' | 'compact';
   className?: string;
+  isLoading?: boolean;
 }
 
 const variantConfig = {
   default: {
-    container: 'flex flex-col items-center text-center h-full w-full p-4 rounded-[20px] bg-muted/50 backdrop-blur-md hover:bg-muted transition-all',
+    container: 'flex flex-col items-center text-center h-full w-full p-4 rounded-sm glass hover:bg-muted/20 transition-all min-w-[140px] sm:min-w-[160px]',
     image: 'w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32',
     button: 'mt-auto px-4 py-2 text-[10px]',
     name: 'text-sm sm:text-base',
   },
   row: {
-    container: 'flex items-center gap-4 p-3 rounded-[12px] hover:bg-muted/50 w-full transition-all',
+    container: 'flex items-center gap-4 p-3 rounded-[12px] hover:bg-muted/50 w-full transition-all glass',
     image: 'w-14 h-14',
     button: 'px-3 py-2 text-[9px]',
     name: 'text-sm',
   },
   compact: {
-    container: 'flex flex-col items-center text-center p-3 rounded-[16px] bg-muted/50 backdrop-blur-md hover:bg-muted w-[140px] transition-all',
+    container: 'flex flex-col items-center text-center p-3 rounded-[16px] glass hover:bg-muted/20 w-[140px] transition-all',
     image: 'w-18 h-18',
     button: 'w-full py-2 text-[9px]',
     name: 'text-[11px]',
   },
 };
 
-const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', className = '' }) => {
+const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', className = '', isLoading = false }) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser } = useAudio();
-  const isFollowing = followedUserIds.includes(artist.uid);
   const config = variantConfig[variant];
+
+  if (isLoading || !artist) {
+    return (
+      <div className={`group ${config.container} ${className}`}>
+        <div className={`relative mb-2 ${config.image}`}>
+          <Skeleton className="w-full h-full rounded-full" />
+        </div>
+        <Skeleton className={`h-4 w-3/4 mb-2 ${config.name}`} />
+        {variant !== 'row' && <Skeleton className="h-3 w-1/2 mb-2" />}
+        <Skeleton className={`${config.button} rounded-full w-full`} />
+      </div>
+    );
+  }
+
+  const isFollowing = followedUserIds.includes(artist.uid);
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();

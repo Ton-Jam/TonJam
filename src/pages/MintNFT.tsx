@@ -80,8 +80,7 @@ const MintNFT: React.FC = () => {
       traits: [
         { trait_type: 'Genre', value: track?.genre || 'Electronic' },
         { trait_type: 'BPM', value: track?.bpm || 128 },
-        { trait_type: 'Key', value: track?.key || 'Am' },
-        { trait_type: 'Rarity', value: 'Common' }
+        { trait_type: 'Key', value: track?.key || 'Am' }
       ],
       exclusiveContent: []
     },

@@ -6,8 +6,11 @@ import { GoogleGenAI } from '@google/genai';
 import { Loader2, Upload } from 'lucide-react';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { uploadFile } from '@/services/storageService';
+import { uploadAvatar } from '@/services/storageService';
 import { validateFile } from '@/lib/utils';
+import RoyaltySplitManager from '@/components/RoyaltySplitManager';
+import CollaboratorManager from '@/components/CollaboratorManager';
+import { RoyaltySplit, Collaborator } from '@/types';
 
 export default function ProfileSettings() {
   const { userProfile, addNotification } = useAudio();
@@ -26,6 +29,9 @@ export default function ProfileSettings() {
     twitter: '',
     instagram: '',
     website: '',
+    streamingSplits: [] as RoyaltySplit[],
+    nftSaleSplits: [] as RoyaltySplit[],
+    collaborators: [] as Collaborator[],
   });
 
   useEffect(() => {
@@ -39,6 +45,9 @@ export default function ProfileSettings() {
         twitter: userProfile.socials?.x || '',
         instagram: userProfile.socials?.instagram || '',
         website: userProfile.socials?.website || '',
+        streamingSplits: userProfile.royaltyConfig?.streamingSplits || [],
+        nftSaleSplits: userProfile.royaltyConfig?.nftSaleSplits || [],
+        collaborators: userProfile.collaborators || [],
       });
     }
   }, [userProfile]);
@@ -63,8 +72,7 @@ export default function ProfileSettings() {
     try {
       setUploading(true);
       addNotification('Adding profile image...', 'info');
-      const storagePath = `profiles/${user.uid}/avatar.png`;
-      const { downloadUrl } = await uploadFile(file, storagePath);
+      const { downloadUrl } = await uploadAvatar(file);
       setProfile(prev => ({ ...prev, avatar: downloadUrl }));
       addNotification('Profile image added successfully', 'success');
     } catch (error) {
@@ -96,7 +104,12 @@ export default function ProfileSettings() {
           x: profile.twitter,
           instagram: profile.instagram,
           website: profile.website,
-        }
+        },
+        royaltyConfig: {
+          streamingSplits: profile.streamingSplits,
+          nftSaleSplits: profile.nftSaleSplits,
+        },
+        collaborators: profile.collaborators
       }));
       
       addNotification('Profile updated successfully!', 'success');
@@ -336,6 +349,52 @@ Return ONLY the bio text, nothing else.`;
                 </div>
               </div>
 
+              {/* Royalty Splits Section (Artist Only) */}
+              {(userProfile?.role === 'artist' || userProfile?.isVerifiedArtist) && (
+                <div className="col-span-full pt-8 border-t border-white/5 space-y-12">
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">Collaborators</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Manage your frequent collaborators and their roles.
+                      </p>
+                    </div>
+                    <CollaboratorManager 
+                      collaborators={profile.collaborators}
+                      onChange={(collaborators) => setProfile({ ...profile, collaborators })}
+                    />
+                  </div>
+
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">Default Royalty Splits</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Define how revenue from your tracks and NFTs should be distributed by default.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold uppercase tracking-widest text-cyan-500">Streaming Royalties</h4>
+                        <RoyaltySplitManager 
+                          splits={profile.streamingSplits}
+                          onChange={(splits) => setProfile({ ...profile, streamingSplits: splits })}
+                          collaborators={profile.collaborators}
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold uppercase tracking-widest text-purple-500">NFT Sale Royalties</h4>
+                        <RoyaltySplitManager 
+                          splits={profile.nftSaleSplits}
+                          onChange={(splits) => setProfile({ ...profile, nftSaleSplits: splits })}
+                          collaborators={profile.collaborators}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
 
@@ -353,6 +412,9 @@ Return ONLY the bio text, nothing else.`;
                   twitter: userProfile?.socials?.x || '',
                   instagram: userProfile?.socials?.instagram || '',
                   website: userProfile?.socials?.website || '',
+                  streamingSplits: userProfile?.royaltyConfig?.streamingSplits || [],
+                  nftSaleSplits: userProfile?.royaltyConfig?.nftSaleSplits || [],
+                  collaborators: userProfile?.collaborators || [],
                 });
               }}
             >

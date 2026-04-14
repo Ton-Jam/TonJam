@@ -173,6 +173,21 @@ const Profile: React.FC = () => {
     [userProfile.anthemId, allNFTs]
   );
 
+  const handleSwitchRole = async (newRole: 'artist' | 'collector') => {
+    if (!user) return;
+    try {
+      setIsUploading(true);
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { role: newRole, isVerifiedArtist: newRole === 'artist' });
+      setUserProfile({ ...userProfile, role: newRole, isVerifiedArtist: newRole === 'artist' });
+      addNotification(`Switched to ${newRole} role`, 'success');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const feedPosts = useMemo(() => {
     return posts.filter(p => p.userId === userProfile.uid || followedUserIds.includes(p.userId));
   }, [userProfile.uid, followedUserIds, posts]);
@@ -389,9 +404,17 @@ const Profile: React.FC = () => {
                   <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
                     {localUser.name}
                   </h1>
-                  <div className="flex items-center justify-center md:justify-start gap-3">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                     <span className="text-muted-foreground font-bold text-sm md:text-base">
                       @{localUser.username?.replace('@', '') || 'user'}
+                    </span>
+                    <span className={cn(
+                      "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest",
+                      localUser.role === 'admin' ? "bg-red-500/10 text-red-500" :
+                      localUser.role === 'artist' ? "bg-orange-500/10 text-orange-500" :
+                      "bg-blue-500/10 text-blue-500"
+                    )}>
+                      {localUser.role || 'collector'}
                     </span>
                     <div className="flex gap-2">
                       {localUser.socials?.x && (
@@ -571,9 +594,15 @@ const Profile: React.FC = () => {
               )}
             </div>
             
-            {!isSpotifyVerified && (
+            {!isSpotifyVerified && localUser.role === 'collector' && (
               <button onClick={() => setIsVerificationModalOpen(true)} className="w-full py-4 bg-orange-500/10 rounded-2xl text-orange-500 text-xs font-bold uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center gap-3 shadow-sm border border-orange-500/20" >
-                <CheckCircle className="h-5 w-5" /> Verify Artist Identity
+                <CheckCircle className="h-5 w-5" /> Become an Artist
+              </button>
+            )}
+            
+            {localUser.role === 'artist' && (
+              <button onClick={() => handleSwitchRole('collector')} className="w-full py-4 bg-blue-500/10 rounded-2xl text-blue-500 text-xs font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center gap-3 shadow-sm border border-blue-500/20" >
+                <User className="h-5 w-5" /> Switch to Collector
               </button>
             )}
           </div>

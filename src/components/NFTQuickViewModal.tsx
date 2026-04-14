@@ -36,7 +36,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-2 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose}></div>
       
-      <div className="relative w-full max-w-2xl glass border border-border bg-background rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col md:flex-row max-h-[80vh] md:max-h-[600px] min-h-[400px]">
+      <div className="relative w-full max-w-2xl glass bg-background rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col md:flex-row max-h-[80vh] md:max-h-[600px] min-h-[400px]">
         
         {/* Close Button */}
         <button 
@@ -63,11 +63,11 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
               />
               <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-2 bg-amber-500/20 text-amber-500 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border border-neutral-500/20">
+                    <span className="px-2 py-2 bg-amber-500/20 text-amber-500 rounded-[4px] text-[8px] font-bold uppercase tracking-widest">
                       {nft.edition}
                     </span>
                     {nft.isAuction && (
-                      <span className="px-2 py-2 bg-purple-500/20 text-purple-400 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border border-neutral-500/20">
+                      <span className="px-2 py-2 bg-purple-500/20 text-purple-400 rounded-[4px] text-[8px] font-bold uppercase tracking-widest">
                         Auction
                       </span>
                     )}
@@ -129,7 +129,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
                     {nft.traits.slice(0, 4).map((trait) => (
-                      <div key={trait.trait_type} className="bg-muted/50 rounded-[5px] p-2 border border-border/50">
+                      <div key={trait.trait_type} className="bg-muted/50 rounded-[5px] p-2">
                         <p className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest mb-3">{trait.trait_type}</p>
                         <p className="text-[10px] font-bold text-foreground uppercase truncate">{trait.value}</p>
                       </div>
@@ -138,7 +138,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                 </div>
               )}
 
-              <div className="mt-auto pt-2 border-t border-border/50 space-y-2">
+              <div className="mt-auto pt-2 space-y-2">
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-[9px] font-bold text-foreground/30 uppercase tracking-widest mb-2">Current Price</p>
@@ -153,7 +153,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                 <div className="flex gap-2">
                   <button 
                     onClick={handleViewFullDetails}
-                    className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border border-white/10"
+                    className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
                     View Details <ExternalLink className="h-3 w-3" />
                   </button>

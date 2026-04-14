@@ -35,7 +35,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-[24px] border-neutral-800 bg-neutral-900/95 backdrop-blur-xl p-6">
+      <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-[24px] bg-neutral-900/95 backdrop-blur-xl p-6">
         <AlertDialogHeader className="space-y-3">
           <AlertDialogTitle className="text-xl font-bold text-white tracking-tight">
             {title}
@@ -47,7 +47,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <AlertDialogFooter className="mt-6 gap-3 sm:gap-0">
           <AlertDialogCancel 
             onClick={onClose}
-            className="flex-1 bg-transparent border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded-[12px] h-11 font-medium transition-all"
+            className="flex-1 bg-transparent text-neutral-400 hover:bg-neutral-800 hover:text-white rounded-[12px] h-11 font-medium transition-all"
           >
             {cancelText}
           </AlertDialogCancel>

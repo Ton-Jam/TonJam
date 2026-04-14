@@ -83,7 +83,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
     return (
       <div 
         onClick={onClick} 
-        className="group flex items-center gap-2 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full glass bg-foreground/[0.02]"
+        className="group flex items-center gap-2 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full glass"
       >
         <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
           {renderCover()}
@@ -106,7 +106,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   return (
     <div 
       onClick={onClick} 
-      className="group relative cursor-pointer glass p-2 rounded-[10px] bg-foreground/[0.02]"
+      className="group relative cursor-pointer glass p-2 rounded-sm min-w-[180px] sm:min-w-[200px]"
     >
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
@@ -114,7 +114,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center gap-3">
           <button 
             onClick={handlePlay}
-            className="w-10 h-10 rounded-full bg-blue-600 border border-blue-500/30 flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300"
+            className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300"
           >
             <Play className="h-4 w-4 text-white fill-white ml-0.5" />
           </button>
@@ -122,7 +122,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
           {isOwner && (
             <button 
               onClick={(e) => { e.stopPropagation(); setIsGeneratorOpen(true); }}
-              className="w-10 h-10 rounded-full bg-neutral-800/80 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300 delay-75 hover:bg-neutral-700"
+              className="w-10 h-10 rounded-full bg-neutral-800/80 backdrop-blur-md flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300 delay-75 hover:bg-neutral-700"
               title="Generate Cover"
             >
               <Sparkles className="h-4 w-4 text-blue-400" />

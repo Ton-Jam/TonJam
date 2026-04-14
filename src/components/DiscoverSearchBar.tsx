@@ -50,7 +50,8 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
   return (
     <div className="w-full mx-auto relative group discover-search-bar">
       {/* Main Container */}
-      <ButtonGroup className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 ${isFocused ? 'border-blue-500/50 bg-foreground/[0.08] shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+      <ButtonGroup className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 flex items-center px-2 ${isFocused ? 'border-blue-500/50 bg-foreground/[0.08] shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+        <SearchIcon className="h-4 w-4 text-muted-foreground ml-2" />
         <Input
           ref={inputRef}
           type="text"
@@ -62,7 +63,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           placeholder={placeholder}
-          className="flex-1 bg-transparent border-none outline-none py-2 text-xs font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="flex-1 bg-transparent border-none outline-none py-2 px-3 text-xs font-medium text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 tracking-tight focus-visible:ring-0 focus-visible:ring-offset-0"
         />
         
         <div className="flex items-center gap-1 pr-2">
@@ -86,20 +87,12 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
                 e.preventDefault();
                 onVoiceSearch();
               }}
-              className={`p-1 rounded-lg transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+              className={`p-2 rounded-full transition-all ${isListening ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
             >
-              {isListening ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
+              {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </button>
           )}
         </div>
-
-        <Button 
-          variant="outline" 
-          aria-label="Search"
-          className="rounded-l-none border-y-0 border-r-0 border-l border-blue-500/30 h-full py-2"
-        >
-          <SearchIcon className="h-4 w-4" />
-        </Button>
       </ButtonGroup>
 
       {/* Bottom Progress Bar (Animated) */}

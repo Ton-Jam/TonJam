@@ -7,33 +7,34 @@ export interface TokenGating {
   tokenType: 'jetton' | 'nft'; // TON specific types
 }
 
-export interface Track {
-  id: string;
-  songId: string;
-  title: string;
-  artist: string;
-  artistId: string;
-  coverUrl: string;
-  audioUrl: string;
-  duration: number; // in seconds
-  genre: string;
-  mood?: string;
-  isNFT: boolean;
+export class Track {
+  id!: string;
+  songId!: string;
+  title!: string;
+  artist!: string;
+  artistId!: string;
+  coverUrl!: string;
+  audioUrl!: string;
+  duration!: number; // in seconds
+  genre: string = 'Unknown';
+  mood?: string = 'Unknown';
+  isNFT!: boolean;
   artistVerified?: boolean;
   price?: string; 
   listingType?: 'fixed' | 'auction';
   auctionDuration?: string;
   streamingPrice?: string;
   editions?: string;
+  minted?: number;
   editionType?: string;
   rarity?: string;
   royalty?: string;
-  bpm?: number;
-  key?: string;
+  bpm?: number = 0;
+  key?: string = '';
   bitrate?: string; // e.g. "FLAC", "320kbps"
-  playCount?: number;
+  playCount?: number = 0;
   streams?: number; // Alias for playCount used in UI
-  likes?: number;
+  likes?: number = 0;
   jamScore?: number;
   releaseDate?: string;
   ipfsUrl?: string; // Decentralized metadata/audio link
@@ -42,11 +43,11 @@ export interface Track {
   audioIpfsUrl?: string;
   coverIpfsUrl?: string;
   royaltySplits?: RoyaltySplit[];
-  lyrics?: string;
+  lyrics?: string = '';
   recommendationReason?: string;
   recommendationScore?: number;
   isCollaboration?: boolean;
-  createdAt: string;
+  createdAt!: string | number;
   tokenGating?: TokenGating;
 }
 
@@ -130,6 +131,14 @@ export interface SongRequest {
   createdAt: string;
 }
 
+export interface Collaborator {
+  id: string;
+  userId?: string;
+  address: string;
+  name: string;
+  role: string;
+}
+
 export interface RoyaltySplit {
   address: string;
   percentage: number; // e.g. 0.05 for 5%
@@ -186,23 +195,27 @@ export interface Artist {
   };
   events?: Event[];
   collaborations?: Collaboration[];
+  collaborators?: Collaborator[];
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   playCount?: number;
   location?: string;
 }
 
-export interface Comment {
+export interface PostComment {
   id: string;
+  postId?: string;
   userId: string;
   userName: string;
   username?: string;
   userAvatar: string;
   content: string;
   timestamp: string;
+  createdAt?: string;
   likes: number;
   reactions?: Record<string, number>;
   userReactions?: string[]; // Array of emojis the current user has reacted with
-  replies?: Comment[]; // Nested replies
+  replies?: PostComment[]; // Nested replies
+  replyToId?: string;
 }
 
 export interface Post {
@@ -224,7 +237,7 @@ export interface Post {
   reposts?: number;
   isReposted?: boolean;
   comments: number;
-  commentList?: Comment[];
+  commentList?: PostComment[];
   timestamp: string;
   authorId?: string;
   authorName?: string;
@@ -278,6 +291,7 @@ export interface UserProfile {
   isPremium?: boolean;
   tonBalance?: number;
   jamBalance?: number;
+  tjBalance?: number;
   stakedJam?: number;
   pendingJamRewards?: number;
   lastStakingUpdate?: string;
@@ -297,6 +311,11 @@ export interface UserProfile {
   role?: 'artist' | 'collector' | 'admin';
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   isVerified?: boolean;
+  royaltyConfig?: {
+    streamingSplits: RoyaltySplit[];
+    nftSaleSplits: RoyaltySplit[];
+  };
+  collaborators?: Collaborator[];
 }
 
 export interface User {
@@ -306,6 +325,13 @@ export interface User {
   avatar?: string;
   verified?: boolean;
   followers: number;
+}
+
+export interface Royalty {
+  artistId: string;
+  totalEarned: string; // Total lifetime earnings in TON
+  pendingWithdrawal: string; // Earnings available for withdrawal
+  lastWithdrawal?: string; // Last withdrawal timestamp
 }
 
 export interface Transaction {

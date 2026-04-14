@@ -45,6 +45,8 @@ import ManageNFTModal from '@/components/ManageNFTModal';
 import NFTCard from '@/components/NFTCard';
 import SendNFTModal from '@/components/SendNFTModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import CommentsSection from '@/components/CommentsSection';
+import ReactionsSection from '@/components/ReactionsSection';
 import confetti from 'canvas-confetti';
 import { getPlaceholderImage } from '@/lib/utils';
 
@@ -63,7 +65,7 @@ const NFTDetail: React.FC = () => {
   }, [id, allNFTs]);
 
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers' | 'exclusive'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers' | 'comments' | 'exclusive'>('details');
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
@@ -527,9 +529,11 @@ const NFTDetail: React.FC = () => {
                 </div>
               </div>
 
-              <h1 className="text-[44px] md:text-[68px] font-bold tracking-tighter uppercase text-foreground leading-[0.85] mb-4">{localNft.title}</h1>
+              <h1 className="text-[44px] md:text-[68px] font-bold tracking-tighter uppercase text-foreground leading-[0.85] mb-2">{localNft.title}</h1>
               
-              <div className="flex items-center justify-between py-4">
+              <ReactionsSection targetId={localNft.id} targetType="nft" />
+
+              <div className="flex items-center justify-between py-4 mt-2">
                 <div className="flex items-center gap-4">
                   <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Protocol ID</span>
                   <span className="text-[10px] font-mono text-blue-500/60 uppercase tracking-widest">{localNft.id.toUpperCase()}</span>
@@ -695,7 +699,7 @@ const NFTDetail: React.FC = () => {
 
             {/* Information Tabs */}
             <div className="flex items-center gap-4 mb-4">
-              {['details', 'history', 'offers', ...(isOwner && localNft.exclusiveContent?.length ? ['exclusive'] : [])].map((tab) => (
+              {['details', 'history', 'offers', 'comments', ...(isOwner && localNft.exclusiveContent?.length ? ['exclusive'] : [])].map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab as any)} className={`pb-4 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? 'text-blue-500' : 'text-muted-foreground/50 hover:text-foreground'}`}>
                   {tab === 'exclusive' ? 'Holder Perks' : tab}
                   {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></motion.div>}
@@ -910,6 +914,18 @@ const NFTDetail: React.FC = () => {
                   </motion.div>
                 )}
   
+                {activeTab === 'comments' && (
+                  <motion.div 
+                    key="comments"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-4"
+                  >
+                    <CommentsSection targetId={localNft.id} targetType="nft" />
+                  </motion.div>
+                )}
+
                 {activeTab === 'exclusive' && isOwner && (
                   <motion.div 
                     key="exclusive"

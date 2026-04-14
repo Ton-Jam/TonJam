@@ -56,7 +56,7 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
       >
         {items.map((item, idx) => (
           <div key={item.id || `carousel-item-${idx}`} className="w-full flex-shrink-0 snap-center px-2 lg:px-2">
-            <Link to={item.link} className="block relative w-full aspect-[21/9] sm:aspect-[3/1] lg:aspect-[4/1] rounded-[10px] overflow-hidden group border border-blue-500/50">
+            <Link to={item.link} className="block relative w-full aspect-[21/9] sm:aspect-[3/1] lg:aspect-[4/1] rounded-[10px] overflow-hidden group">
               <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
               
@@ -66,7 +66,7 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
               
               <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between auto-carousel-text">
                 <div>
-                  <h3 className="text-xl sm:text-[26px] font-black text-white uppercase tracking-tighter leading-tight mb-2">{item.title}</h3>
+                  <h3 className="text-xl sm:text-[26px] font-black text-white uppercase tracking-tighter leading-tight mb-2 font-display">{item.title}</h3>
                   <p className="text-xs sm:text-sm text-white/70 font-medium">{item.subtitle}</p>
                 </div>
                 {onCtaClick ? (
@@ -76,12 +76,12 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
                       e.stopPropagation();
                       onCtaClick(item);
                     }}
-                    className="hidden sm:flex items-center gap-2 bg-muted backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border"
+                    className="hidden sm:flex items-center gap-2 glass backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/20 transition-colors border-none"
                   >
                     {item.cta} <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <div className="hidden sm:flex items-center gap-2 bg-muted backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/80 transition-colors border border-border">
+                  <div className="hidden sm:flex items-center gap-2 glass backdrop-blur-md px-2 py-2 rounded-[5px] text-xs font-bold text-white uppercase tracking-widest hover:bg-muted/20 transition-colors border-none">
                     {item.cta} <ChevronRight className="w-4 h-4" />
                   </div>
                 )}

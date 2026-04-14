@@ -37,7 +37,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-lg bg-background border border-blue-500/40 rounded-3xl overflow-hidden shadow-2xl"
+        className="relative w-full max-w-lg bg-background rounded-3xl overflow-hidden shadow-2xl"
       >
         <div className="p-2">
           <div className="flex items-center justify-between mb-2">
@@ -82,7 +82,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-2 border-t border-border/50">
+            <div className="flex items-center justify-between pt-2">
               <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Reward</div>
               <div className="text-sm font-black text-foreground">{task.reward} + {task.points} XP</div>
             </div>

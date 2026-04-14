@@ -182,8 +182,11 @@ export default function UploadTrackScreen() {
           genre,
           description,
           lyrics,
+          price,
+          editions,
+          minted: 0,
           isNFT: false,
-          createdAt: new Date().toISOString()
+          createdAt: Date.now()
         };
 
         await addUserTrack(newTrack);
@@ -216,8 +219,11 @@ export default function UploadTrackScreen() {
             likes: 0,
             genre: track.genre,
             description: description,
+            price: price,
+            editions: editions,
+            minted: 0,
             isNFT: false,
-            createdAt: new Date().toISOString()
+            createdAt: Date.now()
           };
 
           await addUserTrack(newTrack);

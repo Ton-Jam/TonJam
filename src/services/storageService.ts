@@ -42,18 +42,18 @@ export const uploadAudio = async (file: File, onProgress?: (progress: number) =>
   const userId = auth.currentUser?.uid;
   if (!userId) throw new Error('User must be authenticated to upload files');
 
-  const storagePath = `audio/${userId}/track.mp3`;
+  const storagePath = `audio/${userId}/${file.name}`;
   return uploadFile(file, storagePath, onProgress);
 };
 
 /**
- * Uploads a cover image to Firebase Storage at /covers/{userId}/cover.png
+ * Uploads a cover image to Firebase Storage at /images/{userId}/{fileName}
  */
 export const uploadCover = async (file: File, onProgress?: (progress: number) => void): Promise<StorageUploadResponse> => {
   const userId = auth.currentUser?.uid;
   if (!userId) throw new Error('User must be authenticated to upload files');
 
-  const storagePath = `covers/${userId}/cover.png`;
+  const storagePath = `images/${userId}/${file.name}`;
   return uploadFile(file, storagePath, onProgress);
 };
 
@@ -67,4 +67,26 @@ export const uploadMetadata = async (metadata: any): Promise<StorageUploadRespon
   const storagePath = `nft/${userId}/metadata.json`;
   const blob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
   return uploadFile(blob, storagePath);
+};
+
+/**
+ * Uploads a post image to Firebase Storage at /posts/{userId}/{fileName}
+ */
+export const uploadPostImage = async (file: File, onProgress?: (progress: number) => void): Promise<StorageUploadResponse> => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error('User must be authenticated to upload files');
+
+  const storagePath = `posts/${userId}/${file.name}`;
+  return uploadFile(file, storagePath, onProgress);
+};
+
+/**
+ * Uploads an avatar image to Firebase Storage at /avatars/{userId}/{fileName}
+ */
+export const uploadAvatar = async (file: File, onProgress?: (progress: number) => void): Promise<StorageUploadResponse> => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error('User must be authenticated to upload files');
+
+  const storagePath = `avatars/${userId}/${file.name}`;
+  return uploadFile(file, storagePath, onProgress);
 };

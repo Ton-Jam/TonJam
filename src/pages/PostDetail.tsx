@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BackButton } from '@/components/BackButton';
-import { ArrowLeft, MoreVertical, Zap, CheckCircle2, Heart, MessageCircle, Repeat2, Share2, Send, Smile, MessageSquareOff, Bookmark } from 'lucide-react';
-import { Post, Comment } from '@/types';
+import { EllipsisVerticalIcon, BoltIcon, CheckCircleIcon, HeartIcon, ChatBubbleOvalLeftIcon, ArrowPathRoundedSquareIcon, ShareIcon, PaperAirplaneIcon, FaceSmileIcon, ChatBubbleLeftRightIcon, BookmarkIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { Post, PostComment } from '@/types';
 import { MOCK_POSTS, MOCK_USER, MOCK_TRACKS, MOCK_ARTISTS, TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import PostOptionsModal from '@/components/PostOptionsModal';
 import { motion, AnimatePresence } from 'motion/react'; 
+import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification, followedUserIds, toggleFollowUser, posts, allTracks, allNFTs } = useAudio();
+  const { addNotification, followedUserIds, toggleFollowUser, posts, allTracks, allNFTs, addCommentToPost } = useAudio();
   const [post, setPost] = useState<Post | null>(null);
   const [liked, setLiked] = useState(false);
   const [reposted, setReposted] = useState(false);
@@ -19,7 +22,23 @@ const PostDetail: React.FC = () => {
   const [repostsCount, setRepostsCount] = useState(0);
   const [showOptions, setShowOptions] = useState(false);
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<PostComment[]>([]);
+  const [visibleCommentsCount, setVisibleCommentsCount] = useState(5);
+
+  // Real-time comments listener
+  useEffect(() => {
+    if (!id) return;
+
+    const commentsRef = collection(db, 'posts', id, 'comments');
+    const q = query(commentsRef, orderBy('timestamp', 'desc'));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedComments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PostComment));
+      setComments(fetchedComments);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, `posts/${id}/comments`));
+
+    return () => unsubscribe();
+  }, [id]);
 
   const REACTION_EMOJIS = ['🔥', '💎', '🚀', '🎧', '⚡'];
 
@@ -28,7 +47,7 @@ const PostDetail: React.FC = () => {
     if (foundPost) {
       setPost(foundPost);
       setLikesCount(foundPost.likes);
-      setComments(foundPost.commentList || []);
+      // setComments(foundPost.commentList || []); // Now handled by onSnapshot
       setLiked(foundPost.isLiked || false);
       setReposted(foundPost.isReposted || false);
       setRepostsCount(foundPost.reposts || 0);
@@ -68,23 +87,18 @@ const PostDetail: React.FC = () => {
     setReposted(!reposted);
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!commentText.trim()) return;
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      userId: MOCK_USER.uid,
-      userName: MOCK_USER.name,
-      userAvatar: MOCK_USER.avatar,
+    if (!commentText.trim() || !id) return;
+    
+    const commentData: Partial<PostComment> = {
       content: commentText,
-      timestamp: 'Just now',
-      likes: 0,
-      reactions: {},
-      userReactions: []
+      timestamp: new Date().toISOString(),
+      likes: 0
     };
-    setComments([newComment, ...comments]);
+
+    await addCommentToPost(id, commentData);
     setCommentText('');
-    addNotification('Comment synchronized', 'success');
   };
 
   const handleCommentReaction = (commentId: string, emoji: string) => {
@@ -135,192 +149,158 @@ const PostDetail: React.FC = () => {
 
       <div className="max-w-3xl mx-auto relative z-10">
         {/* Back Button */}
-        <BackButton 
-          className="flex items-center gap-4 text-muted-foreground hover:text-foreground transition-colors mb-4 group"
-          iconClassName="h-3 w-3 group-hover:-translate-x-1 transition-transform"
-        >
-          <span className="text-[10px] font-bold uppercase tracking-widest">Return to Feed</span>
-        </BackButton>
+        {/* Removed back button as it is in the global header */}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="glass border border-border bg-card rounded-[10px] p-4 md:p-4 shadow-2xl relative overflow-hidden">
-          {/* Subtle Background Glow */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+        {/* Subtle Background Glow Removed */}
 
-          <div className="absolute top-8 right-8 z-10">
-            <button onClick={() => setShowOptions(true)} className="w-10 h-10 flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 transition-all rounded-full hover:bg-muted/50">
-              <MoreVertical className="h-5 w-5" />
-            </button>
-          </div>
-              {/* User Identity Section */}
-          <div className="flex items-center gap-3 mb-3">
+          {/* User Identity Section */}
+          <div className="flex items-center gap-2 mb-3">
             <div className="relative flex-shrink-0 cursor-pointer group/avatar" onClick={() => artist ? navigate(`/artist/${artist.uid}`) : post.userId === MOCK_USER.uid ? navigate('/profile') : navigate(`/user/${post.userId}`)}>
-              <img src={post.userAvatar} className="w-12 h-12 rounded-full group-hover/avatar:opacity-90 transition-all object-cover" alt={post.userName} />
+              <img src={post.userAvatar} className="w-10 h-10 rounded-full group-hover/avatar:opacity-90 transition-all object-cover" alt={post.userName} />
             </div>
             <div className="flex-1 min-w-0 flex flex-col">
               <div className="flex items-center gap-1">
                 <h4 
-                  className="font-bold text-base text-foreground truncate cursor-pointer hover:underline inline-block"
+                  className="font-bold text-sm text-white truncate cursor-pointer hover:underline inline-block"
                   onClick={() => artist ? navigate(`/artist/${artist.uid}`) : post.userId === MOCK_USER.uid ? navigate('/profile') : navigate(`/user/${post.userId}`)}
                 > 
                   {post.userName} 
                 </h4>
-                {artist?.verified && <CheckCircle2 className="h-4 w-4 text-blue-500" />}
+                {artist?.verified && <CheckCircleIcon className="h-3 w-3 text-blue-400" />}
               </div>
-              <span className="text-[15px] text-muted-foreground truncate">@{post.username || post.userName.toLowerCase().replace(/\s+/g, '')}</span>
+              <span className="text-[12px] text-white/50 truncate">@{post.username || post.userName.toLowerCase().replace(/\s+/g, '')}</span>
             </div>
-            {!isMe && (
-              <button 
-                onClick={() => toggleFollowUser(post.userId)} 
-                className={`text-sm font-bold transition-all px-4 py-1.5 rounded-full ${isFollowing ? 'border border-border text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive' : 'bg-foreground text-background hover:bg-foreground/90'}`}
-              >
-                {isFollowing ? 'Following' : 'Follow'}
+            <div className="flex items-center gap-2">
+              {!isMe && (
+                <button 
+                  onClick={() => toggleFollowUser(post.userId)} 
+                  className={`text-[10px] font-bold transition-all px-3 py-1 rounded-full ${isFollowing ? 'border border-white/20 text-white hover:bg-white/10' : 'bg-white text-black hover:bg-white/90'}`}
+                >
+                  {isFollowing ? 'Following' : 'Follow'}
+                </button>
+              )}
+              <button onClick={() => setShowOptions(true)} className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white transition-all rounded-full hover:bg-white/10">
+                <EllipsisVerticalIcon className="h-4 w-4" />
               </button>
-            )}
+            </div>
           </div>
 
           {/* Content */}
-          <p className="text-foreground leading-normal mb-4 text-[17px] whitespace-pre-wrap">
+          <p className="text-white/90 leading-snug mb-3 text-[15px] whitespace-pre-wrap">
             {post.content}
           </p>
 
           {post.imageUrl && (
-            <div className="mb-4 rounded-2xl overflow-hidden border border-border/50">
+            <div className="mb-3 rounded-lg overflow-hidden border border-white/10">
               {post.imageUrl.startsWith('data:video') ? (
-                <video src={post.imageUrl} controls className="w-full max-h-[512px] object-cover" />
+                <video src={post.imageUrl} controls className="w-full max-h-[300px] object-cover" />
               ) : (
-                <img src={post.imageUrl} className="w-full max-h-[512px] object-cover" alt="Post media" />
+                <img src={post.imageUrl} className="w-full max-h-[300px] object-cover" alt="Post media" />
               )}
             </div>
           )}
 
           {track && (
-            <div className="mb-4">
-              <TrackCard track={track} />
+            <div className="mb-3">
+              <TrackCard track={track} variant="compact" />
             </div>
           )}
 
           {nft && (
-            <div className="mb-4 rounded-2xl overflow-hidden border border-border/50">
+            <div className="mb-3 rounded-lg overflow-hidden border border-white/10">
               <img src={nft.imageUrl} alt={nft.title} className="w-full aspect-square object-cover" />
-              <div className="p-4 bg-muted/30">
-                <h4 className="font-bold text-lg">{nft.title}</h4>
-                <p className="text-sm text-muted-foreground">{nft.edition}</p>
+              <div className="p-3 bg-white/5">
+                <h4 className="font-bold text-sm text-white">{nft.title}</h4>
+                <p className="text-[10px] text-white/50">{nft.edition}</p>
               </div>
             </div>
           )}
 
           {/* Timestamp and Views */}
-          <div className="flex items-center gap-1 text-[15px] text-muted-foreground mb-4">
+          <div className="flex items-center gap-2 text-[11px] text-white/50 mb-3">
             <span>{new Date(post.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             <span>·</span>
-            <span>{new Date(post.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            <span>{new Date(post.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
             <span>·</span>
-            <span className="font-bold text-foreground">{(Math.random() * 10000).toFixed(0)}</span> Views
+            <span className="font-bold text-white">{(Math.random() * 10000).toFixed(0)}</span> Views
           </div>
 
-          <div className="h-px bg-border/50 w-full mb-1"></div>
+          <div className="h-px bg-white/10 w-full mb-1"></div>
 
           {/* Stats Row */}
-          <div className="flex items-center gap-4 py-3 text-[15px] text-muted-foreground">
-            <div className="flex gap-1">
-              <span className="font-bold text-foreground">{repostsCount}</span> Reposts
+          <div className="flex items-center gap-3 py-2 text-[12px] text-white/50">
+            <div className="flex gap-3">
+              <span className="font-bold text-white">{repostsCount}</span> <ArrowPathRoundedSquareIcon className="h-4 w-4 text-white" />
             </div>
             <div className="flex gap-1">
-              <span className="font-bold text-foreground">{Math.floor(repostsCount * 0.3)}</span> Quotes
+              <span className="font-bold text-white">{Math.floor(repostsCount * 0.3)}</span> <ChatBubbleOvalLeftIcon className="h-4 w-4 text-white" />
             </div>
+            <button onClick={handleLike} className={`flex gap-1 items-center transition-all ${liked ? 'text-pink-500' : 'text-white/50 hover:text-pink-500'}`}>
+              <span className="font-bold text-white">{likesCount}</span> <HeartIcon className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
+            </button>
             <div className="flex gap-1">
-              <span className="font-bold text-foreground">{likesCount}</span> Likes
+              <span className="font-bold text-white">{Math.floor(likesCount * 0.1)}</span> <BookmarkIcon className="h-4 w-4 text-white" />
             </div>
-            <div className="flex gap-1">
-              <span className="font-bold text-foreground">{Math.floor(likesCount * 0.1)}</span> Bookmarks
-            </div>
-          </div>
-
-          <div className="h-px bg-border/50 w-full mb-1"></div>
-
-          {/* Interaction Bar */}
-          <div className="flex items-center justify-around py-1 mb-4">
-            <button className="flex items-center gap-2 text-muted-foreground hover:text-blue-500 transition-all group">
-              <div className="p-2 rounded-full group-hover:bg-blue-500/10">
-                <MessageCircle className="h-5 w-5" />
-              </div>
-            </button>
-            <button onClick={handleRepost} className={`flex items-center gap-2 transition-all group ${reposted ? 'text-green-500' : 'text-muted-foreground hover:text-green-500'}`}>
-              <div className="p-2 rounded-full group-hover:bg-green-500/10">
-                <Repeat2 className="h-5 w-5" />
-              </div>
-            </button>
-            <button onClick={handleLike} className={`flex items-center gap-2 transition-all group ${liked ? 'text-pink-500' : 'text-muted-foreground hover:text-pink-500'}`}>
-              <div className="p-2 rounded-full group-hover:bg-pink-500/10">
-                <Heart className={`h-5 w-5 ${liked ? 'fill-current' : ''}`} />
-              </div>
-            </button>
-            <button className="flex items-center gap-2 text-muted-foreground hover:text-blue-500 transition-all group">
-              <div className="p-2 rounded-full group-hover:bg-blue-500/10">
-                <Bookmark className="h-5 w-5" />
-              </div>
-            </button>
-            <button onClick={handleShare} className="flex items-center gap-2 text-muted-foreground hover:text-blue-500 transition-all group">
-              <div className="p-2 rounded-full group-hover:bg-blue-500/10">
-                <Share2 className="h-5 w-5" />
-              </div>
+            <button onClick={handleShare} className="flex gap-1 items-center text-white/50 hover:text-white transition-all">
+              <ShareIcon className="h-4 w-4 text-white" />
             </button>
           </div>
 
-          <div className="h-px bg-border/50 w-full mb-4"></div>
+          <div className="h-px bg-white/10 w-full mb-3"></div>
 
           {/* Comments Section */}
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.4em] mb-4">Neural Responses</h3>
-            <form onSubmit={handleAddComment} className="flex gap-4 mb-4">
+          <div className="space-y-3">
+            <h3 className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em] mb-3">Neural Responses</h3>
+            <form onSubmit={handleAddComment} className="flex gap-2 mb-3">
               <img 
                 src={MOCK_USER.avatar} 
-                className="w-10 h-10 rounded-full shadow-xl cursor-pointer hover:opacity-80 transition-opacity" 
+                className="w-8 h-8 rounded-full shadow-lg cursor-pointer hover:opacity-80 transition-opacity" 
                 alt="" 
                 onClick={() => navigate('/profile')}
               />
               <div className="flex-1 relative">
-                <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit your response..." className="w-full bg-muted/50 border border-border rounded-[10px] py-4 px-4 text-sm outline-none focus:border-blue-500/50 transition-all text-foreground shadow-inner" />
-                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-blue-600 rounded-[10px] text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">
-                  <Send className="h-3 w-3" />
+                <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Transmit response..." className="w-full bg-white/5 border border-white/10 rounded-[8px] py-2 px-3 text-xs outline-none focus:border-white/30 transition-all text-white shadow-inner" />
+                <button type="submit" className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center bg-white rounded-[6px] text-black hover:bg-white/90 transition-colors">
+                  <PaperAirplaneIcon className="h-3 w-3" />
                 </button>
               </div>
             </form>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <AnimatePresence mode="popLayout">
-                {comments.map(comment => (
-                  <motion.div layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} key={comment.id} className="flex gap-4 group/comment">
+                {comments.slice(0, visibleCommentsCount).map(comment => (
+                  <motion.div layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} key={comment.id} className="flex gap-3 group/comment">
                     <img 
                       src={comment.userAvatar} 
-                      className="w-10 h-10 rounded-full flex-shrink-0 shadow-lg object-cover cursor-pointer" 
+                      className="w-8 h-8 rounded-full flex-shrink-0 shadow-lg object-cover cursor-pointer" 
                       alt="" 
                       onClick={(e) => handleCommentProfileClick(e, comment.userId)}
                     />
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between mb-1">
                         <h5 
-                          className="text-[11px] font-bold text-foreground uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block"
+                          className="text-[10px] font-bold text-white uppercase tracking-tight cursor-pointer hover:text-blue-400 hover:underline inline-block"
                           onClick={(e) => handleCommentProfileClick(e, comment.userId)}
                         >
                           {comment.userName}
                         </h5>
-                        <span className="text-[9px] text-muted-foreground/50 font-bold uppercase tracking-widest">{comment.timestamp}</span>
+                        <span className="text-[8px] text-white/30 font-bold uppercase tracking-widest">{comment.timestamp}</span>
                       </div>
-                      <p className="text-[13px] text-foreground/70 leading-relaxed mb-4">{comment.content}</p>
-                      <div className="flex items-center gap-4">
+                      <p className="text-[12px] text-white/70 leading-snug mb-2">{comment.content}</p>
+                      <div className="flex items-center gap-2">
                         {/* Existing Reactions */}
-                        <div className="flex flex-wrap gap-4">
+                        <div className="flex flex-wrap gap-2">
                           {Object.entries(comment.reactions || {}).map(([emoji, count]) => {
                             const isActive = comment.userReactions?.includes(emoji);
                             return (
                               <button 
                                 key={emoji} 
                                 onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                className={`flex items-center gap-4 rounded-full px-4 py-4 text-[10px] transition-all ${isActive ? 'bg-neutral-500/20 text-neutral-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground hover:text-neutral-400'}`}
+                                className={`flex items-center gap-2 rounded-full px-2 py-1 text-[9px] transition-all ${isActive ? 'bg-white/10 text-white border border-white/20' : 'bg-white/5 text-white/50 hover:text-white'}`}
                               >
                                 <span>{emoji}</span>
                                 <span className="font-bold">{count}</span>
@@ -330,17 +310,17 @@ const PostDetail: React.FC = () => {
                         </div>
                         {/* Reaction Picker Trigger */}
                         <div className="relative group/picker">
-                          <button className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-blue-500 transition-all hover:bg-muted/50">
-                            <Smile className="h-4 w-4" />
+                          <button className="w-6 h-6 flex items-center justify-center rounded-full text-white/30 hover:text-white transition-all hover:bg-white/10">
+                            <FaceSmileIcon className="h-3 w-3" />
                           </button>
-                          <div className="absolute bottom-full left-0 mb-4 hidden group-hover/picker:flex items-center gap-4 bg-[#1a1a1a] border border-border p-4 rounded-full shadow-xl z-20 backdrop-blur-xl">
+                          <div className="absolute bottom-full left-0 mb-2 hidden group-hover/picker:flex items-center gap-2 bg-[#1a1a1a] border border-white/10 p-2 rounded-full shadow-xl z-20 backdrop-blur-xl">
                             {REACTION_EMOJIS.map(emoji => {
                               const isActive = comment.userReactions?.includes(emoji);
                               return (
                                 <button 
                                   key={emoji} 
                                   onClick={() => handleCommentReaction(comment.id, emoji)} 
-                                  className={`w-8 h-8 flex items-center justify-center rounded-full transition-all text-sm hover:scale-110 ${isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-muted text-muted-foreground/90'}`}
+                                  className={`w-6 h-6 flex items-center justify-center rounded-full transition-all text-[10px] hover:scale-110 ${isActive ? 'bg-white/20 text-white' : 'hover:bg-white/10 text-white/70'}`}
                                 >
                                   {emoji}
                                 </button>
@@ -353,10 +333,18 @@ const PostDetail: React.FC = () => {
                   </motion.div>
                 ))}
               </AnimatePresence>
+              {comments.length > visibleCommentsCount && (
+                <button 
+                  onClick={() => setVisibleCommentsCount(prev => prev + 5)}
+                  className="w-full py-2 text-[10px] font-bold text-white/50 hover:text-white uppercase tracking-[0.2em] transition-colors"
+                >
+                  Show More
+                </button>
+              )}
               {comments.length === 0 && (
-                <div className="text-center py-4 -dashed rounded-[10px]">
-                  <MessageSquareOff className="h-8 w-8 text-foreground/5 mx-auto mb-4" />
-                  <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No neural signals detected</p>
+                <div className="text-center py-3 rounded-[8px]">
+                  <ChatBubbleLeftRightIcon className="h-6 w-6 text-white/5 mx-auto mb-2" />
+                  <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em]">No neural signals</p>
                 </div>
               )}
             </div>

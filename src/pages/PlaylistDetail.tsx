@@ -1,11 +1,13 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Music2, Play, Shuffle, Trash2, MinusCircle, Camera, Pencil, Check, X, GripVertical, ChevronUp, ChevronDown, CheckSquare, Square, AlertTriangle, Sparkles } from 'lucide-react';
+import { ArrowLeft, Music2, Play, Shuffle, Trash2, MinusCircle, Camera, Pencil, Check, X, GripVertical, ChevronUp, ChevronDown, CheckSquare, Square, AlertTriangle, Sparkles, MoreHorizontal } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import TrackCard from '@/components/TrackCard';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import PlaylistCoverGenerator from '@/components/PlaylistCoverGenerator';
+import PlaylistOptionsModal from '@/components/PlaylistOptionsModal';
 import { MOCK_TRACKS } from '@/constants';
+import { AnimatePresence } from 'motion/react';
 
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
 
@@ -20,6 +22,7 @@ const PlaylistDetail: React.FC = () => {
   const [editDescription, setEditDescription] = useState('');
   const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([]);
   const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const [isBulkRemoveModalOpen, setIsBulkRemoveModalOpen] = useState(false);
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [trackToRemove, setTrackToRemove] = useState<string | null>(null);
@@ -213,7 +216,13 @@ const PlaylistDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-4 px-4 md:px-4">
-      <div className="flex flex-col md:flex-row gap-4 mb-4 items-center md:items-end bg-gradient-to-b from-blue-900/20 to-background p-4 rounded-3xl">
+      <div className="flex flex-col md:flex-row gap-4 mb-4 items-center md:items-end bg-gradient-to-b from-blue-900/20 to-background p-4 rounded-3xl relative">
+        <button 
+          onClick={() => setIsOptionsModalOpen(true)}
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors text-white"
+        >
+          <MoreHorizontal className="w-6 h-6" />
+        </button>
         {/* Cover Image / Collage */}
         <div className="relative group w-48 h-48 md:w-56 md:h-56 flex-shrink-0 rounded-lg overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-neutral-900 border border-white/10 mx-auto md:mx-4">
           {playlist.coverUrl ? (
@@ -307,6 +316,12 @@ const PlaylistDetail: React.FC = () => {
                 <span className="font-bold text-white">{playlist.creator}</span>
                 <span>•</span>
                 <span>{playlistTracks.length} tracks</span>
+                {playlist.isCollaborative && (
+                  <>
+                    <span>•</span>
+                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-[10px] uppercase tracking-widest font-bold">Collaborative</span>
+                  </>
+                )}
               </div>
             </>
           )}
@@ -468,6 +483,17 @@ const PlaylistDetail: React.FC = () => {
         playlist={playlist}
         tracks={playlistTracks}
       />
+
+      <AnimatePresence>
+        {isOptionsModalOpen && (
+          <PlaylistOptionsModal
+            playlist={playlist}
+            onClose={() => setIsOptionsModalOpen(false)}
+            onEdit={startEditing}
+            onDelete={handleDeletePlaylist}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

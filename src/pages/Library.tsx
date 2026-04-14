@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
@@ -19,6 +19,7 @@ import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { getPlaceholderImage } from '@/lib/utils';
+import SkeletonCard from '@/components/SkeletonCard';
 
 type LibraryFilter = 'all' | 'playlists' | 'artists' | 'albums' | 'nfts';
 type SortOption = 'recents' | 'recently-added' | 'alphabetical';
@@ -41,6 +42,12 @@ const Library: React.FC = () => {
   const [filter, setFilter] = useState<LibraryFilter>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('recents');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Data processing
   const likedTracksCount = likedTrackIds.length;
@@ -224,7 +231,13 @@ const Library: React.FC = () => {
 
           {/* Library Items */}
           <AnimatePresence>
-            {libraryItems.map(item => renderLibraryItem(item))}
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} variant={viewMode === 'grid' ? 'default' : 'row'} />
+              ))
+            ) : (
+              libraryItems.map(item => renderLibraryItem(item))
+            )}
           </AnimatePresence>
 
           {libraryItems.length === 0 && (

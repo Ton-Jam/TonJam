@@ -29,15 +29,17 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import TokenGate from '@/components/TokenGate';
 import { useTokenGating } from '@/hooks/useTokenGating';
+import CommentsSection from '@/components/CommentsSection';
+import ReactionsSection from '@/components/ReactionsSection';
 
 const TrackDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, jamTrack, likedTrackIds, toggleLikeTrack, addNotification, setTrackToAddToPlaylist, setOptionsTrack } = useAudio();
+  const { playTrack, currentTrack, isPlaying, jamTrack, mintNFT, allTracks, likedTrackIds, toggleLikeTrack, addNotification, setTrackToAddToPlaylist, setOptionsTrack, userProfile } = useAudio();
   const [isTipping, setIsTipping] = useState(false);
   const [tonConnectUI] = useTonConnectUI();
   
-  const track = useMemo(() => MOCK_TRACKS.find(t => t.id === id), [id]);
+  const track = useMemo(() => allTracks.find(t => t.id === id), [id, allTracks]);
   const artist = useMemo(() => MOCK_ARTISTS.find(a => a.uid === track?.artistId), [track]);
   const associatedNFTs = useMemo(() => MOCK_NFTS.filter(n => n.trackId === id), [id]);
   
@@ -133,7 +135,7 @@ const TrackDetail: React.FC = () => {
                          radial-gradient(circle at 80% 70%, #8b5cf6 0%, transparent 50%)`
           }}
         />
-        <div className="absolute inset-0 bg-background/40 backdrop-blur-4" />
+        <div className="absolute inset-0 bg-background/40" />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-4 pt-4">
@@ -296,7 +298,7 @@ const TrackDetail: React.FC = () => {
             </div>
 
             {/* Purchase / Mint Card */}
-            {track.isNFT && (
+            {track.isNFT ? (
               <div className="p-4 rounded-2xl bg-muted/50 backdrop-blur-xl space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -308,12 +310,15 @@ const TrackDetail: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">Available Supply</p>
-                    <p className="text-sm font-bold text-blue-500 tracking-tighter">1 / 100</p>
+                    <p className="text-sm font-bold text-blue-500 tracking-tighter">{track.minted || 0} / {track.editions || '∞'}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <button className="py-4 bg-foreground text-background rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-all flex items-center justify-center gap-4">
+                  <button 
+                    onClick={() => mintNFT(track.id, tonConnectUI)}
+                    className="py-4 bg-foreground text-background rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-all flex items-center justify-center gap-4"
+                  >
                     <ShoppingCart className="h-4 w-4" />
                     Buy NFT
                   </button>
@@ -327,17 +332,39 @@ const TrackDetail: React.FC = () => {
                   Secured by TON Blockchain • Instant Settlement
                 </p>
               </div>
+            ) : (
+              userProfile.uid === track.artistId && (
+                <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 backdrop-blur-xl space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <Zap className="h-5 w-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Mint as NFT</h3>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Turn this track into a digital artifact</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate('/mint', { state: { track } })}
+                    className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20"
+                  >
+                    Mint NFT
+                  </button>
+                </div>
+              )
             )}
           </div>
 
           {/* Right Column: Metadata & Content */}
           <div className="lg:col-span-7 space-y-4">
             <header>
-              <h1 className="text-[32px] md:text-[56px] font-black tracking-tighter uppercase text-foreground leading-[0.9] mb-4">
+              <h1 className="text-[32px] md:text-[56px] font-black tracking-tighter uppercase text-foreground leading-[0.9] mb-2">
                 {track.title}
               </h1>
+              
+              <ReactionsSection targetId={track.id} targetType="track" />
 
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 mt-2">
                 <div className="flex items-center gap-4">
                   <Activity className="h-4 w-4 text-muted-foreground/50" />
                   <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">{track.playCount?.toLocaleString() || '0'} Streams</span>
@@ -531,7 +558,14 @@ const TrackDetail: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <button className="p-4 rounded-lg bg-muted/50 text-muted-foreground hover:bg-foreground hover:text-background transition-all">
+                <button 
+                  onClick={() => {
+                    if (artist?.uid) {
+                      useAudio().toggleFollowUser(artist.uid);
+                    }
+                  }}
+                  className="p-4 rounded-lg bg-muted/50 text-muted-foreground hover:bg-foreground hover:text-background transition-all"
+                >
                   <Users className="h-4 w-4" />
                 </button>
               </div>
@@ -546,48 +580,9 @@ const TrackDetail: React.FC = () => {
               </button>
             </div>
 
-            {/* User Reviews */}
-            <div className="pt-4">
-              <h3 className="text-xl font-bold text-foreground tracking-tight mb-4">User Reviews</h3>
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-muted/50">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
-                      U1
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-foreground">CryptoPunk99</p>
-                      <div className="flex text-yellow-500 text-[10px]">
-                        ★★★★★
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-foreground/70">Absolute banger! The bassline is incredible and the drop is out of this world.</p>
-                </div>
-                <div className="p-4 rounded-xl bg-muted/50">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold text-xs">
-                      U2
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-foreground">NeonRider</p>
-                      <div className="flex text-yellow-500 text-[10px]">
-                        ★★★★☆
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-foreground/70">Great track, really fits the cyberpunk vibe. Wish it was a bit longer though.</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <textarea 
-                  placeholder="Write a review..." 
-                  className="w-full bg-muted/50 rounded-xl p-4 text-sm text-foreground placeholder-white/30 focus:outline-none focus:border-neutral-500/50 transition-colors resize-none h-24"
-                ></textarea>
-                <button className="mt-4 px-4 py-4 bg-blue-600 text-foreground rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all">
-                  Submit Review
-                </button>
-              </div>
+            {/* Comments Section */}
+            <div className="pt-4 border-t border-border/50">
+              <CommentsSection targetId={track.id} targetType="track" />
             </div>
 
           </div>

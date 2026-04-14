@@ -73,7 +73,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-card border border-border rounded-[24px] p-4 shadow-2xl"
+            className="relative w-full max-md bg-card rounded-[24px] p-4 shadow-2xl"
           >
             <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
               <X className="h-5 w-5" />
@@ -85,7 +85,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                 <button
                   type="button"
                   onClick={() => setListingType('fixed')}
-                  className={`flex-1 py-3 rounded-[12px] border transition-all flex flex-col items-center justify-center gap-2 ${listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500 text-blue-500' : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted'}`}
+                  className={`flex-1 py-3 rounded-[12px] transition-all flex flex-col items-center justify-center gap-2 ${listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500 text-blue-500' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
                 >
                   <Tag className="h-4 w-4" />
                   <span className="text-[9px] font-bold uppercase tracking-widest">Fixed Price</span>
@@ -93,7 +93,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                 <button
                   type="button"
                   onClick={() => setListingType('auction')}
-                  className={`flex-1 py-3 rounded-[12px] border transition-all flex flex-col items-center justify-center gap-2 ${listingType === 'auction' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted'}`}
+                  className={`flex-1 py-3 rounded-[12px] transition-all flex flex-col items-center justify-center gap-2 ${listingType === 'auction' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
                 >
                   <Gavel className="h-4 w-4" />
                   <span className="text-[9px] font-bold uppercase tracking-widest">Auction</span>
@@ -110,7 +110,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                       type="number" 
                       value={newPrice} 
                       onChange={(e) => setNewPrice(e.target.value)}
-                      className="w-full bg-muted/50 border border-border rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full bg-muted/50 rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
                   </div>
                   <div>
@@ -121,7 +121,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                       type="datetime-local" 
                       value={newEndDate} 
                       onChange={(e) => setNewEndDate(e.target.value)}
-                      className="w-full bg-muted/50 border border-border rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full bg-muted/50 rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
                     <div className="flex gap-2 mt-2">
                       {['1', '3', '7', '14'].map((d) => (
@@ -150,7 +150,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                     type="number" 
                     value={newPrice} 
                     onChange={(e) => setNewPrice(e.target.value)}
-                    className="w-full bg-muted/50 border border-border rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-muted/50 rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               )}

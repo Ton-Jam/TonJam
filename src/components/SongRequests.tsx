@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { useAudio } from '@/context/AudioContext';
 import { SongRequest } from '@/types';
 import { Loader2, Check, X, Gift } from 'lucide-react';
@@ -21,8 +21,7 @@ const SongRequests: React.FC<SongRequestsProps> = ({ artistId }) => {
       setRequests(reqs);
       setLoading(false);
     }, (error) => {
-      console.error("Error fetching requests:", error);
-      addNotification("Failed to fetch song requests.", "error");
+      handleFirestoreError(error, OperationType.GET, 'songRequests');
       setLoading(false);
     });
     return () => unsubscribe();

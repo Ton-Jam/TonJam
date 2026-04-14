@@ -51,10 +51,10 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full max-w-md bg-white border border-border rounded-[20px] overflow-hidden shadow-2xl"
+        className="relative w-full max-w-md bg-white rounded-[20px] overflow-hidden shadow-2xl"
       >
         {/* Header */}
-        <div className="p-2 border-b border-border/50 flex items-center justify-between">
+        <div className="p-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-[8px] bg-blue-600/20 flex items-center justify-center">
               <Send className="h-4 w-4 text-blue-500" />
@@ -76,7 +76,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-2"
               >
-                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-[12px] border border-border/50">
+                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-[12px]">
                   <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-16 h-16 rounded-[8px] object-cover" alt="" />
                   <div>
                     <h3 className="text-sm font-bold text-black uppercase tracking-tight">{nft.title}</h3>
@@ -94,12 +94,12 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                       value={recipient}
                       onChange={(e) => setRecipient(e.target.value)}
                       placeholder="EQD... or username"
-                      className="w-full bg-muted/50 border border-border rounded-[12px] py-2 pl-2 pr-2 text-xs text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                      className="w-full bg-muted/50 rounded-[12px] py-2 pl-2 pr-2 text-xs text-black outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="p-2 bg-amber-500/5 border border-amber-500/10 rounded-[12px] flex gap-2">
+                <div className="p-2 bg-amber-500/5 rounded-[12px] flex gap-2">
                   <Shield className="h-4 w-4 text-amber-500 shrink-0 mt-3" />
                   <p className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest leading-relaxed">
                     Warning: This action is irreversible. Ensure the recipient address is correct on the TON network.
@@ -129,7 +129,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">You are sending {nft.title} to:</p>
                 </div>
 
-                <div className="p-2 bg-muted/50 border border-border rounded-[16px] break-all">
+                <div className="p-2 bg-muted/50 rounded-[16px] break-all">
                   <p className="text-xs font-mono text-blue-400">{recipient}</p>
                 </div>
 
@@ -158,7 +158,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 className="py-2 flex flex-col items-center justify-center gap-2"
               >
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-full border-2 border-neutral-500/20 border-t-blue-500 animate-spin"></div>
+                  <div className="w-20 h-20 rounded-full border-2 border-transparent border-t-blue-500 animate-spin"></div>
                   <Loader2 className="absolute inset-0 m-auto h-8 w-8 text-blue-500 animate-pulse" />
                 </div>
                 <div className="text-center space-y-2">
@@ -175,7 +175,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
                 animate={{ opacity: 1, scale: 1 }}
                 className="py-2 flex flex-col items-center justify-center gap-2 text-center"
               >
-                <div className="w-20 h-20 rounded-full bg-neutral-500/20 flex items-center justify-center border border-neutral-500/30">
+                <div className="w-20 h-20 rounded-full bg-neutral-500/20 flex items-center justify-center">
                   <CheckCircle2 className="h-10 w-10 text-green-500" />
                 </div>
                 <div className="space-y-2">

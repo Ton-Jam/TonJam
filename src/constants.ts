@@ -348,7 +348,8 @@ export const MOCK_USER: UserProfile = {
     x: 'https://x.com/pioneer_ton',
     instagram: 'https://instagram.com/pioneer_ton',
     telegram: 'https://t.me/pioneer_ton'
-  }
+  },
+  role: 'collector'
 };
 
 export const MOCK_NFTS: NFTItem[] = [
@@ -773,7 +774,8 @@ export const MOCK_USERS: UserProfile[] = [
     following: 120,
     earnings: 0,
     followedArtists: ['a1', 'a5'],
-    friends: ['u1']
+    friends: ['u1'],
+    role: 'collector'
   },
   {
     uid: 'u3',
@@ -786,7 +788,8 @@ export const MOCK_USERS: UserProfile[] = [
     following: 340,
     earnings: 0,
     followedArtists: ['a2', 'a3', 'a6'],
-    friends: ['u1']
+    friends: ['u1'],
+    role: 'artist'
   }
 ];
 

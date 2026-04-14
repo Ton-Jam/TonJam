@@ -33,10 +33,24 @@ const LoadingScreen: React.FC = () => {
             layoutId="app-logo"
             src={APP_LOGO}
             alt="TonJam"
-            className="w-26 h-26 md:w-34 md:h-34 object-contain"
-            animate={{ rotate: 360 }}
-            transition={{ rotate: { duration: 8, repeat: Infinity, ease: "linear" } }}
+            className="w-[107px] h-[107px] md:w-[139px] md:h-[139px] object-contain"
+            animate={{ 
+              rotate: 360,
+              opacity: progress >= 90 ? 0 : 1 
+            }}
+            transition={{ 
+              rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+              opacity: { duration: 0.5 }
+            }}
           />
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center text-white text-4xl font-black tracking-tighter"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: progress >= 90 ? 1 : 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            TonJam
+          </motion.div>
         </div>
       </div>
 

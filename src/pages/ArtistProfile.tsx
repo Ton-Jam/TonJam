@@ -658,6 +658,27 @@ const ArtistProfile: React.FC = () => {
                   </div>
                 </section>
 
+                {/* Top Tracks by Play Count */}
+                <section>
+                  <h3 className="text-xl font-black text-foreground tracking-tight mb-8">Top Tracks</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    {topTracks.map((track, idx) => (
+                      <div key={track.id} className="group flex items-center gap-6 p-4 rounded-2xl bg-muted/20 border border-border/50">
+                        <span className="text-xs font-black text-orange-500 w-4">{idx + 1}</span>
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden">
+                          <img src={track.coverUrl} className="w-full h-full object-cover" alt="" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-foreground truncate">{track.title}</h4>
+                        </div>
+                        <div className="text-xs font-bold text-muted-foreground tabular-nums">
+                          {(track.playCount || 0).toLocaleString()} plays
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
                 {/* All Tracks */}
                 <section>
                   <h3 className="text-xl font-black text-foreground tracking-tight mb-8">All Tracks</h3>

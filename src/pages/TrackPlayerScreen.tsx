@@ -22,7 +22,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/context/AudioContext";
-import { MOCK_TRACKS, MOCK_ARTISTS } from "@/constants";
+import { processNFTSaleRoyalty } from "@/services/royaltyService";
+import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS } from "@/constants";
 import { getPlaceholderImage } from "@/lib/utils";
 
 export default function TrackPlayerScreen() {
@@ -82,11 +83,33 @@ export default function TrackPlayerScreen() {
     navigate(`/mint?trackId=${track?.id}`, { state: { track } });
   };
 
-  const handleBuy = () => {
-    addNotification(`Purchase of ${track?.title} initiated...`, "info");
-    setTimeout(() => {
-      addNotification(`Successfully purchased edition of ${track?.title}!`, "success");
-    }, 2000);
+  const handleBuy = async () => {
+    if (!track) return;
+    addNotification(`Purchase of ${track.title} initiated...`, "info");
+    
+    try {
+      // Find associated NFT if it exists, or create a temporary one for the simulation
+      const nft = MOCK_NFTS.find(n => n.trackId === track.id) || {
+        id: `nft-${track.id}`,
+        trackId: track.id,
+        title: track.title,
+        creator: track.artist,
+        artistId: track.artistId,
+        price: track.price || '5',
+        imageUrl: track.coverUrl,
+        owner: 'EQ_MARKETPLACE',
+        edition: 'Limited',
+        royaltySplits: track.royaltySplits || []
+      } as any;
+
+      const price = parseFloat(track.price || '5');
+      await processNFTSaleRoyalty(nft, price);
+      
+      addNotification(`Successfully purchased edition of ${track.title}!`, "success");
+    } catch (error) {
+      console.error("Purchase failed:", error);
+      addNotification("Purchase failed. Please try again.", "error");
+    }
   };
 
   const handlePostComment = () => {

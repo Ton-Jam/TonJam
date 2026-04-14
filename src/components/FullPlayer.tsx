@@ -168,7 +168,7 @@ const FullPlayer: React.FC = () => {
     prevTrack,
     isShuffle,
     toggleShuffle,
-    isRepeat,
+    repeatMode,
     toggleRepeat,
     toggleLikeTrack,
     likedTrackIds,
@@ -275,7 +275,7 @@ const FullPlayer: React.FC = () => {
 
       <div className="relative z-10 flex flex-col min-h-full">
         {/* Header */}
-        <div className="z-30 flex items-center justify-between p-4 bg-background/10 backdrop-blur-md">
+        <div className="z-30 flex items-center justify-between p-[14px] bg-background/10 backdrop-blur-md">
           <button 
             onClick={() => setFullPlayerOpen(false)}
             className="p-2 -ml-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
@@ -401,10 +401,13 @@ const FullPlayer: React.FC = () => {
               
               <button 
                 onClick={toggleRepeat}
-                className={`p-2 transition-all focus-visible:outline-none rounded-full ${isRepeat ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
-                aria-label={isRepeat ? "Disable repeat" : "Enable repeat"}
+                className={`p-2 transition-all focus-visible:outline-none rounded-full ${repeatMode !== 'off' ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
+                aria-label={repeatMode === 'off' ? "Enable repeat" : repeatMode === 'all' ? "Repeat one" : "Disable repeat"}
               >
-                <ArrowPathRoundedSquareIcon className="h-6 w-6" />
+                <div className="relative">
+                  <ArrowPathRoundedSquareIcon className="h-6 w-6" />
+                  {repeatMode === 'one' && <span className="absolute -top-1 -right-1 text-[8px] font-bold bg-blue-500 text-white rounded-full w-3 h-3 flex items-center justify-center">1</span>}
+                </div>
               </button>
             </div>
 
@@ -451,46 +454,21 @@ const FullPlayer: React.FC = () => {
               </div>
               
               <div className="flex gap-4">
-                {!currentTrack.isNFT ? (
-                  <button 
-                    onClick={() => {
-                      setFullPlayerOpen(false);
-                      navigate(`/mint?trackId=${currentTrack.id}`);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-foreground rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all"
-                    aria-label="Mint NFT"
-                  >
-                    <SparklesIcon className="h-4 w-4" />
-                    Mint NFT
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => {
-                      addNotification(`Purchase of ${currentTrack.title} initiated...`, "info");
-                      setTimeout(() => {
-                        addNotification(`Successfully purchased edition of ${currentTrack.title}!`, "success");
-                      }, 2000);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-full text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-all"
-                    aria-label="Buy NFT"
-                  >
-                    <PlusCircleIcon className="h-4 w-4" />
-                    Buy Edition
-                  </button>
-                )}
-                {currentTrack.isNFT && (
-                  <button 
-                    onClick={() => {
-                      setFullPlayerOpen(false);
-                      navigate(`/player/${currentTrack.id}`);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-foreground/10 text-foreground rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-foreground/20 transition-all"
-                    aria-label="View Editions"
-                  >
-                    <ListBulletIcon className="h-4 w-4" />
-                    Editions
-                  </button>
-                )}
+                <button 
+                  onClick={() => {
+                    setFullPlayerOpen(false);
+                    if (currentTrack.isNFT) {
+                      navigate(`/nft/${currentTrack.id}`);
+                    } else {
+                      navigate(`/track/${currentTrack.id}`);
+                    }
+                  }}
+                  className="p-3 bg-foreground text-background rounded-full hover:opacity-90 transition-all shadow-lg"
+                  title="View Details"
+                  aria-label="View Details"
+                >
+                  <InformationCircleIcon className="h-6 w-6" />
+                </button>
               </div>
             </div>
 
@@ -535,7 +513,7 @@ const FullPlayer: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <img 
                     src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.uid}`)} 
-                    className="w-20 h-20 rounded-full object-cover border-2 border-background shadow-xl" 
+                    className="w-20 h-20 rounded-full object-cover shadow-xl" 
                     alt={artistData.name} 
                   />
                   <div className="flex-1">
@@ -566,42 +544,17 @@ const FullPlayer: React.FC = () => {
           </section>
 
           {/* 4. Lyrics Section (If available) */}
-          {(currentTrack.lyrics || currentTrack.artistId === userProfile.uid) && (
+          {currentTrack.lyrics && (
             <section className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MicrophoneIcon className="h-5 w-5 text-blue-500" />
                   <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Lyrics</h3>
                 </div>
-                {currentTrack.artistId === userProfile.uid && !currentTrack.lyrics && (
-                  <button 
-                    onClick={() => setShowAddLyricsModal(true)}
-                    className="text-xs font-bold text-blue-500 uppercase tracking-widest hover:underline"
-                  >
-                    Add Lyrics
-                  </button>
-                )}
-                {currentTrack.artistId === userProfile.uid && currentTrack.lyrics && (
-                  <button 
-                    onClick={() => {
-                      setNewLyrics(currentTrack.lyrics || '');
-                      setShowAddLyricsModal(true);
-                    }}
-                    className="text-xs font-bold text-blue-500 uppercase tracking-widest hover:underline"
-                  >
-                    Edit Lyrics
-                  </button>
-                )}
               </div>
-              {currentTrack.lyrics ? (
-                <div className="bg-foreground/5 p-6 rounded-2xl">
-                  <LyricsView lyrics={currentTrack.lyrics} />
-                </div>
-              ) : (
-                <div className="bg-foreground/5 p-6 rounded-2xl text-center text-muted-foreground">
-                  <p className="text-sm">No lyrics available for this track.</p>
-                </div>
-              )}
+              <div className="bg-foreground/5 p-6 rounded-2xl">
+                <LyricsView lyrics={currentTrack.lyrics} />
+              </div>
             </section>
           )}
 
@@ -618,7 +571,7 @@ const FullPlayer: React.FC = () => {
                   <input 
                     type="text" 
                     placeholder="Add a comment..." 
-                    className="w-full bg-background/50 rounded-xl py-3 px-4 text-sm text-foreground outline-none border border-foreground/10 focus:border-blue-500/50 transition-all"
+                    className="w-full bg-background/50 rounded-xl py-3 px-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all"
                   />
                 </div>
               </div>
@@ -640,7 +593,7 @@ const FullPlayer: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <button className="w-full py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors border-t border-foreground/5 mt-4">
+              <button className="w-full py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mt-4">
                 View all 24 comments
               </button>
             </div>
@@ -687,14 +640,14 @@ const FullPlayer: React.FC = () => {
               <h3 className="text-[14px] font-bold uppercase tracking-[0.2em] text-foreground/70">Featured Playlists</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer group">
+              <div className="p-4 rounded-2xl bg-blue-500/10 hover:bg-blue-500/20 transition-all cursor-pointer group">
                 <div className="w-full aspect-video rounded-xl bg-blue-500/20 mb-3 overflow-hidden">
                   <img src={getPlaceholderImage('playlist-1')} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" alt="" />
                 </div>
                 <p className="font-bold text-blue-400">TonJam Top 50</p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Updated Daily</p>
               </div>
-              <div className="p-4 rounded-2xl bg-muted/50 border border-transparent hover:border-foreground/10 transition-all cursor-pointer group">
+              <div className="p-4 rounded-2xl bg-muted/50 transition-all cursor-pointer group">
                 <div className="w-full aspect-video rounded-xl bg-foreground/5 mb-3 overflow-hidden">
                   <img src={getPlaceholderImage('playlist-2')} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" alt="" />
                 </div>
@@ -728,7 +681,7 @@ const FullPlayer: React.FC = () => {
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Now Playing</h4>
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-4">
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-blue-500/10 mb-4">
                 <img src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} className="w-16 h-16 rounded-xl shadow-lg" alt="" />
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-bold text-blue-400 truncate">{currentTrack.title}</p>
@@ -788,9 +741,9 @@ const FullPlayer: React.FC = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-card w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-border flex flex-col max-h-[90vh]"
+              className="bg-card w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
             >
-              <div className="p-6 border-b border-border flex items-center justify-between">
+              <div className="p-6 flex items-center justify-between">
                 <h3 className="text-xl font-bold text-foreground">Add Lyrics</h3>
                 <button 
                   onClick={() => setShowAddLyricsModal(false)}

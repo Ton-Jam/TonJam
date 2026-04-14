@@ -127,7 +127,7 @@ const FullAudioPlayer: React.FC = () => {
     prevTrack,
     setFullPlayerOpen,
     isShuffle,
-    isRepeat,
+    repeatMode,
     toggleShuffle,
     toggleRepeat,
     addNotification,
@@ -363,6 +363,9 @@ const FullAudioPlayer: React.FC = () => {
                   >
                     {currentTrack.artist}
                   </p>
+                  <span className="text-[12px] font-bold text-muted-foreground/80 uppercase tracking-widest">
+                    • {currentTrack.streams?.toLocaleString() || 0} streams
+                  </span>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -519,10 +522,11 @@ const FullAudioPlayer: React.FC = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={toggleRepeat}
-                className={`text-lg transition-all p-2 rounded-full ${isRepeat ? "text-blue-400 bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.3)]" : "text-muted-foreground/50 hover:text-foreground"}`}
+                className={`text-lg transition-all p-2 rounded-full relative ${repeatMode !== 'off' ? "text-blue-400 bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.3)]" : "text-muted-foreground/50 hover:text-foreground"}`}
                 title="Repeat"
               >
                 <Repeat className="h-5 w-5" />
+                {repeatMode === 'one' && <span className="absolute -top-0.5 -right-0.5 text-[8px] font-bold bg-blue-500 text-white rounded-full w-3 h-3 flex items-center justify-center">1</span>}
               </motion.button>
             </div>
           </div>

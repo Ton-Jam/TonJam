@@ -204,6 +204,99 @@ const Marketplace: React.FC = () => {
           </div>
         </div>
 
+        {/* Floor Price Analytics Cards */}
+        <section className="mb-2 mt-2 max-w-[1600px] mx-auto px-4 md:px-4">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+
+            {/* Floor Price */}
+            <div className="flex-shrink-0 w-[110px] sm:w-auto sm:flex-1 bg-muted/30 backdrop-blur-md rounded-xl p-2 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-all"></div>
+              <div className="relative z-10 flex flex-col">
+                <p className="text-[7px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-0.5">
+                  Floor Price
+                </p>
+                <div className="flex items-end gap-1 mb-0.5">
+                  <h3 className="text-sm font-black tracking-tighter text-foreground leading-none">
+                    {Math.min(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2)} TON
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1 text-emerald-400">
+                  <TrendingUp className="h-2 w-2" />
+                  <span className="text-[7px] font-bold uppercase tracking-wider">
+                    Lowest Entry
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Highest Sale */}
+            <div className="flex-shrink-0 w-[110px] sm:w-auto sm:flex-1 bg-muted/30 backdrop-blur-md rounded-xl p-2 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-amber-600/5 opacity-0 group-hover:opacity-100 transition-all"></div>
+              <div className="relative z-10 flex flex-col">
+                <p className="text-[7px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-0.5">
+                  Highest Sale
+                </p>
+                <div className="flex items-end gap-1 mb-0.5">
+                  <h3 className="text-sm font-black tracking-tighter text-foreground leading-none">
+                    {Math.max(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2)} TON
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1 text-amber-400">
+                  <Rocket className="h-2 w-2" />
+                  <span className="text-[7px] font-bold uppercase tracking-wider">
+                    Premium Value
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Total Market Volume */}
+            <div className="flex-shrink-0 w-[110px] sm:w-auto sm:flex-1 bg-muted/30 backdrop-blur-md rounded-xl p-2 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-purple-600/5 opacity-0 group-hover:opacity-100 transition-all"></div>
+              <div className="relative z-10 flex flex-col">
+                <p className="text-[7px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-0.5">
+                  Market Volume
+                </p>
+                <div className="flex items-end gap-1 mb-0.5">
+                  <h3 className="text-sm font-black tracking-tighter text-foreground leading-none">
+                    {allNFTs
+                      .reduce((sum, nft) => sum + parseFloat(nft.price), 0)
+                      .toFixed(2)} TON
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1 text-purple-400">
+                  <Zap className="h-2 w-2" />
+                  <span className="text-[7px] font-bold uppercase tracking-wider">
+                    Total Liquidity
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Auctions */}
+            <div className="flex-shrink-0 w-[110px] sm:w-auto sm:flex-1 bg-muted/30 backdrop-blur-md rounded-xl p-2 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-emerald-600/5 opacity-0 group-hover:opacity-100 transition-all"></div>
+              <div className="relative z-10 flex flex-col">
+                <p className="text-[7px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-0.5">
+                  Active Auctions
+                </p>
+                <div className="flex items-end gap-1 mb-0.5">
+                  <h3 className="text-sm font-black tracking-tighter text-foreground leading-none">
+                    {allNFTs.filter(nft => nft.listingType === 'auction').length}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1 text-emerald-400">
+                  <Bell className="h-2 w-2" />
+                  <span className="text-[7px] font-bold uppercase tracking-wider">
+                    Live Bidding
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
         {/* 2. LIVE BIDDING RELAY - ENHANCED GLASS */}
         <section className="mb-2 mt-2">
           <div className="max-w-[1600px] mx-auto px-4 md:px-4">
@@ -279,7 +372,7 @@ const Marketplace: React.FC = () => {
               </div>
               <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
                 {allNFTs.slice(0, 8).map((nft) => (
-                  <div key={nft.id} className="flex-shrink-0 w-[200px] snap-start">
+                  <div key={nft.id} className="flex-shrink-0 w-[160px] snap-start">
                     <NFTCard nft={nft} />
                   </div>
                 ))}
@@ -298,7 +391,7 @@ const Marketplace: React.FC = () => {
               </div>
               <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
                 {allNFTs.sort((a,b) => (b.offers?.length || 0) - (a.offers?.length || 0)).slice(0, 8).map((nft) => (
-                  <div key={nft.id} className="flex-shrink-0 w-[180px] snap-start">
+                  <div key={nft.id} className="flex-shrink-0 w-[160px] snap-start">
                     <NFTCard nft={nft} />
                   </div>
                 ))}
@@ -337,32 +430,19 @@ const Marketplace: React.FC = () => {
                 </div>
               </div>
               
-              {displayedNfts.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                    {displayedNfts.map((nft, idx) => (
+              {filteredNfts.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {filteredNfts.map((nft, idx) => (
                       <motion.div 
                         key={nft.id} 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: (idx % 10) * 0.05 }}
                       >
                         <NFTCard nft={nft} />
                       </motion.div>
                     ))}
                   </div>
-                  
-                  {/* Infinite Scroll Sentinel */}
-                  {displayCount < filteredNfts.length && (
-                    <div ref={loaderRef} className="py-12 flex justify-center">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                      </div>
-                    </div>
-                  )}
-                </>
               ) : (
                 <div className="py-4 flex flex-col items-center justify-center rounded-[24px] text-center bg-muted/50 backdrop-blur-xl border border-border dark:border-transparent">
                   <div className="w-24 h-24 rounded-full bg-primary/5 border border-border/50 dark:border-transparent flex items-center justify-center mb-4">
@@ -377,19 +457,19 @@ const Marketplace: React.FC = () => {
 
             {/* 7. ALPHA DROP / SUBSCRIPTION */}
             <section className="pb-4">
-              <div className="bg-muted/50 backdrop-blur-3xl border border-border dark:border-transparent p-4 md:p-4 rounded-[32px] flex flex-col lg:flex-row items-center justify-between gap-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] -rotate-12 group-hover:opacity-[0.06] transition-opacity"><Zap className="h-64 w-64 text-primary" /></div>
+              <div className="bg-muted/30 backdrop-blur-md p-4 md:p-6 rounded-2xl flex flex-col lg:flex-row items-center justify-between gap-4 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] -rotate-12 group-hover:opacity-[0.06] transition-opacity"><Zap className="h-32 w-32 text-primary" /></div>
                 <div className="text-center lg:text-left relative z-10">
-                  <div className="flex items-center justify-center lg:justify-start gap-4 mb-4">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                    <span className="text-[10px] font-bold text-primary uppercase tracking-[0.6em]">Genesis Whitelist</span>
+                  <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                    <span className="text-[9px] font-bold text-primary uppercase tracking-[0.4em]">Genesis Whitelist</span>
                   </div>
-                  <h4 className="text-[44px] md:text-[68px] font-bold uppercase tracking-tighter text-foreground leading-none mb-4">THE NEURAL <br /> DROP</h4>
-                  <p className="text-xs text-muted-foreground/40 uppercase tracking-[0.4em] max-w-md leading-relaxed">Subscribe to the relay for exclusive mint protocols and early access to genesis artifacts.</p>
+                  <h4 className="text-2xl md:text-3xl font-bold uppercase tracking-tighter text-foreground leading-none mb-2">THE NEURAL DROP</h4>
+                  <p className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.2em] max-w-md leading-relaxed">Subscribe to the relay for exclusive mint protocols and early access.</p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto relative z-10">
-                  <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-80 bg-muted border border-border dark:border-transparent rounded-[16px] px-4 py-4 text-xs font-bold outline-none text-foreground focus:border-primary/50 transition-all placeholder:text-muted-foreground/10" />
-                  <button className="px-4 py-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-[16px] font-bold text-[11px] uppercase tracking-[0.4em] shadow-2xl shadow-primary/30 active:scale-95 transition-all">SYNC_NOW</button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto relative z-10">
+                  <input type="email" placeholder="NEURAL_ID@NETWORK.COM" className="flex-1 lg:w-64 bg-muted/50 rounded-xl px-3 py-2 text-[10px] font-bold outline-none text-foreground focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/30" />
+                  <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 active:scale-95 transition-all">SYNC_NOW</button>
                 </div>
               </div>
             </section>

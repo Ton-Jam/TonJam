@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, ShieldCheck, Twitter, Music, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 
 interface UserArtistVerificationModalProps {
   onClose: () => void;
@@ -39,14 +41,22 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
     }, 1500);
   };
 
-  const handleCompleteVerification = () => {
+  const handleCompleteVerification = async () => {
     setIsVerifying(true);
-    setTimeout(() => {
-      setIsVerifying(false);
-      setUserProfile({ ...userProfile, isVerifiedArtist: true });
+    try {
+      const userRef = doc(db, 'users', userProfile.uid);
+      await updateDoc(userRef, { 
+        isVerifiedArtist: true,
+        role: 'artist'
+      });
+      setUserProfile({ ...userProfile, isVerifiedArtist: true, role: 'artist' });
       addNotification("Artist identity verified successfully!", "success");
       onClose();
-    }, 2000);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${userProfile.uid}`);
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const canVerify = linkedAccounts.x && linkedAccounts.spotify && linkedAccounts.wallet;

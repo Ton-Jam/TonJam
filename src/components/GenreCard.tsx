@@ -32,7 +32,7 @@ const GenreCard: React.FC<GenreCardProps> = ({ genre, onClick, isSelected }) => 
       
       <button 
         onClick={handleClick}
-        className={`relative w-full h-24 rounded-[10px] overflow-hidden transition-all hover:scale-[1.02] active:scale-95 ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-black' : 'border border-border/80'}`}
+        className={`relative w-full h-24 rounded-[10px] overflow-hidden transition-all hover:scale-[1.02] active:scale-95 ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-black' : ''}`}
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-70 group-hover:opacity-100 transition-opacity`}></div>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">

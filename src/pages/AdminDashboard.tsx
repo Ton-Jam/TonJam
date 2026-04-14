@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, 
@@ -13,7 +13,9 @@ import {
   Rocket,
   Settings as SettingsIcon,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  XCircle,
+  Clock
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { TON_LOGO } from '@/constants';
@@ -22,11 +24,14 @@ import { Button } from '@/components/ui/button';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { deployTonJamCollection, deployTonJamMarketplace, TONJAM_COLLECTION_ADDRESS, TONJAM_MARKETPLACE_ADDRESS } from '@/services/tonService';
 import { toast } from 'sonner';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { SponsoredContent } from '@/types';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const { transactions } = useAudio();
+  const { transactions, approveSponsorship, rejectSponsorship } = useAudio();
   const safeTransactions = transactions || [];
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
@@ -35,6 +40,20 @@ const AdminDashboard: React.FC = () => {
   const [isDeployingMarketplace, setIsDeployingMarketplace] = useState(false);
   const [deployedCollection, setDeployedCollection] = useState(localStorage.getItem('tonjam_collection_address') || TONJAM_COLLECTION_ADDRESS);
   const [deployedMarketplace, setDeployedMarketplace] = useState(localStorage.getItem('tonjam_marketplace_address') || TONJAM_MARKETPLACE_ADDRESS);
+
+  const [allSponsorships, setAllSponsorships] = useState<SponsoredContent[]>([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      query(collection(db, 'sponsoredContent'), orderBy('createdAt', 'desc')),
+      (snap) => {
+        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as SponsoredContent));
+        setAllSponsorships(data);
+      },
+      (error) => handleFirestoreError(error, OperationType.LIST, 'sponsoredContent')
+    );
+    return () => unsub();
+  }, []);
 
   const handleDeployCollection = async () => {
     if (!userAddress) {
@@ -262,8 +281,77 @@ const AdminDashboard: React.FC = () => {
 
         {activeTab === 'sponsorships' && (
           <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6">
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">Sponsored Posts</h2>
-            <p className="text-xs text-muted-foreground">Manage posts in the auto-scroll carousel.</p>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-sm font-bold text-foreground uppercase tracking-widest">Sponsored Content Management</h2>
+                <p className="text-[10px] text-muted-foreground mt-1">Review and approve artist sponsorship requests.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                  {allSponsorships.filter(s => s.status === 'pending').length} Pending
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {allSponsorships.length > 0 ? (
+                allSponsorships.map((s) => (
+                  <div key={s.id} className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 bg-muted/30 rounded-xl border border-border/30 group hover:bg-muted/50 transition-all">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                      <img src={s.imageUrl} className="w-full h-full object-cover" alt="" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
+                          s.status === 'approved' ? 'bg-green-500/10 text-green-500' : 
+                          s.status === 'pending' ? 'bg-amber-500/10 text-amber-500' : 
+                          'bg-red-500/10 text-red-500'
+                        }`}>
+                          {s.status}
+                        </span>
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
+                          {s.type}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-bold text-foreground truncate">{s.title}</h3>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">
+                        By {s.artistName} • {s.paymentAmount} {s.paymentCurrency} • {s.durationDays} Days
+                      </p>
+                    </div>
+
+                    {s.status === 'pending' && (
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          onClick={() => rejectSponsorship(s.id)}
+                          variant="outline" 
+                          className="h-9 px-4 rounded-lg border-red-500/20 text-red-500 hover:bg-red-500/10"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" /> Reject
+                        </Button>
+                        <Button 
+                          onClick={() => approveSponsorship(s.id)}
+                          className="h-9 px-4 rounded-lg bg-green-600 hover:bg-green-500 text-white"
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-2" /> Approve & Pay
+                        </Button>
+                      </div>
+                    )}
+
+                    {s.status === 'approved' && (
+                      <div className="flex items-center gap-2 text-green-500 text-[10px] font-bold uppercase tracking-widest">
+                        <Clock className="w-3 h-3" /> Active until {new Date(s.endDate || '').toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="py-12 text-center">
+                  <Rocket className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">No sponsorship requests found</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

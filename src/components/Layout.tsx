@@ -136,7 +136,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const saved = localStorage.getItem('recentSearches');
     return saved ? JSON.parse(saved) : ['Lo-fi hip hop', 'Cyberpunk Beats', 'Phonk Vibes'];
   });
-  const trendingTopics = ['TON Blockchain', 'NFT Drops', 'Jam Sessions', 'Web3 Music', 'Artist Dashboard'];
+  const trendingTopics = useMemo(() => {
+    const topTracks = allTracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 3).map(t => t.title);
+    const topArtists = artists.sort((a, b) => b.followers - a.followers).slice(0, 2).map(a => a.name);
+    return [...topTracks, ...topArtists];
+  }, [allTracks, artists]);
 
   const saveRecentSearch = (query: string) => {
     if (!query.trim()) return;
@@ -233,7 +237,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Header */}
       {!isPlayer && !isExplore && !isSearch && (
-        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between lg:left-64 transition-transform duration-300 border-b-0 ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between lg:left-64 transition-transform duration-300 border-none ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
           <div className="flex items-center gap-2 flex-1">
             {(isHome) ? (
               <button 
@@ -295,7 +299,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   trendingTopics={trendingTopics}
                   placeholder={getSearchPlaceholder()}
                   className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`}
-                  inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2.5 pl-5 pr-10 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
+                  inputClassName="bg-muted/50 border-none rounded-full py-2.5 pl-5 pr-10 text-sm focus:outline-none focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                 >
                   {filteredResults && (
                     <div className="p-4 space-y-4">
@@ -369,8 +373,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     trendingTopics={trendingTopics}
                     placeholder="Search..."
                     className="flex-1 relative"
-                    inputClassName="bg-muted/50 border border-blue-500/30 rounded-full py-2 pl-4 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
-                    dropdownClassName="absolute top-full left-0 right-0 mt-2 bg-background border border-blue-500/20 rounded-xl shadow-2xl overflow-hidden z-50 p-2 max-h-[60vh] overflow-y-auto"
+                    inputClassName="bg-muted/50 rounded-full py-2 pl-4 text-sm focus:outline-none focus:bg-blue-500/10 transition-all text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
+                    dropdownClassName="absolute top-full left-0 right-0 mt-2 bg-background rounded-xl shadow-2xl overflow-hidden z-50 p-2 max-h-[60vh] overflow-y-auto"
                   >
                     <div className="space-y-2">
                       <div>
@@ -443,7 +447,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         aria-label="Filters"
                       >
-                        <AdjustmentsHorizontalIcon className="h-6 w-6" strokeWidth={2.5} />
+                        <AdjustmentsHorizontalIcon className="h-6 w-6 text-white" strokeWidth={2.5} />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[280px] sm:w-72 bg-background border-none shadow-2xl p-2 overflow-hidden" align="end">
@@ -528,7 +532,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 </DropdownMenuRadioGroup>
                               </div>
 
-                              <div className="p-2 border-t border-border bg-background sticky bottom-0 z-10 flex gap-2">
+                              <div className="p-2 bg-background sticky bottom-0 z-10 flex gap-2">
                                 <button 
                                   onClick={() => setMarketplaceFilters({
                                     genre: 'All',
@@ -537,7 +541,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     priceRange: [0, 1000],
                                     sortBy: 'Newest'
                                   })}
-                                  className="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest border border-border rounded-lg hover:bg-muted transition-colors"
+                                  className="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-muted transition-colors"
                                 >
                                   Clear All
                                 </button>
@@ -561,7 +565,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             >
                               <button 
                                 onClick={() => setActiveFilterSubMenu(null)}
-                                className="flex items-center gap-2 px-2 py-2 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-muted transition-colors border-b border-border sticky top-0 bg-background z-10"
+                                className="flex items-center gap-2 px-2 py-2 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-muted transition-colors sticky top-0 bg-background z-10"
                               >
                                 <ArrowLeftIcon className="h-4 w-4" />
                                 Back to Menu
@@ -617,7 +621,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 )}
                               </div>
 
-                              <div className="p-2 border-t border-border bg-background sticky bottom-0 z-10">
+                              <div className="p-2 bg-background sticky bottom-0 z-10">
                                 <DropdownMenuItem className="p-2 focus:bg-transparent">
                                   <button 
                                     className="w-full py-2 text-[10px] font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
@@ -639,7 +643,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Search"
                   >
-                    <MagnifyingGlassIcon className="h-6 w-6" strokeWidth={2.5} />
+                    <MagnifyingGlassIcon className="h-6 w-6 text-white" strokeWidth={2.5} />
                   </button>
                 )}
                 {isLibrary && (
@@ -692,15 +696,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isDiscoverFiltersOpen ? 'bg-blue-500 text-white shadow-lg' : 'hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground'}`}
                 aria-label="Toggle Filters"
               >
-                <FunnelIcon className="h-5 w-5" />
+                <FunnelIcon className="h-5 w-5 text-white" />
               </button>
             )}
             {!isMarketplace && !isDiscover && !isLibrary && (user ? (
-              <Link to="/profile" className="hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full" aria-label="View Profile">
+              <Link to="/profile" className="relative hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full" aria-label="View Profile">
                 <Avatar className="w-9 h-9">
-                  <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                  <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt={user.displayName || 'User'} className="object-cover" />
                   <AvatarFallback>{user.displayName ? user.displayName.slice(0, 2).toUpperCase() : <UserIcon className="w-4 h-4" />}</AvatarFallback>
                 </Avatar>
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full"></div>
               </Link>
             ) : (
               <button 
@@ -717,7 +722,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sidebar - Desktop */}
       {!isPlayer && (
-        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-r-0 flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
+        <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-none flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
           <SidebarContent user={user} userProfile={userProfile} signOut={signOut} />
         </aside>
       )}
@@ -798,7 +803,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
       </AnimatePresence>
-      <ScrollToTopButton />
+      <ScrollToTopButton isMobileNavHidden={isMobileNavHidden} hasMiniPlayer={!!currentTrack && !isFullPlayerOpen} />
       {!isJamspace && <AIAssistant />}
 
       {/* Mobile Navigation */}
@@ -853,13 +858,15 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       
       <div className="pt-4 pb-4">
         <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Account</p>
-        {userProfile.isVerifiedArtist && (
-          <NavItem to={`/artist/${userProfile.id}`} icon={UserIcon} label="Artist Profile" onClick={onNavigate} />
+        {(userProfile.role === 'artist' || userProfile.role === 'admin' || userProfile.isVerifiedArtist) && (
+          <NavItem to={`/artist/${userProfile.uid}`} icon={UserIcon} label="Artist Profile" onClick={onNavigate} />
         )}
-        {userProfile.isVerifiedArtist && (
+        {(userProfile.role === 'artist' || userProfile.role === 'admin' || userProfile.isVerifiedArtist) && (
           <NavItem to="/artist-dashboard" icon={Squares2X2Icon} label="Artist Dashboard" onClick={onNavigate} />
         )}
-        <NavItem to="/admin" icon={ShieldCheckIcon} label="Admin Console" onClick={onNavigate} />
+        {userProfile.role === 'admin' && (
+          <NavItem to="/admin" icon={ShieldCheckIcon} label="Admin Console" onClick={onNavigate} />
+        )}
         <NavItem to="/profile" icon={UserIcon} label="User Profile" onClick={onNavigate} />
         <NavItem to="/wallet" icon={WalletIcon} label="Wallet" onClick={onNavigate} />
         <NavItem to="/staking" icon={ArrowTrendingUpIcon} label="Staking" onClick={onNavigate} />
@@ -930,7 +937,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           </div>
         </div>
         
-        <div className="pt-2 border-t border-foreground/5 flex items-center justify-between">
+        <div className="pt-2 flex items-center justify-between">
           <div>
             <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Your Balance</p>
             <p className="text-sm font-bold text-blue-500 tracking-tighter">{parseFloat(userProfile.jamBalance || '0').toLocaleString()} JAM</p>
@@ -953,7 +960,7 @@ const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: React.C
       ${isActive ? 'bg-zinc-500/10 text-zinc-900 dark:text-blue-500 font-bold' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400 hover:bg-zinc-500/5'}
     `}
   >
-    <Icon className="h-6 w-6" strokeWidth={3.5} />
+    <Icon className="h-6 w-6 text-white" strokeWidth={3.5} />
     <span className="text-[12px] uppercase font-bold tracking-[0.15em]">{label}</span>
   </NavLink>
 );
@@ -967,9 +974,9 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: React.Comp
       ${isActive ? 'text-blue-600 dark:text-blue-500 active' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400'}
     `}
   >
-    {({ isActive }) => (
-      <Icon className={`h-[22px] w-[22px] transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} strokeWidth={2.5} />
-    )}
+      {({ isActive }) => (
+        <Icon className={`h-[22px] w-[22px] transition-transform text-white ${isActive ? 'scale-110' : 'scale-100'}`} strokeWidth={2.5} />
+      )}
   </NavLink>
 );
 

@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react';
 
-const ScrollToTopButton: React.FC = () => {
+interface ScrollToTopButtonProps {
+  isMobileNavHidden?: boolean;
+  hasMiniPlayer?: boolean;
+}
+
+const ScrollToTopButton: React.FC<ScrollToTopButtonProps> = ({ isMobileNavHidden = true, hasMiniPlayer = false }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const toggleVisibility = () => {
@@ -24,12 +36,15 @@ const ScrollToTopButton: React.FC = () => {
     });
   };
 
+  // Hide if bottom nav is visible (mobile) or mini player is visible
+  const shouldHide = isDesktop ? hasMiniPlayer : (!isMobileNavHidden || hasMiniPlayer);
+
   return (
     <button
       type="button"
       onClick={scrollToTop}
       className={`fixed bottom-8 right-8 z-50 p-3 rounded-full bg-blue-600 text-white shadow-lg transition-all duration-300 hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+        isVisible && !shouldHide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
       }`}
       aria-label="Scroll to top"
     >

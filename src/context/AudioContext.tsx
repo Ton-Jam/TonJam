@@ -2,9 +2,10 @@ import React, { createContext, useContext, useState, useRef, useEffect, useMemo,
 import { toast } from 'sonner';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { GoogleGenAI, Type } from '@google/genai';
-import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post, ExclusiveContent, Task } from '@/types';
+import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post, PostComment, ExclusiveContent, Task, SponsoredContent } from '@/types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
+import { processStreamRoyalty } from '@/services/royaltyService';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -19,6 +20,8 @@ interface Notification {
   duration?: number;
 }
 
+export type RepeatMode = 'off' | 'all' | 'one';
+
 interface AudioContextType {
   currentTrack: Track | null;
   isPlaying: boolean;
@@ -26,7 +29,7 @@ interface AudioContextType {
   progress: number;
   isFullPlayerOpen: boolean;
   isShuffle: boolean;
-  isRepeat: boolean;
+  repeatMode: RepeatMode;
   notifications: Notification[];
   playlists: Playlist[];
   recentlyPlayed: Track[];
@@ -50,7 +53,9 @@ interface AudioContextType {
   communityPosts: Post[];
   addCommunityPost: (post: Partial<Post>) => Promise<void>;
   resetProtocol: () => void;
-  submitSponsorship: (data: any) => Promise<void>;
+  submitSponsorship: (data: Partial<SponsoredContent>) => Promise<void>;
+  approveSponsorship: (id: string) => Promise<void>;
+  rejectSponsorship: (id: string) => Promise<void>;
   userAddress: string | null;
   playTrack: (track: Track) => Promise<void>;
   togglePlay: () => Promise<void>;
@@ -107,12 +112,15 @@ interface AudioContextType {
   analyser: AnalyserNode | null;
   posts: Post[];
   createPost: (post: Partial<Post>) => void;
+  addCommentToPost: (postId: string, comment: Partial<PostComment>) => Promise<void>;
+  toggleLikePost: (postId: string) => Promise<void>;
   deletePost: (postId: string) => void;
   updatePost: (postId: string, updates: Partial<Post>) => void;
-  sponsoredPosts: Post[];
+  sponsoredPosts: SponsoredContent[];
   tasks: Task[];
   addTask: (task: Omit<Task, 'id' | 'completed' | 'claimed' | 'progress'>) => Promise<void>;
   updateTaskProgress: (id: string, progress: number) => Promise<void>;
+  completeTask: (taskId: string) => Promise<void>;
   claimTaskReward: (id: string) => Promise<void>;
   updateUserRole: (userId: string, role: 'artist' | 'collector' | 'admin') => Promise<void>;
   getTrendingTracks: () => Track[];
@@ -120,6 +128,8 @@ interface AudioContextType {
   getTracksByGenre: (genre: string) => Track[];
   getRecommendations: () => { recommendedTracks: Track[], recommendedNFTs: NFTItem[] };
   jamTrack: (trackId: string) => Promise<void>;
+  getEarnings: (userId: string) => Promise<number>;
+  mintNFT: (trackId: string, tonConnectUI: any) => Promise<{ success: boolean; error?: string }>;
   deleteTrack: (trackId: string) => Promise<void>;
   activeJamRoom: { id: string, name: string, listeners: number, currentTrack: Track | null } | null;
   joinJamRoom: (roomId: string) => void;
@@ -205,7 +215,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [progress, setProgress] = useState(0);
   const [isFullPlayerOpen, setFullPlayerOpen] = useState(false);
   const [isShuffle, setIsShuffle] = useState(() => localStorage.getItem(STORAGE_KEYS.SHUFFLE) === 'true');
-  const [isRepeat, setIsRepeat] = useState(() => localStorage.getItem(STORAGE_KEYS.REPEAT) === 'true');
+  const [repeatMode, setRepeatMode] = useState<RepeatMode>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.REPEAT) as RepeatMode;
+    return saved || 'off';
+  });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [trackToAddToPlaylist, setTrackToAddToPlaylist] = useState<Track | null>(null);
   const [optionsTrack, setOptionsTrackState] = useState<Track | null>(null);
@@ -291,7 +304,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const saved = localStorage.getItem('tonjam_posts');
     return saved ? JSON.parse(saved) : MOCK_POSTS;
   });
-  const [sponsoredPosts, setSponsoredPosts] = useState<Post[]>([]);
+  const [sponsoredPosts, setSponsoredPosts] = useState<SponsoredContent[]>([]);
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem('tonjam_tasks');
@@ -344,9 +357,59 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   };
 
+  const completeTask = async (taskId: string) => {
+    if (!auth.currentUser) {
+      addNotification("Please log in to complete tasks", "error");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const userId = auth.currentUser.uid;
+      
+      // 1. Get task details
+      // In a real app, we'd fetch this from Firestore 'tasks' collection
+      // For now, we'll find it in our local state
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) throw new Error("Task not found");
+
+      // Parse reward (e.g., "5 TJ" -> 5)
+      const rewardAmount = parseFloat(task.reward);
+
+      // 2. Add task completion record
+      await addDoc(collection(db, "taskCompletions"), {
+        userId,
+        taskId,
+        completed: true,
+        completedAt: serverTimestamp()
+      });
+
+      // 3. Update user balance
+      // The user's snippet uses 'tjBalance', we'll update both for consistency if needed
+      // but primarily 'jamBalance' is used in the app.
+      await updateDoc(doc(db, "users", userId), {
+        tjBalance: increment(rewardAmount),
+        jamBalance: increment(rewardAmount)
+      });
+
+      // Update local state
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: true } : t));
+      setUserProfile(prev => ({ 
+        ...prev, 
+        tjBalance: (prev.tjBalance || 0) + rewardAmount,
+        jamBalance: (prev.jamBalance || 0) + rewardAmount 
+      }));
+
+      addNotification(`Task "${task.title}" completed! +${rewardAmount} TJ`, "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `task_completions`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const claimTaskReward = async (id: string) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, claimed: true } : t));
-    addNotification("Reward claimed successfully!", "success");
+    await completeTask(id);
   };
 
   const cleanObject = <T extends object>(obj: T): T => {
@@ -389,26 +452,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const checkAuth = async () => {
       const user = auth.currentUser;
       if (isPlaying && currentTrack && user) {
-        const streamPaymentTimeout = setTimeout(() => {
-          // Simulate a micro-payment for the stream
-          const streamPrice = 0.001; // 0.001 TON per stream
-          const platformFee = streamPrice * 0.10;
-          const artistShare = streamPrice - platformFee;
-          
-          const artist = artists.find(a => a.uid === currentTrack.artistId || a.name === currentTrack.artist);
-          
-          recordTransaction({
-            type: 'stream',
-            amount: streamPrice,
-            platformFee: platformFee,
-            artistShare: artistShare,
-            recipientAddress: artist?.walletAddress || 'EQ_ARTIST_FALLBACK_ADDRESS',
-            senderAddress: userProfile.walletAddress,
-            trackId: currentTrack.id,
-            trackTitle: currentTrack.title
-          });
-          
-          addNotification(`Stream royalty distributed: ${artistShare.toFixed(6)} TON to ${currentTrack.artist}`, "info");
+        const streamPaymentTimeout = setTimeout(async () => {
+          // Process real royalty distribution
+          try {
+            await processStreamRoyalty(currentTrack);
+            addNotification(`Stream royalty processed for "${currentTrack.title}"`, 'info');
+          } catch (error) {
+            console.error("Failed to process stream royalty:", error);
+          }
         }, 10000); // Trigger after 10 seconds of playback
         
         return () => clearTimeout(streamPaymentTimeout);
@@ -446,22 +497,32 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const tracksUnsubscribe = onSnapshot(collection(db, 'tracks'), (snapshot) => {
       const tracks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Track));
       setFirestoreTracks(tracks);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'tracks', false));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'tracks'));
 
     const nftsUnsubscribe = onSnapshot(collection(db, 'nfts'), (snapshot) => {
       const nfts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NFTItem));
       setFirestoreNFTs(nfts);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'nfts', false));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'nfts'));
 
     const postsUnsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
       const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post));
       setFirestorePosts(posts);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'posts', false));
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'posts'));
+
+    const sponsoredUnsubscribe = onSnapshot(
+      collection(db, 'sponsoredContent'),
+      (snapshot) => {
+        const sponsored = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SponsoredContent));
+        setSponsoredPosts(sponsored);
+      },
+      (error) => handleFirestoreError(error, OperationType.LIST, 'sponsoredContent')
+    );
 
     return () => {
       tracksUnsubscribe();
       nftsUnsubscribe();
       postsUnsubscribe();
+      sponsoredUnsubscribe();
     };
   }, []);
 
@@ -481,10 +542,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (user) {
         // 1. Start protected collection listeners
-        usersUnsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
+        usersUnsubscribe = onSnapshot(query(collection(db, 'users'), where('isVerifiedArtist', '==', true)), (snapshot) => {
           const users = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
           setFirestoreUsers(users);
-        }, (error) => handleFirestoreError(error, OperationType.LIST, 'users', false));
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'users'));
 
         const transactionsQuery = query(
           collection(db, 'transactions'), 
@@ -497,7 +558,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         transactionsUnsubscribe = onSnapshot(transactionsQuery, (snapshot) => {
           const txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
           setFirestoreTransactions(txs);
-        }, (error) => handleFirestoreError(error, OperationType.LIST, 'transactions', false));
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'transactions'));
 
         const playlistsQuery = query(
           collection(db, 'playlists'),
@@ -509,7 +570,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         playlistsUnsubscribe = onSnapshot(playlistsQuery, (snapshot) => {
           const playlists = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Playlist));
           setFirestorePlaylists(playlists);
-        }, (error) => handleFirestoreError(error, OperationType.LIST, 'playlists', false));
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'playlists'));
 
         // 2. Initial fetch and setup listener for current user profile
         const fetchUserProfile = async (retries = 3): Promise<void> => {
@@ -536,6 +597,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 pendingJamRewards: 0,
                 likedTrackIds: [],
                 followedUserIds: [],
+                role: 'collector',
                 createdAt: new Date().toISOString()
               };
               await setDoc(userRef, newProfile);
@@ -549,14 +611,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               if (snapshot.exists()) {
                 setUserProfile(snapshot.data() as UserProfile);
               }
-            }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`, false));
+            }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`));
           } catch (error) {
             if (retries > 0 && (error instanceof Error && error.message.includes('offline'))) {
               console.warn(`Retrying user profile fetch... (${retries} retries left)`);
               await new Promise(resolve => setTimeout(resolve, 2000));
               return fetchUserProfile(retries - 1);
             }
-            console.error('Error fetching user profile:', error);
+            handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
           }
         };
         await fetchUserProfile();
@@ -574,7 +636,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         playlistsUnsubscribe = onSnapshot(playlistsQuery, (snapshot) => {
           const playlists = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Playlist));
           setFirestorePlaylists(playlists);
-        }, (error) => handleFirestoreError(error, OperationType.LIST, 'playlists', false));
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'playlists'));
       }
     });
 
@@ -915,6 +977,72 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const mintNFT = async (trackId: string, tonConnectUI: any) => {
+    setIsLoading(true);
+    try {
+      if (!userProfile.uid) throw new Error("User must be logged in");
+      
+      const trackRef = doc(db, "tracks", trackId);
+      const trackSnap = await getDoc(trackRef);
+      
+      if (!trackSnap.exists()) {
+        throw new Error("Track not found");
+      }
+      
+      const track = trackSnap.data() as Track;
+      const mintedCount = track.minted || 0;
+      const editionsCount = parseInt(track.editions || "0");
+      
+      if (mintedCount >= editionsCount && editionsCount > 0) {
+        throw new Error("Sold out");
+      }
+
+      // 🔗 Call TON Blockchain here
+      if (userProfile.walletAddress) {
+        addNotification("Initiating TON transaction...", "info");
+        // In a real app, we'd upload metadata to IPFS/Storage first
+        // For this implementation, we'll use the existing track's coverUrl as the image
+        const success = await tonService.mintTonJamNFT(
+          tonConnectUI,
+          userProfile.walletAddress,
+          track.coverUrl // Simplified for prototype
+        );
+        
+        if (!success) throw new Error("TON transaction failed");
+      }
+
+      const nftId = `nft-${Date.now()}`;
+      const newNFT: NFTItem = {
+        id: nftId,
+        trackId: trackId,
+        title: track.title,
+        owner: userProfile.walletAddress || userProfile.uid,
+        creator: track.artist,
+        artist: track.artist,
+        artistId: track.artistId,
+        imageUrl: track.coverUrl,
+        price: track.price || "0",
+        edition: `${mintedCount + 1}`,
+        createdAt: new Date().toISOString()
+      };
+
+      await setDoc(doc(db, "nfts", nftId), cleanObject(newNFT));
+      
+      await updateDoc(trackRef, {
+        minted: mintedCount + 1
+      });
+
+      addNotification(`Successfully minted edition #${mintedCount + 1} of ${track.title}`, "success");
+      return { success: true };
+    } catch (error: any) {
+      console.error("Minting error:", error);
+      addNotification(error.message || "Minting failed", "error");
+      return { success: false, error: error.message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const setAnthem = async (nftId: string | null) => {
     setIsLoading(true);
     try {
@@ -1069,7 +1197,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const handleEnded = () => {
-      if (isRepeat) {
+      if (repeatMode === 'one') {
         audio.currentTime = 0;
         const playPromise = audio.play();
         if (playPromise !== undefined) {
@@ -1093,7 +1221,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [queue, currentTrack, isRepeat, isShuffle]);
+  }, [queue, currentTrack, repeatMode, isShuffle]);
 
   const addNotification = (message: string, type: 'success' | 'info' | 'error' | 'warning' = 'info', duration: number = 3000) => {
     if (type === 'success') toast.success(message, { duration });
@@ -1503,6 +1631,78 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const addCommentToPost = async (postId: string, commentData: Partial<PostComment>) => {
+    if (!auth.currentUser) {
+      addNotification("Please log in to comment", "error");
+      return;
+    }
+
+    try {
+      const commentId = `comment-${Date.now()}`;
+      const newComment: PostComment = {
+        id: commentId,
+        postId: postId,
+        userId: auth.currentUser.uid,
+        userName: userProfile.name,
+        userAvatar: userProfile.avatar,
+        content: commentData.content || '',
+        timestamp: commentData.timestamp || new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        likes: commentData.likes || 0,
+        reactions: {},
+        userReactions: [],
+        ...commentData
+      };
+
+      const cleanComment = cleanObject(newComment);
+      await setDoc(doc(db, 'posts', postId, 'comments', commentId), cleanComment);
+      
+      // Also update the comment count on the post
+      await updateDoc(doc(db, 'posts', postId), {
+        comments: increment(1)
+      });
+      
+      addNotification("Comment posted", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `posts/${postId}/comments`);
+    }
+  };
+
+  const toggleLikePost = async (postId: string) => {
+    if (!auth.currentUser) {
+      addNotification("Please log in to like", "error");
+      return;
+    }
+
+    const userId = auth.currentUser.uid;
+    const likeRef = doc(db, 'posts', postId, 'likes', userId);
+    const postRef = doc(db, 'posts', postId);
+
+    try {
+      const likeSnap = await getDoc(likeRef);
+      if (likeSnap.exists()) {
+        // Unlike
+        await deleteDoc(likeRef);
+        await updateDoc(postRef, {
+          likes: increment(-1)
+        });
+      } else {
+        // Like
+        await setDoc(likeRef, {
+          id: userId,
+          postId: postId,
+          userId: userId,
+          createdAt: new Date().toISOString()
+        });
+        await updateDoc(postRef, {
+          likes: increment(1)
+        });
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `posts/${postId}/likes/${userId}`);
+    }
+  };
+
   const deletePost = async (postId: string) => {
     setIsLoading(true);
     try {
@@ -1638,6 +1838,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       setCurrentTrack(track);
+      
+      // Increment streams
+      const trackRef = doc(db, 'tracks', track.id);
+      await updateDoc(trackRef, {
+        streams: increment(1)
+      });
       
       let sourceUrl = track.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
       let highFidelity = false;
@@ -1776,13 +1982,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const nextTrack = () => {
     if (queue.length === 0 || !currentTrack) return;
+
+    if (repeatMode === 'one') {
+      playTrack(currentTrack);
+      return;
+    }
+
     const index = queue.findIndex(t => t.id === currentTrack.id);
     if (isShuffle) {
       const nextIndex = Math.floor(Math.random() * queue.length);
       playTrack(queue[nextIndex]);
     } else if (index !== -1 && index < queue.length - 1) {
       playTrack(queue[index + 1]);
-    } else if (isRepeat) {
+    } else if (repeatMode === 'all') {
       playTrack(queue[0]);
     }
   };
@@ -1936,8 +2148,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setFullPlayerOpen(false);
   };
 
-  const toggleShuffle = () => setIsShuffle(!isShuffle);
-  const toggleRepeat = () => setIsRepeat(!isRepeat);
+  const toggleShuffle = () => {
+    const nextShuffle = !isShuffle;
+    setIsShuffle(nextShuffle);
+    localStorage.setItem(STORAGE_KEYS.SHUFFLE, String(nextShuffle));
+    if (nextShuffle) {
+      setQueue(prev => [...prev].sort(() => Math.random() - 0.5));
+    }
+  };
+
+  const toggleRepeat = () => {
+    const modes: RepeatMode[] = ['off', 'all', 'one'];
+    const currentIndex = modes.indexOf(repeatMode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+    setRepeatMode(nextMode);
+    localStorage.setItem(STORAGE_KEYS.REPEAT, nextMode);
+  };
 
   const createNewPlaylist = async (name: string, description?: string, initialTrack?: Track, coverUrl?: string, isPrivate?: boolean, isCollaborative?: boolean, tags?: string[]) => {
     setIsLoading(true);
@@ -2321,17 +2547,71 @@ Return a JSON object with the following structure:
     }
   };
 
-  const submitSponsorship = async (data: any) => {
+  const getEarnings = async (userId: string) => {
+    try {
+      const snap = await getDocs(
+        query(collection(db, "nftSales"), where("artistId", "==", userId))
+      );
+
+      let total = 0;
+      snap.forEach(doc => {
+        total += doc.data().price || 0;
+      });
+
+      return total;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, 'nftSales');
+      return 0;
+    }
+  };
+
+  const submitSponsorship = async (data: Partial<SponsoredContent>) => {
     setIsLoading(true);
     try {
-      await addDoc(collection(db, 'sponsorships'), {
+      if (!auth.currentUser) throw new Error("Must be logged in to submit sponsorship");
+      
+      const sponsorshipData = {
         ...data,
-        createdAt: serverTimestamp(),
-        status: 'pending'
-      });
-      addNotification("Sponsorship request submitted", "success");
+        artistId: auth.currentUser.uid,
+        artistName: userProfile.name,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+
+      await addDoc(collection(db, 'sponsoredContent'), sponsorshipData);
+      addNotification("Sponsorship request submitted for consideration", "success");
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'sponsorships');
+      handleFirestoreError(error, OperationType.CREATE, 'sponsoredContent');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const approveSponsorship = async (id: string) => {
+    if (userProfile.role !== 'admin') return;
+    setIsLoading(true);
+    try {
+      await updateDoc(doc(db, 'sponsoredContent', id), { 
+        status: 'approved',
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Default 7 days
+      });
+      addNotification("Sponsorship approved and payment accepted", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `sponsoredContent/${id}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const rejectSponsorship = async (id: string) => {
+    if (userProfile.role !== 'admin') return;
+    setIsLoading(true);
+    try {
+      await updateDoc(doc(db, 'sponsoredContent', id), { status: 'rejected' });
+      addNotification("Sponsorship request rejected", "info");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `sponsoredContent/${id}`);
     } finally {
       setIsLoading(false);
     }
@@ -2339,7 +2619,7 @@ Return a JSON object with the following structure:
 
   return (
     <AudioContext.Provider value={{
-      currentTrack, isPlaying, queue, progress, isFullPlayerOpen, isShuffle, isRepeat,
+      currentTrack, isPlaying, queue, progress, isFullPlayerOpen, isShuffle, repeatMode,
       notifications, playlists, recentlyPlayed, likedTrackIds, followedUserIds, trackToAddToPlaylist,
       optionsTrack, optionsCallbacks, activePlaylistId, userProfile, genesisContractAddress, volume, isMuted,
       playTrack, togglePlay, nextTrack, prevTrack, addToQueue, playAll, seek, setVolume, toggleMute,
@@ -2348,7 +2628,7 @@ Return a JSON object with the following structure:
       removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
       generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
       allTracks, allNFTs, artists, firestoreUsers, setArtists, addUserTrack, updateTrack, addUserNFT, updateNFT, recordTransaction, depositTON, withdrawTON, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
-      posts, createPost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
+      posts, createPost, addCommentToPost, toggleLikePost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, completeTask, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, mintNFT, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
       featuredPlaylist,
       updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters, jamspaceFilters, setJamspaceFilters,
@@ -2357,6 +2637,9 @@ Return a JSON object with the following structure:
       addCommunityPost: createPost,
       resetProtocol,
       submitSponsorship,
+      approveSponsorship,
+      rejectSponsorship,
+      getEarnings,
       userAddress: tonAddress
     }}>
       {children}

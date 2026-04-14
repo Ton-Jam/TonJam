@@ -60,7 +60,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
         </div>
         <button 
           onClick={onBuyTJ}
-          className="px-2 py-2 rounded-lg bg-blue-600/10 border border-neutral-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-all flex items-center gap-2"
+          className="px-2 py-2 rounded-lg bg-blue-600/10 text-blue-400 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-all flex items-center gap-2"
         >
           <img src={TON_LOGO} className="w-3 h-3" alt="" />
           Buy JAM with TON
@@ -70,7 +70,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         {/* Staking Stats */}
         <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="bg-foreground/[0.02] border border-border/50 rounded-2xl p-2 relative overflow-hidden group">
+          <div className="bg-foreground/[0.02] rounded-2xl p-2 relative overflow-hidden group">
             <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity">
               <Lock className="w-full h-full text-foreground" />
             </div>
@@ -85,7 +85,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
             </div>
           </div>
 
-          <div className="bg-foreground/[0.02] border border-border/50 rounded-2xl p-2 relative overflow-hidden group">
+          <div className="bg-foreground/[0.02] rounded-2xl p-2 relative overflow-hidden group">
             <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity">
               <Sparkles className="w-full h-full text-amber-500" />
             </div>
@@ -105,7 +105,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
         </div>
 
         {/* Stake Action */}
-        <div className="bg-blue-600/5 border border-neutral-500/20 rounded-2xl p-2 space-y-2">
+        <div className="bg-blue-600/5 rounded-2xl p-2 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Stake JAM</span>
             <span className="text-[10px] font-bold text-muted-foreground/50">Available: {balance.toLocaleString()}</span>
@@ -116,7 +116,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
               value={stakeAmount}
               onChange={(e) => setStakeAmount(e.target.value)}
               placeholder="0.00"
-              className="w-full bg-background/40 border border-border rounded-xl p-2 text-xl font-black text-foreground outline-none focus:border-neutral-500/50 transition-all placeholder:text-muted-foreground/30"
+              className="w-full bg-background/40 rounded-xl p-2 text-xl font-black text-foreground outline-none focus:bg-neutral-500/10 transition-all placeholder:text-muted-foreground/30"
             />
             <button 
               onClick={() => setStakeAmount(balance.toString())}

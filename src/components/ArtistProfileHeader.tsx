@@ -17,7 +17,7 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
     >
       {/* Profile Picture */}
       <div className="relative -mt-16 md:-mt-24">
-        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-background shadow-2xl bg-muted">
+        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden shadow-2xl bg-muted">
           <img 
             src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
             className="w-full h-full object-cover" 
@@ -48,7 +48,7 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
             <span className="text-xl font-bold text-foreground">{(artist.followers || 0).toLocaleString()}</span>
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Followers</span>
           </div>
-          <div className="flex flex-col items-start border-l border-border pl-6">
+          <div className="flex flex-col items-start pl-6">
             <span className="text-xl font-bold text-foreground">{(artist.playCount || 0).toLocaleString()}</span>
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Total Plays</span>
           </div>

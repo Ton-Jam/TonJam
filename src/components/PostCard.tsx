@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Check, MoreHorizontal, Play, Pause, Plus, Heart, MessageCircle, Repeat2, Share, Smile, Send, MessageSquareOff, X, VerifiedIcon } from 'lucide-react';
-import { Post, Comment } from '@/types';
+import { Post, PostComment } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -9,81 +9,70 @@ import { MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType, auth } from '@/lib/firebase';
 
 const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ post, onDelete }) => {
   const navigate = useNavigate();
-  const { togglePlay, currentTrack, isPlaying, toggleFollowUser, followedUserIds, userProfile, addNotification, allNFTs, updatePost, setOptionsTrack } = useAudio();
+  const { togglePlay, currentTrack, isPlaying, toggleFollowUser, followedUserIds, userProfile, addNotification, allNFTs, updatePost, setOptionsTrack, addCommentToPost, toggleLikePost } = useAudio();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
-  const [likesCount, setLikesCount] = useState(post.likes || 0);
-  const [isReposted, setIsReposted] = useState(post.isReposted || false);
-  const [repostsCount, setRepostsCount] = useState(post.reposts || 0);
   const [showOptions, setShowOptions] = useState(false);
   const [showComments, setShowComments] = useState(false);
-  const [comments, setComments] = useState<Comment[]>(post.commentList || []);
+  const [comments, setComments] = useState<PostComment[]>([]);
   const [commentText, setCommentText] = useState('');
   const [activeReactionCommentId, setActiveReactionCommentId] = useState<string | null>(null);
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
 
+  const likesCount = post.likes || 0;
+  const repostsCount = post.reposts || 0;
+
+  // Real-time comments listener
+  useEffect(() => {
+    if (!showComments) return;
+
+    const commentsRef = collection(db, 'posts', post.id, 'comments');
+    const q = query(commentsRef, orderBy('timestamp', 'desc'));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedComments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PostComment));
+      setComments(fetchedComments);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, `posts/${post.id}/comments`));
+
+    return () => unsubscribe();
+  }, [post.id, showComments]);
+
+  // Real-time likes listener for the current user
+  useEffect(() => {
+    if (!userProfile.uid || !auth.currentUser) return;
+
+    const likeRef = doc(db, 'posts', post.id, 'likes', userProfile.uid);
+    const unsubscribe = onSnapshot(likeRef, (snapshot) => {
+      setIsLiked(snapshot.exists());
+    }, (error) => handleFirestoreError(error, OperationType.GET, `posts/${post.id}/likes/${userProfile.uid}`));
+
+    return () => unsubscribe();
+  }, [post.id, userProfile.uid]);
+
   const REACTION_EMOJIS = ['🔥', '💎', '🚀', '🎧', '⚡'];
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
 
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      userId: userProfile.uid,
-      userName: userProfile.name,
-      username: userProfile.username,
-      userAvatar: userProfile.avatar,
+    const commentData: Partial<PostComment> = {
       content: commentText,
+      replyToId: replyingToId || undefined,
       timestamp: new Date().toISOString(),
-      likes: 0,
-      reactions: {},
-      userReactions: [],
-      replies: []
+      likes: 0
     };
 
-    let newCommentsList: Comment[];
-
-    if (replyingToId) {
-      // Find the comment to reply to and add the new comment to its replies
-      const addReplyToComment = (commentList: Comment[]): Comment[] => {
-        return commentList.map(c => {
-          if (c.id === replyingToId) {
-            return {
-              ...c,
-              replies: [newComment, ...(c.replies || [])]
-            };
-          }
-          if (c.replies && c.replies.length > 0) {
-            return {
-              ...c,
-              replies: addReplyToComment(c.replies)
-            };
-          }
-          return c;
-        });
-      };
-      newCommentsList = addReplyToComment(comments);
-      setReplyingToId(null);
-      addNotification('Reply posted', 'success');
-    } else {
-      newCommentsList = [newComment, ...comments];
-      addNotification('Comment posted', 'success');
-    }
-
-    setComments(newCommentsList);
+    await addCommentToPost(post.id, commentData);
     setCommentText('');
-    
-    updatePost(post.id, {
-      commentList: newCommentsList,
-      comments: post.comments + 1
-    });
+    setReplyingToId(null);
   };
 
   const handleCommentReaction = (commentId: string, emoji: string) => {
-    const updateReactions = (commentList: Comment[]): Comment[] => {
+    const updateReactions = (commentList: PostComment[]): PostComment[] => {
       return commentList.map(c => {
         if (c.id === commentId) {
           const newReactions = { ...(c.reactions || {}) };
@@ -134,22 +123,13 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     }
   };
 
-  const handleLike = () => {
-    const newIsLiked = !isLiked;
-    const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
-    setIsLiked(newIsLiked);
-    setLikesCount(newLikesCount);
-    updatePost(post.id, {
-      isLiked: newIsLiked,
-      likes: newLikesCount
-    });
+  const handleLike = async () => {
+    await toggleLikePost(post.id);
   };
 
   const handleRepost = () => {
-    const newIsReposted = !isReposted;
+    const newIsReposted = !post.isReposted;
     const newRepostsCount = newIsReposted ? repostsCount + 1 : repostsCount - 1;
-    setIsReposted(newIsReposted);
-    setRepostsCount(newRepostsCount);
     updatePost(post.id, {
       isReposted: newIsReposted,
       reposts: newRepostsCount
@@ -321,7 +301,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
           {/* Media Content */}
           {post.imageUrl && (
             <div 
-              className="rounded-2xl overflow-hidden mb-3 border border-border/50 cursor-zoom-in" 
+              className="rounded-2xl overflow-hidden mb-3 cursor-zoom-in" 
               onClick={(e) => { e.stopPropagation(); setExpandedImage(post.imageUrl); }}
             >
               <img src={post.imageUrl} alt="Post content" className="w-full h-auto max-h-[512px] object-cover" />
@@ -330,7 +310,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
 
           {track && (
             <div 
-              className="bg-muted/30 rounded-2xl p-3 mb-3 flex items-center gap-3 border border-border/50 hover:bg-muted/50 transition-all" 
+              className="bg-muted/30 rounded-2xl p-3 mb-3 flex items-center gap-3 hover:bg-muted/50 transition-all" 
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/track/${track.id}`);
@@ -346,7 +326,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 <h5 className="text-sm font-bold truncate text-white">{track.title}</h5>
                 <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
               </div>
-              <Button variant="outline" size="sm" className="rounded-full h-8 text-xs font-bold border-blue-500 text-blue-500 hover:bg-blue-500/10">
+              <Button variant="outline" size="sm" className="rounded-full h-8 text-xs font-bold text-blue-500 hover:bg-blue-500/10">
                 Play
               </Button>
             </div>
@@ -367,7 +347,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
               onClick={(e) => { e.stopPropagation(); handleRepost(); }} 
               className={cn(
                 "flex items-center gap-2 transition-all group",
-                isReposted ? "text-green-500" : "text-white hover:text-green-500"
+                post.isReposted ? "text-green-500" : "text-white hover:text-green-500"
               )}
             >
               <div className="p-2 rounded-full group-hover:bg-green-500/10">
@@ -411,7 +391,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             {/* Comment Form */}
             <form onSubmit={handleAddComment} className="flex flex-col gap-2 mb-2">
               {replyingToId && (
-                <div className="flex items-center justify-between px-2 py-1 bg-blue-500/10 rounded-t-[10px] border-x border-t border-blue-500/20">
+                <div className="flex items-center justify-between px-2 py-1 bg-blue-500/10 rounded-t-[10px]">
                   <span className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Replying to comment</span>
                   <button 
                     type="button" 
@@ -469,7 +449,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 ))}
               </AnimatePresence>
               {comments.length === 0 && (
-                <div className="text-center py-2 border border-dashed border-border/50 rounded-[10px]">
+                <div className="text-center py-2 rounded-[10px]">
                   <MessageSquareOff className="h-6 w-6 text-foreground/5 mx-auto mb-2" />
                   <p className="text-[6px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em]">No comments yet</p>
                 </div>
@@ -522,7 +502,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
 export default PostCard;
 
 interface CommentItemProps {
-  comment: Comment;
+  comment: PostComment;
   onReply: (id: string) => void;
   onReaction: (id: string, emoji: string) => void;
   onProfileClick: (e: React.MouseEvent, userId: string) => void;
@@ -545,7 +525,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   depth = 0
 }) => {
   return (
-    <div className={cn("flex flex-col gap-3", depth > 0 && "ml-6 pl-4 border-l border-border/50")}>
+    <div className={cn("flex flex-col gap-3", depth > 0 && "ml-6 pl-4")}>
       <motion.div
         layout
         initial={{ opacity: 0, x: -10 }}
@@ -603,7 +583,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                       <button 
                         key={emoji} 
                         onClick={() => onReaction(comment.id, emoji)} 
-                        className={`flex items-center gap-2 rounded-full px-2 py-1 text-[7px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400 border border-neutral-500/30' : 'bg-muted/50 text-muted-foreground/80 hover:text-foreground border border-border/50 hover:bg-muted'}`}
+                        className={`flex items-center gap-2 rounded-full px-2 py-1 text-[7px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive ? 'bg-blue-500/20 text-blue-400' : 'bg-muted/50 text-muted-foreground/80 hover:text-foreground hover:bg-muted'}`}
                         aria-label={`${isActive ? 'Remove' : 'Add'} ${emoji} reaction`}
                       >
                         <span className="text-[8px]">{emoji}</span>
@@ -629,7 +609,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 5, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute bottom-full left-0 mb-2 flex items-center gap-2 bg-background border border-border p-2 rounded-full shadow-2xl z-20 backdrop-blur-xl"
+                        className="absolute bottom-full left-0 mb-2 flex items-center gap-2 bg-background p-2 rounded-full shadow-2xl z-20 backdrop-blur-xl"
                         role="menu"
                       >
                         {REACTION_EMOJIS.map(emoji => {

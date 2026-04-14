@@ -6,6 +6,7 @@ import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { buyNFT } from '@/services/tonService';
+import { processNFTSaleRoyalty } from '@/services/royaltyService';
 import { getPlaceholderImage } from '@/lib/utils';
 
 interface BuyNFTModalProps {
@@ -49,16 +50,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
       };
 
       // Record the transaction for royalty distribution
-      recordTransaction({
-        type: 'nft_sale',
-        amount: price,
-        platformFee: totalPlatformFee,
-        artistShare: parseFloat(artistShare),
-        recipientAddress: nft.owner, // Current owner gets the share
-        senderAddress: userAddress,
-        nftId: nft.id,
-        trackTitle: nft.title
-      });
+      await processNFTSaleRoyalty(nft, price);
 
       // Update global state silently so we can show a custom success message
       updateNFT(nft.id, { 
@@ -88,7 +80,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   return (
     <div className="fixed inset-0 z-[400] flex items-center justify-center p-2 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
-      <div className="relative bg-white/5 backdrop-blur-md w-full max-w-sm rounded-[24px] border border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+      <div className="relative bg-white/5 backdrop-blur-md w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 blur-3xl rounded-full"></div>
         <div className="p-2 relative z-10">
           <header className="flex justify-between items-center mb-2">
@@ -96,24 +88,24 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
             <div className="flex items-center gap-2">
               <button 
                 onClick={() => { navigate(`/nft/${nft.id}`); onClose(); }} 
-                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors border border-white/10"
+                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
                 title="View Details"
               >
                 <Info className="h-4 w-4" />
               </button>
-              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors border border-white/10">
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
           </header>
-          <div className="flex items-center gap-2 mb-2 p-2 bg-white/5 border border-white/10 rounded-[16px]">
-            <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-16 h-16 rounded-[12px] object-cover border border-white/10" alt="" />
+          <div className="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-[16px]">
+            <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-16 h-16 rounded-[12px] object-cover" alt="" />
             <div>
               <p className="text-[10px] font-bold text-white uppercase truncate w-32">{nft.title}</p>
               <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-2">Creator: {nft.creator}</p>
             </div>
           </div>
-          <div className="space-y-2 mb-2 bg-white/5 border border-white/5 p-2 rounded-[16px]">
+          <div className="space-y-2 mb-2 bg-white/5 p-2 rounded-[16px]">
             <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
               <span className="text-white/40">Asset Price</span>
               <span className="text-white">{price} TON</span>
@@ -126,7 +118,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
               <span className="text-white/40">Network Gas (est)</span>
               <span className="text-white/20">~{gasFee} TON</span>
             </div>
-            <div className="pt-2 border-t border-white/10 flex justify-between items-center">
+            <div className="pt-2 flex justify-between items-center">
               <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Total Required</span>
               <div className="flex items-center gap-2">
                 <img src={TON_LOGO} className="w-4 h-4" alt="" />
@@ -134,7 +126,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
               </div>
             </div>
             {royaltySplits.length > 0 && (
-              <div className="pt-2 border-t border-white/10 space-y-1">
+              <div className="pt-2 space-y-1">
                 <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Royalty Distribution</span>
                 {royaltySplits.map((split, i) => (
                   <div key={i} className="flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/60">
@@ -144,7 +136,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
                 ))}
               </div>
             )}
-            <div className="pt-2 border-t border-white/10 flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/20">
+            <div className="pt-2 flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/20">
               <span>Artist Receive (Price - 5% Fee - Royalties)</span>
               <span>{artistShare} TON</span>
             </div>

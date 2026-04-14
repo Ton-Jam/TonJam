@@ -28,7 +28,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     setOptionsTrack,
     isShuffle,
     toggleShuffle,
-    isRepeat,
+    repeatMode,
     toggleRepeat,
     volume,
     setVolume,
@@ -55,7 +55,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
   return (
     <>
       <div
-        className={`fixed ${isMobileNavHidden ? 'bottom-0' : 'bottom-16'} lg:bottom-0 left-0 right-0 z-[45] bg-background/95 backdrop-blur-xl px-3 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-muted/50 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
+        className={`fixed ${isMobileNavHidden ? 'bottom-0' : 'bottom-[61px]'} lg:bottom-0 left-0 right-0 z-[45] bg-background/95 backdrop-blur-xl px-3 py-2 flex items-center justify-between shadow-2xl h-16 cursor-pointer hover:bg-muted/50 transition-all lg:left-64 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
         onClick={() => setFullPlayerOpen(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -94,23 +94,6 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               )}
             </h4>
             <div className="flex items-center gap-3 mt-3">
-              {MOCK_ARTISTS.find(a => a.uid === currentTrack.artistId) && (
-                <img 
-                  src={MOCK_ARTISTS.find(a => a.uid === currentTrack.artistId)?.avatarUrl || getPlaceholderImage(`artist-${currentTrack.artistId}`)} 
-                  alt={currentTrack.artist} 
-                  className="w-3.5 h-3.5 rounded-full object-cover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                  onClick={handleArtistClick}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleArtistClick(e as any);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`View ${currentTrack.artist}'s profile`}
-                />
-              )}
               <p
                 onClick={handleArtistClick}
                 onKeyDown={(e) => {
@@ -157,8 +140,9 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             <button onClick={nextTrack} className="p-1.5 text-foreground">
               <SkipForward className="h-4 w-4" />
             </button>
-            <button onClick={toggleRepeat} className={`p-1.5 rounded-full ${isRepeat ? 'text-blue-500' : 'text-muted-foreground'}`}>
+            <button onClick={toggleRepeat} className={`p-1.5 rounded-full relative ${repeatMode !== 'off' ? 'text-blue-500' : 'text-muted-foreground'}`}>
               <Repeat className="h-4 w-4" />
+              {repeatMode === 'one' && <span className="absolute -top-0.5 -right-0.5 text-[8px] font-bold bg-blue-500 text-white rounded-full w-3 h-3 flex items-center justify-center">1</span>}
             </button>
             <div className="flex items-center gap-1 w-20">
               <button onClick={toggleMute} className="text-muted-foreground">
@@ -191,7 +175,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="absolute top-0 left-0 right-0 h-1 bg-muted/30 overflow-hidden pointer-events-none z-10">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-muted/30 overflow-hidden pointer-events-none z-10">
           <div
             className="h-full bg-primary transition-all duration-300"
             style={{ width: `${progress}%` }}

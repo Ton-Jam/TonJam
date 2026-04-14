@@ -59,15 +59,15 @@ const Leaderboard: React.FC = () => {
             <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">The highest JAM earners in the ecosystem</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-2 py-3 rounded-lg bg-muted/50 border border-border text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+        <div className="flex items-center gap-2 px-2 py-3 rounded-lg bg-muted/50 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
           <TrendingUp className="w-3 h-3" />
           Updated 2m ago
         </div>
       </div>
 
-      <div className="bg-foreground/[0.02] border border-border/50 rounded-3xl overflow-hidden">
-        {/* Table Header */}
-        <div className="grid grid-cols-[60px_1fr_120px_120px] px-2 py-2 bg-muted/50 border-b border-border/50 text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
+      <div className="bg-foreground/[0.02] rounded-3xl overflow-hidden">
+        {/* Table Header - Hidden on small mobile */}
+        <div className="hidden sm:grid grid-cols-[60px_1fr_120px_120px] px-4 py-3 bg-muted/30 text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">
           <span>Rank</span>
           <span>Architect</span>
           <span className="text-right">Earnings</span>
@@ -75,46 +75,55 @@ const Leaderboard: React.FC = () => {
         </div>
 
         {/* Table Body */}
-        <div className="divide-y divide-white/5">
+        <div className="divide-y divide-white/[0.02]">
           {topEarners.map((entry, idx) => (
             <motion.div 
               key={entry.name}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="grid grid-cols-[60px_1fr_120px_120px] px-2 py-2 items-center hover:bg-foreground/[0.03] transition-colors group"
+              className="grid grid-cols-[32px_1fr_auto] sm:grid-cols-[60px_1fr_120px_120px] px-3 sm:px-4 py-3 sm:py-4 items-center hover:bg-foreground/[0.03] transition-colors group gap-2 sm:gap-3"
             >
               <div className="flex items-center justify-center">
                 {getRankIcon(entry.rank)}
               </div>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <img src={entry.avatar || getPlaceholderImage(`user-${entry.name}`)} className="w-10 h-10 rounded-full object-cover border border-border" alt="" />
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="relative flex-shrink-0">
+                  <img src={entry.avatar || getPlaceholderImage(`user-${entry.name}`)} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover" alt="" />
                   {entry.isPartner && (
-                    <div className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-blue-600 border-2 border-black flex items-center justify-center">
-                      <Sparkles className="w-2 h-2 text-foreground" />
+                    <div className="absolute -right-0.5 -bottom-0.5 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-600 flex items-center justify-center">
+                      <Sparkles className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-foreground" />
                     </div>
                   )}
                 </div>
-                <div>
-                  <h4 className="text-xs font-black text-foreground tracking-tight group-hover:text-blue-400 transition-colors uppercase">{entry.name}</h4>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                      {entry.isPartner ? 'Verified Partner' : 'Sonic Architect'}
+                <div className="min-w-0">
+                  <h4 className="text-[11px] sm:text-xs font-black text-foreground tracking-tight group-hover:text-blue-400 transition-colors uppercase truncate">{entry.name}</h4>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest truncate">
+                      {entry.isPartner ? 'Partner' : 'Architect'}
                     </span>
                   </div>
                 </div>
               </div>
+              
+              {/* Earnings - Stacked on mobile */}
               <div className="text-right">
-                <div className="flex items-center justify-end gap-3">
-                  <img src={TJ_COIN_ICON} className="w-3 h-3 object-contain" alt="" />
-                  <span className="text-sm font-black text-foreground tracking-tighter">
+                <div className="flex items-center justify-end gap-1 sm:gap-1.5">
+                  <img src={TJ_COIN_ICON} className="w-2.5 h-2.5 sm:w-3 h-3 object-contain" alt="" />
+                  <span className="text-xs sm:text-sm font-black text-foreground tracking-tighter">
                     {entry.earnings.toLocaleString()}
                   </span>
                 </div>
-                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-3">JAM</p>
+                <div className="flex items-center justify-end gap-1 mt-0.5 sm:hidden">
+                  {getChangeIcon(entry.change)}
+                  <span className="text-[7px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                    {entry.change === 'stable' ? 'Stable' : entry.change === 'up' ? 'Rising' : 'Falling'}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center justify-end gap-2">
+
+              {/* Status - Hidden on mobile, shown in earnings stack */}
+              <div className="hidden sm:flex items-center justify-end gap-2">
                 {getChangeIcon(entry.change)}
                 <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                   {entry.change === 'stable' ? 'Stable' : entry.change === 'up' ? 'Rising' : 'Falling'}

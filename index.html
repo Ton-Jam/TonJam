@@ -21,8 +21,8 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              heading: ['Montserrat', 'sans-serif'],
+              sans: ['Poppins', 'sans-serif'],
+              heading: ['Poppins', 'sans-serif'],
             },
             colors: {
               silver: {
@@ -45,305 +45,28 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
         
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background);
-            color: var(--foreground);
+            font-family: 'Poppins', sans-serif;
+            background-color: #0B0F14;
+            color: #FFFFFF;
             overflow-x: clip;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-          width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #000000;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #A6A6A6; /* Silver 400 */
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #3b82f6;
         }
 
         .glass {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: none;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        /* Light Mode Overrides */
-        html.light body {
-            background-color: #ffffff;
-            color: #2563EB;
-        }
-
-        html.light .glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: none;
-        }
-
-        /* Modal Backdrops & Solid Backgrounds */
-        html.light .bg-black,
-        html.light .bg-[#000000],
-        html.light .bg-[#050505],
-        html.light .bg-[#080808],
-        html.light .bg-[#0A0A0A],
-        html.light .bg-[#0f0f0f],
-        html.light .bg-background,
-        html.light [class*="bg-background"] {
-            background-color: #ffffff !important;
-        }
-
-        html.light .bg-black\/95,
-        html.light .bg-black\/90,
-        html.light .bg-black\/85,
-        html.light .bg-black\/80,
-        html.light .bg-background\/80,
-        html.light .bg-background\/90,
-        html.light .bg-background\/95 {
-            background-color: rgba(255, 255, 255, 0.95) !important;
-        }
-
-        /* Subtle backgrounds for inputs and items */
-        html.light .bg-white\/5,
-        html.light .bg-white\/10,
-        html.light .bg-muted,
-        html.light .bg-muted\/50,
-        html.light .bg-muted\/30 {
-            background-color: rgba(37, 99, 235, 0.05) !important;
-        }
-
-        html.light aside,
-        html.light header,
-        html.light nav,
-        html.light section,
-        html.light .modal-content,
-        html.light [role="dialog"] {
-            background-color: #ffffff !important;
-            border: none !important;
-        }
-
-        /* Text Overrides - Force Blue in Light Mode by default */
-        html.light .text-foreground,
-        html.light .text-muted-foreground,
-        html.light .text-primary,
-        html.light [class*="text-"]:not(.text-white),
-        html.light [class*="text-"]:not(.text-white) * { 
-            color: #2563EB !important; 
-        }
-
-        /* Ensure carousel text is always white regardless of theme */
-        .auto-carousel-text,
-        .auto-carousel-text * {
-            color: #ffffff !important;
-        }
-
-        /* Ensure white text on blue backgrounds */
-        html.light .bg-blue-600,
-        html.light .bg-blue-500,
-        html.light .bg-blue-400,
-        html.light .bg-primary,
-        html.light .electric-blue-bg,
-        html.light [class*="bg-blue-600"],
-        html.light [class*="bg-blue-500"],
-        html.light [class*="bg-primary"],
-        html.light .bg-blue-600 *,
-        html.light .bg-blue-500 *,
-        html.light .bg-blue-400 *,
-        html.light .bg-primary *,
-        html.light .electric-blue-bg * {
-            color: #ffffff !important;
-        }
-
-        /* Navigation & Pill Overrides for Light Mode */
-        html.light .text-neutral-500,
-        html.light .text-neutral-400,
-        html.light .text-muted-foreground {
-            color: #8F8F8F !important; /* Silver 500 / Grey */
-        }
-
-        /* Bottom Navigation Bar Styles */
-        html.light nav[aria-label="Mobile Navigation"] {
-            background-color: #ffffff !important;
-        }
-
-        html.light .mobile-nav-item {
-            color: #9CA3AF !important; /* Grey 400 */
-        }
-
-        html.light .mobile-nav-item.active {
-            color: #2563EB !important; /* Blue 600 */
-        }
-
-        html.light .mobile-nav-item.active * {
-            color: #2563EB !important;
-        }
-
-        /* Pill Styles */
-        html.light .active-pill,
-        html.light .bg-blue-500.text-white {
-            background-color: #2563EB !important;
-            color: #ffffff !important;
-        }
-
-        html.light .inactive-pill {
-            background-color: #ffffff !important;
-            color: #2563EB !important;
-        }
-
-        html.light .active-pill *,
-        html.light .bg-blue-500.text-white * {
-            color: #ffffff !important;
-        }
-
-        html.light .inactive-pill * {
-            color: #2563EB !important;
-        }
-
-        /* Specific Fix for Filter Sections (Selects and Inputs) */
-        html.light select,
-        html.light input,
-        html.light textarea,
-        html.light .filter-section *,
-        html.light [class*="filter"] * {
-            color: #2563EB !important;
-        }
-        
-        html.light select option {
-            background-color: #ffffff !important;
-            color: #2563EB !important;
-        }
-
-        /* Special case for icons that might use fill-current or stroke-current */
-        html.light .bg-blue-600 svg,
-        html.light .bg-blue-500 svg,
-        html.light .bg-blue-400 svg,
-        html.light .bg-primary svg,
-        html.light .electric-blue-bg svg {
-            color: #ffffff !important;
-            fill: transparent;
-        }
-        
-        html.light .bg-blue-600 .fill-current,
-        html.light .bg-blue-500 .fill-current,
-        html.light .bg-blue-400 .fill-current,
-        html.light .bg-primary .fill-current,
-        html.light .electric-blue-bg .fill-current {
-            fill: #ffffff !important;
-        }
-
-        html.light .text-white\/80,
-        html.light .text-white\/60,
-        html.light .text-white\/50,
-        html.light .text-muted-foreground\/50,
-        html.light .text-muted-foreground\/70 { 
-            color: rgba(37, 99, 235, 0.7) !important; 
-        }
-
-        html.light .text-white\/40,
-        html.light .text-white\/30,
-        html.light .text-white\/20,
-        html.light .text-white\/10 { 
-            color: rgba(37, 99, 235, 0.4) !important; 
         }
 
         /* JAM Coin Icon Visibility */
-        html.light img[src*="TonjamCoin"] {
-            filter: drop-shadow(0 0 2px rgba(37, 99, 235, 0.5));
-        }
-
-        html.light .shadow-2xl {
-            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15) !important;
-        }
-
-        /* Cyberpunk Theme */
-        html.cyberpunk body {
-            background-color: #050014;
-            color: #e0f7fa;
-        }
-        html.cyberpunk .glass {
-            background: rgba(255, 0, 255, 0.05);
-            /* border: 1px solid rgba(0, 255, 255, 0.2); Removed border */
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.1);
-        }
-        html.cyberpunk .bg-black, html.cyberpunk .bg-[#000000] {
-            background-color: #09001f !important;
-        }
-        html.cyberpunk .text-blue-500, html.cyberpunk .text-blue-400 {
-            color: #00fff2 !important;
-            text-shadow: 0 0 5px rgba(0, 255, 242, 0.5);
-        }
-        html.cyberpunk .bg-blue-600, html.cyberpunk .bg-blue-500 {
-            background-color: #ff00ff !important;
-            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
-        }
-        html.cyberpunk .border-blue-500 {
-            border-color: transparent !important;
-        }
-
-        /* Ocean Theme */
-        html.ocean body {
-            background-color: #02040a;
-            color: #e2e8f0;
-        }
-        html.ocean .glass {
-            background: rgba(14, 165, 233, 0.05);
-            /* border: 1px solid rgba(14, 165, 233, 0.1); Removed border */
-        }
-        html.ocean .bg-black, html.ocean .bg-[#000000] {
-            background-color: #050b14 !important;
-        }
-        html.ocean .text-blue-500, html.ocean .text-blue-400 {
-            color: #38bdf8 !important;
-        }
-        html.ocean .bg-blue-600, html.ocean .bg-blue-500 {
-            background-color: #0ea5e9 !important;
-        }
-
-        /* Forest Theme */
-        html.forest body {
-            background-color: #020a02;
-            color: #e2e8f0;
-        }
-        html.forest .glass {
-            background: rgba(16, 185, 129, 0.05);
-            /* border: 1px solid rgba(16, 185, 129, 0.1); Removed border */
-        }
-        html.forest .bg-black, html.forest .bg-[#000000] {
-            background-color: #051105 !important;
-        }
-        html.forest .text-blue-500, html.forest .text-blue-400 {
-            color: #34d399 !important;
-        }
-        html.forest .bg-blue-600, html.forest .bg-blue-500 {
-            background-color: #059669 !important;
-        }
-
-        .electric-blue-bg {
-            background: #2563EB;
-        }
-
-        .bright-blue-text {
-            color: #60A5FA;
-        }
-
-        @keyframes pulse-soft {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
-        }
-
-        .testnet-pulse {
-          animation: pulse-soft 2s infinite;
+        img[src*="TonjamCoin"] {
+            filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.3));
         }
 
         @keyframes marquee {
@@ -355,32 +78,12 @@
             animation: marquee 30s linear infinite;
         }
 
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-
-        input::placeholder {
-          color: rgba(255, 255, 255, 0.4);
-        }
-
-        html.light input::placeholder {
-          color: rgba(15, 23, 42, 0.4);
-        }
-
         .hero-gradient {
-            background: linear-gradient(to right, #000000 0%, rgba(0,0,0,0) 60%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(to right, #0B0F14 0%, rgba(11, 15, 20, 0) 60%, rgba(11, 15, 20, 0) 100%);
         }
         
         .hero-bottom-gradient {
-            background: linear-gradient(to top, #000000 0%, rgba(0,0,0,0) 100%);
-        }
-
-        .font-black {
-          font-weight: 700 !important;
+            background: linear-gradient(to top, #0B0F14 0%, rgba(11, 15, 20, 0) 100%);
         }
 
         /* Custom typography refinements */
@@ -389,31 +92,11 @@
           line-height: 1.3;
         }
 
-        .tracking-tighter {
-          letter-spacing: -0.03em !important;
-        }
-        
-        .tracking-tight {
-          letter-spacing: -0.01em !important;
-        }
-        
-        .tracking-widest {
-          letter-spacing: 0.05em !important;
-        }
-        
-        .leading-none {
-          line-height: 1.1 !important;
-        }
-        
-        .leading-tight {
-          line-height: 1.3 !important;
-        }
-
         /* TON Connect Button Theming */
         tc-root {
           --tc-accent-color: #2563EB;
           --tc-text-color: #ffffff;
-          --tc-bg-color: #111111;
+          --tc-bg-color: #0B0F14;
         }
 
         .scroll-row {

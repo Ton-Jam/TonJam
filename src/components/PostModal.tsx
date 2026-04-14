@@ -1,9 +1,10 @@
 import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
-import { X, Image, Share2, Sparkles, Music, Check, Send } from "lucide-react";
+import { X, Image, Share2, Sparkles, Music, Check, Send, Loader2 } from "lucide-react";
 import { MOCK_USER, APP_LOGO } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES } from "@/lib/utils";
+import { uploadPostImage } from "@/services/storageService";
 
 interface PostModalProps {
   onClose: () => void;
@@ -13,15 +14,34 @@ interface PostModalProps {
 const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
   const [content, setContent] = useState("");
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
   const [showTrackPicker, setShowTrackPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addNotification, allTracks } = useAudio();
   const maxLength = 280;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!content.trim() && !mediaUrl && !selectedTrackId) return;
-    onSubmit(content, mediaUrl || undefined, selectedTrackId || undefined);
+    
+    let finalMediaUrl = mediaUrl || undefined;
+    
+    if (mediaFile) {
+      try {
+        setIsUploading(true);
+        addNotification("Broadcasting signal assets...", "info");
+        const { downloadUrl } = await uploadPostImage(mediaFile);
+        finalMediaUrl = downloadUrl;
+      } catch (error) {
+        console.error("Post upload error:", error);
+        addNotification("Failed to upload signal media", "error");
+        setIsUploading(false);
+        return;
+      }
+    }
+
+    onSubmit(content, finalMediaUrl, selectedTrackId || undefined);
     onClose();
   };
 
@@ -34,6 +54,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
         e.target.value = '';
         return;
       }
+      setMediaFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setMediaUrl(reader.result as string);
@@ -266,12 +287,12 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             <button
               onClick={handleSubmit}
               disabled={
-                (!content.trim() && !mediaUrl && !selectedTrackId) || content.length > maxLength
+                (!content.trim() && !mediaUrl && !selectedTrackId) || content.length > maxLength || isUploading
               }
               className="bg-blue-600 hover:bg-blue-500 disabled:bg-muted/50 disabled:text-muted-foreground/30 w-10 h-10 rounded-[8px] flex items-center justify-center text-foreground transition-all shadow-lg shadow-blue-600/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Post Signal"
             >
-              <Send className="h-4 w-4" />
+              {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </button>
           </div>
         </footer>

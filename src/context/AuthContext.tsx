@@ -76,15 +76,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await setDoc(docRef, defaultProfile);
           setUserProfile(defaultProfile as UserProfile);
         } catch (error) {
-          handleFirestoreError(error, OperationType.WRITE, `users/${userId}`, false);
+          handleFirestoreError(error, OperationType.WRITE, `users/${userId}`);
           throw error;
         }
       }
     } catch (error) {
       if (!(error as any).message?.includes('Firestore Error')) {
-        handleFirestoreError(error, OperationType.GET, `users/${userId}`, false);
+        handleFirestoreError(error, OperationType.GET, `users/${userId}`);
       }
-      console.error('Error fetching user profile:', error);
     }
   };
 

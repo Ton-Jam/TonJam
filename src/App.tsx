@@ -20,6 +20,7 @@ import ExploreList from '@/pages/ExploreList';
 import Notifications from '@/pages/Notifications';
 import UploadTrack from '@/pages/UploadTrack';
 import MintNFT from '@/pages/MintNFT';
+import ArtistMinting from '@/pages/ArtistMinting';
 import LoadingScreen from '@/components/LoadingScreen';
 import PlaylistDetail from '@/pages/PlaylistDetail';
 import PostDetail from '@/pages/PostDetail';
@@ -28,8 +29,10 @@ import TrackDetail from '@/pages/TrackDetail';
 import TrackPlayerScreen from '@/pages/TrackPlayerScreen';
 import AdminDashboard from '@/pages/AdminDashboard';
 import Wallet from '@/pages/Wallet';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import Staking from '@/pages/Staking';
 import About from '@/pages/About';
+import AlbumDetails from '@/pages/AlbumDetails';
 import { AudioProvider } from '@/context/AudioContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -138,24 +141,26 @@ const AppContent: React.FC = () => {
               <Route path="/profile" element={<PageWrapper><Profile /></PageWrapper>} />
               <Route path="/user/:id" element={<PageWrapper><UserProfile /></PageWrapper>} />
               <Route path="/artist/:id" element={<PageWrapper><ArtistProfile /></PageWrapper>} />
-              <Route path="/artist-dashboard" element={<PageWrapper><ArtistDashboard /></PageWrapper>} />
-              <Route path="/artist-onboarding" element={<PageWrapper><ArtistOnboarding /></PageWrapper>} />
-              <Route path="/upload" element={<PageWrapper><UploadTrack /></PageWrapper>} />
-              <Route path="/mint" element={<PageWrapper><MintNFT /></PageWrapper>} />
+              <Route path="/artist-dashboard" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistDashboard /></ProtectedRoute></PageWrapper>} />
+              <Route path="/artist-onboarding" element={<PageWrapper><ProtectedRoute><ArtistOnboarding /></ProtectedRoute></PageWrapper>} />
+              <Route path="/upload" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><UploadTrack /></ProtectedRoute></PageWrapper>} />
+              <Route path="/mint" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><MintNFT /></ProtectedRoute></PageWrapper>} />
+              <Route path="/artist-minting" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistMinting /></ProtectedRoute></PageWrapper>} />
               <Route path="/library" element={<PageWrapper><Library /></PageWrapper>} />
-              <Route path="/wallet" element={<PageWrapper><Wallet /></PageWrapper>} />
-              <Route path="/staking" element={<PageWrapper><Staking /></PageWrapper>} />
+              <Route path="/wallet" element={<PageWrapper><ProtectedRoute><Wallet /></ProtectedRoute></PageWrapper>} />
+              <Route path="/staking" element={<PageWrapper><ProtectedRoute><Staking /></ProtectedRoute></PageWrapper>} />
               <Route path="/playlist/:id" element={<PageWrapper><PlaylistDetail /></PageWrapper>} />
+              <Route path="/album/:id" element={<PageWrapper><AlbumDetails /></PageWrapper>} />
               <Route path="/track/:id" element={<PageWrapper><TrackDetail /></PageWrapper>} />
               <Route path="/player/:id" element={<PageWrapper><TrackPlayerScreen /></PageWrapper>} />
               <Route path="/player" element={<PageWrapper><TrackPlayerScreen /></PageWrapper>} />
-              <Route path="/settings" element={<PageWrapper><Settings /></PageWrapper>} />
-              <Route path="/profile-settings" element={<PageWrapper><ProfileSettings /></PageWrapper>} />
+              <Route path="/settings" element={<PageWrapper><ProtectedRoute><Settings /></ProtectedRoute></PageWrapper>} />
+              <Route path="/profile-settings" element={<PageWrapper><ProtectedRoute><ProfileSettings /></ProtectedRoute></PageWrapper>} />
               <Route path="/tasks" element={<PageWrapper><Tasks /></PageWrapper>} />
-              <Route path="/notifications" element={<PageWrapper><Notifications /></PageWrapper>} />
+              <Route path="/notifications" element={<PageWrapper><ProtectedRoute><Notifications /></ProtectedRoute></PageWrapper>} />
               <Route path="/post/:id" element={<PageWrapper><PostDetail /></PageWrapper>} />
               <Route path="/social" element={<PageWrapper><SocialFeedPage /></PageWrapper>} />
-              <Route path="/admin" element={<PageWrapper><AdminDashboard /></PageWrapper>} />
+              <Route path="/admin" element={<PageWrapper><ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute></PageWrapper>} />
               <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
             </Routes>
           </AnimatePresence>
@@ -168,7 +173,7 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <TonConnectUIProvider manifestUrl="https://tonjam.app/tonconnect-manifest.json">
           <AuthProvider>
             <AudioProvider>
