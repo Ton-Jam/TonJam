@@ -1,5 +1,5 @@
 import { Track, NFTItem, Transaction, RoyaltySplit, Royalty } from '../types';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType, auth } from '../lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, increment } from 'firebase/firestore';
 
 /**
@@ -101,13 +101,16 @@ export async function distributeRoyalties(
     }
 
     // 3. Record Transactions
-    const txData: Partial<Transaction> = {
+    const participants = [artistId, auth.currentUser?.uid].filter(Boolean) as string[];
+    const txData: Partial<Transaction> & { participants: string[] } = {
       type,
       amount,
+      userId: auth.currentUser?.uid,
       platformFee: distribution.platformFee,
       artistShare: distribution.artistShare,
       timestamp: new Date().toISOString(),
       status: 'completed',
+      participants,
       ...metadata
     };
 

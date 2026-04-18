@@ -46,7 +46,7 @@ const ProtocolForge: React.FC = () => {
         <p className="text-muted-foreground max-w-md leading-relaxed mb-2">
           The Protocol Forge is reserved for <span className="text-blue-500 font-bold">Verified Artists</span>. Establish your sonic identity via Spotify or TON verification to unlock genesis deployment capabilities.
         </p>
-        <button onClick={() => navigate('/settings')} className="px-2 py-2 electric-blue-bg rounded-[10px] font-bold text-[10px] uppercase tracking-[0.3em] text-foreground shadow-xl shadow-blue-500/20 active:scale-95 transition-all">
+        <button onClick={() => navigate('/settings')} className="px-2 py-2 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] rounded-[10px] font-bold text-[10px] uppercase tracking-[0.3em] text-white shadow-xl shadow-blue-500/20 active:scale-95 transition-all">
           Initialize Verification
         </button>
       </div>
@@ -168,7 +168,7 @@ const ProtocolForge: React.FC = () => {
               </p>
               <button
                 onClick={handleDeploy}
-                className="w-full py-2 electric-blue-bg rounded-[10px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-blue-500/30 text-foreground flex items-center justify-center gap-2"
+                className="w-full py-2 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] rounded-[10px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-blue-500/30 text-white flex items-center justify-center gap-2"
               >
                 <Hammer className="w-4 h-4" /> Forge New Genesis
               </button>
@@ -251,7 +251,7 @@ const ProtocolForge: React.FC = () => {
                   </div>
                   <button
                     onClick={() => navigate('/mint')}
-                    className="w-full py-2 electric-blue-bg rounded-[10px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-blue-500/30 text-foreground flex items-center justify-center gap-2 mt-2"
+                    className="w-full py-2 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] rounded-[10px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-blue-500/30 text-white flex items-center justify-center gap-2 mt-2"
                   >
                     <PlusCircle className="w-4 h-4" /> Mint New Track Protocol
                   </button>

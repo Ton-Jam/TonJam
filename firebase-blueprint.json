@@ -8,9 +8,26 @@
         "uid": { "type": "string" },
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
+        "walletAddress": { "type": "string" },
         "role": { "type": "string", "enum": ["user", "artist", "admin"] }
       },
       "required": ["uid", "name", "email"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial or platform transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "amount": { "type": "number" },
+        "recipientAddress": { "type": "string" },
+        "senderAddress": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "type", "amount", "recipientAddress", "timestamp", "status"]
     },
     "Track": {
       "title": "Track",
@@ -34,6 +51,10 @@
     "/tracks/{trackId}": {
       "schema": "Track",
       "description": "Music tracks"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Transaction history"
     }
   }
 }

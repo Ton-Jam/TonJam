@@ -166,6 +166,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isArtistProfile = location.pathname.startsWith('/artist/');
   const isUserProfile = location.pathname.startsWith('/user/') || location.pathname === '/profile';
   const isPlayer = location.pathname === '/player';
+  const isPostDetail = location.pathname.startsWith('/post/');
 
   const getSearchPlaceholder = () => {
     const path = location.pathname;
@@ -203,25 +204,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [isFullPlayerOpen]);
 
   useEffect(() => {
+    // Scroll handling is simplified to keep headers and nav always visible
     const handleScroll = () => {
-      if (isFullPlayerOpen) return;
-
       const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 64) {
-        setIsHeaderHidden(true);
-        setIsMobileNavHidden(true);
-        document.documentElement.style.setProperty('--header-height', '0px');
-      } else {
-        setIsHeaderHidden(false);
-        setIsMobileNavHidden(false);
-        document.documentElement.style.setProperty('--header-height', '64px');
-      }
       setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, isFullPlayerOpen]);
+  }, [lastScrollY]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300 relative">
@@ -237,7 +228,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Header */}
       {!isPlayer && !isExplore && !isSearch && (
-        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between lg:left-64 transition-transform duration-300 border-none ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between ${isPostDetail ? '' : 'lg:left-64'} transition-transform duration-300 border-none ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
           <div className="flex items-center gap-2 flex-1">
             {(isHome) ? (
               <button 
@@ -271,7 +262,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     />
                   ) : (
                     <span className="font-bold text-sm tracking-tight text-foreground uppercase truncate max-w-[100px]">
-                      {isJamspace ? 'JamSpace' : (location.pathname.split('/')[1] || '').replace('-', ' ')}
+                      {isJamspace ? 'JamSpace' : isPostDetail ? 'Post' : (location.pathname.split('/')[1] || '').replace('-', ' ')}
                     </span>
                   )}
                 </div>
@@ -280,10 +271,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {!isHome && !isDiscover && (
               <>
-                {(isJamspace || isLibrary || isMarketplace) && !isHeaderSearchOpen && (
+                {(isJamspace || isLibrary || isMarketplace || isPostDetail) && !isHeaderSearchOpen && (
                   <div className="hidden lg:flex items-center gap-2 ml-4 flex-1">
                     <span className="font-bold text-lg tracking-tight text-foreground uppercase truncate">
-                      {isJamspace ? 'JamSpace' : isLibrary ? 'Library' : 'Marketplace'}
+                      {isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Post'}
                     </span>
                   </div>
                 )}
@@ -660,60 +651,60 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {!isJamspace && !isLibrary && !isMarketplace && (
                   <button 
                     onClick={() => navigate('/notifications')} 
-                    className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="p-2.5 rounded-full hover:bg-muted text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Notifications"
                   >
-                    <BellIcon className="h-5 w-5" />
+                    <BellIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
                   </button>
                 )}
 
             {/* Wallet & User Avatar / Sign In */}
             {userAddress && !isLibrary && !isJamspace ? (
-              <div className="flex items-center gap-1.5">
-                <div className="hidden sm:block px-3 py-1.5 text-xs font-mono text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-1">
+                <div className="hidden sm:block px-3 py-1.5 text-xs font-mono text-white">
                   {userAddress.slice(0, 4)}...{userAddress.slice(-4)}
                 </div>
                 <button 
                   onClick={() => tonConnectUI.disconnect()}
-                  className="p-2 rounded-full hover:bg-destructive/10 text-destructive transition-all"
+                  className="p-2 rounded-full hover:bg-white/10 text-white transition-all"
                   title="Disconnect Wallet"
                 >
-                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  <ArrowRightOnRectangleIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
                 </button>
               </div>
             ) : (!isLibrary && !isJamspace && !userAddress) ? (
               <button 
                 onClick={() => tonConnectUI.openModal()}
-                className="px-4 py-2 text-blue-600 dark:text-primary rounded-full text-sm font-bold hover:bg-muted transition-all flex items-center gap-2"
+                className="px-3 py-2 text-white rounded-full text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-1"
               >
-                <WalletIcon className="h-5 w-5" />
+                <WalletIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
                 <span className="hidden sm:inline">Connect Wallet</span>
               </button>
             ) : null}
               {isDiscover && (
               <button 
                 onClick={() => setIsDiscoverFiltersOpen(!isDiscoverFiltersOpen)}
-                className={`p-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isDiscoverFiltersOpen ? 'bg-blue-500 text-white shadow-lg' : 'hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground'}`}
+                className={`p-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isDiscoverFiltersOpen ? 'bg-blue-500 text-white shadow-lg' : 'hover:bg-white/10 text-white'}`}
                 aria-label="Toggle Filters"
               >
-                <FunnelIcon className="h-5 w-5 text-white" />
+                <FunnelIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
               </button>
             )}
             {!isMarketplace && !isDiscover && !isLibrary && (user ? (
-              <Link to="/profile" className="relative hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full" aria-label="View Profile">
+              <Link to="/profile" className="relative hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full ml-1" aria-label="View Profile">
                 <Avatar className="w-9 h-9">
                   <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt={user.displayName || 'User'} className="object-cover" />
-                  <AvatarFallback>{user.displayName ? user.displayName.slice(0, 2).toUpperCase() : <UserIcon className="w-4 h-4" />}</AvatarFallback>
+                  <AvatarFallback className="bg-white/10 text-white">{user.displayName ? user.displayName.slice(0, 2).toUpperCase() : <UserIcon className="w-[22px] h-[22px]" strokeWidth={2.5} />}</AvatarFallback>
                 </Avatar>
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full"></div>
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-background"></div>
               </Link>
             ) : (
               <button 
                 onClick={() => setIsAuthModalOpen(true)}
-                className="p-3 rounded-full hover:bg-muted text-blue-600 dark:text-primary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="p-2.5 rounded-full hover:bg-white/10 text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ml-1"
                 aria-label="Sign In"
               >
-                <UserIcon className="h-5 w-5" />
+                <UserIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
               </button>
             ))}
           </div>
@@ -721,7 +712,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       {/* Sidebar - Desktop */}
-      {!isPlayer && (
+      {!isPlayer && !isPostDetail && (
         <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 w-64 bg-background border-none flex-col p-4 z-50 overflow-y-auto transition-colors duration-300" aria-label="Main Sidebar">
           <SidebarContent user={user} userProfile={userProfile} signOut={signOut} />
         </aside>
@@ -761,7 +752,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full ${isPlayer || isExplore ? '' : 'pt-16'} ${isPlayer ? '' : 'lg:ml-64'} relative z-10 overflow-x-hidden pb-24`}>
+      <main id="main-content" className={`transition-all w-full ${isPlayer || isExplore || isPostDetail ? '' : 'pt-16'} ${isPlayer || isPostDetail ? '' : 'lg:ml-64'} relative z-10 overflow-x-hidden pb-24`}>
         <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>
@@ -807,7 +798,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {!isJamspace && <AIAssistant />}
 
       {/* Mobile Navigation */}
-      {!isPlayer && (
+      {!isPlayer && !isPostDetail && (
         <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-[61px] px-2 flex justify-around items-center shadow-2xl transition-transform duration-300 ${isMobileNavHidden ? 'translate-y-full' : 'translate-y-0'}`} aria-label="Mobile Navigation">
           <MobileNavItem to="/" icon={HomeIcon} label="Home" />
           <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
@@ -971,11 +962,11 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: React.Comp
     aria-label={label}
     className={({ isActive }) => `
       flex-1 flex flex-col items-center justify-center transition-all gap-2 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm mobile-nav-item
-      ${isActive ? 'text-blue-600 dark:text-blue-500 active' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400'}
+      ${isActive ? 'text-blue-500 active' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400'}
     `}
   >
       {({ isActive }) => (
-        <Icon className={`h-[22px] w-[22px] transition-transform text-white ${isActive ? 'scale-110' : 'scale-100'}`} strokeWidth={2.5} />
+        <Icon className={`h-[22px] w-[22px] transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-white/70 scale-100'}`} strokeWidth={2.5} />
       )}
   </NavLink>
 );

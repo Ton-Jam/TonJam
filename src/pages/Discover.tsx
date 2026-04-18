@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Joyride } from 'react-joyride';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { MagnifyingGlassIcon, XMarkIcon, MicrophoneIcon, PlayIcon, EllipsisVerticalIcon, CheckIcon } from '@heroicons/react/24/solid';
-import { GENRES, MOCK_NFTS, MOODS } from '@/constants';
+import { GENRES, MOODS } from '@/constants';
 import NFTCard from '@/components/NFTCard';
+import TrackCard from '@/components/TrackCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
+import { SearchIcon, MicIcon, MicOffIcon } from 'lucide-react';
 
 const BROWSE_CATEGORIES = [
   { id: 'music', title: 'Music', color: 'bg-pink-600', image: 'https://picsum.photos/seed/music/200/200' },
@@ -34,7 +36,9 @@ const Discover: React.FC = () => {
     searchQuery, 
     setSearchQuery, 
     allTracks, 
+    allNFTs,
     artists, 
+    firestoreUsers,
     playTrack
   } = useAudio();
 
@@ -116,22 +120,33 @@ const Discover: React.FC = () => {
       t.genre.toLowerCase().includes(query))
     );
     
-    const nfts = MOCK_NFTS.filter(n => 
-      query === '' || n.title.toLowerCase().includes(query) || 
-      n.description.toLowerCase().includes(query)
-    );
+    const nfts = allNFTs.filter(n => {
+      if (query === '') return true;
+      const q = query;
+      return (
+        (n.title && n.title.toLowerCase().includes(q)) || 
+        (n.artist && n.artist.toLowerCase().includes(q)) ||
+        (n.description && n.description.toLowerCase().includes(q))
+      );
+    });
     
     const filteredArtists = artists.filter(a => 
       query === '' || a.name.toLowerCase().includes(query) || 
       (a.genre && a.genre.toLowerCase().includes(query))
     );
 
-    return { tracks, nfts, artists: filteredArtists };
-  }, [searchQuery, allTracks, artists]);
+    const users = firestoreUsers.filter(u => 
+      query === '' || u.name.toLowerCase().includes(query) || 
+      u.username.toLowerCase().includes(query)
+    );
+
+    return { tracks, nfts, artists: filteredArtists, users };
+  }, [searchQuery, allTracks, artists, allNFTs, firestoreUsers]);
 
   const hasResults = filteredResults.tracks.length > 0 || 
                      filteredResults.nfts.length > 0 || 
-                     filteredResults.artists.length > 0;
+                     filteredResults.artists.length > 0 ||
+                     filteredResults.users.length > 0;
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +154,7 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-[calc(100vh-4rem)] bg-background pb-24">
         <Joyride
         steps={[
           {
@@ -155,49 +170,58 @@ const Discover: React.FC = () => {
         continuous
       />
 
-      <div className="px-4 lg:px-8 py-6 space-y-8 pt-16">
+      <div className="px-4 lg:px-8 py-6 space-y-8">
         {/* Search Header */}
-        <div className="fixed top-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-3xl pt-4 pb-4 px-4 lg:px-8">
-          <form onSubmit={handleSearchSubmit} className="relative max-w-2xl mx-auto">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-black" />
-            </div>
-            <input
-              type="text"
-              placeholder="What do you want to play?"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white text-black h-12 pl-12 pr-24 rounded-full font-medium focus:outline-none focus:ring-2 focus:ring-white transition-all discover-search-input placeholder:text-black/60 shadow-lg"
-            />
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-              {searchQuery && (
+        <div className="fixed top-0 left-0 lg:left-64 right-0 z-30 bg-background/95 backdrop-blur-3xl pt-6 pb-4 px-4 lg:px-8 shadow-sm">
+          <form onSubmit={handleSearchSubmit} className="relative max-w-2xl mx-auto flex items-center">
+            <div className="relative w-full flex items-center bg-white/10 hover:bg-white/15 focus-within:bg-white/15 border border-white/10 rounded-full transition-all duration-300 shadow-xl overflow-hidden group">
+              <div className="pl-4 pr-3 flex items-center justify-center">
+                <SearchIcon className="h-5 w-5 text-white/50 group-focus-within:text-cyan-400 transition-colors" strokeWidth={2.5} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search artists, tracks, NFTs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-white h-12 pr-4 font-medium focus:outline-none transition-all discover-search-input placeholder:text-white/40 tracking-wide text-sm"
+              />
+              <div className="pr-2 flex items-center gap-1">
+                <AnimatePresence>
+                  {searchQuery && (
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                    >
+                      <XMarkIcon className="h-5 w-5" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+                <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
                 <button
                   type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="p-2 text-black/60 hover:text-black rounded-full transition-colors"
+                  onClick={handleVoiceSearch}
+                  className={`p-2.5 rounded-full transition-all ${isVoiceSearchActive ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'text-white/40 hover:text-white hover:bg-white/10'}`}
+                  aria-label="Voice Search"
                 >
-                  <XMarkIcon className="h-5 w-5" />
+                  {isVoiceSearchActive ? <MicOffIcon className="h-5 w-5" /> : <MicIcon className="h-5 w-5" />}
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={handleVoiceSearch}
-                className={`p-2 rounded-full transition-colors ${isVoiceSearchActive ? 'bg-red-500 text-white animate-pulse' : 'text-black/60 hover:text-black'}`}
-              >
-                <MicrophoneIcon className="h-5 w-5" />
-              </button>
+              </div>
             </div>
           </form>
 
-          <div className="flex items-center gap-2 mt-4 overflow-x-auto no-scrollbar justify-center filter-buttons">
-            {(['all', 'nfts', 'tracks', 'artists', 'users', 'playlists'] as const).map((filter) => (
+          <div className="flex items-center gap-2 mt-5 overflow-x-auto no-scrollbar justify-start md:justify-center filter-buttons pb-1">
+            {(['all', 'tracks', 'artists', 'nfts', 'users', 'playlists'] as const).map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${
+                className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${
                   activeFilter === filter 
-                    ? 'bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]' 
-                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+                    ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' 
+                    : 'bg-white/5 text-white/50 border-white/5 hover:bg-white/10 hover:border-white/20 hover:text-white'
                 }`}
               >
                 {filter}
@@ -205,6 +229,9 @@ const Discover: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* Adjust spacing since header is fixed */}
+        <div className="pt-32" />
 
         {!searchQuery ? (
           <>
@@ -303,25 +330,7 @@ const Discover: React.FC = () => {
                         ))
                       ) : (
                         filteredResults.tracks.slice(0, activeFilter === 'all' ? 4 : undefined).map((track, idx) => (
-                          <div 
-                            key={`${track.id}-${idx}`}
-                            onClick={() => playTrack(track)}
-                            className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-xl cursor-pointer group transition-all"
-                          >
-                            <div className="relative w-12 h-12 flex-shrink-0">
-                              <img src={track.coverUrl || getPlaceholderImage(track.title)} alt="" className="w-full h-full object-cover rounded-lg" />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg">
-                                <PlayIcon className="h-5 w-5 fill-white text-white" />
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-bold text-white truncate">{track.title}</h4>
-                              <p className="text-[11px] text-white/50 truncate">{track.artist}</p>
-                            </div>
-                            <button className="p-2 text-white/50 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                              <EllipsisVerticalIcon className="h-5 w-5" />
-                            </button>
-                          </div>
+                          <TrackCard key={`${track.id}-${idx}`} track={track} variant="row" />
                         ))
                       )}
                     </div>
@@ -352,10 +361,34 @@ const Discover: React.FC = () => {
                   </section>
                 )}
 
+                {/* Users Grid */}
+                {(activeFilter === 'all' || activeFilter === 'users') && filteredResults.users.length > 0 && (
+                  <section>
+                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 mb-4">Users</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                      {filteredResults.users.map((u) => (
+                        <div 
+                          key={u.uid}
+                          onClick={() => navigate(`/user/${u.uid}`)}
+                          className="bg-white/5 border border-white/5 hover:bg-white/10 p-4 rounded-2xl cursor-pointer transition-all text-center group"
+                        >
+                          <img 
+                            src={u.avatar || getPlaceholderImage(u.name)} 
+                            alt="" 
+                            className="w-full aspect-square rounded-full object-cover shadow-lg mb-4 group-hover:scale-105 transition-transform"
+                          />
+                          <h4 className="text-sm font-bold truncate">{u.name}</h4>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-500/80">@{u.username}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
                 {/* NFTs */}
                 {(activeFilter === 'all' || activeFilter === 'nfts') && filteredResults.nfts.length > 0 && (
                   <section>
-                    <h2 className="text-xl font-bold tracking-tight mb-4">Marketplace</h2>
+                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500/80 mb-4">Marketplace NFTs</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                       {filteredResults.nfts.map((nft) => (
                         <div key={nft.id} className="snap-start">
@@ -368,9 +401,9 @@ const Discover: React.FC = () => {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                <MagnifyingGlassIcon className="h-16 w-16 text-muted-foreground/20" />
-                <h3 className="text-xl font-bold tracking-tight">No results found for "{searchQuery}"</h3>
-                <p className="text-muted-foreground max-w-xs">Please check your spelling or try searching for something else.</p>
+                <SearchIcon className="h-16 w-16 text-white/10" />
+                <h3 className="text-xl font-bold tracking-tight text-white/80">No results found for "{searchQuery}"</h3>
+                <p className="text-white/40 max-w-xs text-sm">Please check your spelling or try searching for something else.</p>
               </div>
             )}
           </div>

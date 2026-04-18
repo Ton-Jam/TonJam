@@ -145,41 +145,42 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
           </div>
 
           <div className="flex items-center gap-4">
-            {task.completed && !task.claimed ? (
-              <button 
-                onClick={handleClaim}
-                disabled={isClaiming}
-                className="px-[15px] py-[7px] rounded-full bg-green-500 hover:bg-green-400 text-background text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-2"
-              >
-                {isClaiming ? (
-                  <>
-                    <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                    Claiming...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3 h-3" />
-                    Claim Reward
-                  </>
-                )}
-              </button>
-            ) : task.claimed ? (
+            {task.claimed ? (
               <div className="flex items-center gap-2 text-green-500/50 text-[10px] font-bold uppercase tracking-widest">
                 <CheckCircle2 className="w-3 h-3" /> Claimed
               </div>
             ) : (
               <div className="flex items-center gap-2">
+                {!task.completed && (
+                  <button 
+                    onClick={handleIncrement}
+                    className="px-[12px] py-[6px] rounded-full bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
+                  >
+                    +1 Progress
+                  </button>
+                )}
                 <button 
-                  onClick={handleIncrement}
-                  className="px-[15px] py-[7px] rounded-full bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-all text-[11px] font-bold uppercase tracking-widest"
+                  onClick={task.completed ? handleClaim : handleComplete}
+                  disabled={isClaiming}
+                  className={`px-[15px] py-[7px] rounded-full text-[11px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 ${
+                    task.completed 
+                      ? 'bg-green-500 hover:bg-green-400 text-background shadow-green-500/20' 
+                      : 'bg-blue-600 hover:bg-blue-500 text-foreground shadow-blue-600/20'
+                  }`}
                 >
-                  +1 Progress
-                </button>
-                <button 
-                  onClick={handleComplete}
-                  className="px-[15px] py-[7px] rounded-full bg-blue-600 hover:bg-blue-500 text-foreground transition-all text-[11px] font-bold uppercase tracking-widest"
-                >
-                  Complete
+                  {isClaiming ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                      Claiming...
+                    </>
+                  ) : task.completed ? (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      Claim Reward
+                    </>
+                  ) : (
+                    <>Complete</>
+                  )}
                 </button>
               </div>
             )}

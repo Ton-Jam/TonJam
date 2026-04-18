@@ -105,7 +105,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
           <button
             onClick={handlePlaceBid}
             disabled={isProcessing}
-            className="w-full py-3 bg-primary hover:bg-primary/90 rounded-[12px] text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-full py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 rounded-[12px] text-sm font-bold text-white shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gavel className="h-4 w-4" />}
             {isProcessing ? 'PLACING BID...' : 'PLACE BID'}
           </button>

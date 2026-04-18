@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { X, CheckCircle2, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause, TrendingUp, Zap, ChevronDown, ChevronUp, Clock, Activity, Key } from 'lucide-react';
+import { X, CheckCircle2, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause, TrendingUp, Zap, ChevronDown, ChevronUp, Clock, Activity, Key, Twitter, Instagram, Globe, Send } from 'lucide-react';
 import { Artist, Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -42,10 +42,29 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
     navigate(`/artist/${artist.uid}`);
   };
 
+  const getSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'x':
+      case 'twitter':
+        return Twitter;
+      case 'instagram':
+        return Instagram;
+      case 'website':
+      case 'link':
+        return Globe;
+      case 'telegram':
+        return Send;
+      case 'spotify':
+        return Disc;
+      default:
+        return Globe;
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-2xl bg-white border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header / Banner */}
@@ -66,8 +85,8 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
             <X className="w-5 h-5" />
           </button>
 
-          <div className="absolute bottom-0 left-0 right-0 p-2 flex items-end gap-2">
-            <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden shrink-0">
+          <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end gap-5">
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full border-0 ring-4 ring-white shadow-2xl overflow-hidden shrink-0">
               <img 
                 src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
                 alt={artist.name} 
@@ -75,14 +94,36 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
               />
             </div>
             <div className="mb-2 flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-[20px] sm:text-[26px] font-bold text-black">{artist.name}</h2>
-                {artist.verified && <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/20" />}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl sm:text-4xl font-black text-black tracking-tighter">{artist.name}</h2>
+                  {artist.verified && <CheckCircle2 className="w-6 h-6 text-blue-500 fill-blue-500/20" />}
+                </div>
+                
+                {/* Social Icons near name */}
+                <div className="flex items-center gap-1.5 p-1 bg-black/5 rounded-lg">
+                  {artist.socials && Object.entries(artist.socials).map(([platform, url]) => {
+                    if (!url) return null;
+                    const Icon = getSocialIcon(platform);
+                    return (
+                      <a 
+                        key={platform}
+                        href={url as string}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 text-black/40 hover:text-blue-600 transition-all hover:scale-110"
+                        title={platform}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                      </a>
+                    );
+                  })}
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground/80 font-medium mb-2">
+              <p className="text-sm text-black/60 font-bold uppercase tracking-widest mb-4">
                 {artist.followers.toLocaleString()} Followers
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <button 
                   onClick={handleFollowClick}
                   className={`px-2 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all

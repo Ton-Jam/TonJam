@@ -14,6 +14,10 @@ service cloud.firestore {
           (request.auth.token.email == "krusherkrupy@gmail.com" && request.auth.token.email_verified == true));
     }
 
+    function getWalletAddress(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.get('walletAddress', '');
+    }
+
     match /users/{userId} {
       allow read: if true;
       allow write: if isOwner(userId);
@@ -78,8 +82,29 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
     match /transactions/{transactionId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.senderAddress || request.auth.uid == resource.data.recipientAddress);
-      allow write: if false;
+      function isValidTransaction(data) {
+        return data.amount is number && 
+               data.type is string && 
+               data.status in ['pending', 'completed', 'failed'] &&
+               data.get('recipientAddress', '') is string && data.get('recipientAddress', '').size() < 100 &&
+               (!('senderAddress' in data) || (data.senderAddress is string && data.senderAddress.size() < 100)) &&
+               (!('trackTitle' in data) || (data.trackTitle is string && data.trackTitle.size() < 200)) &&
+               (!('txHash' in data) || (data.txHash is string && data.txHash.size() < 200));
+      }
+
+      function isTransactionOwner(data) {
+        let wallet = getWalletAddress(request.auth.uid);
+        let participants = data.get('participants', []);
+        return request.auth.uid in participants ||
+               request.auth.uid == data.get('userId', '') ||
+               request.auth.uid == data.get('senderAddress', '') || 
+               request.auth.uid == data.get('recipientAddress', '') ||
+               (wallet != '' && (wallet == data.get('senderAddress', '') || wallet == data.get('recipientAddress', '')));
+      }
+
+      allow read: if isAuthenticated() && isTransactionOwner(resource.data);
+      allow create: if isAuthenticated() && isValidTransaction(request.resource.data) && isTransactionOwner(request.resource.data);
+      allow update, delete: if false;
     }
     match /taskCompletions/{completionId} {
       allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;

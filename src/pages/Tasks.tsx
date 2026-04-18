@@ -20,6 +20,7 @@ import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
 import SectionHeader from '@/components/SectionHeader';
 import { useAudio } from '@/context/AudioContext';
+import { useAuth } from '@/context/AuthContext';
 import { TJ_COIN_ICON, TON_LOGO } from '@/constants';
 import StakingPanel from '@/components/StakingPanel';
 import Leaderboard from '@/components/Leaderboard';
@@ -27,12 +28,14 @@ import BuyTJModal from '@/components/BuyTJModal';
 import ReferralPanel from '@/components/ReferralPanel';
 import TaskDetailModal from '@/components/TaskDetailModal';
 import TaskCard from '@/components/TaskCard';
+import AuthModal from '@/components/AuthModal';
 import { Task } from '@/types';
 
 type TaskTab = 'all' | 'daily' | 'achievements' | 'milestones' | 'staking' | 'leaderboard' | 'referrals';
 
 const Tasks: React.FC = () => {
   const { addNotification, tasks, updateTaskProgress, claimTaskReward, userProfile } = useAudio();
+  const { user } = useAuth();
   const safeTasks = tasks || [];
   const [activeTab, setActiveTab] = useState<TaskTab>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
@@ -41,6 +44,7 @@ const Tasks: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const userBalance = userProfile.jamBalance || 0;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
@@ -154,6 +158,40 @@ const Tasks: React.FC = () => {
 
   return (
     <div className="p-4 lg:p-4 space-y-4 max-w-6xl mx-auto pb-4">
+      {!user && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-purple-600 p-6 md:p-8 text-white shadow-2xl shadow-blue-500/20 mb-8"
+        >
+          <div className="absolute inset-0 bg-black/20 z-0"></div>
+          <div className="absolute inset-0 z-0 opacity-30 mix-blend-overlay" style={{ backgroundImage: 'url(https://i.postimg.cc/rmpGP6GC/file-00000000cbe071f4baf73be350672754-1.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-3 text-center md:text-left max-w-2xl">
+              <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">Join the Network</h2>
+              <p className="text-white/90 font-medium text-sm md:text-base">
+                Create an account to start completing tasks, earning rewards, and leveling up your profile in the TonJam ecosystem.
+              </p>
+            </div>
+            
+            <div className="flex-shrink-0">
+              <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-8 py-4 bg-white text-blue-600 font-black uppercase tracking-widest rounded-full text-sm hover:scale-105 transition-transform shadow-xl flex items-center gap-2"
+              >
+                <Zap className="w-5 h-5" />
+                Sign Up Now
+              </button>
+            </div>
+          </div>
+          
+          {/* Decorative elements */}
+          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 blur-3xl rounded-full z-0"></div>
+          <div className="absolute -top-20 -left-20 w-64 h-64 bg-white/10 blur-3xl rounded-full z-0"></div>
+        </motion.div>
+      )}
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative">
         <div className="absolute -left-20 -top-20 w-64 h-64 opacity-[0.03] pointer-events-none">
@@ -421,6 +459,8 @@ const Tasks: React.FC = () => {
           />
         )}
       </AnimatePresence>
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       {/* Seasonal Event Banner */}
       <motion.div 

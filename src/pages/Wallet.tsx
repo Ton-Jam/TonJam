@@ -109,8 +109,8 @@ const Wallet: React.FC = () => {
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4 mb-4">Protocol: TON Mainnet</p>
           </div>
           <div className="flex gap-2 relative z-10 mt-auto">
-            <button onClick={() => openModal('deposit', 'TON')} className="flex-1 py-3 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all border border-blue-500/20">Deposit</button>
-            <button onClick={() => openModal('withdraw', 'TON')} className="flex-1 py-3 bg-white/5 text-foreground hover:bg-white/10 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all border border-white/10">Withdraw</button>
+            <button onClick={() => openModal('deposit', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-blue-500/10">Deposit</button>
+            <button onClick={() => openModal('withdraw', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-blue-500/10">Withdraw</button>
           </div>
         </div>
 
@@ -183,7 +183,7 @@ const Wallet: React.FC = () => {
               <button 
                 onClick={() => handlePurchaseJAM(pkg.price, pkg.amount)}
                 disabled={isProcessing}
-                className={`w-full py-4 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-4 ${pkg.popular ? 'bg-blue-600 text-foreground shadow-xl shadow-blue-500/20' : 'bg-muted/50 text-muted-foreground/80 hover:bg-muted'}`}
+                className={`w-full py-4 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 shadow-xl shadow-blue-500/20 disabled:opacity-50`}
               >
                 {isProcessing ? 'Processing...' : `Buy for ${pkg.price} TON`}
                 {!isProcessing && <ArrowRight className="h-4 w-4" />}
@@ -229,7 +229,7 @@ const Wallet: React.FC = () => {
               <button 
                 onClick={handleSubscribePremium}
                 disabled={isProcessing}
-                className="px-4 py-4 bg-amber-600 hover:bg-amber-500 text-foreground font-bold uppercase tracking-widest rounded-[5px] transition-all shadow-xl shadow-amber-600/20 flex items-center gap-4"
+                className="px-4 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white font-bold uppercase tracking-widest rounded-[5px] transition-all shadow-xl shadow-blue-600/20 flex items-center gap-4"
               >
                 {isProcessing ? 'Processing...' : 'Upgrade Now for 5 TON'}
                 {!isProcessing && <Zap className="h-5 w-5 fill-white" />}
@@ -387,7 +387,7 @@ const Wallet: React.FC = () => {
                 className={`w-full py-4 rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all mt-4 ${
                   modalCurrency === 'JAM' || isProcessing || !amount || Number(amount) <= 0 || (modalType === 'withdraw' && !walletAddress)
                     ? 'bg-muted/50 text-muted-foreground opacity-50 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-500 text-foreground shadow-lg shadow-blue-600/20'
+                    : 'bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-lg shadow-blue-600/20'
                 }`}
               >
                 {isProcessing ? 'Processing...' : modalType === 'deposit' ? 'Confirm Deposit' : 'Confirm Withdrawal'}

@@ -127,7 +127,7 @@ const Staking: React.FC = () => {
               <button 
                 onClick={handleClaim}
                 disabled={isProcessing || pending <= 0}
-                className="px-4 py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+                className="px-4 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
               >
                 Claim
               </button>
@@ -194,7 +194,7 @@ const Staking: React.FC = () => {
           <button 
             onClick={handleStake}
             disabled={isProcessing || !stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > balance}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-4"
+            className="w-full py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-4"
           >
             {isProcessing ? 'Processing...' : 'Initialize Staking'}
             {!isProcessing && <Lock className="h-4 w-4" />}

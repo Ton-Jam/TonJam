@@ -18,9 +18,10 @@ interface NFTCardProps {
   variant?: 'default' | 'row';
   onAction?: (nft: NFTItem) => void;
   isLoading?: boolean;
+  className?: string;
 }
 
-const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false }) => {
+const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false, className = '' }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, userProfile, setAnthem } = useAudio();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -89,7 +90,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   if (variant === 'row') {
     return (
       <div 
-        className="group flex items-center gap-2 p-2 rounded-sm hover:bg-muted/50 transition-all cursor-pointer w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-card/30"
+        className={`group flex items-center gap-4 p-3 rounded-sm hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-card/30 ${className}`}
         onClick={handleCardClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -101,7 +102,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
         tabIndex={0}
         aria-label={`View NFT ${nft.title}`}
       >
-        <div className="relative w-12 h-12 rounded-sm overflow-hidden flex-shrink-0">
+        <div className="relative w-14 h-14 rounded-sm overflow-hidden flex-shrink-0">
           <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} alt={nft.title} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
@@ -147,7 +148,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     <>
       <div
         onClick={handleCardClick}
-        className="group relative cursor-pointer transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-2 hover:bg-muted/20 bg-card/30 w-full"
+        className={`group relative cursor-pointer transition-all duration-300 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-2 bg-card/30 w-full ${className}`}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();

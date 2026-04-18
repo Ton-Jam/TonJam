@@ -326,15 +326,27 @@ const PlaylistDetail: React.FC = () => {
             </>
           )}
           
-          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-            <button onClick={handlePlayAll} className="flex items-center gap-4 px-4 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95 shadow-lg">
-              <Play className="h-4 w-4 fill-current" /> Play
+          <div className="flex flex-wrap gap-4 justify-center md:justify-start items-center">
+            <button 
+              onClick={handlePlayAll} 
+              className="w-14 h-14 flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-all hover:scale-105 active:scale-95 shadow-xl shadow-blue-600/30"
+              title="Play All"
+            >
+              <Play className="h-6 w-6 fill-current ml-1" />
             </button>
-            <button onClick={handleShuffle} className="flex items-center gap-4 px-4 py-4 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
-              <Shuffle className="h-4 w-4" /> Shuffle
+            <button 
+              onClick={handleShuffle} 
+              className="w-12 h-12 flex items-center justify-center bg-neutral-800 hover:bg-neutral-700 text-white rounded-full transition-all hover:scale-105 active:scale-95 group"
+              title="Shuffle"
+            >
+              <Shuffle className="h-5 w-5 group-active:rotate-180 transition-transform duration-500" />
             </button>
-            <button onClick={handleDeletePlaylist} className="flex items-center gap-4 px-4 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full font-bold text-sm uppercase tracking-wider transition-all hover:scale-105 active:scale-95" title="Delete Playlist">
-              <Trash2 className="h-4 w-4" />
+            <button 
+              onClick={handleDeletePlaylist} 
+              className="w-12 h-12 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full transition-all hover:scale-105 active:scale-95" 
+              title="Delete Playlist"
+            >
+              <Trash2 className="h-5 w-5" />
             </button>
           </div>
         </div>

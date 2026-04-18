@@ -10,11 +10,11 @@ export const JAM_PRICE_USD = 0.052;
 export const JAM_JETTON_MASTER = "EQCxE6mNZ_9MvS_88888888888888888888888888888"; // Placeholder JAM Master Address
 
 export const MOODS = [
-  { id: 'chill', name: 'Chill' },
-  { id: 'energetic', name: 'Energetic' },
-  { id: 'focus', name: 'Focus' },
-  { id: 'happy', name: 'Happy' },
-  { id: 'melancholic', name: 'Melancholic' },
+  { id: 'chill', name: 'Chill', color: 'from-blue-400 to-indigo-500' },
+  { id: 'energetic', name: 'Energetic', color: 'from-orange-400 to-red-500' },
+  { id: 'focus', name: 'Focus', color: 'from-emerald-400 to-teal-500' },
+  { id: 'happy', name: 'Happy', color: 'from-yellow-400 to-orange-500' },
+  { id: 'melancholic', name: 'Melancholic', color: 'from-purple-400 to-indigo-500' },
 ];
 
 export const MOCK_TRACKS: Track[] = [

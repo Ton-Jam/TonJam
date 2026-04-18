@@ -161,7 +161,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
             type="submit" 
             disabled={isSubmitting}
             className={`w-full py-2 rounded-[12px] font-bold text-[10px] uppercase tracking-[0.2em] text-white transition-all active:scale-95 shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-              ${listingType === 'auction' ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20 text-black focus-visible:ring-amber-500' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/20'}
+              ${listingType === 'auction' ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20 text-black focus-visible:ring-amber-500' : 'bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 shadow-blue-600/20'}
               ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
             `}
           >

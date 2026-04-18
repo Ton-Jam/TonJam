@@ -83,7 +83,7 @@ const BidAcceptanceModal: React.FC<BidAcceptanceModalProps> = ({ nft, offer, onC
           </div>
 
           <div className="flex flex-col gap-2">
-            <button onClick={handleConfirm} disabled={isProcessing} className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed" >
+            <button onClick={handleConfirm} disabled={isProcessing} className="w-full py-2 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[10px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed" >
               {isProcessing ? (
                 <span className="flex items-center justify-center gap-2">
                   <img src={APP_LOGO} className="w-4 h-4 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." /> PROCESSING...

@@ -202,7 +202,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
               <button 
                 onClick={handleVerify}
                 disabled={isVerifying}
-                className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="w-full py-2 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-blue-600/20 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {isVerifying ? 'Verifying Identity...' : 'Confirm & Verify (0.1 TON)'}
               </button>

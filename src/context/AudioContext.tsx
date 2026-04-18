@@ -79,6 +79,9 @@ interface AudioContextType {
   addTrackToPlaylist: (playlistId: string, track: Track) => void;
   removeTrackFromPlaylist: (playlistId: string, trackId: string) => void;
   reorderTrackInPlaylist: (playlistId: string, trackId: string, direction: 'up' | 'down') => void;
+  searchTracks: (query: string) => Promise<Track[]>;
+  searchArtists: (query: string) => Promise<Artist[]>;
+  searchNFTs: (query: string) => Promise<NFTItem[]>;
   createNewPlaylist: (name: string, description?: string, initialTrack?: Track, coverUrl?: string, isPrivate?: boolean, isCollaborative?: boolean, tags?: string[]) => void;
   deletePlaylist: (playlistId: string) => void;
   updatePlaylist: (playlistId: string, updates: Partial<Playlist>) => void;
@@ -549,15 +552,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         const transactionsQuery = query(
           collection(db, 'transactions'), 
-          or(
-            where('senderAddress', '==', user.uid),
-            where('recipientAddress', '==', user.uid)
-          ),
-          orderBy('timestamp', 'desc')
+          where('participants', 'array-contains', user.uid)
         );
         transactionsUnsubscribe = onSnapshot(transactionsQuery, (snapshot) => {
           const txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
-          setFirestoreTransactions(txs);
+          // Sort locally to avoid needing a composite index for participants array-contains + timestamp orderBy
+          const sortedTxs = [...txs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+          setFirestoreTransactions(sortedTxs);
         }, (error) => handleFirestoreError(error, OperationType.LIST, 'transactions'));
 
         const playlistsQuery = query(
@@ -904,6 +905,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [firestoreTracks, firestoreNFTs, userProfile]);
 
   const updateNFT = async (nftId: string, updates: Partial<NFTItem>, silent: boolean = false) => {
+    if (!nftId) {
+      console.warn("Attempted to update undefined nftId");
+      return;
+    }
     setIsLoading(true);
     try {
       const cleanUpdates = Object.fromEntries(
@@ -1248,9 +1253,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const recordTransaction = async (txData: Omit<Transaction, 'id' | 'timestamp' | 'status'>) => {
     setIsLoading(true);
     const txId = `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newTx: Transaction = {
+    const participants = [auth.currentUser?.uid].filter(Boolean) as string[];
+    const newTx: Transaction & { participants: string[] } = {
       ...txData,
       id: txId,
+      userId: auth.currentUser?.uid,
+      participants,
       timestamp: new Date().toISOString(),
       status: 'completed',
       txHash: `0x${Math.random().toString(16).substr(2, 40)}`
@@ -1632,6 +1640,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const addCommentToPost = async (postId: string, commentData: Partial<PostComment>) => {
+    if (!postId) {
+      console.warn("Attempted to comment on undefined postId");
+      return;
+    }
     if (!auth.currentUser) {
       addNotification("Please log in to comment", "error");
       return;
@@ -1669,6 +1681,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const toggleLikePost = async (postId: string) => {
+    if (!postId) {
+      console.warn("Attempted to like undefined postId");
+      return;
+    }
     if (!auth.currentUser) {
       addNotification("Please log in to like", "error");
       return;
@@ -1704,6 +1720,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deletePost = async (postId: string) => {
+    if (!postId) {
+      console.warn("Attempted to delete undefined postId");
+      return;
+    }
     setIsLoading(true);
     try {
       if (postId.startsWith('post-')) {
@@ -1719,6 +1739,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updatePost = async (postId: string, updates: Partial<Post>) => {
+    if (!postId) {
+      console.warn("Attempted to update undefined postId");
+      return;
+    }
     if (!auth.currentUser) {
       addNotification("Please log in to perform this action", "error");
       return;
@@ -1798,6 +1822,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updateRoyaltyConfig = async (artistId: string, config: Artist['royaltyConfig']) => {
+    if (!artistId) {
+      console.warn("Attempted to update undefined artistId royalty config");
+      return;
+    }
     setIsLoading(true);
     try {
       setArtists(prev => prev.map(artist => 
@@ -2048,6 +2076,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const toggleLikeTrack = async (trackId: string) => {
+    if (!trackId) {
+      console.warn("Attempted to like undefined track");
+      return;
+    }
     setIsLoading(true);
     try {
       const isLiked = likedTrackIds.includes(trackId);
@@ -2080,6 +2112,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [artists, setArtists] = useState<Artist[]>(MOCK_ARTISTS);
 
   const toggleFollowUser = async (userId: string) => {
+    if (!userId) {
+      console.warn("Attempted to follow undefined userId");
+      return;
+    }
     setIsLoading(true);
     try {
       const isFollowing = followedUserIds.includes(userId);
@@ -2617,6 +2653,38 @@ Return a JSON object with the following structure:
     }
   };
 
+  const searchTracks = useCallback(async (queryText: string): Promise<Track[]> => {
+    if (!queryText.trim()) return [];
+    
+    const searchLower = queryText.toLowerCase();
+    
+    return allTracks.filter(track => 
+      track.title.toLowerCase().includes(searchLower) || 
+      track.artist.toLowerCase().includes(searchLower) || 
+      (track.genre && track.genre.toLowerCase().includes(searchLower))
+    );
+  }, [allTracks]);
+
+  const searchArtists = useCallback(async (queryText: string): Promise<Artist[]> => {
+    if (!queryText.trim()) return [];
+    const searchLower = queryText.toLowerCase();
+    return artists.filter(a => 
+      a.name.toLowerCase().includes(searchLower) || 
+      (a.genre && a.genre.toLowerCase().includes(searchLower)) ||
+      (a.bio && a.bio.toLowerCase().includes(searchLower))
+    );
+  }, [artists]);
+
+  const searchNFTs = useCallback(async (queryText: string): Promise<NFTItem[]> => {
+    if (!queryText.trim()) return [];
+    const searchLower = queryText.toLowerCase();
+    return allNFTs.filter(n => 
+      n.title.toLowerCase().includes(searchLower) || 
+      (n.artist && n.artist.toLowerCase().includes(searchLower)) ||
+      (n.description && n.description.toLowerCase().includes(searchLower))
+    );
+  }, [allNFTs]);
+
   return (
     <AudioContext.Provider value={{
       currentTrack, isPlaying, queue, progress, isFullPlayerOpen, isShuffle, repeatMode,
@@ -2625,7 +2693,7 @@ Return a JSON object with the following structure:
       playTrack, togglePlay, nextTrack, prevTrack, addToQueue, playAll, seek, setVolume, toggleMute,
       toggleLikeTrack, toggleFollowUser, closePlayer, setFullPlayerOpen, toggleShuffle, toggleRepeat,
       addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist,
-      removeTrackFromPlaylist, reorderTrackInPlaylist, createNewPlaylist, deletePlaylist, updatePlaylist,
+      removeTrackFromPlaylist, reorderTrackInPlaylist, searchTracks, searchArtists, searchNFTs, createNewPlaylist, deletePlaylist, updatePlaylist,
       generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
       allTracks, allNFTs, artists, firestoreUsers, setArtists, addUserTrack, updateTrack, addUserNFT, updateNFT, recordTransaction, depositTON, withdrawTON, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
       posts, createPost, addCommentToPost, toggleLikePost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, completeTask, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, mintNFT, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,

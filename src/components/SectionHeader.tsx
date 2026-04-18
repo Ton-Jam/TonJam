@@ -11,11 +11,12 @@ interface SectionHeaderProps {
   className?: string;
 }
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ title, viewAllLink, onAction, actionLabel, className = "" }) => {
+const SectionHeader: React.FC<SectionHeaderProps> = ({ title, subtitle, viewAllLink, onAction, actionLabel, className = "" }) => {
   return (
-    <div className={`flex items-end justify-between mb-2 ${className}`}>
-      <div className="space-y-2">
-        <h2 className="text-lg font-bold uppercase tracking-tighter text-foreground leading-none font-display">{title}</h2>
+    <div className={`flex items-end justify-between mb-4 ${className}`}>
+      <div className="space-y-1">
+        <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 leading-none font-display">{title}</h2>
+        {subtitle && <p className="text-xs font-medium text-muted-foreground">{subtitle}</p>}
       </div>
       {viewAllLink && (
         <Link 

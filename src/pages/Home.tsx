@@ -3,7 +3,7 @@ import CompleteProfilePrompt from '@/components/CompleteProfilePrompt';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X, CheckCircle2, Disc3, Heart, ArrowRight } from 'lucide-react';
-import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES, MOODS } from '@/constants';
+import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES, MOODS, TJ_COIN_ICON, TON_LOGO } from '@/constants';
 import { Track, Post, UserProfile, Playlist, SponsoredContent, NFTItem } from '@/types';
 import { getPlaceholderImage } from '@/lib/utils';
 import TrackCard from '@/components/TrackCard';
@@ -47,8 +47,19 @@ const WelcomeBanner = ({ onDismiss, onGetTokens }: { onDismiss: () => void, onGe
       initial={{ opacity: 0, height: 0, marginBottom: 0 }}
       animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-      className="relative overflow-hidden rounded-sm bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white shadow-2xl shadow-blue-500/20"
+      className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-xl p-6 text-white shadow-2xl border border-white/20"
     >
+      {/* Subtle noise texture */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay pointer-events-none"></div>
+
+      {/* Background Icons */}
+      <div className="absolute -right-10 -top-10 w-64 h-64 opacity-10 pointer-events-none rotate-12 z-0">
+        <img src={TJ_COIN_ICON} alt="" className="w-full h-full object-contain" />
+      </div>
+      <div className="absolute left-1/2 -bottom-20 w-80 h-80 opacity-5 pointer-events-none -rotate-12 z-0">
+        <img src={TON_LOGO} alt="" className="w-full h-full object-contain" />
+      </div>
+
       <button 
         onClick={onDismiss}
         className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors z-20"
@@ -56,12 +67,16 @@ const WelcomeBanner = ({ onDismiss, onGetTokens }: { onDismiss: () => void, onGe
         <X className="h-5 w-5" />
       </button>
 
-      <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
-        <div className="w-48 h-32 md:w-64 md:h-40 rounded-2xl bg-white/5 backdrop-blur-md flex items-center justify-center flex-shrink-0 overflow-hidden shadow-xl">
+      <div className="flex flex-col items-center gap-[2px] relative z-10">
+        <motion.div 
+          animate={{ y: [0, -8, 0] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          className="w-[196px] h-32 md:w-[260px] md:h-40 rounded-2xl bg-white/5 backdrop-blur-md flex items-center justify-center flex-shrink-0 overflow-hidden shadow-2xl border-2 border-white/20 group"
+        >
           <img 
             src="https://i.postimg.cc/rmpGP6GC/file-00000000cbe071f4baf73be350672754-1.jpg" 
             alt="TonJam Coins High Five" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             onError={(e) => {
               // Fallback to Sparkles icon if the image is not yet uploaded
               const target = e.target as HTMLImageElement;
@@ -69,23 +84,23 @@ const WelcomeBanner = ({ onDismiss, onGetTokens }: { onDismiss: () => void, onGe
               target.parentElement!.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>';
             }}
           />
-        </div>
+        </motion.div>
 
-        <div className="space-y-2 text-center md:text-left">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Welcome to TonJam</h2>
-          <p className="text-white/80 font-medium max-w-xl">
+        <div className="space-y-2 text-center mt-1">
+          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">Welcome to TonJam</h2>
+          <p className="text-white/80 font-medium max-w-xl text-sm md:text-base leading-relaxed mx-auto">
             You've just entered the future of music. Discover decentralized sounds, collect rare NFTs, and connect with your favorite artists on the TON blockchain.
           </p>
-          <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
+          <div className="flex flex-wrap justify-center gap-4 pt-2">
             <button 
               onClick={onDismiss}
-              className="px-6 py-2 bg-white text-blue-600 font-bold uppercase tracking-widest rounded-full text-[10px] hover:bg-neutral-100 transition-all shadow-lg"
+              className="px-8 py-3 bg-white text-blue-600 font-black uppercase tracking-widest rounded-full text-xs hover:bg-neutral-100 hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]"
             >
               Start Exploring
             </button>
             <button 
               onClick={() => navigate('/tasks')}
-              className="px-6 py-2 bg-white/20 text-white font-bold uppercase tracking-widest rounded-full text-[10px] hover:bg-white/30 transition-all shadow-lg"
+              className="px-8 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white font-black uppercase tracking-widest rounded-full text-xs hover:bg-white/20 hover:scale-105 transition-all shadow-lg"
             >
               Get Free Tokens
             </button>
@@ -94,8 +109,8 @@ const WelcomeBanner = ({ onDismiss, onGetTokens }: { onDismiss: () => void, onGe
       </div>
 
       {/* Decorative elements */}
-      <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 blur-3xl rounded-full"></div>
-      <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/5 blur-3xl rounded-full"></div>
+      <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-500/20 blur-[100px] rounded-full pointer-events-none"></div>
+      <div className="absolute -top-20 -left-20 w-64 h-64 bg-purple-500/20 blur-[100px] rounded-full pointer-events-none"></div>
     </motion.div>
   );
 };
@@ -397,7 +412,10 @@ const Home: React.FC = () => {
     edition: n.edition
   })).slice(0, 4), [nfts]);
 
-  const genres = ["All", "Electronic", "Hip Hop", "Pop", "Rock", "R&B", "Jazz", "Classical", "Lo-Fi", "Synthwave"];
+  const genresWithColors = useMemo(() => [
+    { id: 'all', name: 'All', color: 'from-blue-500 to-blue-600' },
+    ...GENRES
+  ], []);
 
   const carouselPosts = useMemo(() => {
     const withImages = posts.filter(p => p.imageUrl);
@@ -440,17 +458,17 @@ const Home: React.FC = () => {
 
         {/* HORIZONTAL GENRE SCROLL FILTER PILL */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-          {genres.map(genre => (
+          {genresWithColors.map(genre => (
             <button
-              key={genre}
-              onClick={() => setActiveGenre(genre)}
-              className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
-                activeGenre === genre 
-                  ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' 
-                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+              key={genre.id}
+              onClick={() => setActiveGenre(genre.name)}
+              className={`px-5 py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all duration-300 border ${
+                activeGenre === genre.name 
+                  ? `bg-gradient-to-r ${genre.color} text-white border-transparent shadow-lg shadow-white/10 scale-105` 
+                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white border-white/10'
               }`}
             >
-              {genre}
+              {genre.name}
             </button>
           ))}
         </div>
@@ -459,7 +477,7 @@ const Home: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-6 mb-16">
           {artists.length > 0 && (
             <div className="flex-1 min-w-0">
-              <SectionHeader title="Top Chart Artists" link="/discover" />
+              <SectionHeader title="Top Chart Artists" viewAllLink="/discover" />
               <div className="flex gap-6 overflow-x-auto no-scrollbar pb-4">
                 <div className="min-w-[300px] sm:min-w-[350px]">
                   <TopChartArtists artists={artists.map(a => ({ ...a, avatarUrl: a.avatar || '', verified: !!a.isVerifiedArtist }))} title="Global Top Artists" />
@@ -473,7 +491,7 @@ const Home: React.FC = () => {
           
           {topChartNFTsData.length > 0 && (
             <div className="flex-1 min-w-0">
-              <SectionHeader title="Top Chart NFTs" link="/marketplace" />
+              <SectionHeader title="Top Chart NFTs" viewAllLink="/marketplace" />
               <div className="flex gap-6 overflow-x-auto no-scrollbar pb-4">
                 <div className="min-w-[300px] sm:min-w-[350px]">
                   <TopChartNFTs nfts={topChartNFTsData} title="Global Top 50 NFTs" />
@@ -498,23 +516,23 @@ const Home: React.FC = () => {
         <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
           <button
             onClick={() => navigate("/marketplace?filter=trending")}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] text-white text-sm font-semibold whitespace-nowrap transition-colors"
+            className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-purple-500/50 text-white text-sm font-bold whitespace-nowrap transition-all shadow-lg group"
           >
-            <TrendingUp className="w-4 h-4 text-purple-400" />
+            <TrendingUp className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
             Trending NFTs
           </button>
           <button
             onClick={() => navigate("/marketplace?filter=recommended")}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] text-white text-sm font-semibold whitespace-nowrap transition-colors"
+            className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-blue-500/50 text-white text-sm font-bold whitespace-nowrap transition-all shadow-lg group"
           >
-            <Sparkles className="w-4 h-4 text-blue-400" />
+            <Sparkles className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
             AI Recommendations
           </button>
           <button
             onClick={() => navigate("/jamspace")}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] text-white text-sm font-semibold whitespace-nowrap transition-colors"
+            className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-green-500/50 text-white text-sm font-bold whitespace-nowrap transition-all shadow-lg group"
           >
-            <Music2 className="w-4 h-4 text-green-400" />
+            <Music2 className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" />
             Jam Space
           </button>
         </div>
@@ -551,25 +569,25 @@ const Home: React.FC = () => {
         <HomeSection title="Live Now" link="/jamspace">
           <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 snap-x">
             {artists.slice(0, 4).map((artist, i) => (
-              <div key={artist.uid} className="relative min-w-[280px] sm:min-w-[320px] aspect-video rounded-sm overflow-hidden group cursor-pointer snap-start">
+              <div key={artist.uid} className="relative min-w-[280px] sm:min-w-[320px] aspect-video rounded-2xl overflow-hidden group cursor-pointer snap-start shadow-xl border border-white/10">
                 <img 
                   src={artist.bannerUrl || getPlaceholderImage(`live-${i}`, 400, 225)} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   alt="Live stream"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute top-4 left-4 bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-md uppercase tracking-widest flex items-center gap-1">
-                  <Radio className="w-3 h-3" /> Live
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                <div className="absolute top-4 left-4 bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-md uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-red-500/20">
+                  <Radio className="w-3 h-3 animate-pulse" /> Live
                 </div>
-                <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-white text-[8px] font-bold px-2 py-1 rounded-md uppercase tracking-widest flex items-center gap-1">
-                  <Activity className="w-3 h-3" /> {Math.floor(Math.random() * 500) + 100} Watching
+                <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-white text-[8px] font-bold px-2 py-1 rounded-md uppercase tracking-widest flex items-center gap-1 border border-white/10">
+                  <Activity className="w-3 h-3 text-green-400" /> {Math.floor(Math.random() * 500) + 100} Watching
                 </div>
                 <div className="absolute bottom-4 left-4 right-4">
-                  <div className="flex items-center gap-2">
-                    <img src={artist.avatar || getPlaceholderImage(`artist-${i}`)} className="w-8 h-8 rounded-full" alt="" />
+                  <div className="flex items-center gap-3">
+                    <img src={artist.avatar || getPlaceholderImage(`artist-${i}`)} className="w-10 h-10 rounded-full border-2 border-white/20" alt="" />
                     <div>
-                      <p className="text-white text-xs font-bold truncate">{artist.name}</p>
-                      <p className="text-white/60 text-[10px] truncate">Sonic Session #{i + 1}</p>
+                      <p className="text-white text-sm font-bold truncate">{artist.name}</p>
+                      <p className="text-white/60 text-[10px] uppercase tracking-widest truncate">Sonic Session #{i + 1}</p>
                     </div>
                   </div>
                 </div>
@@ -599,11 +617,11 @@ const Home: React.FC = () => {
               <button
                 key={mood.id}
                 onClick={() => navigate(`/discover?mood=${mood.name}`)}
-                className="relative group aspect-[16/9] min-w-[160px] sm:min-w-[200px] rounded-sm overflow-hidden bg-white/5 hover:border-blue-500/50 transition-all"
+                className="relative group aspect-[16/9] min-w-[160px] sm:min-w-[200px] rounded-xl overflow-hidden bg-white/5 hover:border-white/20 transition-all border border-white/5 shadow-lg"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:scale-110 transition-transform duration-500" />
+                <div className={`absolute inset-0 bg-gradient-to-br ${mood.color} opacity-40 group-hover:opacity-70 group-hover:scale-110 transition-all duration-500`} />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-black uppercase tracking-widest text-white drop-shadow-md">{mood.name}</span>
+                  <span className="text-sm font-black uppercase tracking-widest text-white drop-shadow-lg">{mood.name}</span>
                 </div>
               </button>
             ))}

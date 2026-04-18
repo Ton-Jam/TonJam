@@ -342,6 +342,8 @@ export interface Transaction {
   artistShare: number; // Amount sent to artist
   recipientAddress: string;
   senderAddress?: string;
+  userId?: string;
+  participants?: string[];
   trackId?: string;
   trackTitle?: string;
   nftId?: string;

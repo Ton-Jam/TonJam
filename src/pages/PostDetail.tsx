@@ -140,21 +140,21 @@ const PostDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-4 px-4 md:px-4 relative overflow-x-hidden">
+    <div className="min-h-[calc(100vh-64px)] bg-background relative overflow-x-hidden flex flex-col">
       {/* Immersive Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/5 blur-[150px] rounded-full translate-y-1/3 -translate-x-1/4"></div>
       </div>
 
-      <div className="max-w-3xl mx-auto relative z-10">
+      <div className="w-full flex-1 relative z-10 flex flex-col">
         {/* Back Button */}
         {/* Removed back button as it is in the global header */}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass border border-border bg-card rounded-[10px] p-4 md:p-4 shadow-2xl relative overflow-hidden">
+          className="bg-card flex-1 flex flex-col p-4 md:p-6 relative overflow-hidden border-t border-border/50">
         {/* Subtle Background Glow Removed */}
 
           {/* User Identity Section */}

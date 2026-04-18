@@ -128,7 +128,7 @@ const BuyTJModal: React.FC<BuyTJModalProps> = ({ onClose, onSuccess }) => {
                 <button 
                   onClick={handleBuy}
                   disabled={isProcessing || !tonAmount || parseFloat(tonAmount) <= 0}
-                  className="w-full py-2 rounded-2xl bg-blue-600 hover:bg-blue-500 text-foreground text-sm font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-2 rounded-2xl bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white text-sm font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
                     <div className="w-5 h-5 border border-white/30 border-t-white rounded-full animate-spin" />

@@ -173,10 +173,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           <div className="p-8 pt-6">
             <div className="mb-8">
               <h1 className="text-[36px] font-bold text-foreground tracking-tighter uppercase leading-none mb-3">
-                {isLogin ? 'Welcome Back' : 'Join the Network'}
+                {isLogin ? 'Welcome Back' : 'Create an Account'}
               </h1>
               <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                {isLogin ? 'Synchronizing neural frequencies...' : 'Initialize your sonic identity on TON.'}
+                {isLogin ? 'Sign in to your account to continue.' : 'Sign up to get started.'}
               </p>
             </div>
 
@@ -245,7 +245,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
-                    {isLogin ? 'Establish Link' : 'Initialize Protocol'}
+                    {isLogin ? 'Sign In' : 'Create Account'}
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -258,7 +258,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <div className="w-full border-t border-border/20"></div>
               </div>
               <div className="relative flex justify-center text-[8px] font-bold uppercase tracking-[0.3em]">
-                <span className="bg-background px-4 text-muted-foreground/30">Web3 / Social Relay</span>
+                <span className="bg-background px-4 text-muted-foreground/30">Or continue with</span>
               </div>
             </div>
 
@@ -290,9 +290,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] hover:text-foreground transition-colors"
               >
                 {isLogin ? (
-                  <>Don't have a node? <span className="text-blue-500 ml-1">Initialize one</span></>
+                  <>Don't have an account? <span className="text-blue-500 ml-1">Sign up</span></>
                 ) : (
-                  <>Already have a node? <span className="text-blue-500 ml-1">Establish link</span></>
+                  <>Already have an account? <span className="text-blue-500 ml-1">Sign in</span></>
                 )}
               </button>
             </div>

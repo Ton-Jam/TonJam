@@ -128,7 +128,7 @@ const StakingPanel: React.FC<StakingPanelProps> = ({ balance, onStake, onBuyTJ }
           <button 
             onClick={handleStake}
             disabled={isStaking || !stakeAmount || parseFloat(stakeAmount) <= 0}
-            className="w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-foreground text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-400 text-white hover:from-blue-500 hover:to-blue-300 text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isStaking ? (
               <div className="w-4 h-4 border border-white/30 border-t-white rounded-full animate-spin" />

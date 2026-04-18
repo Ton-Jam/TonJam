@@ -580,7 +580,7 @@ const NFTDetail: React.FC = () => {
               <div className="mt-4 flex flex-col sm:flex-row gap-4 relative z-10">
                 {isOwner ? (
                   <>
-                    <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
+                    <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
                       {localNft.listingType ? 'Manage Listing' : 'Sell NFT'}
                     </button>
                     <button onClick={() => setShowSendModal(true)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-4 border border-white/10" >
@@ -606,23 +606,23 @@ const NFTDetail: React.FC = () => {
                         <button 
                           onClick={handleInlineBid} 
                           disabled={isPlacingBid}
-                          className="flex-1 py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-amber-500 hover:bg-amber-400 text-background shadow-amber-500/20 border-amber-400/30 disabled:opacity-50 flex items-center justify-center gap-2" 
+                          className="flex-1 py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-blue-500/20 border-blue-400/30 disabled:opacity-50 flex items-center justify-center gap-2" 
                         >
                           {isPlacingBid ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Place Bid Signal'}
                         </button>
                       </div>
                     ) : (
-                      <button onClick={handleAction} className="flex-[2] py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30 border-blue-400/30" >
+                      <button onClick={handleAction} className="flex-[2] py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-blue-600/30 border-blue-400/30" >
                         Acquire Asset Now
                       </button>
                     )}
                     {!isAuction && (
-                      <button onClick={() => setShowBidModal(true)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
+                      <button onClick={() => setShowBidModal(true)} className="flex-1 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-blue-400/30 shadow-lg shadow-blue-500/20" >
                         Make Offer
                       </button>
                     )}
                     {userOffer && (
-                      <button onClick={handleCancelBid} className="flex-1 py-4 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 hover:border-red-500/20" >
+                      <button onClick={handleCancelBid} className="flex-1 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[12px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-blue-400/30 shadow-lg shadow-blue-500/20" >
                         Withdraw Bid
                       </button>
                     )}

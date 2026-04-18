@@ -163,7 +163,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
                 <button 
                   onClick={() => handleLinkAccount('wallet')}
                   disabled={isVerifying}
-                  className="px-2 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                  className="px-2 py-2 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                 >
                   Connect
                 </button>
@@ -177,7 +177,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
               disabled={!canVerify || isVerifying}
               className={`w-full py-[7px] rounded-full text-xs font-bold uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2 ${
                 canVerify 
-                  ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20' 
+                  ? 'bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-lg shadow-blue-600/20' 
                   : 'bg-muted text-muted-foreground cursor-not-allowed'
               }`}
             >
