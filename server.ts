@@ -124,22 +124,97 @@ async function startServer() {
         }
     });
 
+    // OAuth Helpers
+    const getBaseUrl = (req: express.Request) => {
+        // Preference: env var APP_URL > forwarded headers > host header
+        if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.headers['x-forwarded-host'] || req.headers.host;
+        return `${protocol}://${host}`;
+    };
+
+    const getSpotifyRedirectUri = (req: express.Request) => {
+        return process.env.SPOTIFY_REDIRECT_URI || `${getBaseUrl(req)}/api/auth/spotify/callback`;
+    };
+
+    const getVercelRedirectUri = (req: express.Request) => {
+        return process.env.VERCEL_REDIRECT_URI || `${getBaseUrl(req)}/api/auth/vercel/callback`;
+    };
+
+    // Vercel SSO Config
+    const VERCEL_CLIENT_ID = process.env.VERCEL_CLIENT_ID;
+    const VERCEL_CLIENT_SECRET = process.env.VERCEL_CLIENT_SECRET;
+
+    app.get('/api/auth/vercel/url', (req, res) => {
+        if (!VERCEL_CLIENT_ID) {
+            return res.status(500).json({ error: 'Vercel Client ID not configured' });
+        }
+        const redirectUri = getVercelRedirectUri(req);
+        const state = Math.random().toString(36).substring(7);
+        // Assuming standard Vercel OAuth authorize URL
+        const url = `https://vercel.com/integrations/authorize?client_id=${VERCEL_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+        res.json({ url });
+    });
+
+    app.get('/api/auth/vercel/callback', async (req, res) => {
+        const { code, state } = req.query;
+        if (!code) return res.status(400).send('No code provided');
+
+        if (!VERCEL_CLIENT_ID || !VERCEL_CLIENT_SECRET) {
+            return res.status(500).send('Vercel credentials not configured');
+        }
+
+        const redirectUri = getVercelRedirectUri(req);
+
+        try {
+            // Using the endpoint provided by the user
+            const tokenResponse = await axios.post('https://api.vercel.com/v1/integrations/sso/token', {
+                code: code as string,
+                state: state as string,
+                client_id: VERCEL_CLIENT_ID,
+                client_secret: VERCEL_CLIENT_SECRET,
+                redirect_uri: redirectUri,
+                grant_type: 'authorization_code'
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = tokenResponse.data;
+
+            const html = `
+                <html>
+                    <body>
+                        <script>
+                            if (window.opener) {
+                                window.opener.postMessage({ type: 'VERCEL_SSO_SUCCESS', data: ${JSON.stringify(data)} }, '*');
+                                window.close();
+                            } else {
+                                document.body.innerHTML = '<h1>Authentication Successful</h1><p>You can close this window now.</p>';
+                            }
+                        </script>
+                        <h1>Verifying...</h1>
+                    </body>
+                </html>
+            `;
+            res.send(html);
+
+        } catch (error: any) {
+            console.error('Vercel SSO Auth Error:', error.response?.data || error.message);
+            res.status(500).send('Authentication failed');
+        }
+    });
+
     // Spotify OAuth Config
     const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
     const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
-
-    const getRedirectUri = (req: express.Request) => {
-        if (process.env.SPOTIFY_REDIRECT_URI) return process.env.SPOTIFY_REDIRECT_URI;
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-        const host = req.headers['x-forwarded-host'] || req.headers.host;
-        return `${protocol}://${host}/api/auth/spotify/callback`;
-    };
 
     app.get('/api/auth/spotify/url', (req, res) => {
         if (!SPOTIFY_CLIENT_ID) {
             return res.status(500).json({ error: 'Spotify Client ID not configured' });
         }
-        const redirectUri = getRedirectUri(req);
+        const redirectUri = getSpotifyRedirectUri(req);
         const scopes = 'user-read-private user-read-email';
         const url = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SPOTIFY_CLIENT_ID}&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         res.json({ url });
@@ -153,7 +228,7 @@ async function startServer() {
             return res.status(500).send('Spotify credentials not configured');
         }
 
-        const redirectUri = getRedirectUri(req);
+        const redirectUri = getSpotifyRedirectUri(req);
 
         try {
             const tokenResponse = await axios.post('https://accounts.spotify.com/api/token', new URLSearchParams({

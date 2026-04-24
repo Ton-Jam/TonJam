@@ -2,14 +2,38 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Joyride } from 'react-joyride';
 import { motion, AnimatePresence } from 'motion/react';
-import { MagnifyingGlassIcon, XMarkIcon, MicrophoneIcon, PlayIcon, EllipsisVerticalIcon, CheckIcon } from '@heroicons/react/24/solid';
+import { 
+  Search, 
+  X, 
+  Mic, 
+  MicOff, 
+  Play, 
+  TrendingUp, 
+  Clock, 
+  ChevronRight,
+  MoreVertical,
+  User,
+  Music,
+  LayoutGrid,
+  Check
+} from 'lucide-react';
 import { GENRES, MOODS } from '@/constants';
+import { auth } from '@/lib/firebase';
 import NFTCard from '@/components/NFTCard';
 import TrackCard from '@/components/TrackCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
-import { SearchIcon, MicIcon, MicOffIcon } from 'lucide-react';
+
+// shadcn imports
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 
 const BROWSE_CATEGORIES = [
   { id: 'music', title: 'Music', color: 'bg-pink-600', image: 'https://picsum.photos/seed/music/200/200' },
@@ -49,13 +73,38 @@ const Discover: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const { 
+    generateDiscoverWeekly,
+    playlists: allUserPlaylists
+  } = useAudio();
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      generateDiscoverWeekly();
+    }
+  }, [generateDiscoverWeekly]);
+
+  const discoverWeekly = useMemo(() => 
+    allUserPlaylists.find(p => p.title === 'Discover Weekly'),
+    [allUserPlaylists]
+  );
+
   const [isVoiceSearchActive, setIsVoiceSearchActive] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'tracks' | 'nfts' | 'artists' | 'playlists' | 'users'>('all');
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     const saved = localStorage.getItem('tonjam_search_history');
     return saved ? JSON.parse(saved) : [];
   });
+
+  const trendingTopics = [
+    'TON Alpha Signal',
+    'Genesis Drop',
+    'Sonic Velocity',
+    'Grammys 2026',
+    'NFT Jam'
+  ];
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -154,15 +203,19 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-background pb-24">
-        <Joyride
+    <div className="min-h-[calc(100vh-4rem)] bg-background pb-24 relative overflow-hidden">
+      {/* Atmospheric Background Blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-1/4 -left-24 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] -z-10" />
+      
+      <Joyride
         steps={[
           {
             target: '.discover-search-input',
             content: 'Use the search bar to find your favorite tracks, artists, or NFTs.',
           },
           {
-            target: '.filter-buttons',
+            target: '.filter-tabs',
             content: 'Filter results by category.',
           }
         ]}
@@ -170,241 +223,430 @@ const Discover: React.FC = () => {
         continuous
       />
 
-      <div className="px-4 lg:px-8 py-6 space-y-8">
-        {/* Search Header */}
-        <div className="fixed top-0 left-0 lg:left-64 right-0 z-30 bg-background/95 backdrop-blur-3xl pt-6 pb-4 px-4 lg:px-8 shadow-sm">
-          <form onSubmit={handleSearchSubmit} className="relative max-w-2xl mx-auto flex items-center">
-            <div className="relative w-full flex items-center bg-white/10 hover:bg-white/15 focus-within:bg-white/15 border border-white/10 rounded-full transition-all duration-300 shadow-xl overflow-hidden group">
-              <div className="pl-4 pr-3 flex items-center justify-center">
-                <SearchIcon className="h-5 w-5 text-white/50 group-focus-within:text-cyan-400 transition-colors" strokeWidth={2.5} />
-              </div>
-              <input
-                type="text"
-                placeholder="Search artists, tracks, NFTs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-white h-12 pr-4 font-medium focus:outline-none transition-all discover-search-input placeholder:text-white/40 tracking-wide text-sm"
-              />
-              <div className="pr-2 flex items-center gap-1">
-                <AnimatePresence>
-                  {searchQuery && (
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
+      {/* Search Header - Sticky & Atmospheric */}
+      <div className="fixed top-0 left-0 lg:left-64 right-0 z-30 bg-background/80 backdrop-blur-3xl pt-5 pb-3 px-[var(--page-margin)] md:px-[var(--page-margin-md)] lg:px-[var(--page-margin-lg)]">
+        <form 
+          onSubmit={handleSearchSubmit} 
+          className="relative max-w-2xl mx-auto w-full"
+        >
+          <div className="relative flex items-center group">
+            <div className="absolute left-4 z-10 pointer-events-none">
+              <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-muted-foreground'}`} />
+            </div>
+            <Input
+              type="text"
+              placeholder="Search artists, tracks, NFTs..."
+              value={searchQuery}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-11 pr-24 h-12 bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-xl transition-all discover-search-input text-sm font-medium"
+            />
+            <div className="absolute right-1.5 flex items-center gap-1">
+              <AnimatePresence>
+                {searchQuery && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                      className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-lg"
                     >
-                      <XMarkIcon className="h-5 w-5" />
-                    </motion.button>
-                  )}
-                </AnimatePresence>
-                <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
-                <button
-                  type="button"
-                  onClick={handleVoiceSearch}
-                  className={`p-2.5 rounded-full transition-all ${isVoiceSearchActive ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'text-white/40 hover:text-white hover:bg-white/10'}`}
-                  aria-label="Voice Search"
-                >
-                  {isVoiceSearchActive ? <MicOffIcon className="h-5 w-5" /> : <MicIcon className="h-5 w-5" />}
-                </button>
-              </div>
-            </div>
-          </form>
-
-          <div className="flex items-center gap-2 mt-5 overflow-x-auto no-scrollbar justify-start md:justify-center filter-buttons pb-1">
-            {(['all', 'tracks', 'artists', 'nfts', 'users', 'playlists'] as const).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${
-                  activeFilter === filter 
-                    ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' 
-                    : 'bg-white/5 text-white/50 border-white/5 hover:bg-white/10 hover:border-white/20 hover:text-white'
-                }`}
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <Separator orientation="vertical" className="h-4 bg-white/10" />
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                onClick={handleVoiceSearch}
+                className={`h-9 w-9 rounded-lg transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
               >
-                {filter}
-              </button>
-            ))}
+                {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
+
+          {/* Suggestions Dropdown */}
+          <AnimatePresence>
+            {isFocused && !searchQuery && (
+              <motion.div 
+                initial={{ opacity: 0, y: 4, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden z-50 p-6 border-none"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Recent Searches */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                        <Clock className="h-3 w-3" />
+                        Recent Searches
+                      </div>
+                      {searchHistory.length > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={clearSearchHistory} 
+                          className="h-auto p-0 text-[10px] text-blue-500 hover:text-blue-400 font-bold uppercase tracking-wider"
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      {searchHistory.length > 0 ? (
+                        searchHistory.map((item, index) => (
+                          <div 
+                            key={`hist-${index}`}
+                            className="group flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
+                            onClick={() => {
+                              setSearchQuery(item);
+                              setIsFocused(false);
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Search className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground">{item}</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSearchHistory(prev => prev.filter(t => t !== item));
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-muted-foreground/50 italic px-2">No recent history</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Trending Topics */}
+                  <div>
+                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">
+                      <TrendingUp className="h-3 w-3" />
+                      Trending
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {trendingTopics.map((topic, index) => (
+                        <Badge
+                          key={`trend-${index}`}
+                          variant="secondary"
+                          className="px-3 py-1.5 bg-blue-500/5 hover:bg-blue-500/10 text-blue-400 rounded-full cursor-pointer transition-all border-none"
+                          onClick={() => {
+                            setSearchQuery(topic);
+                            setIsFocused(false);
+                          }}
+                        >
+                          {topic}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </form>
+
+        {/* Filter Tabs - Pill Buttons */}
+        <div className="mt-3 flex justify-center filter-tabs">
+          <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full max-w-2xl">
+            <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start md:justify-center px-4">
+              <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
+                {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
+                  <TabsTrigger
+                    key={filter}
+                    value={filter}
+                    className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground data-[state=inactive]:bg-white/5 border-none shadow-none hover:data-[state=inactive]:bg-white/10 shrink-0"
+                  >
+                    {filter}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </Tabs>
         </div>
+      </div>
 
-        {/* Adjust spacing since header is fixed */}
-        <div className="pt-32" />
-
+      <div className="page-container pt-[120px] pb-6 space-y-10">
         {!searchQuery ? (
           <>
+            {/* Discover Weekly Banner - Premium Look */}
+            {auth.currentUser && discoverWeekly && (
+              <section>
+                <Card 
+                  onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
+                  className="relative h-64 md:h-80 rounded-[2.5rem] overflow-hidden cursor-pointer border-none shadow-2xl group transition-all duration-500"
+                >
+                  <img 
+                    src={discoverWeekly.coverUrl} 
+                    alt="Discover Weekly" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                  <CardContent className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex justify-between items-end">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Badge className="bg-blue-600 hover:bg-blue-600 text-[9px] font-black uppercase tracking-[0.2em] rounded-sm py-1 border-none">
+                          Daily Frequency
+                        </Badge>
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live.Sync_2026</span>
+                      </div>
+                      <div>
+                        <h2 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
+                        <p className="text-sm text-white/50 font-medium max-w-md mt-4">Personalized frequency stream based on your unique neural listening patterns.</p>
+                      </div>
+                    </div>
+                    <Button 
+                      size="icon" 
+                      className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-2xl shadow-blue-600/40 hover:scale-110 transition-all border-none"
+                    >
+                      <Play className="h-8 w-8 fill-current" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </section>
+            )}
+
             {/* Recent Searches */}
             {searchHistory.length > 0 && (
-              <section>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold tracking-tight">Recent searches</h2>
-                  <button 
-                    onClick={clearSearchHistory}
-                    className="text-xs font-bold text-muted-foreground hover:text-foreground uppercase tracking-widest"
-                  >
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Recent exploration</h2>
+                  <Button variant="ghost" size="sm" onClick={clearSearchHistory} className="h-auto p-0 text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-foreground">
                     Clear all
-                  </button>
+                  </Button>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2">
                   {searchHistory.map((term, idx) => (
-                    <button
+                    <Badge
                       key={`history-${idx}`}
+                      variant="secondary"
                       onClick={() => setSearchQuery(term)}
-                      className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-sm font-medium transition-colors group"
+                      className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-xs font-medium cursor-pointer transition-colors border-none"
                     >
-                      <span>{term}</span>
-                      <XMarkIcon 
-                        className="h-3 w-3 text-muted-foreground group-hover:text-foreground" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSearchHistory(prev => prev.filter(t => t !== term));
-                        }}
-                      />
-                    </button>
+                      {term}
+                    </Badge>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Browse All Section */}
-            <section className="mt-8">
-              <h2 className="text-xl font-bold tracking-tight mb-6">Browse all</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {/* Browse Categories - Modern Bento Grid */}
+            <section className="space-y-6">
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Browse Dimensions</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {BROWSE_CATEGORIES.map((category) => (
-                  <div 
+                  <Card 
                     key={category.id}
                     onClick={() => setSearchQuery(category.title)}
-                    className={`${category.color} rounded-xl p-4 aspect-square relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform`}
+                    className={`${category.color} aspect-square relative overflow-hidden cursor-pointer border-none shadow-lg group transition-all duration-300 active:scale-95`}
                   >
-                    <h3 className="text-white font-bold text-lg leading-tight break-words pr-4">{category.title}</h3>
-                    <img 
-                      src={category.image} 
-                      alt={category.title}
-                      className="absolute -bottom-2 -right-4 w-24 h-24 object-cover rotate-[25deg] shadow-2xl rounded-sm"
-                    />
-                  </div>
+                    <CardContent className="p-4 h-full flex flex-col justify-between">
+                      <h3 className="text-white font-black text-lg uppercase leading-[0.9] tracking-tighter opacity-80 group-hover:opacity-100 transition-opacity">
+                        {category.title}
+                      </h3>
+                      <div className="absolute -bottom-2 -right-4 w-32 h-32 group-hover:scale-110 transition-transform duration-500">
+                        <img 
+                          src={category.image} 
+                          alt=""
+                          className="w-full h-full object-cover rotate-[25deg] rounded-lg shadow-2xl opacity-60 group-hover:opacity-100"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </section>
           </>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-12">
             {hasResults ? (
               <>
-                {/* Top Result */}
-                {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 0 && (
-                  <section>
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 mb-4">Top result</h2>
-                    <div 
-                      onClick={() => navigate(`/artist/${filteredResults.artists[0].uid}`)}
-                      className="max-w-md bg-white/5 border border-white/5 hover:bg-white/10 p-6 rounded-2xl cursor-pointer transition-all group"
-                    >
-                      <img 
-                        src={filteredResults.artists[0].avatarUrl || getPlaceholderImage(filteredResults.artists[0].name)} 
-                        alt="" 
-                        className="w-24 h-24 rounded-full object-cover shadow-2xl mb-6"
-                      />
-                      <h3 className="text-3xl font-black tracking-tighter mb-2">{filteredResults.artists[0].name}</h3>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Artist</span>
-                        {filteredResults.artists[0].isVerifiedArtist && (
-                          <div className="bg-blue-500 rounded-full p-0.5">
-                            <CheckIcon className="h-2 w-2 text-white" />
+                {/* Results categorization */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                  {/* Left Column: Top Result & Tracks */}
+                  <div className="lg:col-span-12 space-y-12">
+                    
+                    {/* Top Result */}
+                    {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 0 && (
+                      <section>
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-6">Primary Identification</h2>
+                        <Card 
+                          onClick={() => navigate(`/artist/${filteredResults.artists[0].uid}`)}
+                          className="max-w-2xl bg-white/[0.02] hover:bg-white/[0.05] border-none transition-all p-8 rounded-[2rem] group cursor-pointer"
+                        >
+                          <div className="flex flex-col md:flex-row items-center gap-8">
+                            <Avatar className="h-40 w-40 shadow-2xl ring-8 ring-white/[0.02]">
+                              <AvatarImage src={filteredResults.artists[0].avatarUrl || getPlaceholderImage(filteredResults.artists[0].name)} className="object-cover" />
+                              <AvatarFallback><User className="h-12 w-12" /></AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 text-center md:text-left space-y-4">
+                              <div>
+                                <Badge className="bg-blue-600/20 text-blue-500 hover:bg-blue-600/30 border-none text-[9px] font-black uppercase tracking-[0.2em] mb-2 px-3 py-1">
+                                  Verified Entity
+                                </Badge>
+                                <h3 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter leading-[0.8] mb-2">
+                                  {filteredResults.artists[0].name}
+                                </h3>
+                                <div className="flex items-center justify-center md:justify-start gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                                  <span className="flex items-center gap-1">
+                                    <User className="h-3 w-3" />
+                                    Artist
+                                  </span>
+                                  <Separator orientation="vertical" className="h-3 bg-white/10" />
+                                  <span className="flex items-center gap-1">
+                                    <TrendingUp className="h-3 w-3" />
+                                    {Math.floor(Math.random() * 800 + 200)}k Monthly Listeners
+                                  </span>
+                                </div>
+                              </div>
+                              <Button className="rounded-full px-8 bg-foreground text-background font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all">
+                                Explore Archive
+                              </Button>
+                            </div>
                           </div>
-                        )}
+                        </Card>
+                      </section>
+                    )}
+
+                    {/* Tracks - List View */}
+                    {(activeFilter === 'all' || activeFilter === 'tracks') && filteredResults.tracks.length > 0 && (
+                      <section className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Digital Artifacts</h2>
+                          {activeFilter === 'all' && filteredResults.tracks.length > 4 && (
+                            <Button variant="ghost" onClick={() => setActiveFilter('tracks')} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+                              View all
+                            </Button>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          {isLoading ? (
+                            Array.from({ length: 4 }).map((_, i) => (
+                              <SkeletonCard key={i} variant="row" />
+                            ))
+                          ) : (
+                            filteredResults.tracks.slice(0, activeFilter === 'all' ? 4 : undefined).map((track, idx) => (
+                              <TrackCard key={`${track.id}-${idx}`} track={track} variant="row" />
+                            ))
+                          )}
+                        </div>
+                      </section>
+                    )}
+                  </div>
+                </div>
+
+                {/* Grid Sections: Artists, Users, NFTs */}
+                <div className="space-y-16">
+                  {/* Artists */}
+                  {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 1 && (
+                    <section className="space-y-8">
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Similar Signals</h2>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+                        {filteredResults.artists.slice(activeFilter === 'all' ? 1 : 0).map((artist) => (
+                          <div 
+                            key={artist.uid}
+                            onClick={() => navigate(`/artist/${artist.uid}`)}
+                            className="group cursor-pointer text-center space-y-4"
+                          >
+                            <Avatar className="h-full w-full aspect-square shadow-xl group-hover:scale-105 transition-transform duration-500 ring-4 ring-transparent group-hover:ring-white/5">
+                              <AvatarImage src={artist.avatarUrl || getPlaceholderImage(artist.name)} className="object-cover" />
+                              <AvatarFallback><User className="h-8 w-8" /></AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h4 className="text-sm font-black uppercase tracking-tighter truncate">{artist.name}</h4>
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Protocol</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  </section>
-                )}
+                    </section>
+                  )}
 
-                {/* Tracks */}
-                {(activeFilter === 'all' || activeFilter === 'tracks') && filteredResults.tracks.length > 0 && (
-                  <section>
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 mb-4">Songs</h2>
-                    <div className="space-y-1">
-                      {isLoading ? (
-                        Array.from({ length: 4 }).map((_, i) => (
-                          <SkeletonCard key={i} variant="row" />
-                        ))
-                      ) : (
-                        filteredResults.tracks.slice(0, activeFilter === 'all' ? 4 : undefined).map((track, idx) => (
-                          <TrackCard key={`${track.id}-${idx}`} track={track} variant="row" />
-                        ))
-                      )}
-                    </div>
-                  </section>
-                )}
+                  {/* Users */}
+                  {(activeFilter === 'all' || activeFilter === 'users') && filteredResults.users.length > 0 && (
+                    <section className="space-y-8">
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Neural Nodes</h2>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+                        {filteredResults.users.map((u) => (
+                          <div 
+                            key={u.uid}
+                            onClick={() => navigate(`/user/${u.uid}`)}
+                            className="group cursor-pointer text-center space-y-4"
+                          >
+                            <Avatar className="h-full w-full aspect-square shadow-xl group-hover:scale-105 transition-transform duration-500 grayscale group-hover:grayscale-0 ring-4 ring-transparent group-hover:ring-blue-500/20">
+                              <AvatarImage src={u.avatar || getPlaceholderImage(u.name)} className="object-cover" />
+                              <AvatarFallback><User className="h-8 w-8" /></AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h4 className="text-sm font-black uppercase tracking-tighter truncate">{u.name}</h4>
+                              <p className="text-[10px] font-bold text-blue-500/80 uppercase tracking-widest">@{u.username}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
 
-                {/* Artists Grid */}
-                {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 1 && (
-                  <section>
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 mb-4">Artists</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                      {filteredResults.artists.slice(activeFilter === 'all' ? 1 : 0).map((artist) => (
-                        <div 
-                          key={artist.uid}
-                          onClick={() => navigate(`/artist/${artist.uid}`)}
-                          className="bg-white/5 border border-white/5 hover:bg-white/10 p-4 rounded-2xl cursor-pointer transition-all text-center group"
-                        >
-                          <img 
-                            src={artist.avatarUrl || getPlaceholderImage(artist.name)} 
-                            alt="" 
-                            className="w-full aspect-square rounded-full object-cover shadow-lg mb-4 group-hover:scale-105 transition-transform"
-                          />
-                          <h4 className="text-sm font-bold truncate">{artist.name}</h4>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Artist</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Users Grid */}
-                {(activeFilter === 'all' || activeFilter === 'users') && filteredResults.users.length > 0 && (
-                  <section>
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 mb-4">Users</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                      {filteredResults.users.map((u) => (
-                        <div 
-                          key={u.uid}
-                          onClick={() => navigate(`/user/${u.uid}`)}
-                          className="bg-white/5 border border-white/5 hover:bg-white/10 p-4 rounded-2xl cursor-pointer transition-all text-center group"
-                        >
-                          <img 
-                            src={u.avatar || getPlaceholderImage(u.name)} 
-                            alt="" 
-                            className="w-full aspect-square rounded-full object-cover shadow-lg mb-4 group-hover:scale-105 transition-transform"
-                          />
-                          <h4 className="text-sm font-bold truncate">{u.name}</h4>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-500/80">@{u.username}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* NFTs */}
-                {(activeFilter === 'all' || activeFilter === 'nfts') && filteredResults.nfts.length > 0 && (
-                  <section>
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500/80 mb-4">Marketplace NFTs</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                      {filteredResults.nfts.map((nft) => (
-                        <div key={nft.id} className="snap-start">
-                          <NFTCard nft={nft} />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                  {/* NFTs */}
+                  {(activeFilter === 'all' || activeFilter === 'nfts') && filteredResults.nfts.length > 0 && (
+                    <section className="space-y-8">
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500/80">Blockchain Assets</h2>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {filteredResults.nfts.map((nft) => (
+                          <div key={nft.id} className="transition-all hover:translate-y-[-4px]">
+                            <NFTCard nft={nft} />
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                <SearchIcon className="h-16 w-16 text-white/10" />
-                <h3 className="text-xl font-bold tracking-tight text-white/80">No results found for "{searchQuery}"</h3>
-                <p className="text-white/40 max-w-xs text-sm">Please check your spelling or try searching for something else.</p>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center py-32 text-center space-y-8"
+              >
+                <div className="relative">
+                  <Search className="h-24 w-24 text-white/5" strokeWidth={1} />
+                  <motion.div 
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black uppercase tracking-tighter text-foreground/80 italic">Void Detected</h3>
+                  <p className="text-muted-foreground max-w-xs text-sm font-medium">Spelling check required. No matching data streams found for your current query.</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSearchQuery('')}
+                  className="rounded-full px-8 border-none bg-white/5 hover:bg-white/10"
+                >
+                  Reset Stream
+                </Button>
+              </motion.div>
             )}
           </div>
         )}
@@ -412,5 +654,6 @@ const Discover: React.FC = () => {
     </div>
   );
 };
+
 
 export default Discover;

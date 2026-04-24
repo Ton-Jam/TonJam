@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Mail, Lock, User, Github, Chrome, ArrowRight, Loader2, Wallet } from 'lucide-react';
+import { X, Mail, Lock, User, Github, Chrome, ArrowRight, Loader2, Wallet, ShieldCheck, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
+import { APP_LOGO } from '../constants';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -37,6 +38,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
   });
+
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
 
   useEffect(() => {
     if (walletAddress && wallet && isOpen) {
@@ -152,161 +159,156 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-background rounded-[24px] overflow-hidden shadow-2xl"
+          className="relative w-full max-w-[360px] bg-[#0A0A0C] border border-white/10 rounded-[24px] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] mx-4"
         >
-          {/* Header */}
-          <div className="p-6 pb-0 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-              <h2 className="text-[10px] font-bold text-foreground/50 uppercase tracking-[0.4em]">
-                {isLogin ? 'Login' : 'Register'}
-              </h2>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
-            >
-              <X className="h-5 w-5" />
-            </button>
+          {/* Hero Branding Area - Compact */}
+          <div className="relative h-24 flex items-center justify-center overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-blue-600/10" />
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5" />
+             <div className="relative z-10 flex flex-col items-center">
+                <div className="relative mt-2">
+                  <div className="absolute -inset-3 bg-blue-500/10 blur-lg rounded-full" />
+                  <img src={APP_LOGO} className="w-10 h-10 relative z-10 drop-shadow-xl" alt="TonJam" />
+                </div>
+             </div>
+             <button
+                onClick={onClose}
+                className="absolute top-4 right-4 p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/20 hover:text-white transition-all border border-white/5 z-20"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
           </div>
 
-          <div className="p-8 pt-6">
-            <div className="mb-8">
-              <h1 className="text-[36px] font-bold text-foreground tracking-tighter uppercase leading-none mb-3">
-                {isLogin ? 'Welcome Back' : 'Create an Account'}
+          <div className="px-6 pb-6 pt-2">
+            <div className="text-center mb-6">
+              <h1 className="text-xl font-black text-white tracking-tight uppercase leading-none mb-1 italic">
+                {isLogin ? 'Join the Grid' : 'Network Signup'}
               </h1>
-              <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                {isLogin ? 'Sign in to your account to continue.' : 'Sign up to get started.'}
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em]">
+                {isLogin ? 'Neural link authentication required' : 'Initialize your unique node signature'}
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
               {!isLogin && (
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Username</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50" />
+                <div className="space-y-1">
+                  <div className="relative group">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
                     <input
                       {...register('username')}
                       type="text"
-                      placeholder="TON_VOYAGER"
-                      className="w-full bg-muted/30 rounded-[14px] py-4 pl-12 pr-4 text-base text-foreground outline-none focus:bg-muted/50 transition-all placeholder:text-muted-foreground/30"
+                      placeholder="ALIAS"
+                      className="w-full bg-white/5 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/5 font-bold uppercase tracking-widest"
                     />
-                    {errors.username && <p className="text-[10px] text-red-500 mt-1">{errors.username.message}</p>}
+                    {errors.username && <p className="text-[9px] text-red-500 mt-0.5 font-bold ml-1">{errors.username.message}</p>}
                   </div>
                 </div>
               )}
 
-              <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50" />
+              <div className="space-y-1">
+                <div className="relative group">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
                   <input
                     {...register('email')}
                     type="email"
-                    placeholder="SIGNAL@TONJAM.COM"
-                    className="w-full bg-muted/30 rounded-[14px] py-4 pl-12 pr-4 text-base text-foreground outline-none focus:bg-muted/50 transition-all placeholder:text-muted-foreground/30"
+                    placeholder="EMAIL_ADDRESS"
+                    className="w-full bg-white/5 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/5 font-bold uppercase tracking-widest"
                   />
-                  {errors.email && <p className="text-[10px] text-red-500 mt-1">{errors.email.message}</p>}
+                  {errors.email && <p className="text-[9px] text-red-500 mt-0.5 font-bold ml-1">{errors.email.message}</p>}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center ml-2">
-                  <label className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Password</label>
+              <div className="space-y-1">
+                <div className="relative group">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
+                  <input
+                    {...register('password')}
+                    type="password"
+                    placeholder="PWD_KEY"
+                    className="w-full bg-white/5 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/5 font-bold uppercase tracking-widest"
+                  />
                   {isLogin && (
                     <button 
                       type="button" 
                       onClick={handleForgotPassword}
-                      className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-blue-500 uppercase tracking-widest hover:text-blue-400 bg-[#0A0A0C]/80 px-1.5 py-0.5 rounded"
                     >
-                      Forgot?
+                      Reset
                     </button>
                   )}
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50" />
-                  <input
-                    {...register('password')}
-                    type="password"
-                    placeholder="••••••••"
-                    className="w-full bg-muted/30 rounded-[14px] py-4 pl-12 pr-4 text-base text-foreground outline-none focus:bg-muted/50 transition-all placeholder:text-muted-foreground/30"
-                  />
-                  {errors.password && <p className="text-[10px] text-red-500 mt-1">{errors.password.message}</p>}
+                  {errors.password && <p className="text-[9px] text-red-500 mt-0.5 font-bold ml-1">{errors.password.message}</p>}
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-[14px] font-bold text-[12px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group"
+                className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.97]"
               >
                 {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    {isLogin ? 'Sign In' : 'Create Account'}
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    <span>{isLogin ? 'Access Grid' : 'Register'}</span>
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
                   </>
                 )}
               </button>
             </form>
-            {/* ... rest of the component ... */}
 
-            <div className="mt-8 relative">
+            <div className="mt-6 relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/20"></div>
+                <div className="w-full border-t border-white/5"></div>
               </div>
-              <div className="relative flex justify-center text-[8px] font-bold uppercase tracking-[0.3em]">
-                <span className="bg-background px-4 text-muted-foreground/30">Or continue with</span>
+              <div className="relative flex justify-center">
+                <span className="bg-[#0A0A0C] px-3 text-[7px] font-black text-white/10 uppercase tracking-[0.2em]">Gateways</span>
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3">
+            <div className="mt-4 flex flex-col gap-2">
               <div className="flex justify-center w-full">
-                <TonConnectButton className="w-full [&>button]:w-full [&>button]:py-3 [&>button]:rounded-[12px] [&>button]:bg-blue-500/10 [&>button]:text-blue-500 [&>button]:hover:bg-blue-500/20 [&>button]:transition-all [&>button]:font-bold [&>button]:text-[12px] [&>button]:uppercase [&>button]:tracking-[0.2em]" />
+                <TonConnectButton className="w-full [&>button]:w-full [&>button]:py-3 [&>button]:rounded-xl [&>button]:bg-white/5 [&>button]:text-white [&>button]:hover:bg-white/10 [&>button]:transition-all [&>button]:font-black [&>button]:text-[10px] [&>button]:uppercase [&>button]:tracking-[0.15em] [&>button]:border [&>button]:border-white/5" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => signInWithGoogle()}
-                  className="flex items-center justify-center gap-2 py-3 bg-muted/30 rounded-[12px] hover:bg-muted/50 transition-all group"
+                  className="flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/[0.08] transition-all group"
                 >
-                  <Chrome className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  <span className="text-[9px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">Google</span>
+                  <Chrome className="h-3.5 w-3.5 text-white/20 group-hover:text-white transition-colors" />
+                  <span className="text-[8px] font-black text-white/40 group-hover:text-white uppercase tracking-widest">Google</span>
                 </button>
                 <button
-                  className="flex items-center justify-center gap-2 py-3 bg-muted/30 rounded-[12px] hover:bg-muted/50 transition-all group"
+                  className="flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/[0.08] transition-all group"
                 >
-                  <Github className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  <span className="text-[9px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">GitHub</span>
+                  <Github className="h-3.5 w-3.5 text-white/20 group-hover:text-white transition-colors" />
+                  <span className="text-[8px] font-black text-white/40 group-hover:text-white uppercase tracking-widest">GitHub</span>
                 </button>
               </div>
             </div>
 
-            <div className="mt-8 text-center">
+            <div className="mt-6 text-center">
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 type="button"
-                className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] hover:text-foreground transition-colors"
+                className="text-[9px] font-black text-white/20 uppercase tracking-[0.15em] hover:text-white transition-colors group"
               >
                 {isLogin ? (
-                  <>Don't have an account? <span className="text-blue-500 ml-1">Sign up</span></>
+                  <>New Member? <span className="text-blue-500 group-hover:underline ml-0.5">Register</span></>
                 ) : (
-                  <>Already have an account? <span className="text-blue-500 ml-1">Sign in</span></>
+                  <>Joined Already? <span className="text-blue-500 group-hover:underline ml-0.5">Login</span></>
                 )}
               </button>
             </div>
           </div>
 
-          {/* Hardware Footer Deco */}
-          <div className="bg-foreground/[0.01] p-4 flex justify-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-blue-500/20"></div>
-              <span className="text-[6px] font-mono text-muted-foreground/20 uppercase tracking-widest">AES-256 Encryption Active</span>
+          <div className="bg-white/5 p-3 flex justify-center gap-6 border-t border-white/5">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-2.5 h-2.5 text-emerald-500/30" />
+              <span className="text-[6px] font-black text-white/10 uppercase tracking-widest">Encrypted</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-blue-500/20"></div>
-              <span className="text-[6px] font-mono text-muted-foreground/20 uppercase tracking-widest">Neural Link Secure</span>
+            <div className="flex items-center gap-1.5">
+              <Globe className="w-2.5 h-2.5 text-blue-500/30" />
+              <span className="text-[6px] font-black text-white/10 uppercase tracking-widest">Active Node</span>
             </div>
           </div>
         </motion.div>

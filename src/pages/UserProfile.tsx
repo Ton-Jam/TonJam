@@ -114,20 +114,46 @@ const UserProfile: React.FC = () => {
     : '';
 
   return (
-    <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background`}>
+    <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-[#0A0A0A] text-white`}>
       {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[250px] md:h-[350px] overflow-hidden group">
+      <div className="relative h-[280px] md:h-[400px] overflow-hidden group">
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
           style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
         />
-        <div className="absolute inset-0 bg-black/40"></div>
-        <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#0A0A0A]"></div>
+        
+        {/* Extreme Left Actions ON Cover Picture */}
+        <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3">
+          <button 
+            onClick={handleFollow} 
+            className={cn(
+              "px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all shadow-2xl backdrop-blur-md active:scale-95",
+              isFollowing 
+                ? "bg-white/10 text-white border border-white/20" 
+                : "bg-blue-600 text-white shadow-blue-600/40"
+            )}
+          >
+            {isFollowing ? 'Following' : 'Follow'}
+          </button>
+          <button 
+            onClick={() => {
+              navigator.share?.({ title: user.name, url: window.location.href })
+                .catch(() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  addNotification("Link copied", "success");
+                });
+            }}
+            className="p-3 bg-white/10 text-white rounded-full hover:bg-blue-600 transition-all border border-white/10 backdrop-blur-md shadow-xl active:scale-90"
+          >
+            <Share2 className="h-5 w-5" />
+          </button>
+        </div>
         
         {/* Banner Upload Trigger */}
         {id === userProfile.uid && (
           <div className="absolute top-6 right-6 z-40">
-            <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-all shadow-lg border border-white/10 hover:scale-110 active:scale-90" >
+            <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-blue-600 transition-all shadow-lg border border-white/10 hover:scale-110 active:scale-90" >
               <Camera className="h-5 w-5" />
             </button>
             <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
@@ -136,12 +162,15 @@ const UserProfile: React.FC = () => {
       </div>
 
       {/* 2. IDENTITY & ACTIONS (Audiomack Style) */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-30">
-        <div className="flex flex-row items-end justify-between gap-6 -mt-16 md:-mt-24 pb-8">
-          <div className="flex flex-row items-end gap-6 w-full">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-30">
+        <div className="flex flex-col md:flex-row-reverse items-center md:items-end justify-between gap-8 -mt-8 md:-mt-12 pb-10 border-b border-white/5">
+          <div className="flex flex-col md:flex-row-reverse items-center md:items-end gap-8 w-full font-sans">
             {/* Profile Picture (Overlapping) */}
-            <div className="relative">
-              <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-[6px] border-background shadow-2xl bg-muted ring-1 ring-white/10">
+            <div className="relative flex-shrink-0 md:mr-[-48px]">
+              <div 
+                className="w-20 h-20 md:w-32 h-32 overflow-hidden border-2 border-[#0A0A0A] shadow-2xl bg-muted"
+                style={{ borderRadius: '100px' }}
+              >
                 <img 
                   src={user.avatar || getPlaceholderImage(`user-${user.uid}`)} 
                   className="w-full h-full object-cover" 
@@ -150,82 +179,56 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex flex-col items-start text-left flex-1 pb-2">
-              <div className="flex flex-col gap-1 mb-4">
-                <div className="flex items-center gap-2 justify-start">
-                  <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-lg">
+            <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-4">
+              <div className="flex flex-col gap-2 mb-6">
+                <div className="flex items-center gap-3 justify-center md:justify-start">
+                  <h1 className="text-xl md:text-4xl font-black tracking-tighter text-white drop-shadow-2xl">
                     {user.name}
                   </h1>
                   {user.isVerified && (
-                    <div className="bg-orange-500 rounded-full p-1 shadow-lg">
-                      <CheckCircle className="h-4 w-4 text-white" />
+                    <div className="bg-blue-500 rounded-full p-1 shadow-lg shadow-blue-500/20">
+                      <CheckCircle className="h-3.5 w-3.5 md:h-4 w-4 text-white" />
                     </div>
                   )}
                 </div>
-                <span className="text-white/80 font-bold text-sm md:text-base drop-shadow-md">
+                <span className="text-blue-400 font-bold text-xs md:text-sm tracking-wide uppercase">
                   @{user.username || (user.name || 'user').toLowerCase().replace(/\s+/g, '')}
                 </span>
               </div>
               
-              <div className="flex items-center gap-8 mb-4">
-                <div className="flex flex-col items-start">
-                  <span className="text-xl font-black text-white drop-shadow-md">{(user.followers || 0).toLocaleString()}</span>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-black">Followers</span>
+              <div className="flex items-center gap-6">
+                <div className="flex flex-col items-center md:items-start">
+                  <span className="text-lg font-black text-white leading-none group-hover:text-blue-500 transition-colors">{(user.followers || 0).toLocaleString()}</span>
+                  <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-bold mt-1">Followers</span>
                 </div>
-                <div className="flex flex-col items-start border-l border-white/10 pl-8">
-                  <span className="text-xl font-black text-white drop-shadow-md">{(user.following || 0).toLocaleString()}</span>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-black">Following</span>
+                <div className="flex flex-col items-center md:items-start border-l border-white/10 pl-6">
+                  <span className="text-lg font-black text-white leading-none group-hover:text-blue-500 transition-colors">{(user.following || 0).toLocaleString()}</span>
+                  <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-bold mt-1">Following</span>
                 </div>
               </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-3 pb-2">
-            <button 
-              onClick={handleFollow} 
-              className={cn(
-                "px-10 py-3 rounded-full font-black text-xs uppercase tracking-widest transition-all shadow-xl",
-                isFollowing 
-                  ? "bg-white/10 text-white border border-white/20 backdrop-blur-md hover:bg-white/20" 
-                  : "bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/30"
-              )}
-            >
-              {isFollowing ? 'Following' : 'Follow'}
-            </button>
-            <button 
-              onClick={() => {
-                navigator.share?.({ title: user.name, url: window.location.href })
-                  .catch(() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    addNotification("Link copied", "success");
-                  });
-              }}
-              className="p-3 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all border border-white/20 backdrop-blur-md"
-            >
-              <Share2 className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>
 
       {/* 3. TABS NAVIGATION */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/95 backdrop-blur-xl border-b border-border mb-6">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/5 mb-10 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center gap-10 overflow-x-auto no-scrollbar">
             {['overview', 'inventory', 'activity', 'network'].map(tab => (
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab as any)} 
                 className={cn(
-                  "py-4 text-sm font-bold transition-all relative whitespace-nowrap",
-                  activeTab === tab ? "text-orange-500" : "text-muted-foreground hover:text-foreground"
+                  "py-6 text-xs font-black uppercase tracking-[0.2em] transition-all relative whitespace-nowrap",
+                  activeTab === tab ? "text-blue-500" : "text-white/40 hover:text-white"
                 )} 
               >
-                {tab === 'inventory' ? 'Collection' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'inventory' ? 'Collection' : tab}
                 {activeTab === tab && (
                   <motion.div 
                     layoutId="activeTabUser"
-                    className="absolute bottom-0 left-0 right-0 h-1 bg-orange-500 rounded-t-full" 
+                    className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-t-full shadow-[0_-2px_10px_rgba(59,130,246,0.5)]" 
                   />
                 )}
               </button>
@@ -245,7 +248,7 @@ const UserProfile: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-xl font-black">Activity</h3>
-                      <button onClick={() => setActiveTab('activity')} className="text-xs font-bold text-orange-500 hover:text-orange-400 uppercase tracking-widest">View All</button>
+                      <button onClick={() => setActiveTab('activity')} className="text-xs font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest">View All</button>
                     </div>
                     {userPosts.length > 0 ? (
                       <SocialFeed posts={userPosts.slice(0, 3)} />
@@ -260,7 +263,7 @@ const UserProfile: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-xl font-black">Followed Artists</h3>
-                      <button onClick={() => setActiveTab('network')} className="text-xs font-bold text-orange-500 hover:text-orange-400 uppercase tracking-widest">View All</button>
+                      <button onClick={() => setActiveTab('network')} className="text-xs font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest">View All</button>
                     </div>
                     {user.followedArtists && user.followedArtists.length > 0 ? (
                       <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">

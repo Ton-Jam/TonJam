@@ -181,6 +181,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                       <CheckCircle2 className="h-2.5 w-2.5" /> Owned
                     </span>
                   )}
+                  {isOwner && !nft.listingType && (
+                    <span className="px-2 py-0.5 bg-amber-500/80 rounded-sm text-[7px] font-bold uppercase tracking-widest text-black flex items-center gap-1">
+                      Unlisted
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-1">
                   {isOwner && (

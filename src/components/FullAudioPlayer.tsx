@@ -244,32 +244,32 @@ const FullAudioPlayer: React.FC = () => {
       </div>
 
       <div className="relative z-10 min-h-full flex flex-col p-2 md:p-2 max-w-xl mx-auto w-full pb-2">
-        <header className="flex items-center justify-between mb-2 flex-shrink-0">
+        <header className="flex items-center justify-between mb-1 flex-shrink-0">
           <button
             onClick={() => setFullPlayerOpen(false)}
-            className="w-12 h-12 rounded-full flex items-center justify-center text-muted-foreground/80 hover:text-foreground transition-all hover:bg-muted/50"
+            className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground/80 hover:text-foreground transition-all hover:bg-muted/50"
           >
-            <ChevronDown className="h-6 w-6" />
+            <ChevronDown className="h-5 w-5" />
           </button>
           <div className="flex gap-2 items-center">
             <button
               onClick={() => setView("cover")}
-              className={`p-2 transition-all ${view === "cover" ? "text-blue-500" : "text-muted-foreground/80 hover:text-foreground"}`}
+              className={`p-1.5 transition-all ${view === "cover" ? "text-blue-500" : "text-muted-foreground/80 hover:text-foreground"}`}
             >
-              <Disc className="h-6 w-6" />
+              <Disc className="h-5 w-5" />
             </button>
             <button
               onClick={() => setView("lyrics")}
-              className={`p-2 transition-all ${view === "lyrics" ? "text-blue-500" : "text-muted-foreground/80 hover:text-foreground"}`}
+              className={`p-1.5 transition-all ${view === "lyrics" ? "text-blue-500" : "text-muted-foreground/80 hover:text-foreground"}`}
             >
-              <AlignLeft className="h-6 w-6" />
+              <AlignLeft className="h-5 w-5" />
             </button>
           </div>
           <div className="flex items-center gap-2">
             {activeJamRoom && (
               <button 
                 onClick={leaveJamRoom}
-                className="flex items-center gap-2 px-2 py-2 bg-neutral-500/10 border border-neutral-500/20 rounded-full text-[10px] font-bold text-neutral-500 uppercase tracking-widest animate-pulse"
+                className="flex items-center gap-1.5 px-2 py-1.5 bg-neutral-500/10 border border-neutral-500/20 rounded-full text-[9px] font-bold text-neutral-500 uppercase tracking-widest animate-pulse"
               >
                 <Users className="h-3 w-3" />
                 Live Jam
@@ -279,9 +279,9 @@ const FullAudioPlayer: React.FC = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleLikeToggle}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all relative ${isLiked ? "text-red-500 bg-red-500/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all relative ${isLiked ? "text-red-500 bg-red-500/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
             >
-              <Heart className={`h-6 w-6 transition-all ${isLiked ? "fill-current scale-110" : ""}`} />
+              <Heart className={`h-5 w-5 transition-all ${isLiked ? "fill-current scale-110" : ""}`} />
               {isLiked && (
                 <motion.div
                   initial={{ scale: 0, opacity: 0 }}

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, ShieldCheck, Twitter, Music, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, ShieldCheck, Twitter, Music, Wallet, CheckCircle2, Loader2, Globe } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
-import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { db, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import { useEffect } from 'react';
 
 interface UserArtistVerificationModalProps {
   onClose: () => void;
@@ -16,29 +17,85 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
   const [linkedAccounts, setLinkedAccounts] = useState({
     x: !!userProfile.socials?.x,
     spotify: !!userProfile.socials?.spotify,
+    vercel: !!(userProfile as any).socials?.vercel,
     wallet: !!userProfile.walletAddress
   });
 
-  const handleLinkAccount = (platform: 'x' | 'spotify' | 'wallet') => {
-    setIsVerifying(true);
-    // Simulate OAuth / Wallet connection delay
-    setTimeout(() => {
-      setIsVerifying(false);
-      setLinkedAccounts(prev => ({ ...prev, [platform]: true }));
-      
-      // Update user profile with mock data
-      const updates: any = {};
-      if (platform === 'x') {
-        updates.socials = { ...userProfile.socials, x: `https://x.com/${userProfile.username}` };
-      } else if (platform === 'spotify') {
-        updates.socials = { ...userProfile.socials, spotify: `https://open.spotify.com/artist/mock` };
-      } else if (platform === 'wallet') {
-        updates.walletAddress = 'EQD...mock...wallet';
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Validate origin
+      if (!event.origin.endsWith('.run.app') && !event.origin.includes('localhost')) return;
+
+      if (event.data?.type === 'SPOTIFY_VERIFIED') {
+        const profile = event.data.data;
+        updateRemoteSocial('spotify', profile.external_urls?.spotify || 'verified');
+        setLinkedAccounts(prev => ({ ...prev, spotify: true }));
+        addNotification("Spotify linked successfully", "success");
       }
+
+      if (event.data?.type === 'VERCEL_SSO_SUCCESS') {
+        const data = event.data.data;
+        updateRemoteSocial('vercel', data.user?.username || 'verified');
+        setLinkedAccounts(prev => ({ ...prev, vercel: true }));
+        addNotification("Vercel linked successfully", "success");
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [userProfile]);
+
+  const updateRemoteSocial = async (platform: string, value: string) => {
+    try {
+      const userRef = doc(db, 'users', userProfile.uid);
+      const socials = { ...(userProfile.socials || {}), [platform]: value };
+      await updateDoc(userRef, cleanUpdateData({ socials }));
+      setUserProfile({ ...userProfile, socials });
+    } catch (error) {
+      console.error(`Error updating ${platform}:`, error);
+    }
+  };
+
+  const handleLinkAccount = async (platform: 'x' | 'spotify' | 'wallet' | 'vercel') => {
+    if (platform === 'x' || platform === 'wallet') {
+      setIsVerifying(true);
+      // Simulate OAuth / Wallet connection delay for these for now
+      setTimeout(() => {
+        setIsVerifying(false);
+        setLinkedAccounts(prev => ({ ...prev, [platform]: true }));
+        
+        // Update user profile with mock data
+        const updates: any = {};
+        if (platform === 'x') {
+          updates.socials = { ...userProfile.socials, x: `https://x.com/${userProfile.username}` };
+        } else if (platform === 'wallet') {
+          updates.walletAddress = 'EQD...mock...wallet';
+        }
+        
+        setUserProfile({ ...userProfile, ...updates });
+        addNotification(`${platform.toUpperCase()} linked successfully`, 'success');
+      }, 1500);
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      const response = await fetch(`/api/auth/${platform}/url`);
+      if (!response.ok) throw new Error(`Failed to get ${platform} auth URL`);
+      const { url } = await response.json();
       
-      setUserProfile({ ...userProfile, ...updates });
-      addNotification(`${platform.toUpperCase()} linked successfully`, 'success');
-    }, 1500);
+      const width = 600;
+      const height = 700;
+      const left = window.innerWidth / 2 - width / 2;
+      const top = window.innerHeight / 2 - height / 2;
+      
+      window.open(url, `${platform}_oauth`, `width=${width},height=${height},left=${left},top=${top}`);
+    } catch (error) {
+      console.error(`OAuth error for ${platform}:`, error);
+      addNotification(`Failed to connect ${platform}`, 'error');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const handleCompleteVerification = async () => {
@@ -59,7 +116,7 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
     }
   };
 
-  const canVerify = linkedAccounts.x && linkedAccounts.spotify && linkedAccounts.wallet;
+  const canVerify = linkedAccounts.x && linkedAccounts.spotify && linkedAccounts.wallet && linkedAccounts.vercel;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
@@ -137,6 +194,33 @@ const UserArtistVerificationModal: React.FC<UserArtistVerificationModalProps> = 
                   onClick={() => handleLinkAccount('spotify')}
                   disabled={isVerifying}
                   className="px-2 py-2 bg-[#1DB954] hover:bg-[#1ed760] text-black rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                >
+                  Connect
+                </button>
+              )}
+            </div>
+
+            {/* Vercel Link */}
+            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-2xl">
+              <div className="flex items-center gap-2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${linkedAccounts.vercel ? 'bg-foreground/20 text-foreground' : 'bg-muted text-muted-foreground'}`}>
+                  <Globe className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground uppercase tracking-widest">Vercel</h4>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Developer Artifacts</p>
+                </div>
+              </div>
+              {linkedAccounts.vercel ? (
+                <div className="flex items-center gap-2 text-emerald-500">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Linked</span>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => handleLinkAccount('vercel')}
+                  disabled={isVerifying}
+                  className="px-4 py-2 bg-foreground text-background rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 min-w-[80px]"
                 >
                   Connect
                 </button>

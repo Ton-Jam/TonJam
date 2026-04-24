@@ -10,6 +10,8 @@ import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '
 import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getPlaceholderImage } from '@/lib/utils';
+import { useAudioStore } from '@/store/audioStore';
+import { useUserStore } from '@/store/userStore';
 
 // Helper for Firestore errors (already imported from firebase.ts)
 
@@ -191,36 +193,28 @@ const STORAGE_KEYS = {
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tonConnectUI] = useTonConnectUI();
   const tonAddress = useTonAddress();
-  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
-    return saved ? JSON.parse(saved) : MOCK_USER;
-  });
+  
+  // Zustand State Integration
+  const { 
+    currentTrack, setCurrentTrack,
+    isPlaying, setIsPlaying,
+    queue, setQueue,
+    progress, setProgress,
+    isFullPlayerOpen, setIsFullPlayerOpen: setFullPlayerOpen,
+    isShuffle, setIsShuffle,
+    repeatMode, setRepeatMode,
+    volume, setVolume: setVolumeState,
+    isMuted, setIsMuted
+  } = useAudioStore();
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(userProfile));
-  }, [userProfile]);
+  const {
+    userProfile, setUserProfile,
+    followedUserIds, setFollowedUserIds,
+    likedTrackIds, setLikedTrackIds
+  } = useUserStore();
 
   const [genesisContractAddress, setGenesisContractAddress] = useState<string | null>(() => {
     return localStorage.getItem(STORAGE_KEYS.CONTRACT_ADDRESS);
-  });
-
-  const [currentTrack, setCurrentTrack] = useState<Track | null>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_TRACK);
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [queue, setQueue] = useState<Track[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.QUEUE);
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [progress, setProgress] = useState(0);
-  const [isFullPlayerOpen, setFullPlayerOpen] = useState(false);
-  const [isShuffle, setIsShuffle] = useState(() => localStorage.getItem(STORAGE_KEYS.SHUFFLE) === 'true');
-  const [repeatMode, setRepeatMode] = useState<RepeatMode>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.REPEAT) as RepeatMode;
-    return saved || 'off';
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [trackToAddToPlaylist, setTrackToAddToPlaylist] = useState<Track | null>(null);
@@ -269,16 +263,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const analyserRef = useRef<AnalyserNode | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
-  const [volume, setVolumeState] = useState<number>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.VOLUME);
-    return saved ? parseFloat(saved) : 1;
-  });
-
-  const [isMuted, setIsMuted] = useState<boolean>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.MUTED);
-    return saved === 'true';
-  });
-
   const [isLoading, setIsLoading] = useState(false);
   const [isHighFidelity, setIsHighFidelity] = useState(false);
   const [exclusiveContent, setExclusiveContent] = useState<ExclusiveContent[] | null>(null);
@@ -290,11 +274,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RECENTLY_PLAYED);
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [likedTrackIds, setLikedTrackIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LIKED_TRACKS);
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -471,11 +450,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     checkAuth();
   }, [isPlaying, currentTrack?.id]);
 
-  const [followedUserIds, setFollowedUserIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.FOLLOWED_USERS);
-    return saved ? JSON.parse(saved) : (userProfile.followedUserIds || []);
-  });
-
   useEffect(() => {
     setUserProfile(prev => ({ 
       ...prev, 
@@ -483,7 +457,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       followedArtists: followedUserIds, // Assuming all followed users are artists for now or we just sync them
       following: followedUserIds.length
     }));
-  }, [followedUserIds]);
+  }, [followedUserIds, setUserProfile]);
 
   const [userTracks, setUserTracks] = useState<Track[]>([]);
   const [userNFTs, setUserNFTs] = useState<NFTItem[]>([]);
@@ -496,36 +470,44 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Sync with Firebase
   useEffect(() => {
-    // Public listeners
-    const tracksUnsubscribe = onSnapshot(collection(db, 'tracks'), (snapshot) => {
-      const tracks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Track));
-      setFirestoreTracks(tracks);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'tracks'));
+    let unsubs: (() => void)[] = [];
+    let isMounted = true;
+    
+    // Add a strict mode rapid mount/unmount delay for Firestore
+    const timer = setTimeout(() => {
+      if (!isMounted) return;
 
-    const nftsUnsubscribe = onSnapshot(collection(db, 'nfts'), (snapshot) => {
-      const nfts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NFTItem));
-      setFirestoreNFTs(nfts);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'nfts'));
+      const tracksUnsubscribe = onSnapshot(collection(db, 'tracks'), (snapshot) => {
+        const tracks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Track));
+        setFirestoreTracks(tracks);
+      }, (error) => handleFirestoreError(error, OperationType.LIST, 'tracks'));
 
-    const postsUnsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
-      const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post));
-      setFirestorePosts(posts);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'posts'));
+      const nftsUnsubscribe = onSnapshot(collection(db, 'nfts'), (snapshot) => {
+        const nfts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NFTItem));
+        setFirestoreNFTs(nfts);
+      }, (error) => handleFirestoreError(error, OperationType.LIST, 'nfts'));
 
-    const sponsoredUnsubscribe = onSnapshot(
-      collection(db, 'sponsoredContent'),
-      (snapshot) => {
-        const sponsored = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SponsoredContent));
-        setSponsoredPosts(sponsored);
-      },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'sponsoredContent')
-    );
+      const postsUnsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
+        const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post));
+        setFirestorePosts(posts);
+      }, (error) => handleFirestoreError(error, OperationType.LIST, 'posts'));
+
+      const sponsoredUnsubscribe = onSnapshot(
+        collection(db, 'sponsoredContent'),
+        (snapshot) => {
+          const sponsored = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SponsoredContent));
+          setSponsoredPosts(sponsored);
+        },
+        (error) => handleFirestoreError(error, OperationType.LIST, 'sponsoredContent')
+      );
+
+      unsubs = [tracksUnsubscribe, nftsUnsubscribe, postsUnsubscribe, sponsoredUnsubscribe];
+    }, 150);
 
     return () => {
-      tracksUnsubscribe();
-      nftsUnsubscribe();
-      postsUnsubscribe();
-      sponsoredUnsubscribe();
+      isMounted = false;
+      clearTimeout(timer);
+      unsubs.forEach(unsub => unsub());
     };
   }, []);
 
@@ -2281,45 +2263,72 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Analyze user data
       const historyIds = new Set(recentlyPlayed.map(t => t.id));
       const likedIds = new Set(likedTrackIds);
+      const likedNftIds = new Set(userProfile.likedNftIds || []);
       const nftTrackIds = new Set(userNFTs.map(n => n.trackId));
       
       // Find preferred genres and artists
       const preferredGenres = new Map<string, number>();
       const preferredArtists = new Map<string, number>();
+      const favoredArtistIds = new Set(userProfile.followedUserIds || []);
       
       const analyzeTrack = (trackId: string, weight: number) => {
         const track = allTracks.find(t => t.id === trackId);
         if (track) {
           preferredGenres.set(track.genre, (preferredGenres.get(track.genre) || 0) + weight);
-          preferredArtists.set(track.artistId || track.artist, (preferredArtists.get(track.artistId || track.artist) || 0) + weight);
+          const artistKey = track.artistId || track.artist;
+          preferredArtists.set(artistKey, (preferredArtists.get(artistKey) || 0) + weight);
         }
       };
       
       recentlyPlayed.forEach(t => analyzeTrack(t.id, 1));
-      likedTrackIds.forEach(id => analyzeTrack(id, 2));
-      userNFTs.forEach(n => analyzeTrack(n.trackId, 3));
+      likedTrackIds.forEach(id => analyzeTrack(id, 3)); // Likes weighted more
+      userNFTs.forEach(n => analyzeTrack(n.trackId, 5)); // Collected tracks weighted most
+      
+      // Add weight for interacted (liked) NFTs
+      likedNftIds.forEach(nftId => {
+        const nft = allNFTs.find(n => n.id === nftId);
+        if (nft && nft.trackId) analyzeTrack(nft.trackId, 4);
+      });
+      
+      // Add weight for followed artists
+      favoredArtistIds.forEach(artistId => {
+        preferredArtists.set(artistId, (preferredArtists.get(artistId) || 0) + 4);
+      });
       
       // Sort preferences
-      const topGenres = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
-      const topArtists = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+      const topGenresList = Array.from(preferredGenres.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+      const topArtistsList = Array.from(preferredArtists.entries()).sort((a, b) => b[1] - a[1]).map(e => e[0]);
       
       // Generate recommendations
       const recommendations = allTracks.filter(track => {
-        // Don't recommend tracks they already know well (liked or own NFT)
-        if (likedIds.has(track.id) || nftTrackIds.has(track.id)) return false;
+        // Don't recommend tracks they already own NFT of, but they can be in history
+        if (nftTrackIds.has(track.id)) return false;
         
+        // Exclude tracks already liked too much? No, maybe keep them if they are favorites, 
+        // but Discover Weekly usually aims for NEW stuff.
+        if (likedIds.has(track.id)) return false;
+
         // Recommend based on genre or artist
-        const matchesGenre = topGenres.slice(0, 3).includes(track.genre);
-        const matchesArtist = topArtists.slice(0, 3).includes(track.artistId || track.artist);
+        const matchesGenre = topGenresList.slice(0, 5).includes(track.genre);
+        const matchesArtist = topArtistsList.slice(0, 5).includes(track.artistId || track.artist);
         
         return matchesGenre || matchesArtist;
       });
       
-      // If we don't have enough recommendations, add some trending tracks
-      let finalTracks = recommendations.sort(() => 0.5 - Math.random()).slice(0, 10);
+      // If we don't have enough recommendations, add some trending tracks from same genres
+      let finalTracks = recommendations.sort(() => 0.5 - Math.random()).slice(0, 20);
+      if (finalTracks.length < 20) {
+        const trendingByGenre = getTrendingTracks().filter(t => 
+          !finalTracks.find(ft => ft.id === t.id) && 
+          topGenresList.slice(0, 3).includes(t.genre)
+        );
+        finalTracks = [...finalTracks, ...trendingByGenre].slice(0, 20);
+      }
+      
+      // If still not enough, just trending
       if (finalTracks.length < 10) {
         const trending = getTrendingTracks().filter(t => !finalTracks.find(ft => ft.id === t.id));
-        finalTracks = [...finalTracks, ...trending].slice(0, 10);
+        finalTracks = [...finalTracks, ...trending].slice(0, 20);
       }
       
       const playlistId = existingIndex !== -1 ? playlists[existingIndex].id : `dw-${Date.now()}`;

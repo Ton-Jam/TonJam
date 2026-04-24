@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { UserPen, X, Twitter, Send, Music, Globe, Instagram, Image as ImageIcon, Upload, Loader2 } from 'lucide-react';
-import { Artist } from '@/types';
+import { UserPen, X, Twitter, Send, Music, Globe, Instagram, Image as ImageIcon, Upload, Loader2, Calendar, MapPin, Ticket, Clock, PlusCircle, Trash2 } from 'lucide-react';
+import { Artist, Event } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
@@ -21,6 +21,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
   const [avatarUrl, setAvatarUrl] = useState(artist.avatarUrl || '');
   const [isUploading, setIsUploading] = useState(false);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [events, setEvents] = useState<Event[]>(artist.events || []);
   const [socials, setSocials] = useState({
     x: artist.socials?.x || '',
     spotify: artist.socials?.spotify || '',
@@ -29,6 +30,26 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
     telegram: artist.socials?.telegram || ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAddEvent = () => {
+    setEvents([...events, {
+      id: Math.random().toString(36).substr(2, 9),
+      title: '',
+      date: '',
+      time: '',
+      venue: '',
+      location: '',
+      ticketUrl: ''
+    }]);
+  };
+
+  const handleUpdateEvent = (id: string, field: keyof Event, value: string) => {
+    setEvents(events.map(e => e.id === id ? { ...e, [field]: value } : e));
+  };
+
+  const handleRemoveEvent = (id: string) => {
+    setEvents(events.filter(e => e.id !== id));
+  };
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -93,7 +114,8 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         bio,
         bannerUrl: bannerUrl || a.bannerUrl,
         avatarUrl: avatarUrl || a.avatarUrl,
-        socials
+        socials,
+        events
       } : a));
 
       // Persist to Firebase if it's the current user
@@ -105,7 +127,8 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
           bio,
           bannerUrl: bannerUrl || artist.bannerUrl || '',
           avatar: avatarUrl || artist.avatarUrl || '',
-          socials
+          socials,
+          events
         }));
       }
 
@@ -272,6 +295,74 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                 </div>
               </div>
             </div>
+
+            {/* Events Management Section */}
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Upcoming Events</h3>
+                <button
+                  type="button"
+                  onClick={handleAddEvent}
+                  className="flex items-center gap-1 text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-widest bg-blue-500/10 px-3 py-1.5 rounded-full"
+                >
+                  <PlusCircle className="h-3 w-3" /> Add Event
+                </button>
+              </div>
+
+              {events.length === 0 ? (
+                <p className="text-[11px] text-muted-foreground italic ml-2">No events scheduled. Plan your next gig!</p>
+              ) : (
+                <div className="space-y-4">
+                  {events.map((event, index) => (
+                    <div key={event.id} className="p-4 bg-muted/30 rounded-[10px] border border-border/50 relative">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEvent(event.id)}
+                        className="absolute right-3 top-3 text-muted-foreground/50 hover:text-red-500 transition-colors"
+                        title="Remove Event"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      
+                      <div className="space-y-3">
+                        <div className="pr-8">
+                          <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 block">Title</label>
+                          <input type="text" value={event.title} onChange={(e) => handleUpdateEvent(event.id, 'title', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. Neon Nights Residency" required />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Calendar className="h-2 w-2"/> Date</label>
+                            <input type="date" value={event.date} onChange={(e) => handleUpdateEvent(event.id, 'date', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" required />
+                          </div>
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Clock className="h-2 w-2"/> Time</label>
+                            <input type="time" value={event.time} onChange={(e) => handleUpdateEvent(event.id, 'time', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" required />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><MapPin className="h-2 w-2"/> Venue</label>
+                            <input type="text" value={event.venue} onChange={(e) => handleUpdateEvent(event.id, 'venue', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. The Matrix Club" required />
+                          </div>
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">City/Location</label>
+                            <input type="text" value={event.location} onChange={(e) => handleUpdateEvent(event.id, 'location', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. Neo-Tokyo" required />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Ticket className="h-2 w-2"/> Ticket URL (Optional)</label>
+                          <input type="url" value={event.ticketUrl} onChange={(e) => handleUpdateEvent(event.id, 'ticketUrl', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
           </div>
           <div className="pt-2">
             <button type="submit" className="w-full py-2 bg-purple-600 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-purple-600/20 hover:bg-purple-500 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500" > SAVE_IDENTITY_CHANGES </button>

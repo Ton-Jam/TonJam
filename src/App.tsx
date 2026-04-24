@@ -21,6 +21,7 @@ import Notifications from '@/pages/Notifications';
 import UploadTrack from '@/pages/UploadTrack';
 import MintNFT from '@/pages/MintNFT';
 import ArtistMinting from '@/pages/ArtistMinting';
+import TrendingNFTs from '@/pages/TrendingNFTs';
 import LoadingScreen from '@/components/LoadingScreen';
 import PlaylistDetail from '@/pages/PlaylistDetail';
 import PostDetail from '@/pages/PostDetail';
@@ -46,10 +47,16 @@ import { seedDatabase } from '@/services/seedService';
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
-    initial={{ opacity: 0, x: 10 }}
+    initial={{ opacity: 0, x: 20 }}
     animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -10 }}
-    transition={{ duration: 0.3 }}
+    exit={{ opacity: 0, x: -20 }}
+    transition={{ 
+      type: "spring",
+      stiffness: 300,
+      damping: 30,
+      opacity: { duration: 0.2 }
+    }}
+    className="w-full h-full overflow-x-hidden"
   >
     {children}
   </motion.div>
@@ -136,6 +143,7 @@ const AppContent: React.FC = () => {
               <Route path="/discover" element={<PageWrapper><Discover /></PageWrapper>} />
               <Route path="/jamspace" element={<PageWrapper><JamSpace /></PageWrapper>} />
               <Route path="/marketplace" element={<PageWrapper><Marketplace /></PageWrapper>} />
+              <Route path="/trending-nfts" element={<PageWrapper><TrendingNFTs /></PageWrapper>} />
               <Route path="/nft/:id" element={<PageWrapper><NFTDetail /></PageWrapper>} />
               <Route path="/explore/:type" element={<PageWrapper><ExploreList /></PageWrapper>} />
               <Route path="/profile" element={<PageWrapper><Profile /></PageWrapper>} />
@@ -174,17 +182,15 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <TonConnectUIProvider manifestUrl="https://tonjam.app/tonconnect-manifest.json">
-          <AuthProvider>
-            <AudioProvider>
-              <Toaster theme="light" position="top-right" />
-              <Router>
-                <ScrollToTop />
-                <AppContent />
-              </Router>
-            </AudioProvider>
-          </AuthProvider>
-        </TonConnectUIProvider>
+        <AuthProvider>
+          <AudioProvider>
+            <Toaster theme="light" position="top-right" />
+            <Router>
+              <ScrollToTop />
+              <AppContent />
+            </Router>
+          </AudioProvider>
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

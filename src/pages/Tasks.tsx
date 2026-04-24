@@ -1,492 +1,418 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  CheckCircle2, 
   Zap, 
   Trophy, 
   Star, 
   Gift, 
-  Calendar, 
-  Clock, 
-  ArrowRight, 
-  Lock, 
-  Sparkles, 
-  TrendingUp, 
+  Plus,
+  Flame,
+  Globe,
+  Share2,
+  Play,
+  ShoppingBag,
+  Gem,
+  ArrowRight,
+  TrendingUp,
+  ShieldCheck,
+  Disc,
+  Clock,
+  ChevronRight,
   Target,
-  Info,
-  Plus
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
-import SectionHeader from '@/components/SectionHeader';
+import confetti from 'canvas-confetti';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
-import { TJ_COIN_ICON, TON_LOGO } from '@/constants';
-import StakingPanel from '@/components/StakingPanel';
+import { TJ_COIN_ICON } from '@/constants';
 import Leaderboard from '@/components/Leaderboard';
-import BuyTJModal from '@/components/BuyTJModal';
-import ReferralPanel from '@/components/ReferralPanel';
-import TaskDetailModal from '@/components/TaskDetailModal';
-import TaskCard from '@/components/TaskCard';
 import AuthModal from '@/components/AuthModal';
-import { Task } from '@/types';
+import StakingPanel from '@/components/StakingPanel';
+import ReferralPanel from '@/components/ReferralPanel';
+import BuyTJModal from '@/components/BuyTJModal';
 
-type TaskTab = 'all' | 'daily' | 'achievements' | 'milestones' | 'staking' | 'leaderboard' | 'referrals';
+import { useTaskStore } from '@/store/taskStore';
+import { claimTaskReward, getTasks } from '@/services/taskService';
+import { useUserStore } from '@/store/userStore';
+
+const ICONS: Record<string, React.FC<any>> = {
+  'ShieldCheck': ShieldCheck,
+  'Share2': Share2,
+  'Play': Play,
+  'ShoppingBag': ShoppingBag,
+  'Zap': Zap,
+};
 
 const Tasks: React.FC = () => {
-  const { addNotification, tasks, updateTaskProgress, claimTaskReward, userProfile } = useAudio();
+  const { userProfile, addNotification } = useAudio(); // Using for addNotification for backwards compatibility right now
   const { user } = useAuth();
-  const safeTasks = tasks || [];
-  const [activeTab, setActiveTab] = useState<TaskTab>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
-  const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
-  const [showBuyModal, setShowBuyModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const userBalance = userProfile.jamBalance || 0;
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const tasks = useTaskStore(state => state.tasks);
+  const setTasks = useTaskStore(state => state.setTasks);
+  const claimTaskLocal = useTaskStore(state => state.claimTaskLocal);
+  const completeTaskLocal = useTaskStore(state => state.completeTaskLocal);
+  
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'quest' | 'staking' | 'referral' | 'leaderboard'>('quest');
+  const [isClaiming, setIsClaiming] = useState<string | null>(null);
 
-  const handleTaskClick = (task: Task) => {
-    setSelectedTask(task);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedTask(null);
-  };
-
-  const stats = useMemo(() => {
-    const safeTasks = tasks || [];
-    const completed = safeTasks.filter(t => t.completed).length;
-    const total = safeTasks.length;
-    const dailyCompleted = safeTasks.filter(t => t.type === 'daily' && t.completed).length;
-    const dailyTotal = safeTasks.filter(t => t.type === 'daily').length;
-    
-    // Calculate total XP from claimed tasks
-    const totalXP = safeTasks.filter(t => t.claimed).reduce((sum, t) => sum + t.points, 0) + 14400; // Base XP
-    
-    // Level formula: Level = floor(sqrt(totalXP / 100))
-    const currentLevel = Math.floor(Math.sqrt(totalXP / 100));
-    const nextLevelXP = Math.pow(currentLevel + 1, 2) * 100;
-    const currentLevelXP = Math.pow(currentLevel, 2) * 100;
-    const xpProgress = totalXP - currentLevelXP;
-    const xpRequired = nextLevelXP - currentLevelXP;
-    const xpPercent = Math.round((xpProgress / xpRequired) * 100);
-    const xpToNext = nextLevelXP - totalXP;
-    
-    return {
-      percent: total > 0 ? Math.round((completed / total) * 100) : 0,
-      dailyPercent: dailyTotal > 0 ? Math.round((dailyCompleted / dailyTotal) * 100) : 0,
-      totalEarned: 1240,
-      currentLevel,
-      xpToNext,
-      xpPercent
-    };
-  }, [safeTasks]);
-
-  const filteredTasks = useMemo(() => {
-    let result = safeTasks;
-    
-    // Tab filter
-    if (activeTab === 'daily') result = result.filter(t => t.type === 'daily');
-    else if (activeTab === 'achievements') result = result.filter(t => t.type === 'achievement');
-    else if (activeTab === 'milestones') result = result.filter(t => t.type === 'milestone');
-    
-    // Status filter
-    if (statusFilter === 'pending') result = result.filter(t => !t.completed);
-    else if (statusFilter === 'completed') result = result.filter(t => t.completed);
-    
-    // Priority filter
-    if (priorityFilter !== 'all') result = result.filter(t => t.priority === priorityFilter);
-    
-    return result;
-  }, [safeTasks, activeTab, statusFilter, priorityFilter]);
-
-  const handleClaim = (id: string) => {
-    claimTaskReward(id);
-  };
-
-  const handleToggle = async (id: string, progress: number) => {
-    try {
-      // Simulate API call for task progress update
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // 5% chance of failure for demonstration
-          if (Math.random() < 0.05) {
-            reject(new Error("Failed to sync progress with the network."));
-          } else {
-            resolve(true);
-          }
-        }, 500);
-      });
-
-      const task = tasks.find(t => t.id === id);
-      if (task) {
-        const newProgress = Math.min(task.total, progress);
-        const isNowCompleted = newProgress >= task.total;
-        if (isNowCompleted && !task.completed) {
-            toast.success(`Task "${task.title}" completed!`, {
-              description: "You can now claim your reward."
-            });
-            addNotification(`Task "${task.title}" completed!`, "success");
-            confetti({
-              particleCount: 100,
-              spread: 70,
-              origin: { y: 0.6 },
-              colors: ['#3b82f6', '#10b981', '#f59e0b']
-            });
+  useEffect(() => {
+    // Fetch live tasks if authenticated
+    if (user) {
+      getTasks().then(firestoreTasks => {
+        if (firestoreTasks.length > 0) {
+           // Merge firestore tasks over default tasks or replace entirely depending on logic
+           // For now, let's just use firestore tasks if any exist
+           setTasks(firestoreTasks);
         }
-        updateTaskProgress(id, newProgress);
-      }
-    } catch (error: any) {
-      toast.error("Update failed", {
-        description: error.message || "Could not update task progress. Please try again.",
       });
+    }
+  }, [user, setTasks]);
+
+  // Logic for leveling and rewards
+  const balance = userProfile.tjBalance || 0;
+  const streak = 3; 
+  const isVIP = userProfile.isVerifiedArtist || userProfile.role === 'admin';
+
+  // Level Logic
+  const stats = useMemo(() => {
+    const baseXP = 1250; // Dynamic starting XP
+    const earnedXP = tasks.filter(t => t.claimed).reduce((acc, t) => acc + (t.points || 0), 0);
+    const totalXP = baseXP + earnedXP;
+    
+    // Level = floor(sqrt(XP / 50))
+    const level = Math.floor(Math.sqrt(totalXP / 50));
+    const nextLevelXP = Math.pow(level + 1, 2) * 50;
+    const currentLevelXP = Math.pow(level, 2) * 50;
+    const progress = ((totalXP - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+
+    return { level, progress, totalXP, xpToNext: nextLevelXP - totalXP };
+  }, [tasks]);
+
+  const handleClaim = async (taskId: string) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.completed || task.claimed) return;
+
+    try {
+      setIsClaiming(taskId);
+      const parsedReward = parseInt(task.reward) || 50;
+      await claimTaskReward(taskId, parsedReward, task.points);
+
+      const multiplier = isVIP ? 2 : 1;
+      const finalReward = parsedReward * multiplier;
+      
+      claimTaskLocal(taskId);
+
+      toast.success(`Protocol Synthesized!`, {
+        description: `Received ${finalReward} TJ and ${task.points} XP.`
+      });
+      
+      addNotification(`Received ${finalReward} TJ for ${task.title}`, "success");
+      
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#3b82f6', '#10b981', '#f59e0b']
+      });
+      
+    } catch (error) {
+      toast.error('Failed to claim reward. Please try again.');
+    } finally {
+      setIsClaiming(null);
     }
   };
 
-
-
-  const handleStake = (amount: number) => {
-    // Staking is handled by StakingPanel calling stakeJam from context
+  const handleStart = (id: string) => {
+    toast.info("Task Sequence Initialized", {
+      description: "Return after completing the neural protocol."
+    });
+    // Mock local completion for demo purposes
+    setTimeout(() => {
+      completeTaskLocal(id);
+    }, 2000);
   };
 
-  const handleBuySuccess = (amount: number) => {
-    addNotification(`Successfully forged ${amount} JAM using TON.`, "success");
-  };
 
   return (
-    <div className="p-4 lg:p-4 space-y-4 max-w-6xl mx-auto pb-4">
-      {!user && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-purple-600 p-6 md:p-8 text-white shadow-2xl shadow-blue-500/20 mb-8"
-        >
-          <div className="absolute inset-0 bg-black/20 z-0"></div>
-          <div className="absolute inset-0 z-0 opacity-30 mix-blend-overlay" style={{ backgroundImage: 'url(https://i.postimg.cc/rmpGP6GC/file-00000000cbe071f4baf73be350672754-1.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
-          
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-3 text-center md:text-left max-w-2xl">
-              <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">Join the Network</h2>
-              <p className="text-white/90 font-medium text-sm md:text-base">
-                Create an account to start completing tasks, earning rewards, and leveling up your profile in the TonJam ecosystem.
-              </p>
-            </div>
-            
-            <div className="flex-shrink-0">
-              <button 
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-8 py-4 bg-white text-blue-600 font-black uppercase tracking-widest rounded-full text-sm hover:scale-105 transition-transform shadow-xl flex items-center gap-2"
-              >
-                <Zap className="w-5 h-5" />
-                Sign Up Now
-              </button>
-            </div>
-          </div>
-          
-          {/* Decorative elements */}
-          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 blur-3xl rounded-full z-0"></div>
-          <div className="absolute -top-20 -left-20 w-64 h-64 bg-white/10 blur-3xl rounded-full z-0"></div>
-        </motion.div>
-      )}
+    <div className="min-h-screen pb-32 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[10%] left-[10%] w-[40%] h-[40%] bg-blue-600/5 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] bg-purple-600/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
 
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative">
-        <div className="absolute -left-20 -top-20 w-64 h-64 opacity-[0.03] pointer-events-none">
-          <motion.img 
-            src={TJ_COIN_ICON} 
-            animate={{ 
-              y: [0, -20, 0],
-              rotate: [-12, -8, -12]
-            }}
-            transition={{ 
-              duration: 6, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
-            }}
-            className="w-full h-full object-contain" 
-            alt="" 
-            referrerPolicy="no-referrer" 
-          />
-        </div>
+      <div className="relative z-10 max-w-xl mx-auto p-4 space-y-6">
         
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-4 relative z-10"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-4 rounded-xl bg-blue-500/10 text-blue-500">
-              <Target className="w-5 h-5" />
+        {/* HEADER AREA */}
+        <div className="flex flex-col gap-6 pt-8">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-blue-500 mb-1">
+                <Target className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em]">Protocol Node</span>
+              </div>
+              <h1 className="text-4xl font-black uppercase tracking-tighter italic leading-none">Command Center</h1>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500">Protocol Center</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <h1 className="text-[44px] font-black uppercase tracking-tighter text-foreground leading-none">Neural Tasks</h1>
-          </div>
-          <p className="text-sm font-medium text-foreground/30 max-w-md">
-            Execute network protocols to strengthen the ecosystem and earn TJ rewards.
-          </p>
-        </motion.div>
 
-        {/* Daily Progress Widget */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-muted/50 rounded-2xl p-4 min-w-[280px] relative overflow-hidden group"
-        >
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <TrendingUp className="w-12 h-12" />
-          </div>
-          <div className="space-y-4 relative z-10">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Daily Progress</span>
-              <span className="text-xs font-black text-blue-500">{stats.dailyPercent}%</span>
+            <div className="flex flex-col items-end gap-2">
+               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Level {stats.level}</span>
+               </div>
             </div>
-            <div className="h-2 w-full bg-muted/50 rounded-full overflow-hidden">
+          </div>
+
+          {/* XP PROGRESS BAR */}
+          <div className="glass-card p-4 rounded-2xl border-white/5 relative overflow-hidden group">
+            <div className="flex justify-between items-end mb-3">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-purple-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Network resonance</span>
+              </div>
+              <span className="text-xs font-mono font-bold text-white/60">{Math.round(stats.progress)}% to Level {stats.level + 1}</span>
+            </div>
+            <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
               <motion.div 
                 initial={{ width: 0 }}
-                animate={{ width: `${stats.dailyPercent}%` }}
-                className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
+                animate={{ width: `${stats.progress}%` }}
+                className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-500 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"
               />
             </div>
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-              {safeTasks.filter(t => t.type === 'daily' && t.completed).length} of {safeTasks.filter(t => t.type === 'daily').length} protocols completed
+            <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] mt-2 italic text-right">
+              {stats.xpToNext} XP required for next node expansion
             </p>
           </div>
-        </motion.div>
-      </div>
 
-      {/* Stats Bento Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="min-w-[240px] flex-1 bg-blue-600/10 rounded-2xl p-4 flex items-center gap-4 group hover:bg-blue-600/20 transition-all relative overflow-hidden"
-        >
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity">
-            <img src={TJ_COIN_ICON} className="w-full h-full object-contain rotate-12" alt="" referrerPolicy="no-referrer" />
-          </div>
-          <div className="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform relative z-10">
-            <Trophy className="w-7 h-7" />
-          </div>
-          <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-widest text-blue-500/60 mb-4">Total Earned</p>
-            <div className="flex items-center gap-4">
-              <img src={TJ_COIN_ICON} className="w-6 h-6 object-contain" alt="" referrerPolicy="no-referrer" />
-              <p className="text-[26px] font-black text-foreground tracking-tighter">{userBalance.toLocaleString()} TJ</p>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-purple-600/10 rounded-2xl p-4 flex flex-col justify-center gap-4 group hover:bg-purple-600/20 transition-all relative overflow-hidden"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform">
-              <Star className="w-7 h-7" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-purple-500/60 mb-4">Current Level</p>
-              <p className="text-[26px] font-black text-foreground tracking-tighter">LVL {stats.currentLevel}</p>
-            </div>
-          </div>
-          <div className="space-y-4 w-full">
-            <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-              <span>Next: LVL {stats.currentLevel + 1}</span>
-              <span>{stats.xpToNext} XP needed</span>
-            </div>
-            <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 rounded-full transition-all duration-500" style={{ width: `${stats.xpPercent}%` }} />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-amber-600/10 rounded-2xl p-4 flex items-center gap-4 group hover:bg-amber-600/20 transition-all sm:col-span-2 lg:col-span-1"
-        >
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-            <Gift className="w-7 h-7" />
-          </div>
-          <div className="flex-1">
-            <p className="text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-4">Next Reward</p>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[20px] font-black text-foreground tracking-tighter">{stats.xpToNext} XP</p>
-              <span className="text-[10px] font-bold text-muted-foreground">75%</span>
-            </div>
-            <div className="h-1.5 w-full bg-amber-500/10 rounded-full overflow-hidden">
-              <div className="h-full w-[75%] bg-amber-500 rounded-full" />
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Task Filters & List */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
-          <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl self-start overflow-x-auto no-scrollbar max-w-full">
-            {(['all', 'daily', 'achievements', 'milestones', 'staking', 'leaderboard', 'referrals'] as TaskTab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                  activeTab === tab 
-                    ? 'bg-blue-600 text-foreground shadow-lg shadow-blue-600/20' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="bg-muted/50 text-[10px] font-black uppercase tracking-widest p-4 rounded-lg text-muted-foreground hover:text-foreground focus:outline-none"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-            </select>
-            <select 
-              value={priorityFilter} 
-              onChange={(e) => setPriorityFilter(e.target.value as any)}
-              className="bg-muted/50 text-[10px] font-black uppercase tracking-widest p-4 rounded-lg text-muted-foreground hover:text-foreground focus:outline-none"
-            >
-              <option value="all">All Priority</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-            <div className="flex items-center gap-4">
-              <Clock className="w-3 h-3" />
-              <span>Resets in 14h 22m</span>
-            </div>
-          </div>
-        </div>
-
-        <AnimatePresence mode="wait">
-          {activeTab === 'staking' ? (
-            <motion.div 
-              key="staking"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <StakingPanel balance={userBalance} onStake={handleStake} onBuyTJ={() => setShowBuyModal(true)} />
-            </motion.div>
-          ) : activeTab === 'leaderboard' ? (
-            <motion.div 
-              key="leaderboard"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <Leaderboard />
-            </motion.div>
-          ) : activeTab === 'referrals' ? (
-            <motion.div 
-              key="referrals"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <ReferralPanel />
-            </motion.div>
-          ) : (
-            <motion.div 
-              key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            >
-              {filteredTasks.length > 0 ? (
-                filteredTasks.map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onClaim={handleClaim}
-                    onToggle={handleToggle}
-                    onClick={handleTaskClick}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full py-4 flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground/30">
-                    <Lock className="w-8 h-8" />
-                  </div>
-                  <div className="space-y-4">
-                    <p className="text-sm font-bold text-foreground uppercase tracking-widest">No protocols found</p>
-                    <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-widest">Check back later for new network tasks</p>
+          {/* BALANCE BLOCK */}
+          <button onClick={() => setShowBuyModal(true)} className="relative group text-left w-full transition-transform active:scale-95">
+            <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
+            <div className="relative flex items-center gap-5 bg-[#0A0A0C]/80 backdrop-blur-3xl border border-white/10 px-6 py-5 rounded-3xl shadow-2xl overflow-hidden">
+              <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
+              
+              {isVIP && (
+                <div className="absolute -top-0 -right-0 pt-3 pr-3">
+                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 rounded-full shadow-lg border border-white/20">
+                    <Gem className="w-2.5 h-2.5 text-white animate-pulse" />
+                    <span className="text-[7px] font-black text-white tracking-[0.2em]">VIP NODE</span>
                   </div>
                 </div>
               )}
+
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 bg-blue-500/30 blur-xl rounded-full" />
+                <motion.img 
+                  src={TJ_COIN_ICON} 
+                  className="w-11 h-11 object-contain relative z-10" 
+                  alt="Balance"
+                  animate={{ rotate: [0, 8, -8, 0] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </div>
+
+              <div className="flex-1 flex flex-col -space-y-1 relative z-10">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-mono font-black tracking-[-0.08em] text-white tabular-nums leading-none">
+                    {balance.toLocaleString()}
+                  </span>
+                  <span className="text-sm font-black text-blue-500 italic uppercase tracking-tighter">TJ</span>
+                </div>
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-blue-500/60 animate-pulse" />
+                   <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.25em] whitespace-nowrap">
+                     AVAILABLE NEURAL CREDITS
+                   </span>
+                </div>
+              </div>
+              
+              <div className="shrink-0 bg-white/5 p-2 rounded-full border border-white/5">
+                <Plus className="w-4 h-4 text-white/40" />
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* STREAK BENTO */}
+        <div className="grid grid-cols-2 gap-4">
+          <motion.div 
+            whileHover={{ y: -2 }}
+            className="glass-card p-5 rounded-3xl relative overflow-hidden group border-white/5"
+          >
+            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Flame className="w-8 h-8 text-orange-500" />
+            </div>
+            <div className="flex items-center gap-2 text-orange-500 mb-3">
+              <Flame className="w-4 h-4 fill-current" />
+              <span className="text-[10px] font-black uppercase tracking-wider">Sync Streak</span>
+            </div>
+            <div className="text-2xl font-black italic tracking-tighter">{streak} Days</div>
+            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
+              Next Sync: +{Math.min((streak + 1) * 10, 100)} TJ
+            </p>
+          </motion.div>
+
+          <motion.div 
+            whileHover={{ y: -2 }}
+            className="glass-card p-5 rounded-3xl relative overflow-hidden group border-white/5"
+          >
+            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Sparkles className="w-8 h-8 text-blue-400" />
+            </div>
+            <div className="flex items-center gap-2 text-blue-400 mb-3">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-[10px] font-black uppercase tracking-wider">Rewards</span>
+            </div>
+            <div className="text-2xl font-black italic tracking-tighter">2.4K+ <span className="text-[10px] text-white/30 lowercase not-italic">total earned</span></div>
+            <p className="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mt-1">
+              Top 15% of Nodes
+            </p>
+          </motion.div>
+        </div>
+
+        {/* NAVIGATION RAIL */}
+        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'quest', label: 'Quests', icon: Target },
+            { id: 'staking', label: 'Vault', icon: Layers },
+            { id: 'referral', label: 'Nodes', icon: Share2 },
+            { id: 'leaderboard', label: 'Ranks', icon: Trophy }
+          ].map((tab) => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
+                activeTab === tab.id 
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-black' 
+                : 'text-white/40 hover:text-white/60 font-bold'
+              }`}
+            >
+              <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'opacity-100' : 'opacity-40'}`} />
+              <span className="text-[10px] uppercase tracking-widest">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <AnimatePresence mode="wait">
+          {activeTab === 'quest' && (
+            <motion.div 
+              key="quests"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              {/* TASK LIST */}
+              <div className="space-y-3">
+                {tasks.map((task, idx) => {
+                  const TaskIcon = (task.iconName && ICONS[task.iconName]) || Target;
+                  const taskColor = task.color || 'blue';
+
+                  return (
+                  <motion.div
+                    key={task.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className={`glass-card p-4 rounded-3xl flex justify-between items-center group hover:bg-white/[0.03] transition-colors border-white/5 ${task.claimed ? 'opacity-50 pointer-events-none' : ''}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-2xl bg-${taskColor}-500/10 flex items-center justify-center text-${taskColor}-500 group-hover:scale-110 transition-transform shadow-inner`}>
+                        <TaskIcon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-black uppercase text-[11px] tracking-tight">{task.title}</h3>
+                        <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{task.subtitle || task.description}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <div className="flex items-center gap-1">
+                            <img src={TJ_COIN_ICON} className="w-3 h-3 grayscale opacity-30" alt="" />
+                            <span className={`text-[10px] font-mono font-bold text-${taskColor}-500`}>+{task.reward}</span>
+                          </div>
+                          <div className="w-1 h-1 rounded-full bg-white/10" />
+                          <span className="text-[10px] font-mono font-bold text-white/40">+{task.points || 0} XP</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      {!task.completed && (
+                        <button 
+                          onClick={() => handleStart(task.id)}
+                          className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:border-blue-500/50"
+                        >
+                          Execute
+                        </button>
+                      )}
+
+                      {task.completed && !task.claimed && (
+                        <button
+                          onClick={() => handleClaim(task.id)}
+                          disabled={isClaiming === task.id}
+                          className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-blue-600/30 disabled:opacity-50 disabled:scale-100"
+                        >
+                          {isClaiming === task.id ? 'Syncing...' : 'Claim'}
+                        </button>
+                      )}
+
+                      {task.claimed && (
+                        <div className="flex items-center gap-2 pr-2">
+                          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                          <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Protocol Sync</span>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )})}
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'staking' && (
+            <motion.div 
+               key="staking"
+               initial={{ opacity: 0, x: 20 }}
+               animate={{ opacity: 1, x: 0 }}
+               exit={{ opacity: 0, x: -20 }}
+            >
+               <StakingPanel balance={balance} onStake={() => {}} onBuyTJ={() => setShowBuyModal(true)} />
+            </motion.div>
+          )}
+
+          {activeTab === 'referral' && (
+            <motion.div 
+               key="referral"
+               initial={{ opacity: 0, x: 20 }}
+               animate={{ opacity: 1, x: 0 }}
+               exit={{ opacity: 0, x: -20 }}
+            >
+               <ReferralPanel />
+            </motion.div>
+          )}
+
+          {activeTab === 'leaderboard' && (
+            <motion.div 
+               key="leaderboard"
+               initial={{ opacity: 0, x: 20 }}
+               animate={{ opacity: 1, x: 0 }}
+               exit={{ opacity: 0, x: -20 }}
+               transition={{ duration: 0.3 }}
+            >
+               <Leaderboard />
             </motion.div>
           )}
         </AnimatePresence>
+
       </div>
-
-
-      <AnimatePresence>
-        {isModalOpen && selectedTask && (
-          <TaskDetailModal 
-            task={selectedTask}
-            onClose={handleCloseModal}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showBuyModal && (
-          <BuyTJModal 
-            onClose={() => setShowBuyModal(false)} 
-            onSuccess={handleBuySuccess} 
-          />
-        )}
-      </AnimatePresence>
-
+      
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
-
-      {/* Seasonal Event Banner */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 p-4 flex flex-col md:flex-row items-center justify-between gap-4 group"
-      >
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-        <div className="absolute -right-10 -bottom-10 w-48 h-48 opacity-10 group-hover:opacity-20 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700">
-          <img src={TJ_COIN_ICON} className="w-full h-full object-contain" alt="" referrerPolicy="no-referrer" />
-        </div>
-        
-        <div className="relative z-10 space-y-4 text-center md:text-left">
-          <div className="inline-flex items-center gap-4 px-4 py-4 rounded-full bg-muted/80 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-foreground">
-            <Sparkles className="w-3 h-3" /> Limited Time Event
-          </div>
-          <h2 className="text-[26px] font-black uppercase tracking-tighter text-foreground">Genesis Launch Season</h2>
-          <p className="text-sm font-medium text-muted-foreground/90 max-w-md">
-            Complete special seasonal tasks to earn exclusive NFT badges and multiplier bonuses for your TJ earnings.
-          </p>
-        </div>
-        <button className="relative z-10 px-4 py-4 rounded-xl bg-foreground text-blue-600 text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-xl shadow-black/20">
-          View Event Tasks
-        </button>
-      </motion.div>
+      {showBuyModal && <BuyTJModal onClose={() => setShowBuyModal(false)} onSuccess={() => {}} />}
     </div>
   );
 };

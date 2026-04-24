@@ -1,14 +1,60 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics } from 'firebase/analytics';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+
+// Initialize Analytics if supported (measurementId is present)
+export const analytics = typeof window !== 'undefined' && firebaseConfig.measurementId ? getAnalytics(app) : null;
+
+// Standard Firestore initialization
+const firestoreDatabaseId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
+export const db = getFirestore(app, firestoreDatabaseId);
+
 export const auth = getAuth();
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
+
+/**
+ * Validates connection to Firestore
+ * CRITICAL CONSTRAINT: When the application initially boots, call getFromServer to test the connection.
+ */
+async function testConnection() {
+  try {
+    // Try to reach the specific database instance
+    await getDocFromServer(doc(db, 'test', 'connection_check'));
+    console.log("Firestore connection check: Server is reachable.");
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message.includes('Missing or insufficient permissions')) {
+        console.warn("Firestore connection check: Server is reachable but requires Firestore Rules to be published.");
+      } else {
+        console.error("Firestore connectivity check failed:", error);
+      }
+
+      if (error.message.includes('unavailable')) {
+        const dbId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
+        console.warn(
+          "Firestore backend is UNAVAILABLE. Common reasons:\n" +
+          "1. The database instance '" + dbId + "' hasn't been provisioned yet.\n" +
+          "2. You haven't accepted the Firebase Terms of Service in the console.\n" +
+          "3. The database is still initializing. Please wait a few minutes."
+        );
+      } else if (error.message.includes('the client is offline')) {
+        console.error(
+          "The client is reporting as OFFLINE. This often happens if the initial handshake fails.\n" +
+          "Check if your Project ID '" + firebaseConfig.projectId + "' and API Key are correct in firebase-applet-config.json."
+        );
+      }
+    } else {
+      console.error("Firestore connectivity check failed:", error);
+    }
+  }
+}
+testConnection();
 
 export enum OperationType {
   CREATE = 'create',
@@ -57,8 +103,10 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  
+  // Log the error but do NOT throw to prevent fatal app crashes if 
+  // rules haven't propagated or the user hasn't copied the rules yet.
+  console.warn('Firestore Error Detected (Gracefully Handled):', JSON.stringify(errInfo));
 }
 
 export function cleanUpdateData(data: Record<string, any>) {

@@ -9,25 +9,13 @@
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "walletAddress": { "type": "string" },
-        "role": { "type": "string", "enum": ["user", "artist", "admin"] }
+        "role": { "type": "string", "enum": ["user", "artist", "admin"] },
+        "avatar": { "type": "string" },
+        "bio": { "type": "string" },
+        "isVerifiedArtist": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "name", "email"]
-    },
-    "Transaction": {
-      "title": "Transaction",
-      "description": "Financial or platform transaction",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string" },
-        "amount": { "type": "number" },
-        "recipientAddress": { "type": "string" },
-        "senderAddress": { "type": "string" },
-        "participants": { "type": "array", "items": { "type": "string" } },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "status": { "type": "string" }
-      },
-      "required": ["id", "type", "amount", "recipientAddress", "timestamp", "status"]
     },
     "Track": {
       "title": "Track",
@@ -37,10 +25,114 @@
         "id": { "type": "string" },
         "title": { "type": "string" },
         "artistId": { "type": "string" },
+        "creator": { "type": "string" },
         "coverUrl": { "type": "string" },
-        "audioUrl": { "type": "string" }
+        "audioUrl": { "type": "string" },
+        "genre": { "type": "string" },
+        "playCount": { "type": "number" },
+        "likes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "title", "artistId"]
+    },
+    "NFT": {
+      "title": "NFT",
+      "description": "Sonic artifact",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "artistId": { "type": "string" },
+        "creator": { "type": "string" },
+        "trackId": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "price": { "type": "string" },
+        "edition": { "type": "string" },
+        "listingType": { "type": "string" },
+        "owner": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "artistId", "trackId"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Social post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "likes": { "type": "number" },
+        "comments": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "content"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial or platform transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" },
+        "recipientAddress": { "type": "string" },
+        "senderAddress": { "type": "string" },
+        "participants": { "type": "array" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "type", "amount", "status"]
+    },
+    "Playlist": {
+      "title": "Playlist",
+      "description": "User created music playlist",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "creator": { "type": "string" },
+        "tracks": { "type": "array" },
+        "description": { "type": "string" },
+        "isPrivate": { "type": "boolean" },
+        "coverUrl": { "type": "string" }
+      }
+    },
+    "Community": {
+      "title": "Community",
+      "description": "Artist fan community",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "artistId": { "type": "string" },
+        "memberCount": { "type": "number" }
+      }
+    },
+    "Follow": {
+      "title": "Follow",
+      "description": "User follow relationship",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "followerId": { "type": "string" },
+        "followingId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Direct message",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderId": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -52,9 +144,33 @@
       "schema": "Track",
       "description": "Music tracks"
     },
+    "/nfts/{nftId}": {
+      "schema": "NFT",
+      "description": "Sonic artifacts"
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "Social feed"
+    },
     "/transactions/{transactionId}": {
       "schema": "Transaction",
-      "description": "Transaction history"
+      "description": "Platform transactions"
+    },
+    "/playlists/{playlistId}": {
+      "schema": "Playlist",
+      "description": "User playlists"
+    },
+    "/communities/{communityId}": {
+      "schema": "Community",
+      "description": "Artist communities"
+    },
+    "/follows/{followId}": {
+      "schema": "Follow",
+      "description": "Follow relationships"
+    },
+    "/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Direct messages"
     }
   }
 }

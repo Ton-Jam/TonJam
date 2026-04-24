@@ -1,3 +1,4 @@
+// Updated Profile Styling
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
@@ -88,6 +89,10 @@ const Profile: React.FC = () => {
  const isSpotifyVerified = useMemo(() => {
  return !!localUser.socials?.spotify || localUser.isVerifiedArtist;
  }, [localUser.socials?.spotify, localUser.isVerifiedArtist]);
+
+ const isVercelVerified = useMemo(() => {
+ return !!(localUser.socials as any)?.vercel;
+ }, [localUser.socials]);
 
  /* Staking State - Persisted */
  const [stakeAmount, setStakeAmount] = useState('');
@@ -323,13 +328,13 @@ const Profile: React.FC = () => {
  const SectionHeader = ({ title, onAction, actionLabel }: { title: string, onAction?: () => void, actionLabel?: string }) => (
  <div className="flex items-center justify-between mb-4 px-4 md:px-4">
  <div className="flex items-center gap-4">
- <div className="w-1 h-5 bg-orange-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
+ <div className="w-1 h-5 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
  <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.2em]">
  {title}
  </h3>
  </div>
  {onAction && (
- <button onClick={onAction} className="text-[10px] font-bold uppercase tracking-widest text-orange-500 hover:text-foreground transition-all flex items-center gap-2 group">
+ <button onClick={onAction} className="text-[10px] font-bold uppercase tracking-widest text-blue-500 hover:text-foreground transition-all flex items-center gap-2 group">
  {actionLabel || 'View All'}
  <Plus className="h-3 w-3 group-hover:rotate-90 transition-transform"/>
  </button>
@@ -362,112 +367,127 @@ const Profile: React.FC = () => {
  <input type="file"hidden ref={bannerInputRef} onChange={(e) => handleFileChange(e, 'banner')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
  </div>
 
- {/* IDENTITY SECTION */}
- <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-20 md:-mt-28 relative z-30 flex flex-col md:flex-row items-center md:items-end w-full gap-6">
- {/* Profile Picture */}
- <div className="relative group flex-shrink-0">
- <div className="relative rounded-full overflow-hidden -4 -background shadow-2xl bg-muted w-32 h-32 md:w-48 md:h-48">
- <Avatar className="w-full h-full">
- <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} className="object-cover"alt={localUser.name} />
- <AvatarFallback className="text-4xl">{localUser.name.charAt(0)}</AvatarFallback>
- </Avatar>
- 
- {isEditing && (
- <button 
- onClick={() => avatarInputRef.current?.click()} 
- className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
- >
- <Camera className="text-white h-8 w-8"/>
- </button>
- )}
- </div>
- {isSpotifyVerified && (
- <div className="absolute bottom-2 right-2 z-10 bg-background rounded-full p-1 shadow-lg">
- <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-orange-500 fill-current"/>
- </div>
- )}
- <input type="file"hidden ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
- </div>
+  {/* IDENTITY SECTION */}
+  <div className="max-w-7xl mx-auto px-4 md:px-2 -mt-8 md:-mt-12 relative z-30 flex flex-col md:flex-row-reverse items-center md:items-end w-full gap-8 text-white font-sans">
+    {/* Profile Picture */}
+    <div className="relative group flex-shrink-0 md:mr-[-48px]">
+      <div 
+        className="relative overflow-hidden border-2 border-[#0A0A0A] shadow-2xl bg-muted w-20 h-20 md:w-32 h-32"
+        style={{ borderRadius: '100px' }}
+      >
+        <Avatar className="w-full h-full">
+          <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} className="object-cover" alt={localUser.name} />
+          <AvatarFallback className="text-3xl font-black">{localUser.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+        
+        {isEditing && (
+          <button 
+            onClick={() => avatarInputRef.current?.click()} 
+            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Camera className="text-white h-8 w-8"/>
+          </button>
+        )}
+      </div>
+      {isSpotifyVerified && (
+        <div className="absolute bottom-1.5 right-1.5 z-10 bg-[#0A0A0A] rounded-full p-1 shadow-xl flex gap-1 border border-white/5">
+          <CheckCircle className="w-4 h-4 md:w-5 h-5 text-blue-500 fill-current"/>
+          {isVercelVerified && <Globe className="w-4 h-4 md:w-5 h-5 text-blue-500"/>}
+        </div>
+      )}
+      <input type="file" hidden ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
+    </div>
 
- {/* Name, Handle, Stats, and Actions */}
- <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full pb-2">
- <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-4 mb-6">
- {/* Name & Handle */}
- <div className="w-full md:w-auto">
- {isEditing ? (
- <div className="space-y-3 w-full max-w-lg">
- <input type="text"value={localUser.name} onChange={(e) => setLocalUser({...localUser, name: e.target.value})} className="bg-muted/50 rounded-xl px-4 py-3 text-2xl font-bold outline-none text-foreground w-full focus:-orange-500 transition-all"placeholder="Display Name"/>
- <input type="text"value={localUser.username} onChange={(e) => setLocalUser({...localUser, username: e.target.value})} className="bg-muted/50 rounded-xl px-4 py-3 text-sm font-bold outline-none text-orange-500 w-full focus:-orange-500 transition-all"placeholder="@username"/>
- </div>
- ) : (
- <div className="space-y-1">
- <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
- {localUser.name}
- </h1>
- <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
- <span className="text-muted-foreground font-bold text-sm md:text-base">
- @{localUser.username?.replace('@', '') || 'user'}
- </span>
- <span className={cn(
-"px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest",
- localUser.role === 'admin' ?"bg-red-500/10 text-red-500":
- localUser.role === 'artist' ?"bg-orange-500/10 text-orange-500":
-"bg-blue-500/10 text-blue-500"
- )}>
- {localUser.role || 'collector'}
- </span>
- <div className="flex gap-2">
- {localUser.socials?.x && (
- <a href={localUser.socials.x} target="_blank"rel="noopener noreferrer"className="text-muted-foreground hover:text-foreground transition-colors">
- <Satellite className="h-4 w-4"/>
- </a>
- )}
- {localUser.socials?.instagram && (
- <a href={localUser.socials.instagram} target="_blank"rel="noopener noreferrer"className="text-muted-foreground hover:text-foreground transition-colors">
- <span className="text-[10px] font-bold">IG</span>
- </a>
- )}
- </div>
- </div>
- </div>
- )}
- </div>
+    {/* Name, Handle, Stats, and Actions */}
+    <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full pb-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-6 mb-8">
+        {/* Name & Handle */}
+        <div className="w-full md:w-auto">
+          {isEditing ? (
+            <div className="space-y-4 w-full max-w-lg">
+              <input 
+                type="text" 
+                value={localUser.name} 
+                onChange={(e) => setLocalUser({...localUser, name: e.target.value})} 
+                className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-2xl font-black outline-none text-white w-full focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-white/20"
+                placeholder="Display Name"
+              />
+              <input 
+                type="text" 
+                value={localUser.username} 
+                onChange={(e) => setLocalUser({...localUser, username: e.target.value})} 
+                className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm font-bold outline-none text-blue-400 w-full focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-blue-400/20"
+                placeholder="@username"
+              />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 justify-center md:justify-start">
+                <h1 className="text-xl md:text-4xl font-black tracking-tighter text-white drop-shadow-2xl uppercase leading-tight">
+                  {localUser.name}
+                </h1>
+              </div>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                <span className="text-blue-400 font-black text-xs md:text-sm tracking-widest uppercase">
+                  @{localUser.username?.replace('@', '') || 'user'}
+                </span>
+                <span className={cn(
+                  "px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.3em] backdrop-blur-md border",
+                  localUser.role === 'admin' ? "bg-red-500/20 text-red-400 border-red-500/30" :
+                  localUser.role === 'artist' ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
+                  "bg-white/5 text-white/60 border-white/10"
+                )}>
+                  {localUser.role || 'collector'}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
 
- {/* Edit/Save Actions */}
- <div className="flex flex-wrap gap-3 justify-center md:justify-end">
- {localUser.isVerifiedArtist && (
- <button onClick={() => navigate('/artist-dashboard')} className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 rounded-full text-xs font-bold text-white shadow-lg shadow-orange-500/20 transition-all active:scale-95 flex items-center gap-2">
- <BarChart3 className="h-4 w-4"/> Dashboard
- </button>
- )}
- {!isEditing ? (
- <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 bg-muted text-foreground rounded-full font-bold text-sm hover:bg-muted/80 transition-all flex items-center gap-2">
- <Pencil className="h-4 w-4"/> Edit Profile
- </button>
- ) : (
- <div className="flex gap-2">
- <button onClick={() => setIsEditing(false)} className="px-6 py-2.5 bg-muted text-muted-foreground rounded-full font-bold text-sm hover:bg-muted/80 transition-all">Cancel</button>
- <button onClick={handleSave} className="px-6 py-2.5 bg-foreground text-background rounded-full font-bold text-sm hover:bg-orange-500 hover:text-white transition-all shadow-lg">Save Changes</button>
- </div>
- )}
- </div>
- </div>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-4">
+          {isEditing && (
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setIsEditing(false)} 
+                className="px-6 py-2.5 bg-white/5 text-white rounded-full font-black text-[10px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all active:scale-95"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSave} 
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 active:scale-95"
+              >
+                Save Changes
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
 
- {/* Stats Cluster */}
- <div className="flex items-center justify-center md:justify-start gap-8">
- <div className="flex flex-col items-center md:items-start">
- <span className="text-xl font-bold text-foreground">{(localUser.followers || 0).toLocaleString()}</span>
- <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Followers</span>
- </div>
- <div className="flex flex-col items-center md:items-start pl-8">
- <span className="text-xl font-bold text-foreground">{(localUser.following || 0).toLocaleString()}</span>
- <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Following</span>
- </div>
- <Link to="/settings"className="p-2 bg-muted rounded-full hover:bg-muted/80 transition-all ml-2"title="Settings">
- <Settings className="h-5 w-5 text-muted-foreground"/>
- </Link>
- </div>
- </div>
+      {/* Stats Cluster */}
+      <div className="flex items-center justify-center md:justify-start gap-8 pt-4 border-t border-white/5">
+        <div className="flex flex-col items-center md:items-start group cursor-pointer">
+          <span className="text-lg font-black text-white tracking-tight group-hover:text-blue-500 transition-colors">
+            {(localUser.followers || 0).toLocaleString()}
+          </span>
+          <span className="text-[8px] uppercase tracking-[0.3em] text-white/40 font-black mt-1">Followers</span>
+        </div>
+        <div className="flex flex-col items-center md:items-start pl-8 border-l border-white/10 group cursor-pointer">
+          <span className="text-lg font-black text-white tracking-tight group-hover:text-blue-500 transition-colors">
+            {(localUser.following || 0).toLocaleString()}
+          </span>
+          <span className="text-[8px] uppercase tracking-[0.3em] text-white/40 font-black mt-1">Following</span>
+        </div>
+        <Link 
+          to="/settings" 
+          className="p-3 bg-white/5 rounded-full hover:bg-blue-600 transition-all ml-4 border border-white/10 group active:scale-90"
+          title="Settings"
+        >
+          <Settings className="h-4 w-4 text-white group-hover:rotate-90 transition-transform" />
+        </Link>
+      </div>
+    </div>
  </div>
 
  {/* Tab Navigation */}
@@ -489,14 +509,14 @@ const Profile: React.FC = () => {
  onClick={() => setActiveTab(tab.id as any)} 
  className={cn(
 "py-4 text-sm font-bold transition-all relative whitespace-nowrap",
- activeTab === tab.id ?"text-orange-500":"text-muted-foreground hover:text-foreground"
+ activeTab === tab.id ?"text-blue-500":"text-muted-foreground hover:text-foreground"
  )} 
  >
  {tab.label}
  {activeTab === tab.id && (
  <motion.div 
  layoutId="activeTabProfile"
- className="absolute bottom-0 left-0 right-0 h-1 bg-orange-500 rounded-t-full"
+ className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-t-full"
  />
  )}
  </button>
@@ -517,7 +537,7 @@ const Profile: React.FC = () => {
  <div className="lg:col-span-4 space-y-6">
  <div className="bg-background p-6 rounded-2xl shadow-sm">
  <div className="flex items-center gap-3 mb-6">
- <div className="w-1 h-4 bg-orange-500 rounded-full"></div>
+ <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Stats</h3>
  </div>
  <div className="grid grid-cols-2 gap-6">
@@ -528,13 +548,13 @@ const Profile: React.FC = () => {
 
  <div className="bg-background p-6 rounded-2xl shadow-sm">
  <div className="flex items-center gap-3 mb-6">
- <div className="w-1 h-4 bg-orange-500 rounded-full"></div>
+ <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Bio</h3>
  </div>
  
  {isEditing ? (
  <div className="space-y-6">
- <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-xl p-4 text-sm text-foreground outline-none h-40 leading-relaxed bg-muted/50 focus:-orange-500 transition-all resize-none"placeholder="Tell us about yourself..."/>
+ <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-xl p-4 text-sm text-foreground outline-none h-40 leading-relaxed bg-muted/50 focus:-blue-500 transition-all resize-none"placeholder="Tell us about yourself..."/>
  
  <div className="space-y-4">
  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Favorite Genres</p>
@@ -554,7 +574,7 @@ const Profile: React.FC = () => {
  className={cn(
 "px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all",
  isSelected 
- ?"bg-orange-500 text-white"
+ ?"bg-blue-500 text-white"
  :"bg-muted text-muted-foreground hover:bg-muted/80"
  )}
  >
@@ -575,7 +595,7 @@ const Profile: React.FC = () => {
  placeholder={`${platform.toUpperCase()} URL`} 
  value={(localUser.socials as any)?.[platform] || ''} 
  onChange={(e) => handleSocialChange(platform, e.target.value)}
- className="w-full bg-muted/50 rounded-xl px-4 py-2.5 text-xs text-foreground outline-none focus:-orange-500 transition-all"
+ className="w-full bg-muted/50 rounded-xl px-4 py-2.5 text-xs text-foreground outline-none focus:-blue-500 transition-all"
  />
  ))}
  </div>
@@ -588,14 +608,14 @@ const Profile: React.FC = () => {
  </p>
  <div className="mt-6 pt-4 flex items-center justify-between">
  <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">ID: {localUser?.uid?.slice(0, 8) || '...'}</span>
- <Pencil className="h-3 w-3 text-orange-500 opacity-0 group-hover/bio:opacity-100 transition-opacity"/>
+ <Pencil className="h-3 w-3 text-blue-500 opacity-0 group-hover/bio:opacity-100 transition-opacity"/>
  </div>
  </div>
  )}
  </div>
  
  {!isSpotifyVerified && localUser.role === 'collector' && (
- <button onClick={() => setIsVerificationModalOpen(true)} className="w-full py-4 bg-orange-500/10 rounded-2xl text-orange-500 text-xs font-bold uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center gap-3 shadow-sm">
+ <button onClick={() => setIsVerificationModalOpen(true)} className="w-full py-4 bg-blue-500/10 rounded-2xl text-blue-500 text-xs font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center gap-3 shadow-sm">
  <CheckCircle className="h-5 w-5"/> Become an Artist
  </button>
  )}
@@ -615,7 +635,7 @@ const Profile: React.FC = () => {
  {anthemNft && (
  <div className="bg-background p-6 rounded-2xl shadow-sm overflow-hidden relative group">
  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
- <Star className="h-24 w-24 text-orange-500 fill-orange-500"/>
+ <Star className="h-24 w-24 text-blue-500 fill-blue-500"/>
  </div>
  <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
  <div className="w-48 h-48 rounded-xl overflow-hidden shadow-xl flex-shrink-0">
@@ -623,7 +643,7 @@ const Profile: React.FC = () => {
  </div>
  <div className="flex-1 text-center md:text-left">
  <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
- <span className="px-3 py-1 bg-orange-500/10 text-orange-500 rounded-full text-[10px] font-bold uppercase tracking-widest">
+ <span className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-full text-[10px] font-bold uppercase tracking-widest">
  Profile Anthem
  </span>
  </div>
@@ -639,7 +659,7 @@ const Profile: React.FC = () => {
  const track = allTracks.find(t => t.id === anthemNft.trackId);
  if (track) playTrack(track);
  }}
- className="px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-orange-500/20"
+ className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
  >
  <Zap className="h-4 w-4"/> Play Anthem
  </button>
@@ -720,7 +740,7 @@ const Profile: React.FC = () => {
  <div className="flex items-center gap-3 mb-2">
  <span className={cn(
 "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest",
- item.type === 'track' ?"bg-orange-500/10 text-orange-500":"bg-purple-500/10 text-purple-500"
+ item.type === 'track' ?"bg-blue-500/10 text-blue-500":"bg-purple-500/10 text-purple-500"
  )}>
  {item.type === 'track' ? 'New Release' : 'NFT Drop'}
  </span>
@@ -731,7 +751,7 @@ const Profile: React.FC = () => {
  </div>
  <button 
  onClick={() => item.type === 'track' ? playTrack(item as any) : navigate(`/nft/${item.id}`)}
- className="px-6 py-2 bg-orange-500 hover:bg-orange-600 rounded-full text-xs font-bold text-white transition-all shadow-sm"
+ className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-full text-xs font-bold text-white transition-all shadow-sm"
  >
  {item.type === 'track' ? 'Listen' : 'View'}
  </button>
@@ -740,7 +760,7 @@ const Profile: React.FC = () => {
  {followedUserIds.length === 0 && (userProfile.followedArtists?.length || 0) === 0 && (
  <div className="py-12 text-center flex flex-col items-center justify-center bg-muted/30 rounded-3xl">
  <p className="text-muted-foreground font-medium text-sm max-w-xs">Your feed is empty. Follow artists to see their latest releases and updates.</p>
- <button onClick={() => navigate('/discover')} className="mt-6 px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-orange-500/20">Find Artists</button>
+ <button onClick={() => navigate('/discover')} className="mt-6 px-8 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-500/20">Find Artists</button>
  </div>
  )}
  </div>
@@ -761,7 +781,7 @@ const Profile: React.FC = () => {
  <Box className="h-8 w-8 text-muted-foreground/40"/>
  </div>
  <p className="text-muted-foreground font-medium">No items in your collection yet.</p>
- <button onClick={() => navigate('/marketplace')} className="mt-6 px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-orange-500/20"> Browse Marketplace </button>
+ <button onClick={() => navigate('/marketplace')} className="mt-6 px-8 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-500/20"> Browse Marketplace </button>
  </div>
  )}
  </div>
@@ -779,24 +799,24 @@ const Profile: React.FC = () => {
  </div>
  </section>
  <section className="bg-background p-6 rounded-2xl shadow-sm relative overflow-hidden group">
- <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><BarChart3 className="h-16 w-16 text-orange-500"/></div>
+ <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><BarChart3 className="h-16 w-16 text-blue-500"/></div>
  <SectionHeader title="Earnings Dashboard"/>
  <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 relative z-10">
  <div>
  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Total Earned</span>
- <span className="text-2xl font-black text-foreground">{royaltyStats.total} <span className="text-xs text-orange-500">TON</span></span>
+ <span className="text-2xl font-black text-foreground">{royaltyStats.total} <span className="text-xs text-blue-500">TON</span></span>
  </div>
  <div>
  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Streaming</span>
- <span className="text-2xl font-black text-foreground">{royaltyStats.streaming} <span className="text-xs text-orange-500">TON</span></span>
+ <span className="text-2xl font-black text-foreground">{royaltyStats.streaming} <span className="text-xs text-blue-500">TON</span></span>
  </div>
  <div>
  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">NFT Royalties</span>
- <span className="text-2xl font-black text-foreground">{royaltyStats.nft} <span className="text-xs text-orange-500">TON</span></span>
+ <span className="text-2xl font-black text-foreground">{royaltyStats.nft} <span className="text-xs text-blue-500">TON</span></span>
  </div>
  <div>
- <span className="text-[10px] font-bold text-orange-500/60 uppercase tracking-widest block mb-2">Pending</span>
- <span className="text-2xl font-black text-orange-500">{royaltyStats.pending} <span className="text-xs">TON</span></span>
+ <span className="text-[10px] font-bold text-blue-500/60 uppercase tracking-widest block mb-2">Pending</span>
+ <span className="text-2xl font-black text-blue-500">{royaltyStats.pending} <span className="text-xs">TON</span></span>
  </div>
  </div>
  <div className="relative z-10">
@@ -811,7 +831,7 @@ const Profile: React.FC = () => {
  <div className="flex items-center gap-4">
  <div className={cn(
 "w-10 h-10 rounded-full flex items-center justify-center",
- tx.type === 'Streaming' ?"bg-orange-500/10 text-orange-500":"bg-purple-500/10 text-purple-500"
+ tx.type === 'Streaming' ?"bg-blue-500/10 text-blue-500":"bg-purple-500/10 text-purple-500"
  )}>
  {tx.type === 'Streaming' ? <Disc className="h-5 w-5"/> : <Gem className="h-5 w-5"/>}
  </div>
@@ -842,8 +862,8 @@ const Profile: React.FC = () => {
  <PlaylistCard key={pl.id} playlist={pl} onClick={() => navigate(`/playlist/${pl.id}`)} />
  ))}
  <button onClick={() => navigate('/library')} className="aspect-square rounded-2xl flex flex-col items-center justify-center group cursor-pointer transition-all bg-muted/30 hover:">
- <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4 group-hover:bg-orange-500/10 transition-colors">
- <Plus className="text-muted-foreground/40 group-hover:text-orange-500 transition-colors h-6 w-6"/>
+ <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4 group-hover:bg-blue-500/10 transition-colors">
+ <Plus className="text-muted-foreground/40 group-hover:text-blue-500 transition-colors h-6 w-6"/>
  </div>
  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">New Playlist</span>
  </button>
@@ -874,14 +894,14 @@ const Profile: React.FC = () => {
  value={newPostContent}
  onChange={(e) => setNewPostContent(e.target.value)}
  placeholder={currentTrack ? `Share your thoughts on ${currentTrack.title}...` :"What's on your mind?"}
- className="w-full bg-muted/30 rounded-xl p-4 text-sm text-foreground outline-none focus:-orange-500 transition-all resize-none h-32 mb-4"
+ className="w-full bg-muted/30 rounded-xl p-4 text-sm text-foreground outline-none focus:-blue-500 transition-all resize-none h-32 mb-4"
  />
  <div className="flex justify-between items-center">
  <div className="flex items-center gap-3">
  {currentTrack ? (
- <div className="flex items-center gap-2 bg-orange-500/10 px-4 py-2 rounded-full">
- <Disc className="h-4 w-4 text-orange-500"/>
- <span className="text-xs font-bold text-orange-500 truncate max-w-[200px]">
+ <div className="flex items-center gap-2 bg-blue-500/10 px-4 py-2 rounded-full">
+ <Disc className="h-4 w-4 text-blue-500"/>
+ <span className="text-xs font-bold text-blue-500 truncate max-w-[200px]">
  {currentTrack.title}
  </span>
  </div>
@@ -894,7 +914,7 @@ const Profile: React.FC = () => {
  <button 
  type="submit"
  disabled={!newPostContent.trim() && !currentTrack}
- className="px-8 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-orange-500/20"
+ className="px-8 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-500/20"
  >
  Post
  </button>
@@ -951,7 +971,7 @@ const Profile: React.FC = () => {
  {activeTab === 'staking' && (
  <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
  <div className="bg-background p-8 rounded-3xl shadow-sm relative overflow-hidden">
- <div className="absolute top-0 right-0 p-8 opacity-5"><Coins className="h-40 w-40 text-orange-500"/></div>
+ <div className="absolute top-0 right-0 p-8 opacity-5"><Coins className="h-40 w-40 text-blue-500"/></div>
  
  <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
  <div className="space-y-2">
@@ -960,7 +980,7 @@ const Profile: React.FC = () => {
  <h3 className="text-4xl font-black text-foreground">
  {(stakedBalance || 0).toLocaleString()}
  </h3>
- <span className="text-sm font-bold text-orange-500">TJ</span>
+ <span className="text-sm font-bold text-blue-500">TJ</span>
  </div>
  <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
  <TrendingUp className="h-3 w-3"/> +2.4%
@@ -983,10 +1003,10 @@ const Profile: React.FC = () => {
  <div className="space-y-2">
  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rewards</p>
  <div className="flex items-baseline gap-2">
- <h3 className="text-4xl font-black text-orange-500">
+ <h3 className="text-4xl font-black text-blue-500">
  {pendingRewards.toFixed(2)}
  </h3>
- <span className="text-sm font-bold text-orange-500">TJ</span>
+ <span className="text-sm font-bold text-blue-500">TJ</span>
  </div>
  <button onClick={handleClaimRewards} disabled={pendingRewards <= 0} className={cn(
 "mt-4 px-6 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2",
@@ -999,8 +1019,8 @@ const Profile: React.FC = () => {
 
  <div className="relative z-10 p-4 bg-muted/30 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 /50">
  <div className="flex items-center gap-4">
- <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
- <BarChart3 className="h-6 w-6 text-orange-500"/>
+ <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+ <BarChart3 className="h-6 w-6 text-blue-500"/>
  </div>
  <div>
  <p className="text-sm font-bold text-foreground">Governance Active</p>
@@ -1027,8 +1047,8 @@ const Profile: React.FC = () => {
  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Balance: {(walletBalance || 0).toLocaleString()} TJ</span>
  </div>
  <div className="relative">
- <input type="number"value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="0.00"className="w-full bg-muted/30 rounded-2xl p-4 text-2xl font-black text-foreground outline-none focus:-orange-500 transition-all"/>
- <button onClick={() => setStakeAmount(walletBalance.toString())} className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 rounded-full text-[10px] font-bold text-orange-500 uppercase tracking-widest transition-all"> MAX </button>
+ <input type="number"value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="0.00"className="w-full bg-muted/30 rounded-2xl p-4 text-2xl font-black text-foreground outline-none focus:-blue-500 transition-all"/>
+ <button onClick={() => setStakeAmount(walletBalance.toString())} className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 rounded-full text-[10px] font-bold text-blue-500 uppercase tracking-widest transition-all"> MAX </button>
  </div>
  </div>
  
@@ -1067,7 +1087,7 @@ const Profile: React.FC = () => {
 
  {/* RECOMMENDATIONS SECTION */}
  <section className="bg-background p-8 rounded-3xl shadow-sm relative overflow-hidden mt-8">
- <div className="absolute top-0 right-0 p-8 opacity-5"><Satellite className="h-32 w-32 text-orange-500"/></div>
+ <div className="absolute top-0 right-0 p-8 opacity-5"><Satellite className="h-32 w-32 text-blue-500"/></div>
  
  <SectionHeader title="Suggestions"/>
  

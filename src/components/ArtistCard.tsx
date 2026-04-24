@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, UserPlus, UserCheck } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
-import { getPlaceholderImage } from '@/lib/utils';
+import { cn, getPlaceholderImage } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 interface ArtistCardProps {
   artist?: Artist;
@@ -92,16 +93,25 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
         )}
       </div>
       
-      <h3 className={`font-bold text-foreground tracking-tight mb-2 group-hover:text-primary transition-colors truncate w-full ${config.name}`}>
-        {artist.name}
-        {variant !== 'default' && artist.verified && <CheckCircle2 className="w-3 h-3 text-blue-500 inline ml-1" />}
-      </h3>
-      
-      {variant !== 'row' && (
-        <p className="text-[8px] font-bold text-muted-foreground/20 uppercase tracking-widest mb-2">
-          {artist.followers.toLocaleString()} Followers
-        </p>
-      )}
+      <div className={cn("flex flex-col min-w-0 w-full mb-2", variant === 'row' ? "items-start" : "items-center text-center")}>
+        <div className={cn("flex items-center gap-1.5 max-w-full overflow-hidden", variant === 'row' ? "justify-start" : "justify-center")}>
+          <h3 className={cn("font-bold text-foreground tracking-tight group-hover:text-primary transition-colors truncate", config.name)}>
+            {artist.name}
+          </h3>
+          {artist.verified && (
+            <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-none px-1.5 py-0 h-4 shrink-0 flex items-center gap-1 rounded-full hover:bg-blue-500/20 transition-colors">
+              <CheckCircle2 className="w-2.5 h-2.5" />
+              <span className="text-[8px] font-black uppercase tracking-widest mt-[0.5px]">Verified</span>
+            </Badge>
+          )}
+        </div>
+        
+        {variant !== 'row' && (
+          <p className="text-[8px] font-bold text-muted-foreground/20 uppercase tracking-widest mt-0.5">
+            {artist.followers.toLocaleString()} Followers
+          </p>
+        )}
+      </div>
       
       <button 
         onClick={handleFollowClick}

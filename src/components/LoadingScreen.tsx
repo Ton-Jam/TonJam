@@ -1,65 +1,42 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { APP_LOGO } from "@/constants";
 import { motion } from "motion/react";
 
 const LoadingScreen: React.FC = () => {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          return 100;
-        }
-        /* Simulate variable loading speed */
-        const increment = Math.random() * 15;
-        return Math.min(prev + increment, 100);
-      });
-    }, 200);
-
-    return () => clearInterval(timer);
-  }, []);
-
   return (
     <motion.div 
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.8 }}
       className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center overflow-hidden"
     >
-      <div className="relative z-10 flex flex-col items-center">
-        <div className="mb-2 relative">
-          <motion.img
-            layoutId="app-logo"
-            src={APP_LOGO}
-            alt="TonJam"
-            className="w-[107px] h-[107px] md:w-[139px] md:h-[139px] object-contain"
-            animate={{ 
-              rotate: 360,
-              opacity: progress >= 90 ? 0 : 1 
-            }}
-            transition={{ 
-              rotate: { duration: 8, repeat: Infinity, ease: "linear" },
-              opacity: { duration: 0.5 }
-            }}
-          />
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center text-white text-4xl font-black tracking-tighter"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: progress >= 90 ? 1 : 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            TonJam
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Progress Bar Container at the bottom */}
-      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-neutral-800 overflow-hidden">
+      <div className="relative z-10 flex flex-col items-center gap-8">
         <motion.div
-          className="h-full bg-neutral-500 transition-all duration-200 ease-out"
-          style={{ width: `${progress}%` }}
-        ></motion.div>
+          animate={{ rotate: 360 }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        >
+          <img
+            src={APP_LOGO}
+            alt="TonJam Icon"
+            className="w-[106px] h-[106px] md:w-[146px] md:h-[146px] object-contain drop-shadow-[0_0_20px_rgba(37,99,235,0.4)]"
+            referrerPolicy="no-referrer"
+          />
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: [0, 1, 0.4, 1], scale: [0.95, 1, 0.98, 1] }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            repeatType: "reverse",
+            ease: "easeInOut",
+            delay: 0.5
+          }}
+        >
+          <h1 className="text-[24px] md:text-[42px] font-black text-white tracking-[0.3em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            TonJam
+          </h1>
+        </motion.div>
       </div>
     </motion.div>
   );

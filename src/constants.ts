@@ -276,6 +276,114 @@ Everything is clear in the neon light`
       tokenType: 'jetton'
     }
   },
+  { 
+    id: '12', 
+    songId: 'song-12',
+    title: 'Midnight Bourbon', 
+    artist: 'Smooth Operator', 
+    artistId: 'a7', 
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Midnight%20Bourbon%20Jazz?width=400&height=400&nologo=true', 
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', 
+    duration: 255, 
+    genre: 'Jazz', 
+    mood: 'Chill',
+    isNFT: true, 
+    artistVerified: true, 
+    price: '3.5', 
+    bpm: 78, 
+    key: 'Bb maj', 
+    bitrate: '320kbps', 
+    playCount: 4200, 
+    likes: 310, 
+    releaseDate: '2024-04-01',
+    createdAt: '2024-04-01T00:00:00Z'
+  },
+  { 
+    id: '13', 
+    songId: 'song-13',
+    title: 'Concrete Jungle', 
+    artist: 'Urban Flow', 
+    artistId: 'a8', 
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Concrete%20Jungle%20Hip%20Hop?width=400&height=400&nologo=true', 
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', 
+    duration: 180, 
+    genre: 'Hip Hop', 
+    mood: 'Energetic',
+    isNFT: false, 
+    artistVerified: true, 
+    bpm: 95, 
+    key: 'C min', 
+    bitrate: '320kbps', 
+    playCount: 15400, 
+    likes: 1240, 
+    releaseDate: '2024-04-05',
+    createdAt: '2024-04-05T00:00:00Z'
+  },
+  { 
+    id: '14', 
+    songId: 'song-14',
+    title: 'Eternal Resonance', 
+    artist: 'Serenity Strings', 
+    artistId: 'a9', 
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Eternal%20Resonance%20Classical?width=400&height=400&nologo=true', 
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', 
+    duration: 420, 
+    genre: 'Classical', 
+    mood: 'Melancholic',
+    isNFT: true, 
+    artistVerified: false, 
+    price: '15.0', 
+    bpm: 65, 
+    key: 'D min', 
+    bitrate: 'FLAC', 
+    playCount: 2100, 
+    likes: 450, 
+    releaseDate: '2024-04-10',
+    createdAt: '2024-04-10T00:00:00Z'
+  },
+  { 
+    id: '15', 
+    songId: 'song-15',
+    title: 'Voltage Peak', 
+    artist: 'Electric Storm', 
+    artistId: 'a10', 
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Voltage%20Peak%20Rock?width=400&height=400&nologo=true', 
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', 
+    duration: 215, 
+    genre: 'Rock', 
+    mood: 'Energetic',
+    isNFT: false, 
+    artistVerified: true, 
+    bpm: 145, 
+    key: 'E maj', 
+    bitrate: '320kbps', 
+    playCount: 8900, 
+    likes: 560, 
+    releaseDate: '2024-04-15',
+    createdAt: '2024-04-15T00:00:00Z'
+  },
+  { 
+    id: '16', 
+    songId: 'song-16',
+    title: 'Rainy Window', 
+    artist: 'Chill Coffee', 
+    artistId: 'a11', 
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Rainy%20Window%20Lo-Fi?width=400&height=400&nologo=true', 
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3', 
+    duration: 165, 
+    genre: 'Lo-Fi', 
+    mood: 'Focus',
+    isNFT: true, 
+    artistVerified: true, 
+    price: '1.5', 
+    bpm: 82, 
+    key: 'F maj', 
+    bitrate: '320kbps', 
+    playCount: 25000, 
+    likes: 4200, 
+    releaseDate: '2024-04-20',
+    createdAt: '2024-04-20T00:00:00Z'
+  },
 ];
 
 import { Zap, Moon, Waves, Sparkles, Factory, Coffee, Headphones, Guitar, Music, Piano } from 'lucide-react';
@@ -488,6 +596,27 @@ export const MOCK_NFTS: NFTItem[] = [
     history: [],
     offers: []
   },
+  { 
+    id: 'n6', 
+    trackId: '12', 
+    title: 'Midnight Bourbon: Vintage Cask #001', 
+    owner: 'Smooth Operator', 
+    creator: 'Smooth Operator', 
+    price: '25', 
+    imageUrl: 'https://image.pollinations.ai/prompt/music%20nft%20Midnight%20Bourbon%20Vintage%20Cask?width=600&height=600&nologo=true', 
+    edition: 'Unique',
+    listingType: 'fixed',
+    contractAddress: 'EQSmooth_Operator_Jazz_001',
+    royaltySplits: [{ address: 'Smooth Operator', percentage: 10.0 }],
+    stems_available: true,
+    description: 'A smooth, vintage jazz NFT. Granting access to live improv sessions.',
+    traits: [
+      { trait_type: 'Genre', value: 'Jazz' },
+      { trait_type: 'Rarity', value: 'Exotic' }
+    ],
+    history: [],
+    offers: []
+  },
 ];
 
 export const MOCK_ARTISTS: Artist[] = [
@@ -620,6 +749,101 @@ export const MOCK_ARTISTS: Artist[] = [
       nftSaleSplits: [{ address: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2', percentage: 0.10, label: 'Main Artist' }]
     },
     earnings: { streaming: 8.4, nftSales: 22.1, total: 30.5 }
+  },
+  { 
+    uid: 'a7', 
+    name: 'Smooth Operator', 
+    username: '@smooth_operator',
+    walletAddress: 'UQJazzMan_j1a2_z3z4_m5a6_n7n8',
+    avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Jazz%20Musician?width=200&height=200&nologo=true', 
+    followers: 4500, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Jazz',
+    bio: "Setting the mood with classic jazz standards and original compositions.",
+    bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Jazz%20Club?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/smooth_jazz' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQJazzMan_j1a2_z3z4_m5a6_n7n8', percentage: 0.05, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQJazzMan_j1a2_z3z4_m5a6_n7n8', percentage: 0.10, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 4.1, nftSales: 15.2, total: 19.3 }
+  },
+  { 
+    uid: 'a8', 
+    name: 'Urban Flow', 
+    username: '@urbanflow',
+    walletAddress: 'UQHipHop_h1i2_p3h4_o5p6_u7r8',
+    avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Hip%20Hop%20Artist?width=200&height=200&nologo=true', 
+    followers: 32000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Hip Hop',
+    bio: "The voice of the TON streets. Real words, real beats.",
+    bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Urban%20Graffiti?width=1200&height=400&nologo=true",
+    socials: { instagram: 'https://instagram.com/urban_flow' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQHipHop_h1i2_p3h4_o5p6_u7r8', percentage: 0.04, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQHipHop_h1i2_p3h4_o5p6_u7r8', percentage: 0.08, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 25.4, nftSales: 12.1, total: 37.5 }
+  },
+  { 
+    uid: 'a9', 
+    name: 'Serenity Strings', 
+    username: '@serenity_strings',
+    walletAddress: 'UQClassical_c1l2_a3s4_s5i6_c7a8',
+    avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Classical%20Pianist?width=200&height=200&nologo=true', 
+    followers: 1200, 
+    verified: false,
+    isVerifiedArtist: false,
+    genre: 'Classical',
+    bio: "Modern classical interpretations for the digital age.",
+    bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Concert%20Hall?width=1200&height=400&nologo=true",
+    socials: { website: 'https://serenitystrings.com' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQClassical_c1l2_a3s4_s5i6_c7a8', percentage: 0.03, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQClassical_c1l2_a3s4_s5i6_c7a8', percentage: 0.05, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 1.5, nftSales: 22.0, total: 23.5 }
+  },
+  { 
+    uid: 'a10', 
+    name: 'Electric Storm', 
+    username: '@electric_storm',
+    walletAddress: 'UQRock_r1o2_c3k4_s5t6_o7r8',
+    avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Rock%20Guitarist?width=200&height=200&nologo=true', 
+    followers: 8500, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Rock',
+    bio: "High voltage rock and roll. Amplifying the TON ecosystem.",
+    bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Rock%20Stage?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/electric_rock' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQRock_r1o2_c3k4_s5t6_o7r8', percentage: 0.05, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQRock_r1o2_c3k4_s5t6_o7r8', percentage: 0.10, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 9.8, nftSales: 18.5, total: 28.3 }
+  },
+  { 
+    uid: 'a11', 
+    name: 'Chill Coffee', 
+    username: '@chillcoffee',
+    walletAddress: 'UQLoFi_l1o2_f3i4_c5o6_f7f8',
+    avatarUrl: 'https://image.pollinations.ai/prompt/artist%20avatar%20Lo-Fi%20Producer?width=200&height=200&nologo=true', 
+    followers: 42000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Lo-Fi',
+    bio: "Beats to study, chill, and relax to. Your daily coffee companion.",
+    bannerUrl: "https://image.pollinations.ai/prompt/artist%20banner%20Cosy%20Cafe?width=1200&height=400&nologo=true",
+    socials: { spotify: 'https://spotify.com/artist/chillcoffee' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQLoFi_l1o2_f3i4_c5o6_f7f8', percentage: 0.02, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQLoFi_l1o2_f3i4_c5o6_f7f8', percentage: 0.04, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 4.2, nftSales: 8.4, total: 12.6 }
   },
 ];
 

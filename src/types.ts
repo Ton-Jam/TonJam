@@ -300,6 +300,7 @@ export interface UserProfile {
   followedArtists?: string[];
   followedUserIds?: string[];
   likedTrackIds?: string[];
+  likedNftIds?: string[];
   friends?: string[];
   favoriteGenres?: string[];
   transactions?: Transaction[];
@@ -384,14 +385,17 @@ export interface WithdrawalRequest {
 export interface Task {
   id: string;
   title: string;
+  subtitle?: string;
   description: string;
   reward: string;
   points: number;
   completed: boolean;
   claimed: boolean;
-  type: 'daily' | 'achievement' | 'milestone' | 'seasonal';
+  type: 'daily' | 'achievement' | 'milestone' | 'seasonal' | 'one-time' | 'referral' | 'boost' | 'onchain';
   progress: number;
   total: number;
+  color?: string;
+  iconName?: string;
   dueDate?: string;
   rarity?: 'common' | 'rare' | 'epic' | 'legendary';
   priority?: 'high' | 'medium' | 'low';

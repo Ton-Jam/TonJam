@@ -44,6 +44,7 @@ import CreatePlaylistModal from './CreatePlaylistModal';
 import AuthModal from './AuthModal';
 import ScrollToTopButton from './ScrollToTopButton';
 import AIAssistant from './AIAssistant';
+import { MintTrackDialog } from './MintTrackDialog';
 import { Button } from "@/components/ui/button"
 import { ButtonGroupInput } from './ButtonGroupInput';
 import {
@@ -167,6 +168,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isUserProfile = location.pathname.startsWith('/user/') || location.pathname === '/profile';
   const isPlayer = location.pathname === '/player';
   const isPostDetail = location.pathname.startsWith('/post/');
+  const isTrendingNFTs = location.pathname === '/trending-nfts';
 
   const getSearchPlaceholder = () => {
     const path = location.pathname;
@@ -245,36 +247,36 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
             ) : (
               <>
-                <BackButton 
-                  className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all"
-                  ariaLabel="Go back"
-                />
-                <div className="flex items-center gap-2 lg:hidden w-full">
-                  {(isJamspace || isLibrary || isMarketplace) && isHeaderSearchOpen ? (
-                    <input 
-                      type="text" 
-                      placeholder="Search..." 
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={handleSearch}
-                      className="bg-transparent border-none outline-none text-sm w-full text-foreground placeholder:text-muted-foreground"
-                      autoFocus
-                    />
-                  ) : (
-                    <span className="font-bold text-sm tracking-tight text-foreground uppercase truncate max-w-[100px]">
-                      {isJamspace ? 'JamSpace' : isPostDetail ? 'Post' : (location.pathname.split('/')[1] || '').replace('-', ' ')}
-                    </span>
-                  )}
-                </div>
+                  <BackButton 
+                    className={`p-3 rounded-full hover:bg-muted transition-all ${isTrendingNFTs ? 'text-white' : 'text-zinc-500 dark:text-muted-foreground hover:text-foreground'}`}
+                    ariaLabel="Go back"
+                  />
+                  <div className="flex items-center gap-2 lg:hidden w-full">
+                    {(isJamspace || isLibrary || isMarketplace || isTrendingNFTs) && isHeaderSearchOpen ? (
+                      <input 
+                        type="text" 
+                        placeholder="Search..." 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearch}
+                        className={`bg-transparent border-none outline-none text-sm w-full placeholder:text-muted-foreground/50 ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
+                        autoFocus
+                      />
+                    ) : (
+                      <span className={`font-bold text-sm tracking-tight uppercase truncate max-w-[100px] ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}>
+                        {isJamspace ? 'JamSpace' : isPostDetail ? 'Post' : (location.pathname.split('/')[1] || '').replace('-', ' ')}
+                      </span>
+                    )}
+                  </div>
               </>
             )}
 
             {!isHome && !isDiscover && (
               <>
-                {(isJamspace || isLibrary || isMarketplace || isPostDetail) && !isHeaderSearchOpen && (
+                {(isJamspace || isLibrary || isMarketplace || isPostDetail || isTrendingNFTs) && !isHeaderSearchOpen && (
                   <div className="hidden lg:flex items-center gap-2 ml-4 flex-1">
-                    <span className="font-bold text-lg tracking-tight text-foreground uppercase truncate">
-                      {isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Post'}
+                    <span className={`font-bold text-lg tracking-tight uppercase truncate ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}>
+                      {isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Post')}
                     </span>
                   </div>
                 )}
@@ -290,7 +292,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   trendingTopics={trendingTopics}
                   placeholder={getSearchPlaceholder()}
                   className={`hidden lg:flex flex-1 relative transition-all duration-300 ${isSearchOpen ? 'max-w-6xl' : 'max-w-2xl'}`}
-                  inputClassName="bg-muted/50 border-none rounded-full py-2.5 pl-5 pr-10 text-sm focus:outline-none focus:bg-blue-500/10 transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
+                  inputClassName={`border-none rounded-full py-2.5 pl-5 pr-10 text-sm focus:outline-none transition-all placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500 ${isTrendingNFTs ? 'bg-white/5 text-white focus:bg-white/10' : 'bg-muted/50 text-foreground focus:bg-blue-500/10'}`}
                 >
                   {filteredResults && (
                     <div className="p-4 space-y-4">
@@ -429,7 +431,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
 
             {/* Notification Icon & Marketplace Filters */}
-            {(isMarketplace || isJamspace || isLibrary) && (
+            {(isMarketplace || isJamspace || isLibrary || isTrendingNFTs) && (
               <div className="flex items-center gap-1.5">
                 {(isMarketplace) && (
                   <DropdownMenu onOpenChange={(open) => { if (!open) setActiveFilterSubMenu(null); }}>
@@ -628,13 +630,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
-                {(isJamspace || isLibrary || isMarketplace) && (
+                {(isJamspace || isLibrary || isMarketplace || isTrendingNFTs) && (
                   <button 
                     onClick={() => setIsHeaderSearchOpen(!isHeaderSearchOpen)}
                     className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Search"
                   >
-                    <MagnifyingGlassIcon className="h-6 w-6 text-white" strokeWidth={2.5} />
+                    <MagnifyingGlassIcon className={`h-6 w-6 ${isTrendingNFTs ? 'text-white' : 'text-zinc-500 dark:text-muted-foreground'}`} strokeWidth={2.5} />
                   </button>
                 )}
                 {isLibrary && (
@@ -648,7 +650,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
               </div>
             )}
-                {!isJamspace && !isLibrary && !isMarketplace && (
+                {!isJamspace && !isLibrary && !isMarketplace && !isTrendingNFTs && (
                   <button 
                     onClick={() => navigate('/notifications')} 
                     className="p-2.5 rounded-full hover:bg-muted text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -658,18 +660,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </button>
                 )}
 
-            {/* Wallet & User Avatar / Sign In */}
             {userAddress && !isLibrary && !isJamspace ? (
               <div className="flex items-center gap-1">
-                <div className="hidden sm:block px-3 py-1.5 text-xs font-mono text-white">
-                  {userAddress.slice(0, 4)}...{userAddress.slice(-4)}
-                </div>
+                {!isTrendingNFTs && (
+                  <div className={`hidden sm:block px-3 py-1.5 text-xs font-mono text-foreground/60`}>
+                    {userAddress.slice(0, 4)}...{userAddress.slice(-4)}
+                  </div>
+                )}
                 <button 
                   onClick={() => tonConnectUI.disconnect()}
-                  className="p-2 rounded-full hover:bg-white/10 text-white transition-all"
+                  className="p-2 rounded-full hover:bg-white/10 text-white transition-all flex items-center gap-1"
                   title="Disconnect Wallet"
                 >
-                  <ArrowRightOnRectangleIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
+                  <WalletIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
+                  <ArrowRightOnRectangleIcon className="h-[18px] w-[18px] opacity-40" strokeWidth={2.5} />
                 </button>
               </div>
             ) : (!isLibrary && !isJamspace && !userAddress) ? (
@@ -678,7 +682,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="px-3 py-2 text-white rounded-full text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-1"
               >
                 <WalletIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
-                <span className="hidden sm:inline">Connect Wallet</span>
+                {!isTrendingNFTs && <span className="hidden sm:inline">Connect Wallet</span>}
               </button>
             ) : null}
               {isDiscover && (
@@ -690,7 +694,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <FunnelIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
               </button>
             )}
-            {!isMarketplace && !isDiscover && !isLibrary && (user ? (
+            {!isMarketplace && !isDiscover && !isLibrary && !isTrendingNFTs && (user ? (
               <Link to="/profile" className="relative hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full ml-1" aria-label="View Profile">
                 <Avatar className="w-9 h-9">
                   <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt={user.displayName || 'User'} className="object-cover" />
@@ -752,7 +756,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full ${isPlayer || isExplore || isPostDetail ? '' : 'pt-16'} ${isPlayer || isPostDetail ? '' : 'lg:ml-64'} relative z-10 overflow-x-hidden pb-24`}>
+      <main id="main-content" className={`transition-all w-full flex-1 ${isPlayer || isExplore || isPostDetail ? '' : 'pt-16'} ${isPlayer || isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden pb-24 min-h-screen`}>
         <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>
@@ -889,15 +893,18 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             <ArrowUpTrayIcon className="h-5 w-5" />
             <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Upload Track</span>
           </Link>
-          <Link 
-            to="/mint"
-            onClick={onNavigate}
-            className="w-full flex items-center gap-4 px-6 py-4 rounded-[12px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            aria-label="Mint new NFT"
-          >
-            <PlusCircleIcon className="h-5 w-5" />
-            <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
-          </Link>
+          
+          <div onClick={onNavigate}>
+            <MintTrackDialog>
+              <button 
+                className="w-full flex items-center gap-4 px-6 py-4 rounded-[12px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left"
+                aria-label="Mint new NFT"
+              >
+                <PlusCircleIcon className="h-5 w-5" />
+                <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
+              </button>
+            </MintTrackDialog>
+          </div>
         </div>
       ) : (
         <div className="pt-4 space-y-3">

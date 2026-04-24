@@ -213,7 +213,7 @@ const JamSpace: React.FC = () => {
             <div className="mt-8 bg-muted/30 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold">Live Jam Rooms</h3>
-                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
               </div>
               <div className="space-y-3">
                 {[
@@ -225,8 +225,8 @@ const JamSpace: React.FC = () => {
                     onClick={() => activeJamRoom?.id === room.id ? leaveJamRoom() : joinJamRoom(room.id)}
                     className="flex items-center gap-3 p-2 rounded-xl hover:bg-foreground/5 cursor-pointer transition-all"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                      <room.icon className="h-5 w-5 text-orange-500" />
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <room.icon className="h-5 w-5 text-blue-500" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold truncate">{room.name}</p>

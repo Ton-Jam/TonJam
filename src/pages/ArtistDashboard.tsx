@@ -17,9 +17,10 @@ import {
 import { motion } from "motion/react";
 import { BackButton } from "@/components/BackButton";
 import { useAudio } from "@/context/AudioContext";
-import ConfigureMintingModal from "@/components/ConfigureMintingModal";
+import NFTMetadataModal from "@/components/NFTMetadataModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
 import TrackUploadModal from "@/components/TrackUploadModal";
+import SongRequestsTab from "@/components/SongRequestsTab";
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
@@ -311,10 +312,22 @@ export default function ArtistDashboard() {
             )}
           </div>
         </div>
+
+        {/* Management Module for Song Requests */}
+        <div className="pt-8 border-t border-white/5 space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-1 h-6 bg-pink-500 rounded-full"></div>
+            <h2 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Audience Requests</h2>
+          </div>
+          <div className="bg-white/5 border border-white/10 p-6 rounded-3xl">
+            <SongRequestsTab artistId={user.uid} isOwnProfile={true} />
+          </div>
+        </div>
+
       </div>
 
       {selectedTrackForConfig && (
-        <ConfigureMintingModal 
+        <NFTMetadataModal 
           track={selectedTrackForConfig}
           isOpen={isConfigModalOpen}
           onClose={() => setIsConfigModalOpen(false)}

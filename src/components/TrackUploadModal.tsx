@@ -28,6 +28,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     listingType: 'fixed' as 'fixed' | 'auction',
     auctionDuration: '7',
     editions: '1',
+    rarity: 'Common',
+    royaltySplits: [{ address: userProfile?.walletAddress || '', percentage: 100 }] as { address: string; percentage: number }[],
   });
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -91,6 +93,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         isNFT: formData.isNFT,
         price: formData.isNFT ? formData.price : undefined,
         streamingPrice: formData.streamingPrice,
+        royaltySplits: formData.isNFT ? formData.royaltySplits : undefined,
+        rarity: formData.isNFT ? formData.rarity : undefined,
         playCount: 0,
         likes: 0,
         releaseDate: new Date().toISOString().split('T')[0],
@@ -154,6 +158,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
       listingType: 'fixed',
       auctionDuration: '7',
       editions: '1',
+      rarity: 'Common',
+      royaltySplits: [{ address: userProfile?.walletAddress || '', percentage: 100 }],
     });
     setAudioFile(null);
     setCoverFile(null);
@@ -385,6 +391,78 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                             />
                           </div>
                         )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Rarity Gradient</label>
+                        <select 
+                          value={formData.rarity}
+                          onChange={(e) => setFormData({...formData, rarity: e.target.value})}
+                          className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
+                        >
+                          <option value="Common">Common</option>
+                          <option value="Uncommon">Uncommon</option>
+                          <option value="Rare">Rare</option>
+                          <option value="Legendary">Legendary</option>
+                          <option value="Mythic">Mythic</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Royalty Configuration (%)</label>
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              const newSplits = [...formData.royaltySplits, { address: '', percentage: 0 }];
+                              setFormData({...formData, royaltySplits: newSplits});
+                            }}
+                            className="text-[9px] font-bold text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-[0.2em]"
+                          >
+                            + Add Node
+                          </button>
+                        </div>
+                        <div className="space-y-2 max-h-32 overflow-y-auto pr-2 no-scrollbar">
+                          {formData.royaltySplits.map((split, idx) => (
+                            <div key={idx} className="flex gap-2 items-center">
+                              <input 
+                                type="text"
+                                placeholder="TON Wallet Address"
+                                value={split.address}
+                                onChange={(e) => {
+                                  const newSplits = [...formData.royaltySplits];
+                                  newSplits[idx].address = e.target.value;
+                                  setFormData({...formData, royaltySplits: newSplits});
+                                }}
+                                className="flex-1 bg-foreground/[0.02] border border-border/50 rounded-[4px] p-1.5 text-[10px] text-foreground outline-none"
+                              />
+                              <input 
+                                type="number"
+                                placeholder="%"
+                                value={split.percentage}
+                                onChange={(e) => {
+                                  const newSplits = [...formData.royaltySplits];
+                                  newSplits[idx].percentage = parseInt(e.target.value || '0');
+                                  setFormData({...formData, royaltySplits: newSplits});
+                                }}
+                                className="w-16 bg-foreground/[0.02] border border-border/50 rounded-[4px] p-1.5 text-[10px] text-foreground outline-none"
+                              />
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  const newSplits = formData.royaltySplits.filter((_, i) => i !== idx);
+                                  setFormData({...formData, royaltySplits: newSplits});
+                                }}
+                                className="text-muted-foreground/40 hover:text-red-500 transition-colors"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                          <div className="text-[8px] font-bold text-right text-muted-foreground/40 mt-1">
+                            Total Split: {formData.royaltySplits.reduce((s, c) => s + c.percentage, 0)}%
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

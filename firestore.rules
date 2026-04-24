@@ -1,134 +1,181 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      return isAuthenticated() &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-          (request.auth.token.email == "krusherkrupy@gmail.com" && request.auth.token.email_verified == true));
+    
+    // 🛡️ PILLAR 0: Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
     }
 
-    function getWalletAddress(userId) {
-      return get(/databases/$(database)/documents/users/$(userId)).data.get('walletAddress', '');
+    // 🔧 Phase 3: Primitives & Global Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    // Admin check looks for an entry in /admins/ or a hardcoded bootstrap admin
+    function isAdmin() { 
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) || 
+        request.auth.token.email == "krusherkrupy@gmail.com"
+      ); 
     }
 
+    // 🧪 PILLAR 2: Validation Blueprints (The "Anti-Update-Gap")
+    
+    function isValidUser(data) {
+      return data.uid is string && data.uid.size() <= 128
+        && data.name is string && data.name.size() <= 100
+        && data.username is string && data.username.size() <= 50
+        && data.email is string && data.email.size() <= 256
+        && (!data.keys().contains('bio') || (data.bio is string && data.bio.size() <= 1000))
+        && (!data.keys().contains('avatar') || (data.avatar is string && data.avatar.size() <= 2048));
+    }
+
+    function isValidTrack(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.title is string && data.title.size() <= 200
+        && data.artistId is string && data.artistId.size() <= 128
+        && data.createdAt is string; // Seeder uses string, production might use timestamp
+    }
+
+    function isValidNFT(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.title is string && data.title.size() <= 200
+        && data.price is string && data.price.size() <= 20;
+    }
+
+    function isValidPost(data) {
+      return data.userId is string && data.userId.size() <= 128
+        && data.content is string && data.content.size() <= 2000;
+    }
+
+    // 👤 USERS
     match /users/{userId} {
       allow read: if true;
-      allow write: if isOwner(userId);
-      
-      match /tasks/{taskId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
-      }
+      allow create: if isSignedIn() && isOwner(userId) && isValidUser(incoming()) && isValidId(userId);
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          isOwner(userId) && isValidUser(incoming()) &&
+          incoming().uid == existing().uid &&
+          // Action: Profile Update (Restrict sensitive fields)
+          incoming().diff(existing()).affectedKeys().hasOnly(['name', 'username', 'bio', 'avatar', 'bannerUrl', 'socials', 'walletAddress', 'anthemId', 'likedTrackIds', 'followedUserIds'])
+        ) || (
+          // Action: Public Stats Increment (e.g. followers)
+          incoming().diff(existing()).affectedKeys().hasOnly(['followers', 'following', 'earnings', 'streamingEarnings', 'nftEarnings', 'jamBalance', 'stakedJam', 'pendingJamRewards'])
+        )
+      );
+      allow delete: if isAdmin();
     }
+
+    // 🎵 TRACKS (Pillar 1: Master Gate)
     match /tracks/{trackId} {
       allow read: if true;
-      // TODO: Harden write access to artist-only
-      allow write: if isAuthenticated();
+      allow create: if isSignedIn() && isValidTrack(incoming()) && isValidId(trackId) && (
+        isAdmin() || isOwner(incoming().artistId)
+      );
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          isOwner(existing().artistId) && isValidTrack(incoming()) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'audioUrl', 'coverUrl', 'genre', 'isExplicit', 'albumId'])
+        ) || (
+          // Action: Engagement Stats
+          incoming().diff(existing()).affectedKeys().hasOnly(['playCount', 'likes', 'jamScore', 'mintedCount'])
+        )
+      );
+      allow delete: if isAdmin() || isOwner(existing().artistId);
     }
+
+    // 🖼 NFTS
     match /nfts/{nftId} {
       allow read: if true;
-      // TODO: Harden write access to owner-only
-      allow write: if isAuthenticated();
+      allow create: if isSignedIn() && isValidNFT(incoming()) && isValidId(nftId);
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          (isOwner(existing().ownerId) || isOwner(existing().owner)) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['isListed', 'listingType', 'price', 'expiry', 'offers'])
+        ) || (
+          // Action: Transfer Ownership
+          (isOwner(existing().ownerId) || isOwner(existing().owner) || isAdmin()) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['ownerId', 'owner', 'isListed', 'price'])
+        )
+      );
+      allow delete: if isAdmin();
     }
-    match /follows/{followId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-    match /comments/{commentId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-    match /reactions/{reactionId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-    match /playlists/{playlistId} {
-      allow read: if true;
-      // TODO: Harden write access to creator-only
-      allow write: if isAuthenticated();
-    }
-    match /sponsoredContent/{contentId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
+
+    // 🧠 POSTS & INTERACTIONS
     match /posts/{postId} {
       allow read: if true;
-      // TODO: Harden write access to author-only
-      allow write: if isAuthenticated();
-      
-      match /comments/{commentId} {
-        allow read: if true;
-        allow write: if isAuthenticated();
-      }
-      
-      match /likes/{userId} {
-        allow read: if isAuthenticated();
-        allow write: if isOwner(userId);
-      }
+      allow create: if isSignedIn() && isValidPost(incoming()) && isValidId(postId) && isOwner(incoming().userId);
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          isOwner(existing().userId) && 
+          incoming().diff(existing()).affectedKeys().hasOnly(['content', 'imageUrl', 'mediaType', 'tags'])
+        ) || (
+          incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'commentsCount', 'reposts'])
+        )
+      );
+      allow delete: if isAdmin() || isOwner(existing().userId);
     }
-    match /songRequests/{requestId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-    }
-    match /fanEngagement/{engagementId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-    }
-    match /transactions/{transactionId} {
-      function isValidTransaction(data) {
-        return data.amount is number && 
-               data.type is string && 
-               data.status in ['pending', 'completed', 'failed'] &&
-               data.get('recipientAddress', '') is string && data.get('recipientAddress', '').size() < 100 &&
-               (!('senderAddress' in data) || (data.senderAddress is string && data.senderAddress.size() < 100)) &&
-               (!('trackTitle' in data) || (data.trackTitle is string && data.trackTitle.size() < 200)) &&
-               (!('txHash' in data) || (data.txHash is string && data.txHash.size() < 200));
-      }
 
-      function isTransactionOwner(data) {
-        let wallet = getWalletAddress(request.auth.uid);
-        let participants = data.get('participants', []);
-        return request.auth.uid in participants ||
-               request.auth.uid == data.get('userId', '') ||
-               request.auth.uid == data.get('senderAddress', '') || 
-               request.auth.uid == data.get('recipientAddress', '') ||
-               (wallet != '' && (wallet == data.get('senderAddress', '') || wallet == data.get('recipientAddress', '')));
-      }
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isOwner(incoming().followerId) && isValidId(followId);
+      allow delete: if isSignedIn() && isOwner(existing().followerId);
+    }
 
-      allow read: if isAuthenticated() && isTransactionOwner(resource.data);
-      allow create: if isAuthenticated() && isValidTransaction(request.resource.data) && isTransactionOwner(request.resource.data);
-      allow update, delete: if false;
-    }
-    match /taskCompletions/{completionId} {
-      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
-      allow write: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
-    }
-    match /messages/{messageId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-    }
-    match /communities/{communityId} {
+    match /likes/{likeId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidId(likeId);
+      allow delete: if isSignedIn() && isOwner(existing().userId);
     }
-    match /subscriptions/{subscriptionId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-    }
-    match /artists/{artistId} {
+
+    match /playlists/{playlistId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow create: if isSignedIn() && isOwner(incoming().creator) && isValidId(playlistId);
+      allow update: if isSignedIn() && (isAdmin() || isOwner(existing().creator));
+      allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().creator));
     }
-    match /nftSales/{saleId} {
+
+    // 💸 TRANSACTIONS (Pillar 7: Atomicity / Persistence)
+    match /transactions/{txId} {
+      // Transaction history is private to participants or admins
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.userId) || 
+        request.auth.uid in resource.data.get('participants', []) || 
+        isAdmin()
+      );
+      // Transactions are typically created by the system/user and then are IMMUTABLE
+      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidId(txId);
+      allow update, delete: if false; // Pillar 7: Transactions must be immutable
+    }
+
+    // 🚀 ADMIN CONTROLLED
+    match /sponsoredContent/{id} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /tasks/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /communities/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /admins/{userId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Only manageable through Firebase Console or Cloud Functions
+    }
+
+    // 🧪 CONNECTION TEST
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

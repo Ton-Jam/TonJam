@@ -275,23 +275,23 @@ const FullPlayer: React.FC = () => {
 
       <div className="relative z-10 flex flex-col min-h-full">
         {/* Header */}
-        <div className="z-30 flex items-center justify-between p-[14px] bg-background/10 backdrop-blur-md">
+        <div className="z-30 flex items-center justify-between py-2 px-4 bg-transparent mt-[1px]">
           <button 
             onClick={() => setFullPlayerOpen(false)}
-            className="p-2 -ml-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
+            className="p-1 -ml-1 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
             aria-label="Close full player"
           >
-            <ChevronDownIcon className="h-8 w-8" />
+            <ChevronDownIcon className="h-6 w-6" />
           </button>
           <div className="text-center flex flex-col items-center">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50">Now Playing</span>
-            <span className="text-xs font-bold text-foreground tracking-tight mt-1">TonJam Network</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/50">Now Playing</span>
+            <span className="text-[10px] font-bold text-foreground tracking-tight">TonJam Network</span>
           </div>
           <button 
-            className="p-2 -mr-2 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
+            className="p-1 -mr-1 text-foreground/80 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
             aria-label="More options"
           >
-            <EllipsisHorizontalIcon className="h-6 w-6" />
+            <EllipsisHorizontalIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -300,7 +300,7 @@ const FullPlayer: React.FC = () => {
           {/* 1. Main Player Section */}
           <section className="w-full flex flex-col pt-4">
             {/* Album Art */}
-            <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 relative group">
+            <div className="w-full aspect-square rounded-[14px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 relative group">
               <img 
                 src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} 
                 alt={currentTrack.title} 

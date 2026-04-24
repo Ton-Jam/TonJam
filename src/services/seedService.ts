@@ -69,21 +69,39 @@ export const seedDatabase = async () => {
       }
     }
 
-    // Check if artists collection is empty
-    const artistsQuery = query(collection(db, 'artists'), limit(1));
-    const artistsSnapshot = await getDocs(artistsQuery);
+    // Check if users collection is empty (seeds for artists)
+    const usersQuery = query(collection(db, 'users'), limit(1));
+    const usersSnapshot = await getDocs(usersQuery);
 
-    if (artistsSnapshot.empty) {
-      console.log('Seeding artists...');
+    if (usersSnapshot.empty) {
+      console.log('Seeding artists into users collection...');
       for (const artist of MOCK_ARTISTS) {
         try {
-          await setDoc(doc(db, 'artists', artist.uid), {
-            ...artist,
-            id: artist.uid,
+          await setDoc(doc(db, 'users', artist.uid), {
+            uid: artist.uid,
+            name: artist.name,
+            username: artist.name.toLowerCase().replace(/\s+/g, '_'),
+            email: `${artist.name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+            avatar: artist.avatarUrl,
+            bannerUrl: artist.bannerUrl,
+            bio: artist.bio,
+            isVerifiedArtist: true,
+            role: 'artist',
+            walletAddress: artist.walletAddress || '',
+            followers: artist.followers || 0,
+            following: 0,
+            earnings: 0,
+            streamingEarnings: 0,
+            nftEarnings: 0,
+            jamBalance: 500,
+            stakedJam: 0,
+            pendingJamRewards: 0,
+            likedTrackIds: [],
+            followedUserIds: [],
             createdAt: new Date().toISOString(),
           });
         } catch (err) {
-          console.error(`Failed to seed artist ${artist.uid}:`, err);
+          console.error(`Failed to seed artist user ${artist.uid}:`, err);
           throw err;
         }
       }

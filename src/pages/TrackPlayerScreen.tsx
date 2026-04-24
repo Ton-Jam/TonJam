@@ -134,7 +134,7 @@ export default function TrackPlayerScreen() {
       <div className="relative z-10 p-4 flex items-center justify-between">
         <div className="text-center">
           <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Now Playing</p>
-          <p className="text-[11px] font-black uppercase tracking-widest text-cyan-400">Protocol 0.1</p>
+          <p className="text-[11px] font-black uppercase tracking-widest text-blue-500">Protocol 0.1</p>
         </div>
         <button 
           onClick={handleShare}
@@ -159,7 +159,7 @@ export default function TrackPlayerScreen() {
           <h1 className="text-xl font-semibold">
             {track.title}
           </h1>
-          <p className="text-gray-400 mt-1 cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => navigate(`/artist/${track.artistId}`)}>
+          <p className="text-gray-400 mt-1 cursor-pointer hover:text-blue-500 transition-colors" onClick={() => navigate(`/artist/${track.artistId}`)}>
             {track.artist}
           </p>
         </div>
@@ -175,7 +175,7 @@ export default function TrackPlayerScreen() {
       <div className="flex justify-center mt-6 relative z-10">
         <button
           onClick={handlePlay}
-          className="bg-cyan-400 text-black w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(56,189,248,0.3)]"
+          className="bg-blue-500 text-black w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(56,189,248,0.3)]"
         >
           {isPlaying && currentTrack?.id === track.id ? (
             <Pause className="w-8 h-8 fill-current" />
@@ -236,11 +236,11 @@ export default function TrackPlayerScreen() {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Add a comment..."
-            className="w-full bg-[#121821] border border-white/5 rounded-xl py-3 px-4 pr-12 text-sm focus:outline-none focus:border-cyan-500/50 transition-all placeholder:text-white/30"
+            className="w-full bg-[#121821] border border-white/5 rounded-xl py-3 px-4 pr-12 text-sm focus:outline-none focus:border-blue-600/50 transition-all placeholder:text-white/30"
           />
           <button 
             onClick={handlePostComment}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-cyan-400 hover:scale-110 transition-transform"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-blue-500 hover:scale-110 transition-transform"
           >
             <Send className="w-4 h-4" />
           </button>

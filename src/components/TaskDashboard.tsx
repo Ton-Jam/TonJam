@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getTasks, Task, claimTaskReward } from '@/services/taskService';
+import { getTasks, claimTaskReward } from '@/services/taskService';
+import { Task } from '@/types';
 import TaskCard from './TaskCard';
 import TaskDetailModal from './TaskDetailModal';
 
@@ -16,7 +17,10 @@ const TaskDashboard: React.FC = () => {
   }, []);
 
   const handleClaim = async (taskId: string) => {
-    await claimTaskReward(taskId);
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    await claimTaskReward(taskId, parseInt(task.reward) || 50, task.points || 0);
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, claimed: true } : t));
   };
 

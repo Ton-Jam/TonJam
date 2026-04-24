@@ -27,6 +27,7 @@ const mintSchema = z.object({
   })),
   supply: z.string().min(1, 'Supply is required'),
   price: z.string().min(1, 'Price is required'),
+  listNow: z.boolean().optional(),
   audioFile: z.any().optional(),
   coverFile: z.any().optional(),
   audioPreview: z.string().min(1, 'Audio is required'),
@@ -75,6 +76,7 @@ const MintNFT: React.FC = () => {
       royaltySplits: track?.royaltySplits || [{ address: userAddress || '', percentage: 100 }],
       supply: track?.editions || '100',
       price: track?.price || '5',
+      listNow: true,
       audioPreview: track?.audioUrl || '',
       coverPreview: track?.coverUrl || '',
       traits: [
@@ -264,6 +266,7 @@ const MintNFT: React.FC = () => {
           { trait_type: 'Rarity', value: data.rarity || 'Common' }
         ] as NFTTrait[],
         royaltySplits: data.royaltySplits,
+        listingType: data.listNow ? 'fixed' : undefined,
         exclusiveContent: data.exclusiveContent.filter(e => e.title && e.url).map(e => ({
           ...e,
           id: `ex-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -509,6 +512,10 @@ const MintNFT: React.FC = () => {
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Supply</label>
                     <input {...register('supply')} type="number" className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" aria-label="Supply" />
                   </div>
+                  <div className="space-y-4 flex items-center gap-3 pt-2 pl-4">
+                    <input {...register('listNow')} type="checkbox" id="listNow" className="w-4 h-4 bg-muted/50 rounded-[4px] accent-blue-600 cursor-pointer" />
+                    <label htmlFor="listNow" className="text-[10px] font-bold text-foreground uppercase tracking-widest cursor-pointer">Auto-list on Marketplace after mint</label>
+                  </div>
                 </div>
 
                 <div className="space-y-4 sm:space-y-4">
@@ -624,6 +631,11 @@ const MintNFT: React.FC = () => {
                         <span className="text-[10px] sm:text-xs font-bold text-foreground">{mintData.rarity}</span>
                       </div>
                     </div>
+                    {mintData.listNow && (
+                      <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-4 py-2 rounded-full w-fit">
+                        <Rocket className="h-3 w-3" /> Auto-listing Enabled
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="h-px bg-muted/50"></div>

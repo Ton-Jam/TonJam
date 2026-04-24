@@ -21,6 +21,9 @@
   :root,
   .light {
     --radius: 0.75rem;
+    --page-margin: 1rem;
+    --page-margin-md: 2rem;
+    --page-margin-lg: 3rem;
 
     /* Core Surfaces */
     --background: oklch(0.985 0.005 250);              /* soft white-blue */
@@ -80,6 +83,9 @@
   }
 
   .dark {
+    --page-margin: 1rem;
+    --page-margin-md: 2rem;
+    --page-margin-lg: 3rem;
     --background: oklch(0.08 0.01 260);                /* deep premium black-blue */
     --foreground: oklch(0.985 0 0);
 
@@ -161,6 +167,23 @@
   
   .glass-button {
     @apply bg-white/[0.05] hover:bg-white/[0.1] active:scale-95 transition-all rounded-[8px] px-4 py-2 text-sm font-bold uppercase tracking-widest;
+  }
+  
+  .page-container {
+    @apply px-[var(--page-margin)] md:px-[var(--page-margin-md)] lg:px-[var(--page-margin-lg)] w-full max-w-7xl mx-auto;
+  }
+  
+  .section-container {
+    @apply mb-12 sm:mb-16;
+  }
+
+  .scroll-row {
+    @apply flex overflow-x-auto gap-4 pb-4 -mx-[var(--page-margin)] px-[var(--page-margin)] md:-mx-[var(--page-margin-md)] md:px-[var(--page-margin-md)] lg:-mx-[var(--page-margin-lg)] lg:px-[var(--page-margin-lg)];
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scroll-row::-webkit-scrollbar {
+    display: none;
   }
 }
 

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap, Filter, Bell, Rocket } from 'lucide-react';
+import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap, Filter, Bell, Rocket, Box } from 'lucide-react';
 import { MOCK_NFTS, TON_LOGO, MOCK_USER, MOCK_ARTISTS, MOCK_TRACKS } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
 import NFTCard from '@/components/NFTCard';
@@ -366,7 +366,7 @@ const Marketplace: React.FC = () => {
                   <div className="w-1 h-4 bg-primary rounded-full" />
                   <h2 className="text-[12px] font-bold tracking-tighter uppercase text-foreground/90">Trending Track NFTs</h2>
                 </div>
-                <button onClick={() => navigate('/explore/nfts?filter=trending_tracks')} className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-widest hover:text-primary transition-all flex items-center group">
+                <button onClick={() => navigate('/trending-nfts')} className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-widest hover:text-primary transition-all flex items-center group">
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -420,6 +420,33 @@ const Marketplace: React.FC = () => {
 
             {/* 6. MAIN MARKET GRID */}
             <section className="mb-4">
+              {activeTab === 'My NFTs' && (
+                <div className="bg-blue-600/10 border border-blue-500/20 rounded-[24px] p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
+                      <Box className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">Your Digital Inventory</h3>
+                      <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-1">Manage and list your sonic artifacts on the marketplace</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-8">
+                    <div className="text-center">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Assets</p>
+                      <p className="text-xl font-black text-white">{myNfts.length}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Listed</p>
+                      <p className="text-xl font-black text-emerald-400">{myNfts.filter(n => n.listingType).length}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Unlisted</p>
+                      <p className="text-xl font-black text-amber-400">{myNfts.filter(n => !n.listingType).length}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className="w-1.5 h-10 bg-foreground/10 rounded-full"></div>

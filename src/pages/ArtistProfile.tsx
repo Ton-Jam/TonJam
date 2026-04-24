@@ -10,7 +10,8 @@ import {
  Globe, 
  Send, 
  CheckCircle, 
- Edit, 
+ Settings,
+ LayoutDashboard, Edit, 
  Upload, 
  Plus, 
  ShieldCheck, 
@@ -59,6 +60,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import ArtistProfileHeader from '@/components/ArtistProfileHeader';
 import ArtistVerification from '@/components/ArtistVerification';
 import RequestSongModal from '@/components/RequestSongModal';
+import SongRequestsTab from '@/components/SongRequestsTab';
 
 const ArtistProfile: React.FC = () => {
  const { id } = useParams<{ id: string }>();
@@ -70,7 +72,6 @@ const ArtistProfile: React.FC = () => {
  const [showVerifyModal, setShowVerifyModal] = useState(false);
  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
- const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
  const [isEditingBio, setIsEditingBio] = useState(false);
  const [editedBio, setEditedBio] = useState("");
  const fileInputRef = useRef<HTMLInputElement>(null);
@@ -367,7 +368,7 @@ const ArtistProfile: React.FC = () => {
   href={href.startsWith('http') ? href : `https://${href}`} 
   target="_blank" 
   rel="noopener noreferrer"
-  className="p-2.5 bg-background shadow-lg shadow-black/20 rounded-xl text-muted-foreground hover:text-orange-500 hover:scale-110 active:scale-95 transition-all group"
+  className="p-2.5 bg-background shadow-lg shadow-black/20 rounded-xl text-muted-foreground hover:text-blue-500 hover:scale-110 active:scale-95 transition-all group"
   title={label}
   >
   <Icon className="w-4 h-4" />
@@ -485,75 +486,75 @@ const ArtistProfile: React.FC = () => {
  <>
  <div className={cn("animate-in fade-in duration-1000 pb-20 min-h-screen font-sans bg-background", themeClass)}>
  {/* 1. CINEMATIC BANNER */}
- <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
+  
+ <div className="relative h-[40vh] md:h-[50vh] overflow-hidden group">
  <div 
  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
  style={{ backgroundImage: `url(${customBanner || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1200, 400)})` }}
  />
- <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+  
+  {/* Extreme Left Actions ON Cover Picture */}
+  {!isOwnProfile && artist && (
+    <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3">
+      <button 
+        onClick={handleFollow} 
+        className={cn(
+          "px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all shadow-2xl backdrop-blur-md active:scale-95",
+          isFollowing 
+            ? "bg-white/10 text-white border border-white/20" 
+            : "bg-blue-600 text-white shadow-blue-600/40"
+        )}
+      >
+        {isFollowing ? 'Following' : 'Follow'}
+      </button>
+      <button 
+        onClick={() => {
+          navigator.share?.({ title: artist.name, url: window.location.href })
+            .catch(() => {
+              navigator.clipboard.writeText(window.location.href);
+              addNotification("Link copied", "success");
+            });
+        }}
+        className="p-3 bg-white/10 text-white rounded-full hover:bg-blue-600 transition-all border border-white/10 backdrop-blur-md shadow-xl active:scale-90"
+      >
+        <Share2 className="h-5 w-5" />
+      </button>
+    </div>
+  )}
  
  {/* Banner Upload Trigger */}
- {isOwnProfile && (
- <div className="absolute top-6 right-6 z-40">
- <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-all shadow-lg hover:scale-110 active:scale-90">
- <Camera className="h-5 w-5"/>
- </button>
- <input type="file"ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden"/>
- </div>
- )}
- </div>
-
- {/* 2. IDENTITY & ACTIONS */}
- <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-30">
- <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-8 pb-10">
- <ArtistProfileHeader artist={artist} onTip={handleTip} />
  
- <div className="flex items-center gap-4 pb-4">
- {!isOwnProfile && (
- <>
- <button 
- onClick={handleFollow} 
- className={cn(
-"px-10 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:scale-105 active:scale-95",
- isFollowing 
- ?"bg-muted text-foreground"
- :"bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20"
- )}
- >
- {isFollowing ? 'Following' : 'Follow'}
- </button>
- <button 
- onClick={() => {
- navigator.share?.({ title: artist.name, url: window.location.href })
- .catch(() => {
- navigator.clipboard.writeText(window.location.href);
- addNotification("Link copied","success");
- });
- }}
- className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-all shadow-sm hover:scale-105 active:scale-95"
- >
- <Share2 className="h-5 w-5"/>
- </button>
- </>
- )}
- {isOwnProfile && (
-  <>
-  {!artist.verified && (
-  <button onClick={() => setShowVerifyModal(true)} className="px-8 py-3 bg-blue-600 text-white rounded-full font-bold text-sm hover:bg-blue-500 transition-all shadow-sm flex items-center gap-2">
-  <ShieldCheck className="h-4 w-4" />
-  Verify Artist
-  </button>
+ </div>
+ 
+   <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-30">
+    <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-8 pb-10">
+      <div className="flex-1 w-full">
+        <ArtistProfileHeader 
+          artist={artist} 
+          onTip={handleTip} 
+          onEditProfile={() => setShowEditProfileModal(true)}
+          isOwnProfile={isOwnProfile} 
+        />
+      </div>
+    </div>
+  </div>
+  {/* Action Section (Moved to Banner) */}
+  <div id="artist-profile-content-anchor" className="max-w-7xl mx-auto md:h-12 flex items-center group">
+    {/* Anchor for tabs or other content */}
+  </div>
+  {isOwnProfile && (
+    <>
+      {!artist.verified && (
+        <button onClick={() => setShowVerifyModal(true)} className="px-8 py-3 bg-blue-600 text-white rounded-full font-bold text-sm hover:bg-blue-500 transition-all shadow-sm flex items-center gap-2 mb-4 ml-4 md:ml-6">
+          <ShieldCheck className="h-4 w-4" />
+          Verify Artist
+        </button>
+      )}
+    </>
   )}
-  <button onClick={() => setShowEditProfileModal(true)} className="px-8 py-3 bg-muted text-foreground rounded-full font-bold text-sm hover:bg-muted/80 transition-all shadow-sm">
-  Edit Profile
-  </button>
-  </>
-  )}
- </div>
- </div>
- </div>
 
- {/* 3. TABS NAVIGATION */}
+  {/* 3. TABS NAVIGATION */}
  <div className="sticky top-[var(--header-height,64px)] z-40 bg-background/95 backdrop-blur-xl mb-8">
  <div className="max-w-7xl mx-auto px-4 md:px-6">
  <div className="flex items-center gap-10 overflow-x-auto no-scrollbar">
@@ -563,14 +564,14 @@ const ArtistProfile: React.FC = () => {
  onClick={() => setActiveTab(tab as any)} 
  className={cn(
 "py-5 text-sm font-bold transition-all relative whitespace-nowrap uppercase tracking-widest",
- activeTab === tab ?"text-orange-500":"text-muted-foreground hover:text-foreground"
+ activeTab === tab ?"text-blue-500":"text-muted-foreground hover:text-foreground"
  )} 
  >
  {tab === 'signals' ? 'Feed' : tab === 'collection' ? 'NFTs' : tab.charAt(0).toUpperCase() + tab.slice(1)}
  {activeTab === tab && (
  <motion.div 
  layoutId="activeTabArtist"
- className="absolute bottom-0 left-0 right-0 h-1 bg-orange-500 rounded-t-full"
+ className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-t-full"
  />
  )}
  </button>
@@ -611,7 +612,7 @@ const ArtistProfile: React.FC = () => {
  {isOwnProfile && (
  <button 
  onClick={() => setIsEditingBio(!isEditingBio)}
- className="text-[10px] font-bold text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors"
+ className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors"
  >
  {isEditingBio ? 'Cancel' : 'Edit'}
  </button>
@@ -623,12 +624,12 @@ const ArtistProfile: React.FC = () => {
  <textarea
  value={editedBio}
  onChange={(e) => setEditedBio(e.target.value)}
- className="w-full bg-background/50 rounded-2xl p-4 text-sm text-foreground focus:ring-2 focus:ring-orange-500/20 focus:-orange-500 outline-none transition-all min-h-[150px] resize-none"
+ className="w-full bg-background/50 rounded-2xl p-4 text-sm text-foreground focus:ring-2 focus:ring-blue-500/20 focus:-blue-500 outline-none transition-all min-h-[150px] resize-none"
  placeholder="Tell your story..."
  />
  <button 
  onClick={handleSaveBio}
- className="w-full py-3 bg-orange-500 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 hover:scale-105 active:scale-95"
+ className="w-full py-3 bg-blue-500 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 hover:scale-105 active:scale-95"
  >
  Save Biography
  </button>
@@ -649,7 +650,7 @@ const ArtistProfile: React.FC = () => {
  <section>
  <div className="flex items-center justify-between mb-8">
  <h3 className="text-xl font-black text-foreground tracking-tight">Popular Releases</h3>
- <button onClick={() => playAll(artistTracks)} className="flex items-center gap-2 text-xs font-bold text-orange-500 uppercase tracking-widest hover:text-orange-400 transition-colors">
+ <button onClick={() => playAll(artistTracks)} className="flex items-center gap-2 text-xs font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">
  <Play className="h-4 w-4 fill-current"/> Play All
  </button>
  </div>
@@ -688,7 +689,7 @@ const ArtistProfile: React.FC = () => {
  <div className="grid grid-cols-1 gap-4">
  {topTracks.map((track, idx) => (
  <div key={track.id} className="group flex items-center gap-6 p-4 rounded-2xl bg-muted/20 /50">
- <span className="text-xs font-black text-orange-500 w-4">{idx + 1}</span>
+ <span className="text-xs font-black text-blue-500 w-4">{idx + 1}</span>
  <div className="relative w-12 h-12 rounded-lg overflow-hidden">
  <img src={track.coverUrl} className="w-full h-full object-cover"alt=""/>
  </div>
@@ -735,7 +736,7 @@ const ArtistProfile: React.FC = () => {
  {artistPosts.map(post => (
  <div key={post.id} className="bg-muted/30 rounded-3xl p-8 /50 backdrop-blur-sm space-y-6">
  <div className="flex items-center gap-4">
- <img src={artist.avatarUrl} className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-500/20"alt=""/>
+ <img src={artist.avatarUrl} className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-500/20"alt=""/>
  <div>
  <h4 className="text-sm font-bold text-foreground">{artist.name}</h4>
  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{post.timestamp}</p>
@@ -748,13 +749,13 @@ const ArtistProfile: React.FC = () => {
  </div>
  )}
  <div className="flex items-center gap-8 pt-4 /50">
- <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-orange-500 transition-colors">
+ <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-blue-500 transition-colors">
  <Heart className="h-4 w-4"/> {post.likes}
  </button>
- <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-orange-500 transition-colors">
+ <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-blue-500 transition-colors">
  <MessageCircle className="h-4 w-4"/> {post.comments}
  </button>
- <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-orange-500 transition-colors">
+ <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-blue-500 transition-colors">
  <Share2 className="h-4 w-4"/> Share
  </button>
  </div>
@@ -786,7 +787,7 @@ const ArtistProfile: React.FC = () => {
  </div>
  <div className="space-y-1">
  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Verified</p>
- <p className="text-sm font-bold text-orange-500">Yes</p>
+ <p className="text-sm font-bold text-blue-500">Yes</p>
  </div>
  </div>
  </div>
@@ -863,14 +864,8 @@ const ArtistProfile: React.FC = () => {
  )}
 
  {activeTab === 'requests' && (
- <section className="glass bg-foreground/[0.01] p-6 rounded-[12px] animate-in fade-in duration-700">
- <div className="flex items-center justify-between mb-6">
- <div className="flex items-center gap-4">
- <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
- <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Song Requests</h2>
- </div>
- <button onClick={() => setIsRequestModalOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Request a Song</button>
- </div>
+ <section className="animate-in fade-in duration-700">
+ <SongRequestsTab artistId={artist.uid} isOwnProfile={isOwnProfile} />
  </section>
  )}
 
@@ -1354,7 +1349,6 @@ const ArtistProfile: React.FC = () => {
  <div className="h-32"></div>
  {showVerifyModal && artist && <VerifyArtistModal onClose={() => setShowVerifyModal(false)} artistName={artist.name} />}
  {showEditProfileModal && <EditArtistProfileModal artist={artist} onClose={() => setShowEditProfileModal(false)} />}
- {isRequestModalOpen && <RequestSongModal artistId={artist.uid} artistName={artist.name} onClose={() => setIsRequestModalOpen(false)} />}
  
  {selectedNftForListing && (
  <SellNFTModal 
