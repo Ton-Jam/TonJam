@@ -15,7 +15,7 @@ export const getArtistSonicDNA = async (artist: Artist, tracks: Track[]) => {
     const ai = getClient();
     if (!ai) throw new Error("No API Key");
 
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-3.1-pro-preview";
     const prompt = `Analyze the sonic profile of artist "${artist.name}" based on these tracks: ${tracks.map(t => t.title).join(", ")}. 
     The artist's bio is: "${artist.bio}".
     Return a JSON object with:
@@ -57,7 +57,7 @@ export const semanticSearchTracks = async (query: string, allTracks: Track[]) =>
     const ai = getClient();
     if (!ai) throw new Error("No API Key");
 
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-3.1-pro-preview";
     const prompt = `The user is searching for music with the query: "${query}".
     Here is a list of available tracks: ${JSON.stringify(allTracks.map(t => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist })))}.
     Return a JSON array of track IDs that best match the user's intent, ordered by relevance.`;
@@ -92,7 +92,7 @@ export const generateNFTLore = async (title: string, genre: string, baseDescript
     const ai = getClient();
     if (!ai) throw new Error("No API Key");
 
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-3.1-pro-preview";
     const prompt = `Generate a short, compelling lore or backstory for a music NFT titled "${title}". 
     The genre is ${genre}. 
     Base description: ${baseDescription}
@@ -118,7 +118,7 @@ export const analyzeRelatedArtists = async (artistName: string, allArtists: Arti
     const ai = getClient();
     if (!ai) throw new Error("No API Key");
 
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-3.1-pro-preview";
     const prompt = `Given the artist "${artistName}", find 3 similar artists from this list: ${allArtists.map(a => a.name).join(", ")}.
     Return a JSON array of artist names.`;
 

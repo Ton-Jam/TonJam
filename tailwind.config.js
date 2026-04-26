@@ -9,6 +9,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],
+        heading: ['Poppins', 'sans-serif'],
+        mono: ['Poppins', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

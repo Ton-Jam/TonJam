@@ -95,6 +95,7 @@ interface AudioContextType {
   setGenesisContractAddress: (address: string | null) => void;
   userTracks: Track[];
   userNFTs: NFTItem[];
+  userBids: NFTItem[];
   allTracks: Track[];
   allNFTs: NFTItem[];
   artists: Artist[];
@@ -468,10 +469,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [firestoreTracks, setFirestoreTracks] = useState<Track[]>([]);
   const [firestoreNFTs, setFirestoreNFTs] = useState<NFTItem[]>([]);
 
+  const [userBids, setUserBids] = useState<NFTItem[]>([]);
+
   // Sync with Firebase
   useEffect(() => {
     let unsubs: (() => void)[] = [];
     let isMounted = true;
+    
+    // Add a mapping for user bids from MOCK data or local storage
+    const savedBids = localStorage.getItem('tonjam_user_bids');
+    if (savedBids) {
+      setUserBids(JSON.parse(savedBids));
+    } else {
+      // Mock some initial bids for demonstration
+      const initialBids = MOCK_NFTS.filter(n => n.listingType === 'auction').slice(0, 2);
+      setUserBids(initialBids);
+    }
     
     // Add a strict mode rapid mount/unmount delay for Firestore
     const timer = setTimeout(() => {
@@ -1653,7 +1666,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       // Also update the comment count on the post
       await updateDoc(doc(db, 'posts', postId), {
-        comments: increment(1)
+        commentsCount: increment(1)
       });
       
       addNotification("Comment posted", "success");
@@ -1852,10 +1865,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Increment streams
       const trackRef = doc(db, 'tracks', track.id);
       await updateDoc(trackRef, {
-        streams: increment(1)
-      });
+        playCount: increment(1)
+      }).catch(console.warn);
       
-      let sourceUrl = track.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+      let sourceUrl = track.audioUrl || 'https://storage.googleapis.com/media-session/sintel/snow-fight.mp3';
       let highFidelity = false;
       let exclusive = null;
 
@@ -1902,9 +1915,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 if (fallbackPromise !== undefined) {
                   fallbackPromise.catch(e => {
                     // Second try: Fallback URL
-                    console.warn("Same URL without CORS failed, trying SoundHelix fallback...", e);
+                    console.warn("Same URL without CORS failed, trying fallback...", e);
                     if (audioRef.current) {
-                      audioRef.current.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+                      audioRef.current.src = 'https://storage.googleapis.com/media-session/sintel/snow-fight.mp3';
                       audioRef.current.play().catch(err => {
                         if (err.name !== 'AbortError' && !err.message?.includes('interrupted')) {
                           console.error("Fallback failed:", err);
@@ -2428,7 +2441,7 @@ Return a JSON object with the following structure:
 `;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.1-pro-preview',
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
@@ -2703,7 +2716,7 @@ Return a JSON object with the following structure:
       toggleLikeTrack, toggleFollowUser, closePlayer, setFullPlayerOpen, toggleShuffle, toggleRepeat,
       addNotification, setTrackToAddToPlaylist, setOptionsTrack, setActivePlaylistId, addTrackToPlaylist,
       removeTrackFromPlaylist, reorderTrackInPlaylist, searchTracks, searchArtists, searchNFTs, createNewPlaylist, deletePlaylist, updatePlaylist,
-      generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs,
+      generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs, userBids,
       allTracks, allNFTs, artists, firestoreUsers, setArtists, addUserTrack, updateTrack, addUserNFT, updateNFT, recordTransaction, depositTON, withdrawTON, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
       posts, createPost, addCommentToPost, toggleLikePost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, completeTask, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, mintNFT, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,

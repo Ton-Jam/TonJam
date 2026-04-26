@@ -133,6 +133,40 @@
         "content": { "type": "string" },
         "timestamp": { "type": "string", "format": "date-time" }
       }
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "User comment on content",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "targetId": { "type": "string" },
+        "userId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Like": {
+      "title": "Like",
+      "description": "User like on content",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "targetId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "TaskCompletion": {
+      "title": "TaskCompletion",
+      "description": "Record of a user completing a task",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "claimedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -152,6 +186,18 @@
       "schema": "Post",
       "description": "Social feed"
     },
+    "/posts/{postId}/likes/{likeId}": {
+      "schema": "Like",
+      "description": "Likes on a post"
+    },
+    "/posts/{postId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments on a post"
+    },
+    "/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Global comments collection"
+    },
     "/transactions/{transactionId}": {
       "schema": "Transaction",
       "description": "Platform transactions"
@@ -168,9 +214,9 @@
       "schema": "Follow",
       "description": "Follow relationships"
     },
-    "/messages/{messageId}": {
-      "schema": "Message",
-      "description": "Direct messages"
+    "/taskCompletions/{id}": {
+      "schema": "TaskCompletion",
+      "description": "Task completions"
     }
   }
 }

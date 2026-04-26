@@ -23,6 +23,7 @@ import {
   MapPinIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,6 +42,7 @@ import UserCard from '@/components/UserCard';
 import TrackCard from '@/components/TrackCard';
 import SocialFeed from '@/components/SocialFeed';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
+import JamChat from '@/components/JamChat';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 import { Post, Track } from '@/types';
@@ -115,7 +117,7 @@ const JamSpace: React.FC = () => {
 
   const filteredPosts = useMemo(() => {
     let basePosts = [...posts];
-    
+
     // 1. Tab Filtering
     if (activeTab === 'Following') {
       basePosts = basePosts.filter(p => followedUserIds.includes(p.userId));
@@ -193,6 +195,7 @@ const JamSpace: React.FC = () => {
                 { id: 'notifications', label: 'Notifications', icon: BellIcon, path: '/notifications' },
                 { id: 'messages', label: 'Messages', icon: EnvelopeIcon, path: '/messages' },
                 { id: 'bookmarks', label: 'Bookmarks', icon: BookmarkIcon, path: '/bookmarks' },
+                { id: 'genesis', label: 'Genesis', icon: SparklesIcon, path: '/genesis-forge' },
                 { id: 'profile', label: 'Profile', icon: UserIcon, path: '/profile' },
               ].map(item => (
                 <button 
@@ -240,6 +243,11 @@ const JamSpace: React.FC = () => {
 
           {/* Center Column: Main Feed (X-style) */}
           <main className="lg:col-span-6 min-h-screen">
+            {/* Featured Carousel */}
+            <div className="px-2 pt-2 md:px-0 mb-4 rounded-xl overflow-hidden shadow-2xl shadow-blue-500/10">
+              <AutoCarousel items={carouselItems} />
+            </div>
+
             {/* Header Tabs & Filters */}
             <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
               <div className="flex">
@@ -375,14 +383,10 @@ const JamSpace: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Action Button (Mobile) */}
-      <button 
-        className="fixed bottom-24 right-4 sm:right-8 z-50 w-14 h-14 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:hidden"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        aria-label="Create Post"
-      >
-        <PlusIcon className="w-7 h-7" strokeWidth={2.5} />
-      </button>
+      {/* JamRoom Chat Overlay */}
+       <AnimatePresence>
+         {activeJamRoom && <JamChat />}
+       </AnimatePresence>
     </div>
   );
 };

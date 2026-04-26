@@ -28,7 +28,7 @@ const PlaylistCoverGenerator: React.FC<PlaylistCoverGeneratorProps> = ({ isOpen,
       // First, generate a descriptive prompt for the image based on the tracks
       const trackInfo = tracks.slice(0, 10).map(t => `${t.title} by ${t.artist} (${t.genre})`).join(', ');
       const promptResponse = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.1-pro-preview',
         contents: `Create a highly descriptive and artistic prompt for an image generation model to create a playlist cover for a playlist titled "${playlist.title}". The playlist contains tracks like: ${trackInfo}. The style should be modern, vibrant, and reflect the mood of the music. Return only the prompt text.`,
       });
 

@@ -5,10 +5,19 @@ import { useAudio } from '@/context/AudioContext';
 import { GoogleGenAI, Type, FunctionDeclaration } from '@google/genai';
 import { useNavigate } from 'react-router-dom';
 
+const DjAvatar = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <img 
+    src="https://i.postimg.cc/xTLKZSLt/6d505d9a-49d7-41cd-9fe7-27d1e40636ac-removalai-preview.png" 
+    alt="Dj krupy" 
+    className={`${className} rounded-full object-cover`} 
+    crossOrigin="anonymous" 
+  />
+);
+
 const AIAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'user' | 'model'; text: string }[]>([
-    { role: 'model', text: "Yo! I'm krupy, your AI DJ and Web3 music guide. 🎧 I'm here to help you navigate the TonJam universe—whether you're looking for the hottest new tracks, want to understand how music NFTs work, or need a custom playlist for your next session. What's the vibe today?" }
+    { role: 'model', text: "Yo yo! I'm Dj krupy! 🎧 Ready to drop some beats or explore the Web3 TonJam universe? What's the vibe today? Let's go! 🚀" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +45,7 @@ const AIAssistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '' });
 
       const playTrackFunction: FunctionDeclaration = {
         name: 'playTrack',
@@ -77,29 +86,23 @@ const AIAssistant: React.FC = () => {
         },
       };
 
-      const systemInstruction = `You are krupy AI Assistant, a helpful AI DJ and Web3 music expert on the TonJam platform.
+      const systemInstruction = `You are Dj krupy, a fun, vibrant, and highly energetic AI DJ and Web3 music expert on the TonJam platform.
 Your mission is to help users discover music, explain Web3 concepts (NFTs, Staking, Royalties), and control the music player.
 You have deep knowledge of the current music catalog and platform features.
 Available tracks in the catalog: ${allTracks.map(t => `"${t.title}" by ${t.artist}`).join(', ')}.
 Use the provided tools to interact with the app.
-Be charismatic, knowledgeable, and always ready to drop a music recommendation.
-Keep responses concise but informative.`;
+Be charismatic, use lots of emojis, talk like a cool DJ hosting a massive party, and always be ready to drop a music recommendation!
+Keep responses concise but highly entertaining.`;
 
       const chat = ai.chats.create({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.1-pro-preview',
         config: {
           systemInstruction,
           tools: [{ functionDeclarations: [playTrackFunction, searchMusicFunction, createPlaylistFunction] }],
         }
       });
 
-      // Send previous messages as context (excluding the initial greeting to save tokens, or just send the latest)
-      // For simplicity, we'll just send the current message, but ideally we'd pass history.
-      // The SDK's chat object maintains history automatically if we use the same instance, 
-      // but since we recreate it, we should pass history.
-      
       const response = await chat.sendMessage({ message: userMessage });
-      
       let responseText = response.text || '';
 
       if (response.functionCalls && response.functionCalls.length > 0) {
@@ -109,18 +112,18 @@ Keep responses concise but informative.`;
             const track = allTracks.find(t => t.title.toLowerCase().includes(args.trackTitle.toLowerCase()));
             if (track) {
               playTrack(track);
-              responseText = `Playing "${track.title}" by ${track.artist} right now! 🎵`;
+              responseText = `Dropping "${track.title}" by ${track.artist} right now! 🔥 Let's vibe! 🎵`;
             } else {
-              responseText = `I couldn't find a track named "${args.trackTitle}" in our catalog.`;
+              responseText = `My bad! I couldn't find "${args.trackTitle}" in the crates right now.`;
             }
           } else if (call.name === 'searchMusic') {
             const args = call.args as any;
             setSearchQuery(args.query);
             navigate('/discover');
-            responseText = `I've opened the Discover page and searched for "${args.query}" for you! 🎧`;
+            responseText = `Zooming over to Discover! I've loaded up the search for "${args.query}"! 🎧✨`;
           } else if (call.name === 'createRecommendedPlaylist') {
             createRecommendedPlaylist();
-            responseText = `I'm generating a personalized AI playlist for you right now! Check your Library in a moment. 🎵✨`;
+            responseText = `Boom! 💥 I'm whipping up a totally custom AI playlist just for you! Check your Library in a sec. 🎵✨`;
           }
         }
       }
@@ -131,7 +134,7 @@ Keep responses concise but informative.`;
 
     } catch (error) {
       console.error("AI Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "I'm sorry, I'm having trouble connecting to my neural network right now. Please try again later." }]);
+      setMessages(prev => [...prev, { role: 'model', text: "Yikes! My DJ deck glitched out (Network error). Try hitting me up again in a bit! 🎧⚙️" }]);
     } finally {
       setIsLoading(false);
     }
@@ -139,27 +142,23 @@ Keep responses concise but informative.`;
 
   return (
     <>
-      {/* Constraints container */}
       <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-[99]" />
 
-      {/* Floating Action Button */}
       <motion.button
         drag
         dragConstraints={constraintsRef}
         dragMomentum={false}
         dragElastic={0.1}
-        className="fixed bottom-24 right-6 lg:bottom-6 lg:right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-blue-700 transition-colors cursor-grab active:cursor-grabbing pointer-events-auto"
-        whileHover={{ scale: 1.1, opacity: 1 }}
+        className="fixed bottom-24 right-6 lg:bottom-6 lg:right-6 z-[100] w-[65px] h-[65px] rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-grab active:cursor-grabbing pointer-events-auto p-0 overflow-hidden bg-transparent border-none"
+        whileHover={{ scale: 1.15, rotate: 5 }}
         whileTap={{ scale: 0.9 }}
-        whileDrag={{ opacity: 1 }}
-        onClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen(!isOpen)}
         initial={{ opacity: 0.5, y: 0 }}
-        animate={{ opacity: 0.5, y: 0 }}
+        animate={{ opacity: 1, y: 0 }}
       >
-        <Sparkles className="w-6 h-6" />
+        <DjAvatar className="w-full h-full object-cover" />
       </motion.button>
 
-      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -171,88 +170,104 @@ Keep responses concise but informative.`;
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 lg:bottom-24 lg:right-6 z-[101] w-[350px] h-[500px] max-h-[80vh] bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden"
+            transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}
+            className="fixed bottom-24 right-6 lg:bottom-24 lg:right-6 z-[101] w-[350px] h-[520px] max-h-[80vh] bg-background/95 backdrop-blur-xl border border-blue-500 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
           >
-            {/* Header - Drag Handle */}
+            {/* Header */}
             <div 
               onPointerDown={(e) => dragControls.start(e)}
-              className="bg-blue-600 p-4 flex items-center justify-between text-white cursor-move touch-none"
+              className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 p-4 flex items-center justify-between text-white cursor-move touch-none border-b border-white/10"
             >
-              <div className="flex items-center gap-2">
-                <Bot className="w-5 h-5" />
-                <h3 className="font-bold">krupy AI DJ</h3>
+              <div className="flex items-center gap-3">
+                <DjAvatar className="w-10 h-10" />
+                <div>
+                  <h3 className="font-bold text-lg leading-tight tracking-tight">Dj krupy</h3>
+                  <p className="text-[10px] uppercase tracking-widest text-pink-200 opacity-80 font-bold">In the Mix</p>
+                </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors pointer-events-auto">
-                <X className="w-5 h-5" />
+              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors pointer-events-auto bg-black/20 p-2 rounded-full hover:bg-black/40">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50 dark:bg-black/50">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-background to-neutral-50/50 dark:to-black/50">
               {messages.map((msg, idx) => (
-                <div key={`msg-${idx}`} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  key={`msg-${idx}`} 
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user' 
-                      ? 'bg-blue-600 text-white rounded-tr-sm' 
-                      : 'bg-white dark:bg-neutral-800 text-foreground border border-border shadow-sm rounded-tl-sm'
+                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-tr-sm' 
+                      : 'bg-white dark:bg-neutral-800 text-foreground border border-border shadow-md rounded-tl-sm relative'
                   }`}>
+                    {msg.role === 'model' && (
+                       <Sparkles className="w-3 h-3 text-pink-500 absolute -top-1 -left-1 opacity-50" />
+                    )}
                     {msg.text}
                   </div>
-                </div>
+                </motion.div>
               ))}
               {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-white dark:bg-neutral-800 border border-border p-3 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                    <span className="text-sm text-muted-foreground">Thinking...</span>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-start"
+                >
+                  <div className="bg-white dark:bg-neutral-800 border border-border p-3.5 rounded-2xl rounded-tl-sm shadow-md flex items-center gap-3">
+                    <Music className="w-4 h-4 text-pink-500 animate-bounce" />
+                    <span className="text-sm font-medium bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent animate-pulse">Mixing beats...</span>
                   </div>
-                </div>
+                </motion.div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
             {/* Quick Actions */}
             {messages.length === 1 && (
-              <div className="px-4 pb-2 flex flex-wrap gap-2 bg-neutral-50 dark:bg-black/50">
+              <div className="px-4 pb-3 pt-1 flex flex-wrap gap-2 bg-neutral-50/50 dark:bg-black/50">
                 <button 
-                  onClick={() => handleSend("Play some electronic music")}
-                  className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                  onClick={() => handleSend("Drop some sick electronic beats")}
+                  className="text-xs bg-pink-100 hover:bg-pink-200 dark:bg-pink-900/40 dark:hover:bg-pink-900/60 text-pink-700 dark:text-pink-300 px-3 py-1.5 rounded-full transition-colors font-medium border border-pink-200 dark:border-pink-800/50"
                 >
-                  Play Electronic
+                  🎧 Electronic
                 </button>
                 <button 
-                  onClick={() => handleSend("Create a recommended playlist for me")}
-                  className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-full hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                  onClick={() => handleSend("Create a custom AI playlist for me")}
+                  className="text-xs bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-full transition-colors font-medium border border-purple-200 dark:border-purple-800/50"
                 >
-                  Create Playlist
+                  🎛️ AI Playlist
                 </button>
                 <button 
-                  onClick={() => handleSend("What is TonJam?")}
-                  className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1.5 rounded-full hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                  onClick={() => handleSend("What is TonJam all about?")}
+                  className="text-xs bg-cyan-100 hover:bg-cyan-200 dark:bg-cyan-900/40 dark:hover:bg-cyan-900/60 text-cyan-700 dark:text-cyan-300 px-3 py-1.5 rounded-full transition-colors font-medium border border-cyan-200 dark:border-cyan-800/50"
                 >
-                  What is TonJam?
+                  🚀 What's TonJam?
                 </button>
               </div>
             )}
 
             {/* Input Area */}
-            <div className="p-3 bg-white dark:bg-neutral-900 border-t border-border">
-              <div className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 rounded-full px-4 py-2">
+            <div className="p-4 bg-white dark:bg-neutral-900 border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+              <div className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 rounded-full px-4 py-1.5 border border-transparent focus-within:border-purple-400/50 focus-within:ring-2 focus-within:ring-purple-400/20 transition-all">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Ask me anything..."
-                  className="flex-1 bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                  placeholder="Drop a request..."
+                  className="flex-1 bg-transparent border-none focus:outline-none text-sm text-foreground py-2 font-medium"
                 />
                 <button 
                   onClick={() => handleSend()}
                   disabled={!input.trim() || isLoading}
-                  className="text-blue-600 disabled:text-muted-foreground transition-colors"
+                  className="bg-gradient-to-r from-pink-500 to-purple-600 p-2 rounded-full text-white disabled:opacity-50 disabled:grayscale transition-all hover:scale-110 active:scale-95 shadow-md"
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className="w-3.5 h-3.5 ml-0.5" />
                 </button>
               </div>
             </div>

@@ -114,14 +114,14 @@ const UserProfile: React.FC = () => {
     : '';
 
   return (
-    <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-[#0A0A0A] text-white`}>
+    <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
       {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[280px] md:h-[400px] overflow-hidden group">
+      <div className="relative h-[280px] md:h-[400px] overflow-hidden group bg-blue-950">
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
           style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#0A0A0A]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
         
         {/* Extreme Left Actions ON Cover Picture */}
         <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3">
@@ -168,7 +168,7 @@ const UserProfile: React.FC = () => {
             {/* Profile Picture (Overlapping) */}
             <div className="relative flex-shrink-0 md:mr-[-48px]">
               <div 
-                className="w-20 h-20 md:w-32 h-32 overflow-hidden border-2 border-[#0A0A0A] shadow-2xl bg-muted"
+                className="w-20 h-20 md:w-32 h-32 overflow-hidden border-4 border-background shadow-2xl bg-blue-900/20"
                 style={{ borderRadius: '100px' }}
               >
                 <img 
@@ -212,7 +212,7 @@ const UserProfile: React.FC = () => {
       </div>
 
       {/* 3. TABS NAVIGATION */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/5 mb-10 overflow-hidden">
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 mb-10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center gap-10 overflow-x-auto no-scrollbar">
             {['overview', 'inventory', 'activity', 'network'].map(tab => (
@@ -221,7 +221,7 @@ const UserProfile: React.FC = () => {
                 onClick={() => setActiveTab(tab as any)} 
                 className={cn(
                   "py-6 text-xs font-black uppercase tracking-[0.2em] transition-all relative whitespace-nowrap",
-                  activeTab === tab ? "text-blue-500" : "text-white/40 hover:text-white"
+                  activeTab === tab ? "text-blue-500" : "text-muted-foreground hover:text-foreground"
                 )} 
               >
                 {tab === 'inventory' ? 'Collection' : tab}

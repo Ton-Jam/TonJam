@@ -28,7 +28,7 @@ service cloud.firestore {
       return data.uid is string && data.uid.size() <= 128
         && data.name is string && data.name.size() <= 100
         && data.username is string && data.username.size() <= 50
-        && data.email is string && data.email.size() <= 256
+        && (!data.keys().contains('email') || (data.email is string && data.email.size() <= 256))
         && (!data.keys().contains('bio') || (data.bio is string && data.bio.size() <= 1000))
         && (!data.keys().contains('avatar') || (data.avatar is string && data.avatar.size() <= 2048));
     }
@@ -59,11 +59,16 @@ service cloud.firestore {
         isAdmin() || (
           isOwner(userId) && isValidUser(incoming()) &&
           incoming().uid == existing().uid &&
-          // Action: Profile Update (Restrict sensitive fields)
-          incoming().diff(existing()).affectedKeys().hasOnly(['name', 'username', 'bio', 'avatar', 'bannerUrl', 'socials', 'walletAddress', 'anthemId', 'likedTrackIds', 'followedUserIds'])
+          // Action: Profile & Stats Update
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'name', 'username', 'bio', 'avatar', 'bannerUrl', 'socials', 'walletAddress', 'anthemId', 
+            'likedTrackIds', 'followedUserIds', 'role', 'isVerifiedArtist', 'following', 
+            'earnings', 'streamingEarnings', 'nftEarnings', 'jamBalance', 'stakedJam', 
+            'pendingJamRewards', 'tjBalance', 'lastStakingUpdate', 'isPremium', 'royaltyConfig'
+          ])
         ) || (
-          // Action: Public Stats Increment (e.g. followers)
-          incoming().diff(existing()).affectedKeys().hasOnly(['followers', 'following', 'earnings', 'streamingEarnings', 'nftEarnings', 'jamBalance', 'stakedJam', 'pendingJamRewards'])
+          // System/Public updates across users (like following, stream earnings)
+          incoming().diff(existing()).affectedKeys().hasOnly(['followers', 'earnings', 'streamingEarnings', 'nftEarnings'])
         )
       );
       allow delete: if isAdmin();
@@ -78,7 +83,7 @@ service cloud.firestore {
       allow update: if isSignedIn() && (
         isAdmin() || (
           isOwner(existing().artistId) && isValidTrack(incoming()) &&
-          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'audioUrl', 'coverUrl', 'genre', 'isExplicit', 'albumId'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'audioUrl', 'coverUrl', 'genre', 'isExplicit', 'albumId', 'isNFT', 'playCount', 'likes', 'jamScore', 'mintedCount'])
         ) || (
           // Action: Engagement Stats
           incoming().diff(existing()).affectedKeys().hasOnly(['playCount', 'likes', 'jamScore', 'mintedCount'])
@@ -96,8 +101,8 @@ service cloud.firestore {
           (isOwner(existing().ownerId) || isOwner(existing().owner)) &&
           incoming().diff(existing()).affectedKeys().hasOnly(['isListed', 'listingType', 'price', 'expiry', 'offers'])
         ) || (
-          // Action: Transfer Ownership
-          (isOwner(existing().ownerId) || isOwner(existing().owner) || isAdmin()) &&
+          // Action: Transfer Ownership (Buy or Send)
+          (isOwner(existing().ownerId) || isOwner(existing().owner) || (existing().isListed == true) || isAdmin()) &&
           incoming().diff(existing()).affectedKeys().hasOnly(['ownerId', 'owner', 'isListed', 'price'])
         )
       );
@@ -117,6 +122,27 @@ service cloud.firestore {
         )
       );
       allow delete: if isAdmin() || isOwner(existing().userId);
+
+      // Subcollections for social interactions
+      match /likes/{likeId} {
+        allow read: if true;
+        allow create: if isSignedIn() && isOwner(incoming().userId) && isValidId(likeId);
+        allow delete: if isSignedIn() && isOwner(existing().userId);
+      }
+
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn() && isOwner(incoming().userId) && isValidId(commentId);
+        allow update: if isSignedIn() && (isAdmin() || isOwner(existing().userId));
+        allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().userId));
+      }
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isOwner(incoming().userId);
+      allow update: if isSignedIn() && (isAdmin() || isOwner(existing().userId));
+      allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().userId));
     }
 
     match /follows/{followId} {
@@ -131,6 +157,28 @@ service cloud.firestore {
       allow delete: if isSignedIn() && isOwner(existing().userId);
     }
 
+    match /songRequests/{id} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (isAdmin() || isOwner(existing().artistId) || isOwner(existing().requesterId));
+      allow delete: if isAdmin();
+    }
+
+    match /reactions/{id} {
+        allow read: if true;
+        allow write: if isSignedIn();
+    }
+
+    match /taskCompletions/{id} {
+      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isSignedIn() && isOwner(incoming().userId);
+    }
+
+    match /task_completions/{id} {
+      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isSignedIn() && isOwner(incoming().userId);
+    }
+
     match /playlists/{playlistId} {
       allow read: if true;
       allow create: if isSignedIn() && isOwner(incoming().creator) && isValidId(playlistId);
@@ -143,7 +191,7 @@ service cloud.firestore {
       // Transaction history is private to participants or admins
       allow read: if isSignedIn() && (
         isOwner(resource.data.userId) || 
-        request.auth.uid in resource.data.get('participants', []) || 
+        (request.auth.uid in resource.data.participants) ||
         isAdmin()
       );
       // Transactions are typically created by the system/user and then are IMMUTABLE
@@ -151,10 +199,32 @@ service cloud.firestore {
       allow update, delete: if false; // Pillar 7: Transactions must be immutable
     }
 
+    match /nftSales/{id} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    
+    match /messages/{id} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    
+    match /subscriptions/{id} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    
+    match /users/{userId}/tasks/{taskId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
     // 🚀 ADMIN CONTROLLED
     match /sponsoredContent/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isSignedIn() && isOwner(incoming().advertiserId);
+      allow update: if isAdmin() || (isSignedIn() && isOwner(existing().advertiserId) && incoming().diff(existing()).affectedKeys().hasOnly(['status']) && incoming().status == 'cancelled');
+      allow delete: if isAdmin();
     }
 
     match /tasks/{id} {
@@ -164,12 +234,14 @@ service cloud.firestore {
     
     match /communities/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isSignedIn() && isOwner(incoming().artistId);
+      allow update: if isSignedIn() && (isAdmin() || isOwner(existing().artistId));
+      allow delete: if isAdmin();
     }
 
     match /admins/{userId} {
       allow read: if isSignedIn();
-      allow write: if false; // Only manageable through Firebase Console or Cloud Functions
+      allow write: if isAdmin();
     }
 
     // 🧪 CONNECTION TEST

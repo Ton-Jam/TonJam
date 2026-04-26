@@ -816,25 +816,7 @@ const ArtistProfile: React.FC = () => {
 
  {/* Events */}
  {artist.events && artist.events.length > 0 && (
- <section>
- <div className="flex items-center gap-4 mb-4">
- <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
- <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Upcoming Events</h2>
- </div>
- <div className="space-y-4">
- {artist.events.map(event => (
- <div key={event.id} className="p-4 rounded-[10px] bg-muted/50 flex justify-between items-center">
- <div>
- <h4 className="text-sm font-bold text-foreground">{event.title}</h4>
- <p className="text-[10px] text-muted-foreground">{event.date} @ {event.time} • {event.venue}</p>
- </div>
- {event.ticketUrl && (
- <a href={event.ticketUrl} target="_blank"rel="noopener noreferrer"className="px-4 py-2 bg-blue-600 text-white rounded-[6px] text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all">Tickets</a>
- )}
- </div>
- ))}
- </div>
- </section>
+ <ArtistEvents events={artist.events} />
  )}
  </div>
  )}

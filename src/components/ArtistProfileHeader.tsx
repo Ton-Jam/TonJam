@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { Artist } from '@/types';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 import ArtistVerification from './ArtistVerification';
-import { MintTrackDialog } from './MintTrackDialog';
 
 interface ArtistProfileHeaderProps {
   artist: Artist;
@@ -76,14 +75,13 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
               Dashboard
             </button>
             
-            <MintTrackDialog>
-              <button 
-                className="px-6 py-2.5 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all shadow-xl flex items-center gap-2 active:scale-95"
-              >
-                <Hammer className="h-4 w-4 text-blue-500" />
-                Mint
-              </button>
-            </MintTrackDialog>
+            <button 
+              onClick={() => navigate('/mint')}
+              className="px-6 py-2.5 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all shadow-xl flex items-center gap-2 active:scale-95"
+            >
+              <Hammer className="h-4 w-4 text-blue-500" />
+              Mint
+            </button>
 
             <button 
               id="artist-settings-btn"

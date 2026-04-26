@@ -26,7 +26,8 @@ import { deployTonJamCollection, deployTonJamMarketplace, TONJAM_COLLECTION_ADDR
 import { toast } from 'sonner';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
-import { SponsoredContent } from '@/types';
+import { SponsoredContent, UserProfile } from '@/types';
+import { doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -42,6 +43,8 @@ const AdminDashboard: React.FC = () => {
   const [deployedMarketplace, setDeployedMarketplace] = useState(localStorage.getItem('tonjam_marketplace_address') || TONJAM_MARKETPLACE_ADDRESS);
 
   const [allSponsorships, setAllSponsorships] = useState<SponsoredContent[]>([]);
+  const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -54,6 +57,36 @@ const AdminDashboard: React.FC = () => {
     );
     return () => unsub();
   }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      collection(db, 'users'),
+      (snap) => {
+        const data = snap.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
+        setAllUsers(data);
+      },
+      (error) => handleFirestoreError(error, OperationType.LIST, 'users')
+    );
+    return () => unsub();
+  }, []);
+
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    setIsUpdatingRole(true);
+    try {
+      await updateDoc(doc(db, 'users', userId), { role: newRole });
+      if (newRole === 'admin') {
+        await setDoc(doc(db, 'admins', userId), { assignedAt: new Date().toISOString() });
+      } else {
+        await deleteDoc(doc(db, 'admins', userId));
+      }
+      toast.success(`Role updated successfully to ${newRole}`);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to update user role');
+    } finally {
+      setIsUpdatingRole(false);
+    }
+  };
 
   const handleDeployCollection = async () => {
     if (!userAddress) {
@@ -139,6 +172,12 @@ const AdminDashboard: React.FC = () => {
                 className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tasks' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Tasks
+              </button>
+              <button 
+                onClick={() => setActiveTab('users')}
+                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Users
               </button>
             </div>
           </div>
@@ -365,6 +404,71 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-[10px] text-muted-foreground">Task creation form will be implemented here.</p>
               </div>
               {/* Add task list here */}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'users' && (
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6 mb-4">
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">User Role Management</h2>
+            <div className="space-y-4">
+              {allUsers.length > 0 ? (
+                <div className="overflow-x-auto no-scrollbar">
+                  <table className="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                      <tr className="border-b border-border/50">
+                        <th className="pb-4 text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest px-2">User details</th>
+                        <th className="pb-4 text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest px-2">Role</th>
+                        <th className="pb-4 text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest px-2 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allUsers.map((user) => (
+                        <tr key={user.uid} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
+                          <td className="py-4 px-2">
+                            <div className="flex items-center gap-3">
+                              {user.avatar ? (
+                                <img src={user.avatar} className="w-8 h-8 rounded-full bg-muted object-cover" alt="" />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold uppercase">{user.name?.charAt(0)}</div>
+                              )}
+                              <div>
+                                <p className="text-xs font-bold text-foreground">{user.name}</p>
+                                <p className="text-[10px] text-muted-foreground">@{user.username || user.uid.substring(0, 8)}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-2">
+                            <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-full ${
+                              user.role === 'admin' ? 'bg-red-500/10 text-red-500' :
+                              user.role === 'artist' ? 'bg-purple-500/10 text-purple-400' :
+                              'bg-blue-500/10 text-blue-400'
+                            }`}>
+                              {user.role || 'user'}
+                            </span>
+                          </td>
+                          <td className="py-4 px-2 text-right">
+                            <select 
+                              value={user.role || 'user'} 
+                              onChange={(e) => handleRoleChange(user.uid, e.target.value)}
+                              disabled={isUpdatingRole}
+                              className="bg-transparent border border-border/50 p-2 text-xs rounded-lg text-foreground uppercase outline-none focus:border-blue-500/50 hover:bg-foreground/5 transition-colors disabled:opacity-50"
+                            >
+                              <option value="user" className="bg-background text-foreground">User</option>
+                              <option value="artist" className="bg-background text-foreground">Artist</option>
+                              <option value="admin" className="bg-background text-foreground">Admin</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="py-12 text-center">
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">No users found</p>
+                </div>
+              )}
             </div>
           </div>
         )}

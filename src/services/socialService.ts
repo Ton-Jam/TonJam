@@ -61,7 +61,7 @@ export const addComment = async (postId: string, userId: string, userName: strin
     });
     
     await updateDoc(doc(db, 'posts', postId), {
-      comments: increment(1)
+      commentsCount: increment(1)
     });
     
     return { id: docRef.id };

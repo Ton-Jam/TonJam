@@ -1,4 +1,6 @@
 import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -36,10 +38,46 @@ const upload = multer({
 
 async function startServer() {
     const app = express();
+    const httpServer = createServer(app);
+    const io = new Server(httpServer, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
+        }
+    });
 
     app.use(cors());
     app.use(cookieParser());
     app.use(express.json());
+
+    // Socket.io Logic
+    io.on('connection', (socket) => {
+        console.log('User connected:', socket.id);
+
+        socket.on('join-room', (roomId) => {
+            socket.join(roomId);
+            console.log(`User ${socket.id} joined room ${roomId}`);
+        });
+
+        socket.on('leave-room', (roomId) => {
+            socket.leave(roomId);
+            console.log(`User ${socket.id} left room ${roomId}`);
+        });
+
+        socket.on('send-message', ({ roomId, message, user }) => {
+            const chatMessage = {
+                id: Math.random().toString(36).substring(7),
+                text: message,
+                user: user,
+                timestamp: new Date().toISOString()
+            };
+            io.to(roomId).emit('new-message', chatMessage);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('User disconnected:', socket.id);
+        });
+    });
 
     // Serve static files from public/uploads
     app.use('/uploads', express.static(uploadsDir));
@@ -290,7 +328,7 @@ async function startServer() {
         app.use(vite.middlewares);
     }
 
-    app.listen(PORT, '0.0.0.0', () => {
+    httpServer.listen(PORT, '0.0.0.0', () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });
 }

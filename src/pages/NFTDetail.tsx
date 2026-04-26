@@ -28,7 +28,10 @@ import {
   Lock,
   Share2,
   Send,
-  Coins
+  Coins,
+  TrendingUp,
+  Activity,
+  Award
 } from 'lucide-react';
 
 import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
@@ -37,6 +40,15 @@ import { NFTItem, Track, NFTOffer } from '@/types';
 import { fetchNFTMetadata } from '@/services/nftService';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 import BuyNFTModal from '@/components/BuyNFTModal';
 import SellNFTModal from '@/components/SellNFTModal';
 import BidModal from '@/components/BidModal';
@@ -203,6 +215,19 @@ const NFTDetail: React.FC = () => {
       .map(t => t.id);
     return allNFTs.filter(n => relatedTrackIds.includes(n.trackId) && n.id !== localNft.id).slice(0, 4);
   }, [localNft, associatedTrack, allNFTs]);
+
+  const priceHistoryData = useMemo(() => {
+    if (!localNft) return [];
+    const basePrice = parseFloat(localNft.price) || 0.5;
+    return [
+      { name: 'Jan', price: basePrice * 0.4 },
+      { name: 'Feb', price: basePrice * 0.6 },
+      { name: 'Mar', price: basePrice * 0.5 },
+      { name: 'Apr', price: basePrice * 0.9 },
+      { name: 'May', price: basePrice * 0.8 },
+      { name: 'Jun', price: basePrice },
+    ];
+  }, [localNft?.price]);
 
   if (allNFTs.length === 0) return <div className="min-h-screen flex items-center justify-center text-foreground">Loading assets...</div>;
   if (!localNft) {
@@ -473,17 +498,78 @@ const NFTDetail: React.FC = () => {
             {/* Hardware-style Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'BPM', val: associatedTrack?.bpm || '128', color: 'text-blue-500' },
-                { label: 'KEY', val: associatedTrack?.key || 'C#m', color: 'text-purple-500' },
-                { label: 'BIT', val: associatedTrack?.bitrate || 'FLAC', color: 'text-emerald-500' },
-                { label: 'REL', val: associatedTrack?.releaseDate?.split('-')[0] || '2024', color: 'text-amber-500' }
+                { label: 'BPM', val: associatedTrack?.bpm || '128', icon: Activity, color: 'text-blue-500' },
+                { label: 'KEY', val: associatedTrack?.key || 'C#m', icon: MusicIcon, color: 'text-purple-500' },
+                { label: 'BIT', val: associatedTrack?.bitrate || 'FLAC', icon: Zap, color: 'text-emerald-500' },
+                { label: 'RANK', val: '#12', icon: Award, color: 'text-amber-500' }
               ].map((stat) => (
-                <div key={stat.label} className="bg-white/5 backdrop-blur-md p-4 rounded-[16px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20">
+                <div key={stat.label} className="bg-white/5 backdrop-blur-md p-4 rounded-[16px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10">
                   <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-40`}></div>
-                  <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.3em] mb-4">{stat.label}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.3em]">{stat.label}</p>
+                    <stat.icon className={`h-3 w-3 ${stat.color} opacity-40`} />
+                  </div>
                   <p className="text-base font-bold text-foreground tracking-tighter font-mono">{stat.val}</p>
                 </div>
               ))}
+            </div>
+
+            {/* Price Analysis Section */}
+            <div className="bg-white/5 backdrop-blur-xl rounded-[24px] p-6 border border-white/5 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="h-4 w-4 text-blue-500" />
+                  <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Protocol Value Analysis</h3>
+                </div>
+                <div className="flex items-center gap-4 text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <span className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    Market Floor
+                  </span>
+                </div>
+              </div>
+
+              <div className="h-[180px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={priceHistoryData}>
+                    <defs>
+                      <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#0a0a0a', 
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        fontSize: '10px',
+                        fontFamily: 'Poppins, sans-serif'
+                      }}
+                      itemStyle={{ color: '#3b82f6' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="price" 
+                      stroke="#3b82f6" 
+                      fillOpacity={1} 
+                      fill="url(#colorPrice)" 
+                      strokeWidth={3}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="flex justify-between items-center pt-2">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">All Time High</p>
+                  <p className="text-sm font-bold text-foreground font-mono">{(parseFloat(localNft.price) * 2.4).toFixed(2)} TON</p>
+                </div>
+                <div className="text-right space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Protocol Velocity</p>
+                  <p className="text-sm font-bold text-emerald-500 font-mono">+12.4%</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -547,32 +633,38 @@ const NFTDetail: React.FC = () => {
             </header>
 
             {/* Pricing Section - Hardware Style */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-[24px] p-4 mb-4 border border-white/10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-[0.05] rotate-12 pointer-events-none"><Zap className="h-48 w-48 text-blue-500" /></div>
+            <div className="bg-white/5 backdrop-blur-xl rounded-[24px] p-8 mb-4 border border-white/10 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000"><Zap className="h-64 w-64 text-blue-500" /></div>
               
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative z-10">
-                <div className="space-y-4">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 relative z-10">
+                <div className="space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className={`w-2 h-2 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`}></div>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em]">
-                      {isAuction ? 'Current Highest Bid' : 'Fixed Valuation Protocol'}
+                    <div className={`w-3 h-3 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_15px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]'}`}></div>
+                    <span className="text-[12px] font-black text-muted-foreground uppercase tracking-[0.5em]">
+                      {isAuction ? 'Current Highest Bid' : 'Valuation Protocol V.4'}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-4">
-                    <span className="text-[68px] font-bold text-foreground tracking-tighter leading-none">
+                    <span className="text-[72px] md:text-[96px] font-black text-foreground tracking-tighter leading-none italic">
                       {isAuction ? (highestOfferPrice > 0 ? highestOfferPrice : (localNft.startingBid || localNft.price)) : localNft.price}
                     </span>
-                    <span className="text-[20px] font-bold text-blue-500 uppercase tracking-tighter">TON</span>
+                    <span className="text-[24px] font-black text-blue-500 uppercase tracking-tighter italic">TON</span>
                   </div>
-                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
-                    ≈ ${(parseFloat(localNft.price) * 5.2).toLocaleString()} USD at current relay rate
-                  </p>
+                  <div className="flex items-center gap-4">
+                    <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest px-4 py-2 bg-white/5 rounded-full border border-white/5">
+                      ≈ ${(parseFloat(localNft.price) * 5.2).toLocaleString()} USD
+                    </p>
+                    <div className="h-px w-12 bg-white/10"></div>
+                    <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Floor +12%</p>
+                  </div>
                 </div>
 
                 {isAuction && (
-                  <div className="bg-white/5 backdrop-blur-md p-4 rounded-[16px] border border-white/5 text-right min-w-[220px]">
-                    <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-4">Minimum Next Step</p>
-                    <p className="text-[20px] font-bold text-amber-500 tracking-tighter">+{minNextBid} <span className="text-xs">TON</span></p>
+                  <div className="bg-white/5 backdrop-blur-md p-6 rounded-[20px] border border-white/5 text-right min-w-[240px] shadow-2xl">
+                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-4 flex items-center justify-end gap-2">
+                       <Clock className="h-3 w-3" /> Min Next Step
+                    </p>
+                    <p className="text-[28px] font-bold text-amber-500 tracking-tighter italic">+{minNextBid} <span className="text-sm">TON</span></p>
                   </div>
                 )}
               </div>
@@ -705,7 +797,8 @@ const NFTDetail: React.FC = () => {
                   {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></motion.div>}
                 </button>
               ))}
-            </div>            <div className="min-h-[400px]">
+            </div>
+            <div className="min-h-[400px]">
               <AnimatePresence mode="wait">
                 {activeTab === 'details' && (
                   <motion.div 
@@ -713,10 +806,10 @@ const NFTDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                  >
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                   >
                     {metadataError && (
-                      <div className="col-span-1 md:col-span-2 p-4 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-[16px] flex items-center justify-between">
+                      <div className="col-span-full p-4 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-[16px] flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
                             <X className="h-5 w-5 text-red-500" />
@@ -733,70 +826,78 @@ const NFTDetail: React.FC = () => {
                     )}
                     
                     {dynamicMetadata && dynamicMetadata.traits && (
-                      <div className="col-span-1 md:col-span-2 p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[20px]">
-                        <h4 className="text-[5px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
-                          <div className="w-1 h-3 bg-blue-500 rounded-full" />
-                          On-Chain Traits
-                        </h4>
+                      <div className="col-span-full space-y-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-blue-500/20"></div>
+                          <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">On-Chain DNA Attributes</h4>
+                          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-blue-500/20"></div>
+                        </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           {dynamicMetadata.traits.map((trait) => (
-                            <div key={trait.trait_type} className="flex flex-col gap-2">
-                              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">{trait.trait_type}</span>
-                              <span className="text-sm font-bold text-foreground tracking-tight">{trait.value}</span>
+                            <div key={trait.trait_type} className="bg-white/[0.03] border border-white/5 p-6 rounded-[20px] hover:border-blue-500/30 transition-all group">
+                              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] block mb-4">{trait.trait_type}</span>
+                              <span className="text-sm font-black text-foreground tracking-tight uppercase italic">{trait.value}</span>
+                              <div className="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-500 w-2/3 group-hover:w-full transition-all duration-1000"></div>
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
                     
-                    {associatedTrack && (
-                      <div className="col-span-1 md:col-span-2 p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[20px]">
-                        <h4 className="text-[5px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
-                          <div className="w-1 h-3 bg-blue-500 rounded-full" />
-                          Technical Signal Data
+                    <div className="col-span-full md:col-span-2 space-y-4">
+                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px]">
+                        <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
+                          <div className="w-1.5 h-4 bg-emerald-500 rounded-full" />
+                          Protocol Distribution
                         </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {[
-                            { label: 'BPM', val: associatedTrack.bpm || 'N/A' },
-                            { label: 'KEY', val: associatedTrack.key || 'N/A' },
-                            { label: 'BITRATE', val: associatedTrack.bitrate || 'N/A' },
-                            { label: 'DURATION', val: `${Math.floor(associatedTrack.duration / 60)}:${String(associatedTrack.duration % 60).padStart(2, '0')}` }
-                          ].map((item) => (
-                            <div key={item.label} className="flex flex-col gap-4">
-                              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">{item.label}</span>
-                              <span className="text-lg font-bold text-foreground tracking-tight font-mono">{item.val}</span>
-                            </div>
-                          ))}
+                        <div className="space-y-6">
+                          {localNft.royaltySplits && localNft.royaltySplits.length > 0 ? (
+                            localNft.royaltySplits.map((split, i) => (
+                              <div key={i} className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs font-black text-foreground uppercase tracking-widest italic">{split.label || 'Collaborator'}</span>
+                                  <span className="text-sm font-black text-emerald-500">{(split.percentage * 100).toFixed(0)}%</span>
+                                </div>
+                                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                  <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${split.percentage * 100}%` }}
+                                    className="h-full bg-emerald-500"
+                                  />
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest italic">Standard 100% Creator Share Protocol Active</div>
+                          )}
                         </div>
                       </div>
-                    )}
-  
-                    {localNft.traits?.map((trait) => (
-                      <div key={trait.trait_type} className="p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[16px] flex justify-between items-center group transition-all hover:bg-white/10 hover:border-white/20">
-                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest group-hover:text-muted-foreground transition-colors">{trait.trait_type}</span>
-                        <span className="text-sm font-bold text-foreground tracking-tight">{trait.value}</span>
-                      </div>
-                    ))}
-                    <div className="p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[16px] flex justify-between items-center">
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Asset Class</span>
-                      <span className="text-sm font-bold text-blue-500 tracking-tight">{localNft.edition}</span>
                     </div>
-                    {localNft.royaltySplits && localNft.royaltySplits.length > 0 && (
-                      <div className="col-span-1 md:col-span-2 p-4 bg-white/5 backdrop-blur-md border border-white/5 rounded-[20px]">
-                        <h4 className="text-[5px] font-bold text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 flex items-center gap-4">
-                          <div className="w-1 h-3 bg-emerald-500 rounded-full" />
-                          Royalty Distribution
-                        </h4>
-                        <div className="space-y-2">
-                          {localNft.royaltySplits.map((split, i) => (
-                            <div key={i} className="flex justify-between items-center text-xs font-bold text-foreground uppercase tracking-widest">
-                              <span>{split.label || 'Collaborator'}</span>
-                              <span className="text-emerald-500">{(split.percentage * 100).toFixed(0)}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+
+                    <div className="col-span-full md:col-span-1 space-y-4">
+                       <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px] h-full flex flex-col justify-center">
+                          <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
+                            <div className="w-1.5 h-4 bg-purple-500 rounded-full" />
+                            Provenance
+                          </h4>
+                          <div className="space-y-6">
+                             <div className="flex flex-col gap-2">
+                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Minted Date</span>
+                               <span className="text-sm font-black text-foreground uppercase tracking-tight italic">OCT 14, 2023</span>
+                             </div>
+                             <div className="flex flex-col gap-2">
+                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Standard</span>
+                               <span className="text-sm font-black text-purple-500 uppercase tracking-tight italic">TON NFT-v2</span>
+                             </div>
+                             <div className="flex flex-col gap-2">
+                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Relay Layer</span>
+                               <span className="text-sm font-black text-foreground uppercase tracking-tight italic">Global Consensus</span>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
                   </motion.div>
                 )}
   
@@ -844,57 +945,62 @@ const NFTDetail: React.FC = () => {
                       localNft.offers.map((o) => {
                         const isTopBid = parseFloat(o.price) === highestOfferPrice;
                         return (
-                          <div key={o.id} className={`group p-4 bg-card border rounded-[16px] transition-all flex flex-col md:flex-row items-center justify-between gap-4 hover:shadow-2xl ${isTopBid ? (isAuction ? 'border-border bg-amber-500/[0.02]' : 'border-border bg-blue-500/[0.02]') : 'border-border opacity-70 hover:opacity-100'}`} >
-                            <div className="flex items-center gap-4 w-full md:w-auto">
+                          <div key={o.id} className={`group p-6 bg-white/[0.02] border transition-all rounded-[24px] flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? 'border-amber-500/50 bg-amber-500/[0.05]' : 'border-blue-500/50 bg-blue-500/[0.05]') : 'border-white/5 opacity-80 hover:opacity-100'}`} >
+                            <div className="flex items-center gap-6 w-full md:w-auto">
                               <div className="relative">
-                                <div className={`w-16 h-16 rounded-full bg-background border border-blue-500/30 flex items-center justify-center overflow-hidden`}>
-                                  <img src={`https://picsum.photos/100/100?seed=${o.offerer}`} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="" />
+                                <div className={`w-20 h-20 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-2xl`}>
+                                  <img src={`https://picsum.photos/100/100?seed=${o.offerer}`} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
                                 </div>
                                 {isTopBid && (
-                                  <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-black ${isAuction ? 'bg-amber-500' : 'bg-blue-500'}`}>
-                                    <Crown className="h-3 w-3 text-white" />
+                                  <div className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center border-2 border-black ${isAuction ? 'bg-amber-500' : 'bg-blue-500'} shadow-[0_0_15px_rgba(59,130,246,0.5)]`}>
+                                    <Crown className="h-4 w-4 text-white" />
                                   </div>
                                 )}
                               </div>
-                              <div className="flex flex-col min-w-0">
-                                <div className="flex items-center gap-4 mb-4">
-                                  <span className="text-sm font-bold text-foreground uppercase tracking-tight truncate max-w-[150px]">
-                                    {o.offerer}
+                              <div className="flex flex-col gap-2 min-w-0">
+                                <div className="flex items-center gap-4">
+                                  <span className="text-base font-black text-foreground uppercase tracking-tight truncate max-w-[200px] italic">
+                                    @{o.offerer.slice(0, 8)}...
                                   </span>
                                   {isTopBid && (
-                                    <span className={`text-[8px] px-4 py-4 rounded-full font-bold uppercase tracking-widest ${isAuction ? 'bg-amber-500/20 text-amber-500' : 'bg-blue-500/20 text-blue-500'}`}>Top Signal</span>
+                                    <span className={`text-[8px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${isAuction ? 'bg-amber-500 text-black' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)]'}`}>Top Signal</span>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-4">
-                                  <Clock className="h-3 w-3 text-muted-foreground/50" />
-                                  <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{o.timestamp} • Expires in {o.duration}</span>
+                                  <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5">
+                                    <Clock className="h-3 w-3 text-muted-foreground/50" />
+                                    <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{o.timestamp}</span>
+                                  </div>
+                                  <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest italic">Exp: {o.duration}</span>
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                            <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
                               <div className="text-right">
                                 <div className="flex items-center gap-4">
-                                  <span className={`text-[26px] font-bold tracking-tighter font-mono ${isTopBid ? (isAuction ? 'text-amber-500' : 'text-blue-500') : 'text-muted-foreground'}`}>
+                                  <span className={`text-[32px] font-black tracking-tighter italic ${isTopBid ? (isAuction ? 'text-amber-500' : 'text-blue-500') : 'text-muted-foreground/80'}`}>
                                     {o.price}
                                   </span>
-                                  <img src={TON_LOGO} className={`w-6 h-6 ${isTopBid ? 'opacity-100' : 'opacity-30 grayscale'}`} alt="" />
+                                  <div className="flex flex-col items-center">
+                                    <img src={TON_LOGO} className={`w-8 h-8 ${isTopBid ? 'opacity-100 shadow-[0_0_15px_rgba(0,122,255,0.4)]' : 'opacity-20 grayscale'}`} alt="" />
+                                    <span className="text-[8px] font-black text-muted-foreground/30 uppercase mt-1">TON</span>
+                                  </div>
                                 </div>
-                                <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Valuation Protocol</p>
                               </div>
                               {isOwner ? (
-                                <div className="flex gap-4">
+                                <div className="flex gap-2">
                                   {o.offerer !== localNft.owner && (
-                                    <button onClick={() => handleAcceptOffer(o)} className={`px-4 py-4 text-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-4 ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`} >
-                                      <Check className="h-4 w-4" /> {isTopBid ? 'Accept Top Bid' : 'Accept'}
+                                    <button onClick={() => handleAcceptOffer(o)} className={`h-14 px-6 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-3 italic ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`} >
+                                      <Check className="h-4 w-4" /> ACCEPT
                                     </button>
                                   )}
-                                  <button onClick={() => handleDeclineOffer(o.offerer)} className="px-4 py-4 bg-muted/50 text-muted-foreground rounded-[10px] font-bold text-[9px] uppercase tracking-[0.2em] hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center gap-4" >
-                                    <X className="h-4 w-4" /> Decline
+                                  <button onClick={() => handleDeclineOffer(o.offerer)} className="w-14 h-14 bg-white/5 text-muted-foreground rounded-xl flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 transition-all border border-white/5" >
+                                    <X className="h-5 w-5" />
                                   </button>
                                 </div>
                               ) : (
-                                <div className={`w-14 h-14 rounded-[12px] flex items-center justify-center border border-blue-500/30 ${isTopBid ? (isAuction ? 'bg-amber-500/10 text-amber-500 border-neutral-500/20' : 'bg-blue-500/10 text-blue-500 border-blue-500/30') : 'bg-muted/50 text-muted-foreground/30'}`}>
-                                  {isTopBid ? <Zap className="h-6 w-6" /> : <LogIn className="h-6 w-6" />}
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${isTopBid ? (isAuction ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-[0_0_15px_rgba(0,122,255,0.2)]') : 'bg-white/5 text-muted-foreground/20 border-white/5'}`}>
+                                  {isTopBid ? <Zap className="h-6 w-6" /> : <Activity className="h-6 w-6" />}
                                 </div>
                               )}
                             </div>

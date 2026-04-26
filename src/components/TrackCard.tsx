@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Headphones, Clock, CheckCircle2, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock } from 'lucide-react';
+import { Play, Pause, MoreVertical, Headphones, Clock, CheckCircle2, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key } from 'lucide-react';
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_ARTISTS, TJ_COIN_ICON } from '@/constants';
@@ -213,67 +213,88 @@ const TrackCard: React.FC<TrackCardProps> = ({
     );
   }
 
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
   if (variant === 'row') {
     return (
-      <div 
-        className={`group flex items-center gap-4 p-3 rounded-sm hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-card/30 ${className}`}
-        onClick={handleCardClick}
-        onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
-        role="button"
-        tabIndex={0}
-        aria-label={`View track: ${track.title} by ${track.artist}`}
-      >
+      <div className={`flex flex-col w-full bg-card/30 rounded-sm hover:bg-muted/50 transition-all ${className}`}>
         <div 
-          className="relative w-14 h-14 rounded-sm overflow-hidden flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
-          onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
-          onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handlePlay(e as any)); }}
+          className="group flex items-center gap-4 p-3 cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          onClick={handleCardClick}
+          onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
           role="button"
           tabIndex={0}
-          aria-label={isActive && isPlaying ? `Pause ${track.title}` : `Play ${track.title}`}
+          aria-label={`View track: ${track.title} by ${track.artist}`}
         >
-          <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
-          <div className={`absolute inset-0 flex items-center justify-center bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
-             {track.tokenGating?.enabled && !hasAccess ? (
-                <Lock className="h-4 w-4 text-foreground" />
-             ) : isActive && isPlaying ? (
-                <div className="flex items-end justify-center gap-3 h-4" aria-hidden="true">
-                  <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_0ms]"></div>
-                  <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_200ms]"></div>
-                  <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_400ms]"></div>
-                </div>
-             ) : (
-                <Play className="h-4 w-4 text-foreground fill-white" aria-hidden="true" />
-             )}
+          <div 
+            className="relative w-14 h-14 rounded-sm overflow-hidden flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
+            onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
+            onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handlePlay(e as any)); }}
+            role="button"
+            tabIndex={0}
+            aria-label={isActive && isPlaying ? `Pause ${track.title}` : `Play ${track.title}`}
+          >
+            <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
+            <div className={`absolute inset-0 flex items-center justify-center bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
+              {track.tokenGating?.enabled && !hasAccess ? (
+                  <Lock className="h-4 w-4 text-foreground" />
+              ) : isActive && isPlaying ? (
+                  <div className="flex items-end justify-center gap-3 h-4" aria-hidden="true">
+                    <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_0ms]"></div>
+                    <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_200ms]"></div>
+                    <div className="w-0.5 bg-blue-500 h-full animate-[bounce_1s_infinite_400ms]"></div>
+                  </div>
+              ) : (
+                  <Play className="h-4 w-4 text-foreground fill-white" aria-hidden="true" />
+              )}
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className={`text-[13px] font-bold uppercase tracking-tight truncate text-white`}>{track.title}</h4>
+            <div className="flex items-center gap-3 mt-1">
+              <p 
+                className="text-[8px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate hover:text-blue-600 dark:hover:text-foreground hover:underline cursor-pointer inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                onClick={handleArtistClick}
+                onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
+                role="button"
+                tabIndex={0}
+                aria-label={`View artist: ${track.artist}`}
+              >
+                {track.artist}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+             <span className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest hidden sm:block" aria-label="Duration">
+                {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
+             </span>
+             <button
+               onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+               className="p-1 rounded-full hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
+               aria-label="Toggle details"
+             >
+               {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+             </button>
+             <button 
+               onClick={handleOptions} 
+               className="p-2.5 rounded-full hover:bg-white/10 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+               aria-label="Track options"
+               aria-haspopup="true"
+             >
+               <MoreVertical className="h-5 w-5" />
+             </button>
           </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <h4 className={`text-[13px] font-bold uppercase tracking-tight truncate text-white`}>{track.title}</h4>
-          <div className="flex items-center gap-3 mt-1">
-            <p 
-              className="text-[8px] font-bold text-blue-500/70 dark:text-muted-foreground uppercase tracking-widest truncate hover:text-blue-600 dark:hover:text-foreground hover:underline cursor-pointer inline-block outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
-              onClick={handleArtistClick}
-              onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handleArtistClick(e as any)); }}
-              role="button"
-              tabIndex={0}
-              aria-label={`View artist: ${track.artist}`}
-            >
-              {track.artist}
-            </p>
+        
+        {/* Expanded Details */}
+        {isExpanded && (
+          <div className="px-4 pb-4 pt-1 flex flex-wrap gap-6 text-xs text-muted-foreground border-t border-white/5 mx-2 mt-1">
+             <div className="flex items-center gap-1.5"><Activity className="h-3.5 w-3.5 text-blue-400" /> BPM: <span className="font-bold text-white/80">{track.bpm || '120'}</span></div>
+             <div className="flex items-center gap-1.5"><Key className="h-3.5 w-3.5 text-purple-400" /> Key: <span className="font-bold text-white/80">{track.key || 'C Min'}</span></div>
+             <div className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-yellow-400" /> Bitrate: <span className="font-bold text-white/80">{track.bitrate || '320kbps'}</span></div>
+             {track.genre && <div className="flex items-center gap-1.5"><ListMusic className="h-3.5 w-3.5 text-green-400" /> Genre: <span className="font-bold text-white/80">{track.genre}</span></div>}
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-           <span className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest hidden sm:block" aria-label="Duration">
-              {`${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}`}
-           </span>
-           <button 
-             onClick={handleOptions} 
-             className="p-2.5 rounded-full hover:bg-muted text-white hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-             aria-label="Track options"
-             aria-haspopup="true"
-           >
-             <MoreVertical className="h-5 w-5" />
-           </button>
-        </div>
+        )}
       </div>
     );
   }

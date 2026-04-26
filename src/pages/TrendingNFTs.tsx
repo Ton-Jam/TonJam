@@ -111,6 +111,33 @@ const TrendingNFTs: React.FC = () => {
           ))}
         </div>
 
+        {/* Active Collections */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-black uppercase tracking-tight italic">Active Collections</h2>
+            <button className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">View All</button>
+          </div>
+          <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex-shrink-0 w-32 sm:w-40 group cursor-pointer">
+                <div className="relative aspect-square rounded-[2px] overflow-hidden mb-2">
+                  <img 
+                    src={getPlaceholderImage(`collection-${i}`)} 
+                    alt="Collection"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-2 sm:p-3">
+                    <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white truncate w-full">Vol. {i}</span>
+                  </div>
+                </div>
+                <h3 className="text-xs sm:text-sm font-black uppercase tracking-tight truncate group-hover:text-blue-400 transition-colors">Sonic Genesis {i}</h3>
+                <p className="text-[8px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{Math.floor(Math.random() * 50) + 10} Items</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Infinite List - Flattened Display */}
         <div className="space-y-1">
           <AnimatePresence>
@@ -121,23 +148,24 @@ const TrendingNFTs: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: (idx % 15) * 0.03 }}
               >
-                <div className="group flex flex-col md:flex-row items-center gap-4 py-3 px-4 hover:bg-white/[0.03] transition-colors overflow-hidden relative rounded-[2px]">
+                <div className="group flex flex-row items-center gap-3 py-2 px-3 hover:bg-white/[0.03] transition-colors overflow-hidden relative rounded-[2px] w-full">
                   {/* Ranking & Status */}
-                  <div className="flex flex-col items-center justify-center w-8 flex-shrink-0">
-                    <span className={`text-xs font-black italic tracking-tighter ${idx < 3 ? 'text-blue-500' : 'text-white/20'}`}>
+                  <div className="flex flex-col items-center justify-center w-6 flex-shrink-0">
+                    <span className={`text-[10px] font-black italic tracking-tighter ${idx < 3 ? 'text-blue-500' : 'text-white/20'}`}>
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     {idx < 10 && (
                       <motion.div
                         animate={{ opacity: [0.4, 1, 0.4] }}
                         transition={{ duration: 2, repeat: Infinity }}
+                        className="hidden sm:block"
                       >
-                        <Flame className={`w-3 h-3 mt-0.5 ${idx === 0 ? 'text-blue-500' : idx < 3 ? 'text-blue-400' : 'text-zinc-700'}`} />
+                        <Flame className={`w-2.5 h-2.5 mt-0.5 ${idx === 0 ? 'text-blue-500' : idx < 3 ? 'text-blue-400' : 'text-zinc-700'}`} />
                       </motion.div>
                     )}
                   </div>
 
-                  <div className="relative w-16 h-16 flex-shrink-0">
+                  <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
                     <img 
                       src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
                       alt={nft.title}
@@ -145,68 +173,72 @@ const TrendingNFTs: React.FC = () => {
                       referrerPolicy="no-referrer"
                     />
                     {idx === 0 && (
-                      <div className="absolute top-0 left-0 bg-blue-600 text-[6px] font-black text-white px-1 py-0.5 uppercase tracking-tighter rounded-br-[2px] flex items-center gap-0.5">
-                        <Flame className="w-1.5 h-1.5 fill-white" />
+                      <div className="absolute top-0 left-0 bg-blue-600 text-[5px] md:text-[6px] font-black text-white px-1 py-0.5 uppercase tracking-tighter rounded-br-[2px] flex items-center gap-0.5">
+                        <Flame className="w-1.5 h-1.5 fill-white hidden sm:block" />
                         HOT
                       </div>
                     )}
                     <button 
-                      onClick={() => playTrack(nft.track as any)}
+                      onClick={(e) => { e.stopPropagation(); playTrack(nft.track as any); }}
                       className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2px]"
                     >
-                      <Play className="w-5 h-5 text-white fill-white" />
+                      <Play className="w-4 h-4 text-white fill-white" />
                     </button>
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-blue-500/60">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-[7px] font-bold uppercase tracking-widest text-blue-500/60 hidden sm:inline-block">
                         {nft.edition} Edition
                       </span>
                     </div>
                     <h3 
-                      className="text-sm font-black uppercase tracking-tight truncate cursor-pointer hover:text-blue-400 transition-colors"
+                      className="text-xs md:text-sm font-black uppercase tracking-tight truncate cursor-pointer hover:text-blue-400 transition-colors"
                       onClick={() => navigate(`/nft/${nft.id}`)}
                     >
                       {nft.title}
                     </h3>
-                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                      BY <span className="hover:text-white transition-colors" onClick={() => navigate(`/artist/${nft.artistId}`)}>{nft.creator}</span>
+                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest truncate">
+                      BY <span className="hover:text-white transition-colors" onClick={(e) => { e.stopPropagation(); navigate(`/artist/${nft.artistId}`); }}>{nft.creator}</span>
                     </p>
                   </div>
 
                   {/* Telemetry Data */}
-                  <div className="hidden lg:flex items-center gap-8 mr-8">
-                    <div className="text-center">
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-0.5">Energy</p>
-                      <p className="text-xs font-black text-white/60">{Math.floor(nft.trendingScore)}</p>
+                  <div className="hidden lg:flex items-center gap-6 mr-6 flex-shrink-0">
+                    <div className="text-center w-12">
+                      <p className="text-[7px] font-bold text-white/20 uppercase tracking-widest mb-0.5">Energy</p>
+                      <p className="text-[10px] font-black text-white/60">{Math.floor(nft.trendingScore)}</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-0.5">Bids</p>
-                      <p className="text-xs font-black text-white/60">{nft.offers?.length || 0}</p>
+                    <div className="text-center w-12">
+                      <p className="text-[7px] font-bold text-white/20 uppercase tracking-widest mb-0.5">Bids</p>
+                      <p className="text-[10px] font-black text-white/60">{nft.offers?.length || 0}</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-0.5">Collection</p>
-                      <p className="text-xs font-black text-white/60">GENESIS</p>
+                    <div className="text-center w-16">
+                      <p className="text-[7px] font-bold text-white/20 uppercase tracking-widest mb-0.5">Collection</p>
+                      <p className="text-[10px] font-black text-white/60">GENESIS</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-6">
-                    <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+                    <div className="flex flex-col items-end gap-0.5 hidden sm:flex">
                       <div className="flex items-center gap-1 opacity-40">
-                        <TrendingUp className="w-2.5 h-2.5 text-green-500" />
-                        <span className="text-[8px] font-black text-white italic">TRENDING</span>
-                        <span className="text-[8px] font-bold text-green-400 ml-0.5">+{Math.floor(Math.random() * 20) + 1}%</span>
+                        <TrendingUp className="w-2 h-2 text-green-500" />
+                        <span className="text-[7px] font-black text-white italic">TRENDING</span>
+                        <span className="text-[7px] font-bold text-green-400 ml-0.5">+{Math.floor(Math.random() * 20) + 1}%</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5" />
-                        <p className="text-base font-black text-white leading-none">{nft.price}</p>
+                      <div className="flex items-center gap-1">
+                        <img src={TON_LOGO} alt="TON" className="w-3 h-3" />
+                        <p className="text-xs md:text-sm font-black text-white leading-none truncate max-w-[60px] md:max-w-none">{nft.price}</p>
                       </div>
                     </div>
+                    <div className="flex items-center gap-1 sm:hidden">
+                       <img src={TON_LOGO} alt="TON" className="w-2.5 h-2.5" />
+                       <p className="text-xs font-black text-white leading-none">{nft.price}</p>
+                    </div>
                     <Button 
-                      onClick={() => navigate(`/nft/${nft.id}`)}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/nft/${nft.id}`); }}
                       variant="ghost"
-                      className="h-10 px-6 rounded-[2px] border border-white/10 hover:bg-blue-600 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all"
+                      className="h-7 md:h-8 px-3 md:px-4 rounded-[2px] border border-white/10 hover:bg-blue-600 hover:text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest transition-all"
                     >
                       COLLECT
                     </Button>

@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -12,7 +12,9 @@ export const analytics = typeof window !== 'undefined' && firebaseConfig.measure
 
 // Standard Firestore initialization
 const firestoreDatabaseId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
-export const db = getFirestore(app, firestoreDatabaseId);
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, firestoreDatabaseId);
 
 export const auth = getAuth();
 export const storage = getStorage(app);
@@ -31,26 +33,14 @@ async function testConnection() {
     if (error instanceof Error) {
       if (error.message.includes('Missing or insufficient permissions')) {
         console.warn("Firestore connection check: Server is reachable but requires Firestore Rules to be published.");
-      } else {
-        console.error("Firestore connectivity check failed:", error);
-      }
-
-      if (error.message.includes('unavailable')) {
-        const dbId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
+      } else if (error.message.includes('unavailable') || error.message.includes('the client is offline')) {
         console.warn(
-          "Firestore backend is UNAVAILABLE. Common reasons:\n" +
-          "1. The database instance '" + dbId + "' hasn't been provisioned yet.\n" +
-          "2. You haven't accepted the Firebase Terms of Service in the console.\n" +
-          "3. The database is still initializing. Please wait a few minutes."
+          "Firestore backend is currently unreachable. The app will continue in offline mode (using mock data).\n" +
+          "Reason: " + error.message
         );
-      } else if (error.message.includes('the client is offline')) {
-        console.error(
-          "The client is reporting as OFFLINE. This often happens if the initial handshake fails.\n" +
-          "Check if your Project ID '" + firebaseConfig.projectId + "' and API Key are correct in firebase-applet-config.json."
-        );
+      } else {
+        console.warn("Firestore connectivity check failed (falling back to offline mode):", error.message);
       }
-    } else {
-      console.error("Firestore connectivity check failed:", error);
     }
   }
 }
@@ -104,9 +94,16 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     path
   };
   
-  // Log the error but do NOT throw to prevent fatal app crashes if 
-  // rules haven't propagated or the user hasn't copied the rules yet.
-  console.warn('Firestore Error Detected (Gracefully Handled):', JSON.stringify(errInfo));
+  // Log the error but do NOT throw to prevent fatal app crashes
+  if (errInfo.error.includes('offline') || errInfo.error.includes('unavailable')) {
+    // Only log connection errors once to avoid spamming the console
+    if (!(window as any)._firestoreConnectionErrorLogged) {
+      console.warn('Firestore Connection Issues: The app will operate in offline mode until a connection is established.');
+      (window as any)._firestoreConnectionErrorLogged = true;
+    }
+  } else {
+    console.warn('Firestore Error Detected (Gracefully Handled):', JSON.stringify(errInfo));
+  }
 }
 
 export function cleanUpdateData(data: Record<string, any>) {

@@ -25,7 +25,8 @@ import {
   ArrowUpTrayIcon,
   PlusCircleIcon,
   PlusIcon,
-  StarIcon
+  StarIcon,
+  TicketIcon
 } from '@heroicons/react/24/outline';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -44,7 +45,6 @@ import CreatePlaylistModal from './CreatePlaylistModal';
 import AuthModal from './AuthModal';
 import ScrollToTopButton from './ScrollToTopButton';
 import AIAssistant from './AIAssistant';
-import { MintTrackDialog } from './MintTrackDialog';
 import { Button } from "@/components/ui/button"
 import { ButtonGroupInput } from './ButtonGroupInput';
 import {
@@ -132,6 +132,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isFabActive, setIsFabActive] = useState(true);
   const [activeFilterSubMenu, setActiveFilterSubMenu] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     const saved = localStorage.getItem('recentSearches');
@@ -206,15 +207,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [isFullPlayerOpen]);
 
   useEffect(() => {
+    let fabTimeout: NodeJS.Timeout;
+    
     // Scroll handling is simplified to keep headers and nav always visible
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setLastScrollY(currentScrollY);
+      
+      if (!isFabActive) setIsFabActive(true);
+      
+      clearTimeout(fabTimeout);
+      fabTimeout = setTimeout(() => {
+        setIsFabActive(false);
+      }, 2000);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+    
+    // Initial timeout
+    fabTimeout = setTimeout(() => {
+      setIsFabActive(false);
+    }, 3000);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(fabTimeout);
+    };
+  }, [lastScrollY, isFabActive]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300 relative">
@@ -230,8 +249,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Header */}
       {!isPlayer && !isExplore && !isSearch && (
-        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between ${isPostDetail ? '' : 'lg:left-64'} transition-transform duration-300 border-none ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
-          <div className="flex items-center gap-2 flex-1">
+        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between flex-wrap gap-y-2 ${isPostDetail ? '' : 'lg:left-64'} transition-transform duration-300 border-none ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+          <div className="flex items-center gap-2 flex-1 h-16">
             {(isHome) ? (
               <button 
                 onClick={() => setIsMobileSidebarOpen(true)}
@@ -816,12 +835,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {isJamspace && (
         <button 
           onClick={() => setIsPostModalOpen(true)}
-          className={`lg:hidden fixed right-6 z-50 w-14 h-14 rounded-full bg-primary shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all ${
+          className={`lg:hidden fixed right-6 z-[100] w-14 h-14 rounded-full bg-primary shadow-2xl flex items-center justify-center transition-all duration-300 ${isFabActive ? 'opacity-100 scale-100' : 'opacity-40 scale-95'} hover:opacity-100 hover:scale-110 active:scale-95 ${
             currentTrack && !isFullPlayerOpen ? 'bottom-36' : 'bottom-20'
           }`}
           aria-label="Create Post"
         >
-          <img src={APP_LOGO} alt="" className="w-8 h-8 object-contain" />
+          <PlusIcon className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />
         </button>
       )}
     </div>
@@ -848,6 +867,8 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       <NavItem to="/" icon={HomeIcon} label="Home" onClick={onNavigate} />
       <NavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={onNavigate} />
       <NavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" onClick={onNavigate} />
+      <NavItem to="/auctions" icon={StarIcon} label="Auctions" onClick={onNavigate} />
+      <NavItem to="/genesis-forge" icon={TicketIcon} label="Genesis" onClick={onNavigate} />
       <NavItem to="/library" icon={RectangleStackIcon} label="Library" onClick={onNavigate} />
       <NavItem to="/marketplace" icon={ShoppingBagIcon} label="NFT Market" onClick={onNavigate} />
       
@@ -863,6 +884,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <NavItem to="/admin" icon={ShieldCheckIcon} label="Admin Console" onClick={onNavigate} />
         )}
         <NavItem to="/profile" icon={UserIcon} label="User Profile" onClick={onNavigate} />
+        <NavItem to="/my-nfts" icon={TicketIcon} label="My NFTs" onClick={onNavigate} />
         <NavItem to="/wallet" icon={WalletIcon} label="Wallet" onClick={onNavigate} />
         <NavItem to="/staking" icon={ArrowTrendingUpIcon} label="Staking" onClick={onNavigate} />
         <NavItem to="/about" icon={ShieldCheckIcon} label="About Us" onClick={onNavigate} />
@@ -894,17 +916,15 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Upload Track</span>
           </Link>
           
-          <div onClick={onNavigate}>
-            <MintTrackDialog>
-              <button 
-                className="w-full flex items-center gap-4 px-6 py-4 rounded-[12px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left"
-                aria-label="Mint new NFT"
-              >
-                <PlusCircleIcon className="h-5 w-5" />
-                <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
-              </button>
-            </MintTrackDialog>
-          </div>
+          <Link 
+            to="/mint"
+            onClick={onNavigate}
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-[12px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left"
+            aria-label="Mint new NFT"
+          >
+            <PlusCircleIcon className="h-5 w-5" />
+            <span className="text-[12px] uppercase font-bold tracking-[0.15em]">Mint NFT</span>
+          </Link>
         </div>
       ) : (
         <div className="pt-4 space-y-3">

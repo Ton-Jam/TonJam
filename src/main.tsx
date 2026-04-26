@@ -1,15 +1,12 @@
-import './src/polyfills';
-import './app/globals.css';
+import './polyfills';
+import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './src/App';
+import App from './App';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 /**
  * TON Connect SDK Analytics Error Suppression
- * The SDK attempts to send analytics to its backend, which often fails in
- * restricted environments (previews, sandboxes, or ad-blockers).
- * These "Failed to fetch" errors are non-critical.
  */
 window.addEventListener('unhandledrejection', (event) => {
   const reason = event.reason;
@@ -20,13 +17,11 @@ window.addEventListener('unhandledrejection', (event) => {
   );
 
   if (isSDKError) {
-    // Prevent the error from appearing in the console
     event.preventDefault();
     event.stopPropagation();
   }
 });
 
-// Also intercept console.error for these specific SDK messages
 const originalConsoleError = console.error;
 console.error = (...args) => {
   const message = args.join(' ');
@@ -41,10 +36,6 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-/**
- * TON Connect 2.0 Manifest Resolution
- * Requested Canonical URL: https://ton-jam.vercel.app
- */
 const getManifestUrl = () => {
   try {
     const manifest = {
@@ -55,12 +46,10 @@ const getManifestUrl = () => {
     };
 
     const jsonString = JSON.stringify(manifest);
-    // Robust Base64 encoding for Data URI
     const base64Manifest = btoa(unescape(encodeURIComponent(jsonString)));
 
     return `data:application/json;base64,${base64Manifest}`;
   } catch (e) {
-    // Fallback to static file if dynamic generation fails
     return "/tonconnect-manifest.json";
   }
 };

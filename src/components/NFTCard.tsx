@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, CheckCircle2, Eye, Send, Star } from 'lucide-react';
+import { Play, Pause, MoreVertical, CheckCircle2, Eye, Send, Star, Clock } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -30,6 +30,29 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  useEffect(() => {
+    if (nft.listingType !== 'auction' || !nft.auctionEndTime) return;
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const end = new Date(nft.auctionEndTime!).getTime();
+      const diff = end - now;
+
+      if (diff <= 0) {
+        setTimeLeft('ENDED');
+        clearInterval(timer);
+      } else {
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeLeft(`${h}h ${m}m ${s}s`);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [nft.listingType, nft.auctionEndTime]);
   
   if (isLoading) {
     return <SkeletonCard variant={variant} />;
@@ -217,6 +240,22 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   </button>
                 </div>
              </div>
+
+             {/* Timer Overlay for Auctions */}
+             {nft.listingType === 'auction' && timeLeft && (
+               <div className="absolute bottom-2 left-2 right-2 z-10">
+                 <div className="bg-black/60 backdrop-blur-md rounded-sm px-2 py-1 flex items-center justify-between border border-white/10">
+                   <div className="flex items-center gap-1.5">
+                     <Clock className="w-3 h-3 text-amber-500" />
+                     <span className="text-[9px] font-bold text-white uppercase tracking-wider">{timeLeft}</span>
+                   </div>
+                   <div className="flex items-center gap-1">
+                     <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></div>
+                     <span className="text-[7px] font-bold text-amber-500 uppercase tracking-widest">LIVE</span>
+                   </div>
+                 </div>
+               </div>
+             )}
    
              {/* Center Play Button (if associated track) */}
              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

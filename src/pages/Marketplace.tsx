@@ -10,6 +10,7 @@ import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { motion } from 'motion/react';
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -306,6 +307,13 @@ const Marketplace: React.FC = () => {
                 <h3 className="text-[11px] font-bold text-foreground/80 uppercase tracking-[0.5em]">Live_Auction_Relay</h3>
               </div>
               <div className="flex gap-4">
+                <Button 
+                  variant="link" 
+                  onClick={() => navigate('/auctions')}
+                  className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 p-0 h-auto"
+                >
+                  View Full Screen <ArrowRight className="ml-1 h-3 w-3" />
+                </Button>
                 {topBiddedNfts.map((_, i) => (
                   <div key={`indicator-${i}`} className="w-1 h-1 rounded-full bg-foreground/20"></div>
                 ))}
@@ -358,6 +366,24 @@ const Marketplace: React.FC = () => {
         </div>
 
         <div className="max-w-[1600px] mx-auto px-4 md:px-4">
+          {activeTab === 'Genesis' && (
+            <div className="mb-4 p-8 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-blue-600 text-white border-none font-black italic">ULTRA RARE</Badge>
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400">Protocol Level: 01</span>
+                </div>
+                <h3 className="text-3xl font-black italic uppercase tracking-tighter">The Genesis Forge is Active</h3>
+                <p className="text-muted-foreground text-sm max-w-lg">Enter the dedicated Genesis portal for a hardware-grade experience, deep lore, and high-fidelity artifact showcase.</p>
+              </div>
+              <Button 
+                onClick={() => navigate('/genesis-forge')}
+                className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black italic px-8 h-14 group shadow-xl shadow-blue-500/20"
+              >
+                Go to Forge Fullscreen <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+          )}
           {/* 5. MARKET SECTIONS - BENTO STYLE */}
           <div className="space-y-2">
             <section>
@@ -372,6 +398,25 @@ const Marketplace: React.FC = () => {
               </div>
               <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
                 {allNFTs.slice(0, 8).map((nft) => (
+                  <div key={nft.id} className="flex-shrink-0 w-[160px] snap-start">
+                    <NFTCard nft={nft} />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 bg-orange-600 rounded-full" />
+                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-foreground/90">Limited Audio Artifacts</h2>
+                </div>
+                <button onClick={() => navigate('/limited-editions')} className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-widest hover:text-primary transition-all flex items-center group">
+                  EXPLORE SCARCITY <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
+                {allNFTs.filter(n => n.edition !== 'Open' && n.edition !== 'Unlimited').slice(0, 8).map((nft) => (
                   <div key={nft.id} className="flex-shrink-0 w-[160px] snap-start">
                     <NFTCard nft={nft} />
                   </div>

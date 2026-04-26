@@ -20,8 +20,12 @@ import ExploreList from '@/pages/ExploreList';
 import Notifications from '@/pages/Notifications';
 import UploadTrack from '@/pages/UploadTrack';
 import MintNFT from '@/pages/MintNFT';
+import MyNFTs from '@/pages/MyNFTs';
 import ArtistMinting from '@/pages/ArtistMinting';
 import TrendingNFTs from '@/pages/TrendingNFTs';
+import AuctionScreen from '@/pages/AuctionScreen';
+import GenesisScreen from '@/pages/GenesisScreen';
+import LimitedNFTs from '@/pages/LimitedNFTs';
 import LoadingScreen from '@/components/LoadingScreen';
 import PlaylistDetail from '@/pages/PlaylistDetail';
 import PostDetail from '@/pages/PostDetail';
@@ -143,6 +147,9 @@ const AppContent: React.FC = () => {
               <Route path="/discover" element={<PageWrapper><Discover /></PageWrapper>} />
               <Route path="/jamspace" element={<PageWrapper><JamSpace /></PageWrapper>} />
               <Route path="/marketplace" element={<PageWrapper><Marketplace /></PageWrapper>} />
+              <Route path="/auctions" element={<PageWrapper><AuctionScreen /></PageWrapper>} />
+              <Route path="/genesis-forge" element={<PageWrapper><GenesisScreen /></PageWrapper>} />
+              <Route path="/limited-editions" element={<PageWrapper><LimitedNFTs /></PageWrapper>} />
               <Route path="/trending-nfts" element={<PageWrapper><TrendingNFTs /></PageWrapper>} />
               <Route path="/nft/:id" element={<PageWrapper><NFTDetail /></PageWrapper>} />
               <Route path="/explore/:type" element={<PageWrapper><ExploreList /></PageWrapper>} />
@@ -153,6 +160,7 @@ const AppContent: React.FC = () => {
               <Route path="/artist-onboarding" element={<PageWrapper><ProtectedRoute><ArtistOnboarding /></ProtectedRoute></PageWrapper>} />
               <Route path="/upload" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><UploadTrack /></ProtectedRoute></PageWrapper>} />
               <Route path="/mint" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><MintNFT /></ProtectedRoute></PageWrapper>} />
+              <Route path="/my-nfts" element={<PageWrapper><ProtectedRoute><MyNFTs /></ProtectedRoute></PageWrapper>} />
               <Route path="/artist-minting" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistMinting /></ProtectedRoute></PageWrapper>} />
               <Route path="/library" element={<PageWrapper><Library /></PageWrapper>} />
               <Route path="/wallet" element={<PageWrapper><ProtectedRoute><Wallet /></ProtectedRoute></PageWrapper>} />
