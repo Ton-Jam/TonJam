@@ -26,13 +26,15 @@ import {
   PlusCircleIcon,
   PlusIcon,
   StarIcon,
-  TicketIcon
+  TicketIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
+import { Sparkles as SparklesLucide } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import MiniAudioPlayer from './MiniAudioPlayer';
 import FullPlayer from './FullPlayer';
 import AddToPlaylistModal from './AddToPlaylistModal';
@@ -128,6 +130,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return { tracks, nfts, artists: filteredArtists, users };
   }, [searchQuery, allTracks, allNFTs, artists, firestoreUsers]);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const { scrollY } = useScroll();
+  const headerOpacity = useTransform(scrollY, [0, 50], [0, 1]);
   const [isMobileNavHidden, setIsMobileNavHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
@@ -249,7 +253,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Header */}
       {!isPlayer && !isExplore && !isSearch && (
-        <header className={`fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between flex-wrap gap-y-2 ${isPostDetail ? '' : 'lg:left-64'} transition-transform duration-300 border-none ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+        <motion.header 
+          className={`fixed top-0 left-0 right-0 z-40 px-[var(--page-margin)] md:px-[var(--page-margin-md)] h-16 flex items-center justify-between flex-wrap gap-y-2 ${isPostDetail ? '' : 'lg:left-64'} transition-transform duration-300 border-none ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
+        >
+          {/* Animated Background Overlay */}
+          <motion.div 
+            style={{ opacity: headerOpacity }}
+            className="absolute inset-0 bg-background/80 backdrop-blur-xl -z-10 border-b border-blue-500"
+          />
           <div className="flex items-center gap-2 flex-1 h-16">
             {(isHome) ? (
               <button 
@@ -731,7 +742,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
             ))}
           </div>
-        </header>
+        </motion.header>
       )}
 
       {/* Sidebar - Desktop */}
@@ -822,7 +833,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Mobile Navigation */}
       {!isPlayer && !isPostDetail && (
-        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t-0 h-[61px] px-2 flex justify-around items-center shadow-2xl transition-transform duration-300 ${isMobileNavHidden ? 'translate-y-full' : 'translate-y-0'}`} aria-label="Mobile Navigation">
+        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t border-blue-500 h-[61px] px-2 flex justify-around items-center shadow-2xl transition-transform duration-300 ${isMobileNavHidden ? 'translate-y-full' : 'translate-y-0'}`} aria-label="Mobile Navigation">
           <MobileNavItem to="/" icon={HomeIcon} label="Home" />
           <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
           <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" />
@@ -866,6 +877,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
     <nav className="flex-1 space-y-3" aria-label="Main Navigation">
       <NavItem to="/" icon={HomeIcon} label="Home" onClick={onNavigate} />
       <NavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={onNavigate} />
+      <NavItem to="/discover#sonic" icon={SparklesLucide} label="Sonic AI" onClick={onNavigate} className="text-blue-500 bg-blue-500/5 border border-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.1)]" />
       <NavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" onClick={onNavigate} />
       <NavItem to="/auctions" icon={StarIcon} label="Auctions" onClick={onNavigate} />
       <NavItem to="/genesis-forge" icon={TicketIcon} label="Genesis" onClick={onNavigate} />
@@ -886,6 +898,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         <NavItem to="/profile" icon={UserIcon} label="User Profile" onClick={onNavigate} />
         <NavItem to="/my-nfts" icon={TicketIcon} label="My NFTs" onClick={onNavigate} />
         <NavItem to="/wallet" icon={WalletIcon} label="Wallet" onClick={onNavigate} />
+        <NavItem to="/governance" icon={ShieldCheckIcon} label="Governance" onClick={onNavigate} />
         <NavItem to="/staking" icon={ArrowTrendingUpIcon} label="Staking" onClick={onNavigate} />
         <NavItem to="/about" icon={ShieldCheckIcon} label="About Us" onClick={onNavigate} />
         <NavItem to="/settings" icon={Cog6ToothIcon} label="Settings" onClick={onNavigate} />
@@ -969,31 +982,36 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
   </>
 );
 
-const NavItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; label: string; onClick?: () => void }) => (
+const NavItem = ({ to, icon: Icon, label, onClick, className = "" }: { to: string; icon: any; label: string; onClick?: () => void; className?: string }) => (
   <NavLink 
     to={to} 
     onClick={onClick}
     className={({ isActive }) => `
       flex items-center gap-4 px-6 py-4 rounded-[12px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-      ${isActive ? 'bg-zinc-500/10 text-zinc-900 dark:text-blue-500 font-bold' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400 hover:bg-zinc-500/5'}
+      ${isActive ? 'bg-blue-500/10 text-blue-500 font-bold' : 'text-neutral-500 hover:text-foreground hover:bg-white/5'}
+      ${className}
     `}
   >
-    <Icon className="h-6 w-6 text-white" strokeWidth={3.5} />
-    <span className="text-[12px] uppercase font-bold tracking-[0.15em]">{label}</span>
+    {({ isActive }) => (
+      <>
+        <Icon className={`h-6 w-6 transition-colors ${isActive ? 'text-blue-500' : 'text-neutral-400 dark:text-neutral-500'}`} strokeWidth={isActive ? 3 : 2} />
+        <span className="text-[12px] uppercase font-bold tracking-[0.15em]">{label}</span>
+      </>
+    )}
   </NavLink>
 );
 
-const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; label: string }) => (
+const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => (
   <NavLink 
     to={to} 
     aria-label={label}
     className={({ isActive }) => `
       flex-1 flex flex-col items-center justify-center transition-all gap-2 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm mobile-nav-item
-      ${isActive ? 'text-blue-500 active' : 'text-zinc-500 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-400'}
+      ${isActive ? 'text-blue-500 active' : 'text-neutral-400 dark:text-neutral-500'}
     `}
   >
       {({ isActive }) => (
-        <Icon className={`h-[22px] w-[22px] transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-white/70 scale-100'}`} strokeWidth={2.5} />
+        <Icon className={`h-[22px] w-[22px] transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-neutral-400 dark:text-white/70 scale-100'}`} strokeWidth={2.5} />
       )}
   </NavLink>
 );

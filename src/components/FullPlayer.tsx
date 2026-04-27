@@ -71,49 +71,39 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
         analyser.getByteFrequencyData(dataArray);
       }
 
-      // Center-out visualization
-      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
 
       for (let i = 0; i < bars; i++) {
         if (isPlaying) {
           if (analyser && dataArray) {
-            // Map to frequency data, focusing on bass/mids
             const dataIndex = Math.floor(i * (dataArray.length / bars) * 0.8);
             const value = dataArray[dataIndex] || 0;
-            targets[i] = 4 + (value / 255) * (canvas.height * 0.8);
+            targets[i] = 2 + (value / 255) * (canvas.height * 0.9);
           } else {
-            // Fallback animation
             const wave = Math.sin(phase + i * 0.15) * 0.5 + 0.5;
             if (Math.random() > 0.5) {
-               targets[i] = 4 + wave * (canvas.height * 0.4) + Math.random() * (canvas.height * 0.3);
+               targets[i] = 2 + wave * (canvas.height * 0.4) + Math.random() * (canvas.height * 0.3);
             }
           }
         } else {
-          targets[i] = 4;
+          targets[i] = 2;
         }
 
-        // Smooth interpolation
         heights[i] += (targets[i] - heights[i]) * 0.15;
+        const h = Math.max(2, heights[i]);
         
-        const h = Math.max(4, heights[i]);
+        const barWidth = Math.max(2, width - 2);
+        const x = i * width;
+        const y = centerY - h / 2;
         
-        // Draw mirrored bars from center
-        const xOffset = i * width;
-        
-        // Gradient fill
-        const gradient = ctx.createLinearGradient(0, canvas.height - h, 0, canvas.height);
-        gradient.addColorStop(0, 'rgba(96, 165, 250, 0.8)'); // blue-400
-        gradient.addColorStop(1, 'rgba(37, 99, 235, 0.2)'); // blue-600
+        const gradient = ctx.createLinearGradient(0, y, 0, y + h);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); // blue-500
+        gradient.addColorStop(0.5, 'rgba(59, 130, 246, 1)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
 
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        
-        // Rounded caps
-        const barWidth = Math.max(2, width - 2);
-        const x = i * width;
-        const y = canvas.height - h;
-        
-        ctx.roundRect(x + (width - barWidth) / 2, y, barWidth, h, [4, 4, 0, 0]);
+        ctx.roundRect(x + (width - barWidth) / 2, y, barWidth, h, [4]);
         ctx.fill();
       }
       animationFrameId = requestAnimationFrame(draw);
@@ -128,7 +118,7 @@ const AudioVisualizer: React.FC<{ isPlaying: boolean }> = ({ isPlaying }) => {
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-[40px] opacity-60 mix-blend-screen mt-2"
+      className="w-full h-[80px] opacity-80 mix-blend-screen mt-4"
     />
   );
 };
@@ -187,6 +177,7 @@ const FullPlayer: React.FC = () => {
 
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'playlist'>('player');
   const [showQueue, setShowQueue] = useState(false);
+  const [showVolume, setShowVolume] = useState(false);
   const [showAddLyricsModal, setShowAddLyricsModal] = useState(false);
   const [newLyrics, setNewLyrics] = useState('');
   const [isUpdatingLyrics, setIsUpdatingLyrics] = useState(false);
@@ -271,7 +262,7 @@ const FullPlayer: React.FC = () => {
           backgroundSize: 'cover',
         }}
       />
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505] pointer-events-none" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-background/80 to-background pointer-events-none" />
 
       <div className="relative z-10 flex flex-col min-h-full">
         {/* Header */}
@@ -298,9 +289,9 @@ const FullPlayer: React.FC = () => {
         <div className="flex-1 flex flex-col px-4 pb-20 max-w-2xl mx-auto w-full space-y-12">
           
           {/* 1. Main Player Section */}
-          <section className="w-full flex flex-col pt-4">
+          <section className="w-full bg-foreground/5 p-6 rounded-[2.5rem] flex flex-col shadow-xl">
             {/* Album Art */}
-            <div className="w-full aspect-square rounded-[14px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 relative group">
+            <div className="w-full aspect-square rounded-[2rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 relative group">
               <img 
                 src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} 
                 alt={currentTrack.title} 
@@ -337,11 +328,16 @@ const FullPlayer: React.FC = () => {
               </button>
             </div>
 
+            {/* Visualizer / Wave Profile */}
+            <div className="mb-6 h-[60px] flex items-center">
+              <AudioVisualizer isPlaying={isPlaying} />
+            </div>
+
             {/* Progress Bar */}
             <div className="w-full mb-6 group">
               <div className="relative h-1.5 w-full bg-foreground/10 rounded-full overflow-hidden mb-3">
                 <div 
-                  className="absolute top-0 left-0 h-full bg-foreground transition-all duration-100 group-hover:bg-blue-500"
+                  className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-100"
                   style={{ width: `${progress}%` }}
                 />
                 <input
@@ -353,17 +349,56 @@ const FullPlayer: React.FC = () => {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
               </div>
-              <div className="flex justify-between text-[12px] font-mono text-muted-foreground">
+              <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
             </div>
 
+            {/* Quick Actions Row (Now just above controls) */}
+            <div className="flex items-center justify-center gap-8 mb-6">
+              <button 
+                onClick={() => setTrackToAddToPlaylist(currentTrack)}
+                className="p-2 text-foreground/50 hover:text-blue-500 transition-all rounded-full"
+                aria-label="Add to playlist"
+              >
+                <PlusCircleIcon className="h-5 w-5" />
+              </button>
+              <button 
+                onClick={() => setShowQueue(!showQueue)}
+                className={`p-2 rounded-full transition-all ${showQueue ? 'text-blue-500' : 'text-foreground/50 hover:text-foreground'}`}
+                aria-label="Queue"
+              >
+                <ListBulletIcon className="h-5 w-5" />
+              </button>
+              <button 
+                onClick={() => {
+                  setFullPlayerOpen(false);
+                  if (currentTrack.isNFT) {
+                    navigate(`/nft/${currentTrack.id}`);
+                  } else {
+                    navigate(`/track/${currentTrack.id}`);
+                  }
+                }}
+                className="p-2 text-foreground/50 hover:text-foreground transition-all rounded-full"
+                aria-label="About"
+              >
+                <InformationCircleIcon className="h-5 w-5" />
+              </button>
+              <button 
+                onClick={handleShare}
+                className="p-2 text-foreground/50 hover:text-foreground transition-all rounded-full"
+                aria-label="Share"
+              >
+                <ShareIcon className="h-5 w-5" />
+              </button>
+            </div>
+
             {/* Main Playback Controls */}
-            <div className="w-full flex items-center justify-between mb-8">
+            <div className="w-full flex items-center justify-between mb-2">
               <button 
                 onClick={toggleShuffle}
-                className={`p-2 transition-all focus-visible:outline-none rounded-full ${isShuffle ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
+                className={`p-2 transition-all focus-visible:outline-none rounded-full ${isShuffle ? 'text-blue-500' : 'text-foreground/30 hover:text-foreground'}`}
                 aria-label={isShuffle ? "Disable shuffle" : "Enable shuffle"}
               >
                 <ArrowsRightLeftIcon className="h-6 w-6" />
@@ -401,7 +436,7 @@ const FullPlayer: React.FC = () => {
               
               <button 
                 onClick={toggleRepeat}
-                className={`p-2 transition-all focus-visible:outline-none rounded-full ${repeatMode !== 'off' ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
+                className={`p-2 transition-all focus-visible:outline-none rounded-full ${repeatMode !== 'off' ? 'text-blue-500' : 'text-foreground/30 hover:text-foreground'}`}
                 aria-label={repeatMode === 'off' ? "Enable repeat" : repeatMode === 'all' ? "Repeat one" : "Disable repeat"}
               >
                 <div className="relative">
@@ -411,69 +446,42 @@ const FullPlayer: React.FC = () => {
               </button>
             </div>
 
-            {/* Volume Control */}
-            <div className="w-full flex items-center gap-4 mb-8 px-4">
-              <button onClick={toggleMute} className="text-foreground/50 hover:text-foreground">
-                {isMuted ? <SpeakerXMarkIcon className="h-6 w-6" /> : <SpeakerWaveIcon className="h-6 w-6" />}
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={isMuted ? 0 : volume}
-                onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-foreground/10 rounded-full appearance-none cursor-pointer accent-foreground"
-              />
-            </div>
-
-            {/* Quick Actions Row */}
-            <div className="flex items-center justify-between bg-foreground/5 p-4 rounded-2xl">
-              <div className="flex gap-4">
-                <button 
-                  onClick={() => setTrackToAddToPlaylist(currentTrack)}
-                  className="p-2 text-foreground/50 hover:text-blue-500 transition-all rounded-full"
-                  aria-label="Add to playlist"
-                >
-                  <PlusCircleIcon className="h-6 w-6" />
-                </button>
-                <button 
-                  onClick={handleShare}
-                  className="p-2 text-foreground/50 hover:text-foreground transition-all rounded-full"
-                  aria-label="Share"
-                >
-                  <ShareIcon className="h-6 w-6" />
-                </button>
-                <button 
-                  onClick={() => setShowQueue(!showQueue)}
-                  className={`p-2 rounded-full transition-all ${showQueue ? 'text-blue-500 hover:text-blue-400' : 'text-foreground/50 hover:text-foreground'}`}
-                  aria-label="Queue"
-                >
-                  <ListBulletIcon className="h-6 w-6" />
-                </button>
-              </div>
+            {/* Volume Control Trigger */}
+            <div className="flex flex-col items-center mt-4">
+              <AnimatePresence>
+                {showVolume && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="w-full max-w-[200px] flex items-center gap-3 py-4"
+                  >
+                    <button onClick={toggleMute} className="text-foreground/50 hover:text-foreground">
+                      {isMuted || volume === 0 ? <SpeakerXMarkIcon className="h-5 w-5" /> : <SpeakerWaveIcon className="h-5 w-5" />}
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={isMuted ? 0 : volume}
+                      onChange={(e) => setVolume(parseFloat(e.target.value))}
+                      className="w-full h-1.5 bg-foreground/10 rounded-full appearance-none cursor-pointer accent-blue-500"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
-              <div className="flex gap-4">
+              {!showVolume && (
                 <button 
-                  onClick={() => {
-                    setFullPlayerOpen(false);
-                    if (currentTrack.isNFT) {
-                      navigate(`/nft/${currentTrack.id}`);
-                    } else {
-                      navigate(`/track/${currentTrack.id}`);
-                    }
-                  }}
-                  className="p-3 bg-foreground text-background rounded-full hover:opacity-90 transition-all shadow-lg"
-                  title="View Details"
-                  aria-label="View Details"
+                  onClick={() => setShowVolume(true)} 
+                  className="p-3 text-foreground/30 hover:text-foreground transition-all"
+                  aria-label="Show Volume"
                 >
-                  <InformationCircleIcon className="h-6 w-6" />
+                   {isMuted || volume === 0 ? <SpeakerXMarkIcon className="h-5 w-5" /> : <SpeakerWaveIcon className="h-5 w-5" />}
                 </button>
-              </div>
+              )}
             </div>
-
-            {/* Visualizer */}
-            <AudioVisualizer isPlaying={isPlaying} />
           </section>
 
           {/* 2. Track Details Section */}

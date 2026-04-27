@@ -37,7 +37,7 @@
     --popover-foreground: oklch(0.32 0.04 250);
 
     /* Brand */
-    --primary: oklch(0.58 0.19 255);                   /* TonJam electric blue */
+    --primary: oklch(0.55 0.22 255);                   /* TonJam vibrant blue */
     --primary-foreground: oklch(0.99 0 0);
 
     --secondary: oklch(0.95 0.01 250);
@@ -97,7 +97,7 @@
     --popover-foreground: oklch(0.985 0 0);
 
     /* Brand */
-    --primary: oklch(0.68 0.20 255);                   /* glowing electric blue */
+    --primary: oklch(0.60 0.22 255);                   /* glowing vibrant blue */
     --primary-foreground: oklch(0.99 0 0);
 
     --secondary: oklch(0.18 0.01 260 / 0.62);
@@ -151,7 +151,7 @@
 
 @layer components {
   .glass {
-    @apply bg-black/40 backdrop-blur-xl border-none shadow-2xl;
+    @apply bg-white/40 dark:bg-black/40 backdrop-blur-xl border-none shadow-2xl;
   }
   
   .glass-card {

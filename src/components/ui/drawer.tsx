@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { DrawerPreview as DrawerPrimitive } from "@base-ui/react/drawer";
 import * as React from "react";
-import { createContext, use } from "react";
+import { createContext, useContext } from "react";
 
 const DrawerContext =
   createContext<DrawerPrimitive.Root.Props["swipeDirection"]>("down");
@@ -13,13 +13,13 @@ function Drawer({
   ...props
 }: DrawerPrimitive.Root.Props) {
   return (
-    <DrawerContext value={swipeDirection}>
+    <DrawerContext.Provider value={swipeDirection}>
       <DrawerPrimitive.Root
         data-slot="drawer"
         swipeDirection={swipeDirection}
         {...props}
       />
-    </DrawerContext>
+    </DrawerContext.Provider>
   );
 }
 
@@ -90,7 +90,7 @@ function DrawerPopup({
   children,
   ...props
 }: DrawerPrimitive.Popup.Props) {
-  const dir = use(DrawerContext);
+  const dir = useContext(DrawerContext);
   return (
     <DrawerPrimitive.Popup
       data-slot="drawer-popup"
@@ -150,7 +150,7 @@ function DrawerViewport({
   className,
   ...props
 }: DrawerPrimitive.Viewport.Props) {
-  const dir = use(DrawerContext);
+  const dir = useContext(DrawerContext);
   return (
     <DrawerPrimitive.Viewport
       data-slot="drawer-viewport"
@@ -177,7 +177,7 @@ function DrawerTitle({
   className,
   ...props
 }: DrawerPrimitive.Title.Props & { asChild?: boolean }) {
-  const dir = use(DrawerContext);
+  const dir = useContext(DrawerContext);
 
   return (
     <DrawerPrimitive.Title
@@ -203,7 +203,7 @@ function DrawerDescription({
   className,
   ...props
 }: DrawerPrimitive.Description.Props & { asChild?: boolean }) {
-  const dir = use(DrawerContext);
+  const dir = useContext(DrawerContext);
 
   return (
     <DrawerPrimitive.Description

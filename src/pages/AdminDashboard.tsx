@@ -24,10 +24,11 @@ import { Button } from '@/components/ui/button';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { deployTonJamCollection, deployTonJamMarketplace, TONJAM_COLLECTION_ADDRESS, TONJAM_MARKETPLACE_ADDRESS } from '@/services/tonService';
 import { toast } from 'sonner';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
-import { SponsoredContent, UserProfile } from '@/types';
-import { doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { SponsoredContent, UserProfile, TreasuryStats, GrantAllocation } from '@/types';
+import { doc, updateDoc, setDoc, deleteDoc, getDocs, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { governanceService } from '@/services/governanceService';
+import { treasuryService } from '@/services/treasuryService';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -45,6 +46,43 @@ const AdminDashboard: React.FC = () => {
   const [allSponsorships, setAllSponsorships] = useState<SponsoredContent[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  
+  const [treasuryStats, setTreasuryStats] = useState<TreasuryStats | null>(null);
+  const [allProposals, setAllProposals] = useState<any[]>([]);
+  const [isExecuting, setIsExecuting] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubStats = treasuryService.subscribeToStats(setTreasuryStats);
+    const unsubProposals = governanceService.getProposals(setAllProposals);
+    return () => {
+      unsubStats();
+      unsubProposals();
+    };
+  }, []);
+
+  const handleExecuteTreasury = async (proposal: any) => {
+    setIsExecuting(proposal.id);
+    try {
+      // Mocking recipient details for demo if not in proposal
+      const recipientId = proposal.creatorId;
+      const recipientName = proposal.creatorName;
+      const amount = proposal.category === 'Artist Grant' ? 500 : 2500; // Mock amounts
+      
+      await governanceService.executeTreasuryProposal(
+        proposal.id,
+        recipientId,
+        recipientName,
+        amount,
+        proposal.category === 'Artist Grant' ? 'artist_grant' : 'feature_development'
+      );
+      toast.success('Funds distributed and proposal executed!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to execute treasury proposal');
+    } finally {
+      setIsExecuting(null);
+    }
+  };
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -178,6 +216,12 @@ const AdminDashboard: React.FC = () => {
                 className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Users
+              </button>
+              <button 
+                onClick={() => setActiveTab('treasury')}
+                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'treasury' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Treasury
               </button>
             </div>
           </div>
@@ -469,6 +513,75 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">No users found</p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'treasury' && (
+          <div className="space-y-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Treasury Balance</p>
+                <h3 className="text-xl font-bold text-foreground tracking-tighter">{treasuryStats?.balance?.toFixed(2) || '0.00'} TON</h3>
+              </div>
+              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Fees Collected</p>
+                <h3 className="text-xl font-bold text-green-500 tracking-tighter">+{treasuryStats?.totalFeesCollected?.toFixed(2) || '0.00'} TON</h3>
+              </div>
+              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Grants Allocated</p>
+                <h3 className="text-xl font-bold text-amber-500 tracking-tighter">{treasuryStats?.totalGrantsAllocated?.toFixed(2) || '0.00'} TON</h3>
+              </div>
+            </div>
+
+            <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6">
+              <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">Treasury Governance Proposals</h2>
+              <div className="space-y-4">
+                {allProposals.filter(p => p.category === 'Treasury' || p.category === 'Artist Spotlight').length > 0 ? (
+                  allProposals
+                    .filter(p => (p.category === 'Treasury' || p.category === 'Artist Spotlight') && p.status === 'passed')
+                    .map((p) => (
+                    <div key={p.id} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 bg-muted/30 rounded-xl border border-border/30">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[8px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded uppercase font-bold">Passed</span>
+                          <span className="text-[8px] text-muted-foreground uppercase font-bold">{p.category}</span>
+                        </div>
+                        <h3 className="text-sm font-bold text-foreground">{p.title}</h3>
+                        <p className="text-[10px] text-muted-foreground">Proposed by {p.creatorName} • {p.forVotes} For / {p.againstVotes} Against</p>
+                      </div>
+                      <Button 
+                        disabled={isExecuting === p.id}
+                        onClick={() => handleExecuteTreasury(p)}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground text-[10px] font-bold uppercase py-2 px-6 rounded-lg h-auto"
+                      >
+                        {isExecuting === p.id ? 'Executing...' : 'Execute & Distribute'}
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center">
+                    <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">No executable treasury proposals found</p>
+                  </div>
+                )}
+                
+                {allProposals.filter(p => (p.category === 'Treasury' || p.category === 'Artist Spotlight') && p.status === 'executed').length > 0 && (
+                   <div className="pt-6 border-t border-border/30">
+                     <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Executed Grants</h3>
+                     <div className="space-y-2 opacity-60">
+                        {allProposals
+                          .filter(p => (p.category === 'Treasury' || p.category === 'Artist Spotlight') && p.status === 'executed')
+                          .slice(0, 5)
+                          .map(p => (
+                          <div key={p.id} className="flex items-center justify-between p-3 bg-muted/10 rounded-lg text-xs">
+                             <span className="font-medium text-foreground">{p.title}</span>
+                             <span className="text-muted-foreground text-[10px] uppercase font-bold">Distributed</span>
+                          </div>
+                        ))}
+                     </div>
+                   </div>
+                )}
+              </div>
             </div>
           </div>
         )}

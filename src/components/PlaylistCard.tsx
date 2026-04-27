@@ -106,7 +106,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   return (
     <div 
       onClick={onClick} 
-      className="group relative cursor-pointer glass p-2 rounded-sm min-w-[180px] sm:min-w-[200px]"
+      className="group relative cursor-pointer glass p-2 rounded-sm w-full"
     >
       {/* Image Container - 1:1 Aspect Ratio */}
       <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-2">

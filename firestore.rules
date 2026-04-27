@@ -51,6 +51,31 @@ service cloud.firestore {
         && data.content is string && data.content.size() <= 2000;
     }
 
+    function isValidProposal(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.title is string && data.title.size() <= 200
+        && data.creatorId is string && data.creatorId.size() <= 128
+        && data.status in ['active', 'passed', 'rejected', 'executed'];
+    }
+
+    function isValidVote(data) {
+      return data.userId is string && data.userId.size() <= 128
+        && data.choice in ['for', 'against'];
+    }
+
+    function isValidTreasuryStats(data) {
+      return data.balance is number
+        && data.totalFeesCollected is number
+        && data.totalGrantsAllocated is number;
+    }
+
+    function isValidGrantAllocation(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.proposalId is string && data.proposalId.size() <= 128
+        && data.amount is number
+        && data.status in ['pending', 'distributed'];
+    }
+
     // 👤 USERS
     match /users/{userId} {
       allow read: if true;
@@ -179,6 +204,29 @@ service cloud.firestore {
       allow create: if isSignedIn() && isOwner(incoming().userId);
     }
 
+    match /proposals/{id} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidProposal(incoming()) && isValidId(id) && isOwner(incoming().creatorId);
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          // Voting update (count and voters list)
+          incoming().diff(existing()).affectedKeys().hasOnly(['forVotes', 'againstVotes', 'voters'])
+        ) || (
+          // Creator edit
+          isOwner(existing().creatorId) && 
+          existing().status == 'active' &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'category', 'endTime'])
+        )
+      );
+      allow delete: if isAdmin();
+
+      match /votes/{userId} {
+        allow read: if true;
+        allow create: if isSignedIn() && isOwner(userId) && isValidVote(incoming()) && userId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
     match /playlists/{playlistId} {
       allow read: if true;
       allow create: if isSignedIn() && isOwner(incoming().creator) && isValidId(playlistId);
@@ -242,6 +290,18 @@ service cloud.firestore {
     match /admins/{userId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
+    }
+
+    // 💰 TREASURY & GRANTS
+    match /system/treasury {
+      allow read: if true;
+      allow write: if isSignedIn(); // In this demo, allow users to record fees
+    }
+
+    match /grantAllocations/{id} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
     // 🧪 CONNECTION TEST

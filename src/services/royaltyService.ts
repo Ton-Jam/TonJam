@@ -1,6 +1,7 @@
 import { Track, NFTItem, Transaction, RoyaltySplit, Royalty } from '../types';
 import { db, handleFirestoreError, OperationType, auth } from '../lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, increment } from 'firebase/firestore';
+import { treasuryService } from './treasuryService';
 
 /**
  * Royalty Service
@@ -115,6 +116,11 @@ export async function distributeRoyalties(
     };
 
     await addDoc(collection(db, 'transactions'), txData);
+
+    // 4. Record Platform Fee in Treasury
+    if (distribution.platformFee > 0) {
+      await treasuryService.recordInflow(distribution.platformFee, `Royalty Distribution: ${type}`, metadata.txHash);
+    }
 
     console.log(`Royalty distribution complete for ${type}. Artist Share: ${distribution.artistShare}`);
   } catch (error) {

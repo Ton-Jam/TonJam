@@ -40,7 +40,8 @@ import { NFTItem, Track, NFTOffer } from '@/types';
 import { fetchNFTMetadata } from '@/services/nftService';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
+import * as RechartsPrimitive from 'recharts';
+const { 
   AreaChart, 
   Area, 
   XAxis, 
@@ -48,7 +49,7 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer 
-} from 'recharts';
+} = RechartsPrimitive as any;
 import BuyNFTModal from '@/components/BuyNFTModal';
 import SellNFTModal from '@/components/SellNFTModal';
 import BidModal from '@/components/BidModal';

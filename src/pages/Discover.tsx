@@ -22,6 +22,7 @@ import { auth } from '@/lib/firebase';
 import NFTCard from '@/components/NFTCard';
 import TrackCard from '@/components/TrackCard';
 import SkeletonCard from '@/components/SkeletonCard';
+import SonicSearchSection from '@/components/SonicSearchSection';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
 
@@ -83,6 +84,17 @@ const Discover: React.FC = () => {
       generateDiscoverWeekly();
     }
   }, [generateDiscoverWeekly]);
+
+  useEffect(() => {
+    if (window.location.hash === '#sonic') {
+      setTimeout(() => {
+        const element = document.getElementById('sonic');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500);
+    }
+  }, []);
 
   const discoverWeekly = useMemo(() => 
     allUserPlaylists.find(p => p.title === 'Discover Weekly'),
@@ -426,6 +438,10 @@ const Discover: React.FC = () => {
             )}
 
             {/* Recent Searches */}
+            <div id="sonic">
+              <SonicSearchSection />
+            </div>
+
             {searchHistory.length > 0 && (
               <section className="space-y-4">
                 <div className="flex items-center justify-between">

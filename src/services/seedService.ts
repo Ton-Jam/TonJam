@@ -107,6 +107,65 @@ export const seedDatabase = async () => {
       }
     }
 
+    // Check if proposals collection is empty
+    const proposalsQuery = query(collection(db, 'proposals'), limit(1));
+    const proposalsSnapshot = await getDocs(proposalsQuery);
+
+    if (proposalsSnapshot.empty) {
+      console.log('Seeding proposals...');
+      const MOCK_PROPOSALS = [
+        {
+          id: 'prop-1',
+          creatorId: 'admin',
+          creatorName: 'TonJam Foundation',
+          title: 'Direct-to-Artist Royalty Increase',
+          description: 'Proposed increase of on-chain streaming royalties from 90% to 95% for independent artists using the protocol.',
+          status: 'active',
+          category: 'Platform Change',
+          startTime: new Date().toISOString(),
+          endTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          forVotes: 1250,
+          againstVotes: 120,
+          voters: [],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'prop-2',
+          creatorId: 'admin',
+          creatorName: 'TonJam Foundation',
+          title: 'DAO Treasury Allocation for Artist Grants',
+          description: 'Allocate 50,000 JAM from the community treasury to fund 10 emerging experimental electronic artists.',
+          status: 'active',
+          category: 'Treasury',
+          startTime: new Date().toISOString(),
+          endTime: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          forVotes: 890,
+          againstVotes: 45,
+          voters: [],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'prop-3',
+          creatorId: 'admin',
+          creatorName: 'TonJam Foundation',
+          title: 'Implement Dark Mode as Default',
+          description: 'Based on community feedback, we propose making the high-contrast Dark Mode the default configuration for all new users.',
+          status: 'passed',
+          category: 'Feature',
+          startTime: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+          endTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          forVotes: 4500,
+          againstVotes: 230,
+          voters: [],
+          createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ];
+
+      for (const proposal of MOCK_PROPOSALS) {
+        await setDoc(doc(db, 'proposals', proposal.id), proposal);
+      }
+    }
+
     console.log('Database seeding completed.');
   } catch (error) {
     // Determine which collection failed based on the error or context

@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, ExternalLink, ShieldCheck, Zap } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
 interface NotifyItem {

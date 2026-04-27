@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import Layout from '@/components/Layout';
 import ScrollToTop from '@/components/ScrollToTop';
 import Home from '@/pages/Home';
@@ -38,6 +38,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Staking from '@/pages/Staking';
 import About from '@/pages/About';
 import AlbumDetails from '@/pages/AlbumDetails';
+import Governance from '@/pages/Governance';
 import { AudioProvider } from '@/context/AudioContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -77,34 +78,42 @@ const AppContent: React.FC = () => {
     // Test Firebase connection
     const initBackend = async (retries = 3) => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Initial grace period for Firebase to settle
+        if (retries === 3) await new Promise(resolve => setTimeout(resolve, 1000));
+        
         // Simple connection test - just read from the users collection
+        // We use getDocsFromCache first if possible, or just a very fast query
         const q = query(collection(db, 'users'), limit(1));
         await getDocs(q);
+        console.log("Backend check successful");
         setIsBackendReachable(true);
+        setIsAppLoading(false);
       } catch (error: any) {
-        const isPermissionError = error instanceof Error && (error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions'));
+        const isPermissionError = error instanceof Error && (
+          error.message.includes('permission-denied') || 
+          error.message.includes('Missing or insufficient permissions')
+        );
         
-        if (!isPermissionError) {
-          console.error(`Backend connection attempt failed (${4 - retries}/3):`, error);
-        }
-        
-        // If it's a permission error, it might still be reachable but rules are blocking
+        // If it's a permission error, it's reachable
         if (isPermissionError) {
+          console.log("Backend reached, but permissions limited (expected if not logged in)");
           setIsBackendReachable(true);
+          setIsAppLoading(false);
           return;
         }
 
+        console.warn(`Backend connection attempt failed (${4 - retries}/3):`, error.message);
+        
         if (retries > 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // exponentialish backoff
+          await new Promise(resolve => setTimeout(resolve, 2000 * (4 - retries)));
           return initBackend(retries - 1);
         }
         
+        // Even if unreachable, we might want to let the app load in "offline" mode
+        // but for this specific UX we show an error.
         setIsBackendReachable(false);
-      } finally {
-        if (retries === 1 || isBackendReachable) {
-          setIsAppLoading(false);
-        }
+        setIsAppLoading(false);
       }
     };
     initBackend();
@@ -127,9 +136,17 @@ const AppContent: React.FC = () => {
   if (!isBackendReachable) {
     return (
       <div className="flex items-center justify-center h-screen bg-background text-foreground">
-        <div className="text-center p-4">
-          <h1 className="text-2xl font-bold mb-2">Connection Error</h1>
-          <p>The backend is currently unreachable. Please check your configuration.</p>
+        <div className="text-center p-6 max-w-md border border-border rounded-xl bg-card shadow-lg">
+          <h1 className="text-2xl font-bold mb-4">Connection Issue</h1>
+          <p className="text-muted-foreground mb-6">
+            The platform is having trouble reaching the database. This might be a temporary network issue.
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
+          >
+            Retry Connection
+          </button>
         </div>
       </div>
     );
@@ -173,6 +190,7 @@ const AppContent: React.FC = () => {
               <Route path="/settings" element={<PageWrapper><ProtectedRoute><Settings /></ProtectedRoute></PageWrapper>} />
               <Route path="/profile-settings" element={<PageWrapper><ProtectedRoute><ProfileSettings /></ProtectedRoute></PageWrapper>} />
               <Route path="/tasks" element={<PageWrapper><Tasks /></PageWrapper>} />
+              <Route path="/governance" element={<PageWrapper><Governance /></PageWrapper>} />
               <Route path="/notifications" element={<PageWrapper><ProtectedRoute><Notifications /></ProtectedRoute></PageWrapper>} />
               <Route path="/post/:id" element={<PageWrapper><PostDetail /></PageWrapper>} />
               <Route path="/social" element={<PageWrapper><SocialFeedPage /></PageWrapper>} />

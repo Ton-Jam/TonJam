@@ -87,6 +87,81 @@ export const semanticSearchTracks = async (query: string, allTracks: Track[]) =>
   }
 };
 
+export const globalAISearch = async (
+  query: string, 
+  context: { tracks: Track[]; artists: Artist[]; nfts: any[] }
+) => {
+  try {
+    const ai = getClient();
+    if (!ai) throw new Error("No API Key");
+
+    const model = "gemini-3.1-pro-preview";
+    const prompt = `The user is using natural language to search for artists, tracks, or NFTs on a music platform.
+    Query: "${query}"
+    
+    Database Context:
+    - Tracks: ${JSON.stringify(context.tracks.slice(0, 50).map(t => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre })))}
+    - Artists: ${JSON.stringify(context.artists.slice(0, 50).map(a => ({ id: a.uid, name: a.name, genre: a.genre })))}
+    - NFTs: ${JSON.stringify(context.nfts.slice(0, 50).map(n => ({ id: n.id, name: n.title, artist: n.artist })))}
+
+    Instructions:
+    1. Identify relevant items from the context.
+    2. If no exact matches, suggest similar ones or explain why.
+    3. Return a JSON object with:
+       - results: An array of objects: { type: 'track' | 'artist' | 'nft', id: string, name: string, sub: string (artist name for tracks/nfts, genre for artists), relevance: number (0-1) }
+       - suggestion: A short, friendly AI message (e.g., "I found some deep techno vibes for you").
+    Limit to top 10 results.`;
+
+    const response = await ai.models.generateContent({
+      model,
+      contents: [{ parts: [{ text: prompt }] }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            results: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  type: { type: Type.STRING },
+                  id: { type: Type.STRING },
+                  name: { type: Type.STRING },
+                  sub: { type: Type.STRING },
+                  relevance: { type: Type.NUMBER }
+                },
+                required: ["type", "id", "name", "sub", "relevance"]
+              }
+            },
+            suggestion: { type: Type.STRING }
+          },
+          required: ["results", "suggestion"]
+        }
+      }
+    });
+
+    if (response.text) {
+      return JSON.parse(response.text);
+    }
+    throw new Error("Empty AI response");
+  } catch (error) {
+    console.error("Global AI Search error:", error);
+    // Basic fallback filtering
+    const results: any[] = [];
+    const q = query.toLowerCase();
+    
+    context.tracks.filter(t => t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q)).forEach(t => 
+      results.push({ type: 'track', id: t.id, name: t.title, sub: t.artist, relevance: 0.9 })
+    );
+    context.artists.filter(a => a.name.toLowerCase().includes(q)).forEach(a => 
+      results.push({ type: 'artist', id: a.uid, name: a.name, sub: a.genre || '', relevance: 0.8 })
+    );
+    
+    return { results: results.slice(0, 10), suggestion: `Searching for "${query}" across TonJam...` };
+  }
+};
+
 export const generateNFTLore = async (title: string, genre: string, baseDescription: string) => {
   try {
     const ai = getClient();

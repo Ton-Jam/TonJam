@@ -167,9 +167,78 @@
         "completed": { "type": "boolean" },
         "claimedAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "Proposal": {
+      "title": "Proposal",
+      "description": "Governance proposal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "creatorId": { "type": "string" },
+        "creatorName": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "passed", "rejected", "executed"] },
+        "category": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "forVotes": { "type": "number" },
+        "againstVotes": { "type": "number" },
+        "voters": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "creatorId", "title", "description", "status"]
+    },
+    "Vote": {
+      "title": "Vote",
+      "description": "User vote on a proposal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "proposalId": { "type": "string" },
+        "userId": { "type": "string" },
+        "choice": { "type": "string", "enum": ["for", "against"] },
+        "power": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "proposalId", "userId", "choice"]
+    },
+    "TreasuryStats": {
+      "title": "TreasuryStats",
+      "description": "DAO Treasury statistics",
+      "type": "object",
+      "properties": {
+        "balance": { "type": "number" },
+        "totalFeesCollected": { "type": "number" },
+        "totalGrantsAllocated": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "GrantAllocation": {
+      "title": "GrantAllocation",
+      "description": "Record of funds distributed from treasury",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "proposalId": { "type": "string" },
+        "recipientId": { "type": "string" },
+        "recipientName": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
+    "/system/treasury": {
+      "schema": "TreasuryStats",
+      "description": "DAO Treasury state"
+    },
+    "/grantAllocations/{id}": {
+      "schema": "GrantAllocation",
+      "description": "History of grant distributions"
+    },
     "/users/{userId}": {
       "schema": "User",
       "description": "User profiles"
@@ -217,6 +286,14 @@
     "/taskCompletions/{id}": {
       "schema": "TaskCompletion",
       "description": "Task completions"
+    },
+    "/proposals/{id}": {
+      "schema": "Proposal",
+      "description": "Governance proposals"
+    },
+    "/proposals/{id}/votes/{voteId}": {
+      "schema": "Vote",
+      "description": "Votes for a proposal"
     }
   }
 }

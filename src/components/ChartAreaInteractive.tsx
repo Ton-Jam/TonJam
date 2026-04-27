@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import * as RechartsPrimitive from "recharts"
+const { Area, AreaChart, CartesianGrid, XAxis } = RechartsPrimitive as any
 
 import {
   Card,

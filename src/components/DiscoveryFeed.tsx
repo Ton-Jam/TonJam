@@ -17,7 +17,7 @@ const DiscoveryFeed: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
+    <div className="space-y-8 animate-in fade-in duration-700 pt-6">
       <div className="flex flex-col md:flex-row gap-6">
         {/* Personalized Tracks Feed */}
         <section className="flex-1">

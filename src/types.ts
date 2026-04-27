@@ -409,3 +409,46 @@ export interface TaskCompletion {
   completed: boolean;
   completedAt?: string;
 }
+
+export interface Proposal {
+  id: string;
+  creatorId: string;
+  creatorName: string;
+  title: string;
+  description: string;
+  status: 'active' | 'passed' | 'rejected' | 'executed';
+  category: string;
+  startTime: string;
+  endTime: string;
+  forVotes: number;
+  againstVotes: number;
+  voters?: string[];
+  createdAt: string;
+}
+
+export interface TreasuryStats {
+  balance: number; // Current balance in TON
+  totalFeesCollected: number;
+  totalGrantsAllocated: number;
+  updatedAt: string;
+}
+
+export interface GrantAllocation {
+  id: string;
+  proposalId: string;
+  recipientId: string;
+  recipientName: string;
+  amount: number;
+  category: 'artist_grant' | 'feature_development';
+  status: 'pending' | 'distributed';
+  timestamp: string;
+}
+
+export interface Vote {
+  id: string;
+  proposalId: string;
+  userId: string;
+  choice: 'for' | 'against';
+  power: number;
+  createdAt: string;
+}

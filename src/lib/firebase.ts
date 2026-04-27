@@ -10,10 +10,13 @@ const app = initializeApp(firebaseConfig);
 // Initialize Analytics if supported (measurementId is present)
 export const analytics = typeof window !== 'undefined' && firebaseConfig.measurementId ? getAnalytics(app) : null;
 
-// Standard Firestore initialization
+// Initialize Firestore with settings for reliability in various network environments
 const firestoreDatabaseId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
+console.log(`[Firebase] Initializing Firestore. DatabaseID: ${firestoreDatabaseId}`);
+
 export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: true,
+  ignoreUndefinedProperties: true,
 }, firestoreDatabaseId);
 
 export const auth = getAuth();
