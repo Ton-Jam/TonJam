@@ -557,7 +557,7 @@ const Home: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Brain className="h-5 w-5 text-blue-500" />
-                    <h2 className="text-2xl font-bold text-zinc-800 dark:text-foreground">Sonic Intelligence</h2>
+                    <h2 className="text-2xl font-bold text-zinc-600 dark:text-foreground">Sonic Intelligence</h2>
                   </div>
                   <p className="text-muted-foreground text-sm">Neural-curated frequencies mapped to your collector profile</p>
                 </div>
@@ -692,7 +692,7 @@ const Home: React.FC = () => {
             <section className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-zinc-800 dark:text-foreground mb-1">Featured Tracks</h2>
+                  <h2 className="text-2xl font-bold text-zinc-600 dark:text-foreground mb-1">Featured Tracks</h2>
                   <p className="text-muted-foreground text-sm">Hand-picked by TonJam AI based on network trends</p>
                 </div>
                 <Link 
@@ -771,7 +771,7 @@ const Home: React.FC = () => {
               <SectionHeader title="Trending Now" />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-800 dark:text-muted-foreground">Top 5 Songs</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 dark:text-muted-foreground">Top 5 Songs</h4>
                   {trendingTracks.slice(0, 5).map((track, idx) => (
                     <div key={`trend-track-${track.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/track/${track.id}`)}>
                       <span className="text-lg font-black italic text-muted-foreground/30 w-6">{idx + 1}</span>
@@ -789,7 +789,7 @@ const Home: React.FC = () => {
                   ))}
                 </div>
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-800 dark:text-muted-foreground">Top 3 Artists</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 dark:text-muted-foreground">Top 3 Artists</h4>
                   {trendingArtists.map((artist) => (
                     <div key={`trend-artist-${artist.uid}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/artist/${artist.uid}`)}>
                       <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} className="w-12 h-12 rounded-full object-cover" alt={artist.name} />
@@ -801,7 +801,7 @@ const Home: React.FC = () => {
                   ))}
                 </div>
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-800 dark:text-muted-foreground">Trending NFTs</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 dark:text-muted-foreground">Trending NFTs</h4>
                   {trendingNFTs.slice(0, visibleNFTCount).map((nft) => (
                     <div key={`trend-nft-${nft.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
                       <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-12 h-12 rounded-[2px] object-cover" alt={nft.title} />
