@@ -16,19 +16,19 @@ interface ArtistCardProps {
 
 const variantConfig = {
     default: {
-      container: 'flex flex-col items-center text-center h-full w-full p-4 rounded-sm glass hover:bg-muted/20 transition-all min-w-[140px] sm:min-w-[160px]',
+      container: 'flex flex-col items-center text-center h-full w-full p-4 rounded-sm bg-muted/10 hover:bg-muted/20 transition-all min-w-[140px] sm:min-w-[160px]',
       image: 'w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32',
       button: 'mt-2 px-4 py-2 text-[10px] w-full',
       name: 'text-sm sm:text-base',
     },
   row: {
-    container: 'flex items-center gap-4 p-3 rounded-[12px] hover:bg-muted/50 w-full transition-all glass',
+    container: 'flex items-center gap-4 p-3 rounded-[12px] hover:bg-muted/50 w-full transition-all bg-card/10',
     image: 'w-14 h-14',
     button: 'px-3 py-2 text-[9px]',
     name: 'text-sm',
   },
   compact: {
-    container: 'flex flex-col items-center text-center p-3 rounded-[16px] glass hover:bg-muted/20 w-[140px] transition-all',
+    container: 'flex flex-col items-center text-center p-3 rounded-[16px] bg-muted/10 hover:bg-muted/20 w-[140px] transition-all',
     image: 'w-18 h-18',
     button: 'w-full py-2 text-[9px]',
     name: 'text-[11px]',

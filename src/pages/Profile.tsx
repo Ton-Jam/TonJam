@@ -295,7 +295,7 @@ const Profile: React.FC = () => {
  };
 
  const StatBlock = ({ label, value, icon, subValue, trend }: { label: string, value: string, icon?: string, subValue?: string, trend?: string }) => (
- <div className="relative group overflow-hidden bg-background p-3 rounded-[12px] transition-all shadow-2xl">
+ <div className="relative group overflow-hidden bg-background p-3 rounded-[2px] transition-all shadow-2xl">
  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 blur-3xl rounded-full -mr-4 -mt-4 group-hover:bg-blue-600/10 transition-colors"></div>
  
  <div className="flex justify-between items-start mb-4 relative z-10">
@@ -329,12 +329,12 @@ const Profile: React.FC = () => {
  <div className="flex items-center justify-between mb-4 px-4 md:px-4">
  <div className="flex items-center gap-4">
  <div className="w-1 h-5 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
- <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.2em]">
+ <h3 className="text-[10px] font-bold text-zinc-800 dark:text-foreground uppercase tracking-[0.2em]">
  {title}
  </h3>
  </div>
  {onAction && (
- <button onClick={onAction} className="text-[10px] font-bold uppercase tracking-widest text-blue-500 hover:text-foreground transition-all flex items-center gap-2 group">
+ <button onClick={onAction} className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-500 hover:text-blue-500 transition-all flex items-center gap-2 group">
  {actionLabel || 'View All'}
  <Plus className="h-3 w-3 group-hover:rotate-90 transition-transform"/>
  </button>
@@ -538,7 +538,7 @@ const Profile: React.FC = () => {
  <div className="bg-background p-6 rounded-2xl shadow-sm">
  <div className="flex items-center gap-3 mb-6">
  <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
- <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Stats</h3>
+ <h3 className="text-xs font-bold text-zinc-800 dark:text-foreground uppercase tracking-wider">Stats</h3>
  </div>
  <div className="grid grid-cols-2 gap-6">
  <StatBlock label="Earnings"value={(localUser.earnings || 0).toString()} subValue="TON"icon="gem"/>
@@ -549,7 +549,7 @@ const Profile: React.FC = () => {
  <div className="bg-background p-6 rounded-2xl shadow-sm">
  <div className="flex items-center gap-3 mb-6">
  <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
- <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Bio</h3>
+ <h3 className="text-xs font-bold text-zinc-800 dark:text-foreground uppercase tracking-wider">Bio</h3>
  </div>
  
  {isEditing ? (

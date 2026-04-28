@@ -42,7 +42,7 @@ const AlbumDetails = () => {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-4 flex items-center justify-between">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 text-zinc-700" />
         </button>
         <span className="font-bold text-sm uppercase tracking-widest">Album</span>
         <button className="p-2 rounded-full hover:bg-muted transition-colors">

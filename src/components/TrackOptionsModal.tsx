@@ -115,7 +115,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
 
   return (
     <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="bg-[#121212] border-none shadow-2xl">
+      <DrawerContent className="bg-background border-none shadow-2xl">
         <div className="mx-auto w-full max-w-md relative z-10">
           <DrawerHeader className="pb-4 pt-4">
             <div className="flex items-center gap-4">
@@ -125,10 +125,10 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
                 alt={track.title} 
               />
               <div className="text-left flex-1 min-w-0">
-                <DrawerTitle className="text-lg font-bold text-white truncate leading-tight">
+                <DrawerTitle className="text-lg font-bold text-zinc-900 truncate leading-tight">
                   {track.title}
                 </DrawerTitle>
-                <DrawerDescription className="text-sm text-neutral-400 truncate">
+                <DrawerDescription className="text-sm text-muted-foreground truncate">
                   {track.artist}
                 </DrawerDescription>
               </div>
@@ -140,10 +140,10 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
               <button
                 key={option.id}
                 onClick={option.action} 
-                className="w-full flex items-center gap-4 p-4 hover:bg-white/10 transition-all text-left group focus-visible:outline-none"
+                className="w-full flex items-center gap-4 p-4 hover:bg-muted transition-all text-left group focus-visible:outline-none"
               >
-                <option.icon className={`h-6 w-6 text-neutral-400 group-hover:text-white transition-colors`} />
-                <span className={`text-sm font-medium text-white`}>
+                <option.icon className={`h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors`} />
+                <span className={`text-sm font-medium text-foreground`}>
                   {option.label}
                 </span>
               </button>

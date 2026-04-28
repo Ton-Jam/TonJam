@@ -128,7 +128,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   return (
     <div 
       onClick={handleClick}
-      className="flex flex-col items-center text-center h-full w-full p-4 rounded-sm glass hover:bg-muted/20 transition-all min-w-[140px] sm:min-w-[160px] cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="flex flex-col items-center text-center h-full w-full p-4 rounded-sm bg-muted/10 hover:bg-muted/20 transition-all min-w-[140px] sm:min-w-[160px] cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();

@@ -21,7 +21,8 @@ import {
   FaceSmileIcon,
   CalendarIcon,
   MapPinIcon,
-  PlusIcon
+  PlusIcon,
+  CpuChipIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
@@ -46,14 +47,31 @@ import JamChat from '@/components/JamChat';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 import { Post, Track } from '@/types';
+import { generateAIPlaylist, GenerateAIPlaylistResult } from '@/services/aiPlaylistService';
+import { Loader2 } from 'lucide-react';
 
 const JamSpace: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch, jamspaceFilters, userProfile } = useAudio();
+  const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch, jamspaceFilters, userProfile, playAll, allTracks } = useAudio();
   const [activeTab, setActiveTab] = useState<'For You' | 'Following'>('For You');
   const [postContent, setPostContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   const [filterType, setFilterType] = useState('all');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
+
+  const handleAIPlaylist = async () => {
+    setIsGeneratingAI(true);
+    try {
+      const result = await generateAIPlaylist();
+      setAiResult(result);
+      addNotification('Neural mix generated', 'success');
+    } catch (e) {
+      addNotification('Synthesis failed', 'error');
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   const handleCreatePost = () => {
     if (!postContent.trim()) return;
@@ -215,7 +233,7 @@ const JamSpace: React.FC = () => {
             {/* Live Jam Rooms - Refined */}
             <div className="mt-8 bg-muted/30 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold">Live Jam Rooms</h3>
+                <h3 className="text-lg font-bold text-zinc-800 dark:text-foreground">Live Jam Rooms</h3>
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
               </div>
               <div className="space-y-3">
@@ -336,9 +354,57 @@ const JamSpace: React.FC = () => {
               />
             </div>
 
+            {/* AI Curator Section */}
+            <div className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 rounded-2xl p-5 border border-blue-500/10 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 blur-2xl -z-10 group-hover:scale-150 transition-transform duration-700"></div>
+              
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <CpuChipIcon className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-tight">Neural Discovery</h3>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Sonic Intelligence v4.0</p>
+                </div>
+              </div>
+
+              {aiResult ? (
+                <div className="space-y-4">
+                  <div className="flex gap-3 items-center">
+                    <img src={aiResult.playlist.coverUrl} className="h-14 w-14 rounded shadow-xl" alt="" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-black italic uppercase truncate">{aiResult.playlist.title}</p>
+                      <p className="text-[9px] text-muted-foreground line-clamp-2">{aiResult.explanation}</p>
+                    </div>
+                  </div>
+                  <Button 
+                    className="w-full rounded-full bg-blue-500 hover:bg-blue-600 text-white h-9 text-[10px] font-bold uppercase tracking-widest border-none"
+                    onClick={() => {
+                      const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
+                      playAll(tracks);
+                    }}
+                  >
+                    Play Mix Now
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-xs text-muted-foreground leading-relaxed">Let Gemini analyze your neural footprint on-chain and synthesize a custom frequencies stream.</p>
+                  <Button 
+                    disabled={isGeneratingAI}
+                    onClick={handleAIPlaylist}
+                    className="w-full rounded-full bg-blue-500 hover:bg-blue-600 text-white h-9 text-[10px] font-bold uppercase tracking-widest border-none"
+                  >
+                    {isGeneratingAI ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <SparklesIcon className="h-3 w-3 mr-2" />}
+                    Synthesize Mix
+                  </Button>
+                </div>
+              )}
+            </div>
+
             {/* Trending Section */}
             <div className="bg-muted/30 rounded-2xl overflow-hidden">
-              <h3 className="text-xl font-bold p-4">What's happening</h3>
+              <h3 className="text-xl font-bold p-4 text-zinc-800 dark:text-foreground">What's happening</h3>
               <div className="">
                 {trendingTopics.map((topic) => (
                   <div key={topic.tag} className="p-4 hover:bg-foreground/5 cursor-pointer transition-all">
@@ -348,14 +414,14 @@ const JamSpace: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <button className="w-full p-4 text-left text-blue-500 hover:bg-foreground/5 transition-all text-sm">
+              <button className="w-full p-4 text-left text-blue-600 dark:text-blue-500 hover:bg-foreground/5 transition-all text-sm">
                 Show more
               </button>
             </div>
 
             {/* Who to follow */}
             <div className="bg-muted/30 rounded-2xl overflow-hidden">
-              <h3 className="text-xl font-bold p-4">Who to follow</h3>
+              <h3 className="text-xl font-bold p-4 text-zinc-800 dark:text-foreground">Who to follow</h3>
               <div className="">
                 {artists.slice(0, 3).map(artist => (
                   <div key={artist.uid} className="p-4 flex items-center justify-between hover:bg-foreground/5 transition-all">
@@ -375,7 +441,7 @@ const JamSpace: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <button className="w-full p-4 text-left text-blue-500 hover:bg-foreground/5 transition-all text-sm">
+              <button className="w-full p-4 text-left text-blue-600 dark:text-blue-500 hover:bg-foreground/5 transition-all text-sm">
                 Show more
               </button>
             </div>

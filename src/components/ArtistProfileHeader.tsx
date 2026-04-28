@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Twitter, Instagram, Globe, Send, Disc, CheckCircle2, LayoutDashboard, Settings, Hammer } from 'lucide-react';
+import { Twitter, Instagram, Globe, Send, Disc, CheckCircle2, LayoutDashboard, Settings, Hammer, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Artist } from '@/types';
 import { getPlaceholderImage, cn } from '@/lib/utils';
@@ -67,6 +67,15 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
           {/* Owner Actions directly below username */}
           <div className={cn("flex items-center gap-2 mt-4", !isOwnProfile && "hidden")}>
             <button 
+              id="artist-edit-profile-btn"
+              onClick={onEditProfile}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl flex items-center gap-2 active:scale-95"
+            >
+              <Edit2 className="h-4 w-4" />
+              Edit Profile
+            </button>
+
+            <button 
               id="artist-dashboard-btn"
               onClick={() => navigate('/artist-dashboard')}
               className="px-6 py-2.5 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all shadow-xl flex items-center gap-2 active:scale-95"
@@ -96,16 +105,16 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
       </div>
       
       <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-4">
-        <div className="flex flex-col gap-1.5 mb-2">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2">
+        <div className="flex flex-col gap-1.5 mb-3">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-3">
             <div className="flex items-center gap-3">
-              <h1 id="artist-name-display" className="text-xl md:text-4xl font-black tracking-tighter text-white drop-shadow-2xl uppercase">
+              <h1 id="artist-name-display" className="text-3xl md:text-5xl font-black tracking-tighter text-white drop-shadow-2xl uppercase italic">
                 {artist.name}
               </h1>
             </div>
             
             {/* Social Icons near name */}
-            <div id="artist-socials-group" className="flex items-center gap-2 px-3 py-1.5 bg-white/5 backdrop-blur-md rounded-full border border-white/5">
+            <div id="artist-socials-group" className="flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-xl">
               {artist.socials && Object.entries(artist.socials).map(([platform, url]) => {
                 if (!url) return null;
                 const Icon = getSocialIcon(platform);
@@ -115,10 +124,10 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
                     href={url as string}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1 text-muted-foreground hover:text-blue-500 transition-all hover:scale-110 active:scale-95"
+                    className="p-1 text-white/70 hover:text-white transition-all hover:scale-110 active:scale-95"
                     title={platform}
                   >
-                    <Icon className="w-3.5 h-3.5 md:w-4 h-4" />
+                    <Icon className="w-4 h-4 md:w-5 h-5" />
                   </a>
                 );
               })}
@@ -126,14 +135,18 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
           </div>
         </div>
         
-        <div id="artist-header-stats" className="flex items-center gap-6 mt-2">
-          <div className="flex flex-col items-start">
-            <span className="text-lg font-black text-white tracking-tight leading-none group-hover:text-blue-500 transition-colors">{(artist.followers || 0).toLocaleString()}</span>
-            <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-black mt-1">Followers</span>
+        <div id="artist-header-stats" className="flex items-center gap-8 mt-4">
+          <div className="flex flex-col items-start group/stat">
+            <span className="text-2xl font-black text-white tracking-tighter leading-none transition-colors group-hover/stat:text-blue-400">
+              {(artist.followers || 0).toLocaleString()}
+            </span>
+            <span className="text-[9px] uppercase tracking-[0.2em] text-white/50 font-black mt-1.5">Followers</span>
           </div>
-          <div className="flex flex-col items-start pl-6 border-l border-white/10">
-            <span className="text-lg font-black text-white tracking-tight leading-none group-hover:text-blue-500 transition-colors">{(artist.playCount || 0).toLocaleString()}</span>
-            <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-black mt-1">Total Plays</span>
+          <div className="flex flex-col items-start pl-8 border-l border-white/10 group/stat">
+            <span className="text-2xl font-black text-white tracking-tighter leading-none transition-colors group-hover/stat:text-blue-400">
+              {(artist.playCount || 0).toLocaleString()}
+            </span>
+            <span className="text-[9px] uppercase tracking-[0.2em] text-white/50 font-black mt-1.5">Total Plays</span>
           </div>
         </div>
       </div>

@@ -1893,35 +1893,43 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       try {
         // Reset crossOrigin to anonymous for each new track to allow visualizer
-        audioRef.current.crossOrigin = "anonymous"; 
+        // Only set crossOrigin if it's a remote URL
+        if (sourceUrl.startsWith('http')) {
+          audioRef.current.crossOrigin = "anonymous";
+        } else {
+          audioRef.current.removeAttribute('crossorigin');
+        }
+        
         audioRef.current.src = sourceUrl;
+        audioRef.current.load(); // Explicitly call load()
         
         playPromiseRef.current = audioRef.current.play();
         if (playPromiseRef.current !== undefined) {
           playPromiseRef.current.catch(error => {
             // Check for common playback errors
-            // We'll try fallback for almost any error except user interruption
             const isInterrupted = error.name === 'AbortError' || error.message?.includes('interrupted');
             
             if (!isInterrupted) {
-              console.warn("Primary source failed (CORS, Format, or Network), attempting fallback...", error);
+              console.warn("[Audio] Primary source failed, attempting fallback...", error);
               if (audioRef.current) {
-                // First try: Same URL but without crossOrigin (fixes CORS issues)
-                // We need to reset the src to trigger a reload with the new crossOrigin setting
+                // First try: Same URL but without crossOrigin (fixes CORS issues but breaks visualizer)
+                audioRef.current.pause();
                 audioRef.current.removeAttribute('crossorigin');
-                audioRef.current.src = sourceUrl; 
+                audioRef.current.src = sourceUrl;
+                audioRef.current.load();
                 
                 const fallbackPromise = audioRef.current.play();
                 if (fallbackPromise !== undefined) {
                   fallbackPromise.catch(e => {
-                    // Second try: Fallback URL
-                    console.warn("Same URL without CORS failed, trying fallback...", e);
+                    // Second try: different reliable fallback URL
+                    console.warn("[Audio] CORS-less reload failed, trying global fallback...", e);
                     if (audioRef.current) {
-                      audioRef.current.src = 'https://storage.googleapis.com/media-session/sintel/snow-fight.mp3';
+                      audioRef.current.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+                      audioRef.current.load();
                       audioRef.current.play().catch(err => {
                         if (err.name !== 'AbortError' && !err.message?.includes('interrupted')) {
-                          console.error("Fallback failed:", err);
-                          addNotification("Playback failed. Please check your connection.", "error");
+                          console.error("[Audio] All fallbacks failed:", err);
+                          addNotification("Playback protocol failed. Signal lost.", "error");
                           setIsPlaying(false);
                         }
                       });
@@ -1981,16 +1989,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (playPromiseRef.current !== undefined) {
           playPromiseRef.current.catch(error => {
             if (error.name !== 'AbortError' && !error.message?.includes('interrupted')) {
-              console.error("Playback error during toggle:", error);
-              /* If it failed because of source issues, try to reload */
-              if (error.message.includes('supported source') && currentTrack) {
-                audioRef.current!.src = currentTrack.audioUrl;
+              console.error("[Audio] Playback error during toggle:", error);
+              /* If it failed because of source issues, try to reload with fallbacks */
+              if (currentTrack) {
+                // If it's a "supported source" error, it's likely CORS or a dead link
+                // We'll try the same robust fallback as playTrack
+                console.warn("[Audio] Attempting recovery during toggle...");
+                audioRef.current!.pause();
+                audioRef.current!.removeAttribute('crossorigin');
+                audioRef.current!.src = currentTrack.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
                 audioRef.current!.load();
-                playPromiseRef.current = audioRef.current!.play();
-                playPromiseRef.current.catch(e => {
-                  if (e.name !== 'AbortError' && !e.message?.includes('interrupted')) {
-                    console.error("Reload play failed:", e);
-                  }
+                audioRef.current!.play().catch(e => {
+                   if (e.name !== 'AbortError' && !e.message?.includes('interrupted')) {
+                     console.error("[Audio] Toggle recovery failed:", e);
+                     addNotification("Audio signal lost. Recovery failed.", "error");
+                     setIsPlaying(false);
+                   }
                 });
               }
             }

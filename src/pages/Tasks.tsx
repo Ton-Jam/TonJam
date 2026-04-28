@@ -142,11 +142,11 @@ const Tasks: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen pb-32 relative overflow-hidden">
+    <div className="min-h-screen pb-32 relative overflow-hidden bg-white dark:bg-background">
       {/* Background Decor */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[10%] left-[10%] w-[40%] h-[40%] bg-blue-600/5 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] bg-purple-600/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[10%] left-[10%] w-[40%] h-[40%] bg-blue-600/[0.03] blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[20%] right-[10%] w-[50%] h-[50%] bg-purple-600/[0.03] blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       <div className="relative z-10 max-w-xl mx-auto p-4 space-y-6">
@@ -163,43 +163,43 @@ const Tasks: React.FC = () => {
             </div>
 
             <div className="flex flex-col items-end gap-2">
-               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-white/5 border border-blue-100 dark:border-white/10">
                   <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Level {stats.level}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-white/60">Level {stats.level}</span>
                </div>
             </div>
           </div>
 
           {/* XP PROGRESS BAR */}
-          <div className="glass-card p-4 rounded-2xl border-white/5 relative overflow-hidden group">
+          <div className="glass-card p-4 rounded-2xl bg-blue-50/50 dark:bg-white/5 border border-blue-100 dark:border-white/5 relative overflow-hidden group">
             <div className="flex justify-between items-end mb-3">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-purple-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Network resonance</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-blue-600/40 dark:text-white/40">Network resonance</span>
               </div>
-              <span className="text-xs font-mono font-bold text-white/60">{Math.round(stats.progress)}% to Level {stats.level + 1}</span>
+              <span className="text-xs font-mono font-bold text-blue-600/60 dark:text-white/60">{Math.round(stats.progress)}% to Level {stats.level + 1}</span>
             </div>
-            <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+            <div className="h-2 bg-blue-100 dark:bg-white/5 rounded-full overflow-hidden border border-blue-200 dark:border-white/5">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${stats.progress}%` }}
                 className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-500 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"
               />
             </div>
-            <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] mt-2 italic text-right">
+            <p className="text-[8px] font-bold text-blue-600/20 dark:text-white/20 uppercase tracking-[0.2em] mt-2 italic text-right">
               {stats.xpToNext} XP required for next node expansion
             </p>
           </div>
 
           {/* BALANCE BLOCK */}
           <button onClick={() => setShowBuyModal(true)} className="relative group text-left w-full transition-transform active:scale-95">
-            <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
-            <div className="relative flex items-center gap-5 bg-[#0A0A0C]/80 backdrop-blur-3xl border border-white/10 px-6 py-5 rounded-3xl shadow-2xl overflow-hidden">
-              <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
+            <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
+            <div className="relative flex items-center gap-5 bg-white dark:bg-[#0A0A0C]/80 backdrop-blur-3xl border border-blue-100 dark:border-white/10 px-6 py-6 rounded-3xl shadow-xl overflow-hidden min-h-[110px]">
+              <div className="absolute inset-0 opacity-[0.03] dark:opacity-5 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
               
               {isVIP && (
                 <div className="absolute -top-0 -right-0 pt-3 pr-3">
-                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 rounded-full shadow-lg border border-white/20">
+                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 rounded-[10px] shadow-lg border border-white/20">
                     <Gem className="w-2.5 h-2.5 text-white animate-pulse" />
                     <span className="text-[7px] font-black text-white tracking-[0.2em]">VIP NODE</span>
                   </div>
@@ -207,33 +207,33 @@ const Tasks: React.FC = () => {
               )}
 
               <div className="relative shrink-0">
-                <div className="absolute inset-0 bg-blue-500/30 blur-xl rounded-full" />
+                <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full" />
                 <motion.img 
                   src={TJ_COIN_ICON} 
-                  className="w-11 h-11 object-contain relative z-10" 
+                  className="w-12 h-12 object-contain relative z-10" 
                   alt="Balance"
-                  animate={{ rotate: [0, 8, -8, 0] }}
+                  animate={{ rotate: [0, 8, -8, 0], scale: [1, 1.05, 1] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                 />
               </div>
 
               <div className="flex-1 flex flex-col -space-y-1 relative z-10">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-mono font-black tracking-[-0.08em] text-white tabular-nums leading-none">
+                  <span className="text-4xl font-mono font-black tracking-[-0.08em] text-blue-600 dark:text-white tabular-nums leading-none">
                     {balance.toLocaleString()}
                   </span>
                   <span className="text-sm font-black text-blue-500 italic uppercase tracking-tighter">TJ</span>
                 </div>
                 <div className="flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-blue-500/60 animate-pulse" />
-                   <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.25em] whitespace-nowrap">
+                   <div className="w-1.5 h-1.5 rounded-full bg-blue-500/40 animate-pulse" />
+                   <span className="text-[10px] font-black text-blue-600/30 dark:text-white/30 uppercase tracking-[0.25em] whitespace-nowrap">
                      AVAILABLE NEURAL CREDITS
                    </span>
                 </div>
               </div>
               
-              <div className="shrink-0 bg-white/5 p-2 rounded-full border border-white/5">
-                <Plus className="w-4 h-4 text-white/40" />
+              <div className="shrink-0 bg-blue-50 dark:bg-white/5 p-2 rounded-full border border-blue-100 dark:border-white/5 shadow-inner">
+                <Plus className="w-4 h-4 text-blue-600/40 dark:text-white/40" />
               </div>
             </div>
           </button>
@@ -243,7 +243,7 @@ const Tasks: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <motion.div 
             whileHover={{ y: -2 }}
-            className="glass-card p-5 rounded-3xl relative overflow-hidden group border-white/5"
+            className="glass-card p-5 rounded-3xl relative overflow-hidden group bg-blue-50/20 dark:bg-white/5 border border-blue-100 dark:border-white/5 shadow-sm"
           >
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
               <Flame className="w-8 h-8 text-orange-500" />
@@ -252,15 +252,15 @@ const Tasks: React.FC = () => {
               <Flame className="w-4 h-4 fill-current" />
               <span className="text-[10px] font-black uppercase tracking-wider">Sync Streak</span>
             </div>
-            <div className="text-2xl font-black italic tracking-tighter">{streak} Days</div>
-            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
+            <div className="text-2xl font-black italic tracking-tighter text-zinc-800 dark:text-white">{streak} Days</div>
+            <p className="text-[10px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-1">
               Next Sync: +{Math.min((streak + 1) * 10, 100)} TJ
             </p>
           </motion.div>
 
           <motion.div 
             whileHover={{ y: -2 }}
-            className="glass-card p-5 rounded-3xl relative overflow-hidden group border-white/5"
+            className="glass-card p-5 rounded-3xl relative overflow-hidden group bg-blue-50/20 dark:bg-white/5 border border-blue-100 dark:border-white/5 shadow-sm"
           >
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
               <Sparkles className="w-8 h-8 text-blue-400" />
@@ -269,7 +269,7 @@ const Tasks: React.FC = () => {
               <Sparkles className="w-4 h-4" />
               <span className="text-[10px] font-black uppercase tracking-wider">Rewards</span>
             </div>
-            <div className="text-2xl font-black italic tracking-tighter">2.4K+ <span className="text-[10px] text-white/30 lowercase not-italic">total earned</span></div>
+            <div className="text-2xl font-black italic tracking-tighter text-zinc-800 dark:text-white">2.4K+ <span className="text-[10px] text-blue-600/30 dark:text-white/30 lowercase not-italic">total earned</span></div>
             <p className="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mt-1">
               Top 15% of Nodes
             </p>
@@ -277,7 +277,7 @@ const Tasks: React.FC = () => {
         </div>
 
         {/* NAVIGATION RAIL */}
-        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
+        <div className="flex bg-blue-50/50 dark:bg-white/5 p-1 rounded-2xl border border-blue-100 dark:border-white/5 overflow-x-auto no-scrollbar">
           {[
             { id: 'quest', label: 'Quests', icon: Target },
             { id: 'staking', label: 'Vault', icon: Layers },
@@ -290,7 +290,7 @@ const Tasks: React.FC = () => {
               className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
                 activeTab === tab.id 
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-black' 
-                : 'text-white/40 hover:text-white/60 font-bold'
+                : 'text-blue-600/40 dark:text-white/40 hover:text-blue-600/60 dark:hover:text-white/60 font-bold'
               }`}
             >
               <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'opacity-100' : 'opacity-40'}`} />
@@ -324,19 +324,19 @@ const Tasks: React.FC = () => {
                     className={`glass-card p-4 rounded-3xl flex justify-between items-center group hover:bg-white/[0.03] transition-colors border-white/5 ${task.claimed ? 'opacity-50 pointer-events-none' : ''}`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-2xl bg-${taskColor}-500/10 flex items-center justify-center text-${taskColor}-500 group-hover:scale-110 transition-transform shadow-inner`}>
+                      <div className={`w-12 h-12 rounded-[12px] bg-${taskColor}-500/10 flex items-center justify-center text-${taskColor}-500 group-hover:scale-110 transition-transform shadow-inner`}>
                         <TaskIcon className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="font-black uppercase text-[11px] tracking-tight">{task.title}</h3>
-                        <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{task.subtitle || task.description}</p>
+                        <h3 className="font-black uppercase text-[11px] tracking-tight text-zinc-800 dark:text-white">{task.title}</h3>
+                        <p className="text-[8px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-0.5">{task.subtitle || task.description}</p>
                         <div className="flex items-center gap-3 mt-2">
                           <div className="flex items-center gap-1">
                             <img src={TJ_COIN_ICON} className="w-3 h-3 grayscale opacity-30" alt="" />
                             <span className={`text-[10px] font-mono font-bold text-${taskColor}-500`}>+{task.reward}</span>
                           </div>
-                          <div className="w-1 h-1 rounded-full bg-white/10" />
-                          <span className="text-[10px] font-mono font-bold text-white/40">+{task.points || 0} XP</span>
+                          <div className="w-1 h-1 rounded-full bg-blue-100 dark:bg-white/10" />
+                          <span className="text-[10px] font-mono font-bold text-blue-600/40 dark:text-white/40">+{task.points || 0} XP</span>
                         </div>
                       </div>
                     </div>

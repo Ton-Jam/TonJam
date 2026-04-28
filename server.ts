@@ -314,12 +314,15 @@ async function startServer() {
         }
     });
 
+    const isVercel = !!process.env.VERCEL;
+
     if (process.env.NODE_ENV === 'production') {
-        app.use(express.static('dist'));
+        const distPath = path.join(process.cwd(), 'dist');
+        app.use(express.static(distPath));
         app.get('*', (req, res) => {
-            res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
+            res.sendFile(path.join(distPath, 'index.html'));
         });
-    } else {
+    } else if (!isVercel) {
         const { createServer: createViteServer } = await import('vite');
         const vite = await createViteServer({
             server: { middlewareMode: true },
@@ -328,9 +331,19 @@ async function startServer() {
         app.use(vite.middlewares);
     }
 
-    httpServer.listen(PORT, '0.0.0.0', () => {
-        console.log(`Server running on http://localhost:${PORT}`);
-    });
+    // Only start the listener if this file is run directly (not as a serverless function)
+    if (!isVercel) {
+        httpServer.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        });
+    }
+
+    return app;
 }
 
-startServer();
+// Export the app for Vercel
+const appPromise = startServer();
+export default async (req: express.Request, res: express.Response) => {
+    const app = await appPromise;
+    app(req, res);
+};

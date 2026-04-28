@@ -184,13 +184,13 @@ const TrackCard: React.FC<TrackCardProps> = ({
   if (variant === 'compact') {
     return (
       <div 
-        className={`group flex items-center gap-5 p-4 rounded-sm hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-primary ${className}`}
+        className={`group flex items-center gap-5 p-4 rounded-[2px] hover:bg-muted/50 transition-all cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-primary ${className}`}
         onClick={handleCardClick}
         onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
         role="button"
         tabIndex={0}
       >
-        <div className="relative w-14 h-14 rounded-md overflow-hidden flex-shrink-0">
+        <div className="relative w-14 h-14 rounded-[2px] overflow-hidden flex-shrink-0 shadow-lg">
           <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
           <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
             <button onClick={handlePlay} className="text-white">
@@ -203,10 +203,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className={`text-xs font-bold truncate text-white`}>{track.title}</h4>
-          <p className="text-[10px] text-muted-foreground truncate mt-1">{track.artist}</p>
+          <h4 className={`text-sm font-black truncate text-neutral-800 uppercase italic tracking-tight`}>{track.title}</h4>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{track.artist}</p>
         </div>
-        <button onClick={handleOptions} className="p-2.5 text-white hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+        <button onClick={handleOptions} className="p-2.5 text-muted-foreground/40 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
           <MoreVertical className="h-5 w-5" />
         </button>
       </div>
@@ -217,7 +217,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   if (variant === 'row') {
     return (
-      <div className={`flex flex-col w-full bg-card/30 rounded-sm hover:bg-muted/50 transition-all ${className}`}>
+      <div className={`flex flex-col w-full bg-card/30 rounded-[2px] hover:bg-muted/50 transition-all ${className}`}>
         <div 
           className="group flex items-center gap-4 p-3 cursor-pointer w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           onClick={handleCardClick}
@@ -227,7 +227,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           aria-label={`View track: ${track.title} by ${track.artist}`}
         >
           <div 
-            className="relative w-14 h-14 rounded-sm overflow-hidden flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
+            className="relative w-14 h-14 rounded-[2px] overflow-hidden flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
             onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
             onKeyDown={(e) => { e.stopPropagation(); handleKeyDown(e, () => handlePlay(e as any)); }}
             role="button"
@@ -301,7 +301,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   return (
     <div 
-      className={`group relative cursor-pointer transition-all duration-300 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-2 bg-card/30 w-full ${className}`}
+      className={`group relative cursor-pointer transition-all duration-300 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[2px] p-3 bg-muted/20 border border-border/50 w-full ${className}`}
       onClick={handleCardClick}
       onKeyDown={(e) => handleKeyDown(e, () => handleCardClick(e as any))}
       role="button"
@@ -309,56 +309,60 @@ const TrackCard: React.FC<TrackCardProps> = ({
       aria-label={`View track: ${track.title} by ${track.artist}`}
     >
       {/* Image Container - 1:1 Aspect Ratio */}
-      <div className="relative aspect-square rounded-sm overflow-hidden bg-neutral-900 mb-2">
+      <div className="relative aspect-square rounded-[2px] overflow-hidden bg-neutral-900 mb-4 shadow-xl">
         <img 
           src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
           alt="" 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         
         {/* Overlay for Play Button */}
-        <div className={`absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+        <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 backdrop-blur-[1px] ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
            <button 
-             className="w-10 h-10 rounded-sm bg-primary text-primary-foreground flex items-center justify-center hover:scale-105 transition-transform"
+             className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center hover:scale-110 transition-transform shadow-2xl"
              onClick={handlePlay}
              aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
            >
              {track.tokenGating?.enabled && !hasAccess ? (
-               <Lock className="h-5 w-5" />
+               <Lock className="h-6 w-6" />
              ) : isActive && isPlaying ? (
-               <Pause className="h-5 w-5 fill-current" />
+               <Pause className="h-6 w-6 fill-current" />
              ) : (
-               <Play className="h-5 w-5 fill-current ml-1" />
+               <Play className="h-6 w-6 fill-current ml-1" />
              )}
            </button>
         </div>
       </div>
 
       {/* Content Below Card */}
-      <div className="px-1 flex items-start justify-between">
+      <div className="px-1 flex items-start justify-between pb-1">
         <div className="flex-1 min-w-0">
-          <h3 className={`text-[11px] font-bold truncate text-white`}>
+          <h3 className={`text-[13px] font-black truncate text-neutral-800 uppercase italic tracking-tight`}>
             {track.title}
           </h3>
           <p 
-            className="text-[8px] font-medium text-muted-foreground truncate mt-1 hover:underline cursor-pointer"
+            className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest mt-1.5 hover:text-blue-500 transition-colors"
             onClick={handleArtistClick}
           >
-            {track.artist} • {track.streams?.toLocaleString() || 0} streams
+            {track.artist}
           </p>
+          <div className="flex items-center gap-4 mt-2">
+            <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">{(track.playCount || 0).toLocaleString()} Plays</span>
+            <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest font-mono">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 mt-1">
           {onMint && !track.isNFT && (
             <button
               onClick={handleMint}
-              className="text-[8px] font-bold text-purple-400 hover:text-purple-300 transition-colors mr-1 uppercase tracking-widest"
+              className="text-[9px] font-black text-blue-500 hover:text-blue-400 transition-colors px-2.5 py-1 bg-blue-500/10 rounded-full uppercase tracking-widest mr-1"
             >
               Mint
             </button>
           )}
           <button 
             onClick={handleOptions}
-            className="p-1.5 rounded-full transition-all hover:bg-muted text-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="p-2 rounded-full transition-all hover:bg-muted text-muted-foreground/40 hover:text-foreground"
             aria-label="Track options"
           >
             <MoreVertical className="h-4 w-4" />

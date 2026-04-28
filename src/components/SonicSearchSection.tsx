@@ -62,7 +62,7 @@ const SonicSearchSection: React.FC = () => {
               <div className="p-2 bg-blue-600 rounded-lg">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-2xl font-black italic uppercase tracking-tighter text-foreground">Sonic Core</h2>
+              <h2 className="text-2xl font-black italic uppercase tracking-tighter text-neutral-800">Sonic Core</h2>
             </div>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Neural Search Interface v2.0</p>
           </div>

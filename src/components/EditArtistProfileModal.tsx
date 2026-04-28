@@ -16,6 +16,7 @@ interface EditArtistProfileModalProps {
 const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist, onClose }) => {
   const { addNotification, setArtists } = useAudio();
   const [name, setName] = useState(artist.name);
+  const [username, setUsername] = useState(artist.username || '');
   const [bio, setBio] = useState(artist.bio || '');
   const [bannerUrl, setBannerUrl] = useState(artist.bannerUrl || '');
   const [avatarUrl, setAvatarUrl] = useState(artist.avatarUrl || '');
@@ -111,6 +112,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
       setArtists(prev => prev.map(a => a.uid === artist.uid ? {
         ...a,
         name,
+        username,
         bio,
         bannerUrl: bannerUrl || a.bannerUrl,
         avatarUrl: avatarUrl || a.avatarUrl,
@@ -124,6 +126,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, cleanUpdateData({
           name,
+          username,
           bio,
           bannerUrl: bannerUrl || artist.bannerUrl || '',
           avatar: avatarUrl || artist.avatarUrl || '',
@@ -212,9 +215,18 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Artist Name</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground" aria-label="Artist Name" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Artist Name</label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground" aria-label="Artist Name" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Neural Handle</label>
+                <div className="relative">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 text-xs">@</span>
+                  <input type="text" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))} className="w-full bg-muted/50 rounded-[10px] py-2 pl-6 pr-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground" placeholder="handle" aria-label="Neural Handle" />
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Origin Narrative (Bio)</label>

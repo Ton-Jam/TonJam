@@ -18,6 +18,8 @@ import SectionHeader from '@/components/SectionHeader';
 import DiscoveryFeed from '@/components/DiscoveryFeed';
 import { useAudio } from '@/context/AudioContext';
 import { motion, AnimatePresence } from 'motion/react';
+import { generateAIPlaylist, GenerateAIPlaylistResult } from '@/services/aiPlaylistService';
+import { Loader2, Brain, Sparkle } from 'lucide-react';
 
 const HomeSection = ({ title, icon: Icon, link, children }: { title: string, icon: React.ElementType, link?: string, children: React.ReactNode }) => {
   return (
@@ -130,7 +132,21 @@ const Home: React.FC = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [isTokensModalOpen, setIsTokensModalOpen] = useState(false);
   const [visibleNFTCount, setVisibleNFTCount] = useState(4);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  const handleGenerateAIPlaylist = async () => {
+    setIsGeneratingAI(true);
+    try {
+      const result = await generateAIPlaylist();
+      setAiResult(result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   useEffect(() => {
     generateDiscoverWeekly();
@@ -341,23 +357,24 @@ const Home: React.FC = () => {
                     dismissWelcome();
                     navigate('/marketplace');
                   }}
-                  className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 group/btn text-sm"
+                  className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 group/btn text-sm"
                 >
-                  <ShoppingBag className="h-5 w-5 group-hover/btn:scale-110 transition-transform" />
+                  <ShoppingBag className="h-5 w-5 text-white group-hover/btn:scale-110 transition-transform" />
                   Explore Marketplace
                 </button>
                 <button 
                   onClick={() => setIsTokensModalOpen(true)}
-                  className="px-8 py-4 bg-white/5 hover:bg-white/10 text-foreground font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-3 text-sm"
+                  className="px-8 py-4 bg-white/5 hover:bg-white/10 text-zinc-800 dark:text-foreground font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-3 text-sm"
                 >
-                  <Sparkles className="h-5 w-5" />
+                  <Sparkles className="h-5 w-5 text-blue-500" />
                   Get Free Tokens
                 </button>
                 <button 
                   onClick={dismissWelcome}
-                  className="px-8 py-4 bg-white/5 hover:bg-white/10 text-foreground font-bold uppercase tracking-widest rounded-full border border-white/10 transition-all text-sm"
+                  className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 group/btn text-sm"
                 >
-                  Start Listening
+                  <Play className="h-5 w-5 fill-white group-hover/btn:scale-110 transition-transform" />
+                  Start Playing
                 </button>
               </div>
             </div>
@@ -517,10 +534,10 @@ const Home: React.FC = () => {
                 <div className="flex flex-wrap gap-3 pt-2">
                   <button 
                     onClick={() => playAll(MOCK_TRACKS)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 group/btn text-xs"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 group/btn text-xs"
                   >
                     <Play className="h-4 w-4 fill-white group-hover/btn:scale-110 transition-transform" />
-                    Start Listening
+                    Start Playing
                   </button>
                   <Link 
                     to="/marketplace"
@@ -533,16 +550,154 @@ const Home: React.FC = () => {
               </div>
             </section>
 
+            {/* AI Sonic Intelligence Section */}
+            <section className="mb-12 relative">
+              <div className="absolute inset-0 bg-blue-600/5 blur-3xl -z-10 rounded-full scale-150 opacity-50 overflow-hidden"></div>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Brain className="h-5 w-5 text-blue-500" />
+                    <h2 className="text-2xl font-bold text-zinc-800 dark:text-foreground">Sonic Intelligence</h2>
+                  </div>
+                  <p className="text-muted-foreground text-sm">Neural-curated frequencies mapped to your collector profile</p>
+                </div>
+                {!aiResult && (
+                  <button 
+                    onClick={handleGenerateAIPlaylist}
+                    disabled={isGeneratingAI}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20"
+                  >
+                    {isGeneratingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    {isGeneratingAI ? "Calibrating..." : "Generate AI Mix"}
+                  </button>
+                )}
+              </div>
+
+              {aiResult ? (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-muted/20 border border-blue-500/10 rounded-[10px] p-6 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl -z-10"></div>
+                  
+                  <div className="relative w-48 h-48 flex-shrink-0 group">
+                    <img 
+                      src={aiResult.playlist.coverUrl} 
+                      alt={aiResult.playlist.title}
+                      className="w-full h-full object-cover rounded-[2px] shadow-2xl transition-transform duration-500 group-hover:scale-105"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button 
+                        onClick={() => {
+                          const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
+                          playAll(tracks);
+                        }}
+                        className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white"
+                      >
+                        <Play className="h-6 w-6 fill-white ml-1" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 text-center md:text-left space-y-4">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] font-bold uppercase tracking-wider mb-2">
+                        <Sparkle className="h-3 w-3" />
+                        AI Personalized
+                      </div>
+                      <h3 className="text-3xl font-black italic uppercase tracking-tighter text-foreground leading-none">{aiResult.playlist.title}</h3>
+                      <p className="text-muted-foreground text-sm mt-3 leading-relaxed max-w-xl">
+                        {aiResult.explanation}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+                      <button 
+                        onClick={() => {
+                          const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
+                          playAll(tracks);
+                        }}
+                        className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-full text-[10px] transition-all flex items-center gap-2"
+                      >
+                        <Play className="h-4 w-4 fill-white" />
+                        Play Mix
+                      </button>
+                      <button 
+                        onClick={() => setAiResult(null)}
+                        className="px-6 py-2.5 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest rounded-full text-[10px] transition-all"
+                      >
+                        Regenerate
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="hidden lg:block w-px h-32 bg-border"></div>
+
+                  <div className="hidden lg:block space-y-3 flex-shrink-0 w-64">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Included Samples</p>
+                    {aiResult.playlist.trackIds.slice(0, 4).map(id => {
+                      const track = allTracks.find(t => t.id === id);
+                      if (!track) return null;
+                      return (
+                        <div key={id} className="flex items-center gap-3 group/track cursor-pointer" onClick={() => playTrack(track)}>
+                          <img src={track.coverUrl} className="h-8 w-8 rounded-[2px] object-cover" alt="" />
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-foreground truncate group-hover/track:text-blue-500 transition-colors uppercase italic">{track.title}</p>
+                            <p className="text-[8px] text-muted-foreground uppercase tracking-wide truncate">{track.artist}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="col-span-1 md:col-span-2 bg-muted/10 border border-muted/20 rounded-[10px] p-8 flex flex-col justify-center items-center text-center space-y-4">
+                    <div className="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                      <Brain className="h-8 w-8 text-blue-500/50" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-xl font-bold uppercase tracking-tight text-foreground">Unlock Your Neural Signature</h4>
+                      <p className="text-muted-foreground text-sm max-w-sm">Let our AI analyze your collection and listening habits to generate a unique sonic profile.</p>
+                    </div>
+                    <button 
+                      onClick={handleGenerateAIPlaylist}
+                      disabled={isGeneratingAI}
+                      className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 group shadow-xl shadow-blue-600/20"
+                    >
+                      {isGeneratingAI ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Sparkles className="h-4 w-4 text-white" />}
+                      {isGeneratingAI ? "Calculating Harmonics..." : "Initiate AI Synthesis"}
+                    </button>
+                  </div>
+
+                  <div className="hidden md:flex flex-col gap-4">
+                    <div className="flex-1 bg-muted/5 border border-muted/10 rounded-[10px] p-4 flex flex-col justify-center gap-2">
+                      <Activity className="h-4 w-4 text-blue-500/50" />
+                      <p className="text-[10px] font-bold text-foreground/70 uppercase tracking-widest">Real-time Analysis</p>
+                      <p className="text-[9px] text-muted-foreground leading-tight">Gemini parses BPM, genre density, and artist relationships instantly.</p>
+                    </div>
+                    <div className="flex-1 bg-muted/5 border border-muted/10 rounded-[10px] p-4 flex flex-col justify-center gap-2">
+                      <Globe className="h-4 w-4 text-purple-500/50" />
+                      <p className="text-[10px] font-bold text-foreground/70 uppercase tracking-widest">Network Grounded</p>
+                      <p className="text-[9px] text-muted-foreground leading-tight">Cross-references global TON trends with your local favorites.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+
             {/* Featured Tracks Dynamic Playlist */}
             <section className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground mb-1">Featured Tracks</h2>
+                  <h2 className="text-2xl font-bold text-zinc-800 dark:text-foreground mb-1">Featured Tracks</h2>
                   <p className="text-muted-foreground text-sm">Hand-picked by TonJam AI based on network trends</p>
                 </div>
                 <Link 
                   to={`/playlist/${featuredPlaylist.id}`}
-                  className="text-blue-500 hover:text-blue-400 text-sm font-medium transition-colors"
+                  className="text-blue-600 dark:text-blue-500 hover:text-blue-500 text-sm font-medium transition-colors"
                 >
                   View All
                 </Link>
@@ -557,7 +712,7 @@ const Home: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-transparent z-0"></div>
                 <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
                 
-                <div className="relative z-10 w-48 h-48 rounded-[10px] overflow-hidden shadow-2xl flex-shrink-0 group/cover">
+                <div className="relative z-10 w-48 h-48 rounded-[2px] overflow-hidden shadow-2xl flex-shrink-0 group/cover">
                   <img 
                     src={featuredPlaylist.coverUrl} 
                     alt={featuredPlaylist.title}
@@ -595,7 +750,7 @@ const Home: React.FC = () => {
                         const tracks = (featuredPlaylist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
                         playAll(tracks);
                       }}
-                      className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 group/btn text-xs"
+                      className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 group/btn text-xs"
                     >
                       <Play className="h-5 w-5 fill-white group-hover/btn:scale-110 transition-transform" />
                       Play Now
@@ -616,11 +771,11 @@ const Home: React.FC = () => {
               <SectionHeader title="Trending Now" />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 5 Songs</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-800 dark:text-muted-foreground">Top 5 Songs</h4>
                   {trendingTracks.slice(0, 5).map((track, idx) => (
                     <div key={`trend-track-${track.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/track/${track.id}`)}>
                       <span className="text-lg font-black italic text-muted-foreground/30 w-6">{idx + 1}</span>
-                      <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+                      <div className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0">
                         <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt={track.title} />
                         <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
                           <Play className="h-4 w-4 text-foreground fill-white" />
@@ -634,7 +789,7 @@ const Home: React.FC = () => {
                   ))}
                 </div>
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 3 Artists</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-800 dark:text-muted-foreground">Top 3 Artists</h4>
                   {trendingArtists.map((artist) => (
                     <div key={`trend-artist-${artist.uid}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/artist/${artist.uid}`)}>
                       <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} className="w-12 h-12 rounded-full object-cover" alt={artist.name} />
@@ -646,10 +801,10 @@ const Home: React.FC = () => {
                   ))}
                 </div>
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trending NFTs</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-800 dark:text-muted-foreground">Trending NFTs</h4>
                   {trendingNFTs.slice(0, visibleNFTCount).map((nft) => (
                     <div key={`trend-nft-${nft.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/nft/${nft.id}`)}>
-                      <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-12 h-12 rounded-[5px] object-cover" alt={nft.title} />
+                      <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-12 h-12 rounded-[2px] object-cover" alt={nft.title} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate text-foreground">{nft.title}</p>
                         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.price} TON</p>
@@ -705,12 +860,12 @@ const Home: React.FC = () => {
                     <div 
                       key={`chart-${track.id}`} 
                       onClick={() => navigate(`/track/${track.id}`)}
-                      className="flex items-center gap-4 group cursor-pointer p-2 rounded-[5px] hover:bg-muted/50 transition-all w-[85vw] sm:w-[300px] snap-start"
+                      className="flex items-center gap-4 group cursor-pointer p-2 rounded-[2px] hover:bg-muted/50 transition-all w-[85vw] sm:w-[300px] snap-start"
                     >
                       <span className="text-[20px] font-black italic text-muted-foreground/30 group-hover:text-blue-500/40 transition-colors w-8 text-center">
                         {idx + 1}
                       </span>
-                      <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+                      <div className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0">
                         <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
                           <Play className="h-4 w-4 text-foreground fill-white" />
@@ -742,7 +897,7 @@ const Home: React.FC = () => {
                       onClick={() => navigate(`/track/${track.id}`)}
                       className="flex items-center gap-4 group cursor-pointer"
                     >
-                      <div className="relative w-16 h-16 rounded-[5px] overflow-hidden flex-shrink-0">
+                      <div className="relative w-16 h-16 rounded-[2px] overflow-hidden flex-shrink-0">
                         <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
                           <Play className="h-4 w-4 text-foreground fill-white" />

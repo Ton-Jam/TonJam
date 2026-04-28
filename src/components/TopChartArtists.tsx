@@ -12,7 +12,7 @@ const TopChartArtists: React.FC<TopChartArtistsProps> = ({ artists, title }) => 
   const top4 = [...artists].slice(0, 4);
 
   return (
-    <div className="bg-muted/50 backdrop-blur-md rounded-sm p-2 space-y-2 shadow-2xl relative overflow-hidden group">
+    <div className="bg-muted/50 rounded-sm p-2 space-y-2 shadow-2xl relative overflow-hidden group">
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full -mr-2 -mt-2 group-hover:bg-primary/20 transition-colors"></div>
       
       <div className="flex items-center justify-between relative z-10">

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { GENRES, MOODS } from '@/constants';
 import { auth } from '@/lib/firebase';
+import { APP_LOGO } from '@/constants';
 import NFTCard from '@/components/NFTCard';
 import TrackCard from '@/components/TrackCard';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -217,8 +218,13 @@ const Discover: React.FC = () => {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background pb-24 relative overflow-hidden">
       {/* Atmospheric Background Blobs */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] -z-10" />
-      <div className="absolute top-1/4 -left-24 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] -z-10" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-1/4 -left-24 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px] -z-10" />
+      
+      {/* DJ Krupy Background Decoration */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center -z-20 opacity-[0.02] overflow-hidden">
+        <img src={APP_LOGO} className="w-[120vw] h-[120vw] animate-[spin_120s_linear_infinite] grayscale" alt="" />
+      </div>
       
       <Joyride
         steps={[
@@ -445,7 +451,7 @@ const Discover: React.FC = () => {
             {searchHistory.length > 0 && (
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Recent exploration</h2>
+                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-neutral-800">Recent exploration</h2>
                   <Button variant="ghost" size="sm" onClick={clearSearchHistory} className="h-auto p-0 text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-foreground">
                     Clear all
                   </Button>
@@ -467,7 +473,7 @@ const Discover: React.FC = () => {
 
             {/* Browse Categories - Modern Bento Grid */}
             <section className="space-y-6">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Browse Dimensions</h2>
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-neutral-800">Browse Dimensions</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {BROWSE_CATEGORIES.map((category) => (
                   <Card 
@@ -504,7 +510,7 @@ const Discover: React.FC = () => {
                     {/* Top Result */}
                     {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 0 && (
                       <section>
-                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-6">Primary Identification</h2>
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60 mb-6">Discovery Identification</h2>
                         <Card 
                           onClick={() => navigate(`/artist/${filteredResults.artists[0].uid}`)}
                           className="max-w-2xl bg-white/[0.02] hover:bg-white/[0.05] border-none transition-all p-8 rounded-[2rem] group cursor-pointer"
@@ -547,7 +553,7 @@ const Discover: React.FC = () => {
                     {(activeFilter === 'all' || activeFilter === 'tracks') && filteredResults.tracks.length > 0 && (
                       <section className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Digital Artifacts</h2>
+                          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60 font-black">Sonic Archive</h2>
                           {activeFilter === 'all' && filteredResults.tracks.length > 4 && (
                             <Button variant="ghost" onClick={() => setActiveFilter('tracks')} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
                               View all
@@ -575,7 +581,7 @@ const Discover: React.FC = () => {
                   {/* Artists */}
                   {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 1 && (
                     <section className="space-y-8">
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Similar Signals</h2>
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60">Similar Signals</h2>
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
                         {filteredResults.artists.slice(activeFilter === 'all' ? 1 : 0).map((artist) => (
                           <div 
@@ -600,7 +606,7 @@ const Discover: React.FC = () => {
                   {/* Users */}
                   {(activeFilter === 'all' || activeFilter === 'users') && filteredResults.users.length > 0 && (
                     <section className="space-y-8">
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Neural Nodes</h2>
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60 font-black">Network Nodes</h2>
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
                         {filteredResults.users.map((u) => (
                           <div 
@@ -625,7 +631,7 @@ const Discover: React.FC = () => {
                   {/* NFTs */}
                   {(activeFilter === 'all' || activeFilter === 'nfts') && filteredResults.nfts.length > 0 && (
                     <section className="space-y-8">
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500/80">Blockchain Assets</h2>
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60 font-black">Digital Collectibles</h2>
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                         {filteredResults.nfts.map((nft) => (
                           <div key={nft.id} className="transition-all hover:translate-y-[-4px]">

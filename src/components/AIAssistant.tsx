@@ -171,27 +171,30 @@ Keep responses concise but highly entertaining.`;
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}
-            className="fixed bottom-24 right-6 lg:bottom-24 lg:right-6 z-[101] w-[350px] h-[520px] max-h-[80vh] bg-background/95 backdrop-blur-xl border border-blue-500 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+            className="fixed bottom-24 right-6 lg:bottom-24 lg:right-6 z-[101] w-[350px] h-[520px] max-h-[80vh] bg-white border border-blue-100 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div 
               onPointerDown={(e) => dragControls.start(e)}
-              className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 p-4 flex items-center justify-between text-white cursor-move touch-none border-b border-white/10"
+              className="bg-white p-4 flex items-center justify-between border-b border-neutral-100 cursor-move touch-none relative z-10"
             >
               <div className="flex items-center gap-3">
-                <DjAvatar className="w-10 h-10" />
+                <DjAvatar className="w-10 h-10 border-2 border-blue-500 shadow-md" />
                 <div>
-                  <h3 className="font-bold text-lg leading-tight tracking-tight">Dj krupy</h3>
-                  <p className="text-[10px] uppercase tracking-widest text-pink-200 opacity-80 font-bold">In the Mix</p>
+                  <h3 className="font-bold text-lg leading-tight tracking-tight text-zinc-900">Dj krupy</h3>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    <p className="text-[10px] uppercase tracking-widest text-blue-500 font-black">Online / Mixing</p>
+                  </div>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors pointer-events-auto bg-black/20 p-2 rounded-full hover:bg-black/40">
+              <button onClick={() => setIsOpen(false)} className="text-neutral-400 hover:text-rose-500 transition-colors pointer-events-auto bg-neutral-50 p-2 rounded-full hover:bg-rose-50">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-background to-neutral-50/50 dark:to-black/50">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50/50">
               {messages.map((msg, idx) => (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9, y: 10 }}
@@ -202,11 +205,11 @@ Keep responses concise but highly entertaining.`;
                 >
                   <div className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user' 
-                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-tr-sm' 
-                      : 'bg-white dark:bg-neutral-800 text-foreground border border-border shadow-md rounded-tl-sm relative'
+                      ? 'bg-blue-600 text-white rounded-tr-[2px]' 
+                      : 'bg-white text-zinc-800 border border-neutral-100 shadow-md rounded-tl-[2px] relative'
                   }`}>
                     {msg.role === 'model' && (
-                       <Sparkles className="w-3 h-3 text-pink-500 absolute -top-1 -left-1 opacity-50" />
+                       <Sparkles className="w-3 h-3 text-blue-400 absolute -top-1 -left-1 opacity-50" />
                     )}
                     {msg.text}
                   </div>
@@ -218,9 +221,9 @@ Keep responses concise but highly entertaining.`;
                   animate={{ opacity: 1 }}
                   className="flex justify-start"
                 >
-                  <div className="bg-white dark:bg-neutral-800 border border-border p-3.5 rounded-2xl rounded-tl-sm shadow-md flex items-center gap-3">
-                    <Music className="w-4 h-4 text-pink-500 animate-bounce" />
-                    <span className="text-sm font-medium bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent animate-pulse">Mixing beats...</span>
+                  <div className="bg-white border border-neutral-100 p-3.5 rounded-2xl rounded-tl-[2px] shadow-md flex items-center gap-3">
+                    <Music className="w-4 h-4 text-blue-500 animate-bounce" />
+                    <span className="text-sm font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse">Analyzing Frequencies...</span>
                   </div>
                 </motion.div>
               )}
@@ -229,43 +232,43 @@ Keep responses concise but highly entertaining.`;
 
             {/* Quick Actions */}
             {messages.length === 1 && (
-              <div className="px-4 pb-3 pt-1 flex flex-wrap gap-2 bg-neutral-50/50 dark:bg-black/50">
+              <div className="px-4 pb-3 pt-1 flex flex-wrap gap-2 bg-zinc-50/50">
                 <button 
                   onClick={() => handleSend("Drop some sick electronic beats")}
-                  className="text-xs bg-pink-100 hover:bg-pink-200 dark:bg-pink-900/40 dark:hover:bg-pink-900/60 text-pink-700 dark:text-pink-300 px-3 py-1.5 rounded-full transition-colors font-medium border border-pink-200 dark:border-pink-800/50"
+                  className="text-[10px] bg-white hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full transition-colors font-black uppercase tracking-widest border border-blue-100 shadow-sm"
                 >
                   🎧 Electronic
                 </button>
                 <button 
                   onClick={() => handleSend("Create a custom AI playlist for me")}
-                  className="text-xs bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-full transition-colors font-medium border border-purple-200 dark:border-purple-800/50"
+                  className="text-[10px] bg-white hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full transition-colors font-black uppercase tracking-widest border border-blue-100 shadow-sm"
                 >
                   🎛️ AI Playlist
                 </button>
                 <button 
                   onClick={() => handleSend("What is TonJam all about?")}
-                  className="text-xs bg-cyan-100 hover:bg-cyan-200 dark:bg-cyan-900/40 dark:hover:bg-cyan-900/60 text-cyan-700 dark:text-cyan-300 px-3 py-1.5 rounded-full transition-colors font-medium border border-cyan-200 dark:border-cyan-800/50"
+                  className="text-[10px] bg-white hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full transition-colors font-black uppercase tracking-widest border border-blue-100 shadow-sm"
                 >
-                  🚀 What's TonJam?
+                  🚀 About
                 </button>
               </div>
             )}
 
             {/* Input Area */}
-            <div className="p-4 bg-white dark:bg-neutral-900 border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-              <div className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 rounded-full px-4 py-1.5 border border-transparent focus-within:border-purple-400/50 focus-within:ring-2 focus-within:ring-purple-400/20 transition-all">
+            <div className="p-4 bg-white border-t border-neutral-100">
+              <div className="flex items-center gap-2 bg-neutral-50 rounded-full px-4 py-1.5 border border-transparent focus-within:border-blue-400/50 focus-within:bg-white focus-within:shadow-[0_0_15px_rgba(37,99,235,0.1)] transition-all">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Drop a request..."
-                  className="flex-1 bg-transparent border-none focus:outline-none text-sm text-foreground py-2 font-medium"
+                  placeholder="Ask Krupy anything..."
+                  className="flex-1 bg-transparent border-none focus:outline-none text-sm text-zinc-900 py-2 font-medium"
                 />
                 <button 
                   onClick={() => handleSend()}
                   disabled={!input.trim() || isLoading}
-                  className="bg-gradient-to-r from-pink-500 to-purple-600 p-2 rounded-full text-white disabled:opacity-50 disabled:grayscale transition-all hover:scale-110 active:scale-95 shadow-md"
+                  className="bg-blue-600 p-2 rounded-full text-white disabled:opacity-50 disabled:grayscale transition-all hover:scale-110 active:scale-95 shadow-lg shadow-blue-600/20"
                 >
                   <Send className="w-3.5 h-3.5 ml-0.5" />
                 </button>

@@ -323,7 +323,7 @@ const Marketplace: React.FC = () => {
             <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2 -mx-4 px-4" >
               {topBiddedNfts.map((nft) => (
                 <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full lg:w-[calc(50%-16px)] snap-center cursor-pointer group" >
-                  <div className="relative aspect-[21/9] bg-muted/50 backdrop-blur-md border border-border dark:border-transparent rounded-[16px] overflow-hidden transition-all group-hover:border-primary/40 shadow-2xl">
+                  <div className="relative aspect-[21/9] bg-muted/50 backdrop-blur-md border border-border dark:border-transparent rounded-[2px] overflow-hidden transition-all group-hover:border-primary/40 shadow-2xl">
                     <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`, 800, 400)} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-[10s] group-hover:scale-105" alt={nft.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
@@ -390,9 +390,9 @@ const Marketplace: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-4 bg-primary rounded-full" />
-                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-foreground/90">Trending Track NFTs</h2>
+                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/90">Trending Track NFTs</h2>
                 </div>
-                <button onClick={() => navigate('/trending-nfts')} className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-widest hover:text-primary transition-all flex items-center group">
+                <button onClick={() => navigate('/trending-nfts')} className="text-[10px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -409,9 +409,9 @@ const Marketplace: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-4 bg-orange-600 rounded-full" />
-                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-foreground/90">Limited Audio Artifacts</h2>
+                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/90">Limited Audio Artifacts</h2>
                 </div>
-                <button onClick={() => navigate('/limited-editions')} className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-widest hover:text-primary transition-all flex items-center group">
+                <button onClick={() => navigate('/limited-editions')} className="text-[10px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                   EXPLORE SCARCITY <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -428,9 +428,9 @@ const Marketplace: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-4 bg-amber-600 rounded-full" />
-                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-foreground/90">Most Bidded NFTs</h2>
+                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/90">Most Bidded NFTs</h2>
                 </div>
-                <button onClick={() => navigate('/explore/nfts?filter=most_bidded')} className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-widest hover:text-primary transition-all flex items-center group">
+                <button onClick={() => navigate('/explore/nfts?filter=most_bidded')} className="text-[10px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -448,9 +448,9 @@ const Marketplace: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-4 bg-purple-600 rounded-full" />
-                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-foreground/90">Featured Protocol Architects</h2>
+                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/90">Featured Protocol Architects</h2>
                 </div>
-                <button onClick={() => navigate('/discover?tab=Artists')} className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-widest hover:text-primary transition-all flex items-center group">
+                <button onClick={() => navigate('/discover?tab=Artists')} className="text-[10px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -495,7 +495,7 @@ const Marketplace: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className="w-1.5 h-10 bg-foreground/10 rounded-full"></div>
-                  <h2 className="text-[20px] font-bold tracking-tighter uppercase text-foreground leading-none">Market Explorer</h2>
+                  <h2 className="text-[20px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground leading-none">Market Explorer</h2>
                 </div>
                 <div className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-[0.4em]">
                   {filteredNfts.length} Protocols Found

@@ -19,7 +19,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ playlist, index }) => {
       onClick={() => navigate(`/album/${playlist.id}`)}
       className="group relative min-w-[180px] max-w-[180px] sm:min-w-[200px] sm:max-w-[200px] cursor-pointer"
     >
-      <div className="relative aspect-square rounded-sm overflow-hidden mb-3 bg-white/[0.05]">
+      <div className="relative aspect-square rounded-[2px] overflow-hidden mb-3 bg-white/[0.05]">
         {playlist.coverUrl ? (
           <img
             src={playlist.coverUrl}

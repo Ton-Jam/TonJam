@@ -17,7 +17,7 @@ export const BackButton: React.FC<BackButtonProps> = ({ className, ariaLabel = "
       className={`p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all ${className}`}
       aria-label={ariaLabel}
     >
-      <ArrowLeftIcon className={`${iconClassName} text-white`} />
+      <ArrowLeftIcon className={`${iconClassName} text-zinc-700`} />
       {children}
     </button>
   );

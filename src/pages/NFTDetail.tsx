@@ -79,7 +79,6 @@ const NFTDetail: React.FC = () => {
 
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
   const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers' | 'comments' | 'exclusive'>('details');
-  const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
   const [dynamicMetadata, setDynamicMetadata] = useState<NFTItem | null>(null);
@@ -135,35 +134,7 @@ const NFTDetail: React.FC = () => {
       /* Fetch dynamic metadata */
       loadMetadata();
     }
-    window.scrollTo(0, 0);
   }, [id, localNft?.id]);
-
-  useEffect(() => {
-    if (!localNft?.auctionEndTime) {
-      setTimeLeft('00:00:00');
-      return;
-    }
-    const timer = setInterval(() => {
-      const endTime = new Date(localNft.auctionEndTime!).getTime();
-      if (isNaN(endTime)) {
-        setTimeLeft('INVALID');
-        clearInterval(timer);
-        return;
-      }
-      const now = new Date().getTime();
-      const diff = endTime - now;
-      if (diff <= 0) {
-        setTimeLeft('ENDED');
-        clearInterval(timer);
-      } else {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [localNft]);
 
   const isActive = useMemo(() => currentTrack?.id === localNft?.trackId, [currentTrack, localNft]);
 
@@ -473,22 +444,14 @@ const NFTDetail: React.FC = () => {
                 {/* Live Auction Badge */}
                 {isAuction && (
                   <div className="absolute bottom-6 left-6 right-6">
-                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-4 py-4 rounded-[12px] flex justify-between items-center shadow-2xl flex-wrap gap-4">
-                      <div className="flex flex-col">
-                        <span className="text-[8px] font-bold text-amber-500 uppercase tracking-[0.4em] mb-2">Time Remaining</span>
-                        <span className="text-xl font-bold text-foreground tracking-tighter font-mono">{timeLeft}</span>
+                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-4 py-4 rounded-[12px] flex items-center justify-between shadow-2xl flex-wrap gap-4">
+                      <div className="flex items-center gap-4 px-4 py-4 bg-orange-500 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)]">
+                        <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                        <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Live Auction Bidding Active</span>
                       </div>
-                      {localNft.auctionEndTime && (
-                        <div className="flex flex-col">
-                          <span className="text-[8px] font-bold text-amber-500/70 uppercase tracking-[0.4em] mb-2">Ends On</span>
-                          <span className="text-sm font-bold text-foreground/80 tracking-tighter font-mono">
-                            {new Date(localNft.auctionEndTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-4 px-4 py-4 bg-amber-500/10 rounded-full border border-neutral-500/20">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-                        <span className="text-[8px] font-bold text-amber-500 uppercase tracking-widest">Active Bid</span>
+                      <div className="text-right">
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">Status Protocol</span>
+                        <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Neural Sync Live</span>
                       </div>
                     </div>
                   </div>
@@ -699,7 +662,7 @@ const NFTDetail: React.FC = () => {
                         <button 
                           onClick={handleInlineBid} 
                           disabled={isPlacingBid}
-                          className="flex-1 py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-blue-500/20 border-blue-400/30 disabled:opacity-50 flex items-center justify-center gap-2" 
+                          className="flex-1 py-4 rounded-[12px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20 border-orange-400/30 disabled:opacity-50 flex items-center justify-center gap-2" 
                         >
                           {isPlacingBid ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Place Bid Signal'}
                         </button>

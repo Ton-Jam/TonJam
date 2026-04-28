@@ -83,13 +83,13 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
     return (
       <div 
         onClick={onClick} 
-        className="group flex items-center gap-2 p-2 rounded-[10px] hover:bg-muted/50 transition-all cursor-pointer w-full glass"
+        className="group flex items-center gap-2 p-2 rounded-[2px] hover:bg-muted/50 transition-all cursor-pointer w-full glass"
       >
-        <div className="relative w-12 h-12 rounded-[5px] overflow-hidden flex-shrink-0">
+        <div className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0">
           {renderCover()}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
+          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-neutral-800 group-hover:text-blue-400 transition-colors">
             {playlist.title}
           </h4>
           <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">
@@ -106,10 +106,10 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   return (
     <div 
       onClick={onClick} 
-      className="group relative cursor-pointer glass p-2 rounded-sm w-full"
+      className="group relative cursor-pointer glass p-2 rounded-[2px] w-full"
     >
       {/* Image Container - 1:1 Aspect Ratio */}
-      <div className="relative aspect-square rounded-[8px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
+      <div className="relative aspect-square rounded-[2px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
         {renderCover()}
         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center gap-3">
           <button 
@@ -141,7 +141,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       
       {/* Content Below Card */}
       <div className="px-3">
-        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
+        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-neutral-800 group-hover:text-blue-400 transition-colors">
           {playlist.title}
         </h3>
         <p 

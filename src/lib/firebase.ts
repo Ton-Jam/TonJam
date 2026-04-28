@@ -15,7 +15,7 @@ const firestoreDatabaseId = (firebaseConfig as any).firestoreDatabaseId || '(def
 console.log(`[Firebase] Initializing Firestore. DatabaseID: ${firestoreDatabaseId}`);
 
 export const db = initializeFirestore(app, {
-  experimentalAutoDetectLongPolling: true,
+  experimentalForceLongPolling: true,
   ignoreUndefinedProperties: true,
 }, firestoreDatabaseId);
 
@@ -27,25 +27,33 @@ export const googleProvider = new GoogleAuthProvider();
  * Validates connection to Firestore
  * CRITICAL CONSTRAINT: When the application initially boots, call getFromServer to test the connection.
  */
-async function testConnection() {
-  try {
-    // Try to reach the specific database instance
-    await getDocFromServer(doc(db, 'test', 'connection_check'));
-    console.log("Firestore connection check: Server is reachable.");
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message.includes('Missing or insufficient permissions')) {
-        console.warn("Firestore connection check: Server is reachable but requires Firestore Rules to be published.");
-      } else if (error.message.includes('unavailable') || error.message.includes('the client is offline')) {
-        console.warn(
-          "Firestore backend is currently unreachable. The app will continue in offline mode (using mock data).\n" +
-          "Reason: " + error.message
-        );
-      } else {
-        console.warn("Firestore connectivity check failed (falling back to offline mode):", error.message);
+async function testConnection(retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      console.log(`[Firebase] Connection check attempt ${i + 1}...`);
+      // Try to reach the specific database instance
+      await getDocFromServer(doc(db, 'test', 'connection_check'));
+      console.log("[Firebase] Firestore connection check: Server is reachable.");
+      return;
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes('Missing or insufficient permissions')) {
+          console.warn("[Firebase] Firestore connection check: Server is reachable but requires Firestore Rules to be published.");
+          return;
+        } else if (error.message.includes('unavailable') || error.message.includes('the client is offline')) {
+          console.warn(`[Firebase] Connection attempt ${i + 1} failed: ${error.message}`);
+          if (i < retries - 1) {
+            const delay = Math.pow(2, i) * 1000;
+            console.log(`[Firebase] Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+        }
+        console.warn(`[Firebase] Firestore connectivity check failed on attempt ${i + 1}:`, error.message);
       }
     }
   }
+  console.error("[Firebase] All Firestore connection attempts failed. The app will operate in limited offline mode.");
 }
 testConnection();
 

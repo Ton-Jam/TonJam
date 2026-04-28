@@ -175,6 +175,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isPostDetail = location.pathname.startsWith('/post/');
   const isTrendingNFTs = location.pathname === '/trending-nfts';
 
+  const isNotifications = location.pathname === '/notifications';
+  const isWallet = location.pathname === '/wallet';
+  const isProfile = location.pathname === '/profile' || location.pathname.startsWith('/profile/');
+
   const getSearchPlaceholder = () => {
     const path = location.pathname;
     if (path.startsWith('/marketplace')) return 'Scan Network Protocols (NFTs)...';
@@ -470,7 +474,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         aria-label="Filters"
                       >
-                        <AdjustmentsHorizontalIcon className="h-6 w-6 text-white" strokeWidth={2.5} />
+                        <AdjustmentsHorizontalIcon className="h-6 w-6 text-neutral-500 dark:text-white" strokeWidth={2.5} />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[280px] sm:w-72 bg-background border-none shadow-2xl p-2 overflow-hidden" align="end">
@@ -590,7 +594,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 onClick={() => setActiveFilterSubMenu(null)}
                                 className="flex items-center gap-2 px-2 py-2 text-[11px] font-bold uppercase tracking-widest text-primary hover:bg-muted transition-colors sticky top-0 bg-background z-10"
                               >
-                                <ArrowLeftIcon className="h-4 w-4" />
+                                <ArrowLeftIcon className="h-4 w-4 text-zinc-700" />
                                 Back to Menu
                               </button>
 
@@ -661,13 +665,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </DropdownMenu>
                 )}
                 {(isJamspace || isLibrary || isMarketplace || isTrendingNFTs) && (
-                  <button 
-                    onClick={() => setIsHeaderSearchOpen(!isHeaderSearchOpen)}
-                    className="p-3 rounded-full hover:bg-muted text-zinc-500 dark:text-muted-foreground hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    aria-label="Search"
-                  >
-                    <MagnifyingGlassIcon className={`h-6 w-6 ${isTrendingNFTs ? 'text-white' : 'text-zinc-500 dark:text-muted-foreground'}`} strokeWidth={2.5} />
-                  </button>
+                    <button 
+                      onClick={() => setIsHeaderSearchOpen(!isHeaderSearchOpen)}
+                      className={`p-3 rounded-full hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isHeaderSearchOpen ? 'text-blue-500' : 'text-zinc-500 dark:text-neutral-400'}`}
+                      aria-label="Search"
+                    >
+                      <MagnifyingGlassIcon className="h-6 w-6" strokeWidth={2.5} />
+                    </button>
                 )}
                 {isLibrary && (
                   <button 
@@ -683,7 +687,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {!isJamspace && !isLibrary && !isMarketplace && !isTrendingNFTs && (
                   <button 
                     onClick={() => navigate('/notifications')} 
-                    className="p-2.5 rounded-full hover:bg-muted text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className={`p-2.5 rounded-full hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isNotifications ? 'text-blue-500' : 'text-zinc-500 dark:text-neutral-400'}`}
                     aria-label="Notifications"
                   >
                     <BellIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
@@ -699,7 +703,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
                 <button 
                   onClick={() => tonConnectUI.disconnect()}
-                  className="p-2 rounded-full hover:bg-white/10 text-white transition-all flex items-center gap-1"
+                  className={`p-2 rounded-full hover:bg-white/10 transition-all flex items-center gap-1 ${isWallet ? 'text-blue-500' : 'text-zinc-500 dark:text-neutral-400'}`}
                   title="Disconnect Wallet"
                 >
                   <WalletIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
@@ -709,7 +713,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             ) : (!isLibrary && !isJamspace && !userAddress) ? (
               <button 
                 onClick={() => tonConnectUI.openModal()}
-                className="px-3 py-2 text-white rounded-full text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-1"
+                className={`px-3 py-2 rounded-full text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-1 ${isWallet ? 'text-blue-500' : 'text-zinc-500 dark:text-neutral-400'}`}
               >
                 <WalletIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
                 {!isTrendingNFTs && <span className="hidden sm:inline">Connect Wallet</span>}
@@ -718,24 +722,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {isDiscover && (
               <button 
                 onClick={() => setIsDiscoverFiltersOpen(!isDiscoverFiltersOpen)}
-                className={`p-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isDiscoverFiltersOpen ? 'bg-blue-500 text-white shadow-lg' : 'hover:bg-white/10 text-white'}`}
+                className={`p-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isDiscoverFiltersOpen ? 'bg-blue-500 text-white shadow-lg' : 'hover:bg-white/10 text-neutral-500 dark:text-white'}`}
                 aria-label="Toggle Filters"
               >
                 <FunnelIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
               </button>
             )}
             {!isMarketplace && !isDiscover && !isLibrary && !isTrendingNFTs && (user ? (
-              <Link to="/profile" className="relative hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full ml-1" aria-label="View Profile">
+              <Link to="/profile" className={`relative hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full ml-1 ${isProfile ? 'ring-2 ring-blue-500' : ''}`} aria-label="View Profile">
                 <Avatar className="w-9 h-9">
                   <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt={user.displayName || 'User'} className="object-cover" />
-                  <AvatarFallback className="bg-white/10 text-white">{user.displayName ? user.displayName.slice(0, 2).toUpperCase() : <UserIcon className="w-[22px] h-[22px]" strokeWidth={2.5} />}</AvatarFallback>
+                  <AvatarFallback className={`bg-white/10 ${isProfile ? 'text-blue-500' : 'text-white'}`}>{user.displayName ? user.displayName.slice(0, 2).toUpperCase() : <UserIcon className="w-[22px] h-[22px]" strokeWidth={2.5} />}</AvatarFallback>
                 </Avatar>
                 <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-background"></div>
               </Link>
             ) : (
               <button 
                 onClick={() => setIsAuthModalOpen(true)}
-                className="p-2.5 rounded-full hover:bg-white/10 text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ml-1"
+                className={`p-2.5 rounded-full hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ml-1 ${isAuthModalOpen ? 'text-blue-500' : 'text-zinc-500 dark:text-neutral-400'}`}
                 aria-label="Sign In"
               >
                 <UserIcon className="h-[22px] w-[22px]" strokeWidth={2.5} />
@@ -776,7 +780,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">JamSpace</span>
                 </Link>
                 <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 rounded-full hover:bg-muted">
-                  <ArrowLeftIcon className="h-5 w-5" />
+                  <ArrowLeftIcon className="h-5 w-5 text-zinc-700" />
                 </button>
               </div>
               <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onNavigate={() => setIsMobileSidebarOpen(false)} />
@@ -988,13 +992,13 @@ const NavItem = ({ to, icon: Icon, label, onClick, className = "" }: { to: strin
     onClick={onClick}
     className={({ isActive }) => `
       flex items-center gap-4 px-6 py-4 rounded-[12px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-      ${isActive ? 'bg-blue-500/10 text-blue-500 font-bold' : 'text-neutral-500 hover:text-foreground hover:bg-white/5'}
+      ${isActive ? 'bg-blue-500/10 text-blue-500 font-bold' : 'text-zinc-500 dark:text-neutral-400 hover:text-foreground hover:bg-white/5'}
       ${className}
     `}
   >
     {({ isActive }) => (
       <>
-        <Icon className={`h-6 w-6 transition-colors ${isActive ? 'text-blue-500' : 'text-neutral-400 dark:text-neutral-500'}`} strokeWidth={isActive ? 3 : 2} />
+        <Icon className={`h-6 w-6 transition-colors ${isActive ? 'text-blue-500' : 'text-zinc-500 dark:text-neutral-400'}`} strokeWidth={isActive ? 3 : 2} />
         <span className="text-[12px] uppercase font-bold tracking-[0.15em]">{label}</span>
       </>
     )}
@@ -1007,11 +1011,11 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label
     aria-label={label}
     className={({ isActive }) => `
       flex-1 flex flex-col items-center justify-center transition-all gap-2 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm mobile-nav-item
-      ${isActive ? 'text-blue-500 active' : 'text-neutral-400 dark:text-neutral-500'}
+      ${isActive ? 'text-blue-500 active' : 'text-zinc-500 dark:text-neutral-400'}
     `}
   >
       {({ isActive }) => (
-        <Icon className={`h-[22px] w-[22px] transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-neutral-400 dark:text-white/70 scale-100'}`} strokeWidth={2.5} />
+        <Icon className={`h-[22px] w-[22px] transition-transform ${isActive ? 'text-blue-500 scale-110' : 'text-zinc-500 dark:text-neutral-400 scale-100'}`} strokeWidth={2.5} />
       )}
   </NavLink>
 );

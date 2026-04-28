@@ -78,10 +78,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
       aria-label={`View details for task: ${task.title}`}
       className={`relative group rounded-2xl transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
         task.claimed 
-          ? 'bg-neutral-900/40 opacity-50' 
+          ? 'bg-neutral-100 dark:bg-neutral-900/40 opacity-70' 
           : task.completed
-            ? 'bg-green-500/5 shadow-[0_0_20px_rgba(34,197,94,0.05)]'
-            : 'bg-muted/50 hover:bg-foreground/[0.07]'
+            ? 'bg-green-50 dark:bg-green-500/5 shadow-[0_0_20px_rgba(34,197,94,0.05)] border border-green-500/20'
+            : 'bg-white dark:bg-muted/50 hover:shadow-xl border border-border shadow-sm'
       }`}
     >
       {/* Rarity Indicator */}
@@ -106,7 +106,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
               {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Zap className="w-6 h-6" />}
             </div>
             <div>
-              <h3 className={`text-sm font-bold uppercase tracking-tight transition-all ${task.completed ? 'text-green-500/80' : 'text-foreground'}`}>
+              <h3 className={`text-sm font-bold uppercase tracking-tight transition-all ${task.completed ? 'text-green-600 dark:text-green-500/80' : 'text-zinc-800 dark:text-foreground'}`}>
                 {task.title}
               </h3>
               <p className="text-[10px] font-medium text-muted-foreground leading-relaxed mt-4">
@@ -123,12 +123,26 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
               <span>Progress</span>
               <span>{task.progress} / {task.total}</span>
             </div>
-            <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden relative shadow-inner">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
-                className="h-full bg-blue-500 rounded-full"
-              />
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                className="h-full bg-blue-500 rounded-full relative shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+              >
+                {/* Animated shimmer effect */}
+                <motion.div
+                  animate={{
+                    x: ['-100%', '200%'],
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 2,
+                    ease: "linear",
+                  }}
+                  className="absolute inset-0 w-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                />
+              </motion.div>
             </div>
           </div>
         )}
@@ -139,51 +153,53 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
             <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Reward</span>
             <div className="flex items-center gap-4">
               <img src={TJ_COIN_ICON} className="w-4 h-4 object-contain" alt="" referrerPolicy="no-referrer" />
-              <span className="text-sm font-black text-foreground">{task.reward}</span>
+              <span className="text-sm font-black text-zinc-800 dark:text-white">{task.reward}</span>
               <span className="text-[10px] font-bold text-blue-500/60">+{task.points} XP</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {task.claimed ? (
-              <div className="flex items-center gap-2 text-green-500/50 text-[10px] font-bold uppercase tracking-widest">
-                <CheckCircle2 className="w-3 h-3" /> Claimed
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                {!task.completed && (
-                  <button 
-                    onClick={handleIncrement}
-                    className="px-[12px] py-[6px] rounded-full bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-all text-[10px] font-bold uppercase tracking-widest"
-                  >
-                    +1 Progress
-                  </button>
-                )}
-                <button 
-                  onClick={task.completed ? handleClaim : handleComplete}
-                  disabled={isClaiming}
-                  className={`px-[15px] py-[7px] rounded-full text-[11px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 ${
-                    task.completed 
-                      ? 'bg-green-500 hover:bg-green-400 text-background shadow-green-500/20' 
-                      : 'bg-blue-600 hover:bg-blue-500 text-foreground shadow-blue-600/20'
-                  }`}
-                >
-                  {isClaiming ? (
-                    <>
-                      <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      Claiming...
-                    </>
-                  ) : task.completed ? (
-                    <>
-                      <Sparkles className="w-3 h-3" />
-                      Claim Reward
-                    </>
-                  ) : (
-                    <>Complete</>
-                  )}
-                </button>
-              </div>
+          <div className="flex items-center gap-2">
+            {!task.claimed && !task.completed && (
+              <button 
+                onClick={handleIncrement}
+                className="px-3 py-1.5 rounded-full bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all text-[9px] font-bold uppercase tracking-widest border border-border/50"
+              >
+                +1 Progress
+              </button>
             )}
+            
+            <button 
+              onClick={handleClaim}
+              disabled={isClaiming || !task.completed || task.claimed}
+              className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:shadow-none flex items-center gap-2 ${
+                task.claimed 
+                  ? 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-500 cursor-not-allowed'
+                  : task.completed
+                    ? 'bg-green-500 hover:bg-green-400 text-white shadow-green-500/20' 
+                    : 'bg-muted text-muted-foreground/40 cursor-not-allowed border border-border'
+              }`}
+            >
+              {isClaiming ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  Processing
+                </>
+              ) : task.claimed ? (
+                <>
+                  <CheckCircle2 className="w-3 h-3" />
+                  Claimed
+                </>
+              ) : task.completed ? (
+                <>
+                  <Sparkles className="w-3 h-3" />
+                  Claim Reward
+                </>
+              ) : (
+                <>
+                  Locked
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

@@ -15,13 +15,13 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ title, subtitle, viewAllL
   return (
     <div className={`flex items-end justify-between mb-4 ${className}`}>
       <div className="space-y-1">
-        <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 leading-none font-display">{title}</h2>
+        <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-zinc-800 dark:text-white transition-colors leading-none font-display">{title}</h2>
         {subtitle && <p className="text-xs font-medium text-muted-foreground">{subtitle}</p>}
       </div>
       {viewAllLink && (
         <Link 
           to={viewAllLink} 
-          className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors group"
+          className="flex items-center gap-2 text-[10px] font-bold text-blue-600 dark:text-muted-foreground uppercase tracking-widest hover:text-blue-500 transition-colors group"
         >
           View All
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />

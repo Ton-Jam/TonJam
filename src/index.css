@@ -1,10 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Poppins", sans-serif;
   --font-heading: "Poppins", sans-serif;
   --font-mono: "Poppins", sans-serif;
+  --font-display: "Poppins", sans-serif;
   
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -151,11 +152,11 @@
 
 @layer components {
   .glass {
-    @apply bg-white/40 dark:bg-black/40 backdrop-blur-xl border-none shadow-2xl;
+    @apply bg-white dark:bg-zinc-950 border-none shadow-xl;
   }
   
   .glass-card {
-    @apply bg-white/[0.03] backdrop-blur-md border-none rounded-[10px] transition-all duration-300;
+    @apply bg-white/[0.03] border-none rounded-[10px] transition-all duration-300;
   }
   
   .glass-card:hover {

@@ -143,7 +143,7 @@ const ExploreList: React.FC = () => {
           <div className="flex items-center gap-4 flex-1">
             <BackButton 
               className="p-4 rounded-full bg-muted/50 hover:bg-muted transition-all"
-              iconClassName="h-4 w-4 text-foreground"
+              iconClassName="h-4 w-4 text-zinc-700"
             />
             
             {isSearchActive ? (
@@ -156,7 +156,7 @@ const ExploreList: React.FC = () => {
                 autoFocus
               />
             ) : (
-              <h1 className="text-base md:text-[21px] font-bold tracking-tighter uppercase text-foreground leading-none">
+              <h1 className="text-base md:text-[21px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground leading-none">
                 {title}
               </h1>
             )}

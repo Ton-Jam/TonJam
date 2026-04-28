@@ -1,5 +1,6 @@
  import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { Lock, Hammer, Antenna, PlusCircle } from 'lucide-react';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { useAudio } from '@/context/AudioContext';
@@ -225,11 +226,26 @@ const ProtocolForge: React.FC = () => {
                     <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Progress</span>
                     <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{deploymentStep * 33}%</span>
                   </div>
-                  <div className="h-3 bg-muted/50 rounded-full overflow-hidden ">
-                    <div
-                      className="h-full bg-blue-500 transition-all duration-1000"
-                      style={{ width: `${deploymentStep * 33}%` }}
-                    ></div>
+                  <div className="h-3 bg-muted/50 rounded-full overflow-hidden relative">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${deploymentStep * 33}%` }}
+                      transition={{ type: "spring", stiffness: 50, damping: 20 }}
+                      className="h-full bg-blue-500 rounded-full relative"
+                    >
+                      {/* Animated shimmer effect */}
+                      <motion.div
+                        animate={{
+                          x: ['-100%', '200%'],
+                        }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 2,
+                          ease: "linear",
+                        }}
+                        className="absolute inset-0 w-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      />
+                    </motion.div>
                   </div>
                 </div>
               )}

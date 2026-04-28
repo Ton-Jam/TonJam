@@ -146,173 +146,176 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-2">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[500] bg-background flex flex-col items-center justify-center p-6"
+      >
+        <button
           onClick={onClose}
-          className="absolute inset-0 bg-background/80 backdrop-blur-xl"
-        />
-        
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-[360px] bg-[#0A0A0C] border border-white/10 rounded-[24px] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] mx-4"
+          className="absolute top-6 right-6 p-2 rounded-full hover:bg-muted transition-all border border-border"
+          aria-label="Close"
         >
-          {/* Hero Branding Area - Compact */}
-          <div className="relative h-24 flex items-center justify-center overflow-hidden">
-             <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-blue-600/10" />
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5" />
-             <div className="relative z-10 flex flex-col items-center">
-                <div className="relative mt-2">
-                  <div className="absolute -inset-3 bg-blue-500/10 blur-lg rounded-full" />
-                  <img src={APP_LOGO} className="w-10 h-10 relative z-10 drop-shadow-xl" alt="TonJam" />
-                </div>
-             </div>
-             <button
-                onClick={onClose}
-                className="absolute top-4 right-4 p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/20 hover:text-white transition-all border border-white/5 z-20"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-          </div>
+          <X className="h-5 w-5" />
+        </button>
 
-          <div className="px-6 pb-6 pt-2">
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-black text-white tracking-tight uppercase leading-none mb-1 italic">
-                {isLogin ? 'Join the Grid' : 'Network Signup'}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-[380px] space-y-8"
+        >
+          <div className="flex flex-col items-center text-center space-y-4">
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+            >
+              <img src={APP_LOGO} className="w-16 h-16 object-contain" alt="TonJam" />
+            </motion.div>
+            <div className="space-y-1">
+              <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase italic leading-none">
+                {isLogin ? 'Welcome Back' : 'Join TonJam'}
               </h1>
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em]">
-                {isLogin ? 'Neural link authentication required' : 'Initialize your unique node signature'}
+              <p className="text-xs font-medium text-muted-foreground tracking-normal uppercase">
+                {isLogin ? 'Sign in to access your jamspace' : 'Create an account to start your journey'}
               </p>
             </div>
+          </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <AnimatePresence mode="wait">
               {!isLogin && (
-                <div className="space-y-1">
+                <motion.div
+                  key="username"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-1 overflow-hidden"
+                >
                   <div className="relative group">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                     <input
                       {...register('username')}
                       type="text"
-                      placeholder="ALIAS"
-                      className="w-full bg-white/5 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/5 font-bold uppercase tracking-widest"
+                      placeholder="Username"
+                      className="w-full bg-muted/30 border border-border rounded-[12px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
                     />
-                    {errors.username && <p className="text-[9px] text-red-500 mt-0.5 font-bold ml-1">{errors.username.message}</p>}
                   </div>
-                </div>
+                  {errors.username && <p className="text-[11px] text-red-500 font-medium ml-1">{errors.username.message}</p>}
+                </motion.div>
               )}
+            </AnimatePresence>
 
-              <div className="space-y-1">
-                <div className="relative group">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
-                  <input
-                    {...register('email')}
-                    type="email"
-                    placeholder="EMAIL_ADDRESS"
-                    className="w-full bg-white/5 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/5 font-bold uppercase tracking-widest"
-                  />
-                  {errors.email && <p className="text-[9px] text-red-500 mt-0.5 font-bold ml-1">{errors.email.message}</p>}
-                </div>
+            <div className="space-y-1">
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
+                <input
+                  {...register('email')}
+                  type="email"
+                  placeholder="Email Address"
+                  className="w-full bg-muted/30 border border-border rounded-[12px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
+                />
               </div>
+              {errors.email && <p className="text-[11px] text-red-500 font-medium ml-1">{errors.email.message}</p>}
+            </div>
 
-              <div className="space-y-1">
-                <div className="relative group">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
-                  <input
-                    {...register('password')}
-                    type="password"
-                    placeholder="PWD_KEY"
-                    className="w-full bg-white/5 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500/50 focus:bg-white/[0.08] transition-all placeholder:text-white/5 font-bold uppercase tracking-widest"
-                  />
-                  {isLogin && (
-                    <button 
-                      type="button" 
-                      onClick={handleForgotPassword}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-blue-500 uppercase tracking-widest hover:text-blue-400 bg-[#0A0A0C]/80 px-1.5 py-0.5 rounded"
-                    >
-                      Reset
-                    </button>
-                  )}
-                  {errors.password && <p className="text-[9px] text-red-500 mt-0.5 font-bold ml-1">{errors.password.message}</p>}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.97]"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <span>{isLogin ? 'Access Grid' : 'Register'}</span>
-                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-                  </>
+            <div className="space-y-1">
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
+                <input
+                  {...register('password')}
+                  type="password"
+                  placeholder="Password"
+                  className="w-full bg-muted/30 border border-border rounded-[12px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
+                />
+                {isLogin && (
+                  <button 
+                    type="button" 
+                    onClick={handleForgotPassword}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-500 uppercase tracking-wider hover:text-blue-600 transition-colors"
+                  >
+                    Forgot?
+                  </button>
                 )}
-              </button>
-            </form>
+              </div>
+              {errors.password && <p className="text-[11px] text-red-500 font-medium ml-1">{errors.password.message}</p>}
+            </div>
 
-            <div className="mt-6 relative">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-[12px] font-black text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 group active:scale-[0.98] mt-2"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="space-y-6">
+            <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/5"></div>
+                <div className="w-full border-t border-border"></div>
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-[#0A0A0C] px-3 text-[7px] font-black text-white/10 uppercase tracking-[0.2em]">Gateways</span>
+                <span className="bg-background px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Or continue with</span>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               <div className="flex justify-center w-full">
-                <TonConnectButton className="w-full [&>button]:w-full [&>button]:py-3 [&>button]:rounded-xl [&>button]:bg-white/5 [&>button]:text-white [&>button]:hover:bg-white/10 [&>button]:transition-all [&>button]:font-black [&>button]:text-[10px] [&>button]:uppercase [&>button]:tracking-[0.15em] [&>button]:border [&>button]:border-white/5" />
+                <TonConnectButton className="w-full h-14 [&>button]:w-full [&>button]:h-full [&>button]:rounded-[12px] [&>button]:bg-muted/50 [&>button]:text-foreground [&>button]:hover:bg-muted [&>button]:transition-all [&>button]:font-black [&>button]:text-xs [&>button]:uppercase [&>button]:tracking-widest [&>button]:border [&>button]:border-border" />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => signInWithGoogle()}
-                  className="flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/[0.08] transition-all group"
+                  className="flex items-center justify-center gap-3 py-3.5 bg-muted/50 border border-border rounded-[12px] hover:bg-muted transition-all group"
                 >
-                  <Chrome className="h-3.5 w-3.5 text-white/20 group-hover:text-white transition-colors" />
-                  <span className="text-[8px] font-black text-white/40 group-hover:text-white uppercase tracking-widest">Google</span>
+                  <Chrome className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <span className="text-[10px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">Google</span>
                 </button>
                 <button
-                  className="flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/[0.08] transition-all group"
+                  className="flex items-center justify-center gap-3 py-3.5 bg-muted/50 border border-border rounded-[12px] hover:bg-muted transition-all group"
                 >
-                  <Github className="h-3.5 w-3.5 text-white/20 group-hover:text-white transition-colors" />
-                  <span className="text-[8px] font-black text-white/40 group-hover:text-white uppercase tracking-widest">GitHub</span>
+                  <Github className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <span className="text-[10px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">GitHub</span>
                 </button>
               </div>
             </div>
 
-            <div className="mt-6 text-center">
+            <div className="text-center pt-2">
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 type="button"
-                className="text-[9px] font-black text-white/20 uppercase tracking-[0.15em] hover:text-white transition-colors group"
+                className="text-xs font-bold text-muted-foreground tracking-tight hover:text-foreground transition-colors"
               >
                 {isLogin ? (
-                  <>New Member? <span className="text-blue-500 group-hover:underline ml-0.5">Register</span></>
+                  <>Don't have an account? <span className="text-blue-500 font-black uppercase tracking-tighter italic">Register</span></>
                 ) : (
-                  <>Joined Already? <span className="text-blue-500 group-hover:underline ml-0.5">Login</span></>
+                  <>Already have an account? <span className="text-blue-500 font-black uppercase tracking-tighter italic">Sign In</span></>
                 )}
               </button>
             </div>
           </div>
-
-          <div className="bg-white/5 p-3 flex justify-center gap-6 border-t border-white/5">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-2.5 h-2.5 text-emerald-500/30" />
-              <span className="text-[6px] font-black text-white/10 uppercase tracking-widest">Encrypted</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Globe className="w-2.5 h-2.5 text-blue-500/30" />
-              <span className="text-[6px] font-black text-white/10 uppercase tracking-widest">Active Node</span>
-            </div>
-          </div>
         </motion.div>
-      </div>
+
+        <div className="absolute bottom-8 flex justify-center gap-8 opacity-40">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-3 h-3" />
+            <span className="text-[8px] font-bold uppercase tracking-widest">Secure Node</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Globe className="w-3 h-3" />
+            <span className="text-[8px] font-bold uppercase tracking-widest">Network Enabled</span>
+          </div>
+        </div>
+      </motion.div>
     </AnimatePresence>
   );
 };

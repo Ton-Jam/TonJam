@@ -125,13 +125,13 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           <div className="flex items-center gap-2 sm:gap-3 mr-1">
             <button
               onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center hover:bg-blue-500 hover:scale-105 active:scale-95 transition-all shadow-[0_4px_15px_rgba(37,99,235,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border-none"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
-                <Pause className="h-5 w-5 text-primary-foreground fill-primary-foreground" />
+                <Pause className="h-5 w-5 text-white fill-white" />
               ) : (
-                <Play className="h-5 w-5 text-primary-foreground fill-primary-foreground ml-1" />
+                <Play className="h-5 w-5 text-white fill-white ml-1" />
               )}
             </button>
           </div>
