@@ -383,34 +383,34 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             </div>
       
             {/* Artifact Data Footer */}
-            <CardContent className="p-4 flex flex-col gap-4">
-               <div className="space-y-1">
-                  <h3 className={`text-[15px] font-black uppercase italic tracking-tighter truncate leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
+            <CardContent className="p-3 flex flex-col gap-3">
+               <div className="space-y-0.5">
+                  <h3 className={`text-[13px] font-black uppercase italic tracking-tighter truncate leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
                     {nft.title}
                   </h3>
                   <div className="flex items-center gap-2">
-                     <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] italic">// {nft.creator}</p>
+                     <p className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] italic">// {nft.creator}</p>
                   </div>
                </div>
 
-               <div className="flex items-end justify-between mt-4">
-                  <div className="space-y-1">
-                     <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] italic">Artifact_Value</p>
-                     <div className="flex items-center gap-2 bg-white/5 py-1.5 px-3 rounded-lg border border-white/5">
-                        <img src={TON_LOGO} className="w-3.5 h-3.5" alt="TON" />
-                        <span className="text-xs font-black text-foreground tracking-tighter italic underline decoration-blue-500/50 decoration-2 underline-offset-4">{nft.price}</span>
+               <div className="flex items-end justify-between mt-2">
+                  <div className="space-y-0.5">
+                     <p className="text-[7px] font-black text-muted-foreground/20 uppercase tracking-[0.2em] italic">Artifact_Value</p>
+                     <div className="flex items-center gap-1.5 bg-muted/30 py-1 px-2 rounded-md border border-border/10">
+                        <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+                        <span className="text-[10px] font-black text-foreground tracking-tighter italic">{nft.price}</span>
                      </div>
                   </div>
                   
                   <button 
                     onClick={handleActionClick} 
-                    className={`h-9 px-6 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl italic
+                    className={`h-8 px-4 rounded-lg text-[8px] font-black uppercase tracking-[0.1em] transition-all active:scale-95 shadow-lg italic
                       ${isOwner 
-                        ? 'bg-white/10 text-foreground hover:bg-white/20 border border-white/5' 
-                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/30'}
+                        ? 'bg-muted/50 text-foreground hover:bg-muted/80 border border-border/10' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20'}
                     `}
                   >
-                    {isOwner ? (nft.listingType ? 'MANAGE_SYNC' : 'SELL_ARTIFACT') : 'COLLECT_SIGNAL'}
+                    {isOwner ? (nft.listingType ? 'CONFIG' : 'MARKET') : 'COLLECT'}
                   </button>
                </div>
             </CardContent>

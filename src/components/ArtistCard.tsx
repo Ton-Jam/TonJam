@@ -66,36 +66,31 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
   return (
     <Card 
       onClick={handleCardClick}
-      className={cn("group flex flex-col items-center text-center p-4 space-y-3 cursor-pointer hover:border-primary/50 transition-all", className)}
+      className={cn("group flex flex-col items-center text-center p-3 space-y-2 cursor-pointer hover:border-primary/50 transition-all bg-muted/20 border-border/50 shadow-none", className)}
     >
       <img 
         src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
         alt={artist.name} 
-        className="w-16 h-16 rounded-full object-cover shadow-md"
+        className="w-14 h-14 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform"
         onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }}
       />
-      <div>
-        <div className="flex items-center justify-center gap-1.5">
-            <h3 className="font-bold text-sm tracking-tight">{artist.name}</h3>
-            {artist.verified && <CheckCircle2 className="w-3 h-3 text-primary" />}
+      <div className="space-y-0.5">
+        <div className="flex items-center justify-center gap-1">
+            <h3 className="font-black text-[12px] tracking-tight uppercase italic">{artist.name}</h3>
+            {artist.verified && <CheckCircle2 className="w-2.5 h-2.5 text-primary" />}
         </div>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">{artist.followers.toLocaleString()} Followers</p>
+        <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest">{artist.followers.toLocaleString()} Followers</p>
       </div>
       
       <Button 
         onClick={handleFollowClick}
+        variant={isFollowing ? "outline" : "default"}
         className={cn(
-            "w-full rounded-full transition-all text-[10px] h-8",
-            isFollowing 
-              ? "bg-muted/50 text-muted-foreground border border-border hover:bg-muted/80" 
-              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]"
+            "w-full rounded-md h-7 text-[9px] font-black uppercase tracking-widest",
+            !isFollowing && "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/10"
           )}
       >
-        {isFollowing ? (
-            <><UserCheck className="w-4 h-4 mr-2" /> Following</>
-        ) : (
-            <><UserPlus className="w-4 h-4 mr-2" /> Follow</>
-        )}
+        {isFollowing ? 'SYNCED' : 'FOLLOW'}
       </Button>
     </Card>
   );

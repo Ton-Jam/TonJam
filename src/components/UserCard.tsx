@@ -128,7 +128,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   return (
     <div 
       onClick={handleClick}
-      className="flex flex-col items-center text-center h-full w-full p-4 rounded-[2px] bg-muted/10 hover:bg-muted/20 transition-all min-w-[140px] sm:min-w-[160px] cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="flex flex-col items-center text-center h-full w-full p-3 rounded-xl bg-muted/20 border border-border/50 hover:bg-muted/30 transition-all min-w-[130px] cursor-pointer group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 shadow-none hover:border-primary/50"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -139,8 +139,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       tabIndex={0}
       aria-label={`View profile of ${user.name}`}
     >
-      <div className="relative mb-2 w-20 h-20 sm:w-24 sm:h-24">
-        <div className="w-full h-full rounded-full overflow-hidden shadow-2xl group-hover:scale-105 transition-transform duration-300">
+      <div className="relative mb-2 w-14 h-14">
+        <div className="w-full h-full rounded-full overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300">
           <img 
             src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} 
             alt={user.name} 
@@ -149,14 +149,15 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         </div>
       </div>
       
-      <div className="flex flex-col min-w-0 w-full mb-1 items-center text-center">
-        <div className="flex items-center gap-1.5 max-w-full overflow-hidden justify-center">
-          <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight group-hover:text-primary transition-colors truncate">
+      <div className="flex flex-col min-w-0 w-full mb-2 items-center text-center space-y-0.5">
+        <div className="flex items-center gap-1 justify-center max-w-full">
+          <h3 className="text-[12px] font-black text-foreground tracking-tight uppercase italic truncate">
             {user.name}
           </h3>
+          {verified && <CheckCircle2 className="w-2.5 h-2.5 text-primary" />}
         </div>
         
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+        <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">
           {user.followers?.toLocaleString() || 0} Followers
         </p>
       </div>
@@ -164,16 +165,15 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       {!isOwnProfile && (
         <button 
           onClick={handleFollow}
-          className={`mt-2 px-4 py-1.5 text-[10px] rounded-full flex items-center justify-center gap-2 transition-all font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600
+          className={`w-full py-1.5 text-[9px] rounded-md flex items-center justify-center gap-2 transition-all font-black uppercase tracking-widest focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600
             ${isFollowing 
-              ? 'bg-muted/50 text-muted-foreground/60 border border-border' 
-              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+              ? 'bg-muted/50 text-muted-foreground/60 border border-border/50' 
+              : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/10'
             }
           `}
           aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
         >
-          {isFollowing ? <UserCheck className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
-          {isFollowing ? 'Following' : 'Follow'}
+          {isFollowing ? 'SYNCED' : 'FOLLOW'}
         </button>
       )}
     </div>
