@@ -29,12 +29,23 @@ class GovernanceService {
   async executeTreasuryProposal(proposalId: string, recipientId: string, recipientName: string, amount: number, category: any): Promise<void> {
     if (!auth.currentUser) throw new Error('Must be logged in');
 
-    // 1. Update proposal status to executed
-    const proposalRef = doc(db, this.proposalsCollection, proposalId);
-    await updateDoc(proposalRef, { status: 'executed' });
+    try {
+      // We perform the treasury allocation FIRST. 
+      // If it fails, the proposal status remains 'active/passed' (not executed), 
+      // allowing for retries.
+      await treasuryService.allocateGrant(proposalId, recipientId, recipientName, amount, category);
 
-    // 2. Trigger treasury allocation
-    await treasuryService.allocateGrant(proposalId, recipientId, recipientName, amount, category);
+      // Only after successful distribution do we mark the proposal as executed
+      const proposalRef = doc(db, this.proposalsCollection, proposalId);
+      await updateDoc(proposalRef, { 
+        status: 'executed',
+        executedAt: serverTimestamp(),
+        executedBy: auth.currentUser.uid
+      });
+    } catch (error) {
+      console.error("Failed to execute treasury proposal:", error);
+      throw error;
+    }
   }
 
   async createProposal(proposalData: Partial<Proposal>): Promise<string> {

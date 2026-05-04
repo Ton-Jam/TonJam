@@ -12,6 +12,8 @@ import NFTCard from '@/components/NFTCard';
 import ArtistCard from '@/components/ArtistCard';
 import PlaylistCard from '@/components/PlaylistCard';
 import GenreCard from '@/components/GenreCard';
+import SkeletonCard from '@/components/SkeletonCard';
+import Leaderboard from '@/components/Leaderboard';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import NFTAlphaCarousel from '@/components/NFTAlphaCarousel';
 import SectionHeader from '@/components/SectionHeader';
@@ -103,6 +105,7 @@ const Home: React.FC = () => {
     allPlaylists, 
     featuredPlaylist,
     allTracks,
+    isLoading,
     searchQuery, 
     setSearchQuery, 
     generateDiscoverWeekly, 
@@ -550,14 +553,19 @@ const Home: React.FC = () => {
               </div>
             </section>
 
-            {/* AI Sonic Intelligence Section */}
+            {/* Neural Leaderboard Section */}
+            <section className="section-container mt-16">
+              <Leaderboard artists={artists} limit={5} />
+            </section>
+
+            {/* AI Dj Krupy Section */}
             <section className="mb-12 relative">
               <div className="absolute inset-0 bg-blue-600/5 blur-3xl -z-10 rounded-full scale-150 opacity-50 overflow-hidden"></div>
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Brain className="h-5 w-5 text-blue-500" />
-                    <h2 className="text-2xl font-bold text-zinc-600 dark:text-foreground">Sonic Intelligence</h2>
+                    <h2 className="text-2xl font-bold text-zinc-600 dark:text-foreground">Dj Krupy</h2>
                   </div>
                   <p className="text-muted-foreground text-sm">Neural-curated frequencies mapped to your collector profile</p>
                 </div>
@@ -568,7 +576,7 @@ const Home: React.FC = () => {
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20"
                   >
                     {isGeneratingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                    {isGeneratingAI ? "Calibrating..." : "Generate AI Mix"}
+                    {isGeneratingAI ? "Calibrating..." : "Krupy Vibes"}
                   </button>
                 )}
               </div>
@@ -771,22 +779,12 @@ const Home: React.FC = () => {
               <SectionHeader title="Trending Now" />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 dark:text-muted-foreground">Top 5 Songs</h4>
-                  {trendingTracks.slice(0, 5).map((track, idx) => (
-                    <div key={`trend-track-${track.id}`} className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate(`/track/${track.id}`)}>
-                      <span className="text-lg font-black italic text-muted-foreground/30 w-6">{idx + 1}</span>
-                      <div className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0">
-                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt={track.title} />
-                        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
-                          <Play className="h-4 w-4 text-foreground fill-white" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold truncate text-foreground">{track.title}</p>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
-                      </div>
-                    </div>
-                  ))}
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-muted-foreground">Top 5 Songs</h4>
+                  <div className="flex flex-col rounded-xl overflow-hidden bg-muted/5">
+                    {trendingTracks.slice(0, 5).map((track, idx) => (
+                      <TrackCard key={`trend-track-${track.id}`} track={track} variant="row" index={idx} />
+                    ))}
+                  </div>
                 </div>
                 <div className="space-y-4">
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 dark:text-muted-foreground">Top 3 Artists</h4>
@@ -821,10 +819,18 @@ const Home: React.FC = () => {
             </section>
 
             {/* Recently Played */}
-            {filteredRecentlyPlayed.length > 0 && (
+            {isLoading ? (
+              <HomeSection title="Jump Back In" icon={Clock}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={`recent-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                    <SkeletonCard />
+                  </div>
+                ))}
+              </HomeSection>
+            ) : filteredRecentlyPlayed.length > 0 && (
               <HomeSection title="Jump Back In" icon={Clock} link="/explore/tracks?title=Recently Played&filter=recent">
                 {filteredRecentlyPlayed.map(track => (
-                  <div key={`recent-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+                  <div key={`recent-${track.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
                     <TrackCard track={track} />
                   </div>
                 ))}
@@ -832,10 +838,18 @@ const Home: React.FC = () => {
             )}
 
             {/* Recommended Tracks */}
-            {recommendedTracks.length > 0 && (
+            {isLoading ? (
+              <HomeSection title="Recommended for You" icon={Sparkles}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={`rec-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                    <SkeletonCard />
+                  </div>
+                ))}
+              </HomeSection>
+            ) : recommendedTracks.length > 0 && (
               <HomeSection title="Recommended for You" icon={Sparkles} link="/explore/tracks?title=Recommended for You&filter=recommended">
                 {recommendedTracks.map(track => (
-                  <div key={`rec-track-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+                  <div key={`rec-track-${track.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
                     <TrackCard track={track} />
                   </div>
                 ))}
@@ -843,86 +857,63 @@ const Home: React.FC = () => {
             )}
 
             {/* Trending Tracks */}
-            <HomeSection title="Trending Signals" icon={Flame} link="/explore/tracks?title=Trending Signals&filter=trending">
-              {trendingTracks.map(track => (
-                <div key={`trend-${track.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-                  <TrackCard track={track} />
-                </div>
-              ))}
-            </HomeSection>
+            {isLoading ? (
+              <HomeSection title="Trending Signals" icon={Flame}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={`trend-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                    <SkeletonCard />
+                  </div>
+                ))}
+              </HomeSection>
+            ) : (
+              <HomeSection title="Trending Signals" icon={Flame} link="/explore/tracks?title=Trending Signals&filter=trending">
+                {trendingTracks.map(track => (
+                  <div key={`trend-${track.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                    <TrackCard track={track} />
+                  </div>
+                ))}
+              </HomeSection>
+            )}
 
             {/* Top Charts - List View */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-4">
                 <SectionHeader title="Global Top 10" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
-                <div className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory no-scrollbar">
+                <div className="flex flex-col rounded-xl overflow-hidden bg-muted/5">
                   {trendingTracks.slice(0, 10).map((track, idx) => (
-                    <div 
-                      key={`chart-${track.id}`} 
-                      onClick={() => navigate(`/track/${track.id}`)}
-                      className="flex items-center gap-4 group cursor-pointer p-2 rounded-[2px] hover:bg-muted/50 transition-all w-[85vw] sm:w-[300px] snap-start"
-                    >
-                      <span className="text-[20px] font-black italic text-muted-foreground/30 group-hover:text-blue-500/40 transition-colors w-8 text-center">
-                        {idx + 1}
-                      </span>
-                      <div className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0">
-                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
-                          <Play className="h-4 w-4 text-foreground fill-white" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold uppercase tracking-tight text-foreground truncate group-hover:text-blue-400 transition-colors">{track.title}</h4>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
-                      </div>
-                      <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-1">
-                        {Math.random() > 0.5 ? (
-                          <TrendingUp className="h-3 w-3 text-green-500" />
-                        ) : (
-                          <TrendingDown className="h-3 w-3 text-red-500" />
-                        )}
-                        {(track.playCount || 0).toLocaleString()}
-                      </div>
-                    </div>
+                    <TrackCard key={`chart-${track.id}`} track={track} variant="row" index={idx} />
                   ))}
                 </div>
               </div>
 
               <div className="space-y-4">
                 <SectionHeader title="New Releases" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
-                <div className="space-y-4">
-                  {newReleases.map(track => (
-                    <div 
+                <div className="flex flex-col rounded-xl overflow-hidden bg-muted/5">
+                  {newReleases.map((track, index) => (
+                    <TrackCard 
                       key={`new-${track.id}`} 
-                      onClick={() => navigate(`/track/${track.id}`)}
-                      className="flex items-center gap-4 group cursor-pointer"
-                    >
-                      <div className="relative w-16 h-16 rounded-[2px] overflow-hidden flex-shrink-0">
-                        <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt={track.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                        <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" onClick={(e) => { e.stopPropagation(); playTrack(track); }}>
-                          <Play className="h-4 w-4 text-foreground fill-white" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-[10px] font-bold uppercase tracking-tight text-foreground truncate">{track.title}</h4>
-                        <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <span className="text-[7px] font-bold px-1.5 py-0.5 bg-muted/50 rounded text-muted-foreground uppercase tracking-widest">
-                            {track.genre}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                      track={track} 
+                      variant="row"
+                      index={index}
+                    />
                   ))}
                 </div>
               </div>
             </section>
 
             {/* Curated Playlists */}
-            {curatedPlaylists.length > 0 && (
+            {isLoading ? (
+              <HomeSection title="Curated for You" icon={Sparkles}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={`curated-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                    <SkeletonCard />
+                  </div>
+                ))}
+              </HomeSection>
+            ) : curatedPlaylists.length > 0 && (
               <HomeSection title="Curated for You" icon={Sparkles} link="/explore/playlists?title=Curated Playlists&filter=curated">
                 {curatedPlaylists.map(playlist => (
-                  <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+                  <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
                     <PlaylistCard playlist={playlist} onClick={() => navigate(`/playlist/${playlist.id}`)} />
                   </div>
                 ))}
@@ -930,35 +921,66 @@ const Home: React.FC = () => {
             )}
 
             {/* Genre Grid - Quick Access */}
-            <section className="section-container">
-              <SectionHeader title="Explore Genres" />
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {GENRES.map(genre => (
-                  <GenreCard key={genre.id} genre={genre} />
-                ))}
-              </div>
-            </section>
-
-            {/* Top NFT Sales */}
-            <section className="section-container">
-              <SectionHeader title="NFT Alpha" viewAllLink="/explore/nfts?title=NFT Alpha&filter=top_nfts" />
-              <NFTAlphaCarousel nfts={topNFTsForCarousel} />
-            </section>
-
-            {/* Recommended Artists */}
-            <HomeSection title="Rising Stars" icon={UserCheck} link="/explore/artists?title=Rising Stars&filter=rising">
-              {recommendedArtists.map(artist => (
-                <div key={`artist-${artist.uid}`} className="flex-shrink-0 w-48 sm:w-56 snap-start">
-                  <ArtistCard artist={artist} />
+            <HomeSection title="Explore Genres" icon={Sparkles}>
+              {GENRES.map(genre => (
+                <div key={genre.id} className="flex-shrink-0 w-[140px] sm:w-[160px] snap-start">
+                  <GenreCard genre={genre} />
                 </div>
               ))}
             </HomeSection>
 
+            {/* Top NFT Sales */}
+            <section className="section-container">
+              <SectionHeader title="NFT Alpha" viewAllLink="/explore/nfts?title=NFT Alpha&filter=top_nfts" />
+              {isLoading ? (
+                <div className="flex gap-4 overflow-hidden">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={`nft-alpha-loading-${i}`} className="w-full">
+                       <SkeletonCard />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <NFTAlphaCarousel nfts={topNFTsForCarousel} />
+              )}
+            </section>
+
+            {/* Recommended Artists */}
+            {isLoading ? (
+              <HomeSection title="Rising Stars" icon={UserCheck}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={`artists-loading-${i}`} className="flex-shrink-0 w-[140px] sm:w-[160px] snap-start">
+                    <div className="animate-pulse bg-muted/20 p-6 rounded-[10px] space-y-4">
+                      <div className="w-24 h-24 rounded-full bg-muted mx-auto"></div>
+                      <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+                      <div className="h-3 bg-muted rounded w-1/2 mx-auto"></div>
+                    </div>
+                  </div>
+                ))}
+              </HomeSection>
+            ) : (
+              <HomeSection title="Rising Stars" icon={UserCheck} link="/explore/artists?title=Rising Stars&filter=rising">
+                {recommendedArtists.map(artist => (
+                  <div key={`artist-${artist.uid}`} className="flex-shrink-0 w-[140px] sm:w-[160px] snap-start">
+                    <ArtistCard artist={artist} />
+                  </div>
+                ))}
+              </HomeSection>
+            )}
+
             {/* Recommended NFTs */}
-            {recommendedNFTs.length > 0 && (
+            {isLoading ? (
+               <HomeSection title="Curated Collectibles" icon={Sparkles}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={`rec-nfts-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                    <SkeletonCard />
+                  </div>
+                ))}
+              </HomeSection>
+            ) : recommendedNFTs.length > 0 && (
               <HomeSection title="Curated Collectibles" icon={Sparkles} link="/explore/nfts?title=Curated Collectibles&filter=recommended">
                 {recommendedNFTs.map(nft => (
-                  <div key={`rec-nft-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
+                  <div key={`rec-nft-${nft.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
                     <NFTCard nft={nft} />
                   </div>
                 ))}
@@ -966,13 +988,23 @@ const Home: React.FC = () => {
             )}
 
             {/* Marketplace Highlights */}
-            <HomeSection title="New in Marketplace" icon={PlusCircle} link="/explore/nfts?title=New in Marketplace&filter=new_nfts">
-              {newlyMintedNFTs.map(nft => (
-                <div key={`minted-${nft.id}`} className="flex-shrink-0 w-40 sm:w-48 snap-start">
-                  <NFTCard nft={nft} />
-                </div>
-              ))}
-            </HomeSection>
+            {isLoading ? (
+               <HomeSection title="New in Marketplace" icon={PlusCircle}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={`new-nfts-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                    <SkeletonCard />
+                  </div>
+                ))}
+              </HomeSection>
+            ) : (
+              <HomeSection title="New in Marketplace" icon={PlusCircle} link="/explore/nfts?title=New in Marketplace&filter=new_nfts">
+                {newlyMintedNFTs.map(nft => (
+                  <div key={`minted-${nft.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                    <NFTCard nft={nft} />
+                  </div>
+                ))}
+              </HomeSection>
+            )}
 
             {/* Community & Artist CTA Section */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">

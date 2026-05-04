@@ -2,28 +2,28 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Play, Disc3 } from 'lucide-react';
-import { Playlist } from '@/types';
+import { Album } from '@/types';
 
 interface AlbumCardProps {
-  playlist: Playlist;
+  album: Album;
   index: number;
 }
 
-const AlbumCard: React.FC<AlbumCardProps> = ({ playlist, index }) => {
+const AlbumCard: React.FC<AlbumCardProps> = ({ album, index }) => {
   const navigate = useNavigate();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      onClick={() => navigate(`/album/${playlist.id}`)}
-      className="group relative min-w-[180px] max-w-[180px] sm:min-w-[200px] sm:max-w-[200px] cursor-pointer"
+      onClick={() => navigate(`/album/${album.id}`)}
+      className="group relative w-full cursor-pointer"
     >
-      <div className="relative aspect-square rounded-[2px] overflow-hidden mb-3 bg-white/[0.05]">
-        {playlist.coverUrl ? (
+      <div className="relative aspect-square rounded-[8px] overflow-hidden mb-3 bg-white/[0.05]">
+        {album.coverUrl ? (
           <img
-            src={playlist.coverUrl}
-            alt={playlist.title}
+            src={album.coverUrl}
+            alt={album.title}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -38,10 +38,10 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ playlist, index }) => {
         </div>
       </div>
       <h3 className="text-white font-semibold text-sm truncate group-hover:text-blue-400 transition-colors">
-        {playlist.title}
+        {album.title}
       </h3>
       <p className="text-white/50 text-xs truncate mt-1">
-        Album • {playlist.trackIds?.length || 0} tracks
+        Album • {album.trackIds?.length || 0} tracks
       </p>
     </motion.div>
   );

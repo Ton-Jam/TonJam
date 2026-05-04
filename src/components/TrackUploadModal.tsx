@@ -5,6 +5,17 @@ import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_T
 import { Track } from '@/types';
 import { MOCK_USER } from '@/constants';
 import { uploadAudio, uploadCover } from '@/services/storageService';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface TrackUploadModalProps {
   isOpen: boolean;
@@ -37,12 +48,10 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
   const [audioPreview, setAudioPreview] = useState<string>('');
   const [coverPreview, setCoverPreview] = useState<string>('');
 
-  if (!isOpen) return null;
-
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !audioFile || !coverFile) {
-      addNotification("Please provide title, audio file and cover art.", "warning");
+    if (!formData.title || !formData.genre || !audioFile || !coverFile) {
+      addNotification("Please provide title, genre, audio file and cover art.", "warning");
       return;
     }
 
@@ -51,7 +60,6 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
     setCoverProgress(0);
     
     try {
-      // 0. Double check validation
       const audioValidation = validateFile(audioFile, 'audio', 50);
       if (!audioValidation.isValid) {
         throw new Error(audioValidation.error);
@@ -61,7 +69,6 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
         throw new Error(coverValidation.error);
       }
 
-      // 1. Upload to Firebase Storage
       addNotification("Adding track files...", "info");
       
       const [audioRes, coverRes] = await Promise.all([
@@ -104,7 +111,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
 
       addUserTrack(newTrack);
       addNotification("Track added successfully", "success");
-      setStep(3); // Success step
+      setStep(3);
     } catch (error) {
       console.error("Upload failed:", error);
       addNotification(error instanceof Error ? error.message : "Failed to upload track", "error");
@@ -169,31 +176,32 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-2 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={resetAndClose}></div>
-      
-      <div className="relative w-full max-w-xl glass border border-border bg-background rounded-[10px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        {/* Header */}
-        <div className="p-2 border-b border-blue-500/30 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-foreground tracking-tighter uppercase">
-              {step === 3 ? 'Upload Complete' : 'Forge New Frequency'}
-            </h2>
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-2">
-              {step === 1 && 'Step 1: Audio & Metadata'}
-              {step === 2 && 'Step 2: Review & Broadcast'}
-              {step === 3 && 'Frequency synchronized with network'}
-            </p>
-          </div>
-          <button onClick={resetAndClose} className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close modal">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
+    <Dialog open={isOpen} onOpenChange={(open) => !open && resetAndClose()}>
+      <DialogContent className="max-w-2xl bg-background border border-border p-6 shadow-2xl rounded-xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold text-foreground tracking-tighter uppercase">
+            {step === 3 ? 'Upload Complete' : 'Forge New Frequency'}
+          </DialogTitle>
+          <DialogDescription className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+            {step === 1 && 'Step 1: Audio & Metadata'}
+            {step === 2 && 'Step 2: Review & Broadcast'}
+            {step === 3 && 'Frequency synchronized with network'}
+          </DialogDescription>
+        </DialogHeader>
         <div className="p-2">
           {step === 1 && (
-            <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} className="space-y-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <form 
+              onSubmit={(e) => { 
+                e.preventDefault(); 
+                if (formData.title && formData.genre && audioFile && coverFile) {
+                  setStep(2); 
+                } else {
+                  addNotification("Please fill in all required fields (title, genre, audio, cover)", "warning");
+                }
+              }} 
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Left: Upload Area */}
                 <div className="space-y-2">
                   <div className="relative group">
@@ -259,12 +267,11 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 <div className="space-y-2">
                   <div className="space-y-2">
                     <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Track Title</label>
-                    <input 
+                    <Input 
                       type="text" 
                       id="track-title"
                       value={formData.title}
                       onChange={(e) => setFormData({...formData, title: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all"
                       placeholder="Enter title..."
                       required
                       aria-required="true"
@@ -273,29 +280,29 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
 
                   <div className="space-y-2">
                     <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Description</label>
-                    <textarea 
+                    <Textarea 
                       id="track-description"
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all min-h-[100px]"
+                      className="min-h-[100px]"
                       placeholder="Tell us about your track..."
                     />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Genre</label>
-                    <select 
-                      id="track-genre"
-                      value={formData.genre}
-                      onChange={(e) => setFormData({...formData, genre: e.target.value})}
-                      className="w-full bg-foreground/[0.03] border border-blue-500/30 rounded-[5px] p-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all appearance-none"
-                    >
-                      <option value="Electronic">Electronic</option>
-                      <option value="Techno">Techno</option>
-                      <option value="Ambient">Ambient</option>
-                      <option value="Synthwave">Synthwave</option>
-                      <option value="Pop">Pop</option>
-                    </select>
+                  <Select value={formData.genre} onValueChange={(value) => setFormData({...formData, genre: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Genre" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Electronic">Electronic</SelectItem>
+                        <SelectItem value="Techno">Techno</SelectItem>
+                        <SelectItem value="Ambient">Ambient</SelectItem>
+                        <SelectItem value="Synthwave">Synthwave</SelectItem>
+                        <SelectItem value="Pop">Pop</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -469,20 +476,22 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                 </div>
               </div>
 
-              <div className="pt-2 flex gap-2">
-                <button 
+              <div className="pt-4 flex gap-2">
+                <Button
                   type="button" 
                   onClick={resetAndClose}
-                  className="flex-1 py-2 bg-muted/50 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  variant="secondary"
+                  className="flex-1"
                 >
                   Cancel
-                </button>
-                <button 
+                </Button>
+                <Button 
                   type="submit"
-                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-foreground rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  disabled={!formData.title || !formData.genre || !audioFile || !coverFile}
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:grayscale"
                 >
                   Next Step
-                </button>
+                </Button>
               </div>
             </form>
           )}
@@ -581,8 +590,8 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

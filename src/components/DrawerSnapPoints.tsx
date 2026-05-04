@@ -15,8 +15,7 @@ import {
   DrawerTrigger,
   DrawerPortal,
   DrawerBackdrop,
-  DrawerViewport,
-  DrawerPrimitive,
+  DrawerViewport
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { ButtonGroupInput } from "@/components/ButtonGroupInput";
@@ -50,8 +49,8 @@ function SnapPointsDrawer() {
 
   return (
     <Drawer snapPoints={snapPoints}>
-      <DrawerTrigger render={<Button variant="outline" />}>
-        Open snap drawer
+      <DrawerTrigger asChild>
+        <Button variant="outline">Open snap drawer</Button>
       </DrawerTrigger>
       <DrawerPortal>
         <DrawerBackdrop />
@@ -64,7 +63,7 @@ function SnapPointsDrawer() {
                 view.
               </DrawerDescription>
             </div>
-            <DrawerPrimitive.Content className="pt-2 px-2 flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+            <div className="pt-2 px-2 flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
               <div className="max-w-lg mx-auto">
                 <div className="grid gap-2 mt-2 mb-2" aria-hidden>
                   {Array.from({ length: 20 }, (_, index) => (
@@ -75,12 +74,12 @@ function SnapPointsDrawer() {
                   ))}
                 </div>
                 <div className="flex items-center justify-end gap-2">
-                  <DrawerClose render={<Button variant="outline" />}>
-                    Close
+                  <DrawerClose asChild>
+                    <Button variant="outline">Close</Button>
                   </DrawerClose>
                 </div>
               </div>
-            </DrawerPrimitive.Content>
+            </div>
           </DrawerPopup>
         </DrawerViewport>
       </DrawerPortal>
@@ -93,9 +92,11 @@ function CommentsDrawer() {
 
   return (
     <Drawer snapPoints={snapPoints}>
-      <DrawerTrigger render={<Button variant="outline" />}>
-        <MessageCircleIcon className="size-4" />
-        Comments
+      <DrawerTrigger asChild>
+        <Button variant="outline">
+          <MessageCircleIcon className="size-4" />
+          Comments
+        </Button>
       </DrawerTrigger>
       <DrawerPortal>
         <DrawerBackdrop />
@@ -107,7 +108,7 @@ function CommentsDrawer() {
                 Post comments
               </DrawerDescription>
             </div>
-            <DrawerPrimitive.Content className="flex-1 w-full py-2 overflow-y-auto overscroll-contain">
+            <div className="flex-1 w-full py-2 overflow-y-auto overscroll-contain">
               <div className="max-w-md mx-auto">
                 {comments.map((comment) => (
                   <div key={comment.id} className="flex gap-2 px-2 py-2">
@@ -151,7 +152,7 @@ function CommentsDrawer() {
                   </div>
                 ))}
               </div>
-            </DrawerPrimitive.Content>
+            </div>
             <div className="pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] px-2">
               <div className="max-w-md w-full mx-auto bg-muted px-2 py-2 flex items-center gap-2 rounded-lg">
                 <Avatar className="size-8">
@@ -186,10 +187,12 @@ function ReactionsDrawer() {
   const snapPoints = ["31rem", 1];
 
   return (
-    <Drawer snapPoints={snapPoints} snapToSequentialPoints>
-      <DrawerTrigger render={<Button variant="outline" />}>
-        <HeartIcon className="size-4" />
-        Reactions
+    <Drawer snapPoints={snapPoints} snapToSequentialPoint>
+      <DrawerTrigger asChild>
+        <Button variant="outline">
+          <HeartIcon className="size-4" />
+          Reactions
+        </Button>
       </DrawerTrigger>
       <DrawerPortal>
         <DrawerBackdrop />
@@ -203,7 +206,7 @@ function ReactionsDrawer() {
                 plays
               </DrawerDescription>
             </div>
-            <DrawerPrimitive.Content
+            <div
               className="will-change-transform flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
               style={{
                 scrollbarGutter: "stable",
@@ -240,7 +243,7 @@ function ReactionsDrawer() {
                   </div>
                 ))}
               </div>
-            </DrawerPrimitive.Content>
+            </div>
           </DrawerPopup>
         </DrawerViewport>
       </DrawerPortal>
@@ -253,9 +256,11 @@ function ShareDrawer() {
 
   return (
     <Drawer snapPoints={snapPoints}>
-      <DrawerTrigger render={<Button variant="outline" />}>
-        <Share2Icon className="size-4" />
-        Share
+      <DrawerTrigger asChild>
+        <Button variant="outline">
+          <Share2Icon className="size-4" />
+          Share
+        </Button>
       </DrawerTrigger>
       <DrawerPortal>
         <DrawerBackdrop />
@@ -273,7 +278,7 @@ function ShareDrawer() {
                 />
               </div>
             </div>
-            <DrawerPrimitive.Content className="flex-1 w-full overflow-y-auto overscroll-contain">
+            <div className="flex-1 w-full overflow-y-auto overscroll-contain">
               <div className="max-w-md mx-auto px-2 py-2">
                 <div className="grid grid-cols-3 gap-2">
                   {shareContacts.map((contact) => (
@@ -305,7 +310,7 @@ function ShareDrawer() {
                   ))}
                 </div>
               </div>
-            </DrawerPrimitive.Content>
+            </div>
             <div className="border-t pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
               <div className="max-w-md mx-auto px-2 pt-2">
                 <div className="flex items-center justify-around">

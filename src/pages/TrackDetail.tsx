@@ -35,8 +35,9 @@ import ReactionsSection from '@/components/ReactionsSection';
 const TrackDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, jamTrack, mintNFT, allTracks, likedTrackIds, toggleLikeTrack, addNotification, setTrackToAddToPlaylist, setOptionsTrack, userProfile } = useAudio();
+  const { playTrack, currentTrack, isPlaying, jamTrack, purchaseTrack, mintNFT, allTracks, likedTrackIds, toggleLikeTrack, addNotification, setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile } = useAudio();
   const [isTipping, setIsTipping] = useState(false);
+  const [isProcessingPurchase, setIsProcessingPurchase] = useState(false);
   const [tonConnectUI] = useTonConnectUI();
   
   const track = useMemo(() => allTracks.find(t => t.id === id), [id, allTracks]);
@@ -65,7 +66,7 @@ const TrackDetail: React.FC = () => {
       return;
     }
     playTrack(track);
-    navigate(`/player/${track.id}`);
+    setFullPlayerOpen(true);
   };
 
   const handleTip = async (amount: number) => {
@@ -124,6 +125,21 @@ const TrackDetail: React.FC = () => {
     });
   };
 
+  const handlePurchase = async () => {
+    setIsProcessingPurchase(true);
+    try {
+      await purchaseTrack(track.id);
+      confetti({
+        particleCount: 200,
+        spread: 120,
+        origin: { y: 0.8 },
+        colors: ['#22c55e', '#ffffff', '#10b981']
+      });
+    } finally {
+      setIsProcessingPurchase(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen pb-4 overflow-hidden">
       {/* Immersive Background */}
@@ -148,8 +164,8 @@ const TrackDetail: React.FC = () => {
             <div className="relative">
               <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 100, 100)} className="w-10 h-10 rounded-full object-cover" alt="" />
               {track.artistVerified && (
-                <div className="absolute -bottom-1 -right-1 bg-blue-600 rounded-full p-4 border-2 border-black">
-                  <CheckCircle2 className="h-3 w-3 text-foreground" />
+                <div className="absolute -bottom-0.5 -right-0.5 bg-blue-600 rounded-full p-0.5 border-2 border-background">
+                  <CheckCircle2 className="h-2.5 w-2.5 text-white fill-white" />
                 </div>
               )}
             </div>
@@ -242,7 +258,7 @@ const TrackDetail: React.FC = () => {
                 )}
               </motion.button>
               <button 
-                onClick={() => navigate(`/player/${track.id}`)}
+                onClick={() => setFullPlayerOpen(true)}
                 className="p-4 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all active:scale-95"
                 aria-label="Open in Player"
               >
@@ -333,25 +349,54 @@ const TrackDetail: React.FC = () => {
                 </p>
               </div>
             ) : (
-              userProfile.uid === track.artistId && (
-                <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 backdrop-blur-xl space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                      <Zap className="h-5 w-5 text-purple-500" />
+              <div className="space-y-4">
+                {track.price && parseFloat(track.price) > 0 && (
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[9px] font-bold text-emerald-500/50 uppercase tracking-widest mb-4">Track Acquisition Price</p>
+                        <div className="flex items-baseline gap-4">
+                          <span className="text-[20px] font-black tracking-tighter text-emerald-500">{track.price} TON</span>
+                        </div>
+                      </div>
+                      <ShoppingCart className="w-8 h-8 text-emerald-500/20" />
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Mint as NFT</h3>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Turn this track into a digital artifact</p>
-                    </div>
+                    <button
+                      onClick={handlePurchase}
+                      disabled={isProcessingPurchase || userProfile.ownedTrackIds?.includes(track.id) || userProfile.uid === track.artistId}
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+                    >
+                      {isProcessingPurchase 
+                        ? "Processing Neural Link..." 
+                        : userProfile.ownedTrackIds?.includes(track.id) 
+                          ? "Artifact Owned" 
+                          : userProfile.uid === track.artistId
+                            ? "Your Artifact"
+                            : "Purchase Track Access"}
+                    </button>
                   </div>
-                  <button
-                    onClick={() => navigate('/mint', { state: { track } })}
-                    className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20"
-                  >
-                    Mint NFT
-                  </button>
-                </div>
-              )
+                )}
+
+                {userProfile.uid === track.artistId && (
+                  <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 backdrop-blur-xl space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                        <Zap className="h-5 w-5 text-purple-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Mint as NFT</h3>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Turn this track into a digital artifact</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => navigate('/mint', { state: { track } })}
+                      className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20"
+                    >
+                      Mint NFT
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -543,9 +588,18 @@ const TrackDetail: React.FC = () => {
             <div className="pt-4 border-t border-border/50">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 200, 200)} className="w-16 h-16 rounded-2xl object-cover" alt="" />
+                  <div className="relative group/artist" onClick={() => navigate(`/artist/${track.artistId}`)}>
+                    <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 200, 200)} className="w-16 h-16 rounded-full object-cover cursor-pointer transition-transform group-hover/artist:scale-105" alt="" />
+                    {track.artistVerified && (
+                      <div className="absolute -bottom-0.5 -right-0.5 bg-blue-600 rounded-full p-0.5 border-2 border-background shadow-lg">
+                        <CheckCircle2 className="h-3 w-3 text-white fill-white" />
+                      </div>
+                    )}
+                  </div>
                   <div>
-                    <h3 className="text-xl font-bold text-foreground tracking-tight mb-4">{track.artist}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-xl font-bold text-foreground tracking-tight cursor-pointer hover:text-blue-500 transition-colors" onClick={() => navigate(`/artist/${track.artistId}`)}>{track.artist}</h3>
+                    </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-4 text-muted-foreground">
                         <Users className="h-3 w-3" />

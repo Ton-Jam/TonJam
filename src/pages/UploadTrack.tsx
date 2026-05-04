@@ -21,6 +21,7 @@ import { uploadAudio, uploadCover, uploadMetadata } from "@/services/storageServ
 import { mintTonJamNFT } from "@/services/tonService";
 import { validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from "@/lib/utils";
 import { BackButton } from "@/components/BackButton";
+import { RoyaltySplit } from "@/types";
 
 export default function UploadTrackScreen() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export default function UploadTrackScreen() {
   const [description, setDescription] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [price, setPrice] = useState("5");
-  const [royalty, setRoyalty] = useState("10");
+  const [royaltySplits, setRoyaltySplits] = useState<RoyaltySplit[]>([{ address: userProfile.walletAddress || '', percentage: 100, label: 'Creator' }]);
   const [editions, setEditions] = useState("100");
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -137,6 +138,10 @@ export default function UploadTrackScreen() {
         addNotification("Track title is required", "warning");
         return;
       }
+      if (!genre) {
+        addNotification("Please select a genre", "warning");
+        return;
+      }
     } else {
       if (batchTracks.length === 0) {
         addNotification("Please add at least one track to the batch", "warning");
@@ -145,6 +150,11 @@ export default function UploadTrackScreen() {
       const missingCover = batchTracks.find(t => !t.coverFile && !coverFile);
       if (missingCover) {
         addNotification("All tracks must have a cover image", "warning");
+        return;
+      }
+      const incompleteTracks = batchTracks.filter(t => !t.title.trim() || !t.genre);
+      if (incompleteTracks.length > 0) {
+        addNotification("All tracks in batch must have a title and genre", "warning");
         return;
       }
     }
@@ -184,6 +194,7 @@ export default function UploadTrackScreen() {
           lyrics,
           price,
           editions,
+          royaltySplits,
           minted: 0,
           isNFT: false,
           createdAt: Date.now()
@@ -249,8 +260,8 @@ export default function UploadTrackScreen() {
   // ... (existing state)
 
   const handleMint = async () => {
-    if (!audioFile || !coverFile || !title) {
-      addNotification("Please fill in basic track info first", "warning");
+    if (!audioFile || !coverFile || !title || !genre) {
+      addNotification("Please fill in basic track info (title, genre, audio, cover) first", "warning");
       return;
     }
 
@@ -272,7 +283,7 @@ export default function UploadTrackScreen() {
         animation_url: audioRes.downloadUrl,
         attributes: [
           { trait_type: "Genre", value: genre },
-          { trait_type: "Royalty", value: royalty },
+          { trait_type: "RoyaltySplits", value: JSON.stringify(royaltySplits) },
           { trait_type: "Editions", value: editions }
         ]
       };
@@ -287,6 +298,34 @@ export default function UploadTrackScreen() {
       }
 
       await mintTonJamNFT(tonConnectUI, wallet, metadataRes.downloadUrl);
+
+      // 4. Save to database as NFT
+      const trackId = `track-nft-${Date.now()}`;
+      const newTrack = {
+        id: trackId,
+        songId: `song-${trackId}`,
+        title,
+        artist: userProfile.name || "Unknown Artist",
+        artistId: userProfile.uid,
+        coverUrl: coverRes.downloadUrl,
+        audioUrl: audioRes.downloadUrl,
+        duration: 180,
+        playCount: 0,
+        streams: 0,
+        likes: 0,
+        genre,
+        description,
+        lyrics,
+        price,
+        editions,
+        royaltySplits,
+        minted: 1,
+        isNFT: true,
+        metadataUrl: metadataRes.downloadUrl,
+        createdAt: Date.now()
+      };
+
+      await addUserTrack(newTrack);
 
       setUploadStep('success');
       addNotification("NFT minted successfully!", "success");
@@ -481,16 +520,39 @@ export default function UploadTrackScreen() {
                   />
                 </div>
 
-                <div className="space-y-3">
+               <div className="space-y-4">
                   <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                    <Percent className="w-3 h-3" /> Royalty %
+                    <Percent className="w-3 h-3" /> Royalty Splits (%)
                   </label>
-                  <input
-                    value={royalty}
-                    onChange={(e) => setRoyalty(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10"
-                    placeholder="10"
-                  />
+                  {royaltySplits.map((split, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="Wallet Address" 
+                        value={split.address}
+                        onChange={(e) => {
+                          const newSplits = [...royaltySplits];
+                          newSplits[index].address = e.target.value;
+                          setRoyaltySplits(newSplits);
+                        }}
+                        className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-xs outline-none focus:border-cyan-500/50"
+                      />
+                      <input 
+                        type="number" 
+                        placeholder="%" 
+                        value={split.percentage}
+                        onChange={(e) => {
+                          const newSplits = [...royaltySplits];
+                          newSplits[index].percentage = Number(e.target.value);
+                          setRoyaltySplits(newSplits);
+                        }}
+                        className="w-16 bg-white/5 border border-white/10 rounded-2xl px-3 py-3 text-xs outline-none focus:border-cyan-500/50"
+                      />
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => setRoyaltySplits([...royaltySplits, { address: '', percentage: 0, label: 'Collaborator' }])} className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest">
+                    + Add Collaborator
+                  </button>
                 </div>
               </div>
             </div>
@@ -604,8 +666,10 @@ export default function UploadTrackScreen() {
           )}
           <button
             onClick={handleUpload}
-            disabled={isUploading || (mode === 'batch' && batchTracks.length === 0)}
-            className="w-full bg-[#0891b2] text-black font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(8,145,178,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            disabled={isUploading || 
+              (mode === 'single' && (!title.trim() || !genre || !audioFile || !coverFile)) || 
+              (mode === 'batch' && (batchTracks.length === 0 || batchTracks.some(t => !t.title.trim() || !t.genre)))}
+            className="w-full bg-[#0891b2] text-black font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(8,145,178,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
           >
             {isUploading ? (
               <>
@@ -623,7 +687,8 @@ export default function UploadTrackScreen() {
           {mode === 'single' && (
             <button
               onClick={handleMint}
-              className="w-full bg-purple-600 text-white font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(147,51,234,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+              disabled={isUploading || !title.trim() || !genre || !audioFile || !coverFile}
+              className="w-full bg-purple-600 text-white font-black text-[12px] uppercase tracking-[0.3em] py-5 rounded-2xl shadow-[0_10px_30px_rgba(147,51,234,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
             >
               <Sparkles className="w-5 h-5 fill-current" />
               Mint NFT Protocol

@@ -17,16 +17,24 @@ import {
 import { motion } from "motion/react";
 import { BackButton } from "@/components/BackButton";
 import { useAudio } from "@/context/AudioContext";
-import NFTMetadataModal from "@/components/NFTMetadataModal";
+import TrackMonetizationModal from "@/components/TrackMonetizationModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
 import TrackUploadModal from "@/components/TrackUploadModal";
 import SongRequestsTab from "@/components/SongRequestsTab";
+import AlbumCard from "@/components/AlbumCard";
+import Autoplay from "embla-carousel-autoplay";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
   const { getEarnings } = useAudio();
   const [tracks, setTracks] = useState<any[]>([]);
   const [nfts, setNFTs] = useState<any[]>([]);
+  const [albums, setAlbums] = useState<any[]>([]);
   const [earnings, setEarnings] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTrackForConfig, setSelectedTrackForConfig] = useState<any | null>(null);
@@ -60,6 +68,21 @@ export default function ArtistDashboard() {
 
       setTracks(tracksData);
 
+      // Albums (Mocking for now as per instructions)
+      setAlbums([
+        {
+          id: 'alb-1',
+          title: 'Neon Pulse',
+          artist: 'Neon Voyager',
+          artistId: user?.uid,
+          coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Neon%20Pulse?width=400&height=400&nologo=true',
+          releaseYear: 2023,
+          trackIds: tracksData.map(t => t.id).slice(0, 2),
+          genre: 'Electronic',
+          description: 'The debut album defining the digital frontier.'
+        }
+      ]);
+
       // NFTs
       const nftSnap = await getDocs(
         query(collection(db, "nfts"), where("artistId", "==", user?.uid))
@@ -86,7 +109,7 @@ export default function ArtistDashboard() {
   const mintNFT = (trackId: string) => {
     const track = tracks.find(t => t.id === trackId);
     if (track) {
-      navigate('/mint', { state: { track } });
+      navigate('/artist-minting', { state: { track } });
     }
   };
 
@@ -234,6 +257,33 @@ export default function ArtistDashboard() {
               Refresh
             </button>
           </div>
+          
+          {/* Albums Section */}
+          <section className="space-y-4">
+             <h2 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] flex items-center gap-2 px-2">
+              Albums
+            </h2>
+            <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                plugins={[
+                  Autoplay({
+                    delay: 2000,
+                  }),
+                ]}
+                className="w-full bg-white/5 p-4 rounded-3xl"
+              >
+                <CarouselContent>
+                  {albums.map((album, index) => (
+                    <CarouselItem key={album.id} className="basis-4/5 md:basis-1/3 lg:basis-1/4">
+                       <AlbumCard key={album.id} album={album} index={index} />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+          </section>
 
           <div className="space-y-3">
             {isLoading ? (
@@ -327,7 +377,7 @@ export default function ArtistDashboard() {
       </div>
 
       {selectedTrackForConfig && (
-        <NFTMetadataModal 
+        <TrackMonetizationModal 
           track={selectedTrackForConfig}
           isOpen={isConfigModalOpen}
           onClose={() => setIsConfigModalOpen(false)}

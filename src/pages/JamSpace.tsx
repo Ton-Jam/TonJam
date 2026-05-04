@@ -1,62 +1,89 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  RadioIcon, 
-  SpeakerWaveIcon, 
-  RssIcon, 
-  FireIcon, 
-  UsersIcon, 
-  SparklesIcon, 
-  ArrowTrendingUpIcon, 
-  ChevronRightIcon,
-  HomeIcon,
-  HashtagIcon,
-  BellIcon,
-  EnvelopeIcon,
-  BookmarkIcon,
-  UserIcon,
-  PhotoIcon,
-  GifIcon,
-  ListBulletIcon,
-  FaceSmileIcon,
-  CalendarIcon,
-  MapPinIcon,
-  PlusIcon,
-  CpuChipIcon
-} from '@heroicons/react/24/outline';
+  Radio, 
+  Volume2, 
+  Rss, 
+  Flame, 
+  Users, 
+  Sparkles, 
+  TrendingUp, 
+  ChevronRight,
+  Home,
+  Hash,
+  Bell,
+  Mail,
+  Bookmark,
+  User,
+  Image as ImageIcon,
+  Gift,
+  List,
+  Smile,
+  Calendar,
+  MapPin,
+  Plus,
+  Cpu,
+  Search,
+  MessageSquare,
+  Zap,
+  MoreHorizontal,
+  Share2,
+  Trash2,
+  History,
+  Disc,
+  Play,
+  ArrowUpRight
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { ButtonGroupInput } from '@/components/ButtonGroupInput';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
+  DropdownMenuItem,
   DropdownMenuLabel, 
-  DropdownMenuRadioGroup, 
-  DropdownMenuRadioItem, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { MOCK_POSTS, MOCK_ARTISTS, MOCK_USER, MOCK_TRACKS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
-import UserCard from '@/components/UserCard';
-import TrackCard from '@/components/TrackCard';
+import { MOCK_POSTS, MOCK_ARTISTS, MOCK_USER, MOCK_TRACKS } from '@/constants';
 import SocialFeed from '@/components/SocialFeed';
 import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import JamChat from '@/components/JamChat';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, cn } from '@/lib/utils';
-import { Post, Track } from '@/types';
+import { Track } from '@/types';
 import { generateAIPlaylist, GenerateAIPlaylistResult } from '@/services/aiPlaylistService';
 import { Loader2 } from 'lucide-react';
 
 const JamSpace: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification, followedUserIds, artists, posts, createPost, deletePost, activeJamRoom, joinJamRoom, leaveJamRoom, searchQuery: search, setSearchQuery: setSearch, jamspaceFilters, userProfile, playAll, allTracks } = useAudio();
-  const [activeTab, setActiveTab] = useState<'For You' | 'Following'>('For You');
+  const { 
+    addNotification, 
+    followedUserIds, 
+    artists, 
+    posts, 
+    createPost, 
+    deletePost, 
+    activeJamRoom, 
+    joinJamRoom, 
+    leaveJamRoom, 
+    searchQuery: search, 
+    jamspaceFilters, 
+    userProfile, 
+    playAll, 
+    allTracks 
+  } = useAudio();
+  
+  const [activeTab, setActiveTab] = useState('for-you');
   const [postContent, setPostContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
-  const [filterType, setFilterType] = useState('all');
+  const [filterType, setFilterType] = useState('All');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
 
@@ -111,18 +138,9 @@ const JamSpace: React.FC = () => {
       imageUrl: getPlaceholderImage('jam-2', 1200, 400),
       link: '/jamspace',
       cta: 'Join Room'
-    },
-    {
-      id: '3',
-      title: 'TON Ecosystem Growth',
-      subtitle: 'Discover the future of decentralized music',
-      imageUrl: getPlaceholderImage('jam-3', 1200, 400),
-      link: '/explore',
-      cta: 'Explore'
     }
   ];
 
-  /* Trending topic mocks */
   const trendingTopics = [
     { tag: '#TONGenesis', count: '12.4k' },
     { tag: '#SynthSummer', count: '8.2k' },
@@ -130,18 +148,13 @@ const JamSpace: React.FC = () => {
     { tag: '#MarketSpike', count: '3.9k' }
   ];
 
-  /* AI Recommendations mock */
-  const aiRecommendedTracks = useMemo(() => MOCK_TRACKS.slice(0, 5), []);
-
   const filteredPosts = useMemo(() => {
     let basePosts = [...posts];
 
-    // 1. Tab Filtering
-    if (activeTab === 'Following') {
+    if (activeTab === 'following') {
       basePosts = basePosts.filter(p => followedUserIds.includes(p.userId));
     }
 
-    // 2. Type Filtering
     if (filterType === 'Tracks') {
       basePosts = basePosts.filter(p => p.trackId);
     } else if (filterType === 'NFTs') {
@@ -152,12 +165,13 @@ const JamSpace: React.FC = () => {
       });
     }
 
-    // 3. Search Filtering
     if (search) {
-      basePosts = basePosts.filter(p => p.content.toLowerCase().includes(search.toLowerCase()) || p.userName.toLowerCase().includes(search.toLowerCase()));
+      basePosts = basePosts.filter(p => 
+        p.content.toLowerCase().includes(search.toLowerCase()) || 
+        p.userName.toLowerCase().includes(search.toLowerCase())
+      );
     }
 
-    // 4. Sorting (Date)
     if (jamspaceFilters.sortOrder === 'Oldest') {
       basePosts.reverse();
     }
@@ -165,286 +179,293 @@ const JamSpace: React.FC = () => {
     return basePosts;
   }, [posts, search, activeTab, followedUserIds, filterType, jamspaceFilters.sortOrder]);
 
-  // Auto-switch view mode based on filter type
-  // Note: viewMode is now managed in global state, so we might not want to auto-switch it here,
-  // or we need to call setJamspaceFilters from useAudio. For now, let's remove the auto-switch
-  // since viewMode is controlled globally.
-
   const handleDeletePost = (id: string) => {
     deletePost(id);
   };
 
   return (
-    <div className="min-h-screen w-full bg-background pb-4 relative overflow-x-hidden">
+    <div className="min-h-screen w-full bg-background pb-20 lg:pb-4 relative overflow-x-hidden">
       {/* Immersive Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/5 blur-[150px] rounded-full translate-y-1/3 -translate-x-1/4"></div>
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/[0.03] blur-[150px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/[0.03] blur-[150px] rounded-full translate-y-1/3 -translate-x-1/4"></div>
       </div>
 
-      {/* Live Signal Ticker */}
-      <div className="bg-background py-4 px-4 overflow-hidden whitespace-nowrap relative z-50">
-        <div className="flex items-center gap-4 animate-marquee">
-          {[1,2,3,4,5].map(i => (
-            <div key={i} className="flex items-center gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-                <span className="text-[8px] font-bold text-blue-400 uppercase tracking-[0.4em]">Signal {i}: Genesis Minted by @NeonVoyager</span>
-              </div>
-              <div className="w-1 h-1 bg-muted rounded-full"></div>
-              <div className="flex items-center gap-4">
-                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
-                <span className="text-[8px] font-bold text-amber-500/80 uppercase tracking-[0.4em]">Relay {i}: 42.5 TON Transferred to @ByteBeat</span>
-              </div>
-              <div className="w-1 h-1 bg-muted rounded-full"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 mt-0 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 sm:gap-6">
-          {/* Left Column: X-style Navigation */}
-          <aside className="hidden lg:block lg:col-span-3 space-y-2 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto no-scrollbar pr-4">
-            <div className="flex flex-col gap-1">
-              {[
-                { id: 'home', label: 'Home', icon: HomeIcon, path: '/home' },
-                { id: 'explore', label: 'Explore', icon: HashtagIcon, path: '/discover' },
-                { id: 'notifications', label: 'Notifications', icon: BellIcon, path: '/notifications' },
-                { id: 'messages', label: 'Messages', icon: EnvelopeIcon, path: '/messages' },
-                { id: 'bookmarks', label: 'Bookmarks', icon: BookmarkIcon, path: '/bookmarks' },
-                { id: 'genesis', label: 'Genesis', icon: SparklesIcon, path: '/genesis-forge' },
-                { id: 'profile', label: 'Profile', icon: UserIcon, path: '/profile' },
-              ].map(item => (
-                <button 
-                  key={item.id} 
-                  onClick={() => navigate(item.path)}
-                  className="flex items-center gap-4 px-4 py-3 rounded-full hover:bg-foreground/10 transition-all group w-fit"
-                >
-                  <item.icon className="h-7 w-7 text-foreground stroke-[2px]" />
-                  <span className="text-xl font-bold pr-4">{item.label}</span>
-                </button>
-              ))}
-              <Button className="mt-4 w-full rounded-full py-7 text-lg font-bold bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 border-none">
-                Post
-              </Button>
-            </div>
-
-            {/* Live Jam Rooms - Refined */}
-            <div className="mt-8 bg-muted/30 rounded-2xl p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-zinc-800 dark:text-foreground">Live Jam Rooms</h3>
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-              </div>
-              <div className="space-y-3">
+      <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-8">
+          
+          {/* Left Column: Navigation Sidebar */}
+          <aside className="hidden lg:block lg:col-span-3 sticky top-20 h-[calc(100vh-100px)]">
+            <ScrollArea className="h-full pr-4">
+              <div className="flex flex-col gap-1">
                 {[
-                  { id: 'genesis', name: 'Genesis Node', listeners: 124, icon: RadioIcon },
-                  { id: 'drift', name: 'Cyber Drift', listeners: 89, icon: SpeakerWaveIcon }
-                ].map(room => (
-                  <div 
-                    key={room.id}
-                    onClick={() => activeJamRoom?.id === room.id ? leaveJamRoom() : joinJamRoom(room.id)}
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-foreground/5 cursor-pointer transition-all"
+                  { id: 'home', label: 'Dashboard', icon: Home, path: '/' },
+                  { id: 'explore', label: 'Explore Signals', icon: Hash, path: '/discover' },
+                  { id: 'notifications', label: 'Logs', icon: Bell, path: '/notifications' },
+                  { id: 'library', label: 'Library', icon: Bookmark, path: '/library' },
+                  { id: 'genesis', label: 'Genesis Forge', icon: Sparkles, path: '/genesis-forge' },
+                  { id: 'profile', label: 'Neural Profile', icon: User, path: '/profile' },
+                ].map(item => (
+                  <Button
+                    key={item.id}
+                    variant="ghost"
+                    onClick={() => navigate(item.path)}
+                    className="justify-start h-14 rounded-full px-6 gap-5 group hover:bg-white/[0.05]"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                      <room.icon className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate">{room.name}</p>
-                      <p className="text-xs text-muted-foreground">{room.listeners} listening</p>
-                    </div>
-                  </div>
+                    <item.icon className="h-6 w-6 text-foreground group-hover:text-blue-500 transition-colors" strokeWidth={2.5} />
+                    <span className="text-lg font-black uppercase italic tracking-tighter">{item.label}</span>
+                  </Button>
                 ))}
+                
+                <Button className="mt-6 w-full rounded-full py-7 text-lg font-black uppercase italic tracking-widest bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all">
+                  Post Signal
+                </Button>
               </div>
-            </div>
+
+              {/* Live Status */}
+              <Card className="mt-8 bg-zinc-900/40 border-white/[0.05] rounded-3xl overflow-hidden backdrop-blur-sm">
+                <CardHeader className="p-5 pb-3 flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-blue-500">Live Nodes</CardTitle>
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                </CardHeader>
+                <CardContent className="p-3 pt-0">
+                  <div className="space-y-1">
+                    {[
+                      { id: 'genesis', name: 'Genesis Node', listeners: 124, icon: Radio },
+                      { id: 'drift', name: 'Cyber Drift', listeners: 89, icon: Volume2 }
+                    ].map(room => (
+                      <Button
+                        key={room.id}
+                        variant="ghost"
+                        onClick={() => activeJamRoom?.id === room.id ? leaveJamRoom() : joinJamRoom(room.id)}
+                        className={cn(
+                          "w-full justify-start h-14 rounded-2xl gap-3 px-3",
+                          activeJamRoom?.id === room.id ? "bg-blue-600/10 text-blue-400" : "hover:bg-white/[0.03]"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                          activeJamRoom?.id === room.id ? "bg-blue-600 text-white" : "bg-white/[0.05]"
+                        )}>
+                          <room.icon className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1 text-left min-w-0">
+                          <p className="text-xs font-black uppercase tracking-tight truncate">{room.name}</p>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-60">{room.listeners} Active</p>
+                        </div>
+                        {activeJamRoom?.id === room.id && <Zap className="h-3 w-3 fill-current text-blue-500" />}
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </ScrollArea>
           </aside>
 
-          {/* Center Column: Main Feed (X-style) */}
-          <main className="lg:col-span-6 min-h-screen">
-            {/* Featured Carousel */}
-            <div className="px-2 pt-2 md:px-0 mb-4 rounded-xl overflow-hidden shadow-2xl shadow-blue-500/10">
-              <AutoCarousel items={carouselItems} />
-            </div>
-
-            {/* Header Tabs & Filters */}
-            <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
-              <div className="flex">
-                {['For You', 'Following'].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab as any)}
-                    className="flex-1 py-3 text-center hover:bg-foreground/5 transition-all relative"
+          {/* Center Column: Main Content */}
+          <main className="lg:col-span-6 border-x border-white/[0.05] min-h-screen">
+            <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-white/[0.05]">
+              <Tabs defaultValue="for-you" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full h-14 bg-transparent p-0 rounded-none">
+                  <TabsTrigger 
+                    value="for-you" 
+                    className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent text-xs font-black uppercase tracking-widest transition-all"
                   >
-                    <span className={cn(
-                      "text-xs font-bold",
-                      activeTab === tab ? "text-foreground" : "text-muted-foreground"
-                    )}>
-                      {tab}
-                    </span>
-                    {activeTab === tab && (
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-blue-500 rounded-full" />
-                    )}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-2 p-2 overflow-x-auto no-scrollbar">
-                {['All', 'Tracks', 'NFTs', 'Trending'].map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setFilterType(filter)}
-                    className={cn(
-                      "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap",
-                      filterType === filter ? "bg-blue-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    )}
+                    For You
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="following" 
+                    className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent text-xs font-black uppercase tracking-widest transition-all"
                   >
-                    {filter}
-                  </button>
-                ))}
-              </div>
+                    Following
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
 
             {/* Composer */}
-            <div className="p-2 sm:p-3 flex gap-2 sm:gap-3">
-              <Avatar className="h-8 w-8">
+            <div className="p-4 flex gap-4 border-b border-white/[0.05]">
+              <Avatar className="h-10 w-10 border border-white/10 ring-2 ring-blue-500/10">
                 <AvatarImage src={userProfile.avatar} />
                 <AvatarFallback>{userProfile.name?.[0]}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
+              <div className="flex-1 space-y-4">
                 <Textarea 
-                  placeholder="What is happening?!" 
-                  className="border-none bg-transparent text-sm resize-none focus-visible:ring-0 p-0 min-h-[40px] placeholder:text-muted-foreground/60 font-medium"
+                  placeholder="Broadcast your frequency..." 
+                  className="border-none bg-transparent text-lg resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-zinc-600 font-bold tracking-tight italic"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                 />
-                <div className="flex items-center justify-between pt-1 sm:pt-2 mt-1">
-                  <div className="flex items-center gap-0.5 sm:gap-1 text-blue-500">
-                    <button className="p-1 sm:p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><PhotoIcon className="h-4 w-4 stroke-[2px]" /></button>
-                    <button className="p-1 sm:p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><GifIcon className="h-4 w-4 stroke-[2px]" /></button>
-                    <button className="p-1 sm:p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><ListBulletIcon className="h-4 w-4 stroke-[2px]" /></button>
-                    <button className="p-1 sm:p-1.5 hover:bg-blue-500/10 rounded-full transition-all"><FaceSmileIcon className="h-4 w-4 stroke-[2px]" /></button>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    {[
+                      { icon: ImageIcon, color: 'text-blue-500' },
+                      { icon: Gift, color: 'text-rose-500' },
+                      { icon: List, color: 'text-amber-500' },
+                      { icon: Smile, color: 'text-yellow-500' },
+                      { icon: Calendar, color: 'text-emerald-500' },
+                    ].map((tool, i) => (
+                      <Button key={i} variant="ghost" size="icon" className={cn("h-8 w-8 rounded-full hover:bg-white/5", tool.color)}>
+                        <tool.icon className={cn("h-4 w-4", tool.color)} />
+                      </Button>
+                    ))}
                   </div>
                   <Button 
                     disabled={!postContent.trim() || isPosting}
                     onClick={handleCreatePost}
-                    className="rounded-full px-3 sm:px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold h-7 sm:h-8 text-[10px] sm:text-xs border-none"
+                    className="rounded-full px-6 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase italic tracking-widest h-9 text-xs border-none shadow-lg shadow-blue-600/20"
                   >
-                    {isPosting ? 'Posting...' : 'Post'}
+                    {isPosting ? 'Broadcasting...' : 'Signal'}
                   </Button>
                 </div>
               </div>
+            </div>
+
+            {/* Feed Filters */}
+            <div className="flex gap-2 p-3 overflow-x-auto no-scrollbar border-b border-white/[0.05] bg-white/[0.01]">
+              {['All', 'Tracks', 'NFTs', 'Trending'].map((filter) => (
+                <Button
+                  key={filter}
+                  variant={filterType === filter ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterType(filter)}
+                  className={cn(
+                    "rounded-full h-7 text-[9px] font-black uppercase tracking-[0.2em] border-white/5",
+                    filterType === filter ? "bg-blue-600 border-blue-500 shadow-lg shadow-blue-600/20" : "bg-white/[0.03] text-muted-foreground"
+                  )}
+                >
+                  {filter}
+                </Button>
+              ))}
             </div>
 
             {/* Main Feed */}
-            <div className="">
-              <SocialFeed posts={filteredPosts} onDeletePost={handleDeletePost} emptyMessage="No signals found in this sector." />
-            </div>
+            <SocialFeed 
+              posts={filteredPosts} 
+              onDeletePost={handleDeletePost} 
+              emptyMessage="Static silence... no signals identified in this sector." 
+            />
           </main>
 
-          {/* Right Column: Search & Trending */}
-          <aside className="hidden lg:block lg:col-span-3 space-y-4 sticky top-20 h-fit pl-4">
-            {/* Search Bar */}
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <SparklesIcon className="h-5 w-5 text-muted-foreground group-focus-within:text-blue-500" />
-              </div>
-              <input 
-                type="text"
-                placeholder="Search JamSpace"
-                className="w-full bg-muted/50 border-none rounded-full py-3 pl-12 pr-4 focus:ring-1 focus:ring-blue-500 transition-all"
-              />
-            </div>
-
-            {/* AI Curator Section */}
-            <div className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 rounded-2xl p-5 border border-blue-500/10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 blur-2xl -z-10 group-hover:scale-150 transition-transform duration-700"></div>
-              
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-blue-500/20 rounded-lg">
-                  <CpuChipIcon className="h-5 w-5 text-blue-500" />
+          {/* Right Column: Intelligence & Trending */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-6 pt-4 sticky top-20 h-[calc(100vh-100px)]">
+            <ScrollArea className="h-full pr-1">
+              <div className="space-y-6">
+                {/* Search */}
+                <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-blue-500 transition-colors" />
+                  <input 
+                    type="text"
+                    placeholder="Scan JamSpace"
+                    className="w-full bg-zinc-900/50 border border-white/5 hover:border-white/10 rounded-2xl py-3 pl-11 pr-4 focus:ring-1 focus:ring-blue-500/30 transition-all outline-none text-sm placeholder:text-zinc-600"
+                  />
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold uppercase tracking-tight">Neural Discovery</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Sonic Intelligence v4.0</p>
-                </div>
-              </div>
 
-              {aiResult ? (
-                <div className="space-y-4">
-                  <div className="flex gap-3 items-center">
-                    <img src={aiResult.playlist.coverUrl} className="h-14 w-14 rounded shadow-xl" alt="" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-black italic uppercase truncate">{aiResult.playlist.title}</p>
-                      <p className="text-[9px] text-muted-foreground line-clamp-2">{aiResult.explanation}</p>
-                    </div>
-                  </div>
-                  <Button 
-                    className="w-full rounded-full bg-blue-500 hover:bg-blue-600 text-white h-9 text-[10px] font-bold uppercase tracking-widest border-none"
-                    onClick={() => {
-                      const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
-                      playAll(tracks);
-                    }}
-                  >
-                    Play Mix Now
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-xs text-muted-foreground leading-relaxed">Let Gemini analyze your neural footprint on-chain and synthesize a custom frequencies stream.</p>
-                  <Button 
-                    disabled={isGeneratingAI}
-                    onClick={handleAIPlaylist}
-                    className="w-full rounded-full bg-blue-500 hover:bg-blue-600 text-white h-9 text-[10px] font-bold uppercase tracking-widest border-none"
-                  >
-                    {isGeneratingAI ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <SparklesIcon className="h-3 w-3 mr-2" />}
-                    Synthesize Mix
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Trending Section */}
-            <div className="bg-muted/30 rounded-2xl overflow-hidden">
-              <h3 className="text-xl font-bold p-4 text-zinc-800 dark:text-foreground">What's happening</h3>
-              <div className="">
-                {trendingTopics.map((topic) => (
-                  <div key={topic.tag} className="p-4 hover:bg-foreground/5 cursor-pointer transition-all">
-                    <p className="text-xs text-muted-foreground">Trending in Music</p>
-                    <p className="text-base font-bold">{topic.tag}</p>
-                    <p className="text-xs text-muted-foreground">{topic.count} posts</p>
-                  </div>
-                ))}
-              </div>
-              <button className="w-full p-4 text-left text-blue-600 dark:text-blue-500 hover:bg-foreground/5 transition-all text-sm">
-                Show more
-              </button>
-            </div>
-
-            {/* Who to follow */}
-            <div className="bg-muted/30 rounded-2xl overflow-hidden">
-              <h3 className="text-xl font-bold p-4 text-zinc-800 dark:text-foreground">Who to follow</h3>
-              <div className="">
-                {artists.slice(0, 3).map(artist => (
-                  <div key={artist.uid} className="p-4 flex items-center justify-between hover:bg-foreground/5 transition-all">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={artist.avatarUrl} />
-                        <AvatarFallback>{artist.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold truncate">{artist.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">@{ (artist.name || 'user').toLowerCase().replace(/\s+/g, '')}</p>
+                {/* AI Curator - Neural Discovery */}
+                <Card className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border-blue-500/20 rounded-[24px] overflow-hidden group/ai relative">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl -z-10 group-hover/ai:scale-150 transition-all duration-700" />
+                  <CardHeader className="p-5 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-blue-600/20 rounded-xl">
+                        <Cpu className="h-5 w-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-sm font-black uppercase italic tracking-tighter">Neural Pulse</CardTitle>
+                        <CardDescription className="text-[9px] font-black text-blue-500/60 uppercase tracking-[0.2em] mt-1">SI-v4 Engine</CardDescription>
                       </div>
                     </div>
-                    <Button variant="outline" className="rounded-full bg-foreground text-background hover:bg-foreground/90 border-none px-4 py-1 h-8 text-xs font-bold">
-                      Follow
+                  </CardHeader>
+                  <CardContent className="p-5 pt-0 space-y-4">
+                    {aiResult ? (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                        <div className="flex gap-4 items-center bg-white/[0.03] p-3 rounded-2xl border border-white/5">
+                          <img src={aiResult.playlist.coverUrl} className="h-12 w-12 rounded-lg shadow-2xl" alt="" />
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-black italic uppercase truncate text-blue-400">{aiResult.playlist.title}</p>
+                            <p className="text-[9px] text-muted-foreground line-clamp-2 mt-0.5 leading-tight">{aiResult.explanation}</p>
+                          </div>
+                        </div>
+                        <Button 
+                          className="w-full rounded-2xl bg-blue-600 hover:bg-blue-500 text-white h-10 text-[10px] font-black uppercase tracking-widest border-none shadow-lg shadow-blue-600/20"
+                          onClick={() => {
+                            const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
+                            playAll(tracks);
+                          }}
+                        >
+                          <TrendingUp className="h-3.5 w-3.5 mr-2" />
+                          Execute Frequency
+                        </Button>
+                      </motion.div>
+                    ) : (
+                      <div className="space-y-4">
+                        <p className="text-[11px] text-zinc-500 leading-relaxed font-medium italic">Gemini is ready to synthesize a frequencies stream based on your neural footprint.</p>
+                        <Button 
+                          disabled={isGeneratingAI}
+                          onClick={handleAIPlaylist}
+                          className="w-full rounded-2xl bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white h-10 text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all font-black uppercase italic tracking-tighter"
+                        >
+                          {isGeneratingAI ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
+                          Synthesize Now
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Trending */}
+                <Card className="bg-zinc-900/40 border-white/[0.05] rounded-[24px] overflow-hidden">
+                  <CardHeader className="p-5 pb-2">
+                    <CardTitle className="text-xl font-black italic uppercase tracking-tighter">Hyper-Trending</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-white/[0.03]">
+                      {trendingTopics.map((topic) => (
+                        <div key={topic.tag} className="p-4 px-5 hover:bg-white/[0.03] cursor-pointer transition-all group">
+                          <div className="flex items-center justify-between">
+                            <p className="text-[9px] font-black text-blue-500/60 uppercase tracking-widest">Global Sector</p>
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                          <p className="text-sm font-black uppercase tracking-tight mt-1">{topic.tag}</p>
+                          <p className="text-[10px] font-bold text-muted-foreground mt-0.5 opacity-60">{topic.count} Signals Broadcaster</p>
+                        </div>
+                      ))}
+                    </div>
+                    <Button variant="ghost" className="w-full h-12 text-xs font-black uppercase tracking-widest text-blue-500 hover:text-blue-400 hover:bg-white/[0.03] rounded-none border-t border-white/[0.03]">
+                      Expand Sector
                     </Button>
-                  </div>
-                ))}
+                  </CardContent>
+                </Card>
+
+                {/* Recommendations */}
+                <Card className="bg-zinc-900/40 border-white/[0.05] rounded-[24px] overflow-hidden">
+                  <CardHeader className="p-5 pb-2">
+                    <CardTitle className="text-xl font-black italic uppercase tracking-tighter">Echo Recs</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2 space-y-1">
+                    {artists.slice(0, 3).map(artist => (
+                      <div key={artist.uid} className="flex items-center justify-between p-2 pl-3 rounded-2xl hover:bg-white/[0.03] transition-all group">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Avatar className="h-9 w-9 border border-white/5">
+                            <AvatarImage src={artist.avatarUrl} />
+                            <AvatarFallback className="bg-zinc-800">{artist.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="text-xs font-black uppercase tracking-tight truncate">{artist.name}</p>
+                            <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40 truncate">@{ (artist.name || 'user').toLowerCase().replace(/\s+/g, '')}</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="rounded-full bg-white text-black hover:bg-blue-600 hover:text-white border-none px-4 h-7 text-[9px] font-black uppercase tracking-widest shrink-0 transition-all">
+                          Sync
+                        </Button>
+                      </div>
+                    ))}
+                    <Button variant="ghost" className="w-full h-10 text-[10px] font-black uppercase tracking-widest text-blue-500 hover:text-blue-400 hover:bg-white/[0.03] rounded-none mt-2">
+                      View More
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
-              <button className="w-full p-4 text-left text-blue-600 dark:text-blue-500 hover:bg-foreground/5 transition-all text-sm">
-                Show more
-              </button>
-            </div>
+            </ScrollArea>
           </aside>
         </div>
       </div>
@@ -458,3 +479,4 @@ const JamSpace: React.FC = () => {
 };
 
 export default JamSpace;
+

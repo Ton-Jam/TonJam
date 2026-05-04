@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { X, Image, Share2, Sparkles, Music, Check, Send, Loader2 } from "lucide-react";
 import { MOCK_USER, APP_LOGO } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
-import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES } from "@/lib/utils";
+import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES, shareContent } from "@/lib/utils";
 import { uploadPostImage } from "@/services/storageService";
 
 interface PostModalProps {
@@ -63,21 +63,17 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
     }
   };
 
-  const handleSocialShare = () => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: "TonJam Broadcast",
-          text: content || "Check out this signal on TonJam!",
-          url: window.location.href,
-        })
-        .catch((error) => {
-          if (error.name !== 'AbortError') {
-            console.error('Error sharing:', error);
-          }
-        });
-    } else {
-      addNotification("Web Share API not supported on this browser.", "info");
+  const handleSocialShare = async () => {
+    const result = await shareContent({
+      title: "TonJam Broadcast",
+      text: content || "Check out this signal on TonJam!",
+      url: window.location.href,
+    });
+
+    if (result.success) {
+      if (result.method === 'clipboard') {
+        addNotification("Signal link copied to local buffer", "success");
+      }
     }
   };
 

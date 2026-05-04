@@ -260,6 +260,7 @@ export function ChartAreaInteractive() {
               stroke="var(--color-desktop)"
               stackId="a"
             />
+            {/* @ts-ignore */}
             <ChartLegend content={<ChartLegendContent className="text-muted-foreground/80" />} />
           </AreaChart>
         </ChartContainer>

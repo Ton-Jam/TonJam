@@ -4,6 +4,7 @@ import { NFTItem } from '@/types';
 import { TON_LOGO } from '@/constants';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { useAudio } from '@/context/AudioContext';
+import LoadingOverlay from './LoadingOverlay';
 
 interface SellNFTModalProps {
   nft: NFTItem;
@@ -54,6 +55,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 animate-in fade-in duration-300">
+      <LoadingOverlay isVisible={isSubmitting} type="transaction" message="Listing on TON Blockchain..." />
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
       
       <div className="relative w-full max-sm bg-white/5 backdrop-blur-md rounded-[24px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">

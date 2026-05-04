@@ -37,6 +37,20 @@ import { useTaskStore } from '@/store/taskStore';
 import { claimTaskReward, getTasks } from '@/services/taskService';
 import { useUserStore } from '@/store/userStore';
 
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription 
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+
 const ICONS: Record<string, React.FC<any>> = {
   'ShieldCheck': ShieldCheck,
   'Share2': Share2,
@@ -46,7 +60,7 @@ const ICONS: Record<string, React.FC<any>> = {
 };
 
 const Tasks: React.FC = () => {
-  const { userProfile, addNotification } = useAudio(); // Using for addNotification for backwards compatibility right now
+  const { userProfile, addNotification, artists } = useAudio(); // Using for addNotification for backwards compatibility right now
   const { user } = useAuth();
   const tasks = useTaskStore(state => state.tasks);
   const setTasks = useTaskStore(state => state.setTasks);
@@ -162,49 +176,43 @@ const Tasks: React.FC = () => {
               <h1 className="text-4xl font-black uppercase tracking-tighter italic leading-none">Command Center</h1>
             </div>
 
-            <div className="flex flex-col items-end gap-2">
-               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-white/5 border border-blue-100 dark:border-white/10">
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-white/60">Level {stats.level}</span>
-               </div>
-            </div>
-          </div>
-
-          {/* XP PROGRESS BAR */}
-          <div className="glass-card p-4 rounded-2xl bg-blue-50/50 dark:bg-white/5 border border-blue-100 dark:border-white/5 relative overflow-hidden group">
-            <div className="flex justify-between items-end mb-3">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-purple-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-blue-600/40 dark:text-white/40">Network resonance</span>
+              <div className="flex flex-col items-end gap-2">
+                 <Badge variant="outline" className="bg-blue-50 dark:bg-white/5 border-blue-100 dark:border-white/10 text-blue-600 dark:text-white/60 font-black px-3 h-8 flex items-center gap-2">
+                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                    Level {stats.level}
+                 </Badge>
               </div>
-              <span className="text-xs font-mono font-bold text-blue-600/60 dark:text-white/60">{Math.round(stats.progress)}% to Level {stats.level + 1}</span>
             </div>
-            <div className="h-2 bg-blue-100 dark:bg-white/5 rounded-full overflow-hidden border border-blue-200 dark:border-white/5">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${stats.progress}%` }}
-                className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-500 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"
-              />
-            </div>
-            <p className="text-[8px] font-bold text-blue-600/20 dark:text-white/20 uppercase tracking-[0.2em] mt-2 italic text-right">
-              {stats.xpToNext} XP required for next node expansion
-            </p>
-          </div>
 
-          {/* BALANCE BLOCK */}
-          <button onClick={() => setShowBuyModal(true)} className="relative group text-left w-full transition-transform active:scale-95">
-            <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
-            <div className="relative flex items-center gap-5 bg-white dark:bg-[#0A0A0C]/80 backdrop-blur-3xl border border-blue-100 dark:border-white/10 px-6 py-6 rounded-3xl shadow-xl overflow-hidden min-h-[110px]">
-              <div className="absolute inset-0 opacity-[0.03] dark:opacity-5 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
-              
-              {isVIP && (
-                <div className="absolute -top-0 -right-0 pt-3 pr-3">
-                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 rounded-[10px] shadow-lg border border-white/20">
-                    <Gem className="w-2.5 h-2.5 text-white animate-pulse" />
-                    <span className="text-[7px] font-black text-white tracking-[0.2em]">VIP NODE</span>
-                  </div>
+            {/* XP PROGRESS BAR */}
+            <Card className="bg-blue-50/50 dark:bg-white/5 border-blue-100 dark:border-white/5 shadow-none p-4 rounded-2xl relative overflow-hidden group">
+              <div className="flex justify-between items-end mb-3">
+                <div className="flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-purple-500" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-blue-600/40 dark:text-white/40">Network resonance</span>
                 </div>
-              )}
+                <span className="text-xs font-mono font-bold text-blue-600/60 dark:text-white/60">{Math.round(stats.progress)}% to Level {stats.level + 1}</span>
+              </div>
+              <Progress value={stats.progress} className="h-2 bg-blue-100 dark:bg-white/5" />
+              <p className="text-[8px] font-bold text-blue-600/20 dark:text-white/20 uppercase tracking-[0.2em] mt-2 italic text-right">
+                {stats.xpToNext} XP required for next node expansion
+              </p>
+            </Card>
+
+            {/* BALANCE BLOCK */}
+            <button onClick={() => setShowBuyModal(true)} className="relative group text-left w-full transition-transform active:scale-95">
+              <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
+              <div className="relative flex items-center gap-5 bg-white dark:bg-[#0A0A0C]/80 backdrop-blur-3xl border border-blue-100 dark:border-white/10 px-6 py-6 rounded-3xl shadow-xl overflow-hidden min-h-[110px]">
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-5 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
+                
+                {isVIP && (
+                  <div className="absolute -top-0 -right-0 pt-3 pr-3">
+                    <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 rounded-[10px] shadow-lg border border-white/20 text-[7px] font-black text-white tracking-[0.2em]">
+                      <Gem className="w-2.5 h-2.5 text-white animate-pulse mr-1.5" />
+                      VIP NODE
+                    </Badge>
+                  </div>
+                )}
 
               <div className="relative shrink-0">
                 <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full" />
@@ -241,173 +249,147 @@ const Tasks: React.FC = () => {
 
         {/* STREAK BENTO */}
         <div className="grid grid-cols-2 gap-4">
-          <motion.div 
-            whileHover={{ y: -2 }}
-            className="glass-card p-5 rounded-3xl relative overflow-hidden group bg-blue-50/20 dark:bg-white/5 border border-blue-100 dark:border-white/5 shadow-sm"
-          >
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Flame className="w-8 h-8 text-orange-500" />
-            </div>
-            <div className="flex items-center gap-2 text-orange-500 mb-3">
-              <Flame className="w-4 h-4 fill-current" />
-              <span className="text-[10px] font-black uppercase tracking-wider">Sync Streak</span>
-            </div>
-            <div className="text-2xl font-black italic tracking-tighter text-zinc-800 dark:text-white">{streak} Days</div>
-            <p className="text-[10px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-1">
-              Next Sync: +{Math.min((streak + 1) * 10, 100)} TJ
-            </p>
+          <motion.div whileHover={{ y: -2 }} className="transition-all">
+            <Card className="p-5 rounded-3xl relative overflow-hidden group bg-blue-50/20 dark:bg-white/5 border-blue-100 dark:border-white/5 shadow-none h-full">
+              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Flame className="w-8 h-8 text-orange-500" />
+              </div>
+              <div className="flex items-center gap-2 text-orange-500 mb-3">
+                <Flame className="w-4 h-4 fill-current" />
+                <span className="text-[10px] font-black uppercase tracking-wider">Sync Streak</span>
+              </div>
+              <div className="text-2xl font-black italic tracking-tighter text-zinc-800 dark:text-white">{streak} Days</div>
+              <p className="text-[10px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-1">
+                Next Sync: +{Math.min((streak + 1) * 10, 100)} TJ
+              </p>
+            </Card>
           </motion.div>
 
-          <motion.div 
-            whileHover={{ y: -2 }}
-            className="glass-card p-5 rounded-3xl relative overflow-hidden group bg-blue-50/20 dark:bg-white/5 border border-blue-100 dark:border-white/5 shadow-sm"
-          >
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Sparkles className="w-8 h-8 text-blue-400" />
-            </div>
-            <div className="flex items-center gap-2 text-blue-400 mb-3">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-wider">Rewards</span>
-            </div>
-            <div className="text-2xl font-black italic tracking-tighter text-zinc-800 dark:text-white">2.4K+ <span className="text-[10px] text-blue-600/30 dark:text-white/30 lowercase not-italic">total earned</span></div>
-            <p className="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mt-1">
-              Top 15% of Nodes
-            </p>
+          <motion.div whileHover={{ y: -2 }} className="transition-all">
+            <Card className="p-5 rounded-3xl relative overflow-hidden group bg-blue-50/20 dark:bg-white/5 border-blue-100 dark:border-white/5 shadow-none h-full">
+              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Sparkles className="w-8 h-8 text-blue-400" />
+              </div>
+              <div className="flex items-center gap-2 text-blue-400 mb-3">
+                <Sparkles className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-wider">Rewards</span>
+              </div>
+              <div className="text-2xl font-black italic tracking-tighter text-zinc-800 dark:text-white">2.4K+ <span className="text-[10px] text-blue-600/30 dark:text-white/30 lowercase not-italic">total earned</span></div>
+              <p className="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mt-1">
+                Top 15% of Nodes
+              </p>
+            </Card>
           </motion.div>
         </div>
 
-        {/* NAVIGATION RAIL */}
-        <div className="flex bg-blue-50/50 dark:bg-white/5 p-1 rounded-2xl border border-blue-100 dark:border-white/5 overflow-x-auto no-scrollbar">
-          {[
-            { id: 'quest', label: 'Quests', icon: Target },
-            { id: 'staking', label: 'Vault', icon: Layers },
-            { id: 'referral', label: 'Nodes', icon: Share2 },
-            { id: 'leaderboard', label: 'Ranks', icon: Trophy }
-          ].map((tab) => (
-            <button 
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
-                activeTab === tab.id 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-black' 
-                : 'text-blue-600/40 dark:text-white/40 hover:text-blue-600/60 dark:hover:text-white/60 font-bold'
-              }`}
-            >
-              <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'opacity-100' : 'opacity-40'}`} />
-              <span className="text-[10px] uppercase tracking-widest">{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        {/* NAVIGATION RAIL AND CONTENT */}
+        <Tabs defaultValue="quest" value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full space-y-6">
+          <TabsList className="bg-blue-50/50 dark:bg-white/5 p-1 rounded-2xl border border-blue-100 dark:border-white/5 h-14 w-full grid grid-cols-4">
+            {[
+              { id: 'quest', label: 'Quests', icon: Target },
+              { id: 'staking', label: 'Vault', icon: Layers },
+              { id: 'referral', label: 'Nodes', icon: Share2 },
+              { id: 'leaderboard', label: 'Ranks', icon: Trophy }
+            ].map((tab) => (
+              <TabsTrigger 
+                key={tab.id}
+                value={tab.id}
+                className="flex items-center justify-center gap-2 py-2 rounded-xl transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white shadow-none data-[state=active]:shadow-lg data-[state=active]:shadow-blue-600/30"
+              >
+                <tab.icon className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{tab.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        <AnimatePresence mode="wait">
-          {activeTab === 'quest' && (
+          <TabsContent value="quest" className="mt-0">
             <motion.div 
-              key="quests"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               className="space-y-4"
             >
-              {/* TASK LIST */}
               <div className="space-y-3">
                 {tasks.map((task, idx) => {
                   const TaskIcon = (task.iconName && ICONS[task.iconName]) || Target;
                   const taskColor = task.color || 'blue';
 
                   return (
-                  <motion.div
-                    key={task.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className={`glass-card p-4 rounded-3xl flex justify-between items-center group hover:bg-white/[0.03] transition-colors border-white/5 ${task.claimed ? 'opacity-50 pointer-events-none' : ''}`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-[12px] bg-${taskColor}-500/10 flex items-center justify-center text-${taskColor}-500 group-hover:scale-110 transition-transform shadow-inner`}>
-                        <TaskIcon className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-black uppercase text-[11px] tracking-tight text-zinc-800 dark:text-white">{task.title}</h3>
-                        <p className="text-[8px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-0.5">{task.subtitle || task.description}</p>
-                        <div className="flex items-center gap-3 mt-2">
-                          <div className="flex items-center gap-1">
-                            <img src={TJ_COIN_ICON} className="w-3 h-3 grayscale opacity-30" alt="" />
-                            <span className={`text-[10px] font-mono font-bold text-${taskColor}-500`}>+{task.reward}</span>
+                    <Card key={task.id} className={cn(
+                      "group hover:bg-white/[0.03] transition-all border-white/5 shadow-none bg-white/5 overflow-hidden",
+                      task.claimed && 'opacity-50 grayscale pointer-events-none'
+                    )}>
+                      <CardContent className="p-4 flex justify-between items-center bg-transparent">
+                        <div className="flex items-center gap-4">
+                          <div className={cn(
+                            "w-12 h-12 rounded-[12px] flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner",
+                            `bg-${taskColor}-500/10 text-${taskColor}-500`
+                          )}>
+                            <TaskIcon className="w-5 h-5" />
                           </div>
-                          <div className="w-1 h-1 rounded-full bg-blue-100 dark:bg-white/10" />
-                          <span className="text-[10px] font-mono font-bold text-blue-600/40 dark:text-white/40">+{task.points || 0} XP</span>
+                          <div>
+                            <h3 className="font-black uppercase text-[11px] tracking-tight text-zinc-800 dark:text-white">{task.title}</h3>
+                            <p className="text-[8px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-0.5">{task.subtitle || task.description}</p>
+                            <div className="flex items-center gap-3 mt-2">
+                              <div className="flex items-center gap-1">
+                                <img src={TJ_COIN_ICON} className="w-3 h-3 grayscale opacity-30" alt="" />
+                                <span className={cn("text-[10px] font-mono font-bold", `text-${taskColor}-500`)}>+{task.reward}</span>
+                              </div>
+                              <div className="w-1 h-1 rounded-full bg-blue-100 dark:bg-white/10" />
+                              <span className="text-[10px] font-mono font-bold text-blue-600/40 dark:text-white/40">+{task.points || 0} XP</span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
 
-                    <div>
-                      {!task.completed && (
-                        <button 
-                          onClick={() => handleStart(task.id)}
-                          className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:border-blue-500/50"
-                        >
-                          Execute
-                        </button>
-                      )}
+                        <div>
+                          {!task.completed && (
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleStart(task.id)}
+                              className="h-10 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white/5 border-white/10 hover:border-blue-500/50 hover:bg-white/10 text-white"
+                            >
+                              Execute
+                            </Button>
+                          )}
 
-                      {task.completed && !task.claimed && (
-                        <button
-                          onClick={() => handleClaim(task.id)}
-                          disabled={isClaiming === task.id}
-                          className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-blue-600/30 disabled:opacity-50 disabled:scale-100"
-                        >
-                          {isClaiming === task.id ? 'Syncing...' : 'Claim'}
-                        </button>
-                      )}
+                          {task.completed && !task.claimed && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleClaim(task.id)}
+                              disabled={isClaiming === task.id}
+                              className="h-10 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-blue-600/30 disabled:opacity-50 disabled:scale-100 border-none"
+                            >
+                              {isClaiming === task.id ? 'Syncing...' : 'Claim'}
+                            </Button>
+                          )}
 
-                      {task.claimed && (
-                        <div className="flex items-center gap-2 pr-2">
-                          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                          <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Protocol Sync</span>
+                          {task.claimed && (
+                            <div className="flex items-center gap-2 pr-2">
+                              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                              <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Protocol Sync</span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )})}
+                      </CardContent>
+                    </Card>
+                  )
+                })}
               </div>
             </motion.div>
-          )}
+          </TabsContent>
 
-          {activeTab === 'staking' && (
-            <motion.div 
-               key="staking"
-               initial={{ opacity: 0, x: 20 }}
-               animate={{ opacity: 1, x: 0 }}
-               exit={{ opacity: 0, x: -20 }}
-            >
-               <StakingPanel balance={balance} onStake={() => {}} onBuyTJ={() => setShowBuyModal(true)} />
-            </motion.div>
-          )}
+          <TabsContent value="staking" className="mt-0">
+             <StakingPanel balance={balance} onStake={() => {}} onBuyTJ={() => setShowBuyModal(true)} />
+          </TabsContent>
 
-          {activeTab === 'referral' && (
-            <motion.div 
-               key="referral"
-               initial={{ opacity: 0, x: 20 }}
-               animate={{ opacity: 1, x: 0 }}
-               exit={{ opacity: 0, x: -20 }}
-            >
-               <ReferralPanel />
-            </motion.div>
-          )}
+          <TabsContent value="referral" className="mt-0">
+             <ReferralPanel />
+          </TabsContent>
 
-          {activeTab === 'leaderboard' && (
-            <motion.div 
-               key="leaderboard"
-               initial={{ opacity: 0, x: 20 }}
-               animate={{ opacity: 1, x: 0 }}
-               exit={{ opacity: 0, x: -20 }}
-               transition={{ duration: 0.3 }}
-            >
-               <Leaderboard />
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <TabsContent value="leaderboard" className="mt-0">
+             <Leaderboard artists={artists} limit={10} />
+          </TabsContent>
+        </Tabs>
 
       </div>
       

@@ -70,6 +70,39 @@ export const addComment = async (postId: string, userId: string, userName: strin
   }
 };
 
+export const createActivityPost = async (
+  userId: string, 
+  userName: string, 
+  userAvatar: string, 
+  content: string, 
+  activityType: 'tip' | 'nft_purchase' | 'fan_club_join' | 'track_release',
+  metadata: {
+    targetId?: string;
+    artistName?: string;
+    paymentAmount?: string;
+    paymentCurrency?: string;
+  }
+) => {
+  try {
+    const docRef = await addDoc(collection(db, 'posts'), {
+      userId,
+      userName,
+      userAvatar,
+      content,
+      type: 'activity',
+      status: activityType,
+      ...metadata,
+      likes: 0,
+      comments: 0,
+      timestamp: new Date().toISOString(),
+      createdAt: serverTimestamp()
+    });
+    return { id: docRef.id };
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, 'posts/activity');
+  }
+};
+
 export const followUser = async (followerId: string, followingId: string) => {
   try {
     const followId = `${followerId}_${followingId}`;

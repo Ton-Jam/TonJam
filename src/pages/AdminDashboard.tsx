@@ -45,7 +45,18 @@ const AdminDashboard: React.FC = () => {
 
   const [allSponsorships, setAllSponsorships] = useState<SponsoredContent[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
-  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const [updatingUserUid, setUpdatingUserUid] = useState<string | null>(null);
+  const [selectedRoles, setSelectedRoles] = useState<Record<string, string>>({});
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [minTransactions, setMinTransactions] = useState(0);
+
+  const filteredUsers = useMemo(() => {
+    return allUsers.filter(user => {
+      const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+      const matchesActivity = (user.transactions?.length || 0) >= minTransactions;
+      return matchesRole && matchesActivity;
+    });
+  }, [allUsers, roleFilter, minTransactions]);
   
   const [treasuryStats, setTreasuryStats] = useState<TreasuryStats | null>(null);
   const [allProposals, setAllProposals] = useState<any[]>([]);
@@ -109,7 +120,7 @@ const AdminDashboard: React.FC = () => {
   }, []);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    setIsUpdatingRole(true);
+    setUpdatingUserUid(userId);
     try {
       await updateDoc(doc(db, 'users', userId), { role: newRole });
       if (newRole === 'admin') {
@@ -122,7 +133,7 @@ const AdminDashboard: React.FC = () => {
       console.error(error);
       toast.error('Failed to update user role');
     } finally {
-      setIsUpdatingRole(false);
+      setUpdatingUserUid(null);
     }
   };
 
@@ -455,8 +466,21 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'users' && (
           <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6 mb-4">
             <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">User Role Management</h2>
+            <div className="flex gap-4 mb-4">
+              <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="bg-muted p-2 rounded text-[10px] uppercase font-bold text-muted-foreground outline-none border border-border/20">
+                <option value="all">All Roles</option>
+                <option value="user">Collector</option>
+                <option value="artist">Artist</option>
+                <option value="admin">Admin</option>
+              </select>
+              <select value={minTransactions} onChange={(e) => setMinTransactions(parseInt(e.target.value))} className="bg-muted p-2 rounded text-[10px] uppercase font-bold text-muted-foreground outline-none border border-border/20">
+                <option value={0}>Any Activity</option>
+                <option value={1}>Active (&gt;0 txs)</option>
+                <option value={10}>Very Active (&gt;10 txs)</option>
+              </select>
+            </div>
             <div className="space-y-4">
-              {allUsers.length > 0 ? (
+              {filteredUsers.length > 0 ? (
                 <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
@@ -467,7 +491,7 @@ const AdminDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {allUsers.map((user) => (
+                      {filteredUsers.map((user) => (
                         <tr key={user.uid} className="border-b border-border/50 hover:bg-foreground/[0.01] transition-colors">
                           <td className="py-4 px-2">
                             <div className="flex items-center gap-3">
@@ -491,17 +515,26 @@ const AdminDashboard: React.FC = () => {
                               {user.role || 'user'}
                             </span>
                           </td>
-                          <td className="py-4 px-2 text-right">
+                          <td className="py-4 px-2 text-right flex items-center justify-end gap-2">
                             <select 
-                              value={user.role || 'user'} 
-                              onChange={(e) => handleRoleChange(user.uid, e.target.value)}
-                              disabled={isUpdatingRole}
+                              value={selectedRoles[user.uid] || user.role || 'user'} 
+                              onChange={(e) => setSelectedRoles({...selectedRoles, [user.uid]: e.target.value})}
+                              disabled={updatingUserUid === user.uid}
                               className="bg-transparent border border-border/50 p-2 text-xs rounded-lg text-foreground uppercase outline-none focus:border-blue-500/50 hover:bg-foreground/5 transition-colors disabled:opacity-50"
                             >
                               <option value="user" className="bg-background text-foreground">User</option>
                               <option value="artist" className="bg-background text-foreground">Artist</option>
                               <option value="admin" className="bg-background text-foreground">Admin</option>
                             </select>
+                            {selectedRoles[user.uid] && selectedRoles[user.uid] !== user.role && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleRoleChange(user.uid, selectedRoles[user.uid])}
+                                disabled={updatingUserUid === user.uid}
+                              >
+                                {updatingUserUid === user.uid ? 'Saving...' : 'Save'}
+                              </Button>
+                            )}
                           </td>
                         </tr>
                       ))}

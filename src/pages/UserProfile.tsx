@@ -116,7 +116,7 @@ const UserProfile: React.FC = () => {
   return (
     <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
       {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[280px] md:h-[400px] overflow-hidden group bg-blue-950">
+      <div className="relative h-[160px] sm:h-[240px] md:h-[400px] overflow-hidden group bg-blue-950">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
           style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
@@ -124,13 +124,13 @@ const UserProfile: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
         
         {/* Extreme Left Actions ON Cover Picture */}
-        <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3">
+        <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 flex items-center gap-2 sm:gap-3">
           <button 
             onClick={handleFollow} 
             className={cn(
-              "px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all shadow-2xl backdrop-blur-md active:scale-95",
+              "px-5 sm:px-6 py-1.5 sm:py-2.5 rounded-[2px] font-black text-[9px] sm:text-[10px] uppercase tracking-widest transition-all shadow-2xl backdrop-blur-md active:scale-95",
               isFollowing 
-                ? "bg-white/10 text-white border border-white/20" 
+                ? "bg-white/10 text-white" 
                 : "bg-blue-600 text-white shadow-blue-600/40"
             )}
           >
@@ -144,9 +144,9 @@ const UserProfile: React.FC = () => {
                   addNotification("Link copied", "success");
                 });
             }}
-            className="p-3 bg-white/10 text-white rounded-full hover:bg-blue-600 transition-all border border-white/10 backdrop-blur-md shadow-xl active:scale-90"
+            className="p-2 sm:p-3 bg-white/10 text-white rounded-full hover:bg-blue-600 transition-all border border-white/10 backdrop-blur-md shadow-xl active:scale-90"
           >
-            <Share2 className="h-5 w-5" />
+            <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
         
@@ -163,12 +163,12 @@ const UserProfile: React.FC = () => {
 
       {/* 2. IDENTITY & ACTIONS (Audiomack Style) */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-30">
-        <div className="flex flex-col md:flex-row-reverse items-center md:items-end justify-between gap-8 -mt-8 md:-mt-12 pb-10 border-b border-white/5">
-          <div className="flex flex-col md:flex-row-reverse items-center md:items-end gap-8 w-full font-sans">
+        <div className="flex flex-col md:flex-row-reverse items-center md:items-end justify-between gap-4 sm:gap-8 -mt-8 md:-mt-12 pb-6 sm:pb-10 border-b border-white/5">
+          <div className="flex flex-col md:flex-row-reverse items-center md:items-end gap-4 sm:gap-8 w-full font-sans">
             {/* Profile Picture (Overlapping) */}
             <div className="relative flex-shrink-0 md:mr-[-48px]">
               <div 
-                className="w-20 h-20 md:w-32 h-32 overflow-hidden border-4 border-background shadow-2xl bg-blue-900/20"
+                className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 overflow-hidden border-2 sm:border-4 border-background shadow-2xl bg-blue-900/20"
                 style={{ borderRadius: '100px' }}
               >
                 <img 
@@ -212,15 +212,15 @@ const UserProfile: React.FC = () => {
       </div>
 
       {/* 3. TABS NAVIGATION */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 mb-10 overflow-hidden">
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 mb-4 sm:mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center gap-10 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-4 sm:gap-10 overflow-x-auto no-scrollbar">
             {['overview', 'inventory', 'activity', 'network'].map(tab => (
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab as any)} 
                 className={cn(
-                  "py-6 text-xs font-black uppercase tracking-[0.2em] transition-all relative whitespace-nowrap",
+                  "py-3 sm:py-5 text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] transition-all relative whitespace-nowrap",
                   activeTab === tab ? "text-blue-500" : "text-muted-foreground hover:text-foreground"
                 )} 
               >
@@ -238,10 +238,10 @@ const UserProfile: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Main Content */}
           <div className="lg:col-span-8">
-            <div className="min-h-[500px]">
+            <div className="min-h-[400px]">
               {activeTab === 'overview' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   {/* My Activity (Recent Posts) */}

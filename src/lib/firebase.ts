@@ -12,10 +12,15 @@ export const analytics = typeof window !== 'undefined' && firebaseConfig.measure
 
 // Initialize Firestore with settings for reliability in various network environments
 const firestoreDatabaseId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
-console.log(`[Firebase] Initializing Firestore. DatabaseID: ${firestoreDatabaseId}`);
+console.log('[Firebase] Debug Config:', {
+  projectId: firebaseConfig.projectId,
+  databaseId: firestoreDatabaseId,
+  hasApiKey: !!firebaseConfig.apiKey,
+  authDomain: firebaseConfig.authDomain
+});
+console.log(`[Firebase] Initializing Firestore. Project: ${firebaseConfig.projectId}, DatabaseID: ${firestoreDatabaseId}, Host: firestore.googleapis.com`);
 
 export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
   ignoreUndefinedProperties: true,
 }, firestoreDatabaseId);
 

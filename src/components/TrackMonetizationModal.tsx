@@ -44,14 +44,14 @@ const metadataSchema = z.object({
 
 type MetadataFormData = z.infer<typeof metadataSchema>;
 
-interface NFTMetadataModalProps {
+interface TrackMonetizationModalProps {
   track: Track;
   isOpen: boolean;
   onClose: () => void;
   onUpdate?: () => void;
 }
 
-const NFTMetadataModal: React.FC<NFTMetadataModalProps> = ({ track, isOpen, onClose, onUpdate }) => {
+const TrackMonetizationModal: React.FC<TrackMonetizationModalProps> = ({ track, isOpen, onClose, onUpdate }) => {
   const { updateTrack, addNotification, userProfile } = useAudio();
   
   const {
@@ -123,7 +123,7 @@ const NFTMetadataModal: React.FC<NFTMetadataModalProps> = ({ track, isOpen, onCl
               <Gem className="w-6 h-6 text-cyan-500" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-black uppercase tracking-tight italic">NFT Metadata Configuration</DialogTitle>
+              <DialogTitle className="text-xl font-black uppercase tracking-tight italic">Asset Monetization Configuration</DialogTitle>
               <DialogDescription className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mt-1">
                 Configure protocol parameters for "{track.title}"
               </DialogDescription>
@@ -265,4 +265,4 @@ const NFTMetadataModal: React.FC<NFTMetadataModalProps> = ({ track, isOpen, onCl
   );
 };
 
-export default NFTMetadataModal;
+export default TrackMonetizationModal;

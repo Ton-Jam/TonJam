@@ -5,9 +5,9 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post, PostComment, ExclusiveContent, Task, SponsoredContent } from '@/types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
-import { processStreamRoyalty } from '@/services/royaltyService';
+import { processStreamRoyalty, PLATFORM_FEE_PERCENTAGE } from '@/services/royaltyService';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
-import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getPlaceholderImage } from '@/lib/utils';
 import { useAudioStore } from '@/store/audioStore';
@@ -134,6 +134,7 @@ interface AudioContextType {
   getTracksByGenre: (genre: string) => Track[];
   getRecommendations: () => { recommendedTracks: Track[], recommendedNFTs: NFTItem[] };
   jamTrack: (trackId: string) => Promise<void>;
+  purchaseTrack: (trackId: string) => Promise<void>;
   getEarnings: (userId: string) => Promise<number>;
   mintNFT: (trackId: string, tonConnectUI: any) => Promise<{ success: boolean; error?: string }>;
   deleteTrack: (trackId: string) => Promise<void>;
@@ -349,33 +350,45 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsLoading(true);
     try {
       const userId = auth.currentUser.uid;
-      
-      // 1. Get task details
-      // In a real app, we'd fetch this from Firestore 'tasks' collection
-      // For now, we'll find it in our local state
       const task = tasks.find(t => t.id === taskId);
       if (!task) throw new Error("Task not found");
 
-      // Parse reward (e.g., "5 TJ" -> 5)
       const rewardAmount = parseFloat(task.reward);
+      const batch = writeBatch(db);
 
-      // 2. Add task completion record
-      await addDoc(collection(db, "taskCompletions"), {
+      // 1. Record task completion
+      const completionRef = doc(collection(db, "taskCompletions"));
+      batch.set(completionRef, {
         userId,
         taskId,
         completed: true,
         completedAt: serverTimestamp()
       });
 
-      // 3. Update user balance
-      // The user's snippet uses 'tjBalance', we'll update both for consistency if needed
-      // but primarily 'jamBalance' is used in the app.
-      await updateDoc(doc(db, "users", userId), {
+      // 2. Update user balance atomically
+      const userRef = doc(db, "users", userId);
+      batch.update(userRef, {
         tjBalance: increment(rewardAmount),
-        jamBalance: increment(rewardAmount)
+        jamBalance: increment(rewardAmount),
+        updatedAt: serverTimestamp()
       });
 
-      // Update local state
+      // 3. Record the reward transaction
+      const txRef = doc(collection(db, "transactions"));
+      batch.set(txRef, {
+        type: 'reward',
+        amount: rewardAmount,
+        userId: userId,
+        status: 'completed',
+        timestamp: new Date().toISOString(),
+        serverTimestamp: serverTimestamp(),
+        participants: [userId],
+        trackTitle: `Task Reward: ${task.title}`
+      });
+
+      await batch.commit();
+
+      // Update local state after successful atomic commit
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: true } : t));
       setUserProfile(prev => ({ 
         ...prev, 
@@ -385,7 +398,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       addNotification(`Task "${task.title}" completed! +${rewardAmount} TJ`, "success");
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, `task_completions`);
+      handleFirestoreError(error, OperationType.WRITE, `tasks/${taskId}/completion`);
     } finally {
       setIsLoading(false);
     }
@@ -755,7 +768,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [allTracks]);
 
   const getTracksByGenre = useCallback((genre: string) => {
-    return allTracks.filter(t => t.genre.toLowerCase() === genre.toLowerCase());
+    return allTracks.filter(t => (t.genre || '').toLowerCase() === (genre || '').toLowerCase());
   }, [allTracks]);
 
   const getRecommendations = useCallback(() => {
@@ -1799,6 +1812,86 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const purchaseTrack = async (trackId: string) => {
+    if (!auth.currentUser) {
+      addNotification("Please log in to purchase tracks", "warning");
+      return;
+    }
+
+    const track = allTracks.find(t => t.id === trackId);
+    if (!track) {
+      addNotification("Track artifact not found", "error");
+      return;
+    }
+
+    if (!track.price || parseFloat(track.price) <= 0) {
+      addNotification("This artifact is available for free", "info");
+      return;
+    }
+
+    const price = parseFloat(track.price);
+    if (userProfile.tonBalance && userProfile.tonBalance < price) {
+      addNotification("Insufficient TON balance in your neural link", "error");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const userId = auth.currentUser.uid;
+      const artistId = track.artistId;
+
+      // Atomic transaction: Update balances and record transaction
+      const batch = writeBatch(db);
+
+      // 1. Deduct from buyer
+      const userRef = doc(db, "users", userId);
+      batch.update(userRef, {
+        tonBalance: increment(-price),
+        ownedTrackIds: arrayUnion(trackId)
+      });
+
+      // 2. Add to artist royalties
+      const royaltyRef = doc(db, "royalties", artistId);
+      batch.set(royaltyRef, {
+        artistId,
+        totalEarned: increment(price * (1 - PLATFORM_FEE_PERCENTAGE)),
+        pendingWithdrawal: increment(price * (1 - PLATFORM_FEE_PERCENTAGE)),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      // 3. Record transaction
+      const txRef = doc(collection(db, "transactions"));
+      batch.set(txRef, {
+        type: 'nft_sale', // Reusing nft_sale type for simplicity or adding 'track_purchase'
+        amount: price,
+        userId: userId,
+        platformFee: price * PLATFORM_FEE_PERCENTAGE,
+        artistShare: price * (1 - PLATFORM_FEE_PERCENTAGE),
+        timestamp: new Date().toISOString(),
+        serverTimestamp: serverTimestamp(),
+        status: 'completed',
+        participants: [userId, artistId],
+        trackId: track.id,
+        trackTitle: track.title
+      });
+
+      await batch.commit();
+
+      addNotification(`Neural acquisition complete: "${track.title}"`, "success");
+      
+      // Update local state
+      setUserProfile(prev => ({
+        ...prev,
+        tonBalance: (prev.tonBalance || 0) - price
+      }));
+
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `tracks/${trackId}/purchase`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const joinJamRoom = (roomId: string) => {
     const room = {
       id: roomId,
@@ -2296,7 +2389,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Find preferred genres and artists
       const preferredGenres = new Map<string, number>();
       const preferredArtists = new Map<string, number>();
-      const favoredArtistIds = new Set(userProfile.followedUserIds || []);
+      const favoredArtistIds = new Set(followedUserIds || []);
       
       const analyzeTrack = (trackId: string, weight: number) => {
         const track = allTracks.find(t => t.id === trackId);
@@ -2622,17 +2715,27 @@ Return a JSON object with the following structure:
   const getEarnings = async (userId: string) => {
     try {
       const snap = await getDocs(
-        query(collection(db, "nftSales"), where("artistId", "==", userId))
+        query(
+          collection(db, "transactions"), 
+          where("participants", "array-contains", userId),
+          where("status", "==", "completed")
+        )
       );
 
       let total = 0;
       snap.forEach(doc => {
-        total += doc.data().price || 0;
+        const data = doc.data();
+        if (data.artistShare) {
+          total += data.artistShare;
+        } else if (data.artistId === userId) {
+          // Fallback for older transaction schema or if artistId is explicitly set
+          total += data.price || data.amount || 0;
+        }
       });
 
       return total;
     } catch (error) {
-      handleFirestoreError(error, OperationType.LIST, 'nftSales');
+      console.error("Error fetching earnings:", error);
       return 0;
     }
   };
@@ -2695,8 +2798,8 @@ Return a JSON object with the following structure:
     const searchLower = queryText.toLowerCase();
     
     return allTracks.filter(track => 
-      track.title.toLowerCase().includes(searchLower) || 
-      track.artist.toLowerCase().includes(searchLower) || 
+      (track.title || '').toLowerCase().includes(searchLower) || 
+      (track.artist || '').toLowerCase().includes(searchLower) || 
       (track.genre && track.genre.toLowerCase().includes(searchLower))
     );
   }, [allTracks]);
@@ -2705,7 +2808,7 @@ Return a JSON object with the following structure:
     if (!queryText.trim()) return [];
     const searchLower = queryText.toLowerCase();
     return artists.filter(a => 
-      a.name.toLowerCase().includes(searchLower) || 
+      (a.name || '').toLowerCase().includes(searchLower) || 
       (a.genre && a.genre.toLowerCase().includes(searchLower)) ||
       (a.bio && a.bio.toLowerCase().includes(searchLower))
     );
@@ -2715,7 +2818,7 @@ Return a JSON object with the following structure:
     if (!queryText.trim()) return [];
     const searchLower = queryText.toLowerCase();
     return allNFTs.filter(n => 
-      n.title.toLowerCase().includes(searchLower) || 
+      (n.title || '').toLowerCase().includes(searchLower) || 
       (n.artist && n.artist.toLowerCase().includes(searchLower)) ||
       (n.description && n.description.toLowerCase().includes(searchLower))
     );
@@ -2744,6 +2847,7 @@ Return a JSON object with the following structure:
       approveSponsorship,
       rejectSponsorship,
       getEarnings,
+      purchaseTrack,
       userAddress: tonAddress
     }}>
       {children}

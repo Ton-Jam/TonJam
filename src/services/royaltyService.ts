@@ -1,7 +1,6 @@
 import { Track, NFTItem, Transaction, RoyaltySplit, Royalty } from '../types';
 import { db, handleFirestoreError, OperationType, auth } from '../lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, increment } from 'firebase/firestore';
-import { treasuryService } from './treasuryService';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, increment, writeBatch } from 'firebase/firestore';
 
 /**
  * Royalty Service
@@ -42,7 +41,6 @@ export function calculateRoyaltyDistribution(
     address: split.address,
     amount: distributableAmount * split.percentage,
     label: split.label,
-    // In a real app, we'd map address to userId if needed
   }));
 
   const totalCollaboratorShare = collaboratorShares.reduce((sum, split) => sum + split.amount, 0);
@@ -57,28 +55,7 @@ export function calculateRoyaltyDistribution(
 }
 
 /**
- * Updates an artist's royalty balance in Firestore.
- */
-async function updateRoyaltyBalance(userId: string, amount: number) {
-  const royaltyRef = doc(db, 'royalties', userId);
-  const royaltySnap = await getDoc(royaltyRef);
-
-  if (royaltySnap.exists()) {
-    await updateDoc(royaltyRef, {
-      totalEarned: (parseFloat(royaltySnap.data().totalEarned) + amount).toString(),
-      pendingWithdrawal: (parseFloat(royaltySnap.data().pendingWithdrawal) + amount).toString()
-    });
-  } else {
-    await setDoc(royaltyRef, {
-      artistId: userId,
-      totalEarned: amount.toString(),
-      pendingWithdrawal: amount.toString()
-    });
-  }
-}
-
-/**
- * Distributes royalties for a transaction.
+ * Distributes royalties for a transaction using a writeBatch for atomicity.
  */
 export async function distributeRoyalties(
   amount: number,
@@ -90,38 +67,45 @@ export async function distributeRoyalties(
   const distribution = calculateRoyaltyDistribution(amount, royaltySplits);
 
   try {
-    // 1. Update Artist Balance
-    await updateRoyaltyBalance(artistId, distribution.artistShare);
+    const batch = writeBatch(db);
 
-    // 2. Update Collaborator Balances (if we have their userIds)
-    // For simplicity, we assume royaltySplits might contain a userId or we'd have a lookup
-    // In this demo, we'll just log collaborator distributions
-    for (const split of distribution.collaboratorShares) {
-      console.log(`Distributing ${split.amount} to ${split.address} (${split.label})`);
-      // If split.address was a userId, we'd call updateRoyaltyBalance(split.address, split.amount);
-    }
+    // 1. Update Artist Balance (Using increment for concurrency control)
+    const royaltyRef = doc(db, 'royalties', artistId);
+    batch.set(royaltyRef, {
+      artistId,
+      totalEarned: increment(distribution.artistShare),
+      pendingWithdrawal: increment(distribution.artistShare),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
 
-    // 3. Record Transactions
+    // 2. Record Transaction
+    const txRef = doc(collection(db, 'transactions'));
     const participants = [artistId, auth.currentUser?.uid].filter(Boolean) as string[];
-    const txData: Partial<Transaction> & { participants: string[] } = {
+    const txData = {
       type,
       amount,
-      userId: auth.currentUser?.uid,
+      userId: auth.currentUser?.uid || 'system',
       platformFee: distribution.platformFee,
       artistShare: distribution.artistShare,
       timestamp: new Date().toISOString(),
+      serverTimestamp: serverTimestamp(),
       status: 'completed',
       participants,
       ...metadata
     };
+    batch.set(txRef, txData);
 
-    await addDoc(collection(db, 'transactions'), txData);
-
-    // 4. Record Platform Fee in Treasury
+    // 3. Update Treasury Fees
     if (distribution.platformFee > 0) {
-      await treasuryService.recordInflow(distribution.platformFee, `Royalty Distribution: ${type}`, metadata.txHash);
+      const treasuryRef = doc(db, 'system/treasury');
+      batch.set(treasuryRef, {
+        balance: increment(distribution.platformFee),
+        totalFeesCollected: increment(distribution.platformFee),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
     }
 
+    await batch.commit();
     console.log(`Royalty distribution complete for ${type}. Artist Share: ${distribution.artistShare}`);
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'royalties');

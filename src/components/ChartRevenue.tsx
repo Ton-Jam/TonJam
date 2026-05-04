@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useEffect, useState } from "react"
 import * as RechartsPrimitive from "recharts"
 const { 
   Bar, 
@@ -25,17 +26,8 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-
-export const description = "A stacked bar chart with a legend"
-
-const chartData = [
-  { month: "January", streaming: 186, nft: 80 },
-  { month: "February", streaming: 305, nft: 200 },
-  { month: "March", streaming: 237, nft: 120 },
-  { month: "April", streaming: 73, nft: 190 },
-  { month: "May", streaming: 209, nft: 130 },
-  { month: "June", streaming: 214, nft: 140 },
-]
+import { getArtistRevenueBreakdown, MonthlyRevenue } from "@/services/analyticsService"
+import { auth } from "@/lib/firebase"
 
 const chartConfig = {
   streaming: {
@@ -43,21 +35,45 @@ const chartConfig = {
     color: "#2563eb", // blue-600
   },
   nft: {
-    label: "NFT Sales",
+    label: "Sales Rev",
     color: "#d97706", // amber-600
   },
 } satisfies ChartConfig
 
 export function ChartRevenue() {
+  const [data, setData] = useState<MonthlyRevenue[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchRevenue = async () => {
+      const user = auth.currentUser
+      if (user) {
+        const breakdown = await getArtistRevenueBreakdown(user.uid)
+        setData(breakdown)
+      }
+      setIsLoading(false)
+    }
+
+    fetchRevenue()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <Card className="border-neutral-500/10 bg-foreground/[0.02] text-foreground h-[400px] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </Card>
+    )
+  }
+
   return (
     <Card className="border-neutral-500/10 bg-foreground/[0.02] text-foreground">
       <CardHeader>
         <CardTitle className="text-foreground">Revenue Breakdown</CardTitle>
-        <CardDescription className="text-muted-foreground">Monthly revenue from Streaming vs NFT Sales</CardDescription>
+        <CardDescription className="text-muted-foreground">Monthly revenue analysis (TON)</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
-          <BarChart accessibilityLayer data={chartData}>
+          <BarChart accessibilityLayer data={data}>
             <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.05)" />
             <XAxis
               dataKey="month"
@@ -71,6 +87,7 @@ export function ChartRevenue() {
                 content={<ChartTooltipContent hideLabel className="bg-background border-border text-foreground" />} 
                 cursor={{fill: 'rgba(255,255,255,0.05)'}}
             />
+            {/* @ts-ignore */}
             <ChartLegend content={<ChartLegendContent className="text-muted-foreground/80" />} />
             <Bar
               dataKey="streaming"

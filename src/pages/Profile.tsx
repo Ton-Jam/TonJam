@@ -29,7 +29,11 @@ import {
  Globe
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from"@/components/ui/avatar";
-
+import { 
+  Tabs, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
 import PostCard from '@/components/PostCard';
 import { MOCK_TRACKS, MOCK_NFTS, TON_LOGO, TJ_COIN_ICON, MOCK_POSTS, MOCK_ARTISTS, MOCK_USERS, APP_LOGO, GENRES } from '@/constants';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, cn } from '@/lib/utils';
@@ -351,7 +355,7 @@ const Profile: React.FC = () => {
  return (
  <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
  {/* Banner Section */}
- <div className="relative h-[30vh] md:h-[40vh] w-full overflow-hidden bg-blue-950">
+ <div className="relative h-[15vh] sm:h-[25vh] md:h-[40vh] w-full overflow-hidden bg-blue-950">
  <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.uid}`, 1200, 400)} className="w-full h-full object-cover opacity-80" alt="" />
  <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
  
@@ -368,11 +372,11 @@ const Profile: React.FC = () => {
  </div>
 
   {/* IDENTITY SECTION */}
-  <div className="max-w-7xl mx-auto px-4 md:px-2 -mt-8 md:-mt-12 relative z-30 flex flex-col md:flex-row-reverse items-center md:items-end w-full gap-8 text-white font-sans">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-2 -mt-10 sm:-mt-12 relative z-30 flex flex-col md:flex-row-reverse items-center md:items-end w-full gap-4 sm:gap-8 text-white font-sans">
     {/* Profile Picture */}
     <div className="relative group flex-shrink-0 md:mr-[-48px]">
       <div 
-        className="relative overflow-hidden border-2 border-[#0A0A0A] shadow-2xl bg-muted w-20 h-20 md:w-32 h-32"
+        className="relative overflow-hidden border-2 border-[#0A0A0A] shadow-2xl bg-muted w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32"
         style={{ borderRadius: '100px' }}
       >
         <Avatar className="w-full h-full">
@@ -399,8 +403,8 @@ const Profile: React.FC = () => {
     </div>
 
     {/* Name, Handle, Stats, and Actions */}
-    <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full pb-2">
-      <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-6 mb-8">
+    <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full pb-1 sm:pb-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-4 sm:gap-6 mb-4 sm:mb-8">
         {/* Name & Handle */}
         <div className="w-full md:w-auto">
           {isEditing ? (
@@ -466,34 +470,34 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Stats Cluster */}
-      <div className="flex items-center justify-center md:justify-start gap-8 pt-4 border-t border-white/5">
+      <div className="flex items-center justify-center md:justify-start gap-6 sm:gap-8 pt-3 sm:pt-4 border-t border-white/5">
         <div className="flex flex-col items-center md:items-start group cursor-pointer">
-          <span className="text-lg font-black text-white tracking-tight group-hover:text-blue-500 transition-colors">
+          <span className="text-base sm:text-lg font-black text-white tracking-tight group-hover:text-blue-500 transition-colors">
             {(localUser.followers || 0).toLocaleString()}
           </span>
-          <span className="text-[8px] uppercase tracking-[0.3em] text-white/40 font-black mt-1">Followers</span>
+          <span className="text-[7px] sm:text-[8px] uppercase tracking-[0.3em] text-white/40 font-black mt-0.5 sm:mt-1">Followers</span>
         </div>
-        <div className="flex flex-col items-center md:items-start pl-8 border-l border-white/10 group cursor-pointer">
-          <span className="text-lg font-black text-white tracking-tight group-hover:text-blue-500 transition-colors">
+        <div className="flex flex-col items-center md:items-start pl-6 sm:pl-8 border-l border-white/10 group cursor-pointer">
+          <span className="text-base sm:text-lg font-black text-white tracking-tight group-hover:text-blue-500 transition-colors">
             {(localUser.following || 0).toLocaleString()}
           </span>
-          <span className="text-[8px] uppercase tracking-[0.3em] text-white/40 font-black mt-1">Following</span>
+          <span className="text-[7px] sm:text-[8px] uppercase tracking-[0.3em] text-white/40 font-black mt-0.5 sm:mt-1">Following</span>
         </div>
         <Link 
           to="/settings" 
-          className="p-3 bg-white/5 rounded-full hover:bg-blue-600 transition-all ml-4 border border-white/10 group active:scale-90"
+          className="p-2 sm:p-3 bg-white/5 rounded-full hover:bg-blue-600 transition-all ml-2 sm:ml-4 border border-white/10 group active:scale-90"
           title="Settings"
         >
-          <Settings className="h-4 w-4 text-white group-hover:rotate-90 transition-transform" />
+          <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white group-hover:rotate-90 transition-transform" />
         </Link>
       </div>
     </div>
  </div>
 
  {/* Tab Navigation */}
- <div className="sticky top-[var(--header-height,64px)] z-40 bg-background/95 backdrop-blur-xl mb-8 mt-6">
+ <div className="sticky top-[var(--header-height,64px)] z-40 bg-background/95 backdrop-blur-xl mb-3 sm:mb-8 mt-3 sm:mt-6">
  <div className="max-w-7xl mx-auto px-4 md:px-8">
- <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+ <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar">
  {[
  { id: 'overview', label: 'Overview' },
  { id: 'inventory', label: 'Collection' },
@@ -508,7 +512,7 @@ const Profile: React.FC = () => {
  key={tab.id} 
  onClick={() => setActiveTab(tab.id as any)} 
  className={cn(
-"py-4 text-sm font-bold transition-all relative whitespace-nowrap",
+"py-3 sm:py-4 text-[11px] sm:text-sm font-bold transition-all relative whitespace-nowrap",
  activeTab === tab.id ?"text-blue-500":"text-muted-foreground hover:text-foreground"
  )} 
  >

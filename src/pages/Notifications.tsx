@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Gem, Heart, Zap, Gavel, UserPlus, ChevronRight, Satellite } from 'lucide-react';
 import { APP_LOGO, TJ_COIN_ICON, TON_LOGO } from '@/constants';
 import NotificationDetailModal from '@/components/NotificationDetailModal';
+import { useAudio } from '@/context/AudioContext';
 
 type NotificationType = 'Social' | 'Syncs' | 'Rewards' | 'System';
 
@@ -28,11 +29,35 @@ const MOCK_NOTIFICATIONS: NotifyItem[] = [
 
 const Notifications: React.FC = () => {
   const navigate = useNavigate();
+  const { followedUserIds, artists, firestoreUsers } = useAudio();
   const [activeTab, setActiveTab] = useState<'All' | NotificationType>('All');
   const [notifications, setNotifications] = useState<NotifyItem[]>(MOCK_NOTIFICATIONS);
   const [selectedNotification, setSelectedNotification] = useState<NotifyItem | null>(null);
 
-  const filtered = activeTab === 'All' ? notifications : notifications.filter(n => n.type === activeTab);
+  // Helper to determine if a notification is from a followed user
+  const isFromFollowedUser = (message: string) => {
+    const followedNames = [
+      ...artists.filter(a => followedUserIds.includes(a.uid)).map(a => a.name.toLowerCase()),
+      ...firestoreUsers.filter(u => followedUserIds.includes(u.uid)).map(u => u.name.toLowerCase()),
+      ...firestoreUsers.filter(u => followedUserIds.includes(u.uid)).map(u => u.username.toLowerCase())
+    ];
+    
+    // For mock matching
+    if (followedNames.length > 0 && (message.includes('@luna_ray') || message.includes('@crypto_whale') || message.includes('Neon Nights'))) {
+      return true;
+    }
+    
+    return followedNames.some(name => message.toLowerCase().includes(name));
+  };
+
+  const filtered = (activeTab === 'All' ? notifications : notifications.filter(n => n.type === activeTab))
+    .sort((a, b) => {
+      const aFollowed = isFromFollowedUser(a.message);
+      const bFollowed = isFromFollowedUser(b.message);
+      if (aFollowed && !bFollowed) return -1;
+      if (!aFollowed && bFollowed) return 1;
+      return 0;
+    });
 
   const markAllRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));

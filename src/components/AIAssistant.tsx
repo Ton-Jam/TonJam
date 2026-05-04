@@ -109,7 +109,7 @@ Keep responses concise but highly entertaining.`;
         for (const call of response.functionCalls) {
           if (call.name === 'playTrack') {
             const args = call.args as any;
-            const track = allTracks.find(t => t.title.toLowerCase().includes(args.trackTitle.toLowerCase()));
+            const track = allTracks.find(t => (t.title || '').toLowerCase().includes((args.trackTitle || '').toLowerCase()));
             if (track) {
               playTrack(track);
               responseText = `Dropping "${track.title}" by ${track.artist} right now! 🔥 Let's vibe! 🎵`;

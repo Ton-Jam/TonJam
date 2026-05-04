@@ -26,7 +26,7 @@ export async function generateAIPlaylist(userDescription?: string): Promise<Gene
   }));
 
   const prompt = `
-    You are TonJam's "Sonic Intelligence" AI curator. 
+    You are TonJam's "Dj Krupy" AI curator. 
     Your goal is to create a highly personalized 5-track playlist for a user based on their profile and available tracks in our library.
 
     USER PROFILE:

@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Zap, Sparkles } from 'lucide-react';
+import { CheckCircle2, Zap, Sparkles, Trophy, Target } from 'lucide-react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
 import { Task } from '@/types';
 import { TJ_COIN_ICON } from '@/constants';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 
 interface TaskCardProps {
   task: Task;
@@ -22,13 +26,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
     
     setIsClaiming(true);
     try {
-      // Simulate network delay
       await new Promise((resolve) => setTimeout(resolve, 1200));
       
       onClaim(task.id);
-      toast.success(`Successfully claimed ${task.reward}!`, {
-        description: `Your balance has been updated with ${task.reward}.`
-      });
+      toast.success(`Successfully claimed ${task.reward}!`);
       
       confetti({
         particleCount: 100,
@@ -37,9 +38,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
         colors: ['#3b82f6', '#10b981', '#f59e0b']
       });
     } catch (error: any) {
-      toast.error("Failed to claim reward", {
-        description: error.message || "An unexpected error occurred. Please try again later.",
-      });
+      toast.error("Failed to claim reward");
     } finally {
       setIsClaiming(false);
     }
@@ -52,159 +51,86 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
     onToggle(task.id, newProgress);
   };
 
-  const handleComplete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (task.completed) return;
-    onToggle(task.id, task.total);
-  };
-
   const progressPercent = Math.min(100, (task.progress / task.total) * 100);
 
   return (
-    <motion.div 
+    <motion.div
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      onClick={() => onClick(task)}
-      onKeyDown={(e) => {
-        if (e.target !== e.currentTarget) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick(task);
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={`View details for task: ${task.title}`}
-      className={`relative group rounded-2xl transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-        task.claimed 
-          ? 'bg-neutral-100 dark:bg-neutral-900/40 opacity-70' 
-          : task.completed
-            ? 'bg-green-50 dark:bg-green-500/5 shadow-[0_0_20px_rgba(34,197,94,0.05)] border border-green-500/20'
-            : 'bg-white dark:bg-muted/50 hover:shadow-xl border border-border shadow-sm'
-      }`}
+      className="h-full"
     >
-      {/* Rarity Indicator */}
-      <div className="absolute top-0 right-0 flex items-center gap-4 p-4">
-        {task.rarity && task.rarity !== 'common' && (
-          <div className={`px-4 py-4 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-            task.rarity === 'rare' ? 'bg-blue-500/20 text-blue-400' :
-            task.rarity === 'epic' ? 'bg-purple-500/20 text-purple-400' :
-            'bg-amber-500/20 text-amber-400'
-          }`}>
-            {task.rarity}
-          </div>
-        )}
-      </div>
+      <Card 
+        onClick={() => onClick(task)}
+        className={`group transition-all duration-300 h-full flex flex-col cursor-pointer border-2 ${
+          task.claimed 
+            ? 'bg-muted/50 border-transparent opacity-80' 
+            : task.completed
+              ? 'border-primary/50 bg-primary/5 shadow-md'
+              : 'hover:shadow-lg border-transparent bg-card'
+        }`}
+      >
+        <CardHeader className="flex flex-row items-start justify-between gap-4 pb-2">
+            <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl transition-all duration-300 ${
+                    task.completed ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
+                }`}>
+                    {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Target className="w-5 h-5" />}
+                </div>
+                <CardTitle className="text-sm font-bold uppercase tracking-tight">{task.title}</CardTitle>
+            </div>
+            
+            {task.rarity && (
+              <Badge variant={task.rarity === 'rare' ? 'default' : task.rarity === 'epic' ? 'secondary' : 'outline'} className="uppercase">
+                {task.rarity}
+              </Badge>
+            )}
+        </CardHeader>
 
-      <div className="p-4 flex flex-col flex-1 mt-4">
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 ${
-              task.completed ? 'bg-green-500/20 text-green-500' : 'bg-blue-600/20 text-blue-500'
-            }`}>
-              {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Zap className="w-6 h-6" />}
-            </div>
-            <div>
-              <h3 className={`text-sm font-bold uppercase tracking-tight transition-all ${task.completed ? 'text-green-600 dark:text-green-500/80' : 'text-zinc-800 dark:text-foreground'}`}>
-                {task.title}
-              </h3>
-              <p className="text-[10px] font-medium text-muted-foreground leading-relaxed mt-4">
-                {task.description}
-              </p>
-            </div>
-          </div>
-        </div>
+        <CardContent className="flex-1 space-y-4">
+          <CardDescription className="text-xs text-muted-foreground">
+            {task.description}
+          </CardDescription>
 
-        {/* Progress Bar */}
-        {!task.completed && (
-          <div className="mt-auto pt-4">
-            <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-foreground/30 mb-4">
-              <span>Progress</span>
-              <span>{task.progress} / {task.total}</span>
-            </div>
-            <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden relative shadow-inner">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                className="h-full bg-blue-500 rounded-full relative shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-              >
-                {/* Animated shimmer effect */}
-                <motion.div
-                  animate={{
-                    x: ['-100%', '200%'],
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 2,
-                    ease: "linear",
-                  }}
-                  className="absolute inset-0 w-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                />
-              </motion.div>
-            </div>
-          </div>
-        )}
+          {!task.completed && (
+              <div className="space-y-1.5 pt-2">
+                <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <span>Progress</span>
+                  <span>{task.progress} / {task.total}</span>
+                </div>
+                <Progress value={progressPercent} className="h-2" />
+              </div>
+          )}
+        </CardContent>
 
-        {/* Reward Section */}
-        <div className="mt-4 pt-4 flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Reward</span>
-            <div className="flex items-center gap-4">
-              <img src={TJ_COIN_ICON} className="w-4 h-4 object-contain" alt="" referrerPolicy="no-referrer" />
-              <span className="text-sm font-black text-zinc-800 dark:text-white">{task.reward}</span>
-              <span className="text-[10px] font-bold text-blue-500/60">+{task.points} XP</span>
-            </div>
+        <CardFooter className="pt-2 flex items-center justify-between border-t border-border mt-auto pt-4">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-amber-500" />
+            <span className="text-sm font-bold text-foreground">{task.reward}</span>
+            <span className="text-xs text-muted-foreground">+{task.points} pts</span>
           </div>
 
           <div className="flex items-center gap-2">
-            {!task.claimed && !task.completed && (
-              <button 
-                onClick={handleIncrement}
-                className="px-3 py-1.5 rounded-full bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all text-[9px] font-bold uppercase tracking-widest border border-border/50"
-              >
-                +1 Progress
-              </button>
+            {!task.completed && !task.claimed && (
+              <Button size="sm" variant="outline" onClick={handleIncrement} className="h-8 text-xs">
+                +1
+              </Button>
             )}
             
-            <button 
-              onClick={handleClaim}
-              disabled={isClaiming || !task.completed || task.claimed}
-              className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:shadow-none flex items-center gap-2 ${
-                task.claimed 
-                  ? 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-500 cursor-not-allowed'
-                  : task.completed
-                    ? 'bg-green-500 hover:bg-green-400 text-white shadow-green-500/20' 
-                    : 'bg-muted text-muted-foreground/40 cursor-not-allowed border border-border'
-              }`}
+            <Button 
+                size="sm"
+                onClick={handleClaim}
+                disabled={isClaiming || !task.completed || task.claimed}
+                className={`h-8 text-xs font-semibold uppercase tracking-wide px-4`}
             >
-              {isClaiming ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  Processing
-                </>
-              ) : task.claimed ? (
-                <>
-                  <CheckCircle2 className="w-3 h-3" />
-                  Claimed
-                </>
-              ) : task.completed ? (
-                <>
-                  <Sparkles className="w-3 h-3" />
-                  Claim Reward
-                </>
-              ) : (
-                <>
-                  Locked
-                </>
-              )}
-            </button>
+                {isClaiming ? 'Claiming...' : task.claimed ? 'Claimed' : task.completed ? 'Claim Reward' : 'In Progress'}
+            </Button>
           </div>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </motion.div>
   );
 };
 
 export default TaskCard;
+

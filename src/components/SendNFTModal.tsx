@@ -4,6 +4,7 @@ import { NFTItem } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { getPlaceholderImage } from '@/lib/utils';
+import LoadingOverlay from './LoadingOverlay';
 
 interface SendNFTModalProps {
   nft: NFTItem;
@@ -46,6 +47,7 @@ const SendNFTModal: React.FC<SendNFTModalProps> = ({ nft, isOpen, onClose }) => 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
+      <LoadingOverlay isVisible={isProcessing} type="transaction" message="Broadcasting to Network..." />
       <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={onClose}></div>
       
       <motion.div 

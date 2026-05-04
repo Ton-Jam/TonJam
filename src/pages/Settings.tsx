@@ -15,8 +15,10 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
+import { useNotification } from '@/context/NotificationContext';
 import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
+import { NotificationPreferences } from '@/types';
 
 // shadcn/ui components
 import { Switch } from '@/components/ui/switch';
@@ -35,14 +37,12 @@ const Settings: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
+  
+  const { preferences, updatePreferences } = useNotification();
 
-  // Notification states
-  const [notifications, setNotifications] = useState(true);
-  const [marketNotifications, setMarketNotifications] = useState(true);
-  const [newReleases, setNewReleases] = useState(true);
-  const [socialSignals, setSocialSignals] = useState(true);
-  const [bidNotifications, setBidNotifications] = useState(true);
-  const [saleNotifications, setSaleNotifications] = useState(true);
+  const handlePreferenceToggle = (key: keyof NotificationPreferences, value: boolean) => {
+    updatePreferences({ ...preferences, [key]: value });
+  };
 
   const SettingRow = ({ icon: Icon, title, description, children, onClick }: any) => (
     <div 
@@ -160,28 +160,28 @@ const Settings: React.FC = () => {
                 title="Direct Alerts" 
                 description="All transactional signal activity"
               >
-                <Switch checked={notifications} onCheckedChange={setNotifications} />
+                <Switch checked={preferences.directAlerts} onCheckedChange={(val) => handlePreferenceToggle('directAlerts', val)} />
               </SettingRow>
               <SettingRow 
                 icon={Bell} 
                 title="Market Activity" 
                 description="Global market volume & trends"
               >
-                <Switch checked={marketNotifications} onCheckedChange={setMarketNotifications} />
+                <Switch checked={preferences.marketActivity} onCheckedChange={(val) => handlePreferenceToggle('marketActivity', val)} />
               </SettingRow>
               <SettingRow 
                 icon={Bell} 
                 title="Drops & Releases" 
                 description="New artistic uploads & auctions"
               >
-                <Switch checked={newReleases} onCheckedChange={setNewReleases} />
+                <Switch checked={preferences.dropsAndReleases} onCheckedChange={(val) => handlePreferenceToggle('dropsAndReleases', val)} />
               </SettingRow>
               <SettingRow 
                 icon={Bell} 
                 title="Social Node" 
                 description="Follows, likes and mentions"
               >
-                <Switch checked={socialSignals} onCheckedChange={setSocialSignals} />
+                <Switch checked={preferences.socialSignals} onCheckedChange={(val) => handlePreferenceToggle('socialSignals', val)} />
               </SettingRow>
             </div>
           </div>
@@ -194,14 +194,14 @@ const Settings: React.FC = () => {
                 title="Bid Alerts" 
                 description="When you have been outbid"
               >
-                <Switch checked={bidNotifications} onCheckedChange={setBidNotifications} />
+                <Switch checked={preferences.bidAlerts} onCheckedChange={(val) => handlePreferenceToggle('bidAlerts', val)} />
               </SettingRow>
               <SettingRow 
                 icon={Bell} 
                 title="Sale Events" 
                 description="Successful asset transfers"
               >
-                <Switch checked={saleNotifications} onCheckedChange={setSaleNotifications} />
+                <Switch checked={preferences.saleEvents} onCheckedChange={(val) => handlePreferenceToggle('saleEvents', val)} />
               </SettingRow>
             </div>
           </div>

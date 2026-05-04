@@ -1,4 +1,26 @@
 
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'track_upload' | 'nft_sale' | 'event' | 'bid_update' | 'general';
+  title: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  timestamp: string;
+  metadata?: Record<string, any>;
+}
+
+export interface NotificationPreferences {
+  userId: string;
+  directAlerts: boolean;
+  marketActivity: boolean;
+  dropsAndReleases: boolean;
+  socialSignals: boolean;
+  bidAlerts: boolean;
+  saleEvents: boolean;
+}
+
 export interface TokenGating {
   enabled: boolean;
   tokenAddress?: string; // Address of the required token or NFT collection
@@ -10,6 +32,7 @@ export interface TokenGating {
 export class Track {
   id!: string;
   songId!: string;
+  albumId?: string;
   title!: string;
   artist!: string;
   artistId!: string;
@@ -44,6 +67,7 @@ export class Track {
   coverIpfsUrl?: string;
   royaltySplits?: RoyaltySplit[];
   lyrics?: string = '';
+  isExclusive?: boolean;
   recommendationReason?: string;
   recommendationScore?: number;
   isCollaboration?: boolean;
@@ -99,6 +123,7 @@ export interface NFTItem {
   contractAddress?: string;
   royaltySplits?: RoyaltySplit[];
   stems_available?: boolean;
+  artistVerified?: boolean;
   description?: string;
   traits?: NFTTrait[];
   attributes?: NFTTrait[]; // Alias for traits
@@ -137,12 +162,17 @@ export interface Collaborator {
   address: string;
   name: string;
   role: string;
+  royalty: number;
 }
 
 export interface RoyaltySplit {
   address: string;
   percentage: number; // e.g. 0.05 for 5%
   label?: string; // e.g. "Producer", "Manager"
+}
+
+export interface RoyaltySplitExtended extends RoyaltySplit {
+  label: string;
 }
 
 export interface Event {
@@ -247,12 +277,25 @@ export interface Post {
   title?: string;
   subtitle?: string;
   type?: string;
+  isExclusive?: boolean;
   paymentAmount?: string;
   paymentCurrency?: string;
   status?: string;
   artistName?: string;
   link?: string;
   targetId?: string;
+}
+
+export interface Album {
+  id: string;
+  title: string;
+  artist: string;
+  artistId: string;
+  coverUrl: string;
+  releaseYear: number;
+  trackIds: string[];
+  genre: string;
+  description?: string;
 }
 
 export interface Playlist {
@@ -288,6 +331,8 @@ export interface UserProfile {
     website?: string;
     telegram?: string;
   };
+  location?: string;
+  website?: string;
   isPremium?: boolean;
   tonBalance?: number;
   jamBalance?: number;
@@ -305,6 +350,7 @@ export interface UserProfile {
   favoriteGenres?: string[];
   transactions?: Transaction[];
   createdPlaylistIds?: string[];
+  ownedTrackIds?: string[];
   ownedNftIds?: string[];
   listedNftIds?: string[];
   anthemId?: string;
@@ -337,7 +383,7 @@ export interface Royalty {
 
 export interface Transaction {
   id: string;
-  type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards' | 'sponsorship' | 'deposit';
+  type: 'stream' | 'nft_sale' | 'nft_mint' | 'withdrawal' | 'platform_fee' | 'jam_purchase' | 'premium_subscription' | 'stake' | 'unstake' | 'claim_rewards' | 'sponsorship' | 'deposit' | 'tip' | 'fan_club_join';
   amount: number; // Total amount in TON or JAM
   platformFee: number; // Total platform fee
   artistShare: number; // Amount sent to artist

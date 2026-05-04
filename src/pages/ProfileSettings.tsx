@@ -9,7 +9,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { uploadAvatar } from '@/services/storageService';
 import { validateFile } from '@/lib/utils';
 import RoyaltySplitManager from '@/components/RoyaltySplitManager';
-import CollaboratorManager from '@/components/CollaboratorManager';
+import { CollaboratorManager } from '@/components/CollaboratorManager';
 import { RoyaltySplit, Collaborator } from '@/types';
 
 export default function ProfileSettings() {
@@ -28,6 +28,7 @@ export default function ProfileSettings() {
     profileTheme: 'dark',
     twitter: '',
     instagram: '',
+    location: '',
     website: '',
     streamingSplits: [] as RoyaltySplit[],
     nftSaleSplits: [] as RoyaltySplit[],
@@ -44,7 +45,8 @@ export default function ProfileSettings() {
         profileTheme: userProfile.profileTheme || 'dark',
         twitter: userProfile.socials?.x || '',
         instagram: userProfile.socials?.instagram || '',
-        website: userProfile.socials?.website || '',
+        location: userProfile.location || '',
+        website: userProfile.website || userProfile.socials?.website || '',
         streamingSplits: userProfile.royaltyConfig?.streamingSplits || [],
         nftSaleSplits: userProfile.royaltyConfig?.nftSaleSplits || [],
         collaborators: userProfile.collaborators || [],
@@ -100,6 +102,8 @@ export default function ProfileSettings() {
         bio: profile.bio,
         avatar: profile.avatar,
         profileTheme: profile.profileTheme,
+        location: profile.location,
+        website: profile.website,
         socials: {
           x: profile.twitter,
           instagram: profile.instagram,
@@ -333,6 +337,22 @@ Return ONLY the bio text, nothing else.`;
               </div>
 
               <div className="sm:col-span-2">
+                <label htmlFor="location" className="block text-sm font-medium text-foreground">
+                  Location
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="location"
+                    name="location"
+                    type="text"
+                    value={profile.location}
+                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
                 <label htmlFor="website" className="block text-sm font-medium text-foreground">
                   Website
                 </label>
@@ -411,7 +431,8 @@ Return ONLY the bio text, nothing else.`;
                   profileTheme: userProfile?.profileTheme || 'dark',
                   twitter: userProfile?.socials?.x || '',
                   instagram: userProfile?.socials?.instagram || '',
-                  website: userProfile?.socials?.website || '',
+                  location: userProfile?.location || '',
+                  website: userProfile?.website || userProfile?.socials?.website || '',
                   streamingSplits: userProfile?.royaltyConfig?.streamingSplits || [],
                   nftSaleSplits: userProfile?.royaltyConfig?.nftSaleSplits || [],
                   collaborators: userProfile?.collaborators || [],

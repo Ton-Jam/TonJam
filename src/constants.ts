@@ -1,4 +1,4 @@
-import { Track, NFTItem, Artist, Post, Playlist, UserProfile } from './types';
+import { Track, NFTItem, Artist, Post, Playlist, Album, UserProfile } from './types';
 
 // Official TonJam Brand Assets
 export const APP_LOGO = "https://i.postimg.cc/63GsZHzq/TonJam-icon.png"; 
@@ -387,6 +387,42 @@ Everything is clear in the neon light`
 ];
 
 import { Zap, Moon, Waves, Sparkles, Factory, Coffee, Headphones, Guitar, Music, Piano } from 'lucide-react';
+
+export const MOCK_ALBUMS: Album[] = [
+  {
+    id: 'alb-1',
+    title: 'Neon Pulse',
+    artist: 'Neon Voyager',
+    artistId: 'a1',
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Neon%20Pulse?width=400&height=400&nologo=true',
+    releaseYear: 2023,
+    trackIds: ['1', '7', '11'],
+    genre: 'Electronic',
+    description: 'The debut album defining the digital frontier.'
+  },
+  {
+    id: 'alb-2',
+    title: 'Digital Dreams',
+    artist: 'Byte Beat',
+    artistId: 'a2',
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Digital%20Dreams?width=400&height=400&nologo=true',
+    releaseYear: 2024,
+    trackIds: ['2', '9'],
+    genre: 'Synthwave',
+    description: 'A collection of synthesized melodies.'
+  },
+  {
+    id: 'alb-3',
+    title: 'Atmospheric Voids',
+    artist: 'Echo Phase',
+    artistId: 'a3',
+    coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Atmospheric%20Voids?width=400&height=400&nologo=true',
+    releaseYear: 2024,
+    trackIds: ['3', '10'],
+    genre: 'Ambient',
+    description: 'Drifting through the blockchain.'
+  }
+];
 
 export const GENRES = [
   { id: 'electronic', name: 'Electronic', icon: Zap, color: 'from-blue-500 to-cyan-500' },

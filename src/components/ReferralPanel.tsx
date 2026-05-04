@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Users, Copy, CheckCircle2, Gift, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAudio } from '@/context/AudioContext';
+import { shareContent } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const ReferralPanel: React.FC = () => {
@@ -19,15 +20,19 @@ const ReferralPanel: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Join TonJam',
-        text: 'Join me on TonJam and earn TJ tokens!',
-        url: referralLink,
-      }).catch((error) => console.log('Error sharing', error));
-    } else {
-      handleCopy();
+  const handleShare = async () => {
+    const result = await shareContent({
+      title: 'Join TonJam',
+      text: 'Join me on TonJam and earn TJ tokens!',
+      url: referralLink,
+    });
+
+    if (result.success) {
+      if (result.method === 'clipboard') {
+        addNotification("Referral link copied to clipboard!", "success");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
     }
   };
 

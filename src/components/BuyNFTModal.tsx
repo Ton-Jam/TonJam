@@ -1,13 +1,27 @@
 import React, { useState } from 'react';
-import { X, Loader2, CheckCircle2, Info } from 'lucide-react';
+import { Loader2, CheckCircle2, Info, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { TON_LOGO, APP_LOGO } from '@/constants';
+import { TON_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { buyNFT } from '@/services/tonService';
 import { processNFTSaleRoyalty } from '@/services/royaltyService';
-import { getPlaceholderImage } from '@/lib/utils';
+import { createActivityPost } from '@/services/socialService';
+import { getPlaceholderImage, cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
+import LoadingOverlay from './LoadingOverlay';
 
 interface BuyNFTModalProps {
   nft: NFTItem;
@@ -15,7 +29,7 @@ interface BuyNFTModalProps {
 }
 
 const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
-  const { addNotification, updateNFT, addUserNFT, recordTransaction, createPost } = useAudio();
+  const { addNotification, updateNFT, addUserNFT, userProfile } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const navigate = useNavigate();
@@ -23,7 +37,6 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   const price = parseFloat(nft.price) || 0;
   const platformFeeFromBuyer = price * 0.05;
   const platformFeeFromSeller = price * 0.05;
-  const totalPlatformFee = platformFeeFromBuyer + platformFeeFromSeller;
   const gasFee = 0.05;
   const total = (price + platformFeeFromBuyer + gasFee).toFixed(2);
   
@@ -47,12 +60,12 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
         owner: userAddress,
         listingType: undefined,
         price: nft.price
-      };
+      } as NFTItem;
 
       // Record the transaction for royalty distribution
       await processNFTSaleRoyalty(nft, price);
 
-      // Update global state silently so we can show a custom success message
+      // Update global state
       updateNFT(nft.id, { 
         owner: userAddress, 
         listingType: undefined 
@@ -60,12 +73,20 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
       
       addUserNFT(updatedNFT, true);
 
-      // Create a social post about the purchase
-      createPost({
-        content: `Just acquired this legendary sonic artifact: ${nft.title}! The quality is insane. 💎`,
-        nftId: nft.id,
-        nft: updatedNFT
-      });
+      // Create a sophisticated activity post
+      await createActivityPost(
+        userProfile.uid,
+        userProfile.name,
+        userProfile.avatar,
+        `just acquired a rare sonic artifact: ${nft.title}`,
+        'nft_purchase',
+        {
+          targetId: nft.id,
+          artistName: nft.artist || nft.creator,
+          paymentAmount: nft.price,
+          paymentCurrency: 'TON'
+        }
+      );
       
       addNotification("Asset successfully synced to vault.", "success");
       onClose();
@@ -78,79 +99,99 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-2 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
-      <div className="relative bg-white/5 backdrop-blur-md w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 blur-3xl rounded-full"></div>
-        <div className="p-2 relative z-10">
-          <header className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-bold uppercase tracking-tighter text-white">Purchase Asset</h2>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => { navigate(`/nft/${nft.id}`); onClose(); }} 
-                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
-                title="View Details"
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-3xl border-border bg-card shadow-2xl">
+        <LoadingOverlay isVisible={isProcessing} type="transaction" message="Executing TON Protocol..." />
+        
+        <div className="p-6 space-y-6">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle className="text-xl font-bold tracking-tight">Purchase Asset</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                  TON Blockchain Sync
+                </DialogDescription>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => { navigate(`/nft/${nft.id}`); onClose(); }}
+                className="h-8 w-8 rounded-full"
               >
                 <Info className="h-4 w-4" />
-              </button>
-              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
-                <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
-          </header>
-          <div className="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-[16px]">
-            <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-16 h-16 rounded-[12px] object-cover" alt="" />
-            <div>
-              <p className="text-[10px] font-bold text-white uppercase truncate w-32">{nft.title}</p>
-              <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-2">Creator: {nft.creator}</p>
-            </div>
-          </div>
-          <div className="space-y-2 mb-2 bg-white/5 p-2 rounded-[16px]">
-            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-white/40">Asset Price</span>
-              <span className="text-white">{price} TON</span>
-            </div>
-            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-white/40">Platform Fee (5% Buyer)</span>
-              <span className="text-blue-400">+{platformFeeFromBuyer.toFixed(2)} TON</span>
-            </div>
-            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-white/40">Network Gas (est)</span>
-              <span className="text-white/20">~{gasFee} TON</span>
-            </div>
-            <div className="pt-2 flex justify-between items-center">
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Total Required</span>
-              <div className="flex items-center gap-2">
-                <img src={TON_LOGO} className="w-4 h-4" alt="" />
-                <span className="text-[20px] font-bold text-white tracking-tighter">{total}</span>
+          </DialogHeader>
+
+          <Card className="border-border bg-background/50">
+            <CardContent className="flex items-center gap-4 p-4">
+              <img 
+                src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
+                className="w-16 h-16 rounded-lg object-cover shadow-md" 
+                alt={nft.title} 
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground truncate">{nft.title}</p>
+                <p className="text-xs text-muted-foreground truncate uppercase font-medium mt-0.5">Creator: {nft.creator}</p>
+                <Badge variant="secondary" className="mt-2 text-[10px] font-medium h-5">
+                  {nft.edition || 'Rare'} Artifact
+                </Badge>
               </div>
-            </div>
-            {royaltySplits.length > 0 && (
-              <div className="pt-2 space-y-1">
-                <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Royalty Distribution</span>
-                {royaltySplits.map((split, i) => (
-                  <div key={i} className="flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/60">
-                    <span>{split.label || 'Collaborator'} ({ (split.percentage * 100).toFixed(0) }%)</span>
-                    <span>{(split.percentage * price).toFixed(2)} TON</span>
+            </CardContent>
+          </Card>
+
+          <ScrollArea className="max-h-[300px] pr-2 -mr-2">
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-xs text-muted-foreground">
+                  <span>Artifact Value</span>
+                  <span className="font-semibold text-foreground">{price} TON</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-muted-foreground">
+                  <span>Network Sync Fee</span>
+                  <span className="text-primary font-medium">+{platformFeeFromBuyer.toFixed(2)} TON</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-muted-foreground">
+                  <span>Gas Reservation</span>
+                  <span className="text-muted-foreground">~{gasFee} TON</span>
+                </div>
+                
+                <Separator className="bg-border my-2" />
+                
+                <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-xl">
+                  <span className="text-sm font-semibold text-foreground">Total Required</span>
+                  <div className="flex items-center gap-2">
+                    <img src={TON_LOGO} className="w-5 h-5" alt="TON" />
+                    <span className="text-xl font-bold text-foreground">{total}</span>
                   </div>
-                ))}
+                </div>
               </div>
-            )}
-            <div className="pt-2 flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-white/20">
-              <span>Artist Receive (Price - 5% Fee - Royalties)</span>
-              <span>{artistShare} TON</span>
+
+              {royaltySplits.length > 0 && (
+                <div className="p-4 rounded-xl border border-border bg-background space-y-3">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase">Royalty Distribution</span>
+                  {royaltySplits.map((split, i) => (
+                    <div key={i} className="flex justify-between items-center text-xs text-muted-foreground">
+                      <span>{split.label || 'Collaborator'} ({ (split.percentage * 100).toFixed(0) }%)</span>
+                      <span className="text-primary">{(split.percentage * price).toFixed(2)} TON</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-          <button
+          </ScrollArea>
+
+          <Button
             onClick={handlePurchase}
             disabled={isProcessing}
-            className="w-full py-2 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 rounded-[12px] text-[10px] font-bold uppercase tracking-widest text-white shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-            {isProcessing ? 'SYNCING...' : 'CONFIRM PURCHASE'}
-          </button>
+            className="w-full h-12 rounded-xl text-sm font-semibold uppercase tracking-wide"
+          >
+            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wallet className="h-4 w-4 mr-2" />}
+            {isProcessing ? 'Executing...' : 'Execute Purchase'}
+          </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

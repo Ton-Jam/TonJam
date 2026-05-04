@@ -74,28 +74,13 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
           <h3 className="text-lg font-bold text-foreground mb-4">Popular</h3>
           <div className="space-y-2">
             {topTracks.map((track, idx) => (
-              <div 
-                key={`top-${track.id}`} 
-                className="group flex items-center gap-4 p-2 rounded-[8px] hover:bg-muted/50 transition-all cursor-pointer"
-                onClick={() => playAll([track])}
-              >
-                <span className="w-8 text-sm font-medium text-muted-foreground text-center">{idx + 1}</span>
-                <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0">
-                  <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-full h-full object-cover" alt="" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Play className="h-4 w-4 text-white fill-white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-foreground dark:text-white truncate">{track.title}</h4>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {(track.playCount || 0).toLocaleString()}
-                </div>
-                <div className="text-sm text-muted-foreground w-16 text-right">
-                  {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
-                </div>
-              </div>
+              <TrackCard 
+                key={`top-${track.id}`}
+                track={track}
+                variant="row"
+                index={idx}
+                className="hover:bg-muted/50"
+              />
             ))}
           </div>
         </section>

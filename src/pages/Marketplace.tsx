@@ -6,11 +6,15 @@ import { getPlaceholderImage } from '@/lib/utils';
 import NFTCard from '@/components/NFTCard';
 import ArtistCard from '@/components/ArtistCard';
 import TopChartNFTs from '@/components/TopChartNFTs';
+import SkeletonCard from '@/components/SkeletonCard';
+import Leaderboard from '@/components/Leaderboard';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { motion } from 'motion/react';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +38,7 @@ const SORT_OPTIONS = ['Newest', 'Price: Low', 'Price: High', 'Rarity'];
 const Marketplace: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Trending');
-  const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery, marketplaceFilters, setMarketplaceFilters } = useAudio();
+  const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery, marketplaceFilters, setMarketplaceFilters, isLoading } = useAudio();
   const { genre: genreFilter, artist: artistFilter, rarity: rarityFilter, priceRange, sortBy } = marketplaceFilters;
 
   const setGenreFilter = (genre: string) => setMarketplaceFilters(prev => ({ ...prev, genre }));
@@ -206,94 +210,76 @@ const Marketplace: React.FC = () => {
         </div>
 
         {/* Floor Price Analytics Cards */}
-        <section className="mb-2 mt-2 max-w-[1600px] mx-auto px-4 md:px-4">
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        <section className="mb-8 mt-4 max-w-[1600px] mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
             {/* Floor Price */}
-            <div className="flex-shrink-0 w-[110px] sm:w-auto sm:flex-1 bg-muted/30 backdrop-blur-md rounded-xl p-2 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-all"></div>
-              <div className="relative z-10 flex flex-col">
-                <p className="text-[7px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-0.5">
-                  Floor Price
-                </p>
-                <div className="flex items-end gap-1 mb-0.5">
-                  <h3 className="text-sm font-black tracking-tighter text-foreground leading-none">
-                    {Math.min(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2)} TON
+            <Card className="bg-card border-border shadow-sm">
+              <CardContent className="p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Floor Price</p>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-xl font-bold tracking-tight text-foreground">
+                    {Math.min(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2)}
                   </h3>
+                  <span className="text-xs text-muted-foreground font-medium">TON</span>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-400">
-                  <TrendingUp className="h-2 w-2" />
-                  <span className="text-[7px] font-bold uppercase tracking-wider">
-                    Lowest Entry
-                  </span>
+                <div className="flex items-center gap-1 text-emerald-500 mt-2">
+                  <TrendingUp className="h-3 w-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Lowest Entry</span>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Highest Sale */}
-            <div className="flex-shrink-0 w-[110px] sm:w-auto sm:flex-1 bg-muted/30 backdrop-blur-md rounded-xl p-2 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-amber-600/5 opacity-0 group-hover:opacity-100 transition-all"></div>
-              <div className="relative z-10 flex flex-col">
-                <p className="text-[7px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-0.5">
-                  Highest Sale
-                </p>
-                <div className="flex items-end gap-1 mb-0.5">
-                  <h3 className="text-sm font-black tracking-tighter text-foreground leading-none">
-                    {Math.max(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2)} TON
+            <Card className="bg-card border-border shadow-sm">
+              <CardContent className="p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Highest Sale</p>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-xl font-bold tracking-tight text-foreground">
+                    {Math.max(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2)}
                   </h3>
+                  <span className="text-xs text-muted-foreground font-medium">TON</span>
                 </div>
-                <div className="flex items-center gap-1 text-amber-400">
-                  <Rocket className="h-2 w-2" />
-                  <span className="text-[7px] font-bold uppercase tracking-wider">
-                    Premium Value
-                  </span>
+                <div className="flex items-center gap-1 text-amber-500 mt-2">
+                  <Rocket className="h-3 w-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Premium Value</span>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Total Market Volume */}
-            <div className="flex-shrink-0 w-[110px] sm:w-auto sm:flex-1 bg-muted/30 backdrop-blur-md rounded-xl p-2 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-purple-600/5 opacity-0 group-hover:opacity-100 transition-all"></div>
-              <div className="relative z-10 flex flex-col">
-                <p className="text-[7px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-0.5">
-                  Market Volume
-                </p>
-                <div className="flex items-end gap-1 mb-0.5">
-                  <h3 className="text-sm font-black tracking-tighter text-foreground leading-none">
-                    {allNFTs
-                      .reduce((sum, nft) => sum + parseFloat(nft.price), 0)
-                      .toFixed(2)} TON
+            <Card className="bg-card border-border shadow-sm">
+              <CardContent className="p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Market Volume</p>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-xl font-bold tracking-tight text-foreground">
+                    {allNFTs.reduce((sum, nft) => sum + parseFloat(nft.price), 0).toFixed(0)}
                   </h3>
+                  <span className="text-xs text-muted-foreground font-medium">TON</span>
                 </div>
-                <div className="flex items-center gap-1 text-purple-400">
-                  <Zap className="h-2 w-2" />
-                  <span className="text-[7px] font-bold uppercase tracking-wider">
-                    Total Liquidity
-                  </span>
+                <div className="flex items-center gap-1 text-purple-500 mt-2">
+                  <Zap className="h-3 w-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Total Liquidity</span>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Active Auctions */}
-            <div className="flex-shrink-0 w-[110px] sm:w-auto sm:flex-1 bg-muted/30 backdrop-blur-md rounded-xl p-2 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-emerald-600/5 opacity-0 group-hover:opacity-100 transition-all"></div>
-              <div className="relative z-10 flex flex-col">
-                <p className="text-[7px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-0.5">
-                  Active Auctions
-                </p>
-                <div className="flex items-end gap-1 mb-0.5">
-                  <h3 className="text-sm font-black tracking-tighter text-foreground leading-none">
+            <Card className="bg-card border-border shadow-sm">
+              <CardContent className="p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Active Auctions</p>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-xl font-bold tracking-tight text-foreground">
                     {allNFTs.filter(nft => nft.listingType === 'auction').length}
                   </h3>
+                  <span className="text-xs text-muted-foreground font-medium">Assets</span>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-400">
-                  <Bell className="h-2 w-2" />
-                  <span className="text-[7px] font-bold uppercase tracking-wider">
-                    Live Bidding
-                  </span>
+                <div className="flex items-center gap-1 text-emerald-500 mt-2">
+                  <Bell className="h-3 w-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Live Bidding</span>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
           </div>
         </section>
@@ -343,25 +329,21 @@ const Marketplace: React.FC = () => {
         </section>
 
         {/* 3. REFINED CONTROLS - Clean Tab Filters */}
-        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/20 backdrop-blur-2xl py-2 w-full px-4 md:px-4 mb-2 border-b border-border/50 dark:border-transparent">
-          <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
-            {/* Tab Filters */}
-            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar">
-              {TABS.map(tab => (
-                <button 
-                  key={tab} 
-                  onClick={() => setActiveTab(tab)} 
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${ activeTab === tab ? 'bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-600/20' : 'bg-muted/50 backdrop-blur-md text-muted-foreground border-border dark:border-transparent hover:text-foreground hover:bg-muted' }`} 
-                >
-                  {tab}
-                  {tab === 'My Bids' && userBids.length > 0 && (
-                    <span className="ml-2 text-blue-400 font-mono">[{userBids.length}]</span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* Search and Filters */}
+        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/50 backdrop-blur-md py-4 w-full px-6 mb-8 border-b border-border">
+          <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+            <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="bg-muted p-1">
+                {TABS.map(tab => (
+                  <TabsTrigger 
+                    key={tab} 
+                    value={tab} 
+                    className="px-6 data-[state=active]:bg-background data-[state=active]:text-foreground"
+                  >
+                    {tab}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
         </div>
 
@@ -396,12 +378,20 @@ const Marketplace: React.FC = () => {
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
-                {allNFTs.slice(0, 8).map((nft) => (
-                  <div key={nft.id} className="flex-shrink-0 w-[160px] snap-start">
-                    <NFTCard nft={nft} />
-                  </div>
-                ))}
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={`trending-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                      <SkeletonCard />
+                    </div>
+                  ))
+                ) : (
+                  allNFTs.slice(0, 8).map((nft) => (
+                    <div key={nft.id} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                      <NFTCard nft={nft} />
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
@@ -415,12 +405,20 @@ const Marketplace: React.FC = () => {
                   EXPLORE SCARCITY <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
-                {allNFTs.filter(n => n.edition !== 'Open' && n.edition !== 'Unlimited').slice(0, 8).map((nft) => (
-                  <div key={nft.id} className="flex-shrink-0 w-[160px] snap-start">
-                    <NFTCard nft={nft} />
-                  </div>
-                ))}
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
+                {isLoading ? (
+                   Array.from({ length: 5 }).map((_, i) => (
+                    <div key={`limited-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                      <SkeletonCard />
+                    </div>
+                  ))
+                ) : (
+                  allNFTs.filter(n => n.edition !== 'Open' && n.edition !== 'Unlimited').slice(0, 8).map((nft) => (
+                    <div key={nft.id} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                      <NFTCard nft={nft} />
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
@@ -434,12 +432,20 @@ const Marketplace: React.FC = () => {
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-2 pb-2 -mx-4 px-4">
-                {allNFTs.sort((a,b) => (b.offers?.length || 0) - (a.offers?.length || 0)).slice(0, 8).map((nft) => (
-                  <div key={nft.id} className="flex-shrink-0 w-[160px] snap-start">
-                    <NFTCard nft={nft} />
-                  </div>
-                ))}
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={`bidded-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                      <SkeletonCard />
+                    </div>
+                  ))
+                ) : (
+                  allNFTs.sort((a,b) => (b.offers?.length || 0) - (a.offers?.length || 0)).slice(0, 8).map((nft) => (
+                    <div key={nft.id} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                      <NFTCard nft={nft} />
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
@@ -454,13 +460,18 @@ const Marketplace: React.FC = () => {
                   VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2 -mx-4 px-4">
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
                 {featuredArtists.map((artist) => (
-                  <div key={artist.uid} className="flex-shrink-0 w-[140px] snap-start">
+                  <div key={artist.uid} className="flex-shrink-0 w-[140px] sm:w-[160px] snap-start">
                     <ArtistCard artist={artist} />
                   </div>
                 ))}
               </div>
+            </section>
+
+            {/* Network Top Earners Leaderboard */}
+            <section className="bg-white/[0.02] p-8 rounded-[32px] border border-white/5 my-12">
+              <Leaderboard artists={MOCK_ARTISTS} limit={5} title="Market Top Earners" />
             </section>
 
             {/* 6. MAIN MARKET GRID */}
@@ -503,13 +514,14 @@ const Marketplace: React.FC = () => {
               </div>
               
               {filteredNfts.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
                     {filteredNfts.map((nft, idx) => (
                       <motion.div 
                         key={nft.id} 
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: (idx % 10) * 0.05 }}
+                        className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start"
                       >
                         <NFTCard nft={nft} />
                       </motion.div>
