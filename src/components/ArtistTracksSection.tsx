@@ -1,6 +1,6 @@
 import React from 'react';
 import { Play, Satellite, Tag, Gavel, Info } from 'lucide-react';
-import { Track, NFTItem, Event, Collaboration, Artist } from '@/types';
+import { Track, NFTItem, ArtistEvent, Collaboration, Artist } from '@/types';
 import TrackCard from '@/components/TrackCard';
 import { getPlaceholderImage } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';

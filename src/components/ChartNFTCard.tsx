@@ -37,7 +37,7 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="text-[11px] font-bold text-foreground uppercase tracking-[0.05em] truncate group-hover:text-primary transition-colors">
+        <h4 className="text-[10px] font-bold text-foreground uppercase tracking-[0.05em] truncate group-hover:text-primary transition-colors">
           {nft.title}
         </h4>
         <div className="flex items-center gap-2 mt-2 min-w-0">

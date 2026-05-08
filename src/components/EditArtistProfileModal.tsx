@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { UserPen, X, Twitter, Send, Music, Globe, Instagram, Image as ImageIcon, Upload, Loader2, Calendar, MapPin, Ticket, Clock, PlusCircle, Trash2 } from 'lucide-react';
-import { Artist, Event } from '@/types';
+import { Artist, ArtistEvent } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { uploadFile } from '@/services/storageService';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
@@ -19,10 +19,11 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
   const [username, setUsername] = useState(artist.username || '');
   const [bio, setBio] = useState(artist.bio || '');
   const [bannerUrl, setBannerUrl] = useState(artist.bannerUrl || '');
+  const [bannerImageUrl, setBannerImageUrl] = useState(artist.bannerImageUrl || '');
   const [avatarUrl, setAvatarUrl] = useState(artist.avatarUrl || '');
   const [isUploading, setIsUploading] = useState(false);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const [events, setEvents] = useState<Event[]>(artist.events || []);
+  const [events, setEvents] = useState<ArtistEvent[]>(artist.events || []);
   const [socials, setSocials] = useState({
     x: artist.socials?.x || '',
     spotify: artist.socials?.spotify || '',
@@ -35,16 +36,18 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
   const handleAddEvent = () => {
     setEvents([...events, {
       id: Math.random().toString(36).substr(2, 9),
+      artistId: artist.uid,
       title: '',
       date: '',
       time: '',
       venue: '',
       location: '',
-      ticketUrl: ''
+      ticketUrl: '',
+      bannerImageUrl: ''
     }]);
   };
 
-  const handleUpdateEvent = (id: string, field: keyof Event, value: string) => {
+  const handleUpdateEvent = (id: string, field: keyof ArtistEvent, value: string) => {
     setEvents(events.map(e => e.id === id ? { ...e, [field]: value } : e));
   };
 
@@ -67,7 +70,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         addNotification("Adding banner image...", "info");
         const storagePath = `profiles/${artist.uid}/banner.png`;
         const { downloadUrl } = await uploadFile(file, storagePath);
-        setBannerUrl(downloadUrl);
+        setBannerImageUrl(downloadUrl);
         addNotification("Banner image added successfully", "success");
       } catch (error: any) {
         console.error("Banner upload failed:", error);
@@ -115,6 +118,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         username,
         bio,
         bannerUrl: bannerUrl || a.bannerUrl,
+        bannerImageUrl: bannerImageUrl || a.bannerImageUrl,
         avatarUrl: avatarUrl || a.avatarUrl,
         socials,
         events
@@ -129,6 +133,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
           username,
           bio,
           bannerUrl: bannerUrl || artist.bannerUrl || '',
+          bannerImageUrl: bannerImageUrl || artist.bannerImageUrl || '',
           avatar: avatarUrl || artist.avatarUrl || '',
           socials,
           events
@@ -168,7 +173,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Profile Banner</label>
               <div className="relative w-full h-48 rounded-[10px] overflow-hidden group bg-muted/50">
-                <img src={bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1500, 500)} alt="Banner Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
+                <img src={bannerImageUrl || bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1500, 500)} alt="Banner Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
                     type="button"
@@ -232,78 +237,92 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Origin Narrative (Bio)</label>
               <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground resize-none" placeholder="Describe your sonic journey..." aria-label="Origin Narrative (Bio)" />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em] mb-2">Social Relay Links</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <div className="space-y-2">
-                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">X (Twitter)</label>
-                  <div className="relative">
-                    <a 
-                      href={socials.x || "https://x.com"} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-blue-400 transition-colors z-10"
-                    >
-                      <Twitter className="h-3 w-3" />
-                    </a>
-                    <input type="text" value={socials.x} onChange={(e) => setSocials({ ...socials, x: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://x.com/..." aria-label="X (Twitter) Link" />
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1.5 h-4 bg-blue-500 rounded-full" />
+                <h3 className="text-[10px] font-black text-foreground uppercase tracking-[0.3em]">Social Neural Links</h3>
+              </div>
+              <p className="text-[9px] text-muted-foreground/60 uppercase tracking-widest ml-2 mb-4">Connect your external identities to your artist profile</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-1">
+                {/* Twitter / X */}
+                <div className="group relative bg-muted/20 hover:bg-muted/30 border border-white/5 rounded-2xl p-4 transition-all hover:border-blue-500/30">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-[#1DA1F2]/10 flex items-center justify-center text-[#1DA1F2]">
+                      <Twitter className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-bold text-foreground">Twitter / X</h4>
+                      <p className="text-[8px] text-muted-foreground uppercase tracking-tighter">@username</p>
+                    </div>
                   </div>
+                  <input 
+                    type="text" 
+                    value={socials.x} 
+                    onChange={(e) => setSocials({ ...socials, x: e.target.value })} 
+                    className="w-full bg-background/50 rounded-xl py-2 px-3 text-[10px] outline-none focus:ring-1 focus:ring-blue-500 transition-all text-foreground" 
+                    placeholder="https://x.com/yourname" 
+                  />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Instagram</label>
-                  <div className="relative">
-                    <a 
-                      href={socials.instagram || "https://instagram.com"} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-pink-500 transition-colors z-10"
-                    >
-                      <Instagram className="h-3 w-3" />
-                    </a>
-                    <input type="text" value={socials.instagram} onChange={(e) => setSocials({ ...socials, instagram: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-pink-400 transition-all text-foreground" placeholder="https://instagram.com/..." aria-label="Instagram Link" />
+
+                {/* Instagram */}
+                <div className="group relative bg-muted/20 hover:bg-muted/30 border border-white/5 rounded-2xl p-4 transition-all hover:border-pink-500/30">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-500">
+                      <Instagram className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-bold text-foreground">Instagram</h4>
+                      <p className="text-[8px] text-muted-foreground uppercase tracking-tighter">@handle</p>
+                    </div>
                   </div>
+                  <input 
+                    type="text" 
+                    value={socials.instagram} 
+                    onChange={(e) => setSocials({ ...socials, instagram: e.target.value })} 
+                    className="w-full bg-background/50 rounded-xl py-2 px-3 text-[10px] outline-none focus:ring-1 focus:ring-pink-500 transition-all text-foreground" 
+                    placeholder="https://instagram.com/..." 
+                  />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Spotify</label>
-                  <div className="relative">
-                    <a 
-                      href={socials.spotify || "https://spotify.com"} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-green-400 transition-colors z-10"
-                    >
-                      <Music className="h-3 w-3" />
-                    </a>
-                    <input type="text" value={socials.spotify} onChange={(e) => setSocials({ ...socials, spotify: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-green-400 transition-all text-foreground" placeholder="https://spotify.com/..." aria-label="Spotify Link" />
+
+                {/* Website */}
+                <div className="group relative bg-muted/20 hover:bg-muted/30 border border-white/5 rounded-2xl p-4 transition-all hover:border-blue-400/30">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-400/10 flex items-center justify-center text-blue-400">
+                      <Globe className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-bold text-foreground">Official Website</h4>
+                      <p className="text-[8px] text-muted-foreground uppercase tracking-tighter">https://yourdomain.com</p>
+                    </div>
                   </div>
+                  <input 
+                    type="text" 
+                    value={socials.website} 
+                    onChange={(e) => setSocials({ ...socials, website: e.target.value })} 
+                    className="w-full bg-background/50 rounded-xl py-2 px-3 text-[10px] outline-none focus:ring-1 focus:ring-blue-400 transition-all text-foreground" 
+                    placeholder="https://..." 
+                  />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Telegram</label>
-                  <div className="relative">
-                    <a 
-                      href={socials.telegram || "https://t.me"} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-blue-400 transition-colors z-10"
-                    >
-                      <Send className="h-3 w-3" />
-                    </a>
-                    <input type="text" value={socials.telegram} onChange={(e) => setSocials({ ...socials, telegram: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://t.me/..." aria-label="Telegram Link" />
+
+                {/* Telegram */}
+                <div className="group relative bg-muted/20 hover:bg-muted/30 border border-white/5 rounded-2xl p-4 transition-all hover:border-sky-400/30">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-sky-400/10 flex items-center justify-center text-sky-400">
+                      <Send className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-bold text-foreground">Telegram Channel</h4>
+                      <p className="text-[8px] text-muted-foreground uppercase tracking-tighter">t.me/channel</p>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest ml-2">Website</label>
-                  <div className="relative">
-                    <a 
-                      href={socials.website || "#"} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-blue-400 transition-colors z-10"
-                    >
-                      <Globe className="h-3 w-3" />
-                    </a>
-                    <input type="text" value={socials.website} onChange={(e) => setSocials({ ...socials, website: e.target.value })} className="w-full bg-muted/50 rounded-[10px] py-2 pl-10 pr-2 text-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." aria-label="Website Link" />
-                  </div>
+                  <input 
+                    type="text" 
+                    value={socials.telegram} 
+                    onChange={(e) => setSocials({ ...socials, telegram: e.target.value })} 
+                    className="w-full bg-background/50 rounded-xl py-2 px-3 text-[10px] outline-none focus:ring-1 focus:ring-sky-400 transition-all text-foreground" 
+                    placeholder="https://t.me/..." 
+                  />
                 </div>
               </div>
             </div>
@@ -364,9 +383,15 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                           </div>
                         </div>
 
-                        <div>
-                          <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Ticket className="h-2 w-2"/> Ticket URL (Optional)</label>
-                          <input type="url" value={event.ticketUrl} onChange={(e) => handleUpdateEvent(event.id, 'ticketUrl', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." />
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Ticket className="h-2 w-2"/> Ticket URL (Optional)</label>
+                            <input type="url" value={event.ticketUrl} onChange={(e) => handleUpdateEvent(event.id, 'ticketUrl', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." />
+                          </div>
+                          <div>
+                            <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><ImageIcon className="h-2 w-2"/> Banner Image URL</label>
+                            <input type="url" value={event.bannerImageUrl} onChange={(e) => handleUpdateEvent(event.id, 'bannerImageUrl', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." />
+                          </div>
                         </div>
                       </div>
                     </div>

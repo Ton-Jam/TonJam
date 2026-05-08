@@ -274,13 +274,17 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
 
   return (
     <TooltipProvider>
-      <Card 
-        className={cn(
-          "w-full border-none bg-background hover:bg-white/[0.01] transition-all cursor-pointer group/post relative rounded-none border-b border-white/[0.05]",
-          isActivity && "bg-blue-500/[0.02]"
-        )}
-        onClick={() => navigate(`/post/${post.id}`)}
+      <motion.div
+        whileHover={{ x: 4 }}
+        className="w-full"
       >
+        <Card 
+          className={cn(
+            "w-full border-none bg-background hover:bg-white/[0.01] transition-all cursor-pointer group/post relative rounded-none border-b border-white/[0.05]",
+            isActivity && "bg-blue-500/[0.02]"
+          )}
+          onClick={() => navigate(`/post/${post.id}`)}
+        >
         <CardHeader className="flex flex-row gap-4 p-4 pb-2">
           <Avatar 
             className="h-10 w-10 shrink-0 cursor-pointer ring-offset-background group-hover:ring-2 ring-blue-500/20 transition-all"
@@ -376,17 +380,17 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <p className="text-xs font-bold leading-relaxed text-foreground opacity-90 truncate max-w-[200px] sm:max-w-md">
+                  <p className="text-[11px] font-bold leading-relaxed text-foreground opacity-90 truncate max-w-[200px] sm:max-w-md uppercase tracking-tight">
                     <span className="text-blue-400 font-black italic">{post.userName}</span>
                     <span className="mx-1 opacity-60">·</span>
                     {post.content}
                     {post.artistName && (
-                      <span className="text-blue-500 font-black ml-1 uppercase text-[10px] tracking-tight">{post.artistName}</span>
+                      <span className="text-blue-500 font-black ml-1 uppercase text-[9px] tracking-tight">{post.artistName}</span>
                     )}
                   </p>
                   {post.paymentAmount && (
                     <div className="mt-1 flex items-center gap-2">
-                      <Badge variant="outline" className="text-[8px] h-4 font-black uppercase px-2 rounded-full border-blue-500/20 text-blue-400 bg-blue-500/5">
+                      <Badge variant="outline" className="text-[7px] h-4 font-black uppercase px-2 rounded-full border-blue-500/20 text-blue-400 bg-blue-500/5">
                         {post.paymentAmount} {post.paymentCurrency}
                       </Badge>
                     </div>
@@ -397,7 +401,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm font-bold leading-relaxed tracking-tight text-foreground/90 whitespace-pre-wrap">
+              <p className="text-[13px] font-bold leading-relaxed tracking-tight text-foreground/90 whitespace-pre-wrap">
                 {renderContentWithHashtags(post.content)}
               </p>
 
@@ -431,8 +435,8 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h5 className="text-xs font-black uppercase italic tracking-tighter text-blue-400 truncate">{track.title}</h5>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5 opacity-60 truncate">{track.artist}</p>
+                    <h5 className="text-[10px] font-black uppercase italic tracking-tighter text-blue-400 truncate">{track.title}</h5>
+                    <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-0.5 opacity-60 truncate">{track.artist}</p>
                   </div>
                   <Button 
                     variant="ghost" 
@@ -615,7 +619,8 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
           )}
         </AnimatePresence>
       </Card>
-    </TooltipProvider>
+    </motion.div>
+  </TooltipProvider>
   );
 };
 

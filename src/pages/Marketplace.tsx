@@ -32,7 +32,7 @@ import {
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu"
 
-const TABS = ['Trending', 'Auctions', 'Genesis', 'Limited', 'My Bids', 'My NFTs'];
+const TABS = ['Trending', 'New Signal', 'Auctions', 'Genesis', 'Limited', 'My Bids', 'My NFTs'];
 const SORT_OPTIONS = ['Newest', 'Price: Low', 'Price: High', 'Rarity'];
 
 const Marketplace: React.FC = () => {
@@ -102,6 +102,7 @@ const Marketplace: React.FC = () => {
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
 
       if (activeTab === 'Trending') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
+      if (activeTab === 'New Signal') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
       if (activeTab === 'Genesis') return matchesSearch && nft.edition === 'Unique' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
       if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
       if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
@@ -110,8 +111,13 @@ const Marketplace: React.FC = () => {
       return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
     });
 
-    if (sortBy === 'Price: Low') list.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-    if (sortBy === 'Price: High') list.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    if (activeTab === 'New Signal') {
+      list.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    } else if (sortBy === 'Price: Low') {
+      list.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    } else if (sortBy === 'Price: High') {
+      list.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    }
     if (sortBy === 'Rarity') {
       const rarityMap: any = { 'Unique': 3, 'Rare': 2, 'Limited': 1 };
       list.sort((a, b) => (rarityMap[b.edition] || 0) - (rarityMap[a.edition] || 0));
@@ -371,11 +377,11 @@ const Marketplace: React.FC = () => {
             <section>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-4 bg-primary rounded-full" />
-                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/90">Trending Track NFTs</h2>
+                  <div className="w-1 h-2.5 bg-primary rounded-full" />
+                  <h2 className="text-[11px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/80">Trending Track NFTs</h2>
                 </div>
-                <button onClick={() => navigate('/trending-nfts')} className="text-[10px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
-                  VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                <button onClick={() => navigate('/trending-nfts')} className="text-[7.5px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+                  VIEW MORE <ChevronRight className="ml-1 h-2 w-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
               <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
@@ -398,11 +404,38 @@ const Marketplace: React.FC = () => {
             <section>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-4 bg-orange-600 rounded-full" />
-                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/90">Limited Audio Artifacts</h2>
+                  <div className="w-1 h-2.5 bg-emerald-500 rounded-full" />
+                  <h2 className="text-[11px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/80">Fresh Protocol Drops</h2>
                 </div>
-                <button onClick={() => navigate('/limited-editions')} className="text-[10px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
-                  EXPLORE SCARCITY <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                <button onClick={() => navigate('/trending-nfts')} className="text-[7.5px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+                  VIEW MORE <ChevronRight className="ml-1 h-2 w-2 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={`new-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                      <SkeletonCard />
+                    </div>
+                  ))
+                ) : (
+                  [...allNFTs].sort((a,b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 8).map((nft) => (
+                    <div key={nft.id} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
+                      <NFTCard nft={nft} />
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+
+            <section>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-2.5 bg-orange-600 rounded-full" />
+                  <h2 className="text-[11px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/80">Limited Audio Artifacts</h2>
+                </div>
+                <button onClick={() => navigate('/limited-editions')} className="text-[7.5px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+                  VIEW MORE <ChevronRight className="ml-1 h-2 w-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
               <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
@@ -425,11 +458,11 @@ const Marketplace: React.FC = () => {
             <section>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-4 bg-amber-600 rounded-full" />
-                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/90">Most Bidded NFTs</h2>
+                  <div className="w-1 h-2.5 bg-amber-600 rounded-full" />
+                  <h2 className="text-[11px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/80">Most Bidded NFTs</h2>
                 </div>
-                <button onClick={() => navigate('/explore/nfts?filter=most_bidded')} className="text-[10px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
-                  VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                <button onClick={() => navigate('/explore/nfts?filter=most_bidded')} className="text-[7.5px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+                  VIEW MORE <ChevronRight className="ml-1 h-2 w-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
               <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
@@ -453,11 +486,11 @@ const Marketplace: React.FC = () => {
             <section>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-4 bg-purple-600 rounded-full" />
-                  <h2 className="text-[12px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/90">Featured Protocol Architects</h2>
+                  <div className="w-1 h-2.5 bg-purple-600 rounded-full" />
+                  <h2 className="text-[11px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground/80">Featured Protocol Architects</h2>
                 </div>
-                <button onClick={() => navigate('/discover?tab=Artists')} className="text-[10px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
-                  VIEW ALL <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                <button onClick={() => navigate('/discover?tab=Artists')} className="text-[7.5px] font-bold text-blue-600 dark:text-muted-foreground/20 uppercase tracking-widest hover:text-blue-500 transition-all flex items-center group">
+                  VIEW MORE <ChevronRight className="ml-1 h-2 w-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
               <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-4 -mx-4 px-4">
@@ -470,7 +503,7 @@ const Marketplace: React.FC = () => {
             </section>
 
             {/* Network Top Earners Leaderboard */}
-            <section className="bg-white/[0.02] p-8 rounded-[32px] border border-white/5 my-12">
+            <section className="bg-white/[0.02] p-4 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-white/5 my-8 sm:my-12">
               <Leaderboard artists={MOCK_ARTISTS} limit={5} title="Market Top Earners" />
             </section>
 
@@ -505,8 +538,8 @@ const Marketplace: React.FC = () => {
               )}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-10 bg-foreground/10 rounded-full"></div>
-                  <h2 className="text-[20px] font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground leading-none">Market Explorer</h2>
+                  <div className="w-1 h-8 bg-foreground/10 rounded-full"></div>
+                  <h2 className="text-xl font-bold tracking-tighter uppercase text-zinc-800 dark:text-foreground leading-none">Market Explorer</h2>
                 </div>
                 <div className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-[0.4em]">
                   {filteredNfts.length} Protocols Found

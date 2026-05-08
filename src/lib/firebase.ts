@@ -1,6 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore, initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { 
+  getFirestore, 
+  initializeFirestore, 
+  doc, 
+  getDocFromServer,
+  CACHE_SIZE_UNLIMITED,
+  terminate
+} from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -11,54 +18,57 @@ const app = initializeApp(firebaseConfig);
 export const analytics = typeof window !== 'undefined' && firebaseConfig.measurementId ? getAnalytics(app) : null;
 
 // Initialize Firestore with settings for reliability in various network environments
-const firestoreDatabaseId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
-console.log('[Firebase] Debug Config:', {
-  projectId: firebaseConfig.projectId,
-  databaseId: firestoreDatabaseId,
-  hasApiKey: !!firebaseConfig.apiKey,
-  authDomain: firebaseConfig.authDomain
-});
-console.log(`[Firebase] Initializing Firestore. Project: ${firebaseConfig.projectId}, DatabaseID: ${firestoreDatabaseId}, Host: firestore.googleapis.com`);
+const firestoreDatabaseId = firebaseConfig.firestoreDatabaseId || '(default)';
 
+console.log(`[Firebase] Initializing Firestore. Project: ${firebaseConfig.projectId}, Database: ${firestoreDatabaseId}`);
+
+// Use initializeFirestore with forced long polling for AI Studio environments
+// Adding CACHE_SIZE_UNLIMITED and experimentalAutoDetectLongPolling: false for better stability
 export const db = initializeFirestore(app, {
   ignoreUndefinedProperties: true,
-}, firestoreDatabaseId);
+  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: false,
+  useFetchStreams: false,
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+} as any, firestoreDatabaseId);
 
-export const auth = getAuth();
+export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
-/**
- * Validates connection to Firestore
- * CRITICAL CONSTRAINT: When the application initially boots, call getFromServer to test the connection.
- */
+// Add a specific test for the provided database ID
 async function testConnection(retries = 3) {
+  if (typeof window === 'undefined') return;
+  
   for (let i = 0; i < retries; i++) {
     try {
-      console.log(`[Firebase] Connection check attempt ${i + 1}...`);
-      // Try to reach the specific database instance
-      await getDocFromServer(doc(db, 'test', 'connection_check'));
-      console.log("[Firebase] Firestore connection check: Server is reachable.");
+      console.log(`[Firebase] Connection check attempt ${i + 1} for database: ${firestoreDatabaseId}...`);
+      // Use getDocFromServer on a explicitly allowed path in rules
+      const testDocRef = doc(db, 'test', 'connectivity');
+      await getDocFromServer(testDocRef);
+      console.log("[Firebase] Firestore connectivity verified.");
       return;
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message.includes('Missing or insufficient permissions')) {
-          console.warn("[Firebase] Firestore connection check: Server is reachable but requires Firestore Rules to be published.");
-          return;
-        } else if (error.message.includes('unavailable') || error.message.includes('the client is offline')) {
-          console.warn(`[Firebase] Connection attempt ${i + 1} failed: ${error.message}`);
-          if (i < retries - 1) {
-            const delay = Math.pow(2, i) * 1000;
-            console.log(`[Firebase] Retrying in ${delay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
-          }
-        }
-        console.warn(`[Firebase] Firestore connectivity check failed on attempt ${i + 1}:`, error.message);
+    } catch (error: any) {
+      const errorMessage = error?.message || String(error);
+      const errorCode = error?.code;
+      
+      if (errorMessage.includes('Insufficient permissions') || errorCode === 'permission-denied') {
+        console.log("[Firebase] Firestore connectivity verified (Endpoint reachable, permission denied is expected).");
+        return;
+      } 
+      
+      console.warn(`[Firebase] Connection attempt ${i + 1} failed: ${errorCode || 'unknown'} - ${errorMessage}`);
+      
+      if (errorCode === 'unavailable' || errorMessage.includes('offline')) {
+        console.info("[Firebase] Suggestion: If this persists, try checking if the Firestore database is provisioned in the Firebase console.");
+      }
+      
+      if (i < retries - 1) {
+        const delay = Math.pow(2, i) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
-  console.error("[Firebase] All Firestore connection attempts failed. The app will operate in limited offline mode.");
 }
 testConnection();
 
@@ -114,7 +124,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   if (errInfo.error.includes('offline') || errInfo.error.includes('unavailable')) {
     // Only log connection errors once to avoid spamming the console
     if (!(window as any)._firestoreConnectionErrorLogged) {
-      console.warn('Firestore Connection Issues: The app will operate in offline mode until a connection is established.');
+      console.warn('Firestore Connection Issues: The app will operate in offline mode until a connection is established. This is common in some network environments.');
       (window as any)._firestoreConnectionErrorLogged = true;
     }
   } else {

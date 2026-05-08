@@ -270,7 +270,7 @@ const PostDetail: React.FC = () => {
                   variant={isFollowing ? "outline" : "default"}
                   className={cn(
                     "rounded-xl h-8 px-4 text-[10px] font-black uppercase tracking-[0.15em]",
-                    isFollowing ? "border-white/10 text-zinc-400 hover:bg-white/5" : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20"
+                    isFollowing ? "border-white/10 text-zinc-400 hover:bg-white/5" : "bg-gradient-to-r from-blue-700 to-blue-500 text-white hover:opacity-90 shadow-lg shadow-blue-600/20"
                   )}
                 >
                   {isFollowing ? 'Synchronized' : 'Sync User'}

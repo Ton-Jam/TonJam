@@ -24,6 +24,7 @@ const mintSchema = z.object({
   royaltySplits: z.array(z.object({
     address: z.string().min(1, 'Address is required'),
     percentage: z.number().min(0).max(100),
+    label: z.string().optional(),
   })),
   supply: z.string().min(1, 'Supply is required'),
   price: z.string().min(1, 'Price is required'),
@@ -73,7 +74,7 @@ const MintNFT: React.FC = () => {
       editionType: (track?.editionType as any) || 'Standard',
       rarity: track?.rarity || 'Common',
       lyrics: track?.lyrics || '',
-      royaltySplits: track?.royaltySplits || [{ address: userAddress || '', percentage: 100 }],
+      royaltySplits: track?.royaltySplits || [{ address: userAddress || '', percentage: 100, label: 'Creator' }],
       supply: track?.editions || '100',
       price: track?.price || '5',
       listNow: true,
@@ -143,7 +144,7 @@ const MintNFT: React.FC = () => {
     }
   };
 
-  const handleAddRoyaltySplit = () => appendRoyalty({ address: '', percentage: 0 });
+  const handleAddRoyaltySplit = () => appendRoyalty({ address: '', percentage: 0, label: 'Collaborator' });
   const handleRemoveRoyaltySplit = (index: number) => removeRoyalty(index);
 
   const handleAddTrait = () => appendTrait({ trait_type: '', value: '' });
@@ -212,13 +213,18 @@ const MintNFT: React.FC = () => {
       }
 
       // 2. Prepare Metadata for Firebase Storage
+      const royaltySplitsDecimals = data.royaltySplits.map(s => ({
+        ...s,
+        percentage: s.percentage / 100
+      }));
+
       const metadata = {
         name: data.title,
         description: data.description,
         image: coverUrl,
         audio: audioUrl,
         attributes: data.traits,
-        royalty_splits: data.royaltySplits,
+        royalty_splits: royaltySplitsDecimals,
         exclusive_content: data.exclusiveContent
       };
 
@@ -234,7 +240,7 @@ const MintNFT: React.FC = () => {
         validUntil: Math.floor(Date.now() / 1000) + 120,
         messages: [
           {
-            address: "EQB_PLATFORM_WALLET_ADDRESS", // Platform wallet for fees
+            address: "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888", // Platform wallet for fees
             amount: toNano("0.06").toString(), // Total Protocol Cost (0.05 + 0.01)
             payload: ipfsUrl // Optionally pass metadata URL in payload
           },
@@ -265,7 +271,7 @@ const MintNFT: React.FC = () => {
           { trait_type: 'Edition Type', value: data.editionType },
           { trait_type: 'Rarity', value: data.rarity || 'Common' }
         ] as NFTTrait[],
-        royaltySplits: data.royaltySplits,
+        royaltySplits: royaltySplitsDecimals,
         listingType: data.listNow ? 'fixed' : undefined,
         exclusiveContent: data.exclusiveContent.filter(e => e.title && e.url).map(e => ({
           ...e,
@@ -483,24 +489,30 @@ const MintNFT: React.FC = () => {
                     </div>
                     <div className="space-y-4 sm:space-y-4">
                       {royaltyFields.map((field, index) => (
-                        <div key={field.id} className="flex gap-4 sm:gap-4 items-center">
+                        <div key={field.id} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                          <input 
+                            {...register(`royaltySplits.${index}.label`)}
+                            type="text" 
+                            placeholder="Role (e.g. Producer)" 
+                            className="w-full sm:w-32 bg-muted/50 rounded-[10px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
+                          />
                           <input 
                             {...register(`royaltySplits.${index}.address`)}
                             type="text" 
                             placeholder="Wallet Address" 
-                            className="flex-1 bg-muted/50 rounded-[10px] py-4 px-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
-                            aria-label={`Royalty recipient address ${index + 1}`}
+                            className="flex-1 w-full bg-muted/50 rounded-[10px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground font-mono"
                           />
-                          <input 
-                            {...register(`royaltySplits.${index}.percentage`, { valueAsNumber: true })}
-                            type="number" 
-                            placeholder="%" 
-                            className="w-20 sm:w-24 bg-muted/50 rounded-[10px] py-4 px-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
-                            aria-label={`Royalty recipient percentage ${index + 1}`}
-                          />
-                          <button onClick={() => removeRoyalty(index)} className="p-4 sm:p-4 text-muted-foreground/50 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label={`Remove royalty recipient ${index + 1}`}>
-                            <Trash2 className="h-5 w-5" />
-                          </button>
+                          <div className="flex items-center gap-4 w-full sm:w-auto">
+                            <input 
+                              {...register(`royaltySplits.${index}.percentage`, { valueAsNumber: true })}
+                              type="number" 
+                              placeholder="%" 
+                              className="w-20 bg-muted/50 rounded-[10px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
+                            />
+                            <button type="button" onClick={() => removeRoyalty(index)} className="p-4 text-muted-foreground/50 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm">
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                       <div className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest text-right">

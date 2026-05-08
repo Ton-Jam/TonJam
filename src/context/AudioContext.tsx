@@ -2,10 +2,10 @@ import React, { createContext, useContext, useState, useRef, useEffect, useMemo,
 import { toast } from 'sonner';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { GoogleGenAI, Type } from '@google/genai';
-import { Track, Playlist, UserProfile, NFTItem, Artist, Transaction, Post, PostComment, ExclusiveContent, Task, SponsoredContent } from '@/types';
+import { Track, Playlist, PlaylistFolder, UserProfile, NFTItem, Artist, Transaction, Post, PostComment, ExclusiveContent, Task, SponsoredContent } from '@/types';
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
-import { processStreamRoyalty, PLATFORM_FEE_PERCENTAGE } from '@/services/royaltyService';
+import * as royaltyService from '@/services/royaltyService';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -138,6 +138,8 @@ interface AudioContextType {
   getEarnings: (userId: string) => Promise<number>;
   mintNFT: (trackId: string, tonConnectUI: any) => Promise<{ success: boolean; error?: string }>;
   deleteTrack: (trackId: string) => Promise<void>;
+  headerTitle: string;
+  setHeaderTitle: (title: string) => void;
   activeJamRoom: { id: string, name: string, listeners: number, currentTrack: Track | null } | null;
   joinJamRoom: (roomId: string) => void;
   leaveJamRoom: () => void;
@@ -149,6 +151,11 @@ interface AudioContextType {
   isCreatePlaylistModalOpen: boolean;
   setIsCreatePlaylistModalOpen: (isOpen: boolean) => void;
   featuredPlaylist: Playlist;
+  playlistFolders: PlaylistFolder[];
+  createFolder: (title: string) => Promise<void>;
+  renameFolder: (folderId: string, newTitle: string) => Promise<void>;
+  deleteFolder: (folderId: string) => Promise<void>;
+  movePlaylistToFolder: (playlistId: string, folderId: string | null) => Promise<void>;
   updateRoyaltyConfig: (artistId: string, config: Artist['royaltyConfig']) => void;
   marketplaceFilters: {
     genre: string;
@@ -266,8 +273,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [headerTitle, setHeaderTitle] = useState('');
   const [isHighFidelity, setIsHighFidelity] = useState(false);
   const [exclusiveContent, setExclusiveContent] = useState<ExclusiveContent[] | null>(null);
+
+  const [playlistFolders, setPlaylistFolders] = useState<PlaylistFolder[]>([]);
+  const [firestorePlaylistFolders, setFirestorePlaylistFolders] = useState<PlaylistFolder[]>([]);
 
   const [playlists, setPlaylists] = useState<Playlist[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PLAYLISTS);
@@ -451,7 +462,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const streamPaymentTimeout = setTimeout(async () => {
           // Process real royalty distribution
           try {
-            await processStreamRoyalty(currentTrack);
+            await royaltyService.processStreamRoyalty(currentTrack);
             addNotification(`Stream royalty processed for "${currentTrack.title}"`, 'info');
           } catch (error) {
             console.error("Failed to process stream royalty:", error);
@@ -543,6 +554,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     let transactionsUnsubscribe: any = null;
     let playlistsUnsubscribe: any = null;
     let userDocUnsubscribe: any = null;
+    let playlistFoldersUnsubscribe: any = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       // Cleanup previous listeners
@@ -550,6 +562,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (transactionsUnsubscribe) transactionsUnsubscribe();
       if (playlistsUnsubscribe) playlistsUnsubscribe();
       if (userDocUnsubscribe) userDocUnsubscribe();
+      if (playlistFoldersUnsubscribe) playlistFoldersUnsubscribe();
 
       if (user) {
         // 1. Start protected collection listeners
@@ -557,6 +570,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const users = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
           setFirestoreUsers(users);
         }, (error) => handleFirestoreError(error, OperationType.LIST, 'users'));
+
+        playlistFoldersUnsubscribe = onSnapshot(query(collection(db, 'playlistFolders'), where('creator', '==', user.uid)), (snapshot) => {
+          const folders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PlaylistFolder));
+          setFirestorePlaylistFolders(folders);
+        }, (error) => handleFirestoreError(error, OperationType.LIST, 'playlistFolders'));
 
         const transactionsQuery = query(
           collection(db, 'transactions'), 
@@ -664,6 +682,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setPlaylists(firestorePlaylists);
     }
   }, [firestorePlaylists]);
+
+  useEffect(() => {
+    if (firestorePlaylistFolders.length > 0) {
+      setPlaylistFolders(firestorePlaylistFolders);
+    }
+  }, [firestorePlaylistFolders]);
 
   useEffect(() => {
     if (firestoreTransactions.length > 0) {
@@ -1840,42 +1864,21 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const userId = auth.currentUser.uid;
       const artistId = track.artistId;
 
-      // Atomic transaction: Update balances and record transaction
-      const batch = writeBatch(db);
+      // 1. Distribute Royalties (handles platform fee and splits)
+      await royaltyService.distributeRoyalties(
+        price,
+        artistId,
+        track.royaltySplits || [],
+        'nft_sale', // Reusing nft_sale type for simplicity
+        { trackId: track.id, trackTitle: track.title }
+      );
 
-      // 1. Deduct from buyer
+      // 2. Update Buyer Balance and Inventory in Firestore
       const userRef = doc(db, "users", userId);
-      batch.update(userRef, {
+      await updateDoc(userRef, {
         tonBalance: increment(-price),
         ownedTrackIds: arrayUnion(trackId)
       });
-
-      // 2. Add to artist royalties
-      const royaltyRef = doc(db, "royalties", artistId);
-      batch.set(royaltyRef, {
-        artistId,
-        totalEarned: increment(price * (1 - PLATFORM_FEE_PERCENTAGE)),
-        pendingWithdrawal: increment(price * (1 - PLATFORM_FEE_PERCENTAGE)),
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-
-      // 3. Record transaction
-      const txRef = doc(collection(db, "transactions"));
-      batch.set(txRef, {
-        type: 'nft_sale', // Reusing nft_sale type for simplicity or adding 'track_purchase'
-        amount: price,
-        userId: userId,
-        platformFee: price * PLATFORM_FEE_PERCENTAGE,
-        artistShare: price * (1 - PLATFORM_FEE_PERCENTAGE),
-        timestamp: new Date().toISOString(),
-        serverTimestamp: serverTimestamp(),
-        status: 'completed',
-        participants: [userId, artistId],
-        trackId: track.id,
-        trackTitle: track.title
-      });
-
-      await batch.commit();
 
       addNotification(`Neural acquisition complete: "${track.title}"`, "success");
       
@@ -2364,6 +2367,110 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const createFolder = async (title: string) => {
+    if (!auth.currentUser) return;
+    setIsLoading(true);
+    try {
+      const folderId = `folder-${Date.now()}`;
+      const newFolder: PlaylistFolder = {
+        id: folderId,
+        title,
+        creator: auth.currentUser.uid,
+        playlistIds: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      await setDoc(doc(db, 'playlistFolders', folderId), cleanObject(newFolder));
+      addNotification(`Folder "${title}" created`, 'success');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'playlistFolders');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renameFolder = async (folderId: string, newTitle: string) => {
+    setIsLoading(true);
+    try {
+      await updateDoc(doc(db, 'playlistFolders', folderId), {
+        title: newTitle,
+        updatedAt: new Date().toISOString()
+      });
+      addNotification(`Folder renamed to "${newTitle}"`, 'success');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `playlistFolders/${folderId}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteFolder = async (folderId: string) => {
+    setIsLoading(true);
+    try {
+      const folder = playlistFolders.find(f => f.id === folderId);
+      if (folder && folder.playlistIds.length > 0) {
+        // Unset folderId on all playlists in this folder
+        const batch = writeBatch(db);
+        folder.playlistIds.forEach(playlistId => {
+          batch.update(doc(db, 'playlists', playlistId), { folderId: null });
+        });
+        await batch.commit();
+      }
+      await deleteDoc(doc(db, 'playlistFolders', folderId));
+      addNotification("Folder deleted", "info");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `playlistFolders/${folderId}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const movePlaylistToFolder = async (playlistId: string, folderId: string | null) => {
+    setIsLoading(true);
+    try {
+      const playlist = playlists.find(p => p.id === playlistId);
+      if (!playlist) throw new Error("Playlist not found");
+
+      const oldFolderId = playlist.folderId;
+      const batch = writeBatch(db);
+
+      // 1. Update the playlist itself
+      batch.update(doc(db, 'playlists', playlistId), { 
+        folderId: folderId,
+        updatedAt: new Date().toISOString()
+      });
+
+      // 2. Remove from old folder if it exists
+      if (oldFolderId) {
+        const oldFolder = playlistFolders.find(f => f.id === oldFolderId);
+        if (oldFolder) {
+          batch.update(doc(db, 'playlistFolders', oldFolderId), {
+            playlistIds: oldFolder.playlistIds.filter(id => id !== playlistId),
+            updatedAt: new Date().toISOString()
+          });
+        }
+      }
+
+      // 3. Add to new folder if it exists
+      if (folderId) {
+        const newFolder = playlistFolders.find(f => f.id === folderId);
+        if (newFolder) {
+          batch.update(doc(db, 'playlistFolders', folderId), {
+            playlistIds: arrayUnion(playlistId),
+            updatedAt: new Date().toISOString()
+          });
+        }
+      }
+
+      await batch.commit();
+      addNotification(folderId ? "Playlist moved to folder" : "Playlist removed from folder", 'success');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `playlists/${playlistId}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const generateDiscoverWeekly = async () => {
     setIsLoading(true);
     try {
@@ -2835,7 +2942,9 @@ Return a JSON object with the following structure:
       removeTrackFromPlaylist, reorderTrackInPlaylist, searchTracks, searchArtists, searchNFTs, createNewPlaylist, deletePlaylist, updatePlaylist,
       generateDiscoverWeekly, createRecommendedPlaylist, clearRecentlyPlayed, setUserProfile, setAnthem, setGenesisContractAddress, userTracks, userNFTs, userBids,
       allTracks, allNFTs, artists, firestoreUsers, setArtists, addUserTrack, updateTrack, addUserNFT, updateNFT, recordTransaction, depositTON, withdrawTON, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
-      posts, createPost, addCommentToPost, toggleLikePost, deletePost, updatePost, sponsoredPosts, tasks, addTask, updateTaskProgress, completeTask, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, mintNFT, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
+      posts, createPost, addCommentToPost, toggleLikePost, deletePost, updatePost,
+      playlistFolders, createFolder, renameFolder, deleteFolder, movePlaylistToFolder,
+      sponsoredPosts, tasks, addTask, updateTaskProgress, completeTask, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, mintNFT, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
       searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
       featuredPlaylist,
       updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters, jamspaceFilters, setJamspaceFilters,
@@ -2848,7 +2957,9 @@ Return a JSON object with the following structure:
       rejectSponsorship,
       getEarnings,
       purchaseTrack,
-      userAddress: tonAddress
+      userAddress: tonAddress,
+      headerTitle,
+      setHeaderTitle
     }}>
       {children}
       {isLoading && (

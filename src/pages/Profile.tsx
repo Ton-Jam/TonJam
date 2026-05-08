@@ -26,7 +26,10 @@ import {
  Users,
  User,
  Upload,
- Globe
+ Globe,
+ Twitter,
+ Instagram,
+ Send
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from"@/components/ui/avatar";
 import { 
@@ -320,8 +323,8 @@ const Profile: React.FC = () => {
  </div>
  
  <div className="flex items-baseline gap-4 relative z-10">
- <h4 className="text-[26px] font-bold tracking-tighter text-foreground leading-none font-mono">{value}</h4>
- {subValue && <span className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest leading-none">{subValue}</span>}
+ <h4 className="text-xl sm:text-2xl font-bold tracking-tighter text-neutral-900 dark:text-foreground leading-none font-mono">{value}</h4>
+{subValue && <span className="text-[8px] sm:text-[9px] font-bold text-neutral-400 dark:text-foreground/30 uppercase tracking-widest leading-none">{subValue}</span>}
  </div>
  
  {/* Micro-grid background */}
@@ -372,14 +375,14 @@ const Profile: React.FC = () => {
  </div>
 
   {/* IDENTITY SECTION */}
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-2 -mt-10 sm:-mt-12 relative z-30 flex flex-col md:flex-row-reverse items-center md:items-end w-full gap-4 sm:gap-8 text-white font-sans">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-2 -mt-10 sm:-mt-12 relative z-30 flex flex-col md:flex-row-reverse items-center md:items-end w-full gap-4 sm:gap-8 text-neutral-900 dark:text-white font-sans">
     {/* Profile Picture */}
     <div className="relative group flex-shrink-0 md:mr-[-48px]">
       <div 
-        className="relative overflow-hidden border-2 border-[#0A0A0A] shadow-2xl bg-muted w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32"
-        style={{ borderRadius: '100px' }}
+        className="relative overflow-hidden border-4 border-background shadow-2xl bg-muted w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36"
+        style={{ borderRadius: '40px' }}
       >
-        <Avatar className="w-full h-full">
+        <Avatar className="w-full h-full rounded-none">
           <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} className="object-cover" alt={localUser.name} />
           <AvatarFallback className="text-3xl font-black">{localUser.name.charAt(0)}</AvatarFallback>
         </Avatar>
@@ -425,21 +428,21 @@ const Profile: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 justify-center md:justify-start">
-                <h1 className="text-xl md:text-4xl font-black tracking-tighter text-white drop-shadow-2xl uppercase leading-tight">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 justify-center md:justify-start">
+                <h1 className="text-xl md:text-3xl font-black tracking-tighter text-neutral-900 dark:text-white drop-shadow-sm uppercase leading-none">
                   {localUser.name}
                 </h1>
               </div>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                <span className="text-blue-400 font-black text-xs md:text-sm tracking-widest uppercase">
-                  @{localUser.username?.replace('@', '') || 'user'}
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <span className="text-blue-600 dark:text-blue-400 font-bold text-[10px] md:text-xs tracking-widest uppercase">
+                  {localUser.username?.replace('@', '') || 'user'}
                 </span>
                 <span className={cn(
-                  "px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.3em] backdrop-blur-md border",
-                  localUser.role === 'admin' ? "bg-red-500/20 text-red-400 border-red-500/30" :
-                  localUser.role === 'artist' ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
-                  "bg-white/5 text-white/60 border-white/10"
+                  "px-3 py-0.5 rounded-full text-[7px] font-black uppercase tracking-[0.2em] backdrop-blur-md border",
+                  localUser.role === 'admin' ? "bg-red-500/10 text-red-600 border-red-500/20" :
+                  localUser.role === 'artist' ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
+                  "bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-white/60 border-neutral-200 dark:border-white/10"
                 )}>
                   {localUser.role || 'collector'}
                 </span>
@@ -470,18 +473,18 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Stats Cluster */}
-      <div className="flex items-center justify-center md:justify-start gap-6 sm:gap-8 pt-3 sm:pt-4 border-t border-white/5">
+      <div className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 pt-2 sm:pt-3 border-t border-neutral-100 dark:border-white/5">
         <div className="flex flex-col items-center md:items-start group cursor-pointer">
-          <span className="text-base sm:text-lg font-black text-white tracking-tight group-hover:text-blue-500 transition-colors">
+          <span className="text-sm sm:text-base font-black text-neutral-900 dark:text-white tracking-tight group-hover:text-blue-600 transition-colors">
             {(localUser.followers || 0).toLocaleString()}
           </span>
-          <span className="text-[7px] sm:text-[8px] uppercase tracking-[0.3em] text-white/40 font-black mt-0.5 sm:mt-1">Followers</span>
+          <span className="text-[6px] sm:text-[7px] uppercase tracking-[0.2em] text-neutral-400 dark:text-white/30 font-bold mt-0.5 sm:mt-1">Followers</span>
         </div>
-        <div className="flex flex-col items-center md:items-start pl-6 sm:pl-8 border-l border-white/10 group cursor-pointer">
-          <span className="text-base sm:text-lg font-black text-white tracking-tight group-hover:text-blue-500 transition-colors">
+        <div className="flex flex-col items-center md:items-start pl-4 sm:pl-6 border-l border-neutral-100 dark:border-white/10 group cursor-pointer">
+          <span className="text-sm sm:text-base font-black text-neutral-900 dark:text-white tracking-tight group-hover:text-blue-600 transition-colors">
             {(localUser.following || 0).toLocaleString()}
           </span>
-          <span className="text-[7px] sm:text-[8px] uppercase tracking-[0.3em] text-white/40 font-black mt-0.5 sm:mt-1">Following</span>
+          <span className="text-[6px] sm:text-[7px] uppercase tracking-[0.2em] text-neutral-400 dark:text-white/30 font-bold mt-0.5 sm:mt-1">Following</span>
         </div>
         <Link 
           to="/settings" 
@@ -538,8 +541,8 @@ const Profile: React.FC = () => {
  <div className="max-w-7xl mx-auto px-4 md:px-4">
  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
  {/* Left Sidebar */}
- <div className="lg:col-span-4 space-y-6">
- <div className="bg-background p-6 rounded-2xl shadow-sm">
+ <div className="lg:col-span-4 space-y-4">
+<div className="bg-background p-5 rounded-2xl shadow-sm border border-neutral-100 dark:border-white/5">
  <div className="flex items-center gap-3 mb-6">
  <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
  <h3 className="text-xs font-bold text-zinc-800 dark:text-foreground uppercase tracking-wider">Stats</h3>
@@ -553,7 +556,7 @@ const Profile: React.FC = () => {
  <div className="bg-background p-6 rounded-2xl shadow-sm">
  <div className="flex items-center gap-3 mb-6">
  <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
- <h3 className="text-xs font-bold text-zinc-800 dark:text-foreground uppercase tracking-wider">Bio</h3>
+ <h3 className="text-[10px] font-bold text-neutral-800 dark:text-foreground uppercase tracking-widest">Bio</h3>
  </div>
  
  {isEditing ? (
@@ -576,13 +579,20 @@ const Profile: React.FC = () => {
  setLocalUser({...localUser, favoriteGenres: updated});
  }}
  className={cn(
-"px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all",
- isSelected 
- ?"bg-blue-500 text-white"
- :"bg-muted text-muted-foreground hover:bg-muted/80"
+ "relative p-[2px] rounded-full text-[10px] font-bold uppercase tracking-wider transition-all group",
+ isSelected ? "text-white" : "text-muted-foreground"
  )}
  >
+ <div className={cn(
+  "absolute inset-0 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-opacity",
+  isSelected ? "opacity-100 shadow-[0_0_10px_rgba(37,99,235,0.3)]" : "opacity-20 group-hover:opacity-100"
+ )}></div>
+ <div className={cn(
+  "relative px-3 py-1.5 rounded-full transition-colors font-bold",
+  isSelected ? "bg-blue-600/80 group-hover:bg-transparent" : "bg-muted dark:bg-[#0A0A0A] group-hover:bg-transparent"
+ )}>
  {genre.name}
+ </div>
  </button>
  );
  })}
@@ -606,14 +616,65 @@ const Profile: React.FC = () => {
  </div>
  </div>
  ) : (
- <div onClick={() => setIsEditing(true)} className="cursor-pointer group/bio">
- <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">
+   <div className="space-y-6">
+  <div onClick={() => setIsEditing(true)} className="cursor-pointer group/bio">
+   <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors whitespace-pre-wrap">
  {localUser.bio ||"No bio yet."}
  </p>
- <div className="mt-6 pt-4 flex items-center justify-between">
- <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">ID: {localUser?.uid?.slice(0, 8) || '...'}</span>
- <Pencil className="h-3 w-3 text-blue-500 opacity-0 group-hover/bio:opacity-100 transition-opacity"/>
- </div>
+  <div className="mt-4 flex items-center justify-between">
+  <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest text-[#5773ff]">ID: {localUser?.uid?.slice(0, 8) || '...'}</span>
+  <Pencil className="h-3 w-3 text-[#5773ff] opacity-0 group-hover/bio:opacity-100 transition-opacity"/>
+  </div>
+  </div>
+
+  {(localUser.socials?.x || localUser.socials?.instagram || localUser.socials?.website || localUser.socials?.telegram) && (
+  <div className="flex flex-wrap gap-3 pt-6 border-t border-white/5 transition-all animate-in fade-in slide-in-from-bottom-2 duration-700">
+  {localUser.socials?.x && (
+  <a 
+  href={localUser.socials.x} 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  className="p-2.5 bg-white/5 hover:bg-[#1DA1F2]/20 text-muted-foreground hover:text-[#1DA1F2] rounded-xl transition-all group scale-100 hover:scale-110 active:scale-95"
+  title="Twitter / X"
+  >
+  <Twitter className="h-4 w-4" />
+  </a>
+  )}
+  {localUser.socials?.instagram && (
+  <a 
+  href={localUser.socials.instagram} 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  className="p-2.5 bg-white/5 hover:bg-pink-500/20 text-muted-foreground hover:text-pink-500 rounded-xl transition-all group scale-100 hover:scale-110 active:scale-95"
+  title="Instagram"
+  >
+  <Instagram className="h-4 w-4" />
+  </a>
+  )}
+  {localUser.socials?.website && (
+  <a 
+  href={localUser.socials.website} 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  className="p-2.5 bg-white/5 hover:bg-blue-400/20 text-muted-foreground hover:text-blue-400 rounded-xl transition-all group scale-100 hover:scale-110 active:scale-95"
+  title="Website"
+  >
+  <Globe className="h-4 w-4" />
+  </a>
+  )}
+  {localUser.socials?.telegram && (
+  <a 
+  href={localUser.socials.telegram} 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  className="p-2.5 bg-white/5 hover:bg-sky-500/20 text-muted-foreground hover:text-sky-500 rounded-xl transition-all group scale-100 hover:scale-110 active:scale-95"
+  title="Telegram"
+  >
+  <Send className="h-4 w-4" />
+  </a>
+  )}
+  </div>
+  )}
  </div>
  )}
  </div>
@@ -651,12 +712,12 @@ const Profile: React.FC = () => {
  Profile Anthem
  </span>
  </div>
- <h2 className="text-3xl md:text-4xl font-black text-foreground mb-2">
- {anthemNft.title}
- </h2>
- <p className="text-sm font-bold text-muted-foreground mb-6">
- by @{anthemNft.creator}
- </p>
+ <h2 className="text-2xl md:text-3xl font-black text-neutral-900 dark:text-foreground mb-1">
+{anthemNft.title}
+</h2>
+<p className="text-[10px] sm:text-xs font-bold text-neutral-500 dark:text-muted-foreground mb-4">
+by {anthemNft.creator}
+</p>
  <div className="flex flex-wrap justify-center md:justify-start gap-3">
  <button 
  onClick={() => {

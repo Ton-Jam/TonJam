@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, Heart } from 'lucide-react';
+import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, Heart, TrendingUp, TrendingDown } from 'lucide-react';
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_ARTISTS, TJ_COIN_ICON } from '@/constants';
@@ -25,6 +25,12 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from 'motion/react';
 
 interface TrackCardProps {
@@ -139,15 +145,15 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const TrackMenuContent = () => (
     <>
-      <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4 italic">Neural Output</DropdownMenuLabel>
+      <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4 italic">Neural Output</DropdownMenuLabel>
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={handlePlay} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Play Track</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">Play Track</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleToggleLike} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Heart className={cn("h-4 w-4", isLiked && "fill-current text-red-500")} />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">{isLiked ? "Unlike Track" : "Like Track"}</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">{isLiked ? "Unlike Track" : "Like Track"}</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleAddToQueue} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <ListMusic className="h-4 w-4" />
@@ -160,20 +166,20 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={handleViewArtist} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <User className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">View Artist</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">View Artist</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleViewDetails} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Info className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Track Intelligence</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">Track Intelligence</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleMint} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Gem className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Mint as NFT</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">Mint as NFT</span>
       </DropdownMenuItem>
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Share Signal</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">Share Signal</span>
       </DropdownMenuItem>
       
       {(onRemove || onMoveUp || onMoveDown) && (
@@ -182,19 +188,19 @@ const TrackCard: React.FC<TrackCardProps> = ({
           {onMoveUp && (
             <DropdownMenuItem onClick={onMoveUp} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
               <ArrowUp className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest italic">Shift Up</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest italic">Shift Up</span>
             </DropdownMenuItem>
           )}
           {onMoveDown && (
             <DropdownMenuItem onClick={onMoveDown} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
               <ArrowDown className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest italic">Shift Down</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest italic">Shift Down</span>
             </DropdownMenuItem>
           )}
           {onRemove && (
             <DropdownMenuItem onClick={onRemove} className="flex items-center gap-3 py-3 px-4 cursor-pointer text-red-500 focus:bg-red-600 focus:text-white transition-colors">
               <Trash2 className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest italic">Terminate Signal</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest italic">Terminate Signal</span>
             </DropdownMenuItem>
           )}
         </>
@@ -204,15 +210,15 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const ContextMenuContentRefined = () => (
     <ContextMenuContent className="bg-[#0A0A0B] border-white/5 text-white shadow-2xl min-w-[200px] p-1 rounded-xl backdrop-blur-3xl">
-      <ContextMenuLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4 italic">Neural Context</ContextMenuLabel>
+      <ContextMenuLabel className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4 italic">Neural Context</ContextMenuLabel>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handlePlay} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Execute Playback</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">Execute Playback</span>
       </ContextMenuItem>
       <ContextMenuItem onClick={handleToggleLike} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         <Heart className={cn("h-4 w-4", isLiked && "fill-current text-red-500")} />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">{isLiked ? "Remove Like" : "Initialize Like"}</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">{isLiked ? "Remove Like" : "Initialize Like"}</span>
       </ContextMenuItem>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handleAddToQueue} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
@@ -226,12 +232,12 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handleViewArtist} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         <User className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Vitals: Artist</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">Vitals: Artist</span>
       </ContextMenuItem>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Share Artifact</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest italic">Share Artifact</span>
       </ContextMenuItem>
     </ContextMenuContent>
   );
@@ -276,31 +282,60 @@ const TrackCard: React.FC<TrackCardProps> = ({
     return (
       <ContextMenu>
         <ContextMenuTrigger>
-          <div 
-            className={`group flex items-center gap-5 p-4 rounded-xl hover:bg-white/5 transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 ${className}`}
-            onClick={handleCardClickInner}
-            onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 shadow-lg border border-white/5 group-hover:border-blue-500/30 transition-colors">
+        <motion.div 
+          whileHover={{ y: -4, scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className={`group flex items-center gap-5 p-3 rounded-[2px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 ${className}`}
+          onClick={handleCardClickInner}
+          onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
+          role="button"
+          tabIndex={0}
+        >
+            <div className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0 shadow-sm border border-white/5 group-hover:border-blue-500/30 transition-colors">
               <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
               <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
                 <button onClick={handlePlay} className="text-white">
                   {track.tokenGating?.enabled && !hasAccess ? (
-                    <Lock className="h-5 w-5" />
+                    <Lock className="h-4 w-4" />
                   ) : (
-                    isActive && isPlaying ? <Pause className="h-6 w-6 fill-current animate-pulse" /> : <Play className="h-6 w-6 fill-current" />
+                    isActive && isPlaying ? <Pause className="h-5 w-5 fill-current animate-pulse" /> : <Play className="h-5 w-5 fill-current" />
                   )}
                 </button>
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className={`text-xs font-black truncate uppercase italic tracking-tighter ${isActive ? 'text-blue-500' : 'text-neutral-200'}`}>{track.title}</h4>
-              <p className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mt-1 italic group-hover:text-blue-500/60 transition-colors">{track.artist}</p>
+              <h4 className={`text-[10px] font-bold uppercase italic tracking-tighter line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>{track.title}</h4>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <p 
+                    className="text-[8.5px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-0.5 italic group-hover:text-primary transition-colors hover:underline cursor-pointer inline-block"
+                    onClick={handleArtistClick}
+                  >
+                    {track.artist}
+                  </p>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-64 bg-zinc-950/90 backdrop-blur-xl border-white/10 p-4">
+                  <div className="flex justify-between space-x-4">
+                    <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
+                      <AvatarImage src={artist?.avatarUrl} />
+                      <AvatarFallback className="text-[10px] bg-blue-500/10 text-blue-400">{track.artist?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1 flex-1">
+                      <h4 className="text-[11px] font-black uppercase italic italic tracking-tighter text-white">{track.artist}</h4>
+                      <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
+                        {artist?.followers?.toLocaleString() || '0'} Followers
+                      </p>
+                      <div className="flex items-center pt-2 gap-2">
+                        <Activity className="h-3 w-3 text-emerald-500" />
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">Neural_Sync Active</span>
+                      </div>
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             </div>
             <MoreOptionsButton />
-          </div>
+          </motion.div>
         </ContextMenuTrigger>
         <ContextMenuContentRefined />
       </ContextMenu>
@@ -313,9 +348,12 @@ const TrackCard: React.FC<TrackCardProps> = ({
     return (
       <ContextMenu>
         <ContextMenuTrigger>
-          <div className={`flex flex-col w-full group/row last:border-0 hover:bg-white/5 transition-colors rounded-xl mx-2 ${className}`}>
+        <motion.div 
+          whileHover={{ opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.05)" }}
+          className={`flex flex-col w-full group/row last:border-0 transition-colors rounded-[2px] mx-2 ${className}`}
+        >
             <div 
-              className="flex items-center gap-4 p-2 sm:p-4 cursor-pointer w-full outline-none focus-visible:bg-white/5"
+              className="flex items-center gap-4 p-2 sm:p-3 cursor-pointer w-full outline-none focus-visible:bg-white/5"
               onClick={handleCardClickInner}
               onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
               role="button"
@@ -323,13 +361,13 @@ const TrackCard: React.FC<TrackCardProps> = ({
               aria-label={`View track: ${track.title} by ${track.artist}`}
             >
               {index !== undefined && (
-                <div className="hidden sm:flex items-center justify-center w-8 text-[11px] font-black text-muted-foreground/20 group-hover/row:text-blue-500 transition-colors italic">
+                <div className="hidden sm:flex items-center justify-center w-8 text-[11px] font-bold text-muted-foreground/20 group-hover/row:text-blue-500 transition-colors italic">
                   {String(index + 1).padStart(2, '0')}
                 </div>
               )}
 
               <div 
-                className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-[4px] overflow-hidden flex-shrink-0 cursor-pointer shadow-sm group/thumb border border-white/5 group-hover/row:border-blue-500/20 transition-colors" 
+                className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0 cursor-pointer shadow-sm group/thumb border border-white/5 group-hover/row:border-blue-500/20 transition-colors" 
                 onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
               >
                 <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
@@ -349,28 +387,50 @@ const TrackCard: React.FC<TrackCardProps> = ({
               </div>
 
               <div className="flex-1 min-w-0">
-                <h4 className={`text-[13px] sm:text-[14px] font-black uppercase tracking-tight truncate italic ${isActive ? 'text-blue-500' : 'text-neutral-200'}`}>
+                <h4 className={`text-[10px] font-bold uppercase tracking-tight italic line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>
                   {track.title}
                 </h4>
-                <div className="flex items-center gap-2 mt-1">
-                  <p 
-                    className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] truncate hover:text-blue-500 transition-colors cursor-pointer italic"
-                    onClick={handleArtistClick}
-                  >
-                    // {track.artist}
-                  </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <p 
+                        className="text-[8.5px] font-black text-foreground/80 uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
+                        onClick={handleArtistClick}
+                      >
+                        {track.artist}
+                      </p>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-64 bg-zinc-950/90 backdrop-blur-xl border-white/10 p-4">
+                      <div className="flex justify-between space-x-4">
+                        <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
+                          <AvatarImage src={artist?.avatarUrl} />
+                          <AvatarFallback className="text-[10px] bg-blue-500/10 text-blue-400">{track.artist?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-1 flex-1">
+                          <h4 className="text-[11px] font-black uppercase italic tracking-tighter text-white">{track.artist}</h4>
+                          <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
+                            {artist?.followers?.toLocaleString() || '0'} Listeners Monthly
+                          </p>
+                          <div className="flex items-center pt-2 gap-2 text-blue-400">
+                             <TrendingUp className="h-3 w-3" />
+                             <span className="text-[8px] font-black uppercase tracking-[0.2em]">Ascending Orbit</span>
+                          </div>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 sm:gap-6 pr-1">
                 <div className="hidden md:flex items-center gap-8">
                     <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
-                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest italic">Frequency</span>
-                      <span className="text-[11px] font-black text-foreground uppercase italic group-hover/row:text-blue-400">{(track.playCount || 0).toLocaleString()}</span>
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest italic">Frequency</span>
+                      <span className="text-[11px] font-bold text-foreground uppercase italic group-hover/row:text-blue-400">{(track.playCount || 0).toLocaleString()}</span>
                     </div>
                     <div className="flex flex-col items-end min-w-[60px] opacity-40 group-hover/row:opacity-100 transition-opacity">
-                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest italic">Length</span>
-                      <span className="text-[11px] font-black text-foreground italic">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest italic">Length</span>
+                      <span className="text-[11px] font-bold text-foreground italic">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
                     </div>
                 </div>
 
@@ -393,27 +453,27 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 animate={{ height: 'auto', opacity: 1 }}
                 className="px-5 pb-5 pt-2 overflow-hidden"
               >
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 rounded-xl bg-white/[0.02] border border-white/5 backdrop-blur-md shadow-inner">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-[2px] bg-white/[0.02] border border-white/5 backdrop-blur-md shadow-inner">
                     <div className="space-y-1">
-                      <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] italic">Pulse_BPM</p>
-                      <p className="text-xs font-black text-blue-500 uppercase italic tracking-widest">{track.bpm || '128'}</p>
+                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] italic">Pulse_BPM</p>
+                      <p className="text-xs font-bold text-blue-500 uppercase italic tracking-widest">{track.bpm || '128'}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] italic">Harmonic_Key</p>
-                      <p className="text-xs font-black text-cyan-500 uppercase italic tracking-widest">{track.key || 'C# Maj'}</p>
+                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] italic">Harmonic_Key</p>
+                      <p className="text-xs font-bold text-cyan-500 uppercase italic tracking-widest">{track.key || 'C# Maj'}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] italic">Encoded_Format</p>
-                      <p className="text-xs font-black text-purple-500 uppercase italic tracking-widest">{track.bitrate || '320k'}</p>
+                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] italic">Encoded_Format</p>
+                      <p className="text-xs font-bold text-purple-500 uppercase italic tracking-widest">{track.bitrate || '320k'}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] italic">Core_Genre</p>
-                      <p className="text-xs font-black text-emerald-500 uppercase italic tracking-widest">{track.genre || 'Sonic'}</p>
+                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] italic">Core_Genre</p>
+                      <p className="text-xs font-bold text-emerald-500 uppercase italic tracking-widest">{track.genre || 'Sonic'}</p>
                     </div>
                 </div>
               </motion.div>
             )}
-          </div>
+          </motion.div>
         </ContextMenuTrigger>
         <ContextMenuContentRefined />
       </ContextMenu>
@@ -423,8 +483,12 @@ const TrackCard: React.FC<TrackCardProps> = ({
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <div 
-          className={`group relative cursor-pointer transition-all duration-500 hover:-translate-y-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-2xl p-4 bg-muted/10 hover:border-blue-500/20 hover:bg-white/[0.03] border border-transparent shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] w-full ${className}`}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ y: -8, scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className={`group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[2px] p-3 bg-muted/10 hover:border-blue-500/20 hover:bg-white/[0.03] border border-transparent w-full ${className}`}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"
@@ -432,7 +496,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           aria-label={`View track: ${track.title} by ${track.artist}`}
         >
           {/* Image Container - 1:1 Aspect Ratio */}
-          <div className="relative aspect-square rounded-xl overflow-hidden bg-neutral-900 mb-5 shadow-2xl group-hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] transition-all border border-white/5">
+          <div className="relative aspect-square rounded-[2px] overflow-hidden bg-neutral-900 mb-4 transition-all border border-white/5">
             <img 
               src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
               alt="" 
@@ -440,18 +504,18 @@ const TrackCard: React.FC<TrackCardProps> = ({
               onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }}
             />
             
-            <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-all duration-300 opacity-0 group-hover:opacity-100 ${isActive ? 'opacity-100' : ''}`}>
+            <div className={`absolute inset-0 bg-black/40 transition-all duration-300 opacity-0 group-hover:opacity-100 ${isActive ? 'opacity-100' : ''}`}>
               <button 
-                className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl shadow-blue-600/50 border border-white/20"
+                className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl shadow-blue-600/30 border border-white/20"
                 onClick={handlePlay}
                 aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
               >
                 {track.tokenGating?.enabled && !hasAccess ? (
-                  <Lock className="h-6 w-6" />
+                  <Lock className="h-3 w-3" />
                 ) : isActive && isPlaying ? (
-                  <Pause className="h-8 w-8 fill-current animate-pulse" />
+                  <Pause className="h-4 w-4 fill-current animate-pulse" />
                 ) : (
-                  <Play className="h-8 w-8 fill-current ml-1" />
+                  <Play className="h-4 w-4 fill-current ml-0.5" />
                 )}
               </button>
             </div>
@@ -459,12 +523,12 @@ const TrackCard: React.FC<TrackCardProps> = ({
             {/* Status indicators */}
             <div className="absolute top-3 left-3 flex flex-col gap-1">
               {track.isNFT && (
-                <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-black text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-purple-400/30">
+                <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-purple-400/30">
                   NFT_ASSET
                 </div>
               )}
               {track.tokenGating?.enabled && (
-                <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-black text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
+                <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
                   <Key className="w-2.5 h-2.5" /> GATED
                 </div>
               )}
@@ -474,29 +538,50 @@ const TrackCard: React.FC<TrackCardProps> = ({
           {/* Content Below Card */}
           <div className="px-1 flex flex-col">
             <div className="flex justify-between items-start gap-2">
-              <h3 className={`text-[13px] font-black leading-tight truncate uppercase italic tracking-tighter ${isActive ? 'text-blue-500' : 'text-neutral-100'}`}>
+              <h3 className={`text-[11px] font-black leading-tight line-clamp-2 whitespace-normal break-words uppercase italic tracking-tighter ${isActive ? 'text-primary' : 'text-foreground'}`}>
                 {track.title}
               </h3>
               <MoreOptionsButton />
             </div>
             
             <div className="flex items-center gap-2 mt-1">
-              <p 
-                className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] truncate hover:text-blue-500 transition-colors italic"
-                onClick={handleArtistClick}
-              >
-                // {track.artist}
-              </p>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <p 
+                    className="text-[9px] font-black text-foreground/80 uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
+                    onClick={handleArtistClick}
+                  >
+                    {track.artist}
+                  </p>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-64 bg-zinc-950/90 backdrop-blur-xl border-white/10 p-4 z-[100]">
+                  <div className="flex justify-between space-x-4">
+                    <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
+                      <AvatarImage src={artist?.avatarUrl} />
+                      <AvatarFallback className="text-[10px] bg-blue-500/10 text-blue-400">{track.artist?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1 flex-1">
+                      <h4 className="text-[11px] font-black uppercase italic tracking-tighter text-white">{track.artist}</h4>
+                      <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
+                        {artist?.followers?.toLocaleString() || '0'} Followers
+                      </p>
+                      <button className="w-full mt-2 py-1.5 bg-blue-600 rounded-sm text-[8px] font-black text-white uppercase tracking-widest hover:bg-blue-500 transition-colors">
+                        View Dossier
+                      </button>
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             </div>
 
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 text-[8px] font-black text-muted-foreground/20 uppercase tracking-[0.2em]">
-                    <Headphones className="w-2.5 h-2.5" />
+                <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                    <Headphones className="w-3.5 h-3.5" />
                     {(track.playCount || 0).toLocaleString()}
                 </div>
-                <div className="flex items-center gap-1.5 text-[8px] font-black text-muted-foreground/20 uppercase tracking-[0.2em]">
-                    <Clock className="w-2.5 h-2.5" />
+                <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                    <Clock className="w-3.5 h-3.5" />
                     {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
                 </div>
               </div>
@@ -504,14 +589,14 @@ const TrackCard: React.FC<TrackCardProps> = ({
               {onMint && !track.isNFT && (
                 <button
                   onClick={handleMint}
-                  className="text-[8px] font-black text-blue-400 hover:text-white transition-all px-3 py-1.5 bg-blue-500/10 hover:bg-blue-600 rounded-md uppercase tracking-[0.2em] border border-blue-500/10 italic"
+                  className="text-[9px] font-black text-white hover:text-white transition-all px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-full uppercase tracking-[0.2em] shadow-md shadow-blue-600/10 italic border-none"
                 >
                   MINT
                 </button>
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       </ContextMenuTrigger>
       <ContextMenuContentRefined />
     </ContextMenu>

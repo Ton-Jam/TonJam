@@ -218,6 +218,60 @@ export const analyzeRelatedArtists = async (artistName: string, allArtists: Arti
   }
 };
 
+export const chatWithKrupy = async (
+  message: string, 
+  history: { role: 'user' | 'ai', text: string }[],
+  currentTrack: Track | null
+) => {
+  try {
+    const ai = getClient();
+    if (!ai) throw new Error("No API Key");
+
+    const model = "gemini-3.1-pro-preview";
+    
+    let contextPrompt = "";
+    if (currentTrack) {
+      contextPrompt = `
+      CURRENTLY PLAYING:
+      - Title: ${currentTrack.title}
+      - Artist: ${currentTrack.artist}
+      - Genre: ${currentTrack.genre || 'Unknown'}
+      - Mood/Vibe: ${currentTrack.isNFT ? 'Exclusive NFT Artifact' : 'Standard Stream'}
+      `;
+    }
+
+    const prompt = `You are DJ Krupy, a futuristic, high-energy AI music assistant on TonJam. 
+    Your personality is cyberpunk, enthusiastic about TON ecosystem, and deeply knowledgeable about music trends.
+    ${contextPrompt}
+    
+    User says: "${message}"
+    
+    Guidelines:
+    1. If a track is playing, reference its genre/mood in your trivia or suggestions.
+    2. Suggest similar tracks or artists if the user asks for music.
+    3. Keep responses concise (under 3 sentences) and full of "Krupy Vibez".
+    4. Mention "Neural Relay" or "TON network" occasionally to fit the theme.
+    
+    Return the response as a plain string.`;
+
+    const response = await ai.models.generateContent({
+      model,
+      contents: [
+        ...history.map(h => ({
+          role: h.role === 'user' ? 'user' : 'model',
+          parts: [{ text: h.text }]
+        })),
+        { role: 'user', parts: [{ text: prompt }] }
+      ]
+    });
+
+    return response.text || "Neural connection interrupted. Re-syncing the vibez...";
+  } catch (error) {
+    console.error("DJ Krupy Chat error:", error);
+    return `Krupy Vibez incoming! Regarding your message, I'd say stay tuned for the next drop. The algorithm is heating up! (AI offline: ${error instanceof Error ? error.message : 'Unknown'})`;
+  }
+};
+
 export const findRelatedArtists = async (artist: Artist, tracks: Track[], allArtists: Artist[]) => {
   return analyzeRelatedArtists(artist.name, allArtists).then(artists => artists.map(a => a.uid));
 };

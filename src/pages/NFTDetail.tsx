@@ -38,6 +38,7 @@ import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO, TJ
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem, Track, NFTOffer } from '@/types';
 import { fetchNFTMetadata } from '@/services/nftService';
+import { cancelListing, getActiveListingForNFT } from '@/services/marketplaceService';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as RechartsPrimitive from 'recharts';
@@ -61,7 +62,7 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import CommentsSection from '@/components/CommentsSection';
 import ReactionsSection from '@/components/ReactionsSection';
 import confetti from 'canvas-confetti';
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, cn } from '@/lib/utils';
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -330,12 +331,30 @@ const NFTDetail: React.FC = () => {
     setIsCancelListingConfirmOpen(true);
   };
 
-  const confirmCancelListing = () => {
+  const confirmCancelListing = async () => {
+    if (!localNft) return;
+    
     addNotification("Initiating listing cancellation protocol...", "info");
-    setTimeout(() => {
+    
+    try {
+      const listing = await getActiveListingForNFT(localNft.id);
+      if (!listing) {
+        // Optimistic UI update if listing was already gone
+        updateNFT(localNft.id, { listingType: undefined });
+        addNotification("Listing not found, metadata synced.", "success");
+        return;
+      }
+
+      await cancelListing(tonConnectUI, listing, localNft);
+      
       updateNFT(localNft.id, { listingType: undefined });
       addNotification("Listing cancelled. Asset returned to vault.", "success");
-    }, 1500);
+    } catch (e) {
+      console.error(e);
+      addNotification("Cancellation protocol aborted.", "error");
+    } finally {
+      setIsCancelListingConfirmOpen(false);
+    }
   };
 
   const handleCancelBid = () => {
@@ -888,26 +907,50 @@ const NFTDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="space-y-4"
+                    className="space-y-3"
                   >
-                    {localNft.history?.map((h) => (
-                      <div key={`history-${h.event}-${h.date}-${h.from}-${h.to}-${h.price}`} className="flex items-center justify-between p-4 bg-card border border-border rounded-[12px] hover:bg-foreground/[0.02] transition-all group">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-[10px] bg-muted/50 flex items-center justify-center border border-blue-500/30 group-hover:border-blue-500/50 transition-all">
-                            {h.event === 'Minted' ? (
-                              <Wand2 className="h-5 w-5 text-blue-500/40" />
-                            ) : (
-                              <Handshake className="h-5 w-5 text-emerald-500/40" />
-                            )}
+                    {[...(localNft.history || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((h, i) => (
+                      <div key={`history-${i}`} className="flex items-center justify-between p-6 bg-white/[0.02] rounded-[24px] hover:bg-white/[0.04] transition-all group overflow-hidden relative">
+                        {/* Hardware scanline effect */}
+                        <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
+                        
+                        <div className="flex items-center gap-6 relative z-10">
+                          <div className={cn(
+                            "w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-lg",
+                            h.event === 'Minted' ? "bg-blue-500/10 text-blue-500" : "bg-emerald-500/10 text-emerald-500"
+                          )}>
+                            {h.event === 'Minted' ? <Wand2 className="h-6 w-6" /> : <Handshake className="h-6 w-6" />}
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-xs font-bold text-foreground uppercase tracking-tight">{h.event}</span>
-                            <span className="text-[8px] text-muted-foreground/50 font-bold uppercase tracking-widest mt-4">{h.date}</span>
+                          <div className="flex flex-col gap-2">
+                            <span className="text-base font-black text-foreground uppercase tracking-tight italic flex items-center gap-3">
+                              {h.event}
+                              <div className={cn("w-1.5 h-1.5 rounded-full", h.event === 'Minted' ? "bg-blue-500" : "bg-emerald-500")}></div>
+                            </span>
+                            <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest italic">
+                              <span>Layer_Protocol: {h.event === 'Minted' ? 'MINT' : 'TRANSFER'}</span>
+                              <div className="h-px w-4 bg-white/10"></div>
+                              <span>{h.date}</span>
+                            </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors cursor-pointer">@{h.to}</span>
-                          {h.price && <p className="text-sm text-foreground font-bold mt-4 font-mono">{h.price} TON</p>}
+
+                        <div className="flex items-center gap-12 relative z-10">
+                          <div className="text-right hidden md:block">
+                            <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-2">Sync_Origin</p>
+                            <span className="text-[11px] font-mono text-primary font-black uppercase tracking-widest">
+                               {h.from === 'Vault' ? 'GENESIS_VAULT' : `@${h.from.slice(0, 8)}`}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-2">Recipient_Node</p>
+                             <span className="text-[11px] font-mono text-primary font-black uppercase tracking-widest">@{h.to.slice(0, 8)}</span>
+                             {h.price && (
+                               <div className="flex items-center justify-end gap-2 mt-2">
+                                  <span className="text-xl font-black text-foreground tracking-tighter italic">{h.price}</span>
+                                  <span className="text-[10px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
+                               </div>
+                             )}
+                          </div>
                         </div>
                       </div>
                     ))}

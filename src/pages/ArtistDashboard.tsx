@@ -12,17 +12,25 @@ import {
   Plus,
   ArrowUpRight,
   Activity,
-  Rocket
+  Rocket,
+  Settings,
+  TrendingDown,
+  TrendingUp,
+  BarChart3,
+  ExternalLink
 } from "lucide-react";
 import { motion } from "motion/react";
 import { BackButton } from "@/components/BackButton";
 import { useAudio } from "@/context/AudioContext";
+import { getPlaceholderImage } from "@/lib/utils";
 import TrackMonetizationModal from "@/components/TrackMonetizationModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
 import TrackUploadModal from "@/components/TrackUploadModal";
 import SongRequestsTab from "@/components/SongRequestsTab";
 import AlbumCard from "@/components/AlbumCard";
 import Autoplay from "embla-carousel-autoplay";
+import ManageNFTModal from "@/components/ManageNFTModal";
+import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
 import {
   Carousel,
   CarouselContent,
@@ -38,7 +46,9 @@ export default function ArtistDashboard() {
   const [earnings, setEarnings] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTrackForConfig, setSelectedTrackForConfig] = useState<any | null>(null);
+  const [selectedNFTForManage, setSelectedNFTForManage] = useState<any | null>(null);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
@@ -157,7 +167,7 @@ export default function ArtistDashboard() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden group"
+            className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden group shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Music className="w-12 h-12" />
@@ -173,7 +183,7 @@ export default function ArtistDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden group"
+            className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden group shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Gem className="w-12 h-12" />
@@ -189,7 +199,7 @@ export default function ArtistDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden group"
+            className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden group shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Coins className="w-12 h-12" />
@@ -202,47 +212,145 @@ export default function ArtistDashboard() {
           </motion.div>
         </div>
 
+        {/* Analytics Preview */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white/5 border border-white/10 rounded-[32px] p-6 relative overflow-hidden"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] flex items-center gap-2 mb-1">
+                <BarChart3 className="w-3 h-3 text-cyan-500" /> 
+                Recent Performance
+              </h2>
+              <h3 className="text-sm font-black uppercase tracking-tight italic">Trending Audience Growth</h3>
+            </div>
+            <button 
+              onClick={() => navigate('/artist-analytics')}
+              className="text-[9px] font-bold text-cyan-500 uppercase tracking-widest hover:text-cyan-400 flex items-center gap-1 group"
+            >
+              Detailed Insights <ExternalLink className="w-2.5 h-2.5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+          <div className="h-48 -mx-4">
+            <ChartAreaInteractive />
+          </div>
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">New Listeners</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-black text-white">+1,248</span>
+                <span className="text-[8px] font-black text-emerald-500 px-1.5 py-0.5 bg-emerald-500/10 rounded-full flex items-center gap-0.5">
+                  <TrendingUp className="w-2 h-2" /> 12%
+                </span>
+              </div>
+            </div>
+            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Total Streams</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-black text-white">42.8K</span>
+                <span className="text-[8px] font-black text-emerald-500 px-1.5 py-0.5 bg-emerald-500/10 rounded-full flex items-center gap-0.5">
+                  <TrendingUp className="w-2 h-2" /> 8.4%
+                </span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <button
             onClick={() => setIsUploadModalOpen(true)}
-            className="group bg-cyan-500 text-black p-6 rounded-3xl flex items-center justify-between hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(8,145,178,0.2)]"
+            className="flex flex-col items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-cyan-500 hover:text-black transition-all group active:scale-95 shadow-lg"
           >
-            <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Forge Protocol</p>
-              <h3 className="text-lg font-black uppercase tracking-tight">Upload New Track</h3>
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center group-hover:bg-black/10">
+              <Plus className="w-5 h-5 text-cyan-500 group-hover:text-black" />
             </div>
-            <div className="w-12 h-12 bg-black/10 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform">
-              <Plus className="w-6 h-6" />
-            </div>
+            <span className="text-[8px] font-black uppercase tracking-widest text-center">Add Track</span>
           </button>
 
           <button
             onClick={() => navigate('/artist-minting')}
-            className="group bg-purple-600 text-white p-6 rounded-3xl flex items-center justify-between hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(147,51,234,0.2)]"
+            className="flex flex-col items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-purple-600 transition-all group active:scale-95 shadow-lg"
           >
-            <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-60">NFT Protocol</p>
-              <h3 className="text-lg font-black uppercase tracking-tight">Mint Existing</h3>
+            <div className="w-10 h-10 rounded-xl bg-purple-600/10 flex items-center justify-center group-hover:bg-white/10">
+              <Gem className="w-5 h-5 text-purple-500 group-hover:text-white" />
             </div>
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform">
-              <Gem className="w-6 h-6" />
-            </div>
+            <span className="text-[8px] font-black uppercase tracking-widest text-center">Mint NFT</span>
           </button>
 
           <button
             onClick={() => setIsSponsorshipModalOpen(true)}
-            className="group bg-blue-600 text-white p-6 rounded-3xl flex items-center justify-between hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(37,99,235,0.2)] sm:col-span-2"
+            className="flex flex-col items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-blue-600 transition-all group active:scale-95 shadow-lg"
           >
-            <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Promotion Protocol</p>
-              <h3 className="text-lg font-black uppercase tracking-tight">Submit for Sponsorship</h3>
+            <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center group-hover:bg-white/10">
+              <Rocket className="w-5 h-5 text-blue-500 group-hover:text-white" />
             </div>
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform">
-              <Rocket className="w-6 h-6" />
+            <span className="text-[8px] font-black uppercase tracking-widest text-center">Promote</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/governance')}
+            className="flex flex-col items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group active:scale-95 shadow-lg"
+          >
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <Settings className="w-5 h-5 text-white/60" />
             </div>
+            <span className="text-[8px] font-black uppercase tracking-widest text-center">Governance</span>
           </button>
         </div>
+
+        {/* NFT Vault Section */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] flex items-center gap-2">
+              <Gem className="w-3 h-3 text-purple-500" /> Digital Collection Vault
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {nfts.length > 0 ? (
+              nfts.map((nft, idx) => (
+                <motion.div
+                  key={nft.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="bg-white/5 border border-white/10 rounded-2xl p-2 group hover:bg-white/10 transition-all cursor-pointer relative"
+                  onClick={() => {
+                    setSelectedNFTForManage(nft);
+                    setIsManageModalOpen(true);
+                  }}
+                >
+                  <div className="aspect-square rounded-xl overflow-hidden mb-2 relative">
+                    <img 
+                      src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
+                      className="w-full h-full object-cover"
+                      alt={nft.title}
+                    />
+                    <div className="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded-[4px] text-[7px] font-black text-cyan-400">
+                      {nft.price} TON
+                    </div>
+                  </div>
+                  <h4 className="text-[10px] font-black uppercase tracking-tight truncate px-1">{nft.title}</h4>
+                  <p className="text-[8px] font-bold text-white/30 truncate px-1">{nft.edition}</p>
+                  
+                  <div className="absolute inset-0 bg-purple-600/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-2xl transition-opacity">
+                    <button className="px-3 py-1.5 bg-purple-600 text-[8px] font-black uppercase tracking-widest rounded-lg shadow-xl translate-y-2 group-hover:translate-y-0 transition-transform">
+                      Manage
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center bg-white/5 border border-dashed border-white/10 rounded-2xl">
+                <Gem className="w-8 h-8 text-white/10 mx-auto mb-3" />
+                <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">No minted artifacts in vault</p>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* Track List */}
         <div className="space-y-4">
@@ -318,18 +426,17 @@ export default function ArtistDashboard() {
                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{track.genre}</p>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    {!track.isNFT && (
-                      <>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openConfig(track);
-                          }}
-                          className="text-[9px] font-black text-white/40 hover:text-white uppercase tracking-widest transition-colors"
-                        >
-                          Configure
-                        </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openConfig(track);
+                        }}
+                        className="text-[9px] font-black text-white/40 hover:text-white uppercase tracking-widest transition-colors"
+                      >
+                        Configure
+                      </button>
+                      {!track.isNFT && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -339,8 +446,7 @@ export default function ArtistDashboard() {
                         >
                           Mint NFT
                         </button>
-                      </>
-                    )}
+                      )}
                     <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
                       <ChevronRight className="w-4 h-4 text-white/20" />
                     </div>
@@ -382,6 +488,17 @@ export default function ArtistDashboard() {
           isOpen={isConfigModalOpen}
           onClose={() => setIsConfigModalOpen(false)}
           onUpdate={fetchData}
+        />
+      )}
+      
+      {selectedNFTForManage && (
+        <ManageNFTModal
+          nft={selectedNFTForManage}
+          isOpen={isManageModalOpen}
+          onClose={() => {
+            setIsManageModalOpen(false);
+            fetchData();
+          }}
         />
       )}
 

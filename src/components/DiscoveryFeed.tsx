@@ -27,8 +27,8 @@ const DiscoveryFeed: React.FC = () => {
                 <Sparkles className="h-4 w-4 text-blue-400" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-foreground uppercase tracking-tight font-display">Personalized Signals</h2>
-                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">Based on your neural patterns</p>
+                <h2 className="text-[11px] font-bold text-foreground uppercase tracking-tight font-display">Personalized Signals</h2>
+                <p className="text-[7.5px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">Based on your neural patterns</p>
               </div>
             </div>
             <button 
@@ -60,8 +60,8 @@ const DiscoveryFeed: React.FC = () => {
                 <Zap className="h-4 w-4 text-amber-400" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-foreground uppercase tracking-tight font-display">Emerging Artifacts</h2>
-                <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">Trending NFTs in your sector</p>
+                <h2 className="text-[11px] font-bold text-foreground uppercase tracking-tight font-display">Emerging Artifacts</h2>
+                <p className="text-[7.5px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">Trending NFTs in your sector</p>
               </div>
             </div>
             <button 

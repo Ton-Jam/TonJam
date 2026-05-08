@@ -5,6 +5,7 @@ import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import AddToPlaylistModal from './AddToPlaylistModal';
+import TrackMonetizationModal from './TrackMonetizationModal';
 import { Button } from "@/components/ui/button"
 import { motion } from 'motion/react';
 import {
@@ -27,13 +28,18 @@ interface TrackOptionsModalProps {
 
 const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, onRemove, onMoveUp, onMoveDown }) => {
   const navigate = useNavigate();
-  const { addNotification, addToQueue, likedTrackIds, toggleLikeTrack } = useAudio();
+  const { addNotification, addToQueue, likedTrackIds, toggleLikeTrack, userProfile } = useAudio();
   const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
+  const [showMonetizationModal, setShowMonetizationModal] = useState(false);
 
   const isLiked = likedTrackIds.includes(track.id);
+  const isArtist = userProfile?.uid === track.artistId;
 
   const handleAction = async (action: string) => {
     switch (action) {
+      case 'monetize':
+        setShowMonetizationModal(true);
+        break;
       case 'queue':
         addToQueue(track);
         onClose();
@@ -90,8 +96,13 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
     return <AddToPlaylistModal track={track} onClose={() => { setShowAddToPlaylistModal(false); onClose(); }} />;
   }
 
+  if (showMonetizationModal) {
+    return <TrackMonetizationModal track={track} isOpen={true} onClose={() => { setShowMonetizationModal(false); onClose(); }} />;
+  }
+
   const options = [
     { id: 'like', icon: Heart, label: isLiked ? 'Remove from Liked' : 'Like Track', color: isLiked ? 'text-red-500' : 'text-foreground', iconColor: isLiked ? 'text-red-500 fill-current' : 'text-muted-foreground group-hover:text-red-400', action: () => handleAction('like') },
+    ...(isArtist ? [{ id: 'monetize', icon: Coins, label: 'Configure Monetization', color: 'text-cyan-400', iconColor: 'text-cyan-400 group-hover:text-cyan-200', action: () => handleAction('monetize') }] : []),
     { id: 'queue', icon: ListMusic, label: 'Add to Queue', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('queue') },
     { id: 'playlist', icon: Plus, label: 'Add to Playlist', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('playlist') },
     { id: 'artist', icon: User, label: 'View Artist', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('artist') },

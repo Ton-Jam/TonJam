@@ -96,6 +96,18 @@ export interface NFTOffer {
   timestamp: string;
 }
 
+export interface Listing {
+  id: string;
+  nftId: string;
+  nftAddress?: string;
+  sellerId: string;
+  price: string;
+  status: 'active' | 'sold' | 'cancelled';
+  buyerId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ExclusiveContent {
   id: string;
   title: string;
@@ -175,14 +187,18 @@ export interface RoyaltySplitExtended extends RoyaltySplit {
   label: string;
 }
 
-export interface Event {
+export interface ArtistEvent {
   id: string;
+  artistId: string;
   title: string;
   date: string;
   time: string;
   venue: string;
   location: string;
   ticketUrl?: string;
+  imageUrl?: string;
+  bannerImageUrl?: string;
+  status?: 'upcoming' | 'past' | 'cancelled';
 }
 
 export interface Collaboration {
@@ -205,6 +221,7 @@ export interface Artist {
   monthlyListeners?: number;
   bio?: string;
   bannerUrl?: string;
+  bannerImageUrl?: string;
   socials?: {
     x?: string;
     spotify?: string;
@@ -223,7 +240,7 @@ export interface Artist {
     nftSales: number;
     total: number;
   };
-  events?: Event[];
+  events?: ArtistEvent[];
   collaborations?: Collaboration[];
   collaborators?: Collaborator[];
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
@@ -309,6 +326,16 @@ export interface Playlist {
   isPrivate?: boolean;
   isCollaborative?: boolean;
   tags?: string[];
+  folderId?: string;
+  updatedAt?: string;
+}
+
+export interface PlaylistFolder {
+  id: string;
+  title: string;
+  creator: string;
+  playlistIds: string[];
+  createdAt: string;
   updatedAt?: string;
 }
 

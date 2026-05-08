@@ -14,17 +14,8 @@ import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/ut
 const PlaylistDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist, reorderTrackInPlaylist, addNotification, likedTrackIds, userProfile, toggleLikeTrack } = useAudio();
+  const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist, reorderTrackInPlaylist, addNotification, likedTrackIds, userProfile, toggleLikeTrack, setHeaderTitle } = useAudio();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
-  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
-  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
-  const [trackToRemove, setTrackToRemove] = useState<string | null>(null);
-  const [isLiked, setIsLiked] = useState(false);
 
   const playlist = useMemo(() => {
     if (id === 'liked-songs') {
@@ -41,6 +32,32 @@ const PlaylistDetail: React.FC = () => {
     }
     return playlists.find(p => p.id === id);
   }, [playlists, id, likedTrackIds, userProfile]);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const scrollThreshold = 300;
+      if (window.scrollY > scrollThreshold) {
+        setHeaderTitle(playlist?.title || '');
+      } else {
+        setHeaderTitle('');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      setHeaderTitle('');
+    };
+  }, [playlist?.title, setHeaderTitle]);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
+  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [trackToRemove, setTrackToRemove] = useState<string | null>(null);
+  const [isLiked, setIsLiked] = useState(false);
 
   const playlistTracks = useMemo(() => {
     if (!playlist || !playlist.trackIds) return [];
@@ -192,7 +209,7 @@ const PlaylistDetail: React.FC = () => {
           {id !== 'liked-songs' && (
             <button 
               onClick={() => setIsOptionsModalOpen(true)}
-              className="absolute top-0 right-0 md:top-4 md:right-4 p-2 rounded-full hover:bg-white/10 transition-colors text-white z-20"
+              className="absolute top-0 right-0 md:top-4 md:right-4 p-2 rounded-full hover:bg-blue-500/10 transition-colors text-blue-500 z-20"
             >
               <MoreHorizontal className="w-6 h-6" />
             </button>
@@ -210,7 +227,7 @@ const PlaylistDetail: React.FC = () => {
                       <img src={img} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-neutral-800 flex items-center justify-center">
-                        <Music2 className="h-8 w-8 text-muted-foreground/30" />
+                        <Music2 className="h-8 w-8 text-blue-500/30" />
                       </div>
                     )}
                   </div>
@@ -226,8 +243,8 @@ const PlaylistDetail: React.FC = () => {
                     onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
                     className="flex flex-col items-center gap-2 hover:scale-110 transition-transform"
                   >
-                    <Camera className="h-8 w-8 text-white" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">Upload</span>
+                    <Camera className="h-8 w-8 text-blue-500" />
+                    <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Upload</span>
                   </button>
                   <div className="w-12 h-[1px] bg-white/20"></div>
                   <button 
@@ -278,18 +295,18 @@ const PlaylistDetail: React.FC = () => {
               </div>
             ) : (
               <>
-                <h1 className="text-[32px] md:text-[56px] font-black text-white tracking-tighter leading-tight drop-shadow-lg mb-2">{playlist.title}</h1>
+                <h1 className="text-[32px] md:text-[56px] font-black text-blue-500 tracking-tighter leading-tight drop-shadow-lg mb-2">{playlist.title}</h1>
                 {playlist.description && (
-                  <p className="text-neutral-300 text-sm md:text-base mb-4 max-w-2xl mx-auto md:mx-0 drop-shadow">{playlist.description}</p>
+                  <p className="text-blue-200/70 text-sm md:text-base mb-4 max-w-2xl mx-auto md:mx-0 drop-shadow">{playlist.description}</p>
                 )}
-                <div className="flex items-center justify-center md:justify-start gap-3 text-neutral-200 text-sm font-medium mb-6 drop-shadow">
-                  <span className="font-bold text-white">{playlist.creator}</span>
+                <div className="flex items-center justify-center md:justify-start gap-3 text-blue-100/60 text-sm font-medium mb-6 drop-shadow">
+                  <span className="font-bold text-blue-400">{playlist.creator}</span>
                   <span className="opacity-50">•</span>
                   <span>{playlistTracks.length} tracks</span>
                   {playlist.isCollaborative && (
                     <>
                       <span className="opacity-50">•</span>
-                      <span className="px-3 py-1 bg-white/10 border border-white/20 text-white rounded-full text-[10px] uppercase tracking-widest font-bold backdrop-blur-sm">Collaborative</span>
+                      <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[10px] uppercase tracking-widest font-bold backdrop-blur-sm">Collaborative</span>
                     </>
                   )}
                 </div>
@@ -307,24 +324,24 @@ const PlaylistDetail: React.FC = () => {
                 </button>
                 <button 
                   onClick={handleShuffle} 
-                  className="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white rounded-full transition-all hover:scale-105 active:scale-95 group border border-white/10"
+                  className="w-12 h-12 flex items-center justify-center bg-blue-500/10 backdrop-blur-md hover:bg-blue-500/20 text-blue-400 rounded-full transition-all hover:scale-105 active:scale-95 group border border-blue-500/20"
                   title="Shuffle"
                 >
                   <Shuffle className="h-5 w-5 group-active:rotate-180 transition-transform duration-500" />
                 </button>
                 <button 
                   onClick={handleShare} 
-                  className="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white rounded-full transition-all hover:scale-105 active:scale-95 border border-white/10"
+                  className="w-12 h-12 flex items-center justify-center bg-blue-500/10 backdrop-blur-md hover:bg-blue-500/20 text-blue-400 rounded-full transition-all hover:scale-105 active:scale-95 border border-blue-500/20"
                   title="Share"
                 >
                   <Send className="h-5 w-5" />
                 </button>
                 <button 
                   onClick={() => setIsLiked(!isLiked)} 
-                  className="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white rounded-full transition-all hover:scale-105 active:scale-95 border border-white/10"
+                  className="w-12 h-12 flex items-center justify-center bg-blue-500/10 backdrop-blur-md hover:bg-blue-500/20 text-blue-400 rounded-full transition-all hover:scale-105 active:scale-95 border border-blue-500/20"
                   title="Like"
                 >
-                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-pink-500 text-pink-500' : ''}`} />
+                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-blue-500 text-blue-500' : ''}`} />
                 </button>
               </div>
             )}

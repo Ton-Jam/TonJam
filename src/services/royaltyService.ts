@@ -78,7 +78,22 @@ export async function distributeRoyalties(
       updatedAt: serverTimestamp()
     }, { merge: true });
 
-    // 2. Record Transaction
+    // 2. Update Collaborator Balances
+    distribution.collaboratorShares.forEach(share => {
+      // Use wallet address as ID if userId is not available
+      const collabId = share.userId || share.address;
+      if (collabId && share.amount > 0) {
+        const collabRef = doc(db, 'royalties', collabId);
+        batch.set(collabRef, {
+          artistId: collabId, // Storing address as artistId if it's just an address
+          totalEarned: increment(share.amount),
+          pendingWithdrawal: increment(share.amount),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+    });
+
+    // 3. Record Transaction
     const txRef = doc(collection(db, 'transactions'));
     const participants = [artistId, auth.currentUser?.uid].filter(Boolean) as string[];
     const txData = {

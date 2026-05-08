@@ -29,6 +29,8 @@ import { SponsoredContent, UserProfile, TreasuryStats, GrantAllocation } from '@
 import { doc, updateDoc, setDoc, deleteDoc, getDocs, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { governanceService } from '@/services/governanceService';
 import { treasuryService } from '@/services/treasuryService';
+import { seedDatabase } from '@/services/seedService';
+import { Database, RefreshCw, Trash2, CheckCircle } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -61,6 +63,20 @@ const AdminDashboard: React.FC = () => {
   const [treasuryStats, setTreasuryStats] = useState<TreasuryStats | null>(null);
   const [allProposals, setAllProposals] = useState<any[]>([]);
   const [isExecuting, setIsExecuting] = useState<string | null>(null);
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  const handleForceSeed = async () => {
+    setIsSeeding(true);
+    try {
+      await seedDatabase(true);
+      toast.success('Database re-seeded with high-quality mock data!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to re-seed database');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   useEffect(() => {
     const unsubStats = treasuryService.subscribeToStats(setTreasuryStats);
@@ -234,6 +250,12 @@ const AdminDashboard: React.FC = () => {
               >
                 Treasury
               </button>
+              <button 
+                onClick={() => setActiveTab('mockmaker')}
+                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'mockmaker' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Mock Maker
+              </button>
             </div>
           </div>
           
@@ -260,7 +282,68 @@ const AdminDashboard: React.FC = () => {
           </div>
         </header>
 
-        {/* Stats Grid */}
+        {activeTab === 'mockmaker' && (
+          <div className="space-y-4 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-8 text-center max-w-2xl mx-auto">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <Database className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold tracking-tighter mb-2 uppercase">Platform Mock Maker</h2>
+              <p className="text-muted-foreground text-sm mb-8">
+                Refresh all platform data with high-quality presets. This will update existing tracks, artists, NFTs, and governance proposals with the latest mock data definitions while preserving system-critical information.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-left">
+                {[
+                  { label: 'Metadata Quality', desc: 'Detailed bios, technical specs, and realistic metrics.', icon: <CheckCircle className="w-4 h-4 text-green-500" /> },
+                  { label: 'Visual Assets', desc: 'High-res images from pollinations.ai for all entities.', icon: <CheckCircle className="w-4 h-4 text-green-500" /> },
+                  { label: 'Wallet Context', desc: 'Realistic UQ-prefixed wallet addresses for TON.', icon: <CheckCircle className="w-4 h-4 text-green-500" /> },
+                  { label: 'Engagement Data', desc: 'Consistent play counts, likes, and followers.', icon: <CheckCircle className="w-4 h-4 text-green-500" /> },
+                ].map((feature, i) => (
+                  <div key={i} className="flex gap-3 p-3 rounded-lg bg-muted/30 border border-border/20">
+                    <div className="mt-0.5">{feature.icon}</div>
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest leading-none mb-1">{feature.label}</h4>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">{feature.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button 
+                  onClick={handleForceSeed}
+                  disabled={isSeeding}
+                  className="w-full sm:w-auto h-12 px-8 bg-foreground text-background hover:bg-foreground/90 rounded-lg text-xs font-bold uppercase tracking-widest gap-2"
+                >
+                  {isSeeding ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                  {isSeeding ? 'Refreshing Data...' : 'Run Mock Maker'}
+                </Button>
+                <div className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-2">
+                   <Activity className="w-3 h-3" /> System Version 2.4.0 (Latest)
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="glass p-6 rounded-xl border border-border/50 bg-foreground/[0.01]">
+                <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Seeded Tracks</h3>
+                <div className="text-3xl font-bold tracking-tighter mb-1">16</div>
+                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Across 11 genres</p>
+              </div>
+              <div className="glass p-6 rounded-xl border border-border/50 bg-foreground/[0.01]">
+                <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Verified Artists</h3>
+                <div className="text-3xl font-bold tracking-tighter mb-1">11</div>
+                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">With full profiles</p>
+              </div>
+              <div className="glass p-6 rounded-xl border border-border/50 bg-foreground/[0.01]">
+                <h3 className="text-xs font-bold uppercase tracking-widest mb-4">NFT Inventory</h3>
+                <div className="text-3xl font-bold tracking-tighter mb-1">5</div>
+                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Mythic & Legendary</p>
+              </div>
+            </div>
+          </div>
+        )}
         {activeTab === 'overview' && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">

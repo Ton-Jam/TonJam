@@ -9,7 +9,11 @@ import {
   ArrowLeft,
   Gem,
   Share2,
-  Camera
+  Camera,
+  Twitter,
+  Instagram,
+  Send,
+  Globe
 } from 'lucide-react';
 
 import { MOCK_USERS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '@/constants';
@@ -131,7 +135,7 @@ const UserProfile: React.FC = () => {
               "px-5 sm:px-6 py-1.5 sm:py-2.5 rounded-[2px] font-black text-[9px] sm:text-[10px] uppercase tracking-widest transition-all shadow-2xl backdrop-blur-md active:scale-95",
               isFollowing 
                 ? "bg-white/10 text-white" 
-                : "bg-blue-600 text-white shadow-blue-600/40"
+                : "bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-blue-600/40"
             )}
           >
             {isFollowing ? 'Following' : 'Follow'}
@@ -388,9 +392,58 @@ const UserProfile: React.FC = () => {
           <div className="lg:col-span-4 space-y-6">
             <section className="bg-muted/20 p-6 rounded-2xl">
               <h3 className="text-sm font-black uppercase tracking-wider mb-4">About</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
                 {user.bio || "No biography available."}
               </p>
+
+              {(user.socials?.x || user.socials?.instagram || user.socials?.website || user.socials?.telegram) && (
+                <div className="flex flex-wrap gap-3 pt-6 border-t border-white/5">
+                  {user.socials?.x && (
+                    <a 
+                      href={user.socials.x} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="p-2.5 bg-white/5 hover:bg-blue-500/20 text-muted-foreground hover:text-blue-500 rounded-xl transition-all group"
+                      title="Twitter / X"
+                    >
+                      <Twitter className="h-4 w-4" />
+                    </a>
+                  )}
+                  {user.socials?.instagram && (
+                    <a 
+                      href={user.socials.instagram} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="p-2.5 bg-white/5 hover:bg-pink-500/20 text-muted-foreground hover:text-pink-500 rounded-xl transition-all group"
+                      title="Instagram"
+                    >
+                      <Instagram className="h-4 w-4" />
+                    </a>
+                  )}
+                  {user.socials?.website && (
+                    <a 
+                      href={user.socials.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="p-2.5 bg-white/5 hover:bg-blue-400/20 text-muted-foreground hover:text-blue-400 rounded-xl transition-all group"
+                      title="Website"
+                    >
+                      <Globe className="h-4 w-4" />
+                    </a>
+                  )}
+                  {user.socials?.telegram && (
+                    <a 
+                      href={user.socials.telegram} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="p-2.5 bg-white/5 hover:bg-sky-500/20 text-muted-foreground hover:text-sky-500 rounded-xl transition-all group"
+                      title="Telegram"
+                    >
+                      <Send className="h-4 w-4" />
+                    </a>
+                  )}
+                </div>
+              )}
             </section>
           </div>
         </div>

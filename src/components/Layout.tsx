@@ -75,6 +75,7 @@ import {
   TooltipTrigger 
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -83,7 +84,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { 
+    const { 
     currentTrack, 
     isFullPlayerOpen, 
     userProfile, 
@@ -107,7 +108,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     optionsTrack,
     optionsCallbacks,
     setOptionsTrack,
-    createPost
+    createPost,
+    headerTitle
   } = useAudio();
   const { user, signInWithGoogle, signOut } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
@@ -288,8 +290,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300 relative">
           {/* Ambient Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]" />
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] bg-blue-500/5 rounded-full blur-[120px]" />
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-blue-600/5 rounded-full blur-[120px]" />
+        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] bg-blue-400/5 rounded-full blur-[120px]" />
       </div>
 
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-2 focus:py-2 focus:rounded-md focus:font-bold">
@@ -303,49 +305,61 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         >
           {/* Background with higher blur and subtle border */}
           <motion.div 
-            style={{ opacity: headerOpacity }}
-            className="absolute inset-0 bg-background/60 backdrop-blur-2xl -z-10 border-b border-border/40"
+            className="absolute inset-0 bg-background -z-10 border-b border-border/40"
           />
           
-          <div className="flex items-center gap-4 flex-1">
+          <div className={`flex items-center ${headerTitle ? 'justify-center flex-1' : 'gap-4 flex-1'}`}>
             {isHome ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button 
-                    onClick={() => setIsMobileSidebarOpen(true)}
-                    className="lg:hidden p-2 rounded-[2px] bg-muted/30 hover:bg-muted transition-all"
-                    aria-label="Open sidebar"
-                  >
-                    <motion.img 
-                      layoutId="app-logo"
-                      src={APP_LOGO} 
-                      alt="TonJam Logo" 
-                      className="w-8 h-8 object-contain" 
-                    />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">Open Navigation</TooltipContent>
-              </Tooltip>
+              !headerTitle && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      onClick={() => setIsMobileSidebarOpen(true)}
+                      className="lg:hidden p-2 rounded-[2px] bg-muted/30 hover:bg-muted transition-all"
+                      aria-label="Open sidebar"
+                    >
+                      <motion.img 
+                        layoutId="app-logo"
+                        src={APP_LOGO} 
+                        alt="TonJam Logo" 
+                        className="w-8 h-8 object-contain" 
+                      />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Open Navigation</TooltipContent>
+                </Tooltip>
+              )
             ) : (
-              <div className="flex items-center gap-2">
-                <BackButton 
-                  className={`p-2 rounded-[2px] bg-muted/30 hover:bg-muted transition-all ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
-                  ariaLabel="Go back"
-                />
-                <div className="flex lg:hidden flex-col justify-center">
-                  <span className="font-black text-[12px] uppercase tracking-tighter truncate max-w-[120px]">
-                    {isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isProfileSettings ? 'Settings' : isProfile ? 'Profile' : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' '))}
+              <div className={`flex items-center ${headerTitle ? 'w-full justify-center relative' : 'gap-2'}`}>
+                {!headerTitle && (
+                  <BackButton 
+                    className={`p-2 rounded-[2px] bg-muted/30 hover:bg-muted transition-all ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
+                    ariaLabel="Go back"
+                  />
+                )}
+                <div className={`${headerTitle ? 'flex' : 'lg:hidden'} flex-col justify-center items-center`}>
+                  <span className={cn(
+                    "font-bold uppercase tracking-widest truncate transition-all duration-300",
+                    headerTitle ? "text-sm italic" : "text-[12px] tracking-tighter max-w-[120px]"
+                  )}>
+                    {headerTitle || (isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isProfileSettings ? 'Settings' : isProfile ? 'Profile' : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' ')))}
                   </span>
                 </div>
+                {headerTitle && !isHome && (
+                  <BackButton 
+                    className="absolute left-0 p-2 rounded-[2px] bg-muted/10 hover:bg-muted/20 transition-all text-foreground"
+                    ariaLabel="Go back"
+                  />
+                )}
               </div>
             )}
 
-            {!isHome && !isDiscover && (
+            {!isHome && !isDiscover && !headerTitle && (
               <div className="hidden lg:flex items-center gap-4 flex-1 ml-4 overflow-hidden">
                 <div className="flex items-center gap-3">
                    <div className="w-1 h-6 bg-blue-600 rounded-full" />
-                   <span className="font-black text-xs uppercase tracking-tighter italic">
-                     {isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Post')}
+                   <span className="font-bold text-xs uppercase tracking-tighter italic">
+                     {isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Details')}
                    </span>
                 </div>
                 
@@ -363,19 +377,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   trendingTopics={trendingTopics}
                   placeholder={getSearchPlaceholder()}
                   className={`flex-1 relative transition-all duration-500 max-w-xl`}
-                  inputClassName={`border border-border/40 bg-muted/20 rounded-[2px] py-1.5 pl-4 pr-10 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-muted-foreground/30`}
+                  inputClassName={`border border-border/40 bg-muted/20 rounded-[2px] py-1.5 pl-4 pr-10 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-muted-foreground/30`}
                 />
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className={cn("items-center gap-2 transition-all duration-300", headerTitle ? "hidden" : "flex")}>
             {/* JAM Balance Badge */}
             <button onClick={() => navigate('/tasks')} className={`flex items-center gap-2 bg-blue-600/5 border border-blue-600/10 px-3 py-1.5 rounded-[2px] hover:bg-blue-600/10 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
                <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-5 h-5 object-contain" />
                <div className="flex flex-col items-start hidden sm:flex">
-                  <span className="text-[7px] font-black uppercase tracking-widest text-blue-500 opacity-60">Balance (Tasks)</span>
-                  <span className="text-[9px] font-black tracking-tighter">{parseFloat(String(userProfile.jamBalance || '0')).toLocaleString()} JAM</span>
+                  <span className="text-[7px] font-bold uppercase tracking-widest text-blue-500 opacity-60">Balance (Tasks)</span>
+                  <span className="text-[9px] font-bold tracking-tighter">{parseFloat(String(userProfile.jamBalance || '0')).toLocaleString()} JAM</span>
                </div>
             </button>
 
@@ -425,13 +439,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Link to="/profile" className={`flex items-center gap-2 p-1 rounded-[2px] hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
                       <Avatar className="w-8 h-8 rounded-[2px]">
                         <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover" />
-                        <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-[2px] text-[10px] font-black">
+                        <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-[2px] text-[10px] font-bold">
                           {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : '??'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="hidden lg:flex flex-col leading-none">
-                        <span className="text-[7px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Identity</span>
-                        <span className="text-[9px] font-black tracking-tighter truncate max-w-[60px]">{user.displayName}</span>
+                        <span className="text-[7px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Identity</span>
+                        <span className="text-[9px] font-bold tracking-tighter truncate max-w-[60px]">{user.displayName}</span>
                       </div>
                     </Link>
                   </TooltipTrigger>
@@ -550,13 +564,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Navigation */}
       {!isPostDetail && !isAuthModalOpen && (
-        <nav className={`lg:hidden fixed bottom-2 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-xl border border-border/40 h-16 rounded-full px-4 flex justify-around items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 w-[calc(100%-48px)] max-w-sm ${isMobileNavHidden ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`} aria-label="Mobile Navigation">
-          <MobileNavItem to="/" icon={HomeIcon} label="Home" />
-          <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
-          <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jam" />
-          <MobileNavItem to="/library" icon={RectangleStackIcon} label="Vault" />
-          <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Asset" />
-        </nav>
+        <div className={`lg:hidden fixed bottom-2 left-1/2 -translate-x-1/2 z-50 h-16 transition-all duration-300 w-[calc(100%-48px)] max-w-sm ${isMobileNavHidden ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className="absolute inset-0 rounded-[2px] p-[1px] bg-gradient-to-r from-blue-600/50 via-blue-400/50 to-blue-600/50">
+            <nav className="h-full w-full bg-background/90 backdrop-blur-xl rounded-[2px] px-4 flex justify-around items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]" aria-label="Mobile Navigation">
+              <MobileNavItem to="/" icon={HomeIcon} label="Home" />
+              <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
+              <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jam" />
+              <MobileNavItem to="/library" icon={RectangleStackIcon} label="Vault" />
+              <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Asset" />
+            </nav>
+          </div>
+        </div>
       )}
 
       {/* Floating Action Button for Mobile */}
@@ -631,7 +649,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
             aria-label="Sign Out"
           >
             <ArrowRightOnRectangleIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
-            <span className="text-[10px] uppercase font-black tracking-widest text-left">Sign Out</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-left">Sign Out</span>
           </button>
         )}
       </div>
@@ -641,21 +659,21 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <Link 
             to="/upload"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-blue-600 text-white font-black hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
             aria-label="Upload new track"
           >
             <ArrowUpTrayIcon className="h-4 w-4" />
-            <span className="text-[10px] uppercase font-black tracking-widest">Upload Track</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest">Upload Track</span>
           </Link>
           
           <Link 
             to="/mint"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-muted/50 text-muted-foreground font-black hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-left"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-left"
             aria-label="Mint new NFT"
           >
             <PlusCircleIcon className="h-4 w-4" />
-            <span className="text-[10px] uppercase font-black tracking-widest">Mint NFT</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest">Mint NFT</span>
           </Link>
         </div>
       ) : (
@@ -663,11 +681,11 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <Link 
             to="/artist-onboarding"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-black transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-bold transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
             aria-label="Become an Artist"
           >
             <StarIcon className="h-4 w-4" />
-            <span className="text-[10px] uppercase font-black tracking-widest">Become Artist</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest">Become Artist</span>
           </Link>
         </div>
       )}
@@ -714,7 +732,7 @@ const NavItem = ({ to, icon: Icon, label, onClick, className = "" }: { to: strin
     {({ isActive }) => (
       <>
         <Icon className={`h-4 w-4 transition-all ${isActive ? 'text-blue-500 scale-110' : 'text-muted-foreground/40'}`} strokeWidth={isActive ? 3 : 2} />
-        <span className="text-[10px] uppercase font-black tracking-widest">{label}</span>
+        <span className="text-[10px] uppercase font-bold tracking-widest">{label}</span>
       </>
     )}
   </NavLink>
@@ -734,7 +752,7 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label
           {({ isActive }) => (
             <>
               <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'text-muted-foreground opacity-60'}`} strokeWidth={isActive ? 3 : 2.5} />
-              <span className={`text-[8px] font-black uppercase tracking-widest transition-all ${isActive ? 'opacity-100' : 'opacity-0 scale-75'}`}>{label}</span>
+              <span className={`text-[8px] font-bold uppercase tracking-widest transition-all ${isActive ? 'opacity-100' : 'opacity-0 scale-75'}`}>{label}</span>
             </>
           )}
       </NavLink>

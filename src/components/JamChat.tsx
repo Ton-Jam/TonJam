@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
+import { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { useAudio } from '@/context/AudioContext';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
   Send, 
-  MessageSquare,
-  X,
   Radio,
+  X,
   Zap,
   Terminal
 } from 'lucide-react';
@@ -18,76 +18,74 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
   id: string;
-  text: string;
-  user: {
-    name: string;
-    avatar: string;
-    uid: string;
-  };
-  timestamp: string;
+  content: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar: string;
+  timestamp: any;
 }
 
 const JamChat: React.FC = () => {
   const { activeJamRoom, userProfile, leaveJamRoom } = useAudio();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!activeJamRoom) return;
 
-    // Connect to the server
-    const newSocket = io();
-    setSocket(newSocket);
+    const messagesQuery = query(
+      collection(db, 'jamRooms', activeJamRoom.id, 'messages'),
+      orderBy('timestamp', 'desc'),
+      limit(50)
+    );
 
-    // Join the room
-    newSocket.emit('join-room', activeJamRoom.id);
-
-    // Initial message if empty
-    setMessages([{
-      id: 'system-1',
-      text: `Sync established with ${activeJamRoom.name}. Broadcast your signal.`,
-      user: {
-        name: 'System',
-        avatar: '',
-        uid: 'system'
-      },
-      timestamp: new Date().toISOString()
-    }]);
-
-    // Handle new messages
-    newSocket.on('new-message', (message: Message) => {
-      setMessages(prev => [...prev, message]);
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const newMessages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Message));
+      // Reverse to get chronological order in the UI
+      setMessages(newMessages.reverse());
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `jamRooms/${activeJamRoom.id}/messages`);
     });
 
-    return () => {
-      newSocket.emit('leave-room', activeJamRoom.id);
-      newSocket.disconnect();
-    };
+    return () => unsubscribe();
   }, [activeJamRoom?.id]);
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      setTimeout(() => {
+        scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !socket || !activeJamRoom) return;
+    if (!input.trim() || !activeJamRoom || !auth.currentUser) return;
 
-    socket.emit('send-message', {
-      roomId: activeJamRoom.id,
-      message: input,
-      user: {
-        name: userProfile.name,
-        avatar: userProfile.avatar,
-        uid: userProfile.uid
-      }
-    });
-
+    setIsLoading(true);
+    const messageContent = input.trim();
     setInput('');
+
+    try {
+      await addDoc(collection(db, 'jamRooms', activeJamRoom.id, 'messages'), {
+        content: messageContent,
+        senderId: userProfile.uid,
+        senderName: userProfile.name,
+        senderAvatar: userProfile.avatar,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `jamRooms/${activeJamRoom.id}/messages`);
+      // Restore input on failure
+      setInput(messageContent);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!activeJamRoom) return null;
@@ -128,58 +126,58 @@ const JamChat: React.FC = () => {
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-5 relative z-10">
-        <div ref={scrollRef} className="space-y-4">
-          {messages.map((msg) => {
-            const isMe = msg.user.uid === userProfile.uid;
-            const isSystem = msg.user.uid === 'system';
-
-            if (isSystem) {
-              return (
-                <div key={msg.id} className="flex justify-center py-2">
-                  <div className="flex items-center gap-2 bg-white/[0.03] px-4 py-2 rounded-full border border-white/[0.05]">
-                    <Terminal className="h-3 w-3 text-blue-500/50" />
-                    <span className="text-[9px] text-muted-foreground/60 font-black uppercase tracking-[0.2em]">
-                      {msg.text}
-                    </span>
-                  </div>
-                </div>
-              );
-            }
+        <div className="space-y-4">
+          {messages.length === 0 && (
+            <div className="flex justify-center py-2">
+              <div className="flex items-center gap-2 bg-white/[0.03] px-4 py-2 rounded-full border border-white/[0.05]">
+                <Terminal className="h-3 w-3 text-blue-500/50" />
+                <span className="text-[9px] text-muted-foreground/60 font-black uppercase tracking-[0.2em]">
+                  Syncing with {activeJamRoom.name}...
+                </span>
+              </div>
+            </div>
+          )}
+          {messages.map((msg, index) => {
+            const isMe = msg.senderId === userProfile.uid;
+            
+            // Handle different timestamp formats (Firestore Timestamp vs local serverTimestamp)
+            const date = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date();
 
             return (
-              <div key={msg.id} className={cn(
+              <div key={msg.id || index} className={cn(
                 "flex items-end gap-3",
                 isMe ? "flex-row-reverse" : "flex-row"
               )}>
                 <Avatar className="h-8 w-8 border border-white/5 shrink-0 shadow-lg">
-                  <AvatarImage src={msg.user.avatar} />
-                  <AvatarFallback className="text-[10px] bg-zinc-800 font-bold">{msg.user.name?.[0]}</AvatarFallback>
+                  <AvatarImage src={msg.senderAvatar} />
+                  <AvatarFallback className="text-[10px] bg-zinc-800 font-bold">{msg.senderName?.[0]}</AvatarFallback>
                 </Avatar>
                 <div className={cn(
                   "max-w-[75%] space-y-1",
                   isMe ? "items-end" : "items-start"
                 )}>
                   {!isMe && (
-                    <p className="text-[9px] font-black text-blue-400/70 uppercase tracking-widest ml-1">{msg.user.name}</p>
+                    <p className="text-[9px] font-black text-blue-400/70 uppercase tracking-widest ml-1">{msg.senderName}</p>
                   )}
                   <div className={cn(
-                    "p-3.5 rounded-2xl text-[13px] shadow-lg leading-relaxed font-bold tracking-tight",
+                    "p-3.5 rounded-2xl text-[13px] shadow-lg leading-relaxed font-bold tracking-tight break-words",
                     isMe 
                       ? "bg-blue-600 text-white rounded-br-none border border-blue-500/50" 
                       : "bg-white/[0.05] text-foreground rounded-bl-none border border-white/5 backdrop-blur-sm"
                   )}>
-                    <p>{msg.text}</p>
+                    <p>{msg.content}</p>
                   </div>
                   <p className={cn(
                     "text-[8px] opacity-40 font-black uppercase tracking-[0.1em]",
                     isMe ? "text-right" : "text-left"
                   )}>
-                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
             );
           })}
+          <div ref={scrollRef} />
         </div>
       </ScrollArea>
 
@@ -191,10 +189,11 @@ const JamChat: React.FC = () => {
             className="bg-zinc-900/50 border-white/[0.05] rounded-2xl h-12 pr-14 focus-visible:ring-blue-500/30 transition-all text-xs font-bold italic placeholder:text-zinc-600"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading}
           />
           <Button 
             type="submit"
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
             size="icon"
             className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/30 transition-all font-bold active:scale-95 disabled:opacity-50 disabled:shadow-none"
           >

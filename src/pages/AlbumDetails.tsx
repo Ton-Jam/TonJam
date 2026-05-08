@@ -10,7 +10,7 @@ import { MOCK_TRACKS } from '@/constants';
 const AlbumDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, togglePlay } = useAudio();
+  const { playTrack, currentTrack, isPlaying, togglePlay, setHeaderTitle } = useAudio();
   const [albumTracks, setAlbumTracks] = useState<Track[]>([]);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -25,6 +25,23 @@ const AlbumDetails = () => {
     totalDuration: '32:45',
     description: 'A journey through the neon-lit streets of Neo-Tokyo. This album blends synthwave with modern trap beats to create a unique sonic landscape.'
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollThreshold = 300;
+      if (window.scrollY > scrollThreshold) {
+        setHeaderTitle(album.title);
+      } else {
+        setHeaderTitle('');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      setHeaderTitle('');
+    };
+  }, [album.title, setHeaderTitle]);
 
   useEffect(() => {
     // Just use some mock tracks for the album

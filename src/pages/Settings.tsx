@@ -11,7 +11,9 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
-  UserCircle
+  UserCircle,
+  Eye,
+  Key
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
@@ -23,7 +25,7 @@ import { NotificationPreferences } from '@/types';
 // shadcn/ui components
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Select, 
   SelectContent, 
@@ -32,6 +34,8 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { motion } from 'motion/react';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -47,219 +51,192 @@ const Settings: React.FC = () => {
   const SettingRow = ({ icon: Icon, title, description, children, onClick }: any) => (
     <div 
       className={cn(
-        "flex items-center justify-between p-4 bg-muted/30 rounded-2xl transition-all duration-200",
-        onClick && "cursor-pointer hover:bg-muted/50 active:scale-[0.98]"
+        "flex items-center justify-between py-3 px-1 transition-all duration-200",
+        onClick && "cursor-pointer group hover:opacity-70"
       )}
       onClick={onClick}
     >
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-          <Icon className="h-5 w-5" />
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-blue-500/5 flex items-center justify-center text-blue-500/80 group-hover:bg-blue-500/10 transition-colors">
+          <Icon className="h-4 w-4" />
         </div>
-        <div className="space-y-0.5">
-          <h4 className="text-sm font-bold text-foreground uppercase tracking-tight">{title}</h4>
-          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest leading-none">{description}</p>
+        <div className="flex flex-col">
+          <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{title}</span>
+          <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mt-0.5">{description}</span>
         </div>
       </div>
       <div onClick={(e) => onClick && e.stopPropagation()} className="flex items-center">
-        {children || <ChevronRight className="h-4 w-4 text-muted-foreground/30" />}
+        {children || <ChevronRight className="h-3 w-3 text-muted-foreground/30 group-hover:translate-x-0.5 transition-transform" />}
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 pb-20 pt-4 space-y-8">
-      {/* Header section */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-black uppercase tracking-tighter text-foreground">Settings</h1>
-        <p className="text-[11px] font-bold text-blue-500 uppercase tracking-[0.4em]">Configuration Protocol 8.2</p>
+    <div className="max-w-2xl mx-auto px-4 pb-24 pt-8 animate-in fade-in duration-700">
+      <div className="mb-10 text-center lg:text-left">
+        <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground italic flex items-center justify-center lg:justify-start gap-3">
+          <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
+          Settings
+        </h1>
+        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Neural Interface Parameters</p>
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="bg-muted/30 p-1 rounded-2xl mb-6 flex overflow-x-auto no-scrollbar border-none h-auto">
-          <TabsTrigger value="general" className="flex-1 rounded-xl px-6 py-2.5 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all border-none">
-            General
+        <TabsList className="bg-muted/10 p-1 rounded-full mb-8 flex border border-white/5 h-auto">
+          <TabsTrigger value="general" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+            Identity
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex-1 rounded-xl px-6 py-2.5 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all border-none">
+          <TabsTrigger value="notifications" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
             Signals
           </TabsTrigger>
-          <TabsTrigger value="interface" className="flex-1 rounded-xl px-6 py-2.5 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all border-none">
-            Interface
+          <TabsTrigger value="interface" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+            System
           </TabsTrigger>
         </TabsList>
 
-        {/* --- General Tab --- */}
-        <TabsContent value="general" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.5em] px-1">Identity Protocols</h3>
-            
-            {/* Prominent Edit Profile Button */}
-            <div className="px-1 pb-2">
-              <Button 
-                onClick={() => navigate('/profile-settings')}
-                className="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border-none shadow-lg shadow-blue-600/20 flex items-center justify-center gap-3 animate-in fade-in slide-in-from-left-4 duration-500"
-              >
-                <UserCircle className="h-5 w-5" />
-                Edit Profile Identity
-              </Button>
-            </div>
+        <TabsContent value="general" className="space-y-6">
+          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Identity Core</CardTitle>
+              <CardDescription className="text-[9px] font-bold uppercase tracking-widest opacity-40">Manage your network presence</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-1">
+                <SettingRow 
+                    icon={UserCircle} 
+                    title="Profile Sync" 
+                    description="Edit bio, links and visuals"
+                    onClick={() => navigate('/profile-settings')}
+                />
+                <Separator className="bg-white/5" />
+                <SettingRow 
+                    icon={Wallet} 
+                    title="Vault Bridge" 
+                    description={user?.uid ? "TON MAINNET ACTIVE" : "NODE DISCONNECTED"}
+                    onClick={() => navigate('/wallet')}
+                >
+                    <div className={cn(
+                    "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter border",
+                    user?.uid ? "bg-emerald-500/5 text-emerald-500 border-emerald-500/20" : "bg-red-500/5 text-red-500 border-red-500/20"
+                    )}>
+                    {user?.uid ? "Online" : "Offline"}
+                    </div>
+                </SettingRow>
+            </CardContent>
+          </Card>
 
-            <div className="space-y-3">
+          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Security Matrix</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
               <SettingRow 
-                icon={UserCircle} 
-                title="Profile Details" 
-                description="Update bio, links and avatar"
-                onClick={() => navigate('/profile-settings')}
-              />
-              <SettingRow 
-                icon={Wallet} 
-                title="Wallet Bridge" 
-                description={user?.uid ? "ACTIVE: TON MAINNET" : "INACTIVE: LINK REQUIRED"}
-                onClick={() => navigate('/wallet')}
+                icon={Key} 
+                title="Secondary Auth" 
+                description="Secure vault verification"
               >
-                <div className={cn(
-                  "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter",
-                  user?.uid ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
-                )}>
-                  {user?.uid ? "Connected" : "Disconnected"}
-                </div>
-              </SettingRow>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.5em] px-1">Security Grid</h3>
-            <div className="space-y-3">
-              <SettingRow 
-                icon={ShieldCheck} 
-                title="Two-Factor Auth" 
-                description="Secure your vault access"
-              >
-                <Button variant="ghost" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest bg-blue-500/5 hover:bg-blue-500/10 text-blue-500 hover:text-blue-600 border-none">
-                  Enable
+                <Button variant="ghost" size="sm" className="h-7 px-3 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-500/5 hover:bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                  Setup
                 </Button>
               </SettingRow>
+              <Separator className="bg-white/5" />
               <SettingRow 
-                icon={Shield} 
-                title="Privacy Mode" 
-                description="Toggle public visibility"
+                icon={Eye} 
+                title="Ghost Protocol" 
+                description="Public node visibility"
               >
-                <Switch defaultChecked />
+                <Switch defaultChecked className="scale-75 data-[state=checked]:bg-blue-600" />
               </SettingRow>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        {/* --- Notifications Tab --- */}
-        <TabsContent value="notifications" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.5em] px-1">Signal Filters</h3>
-            <div className="space-y-3">
+        <TabsContent value="notifications" className="space-y-6">
+          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Signal Filters</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
               <SettingRow 
                 icon={Bell} 
-                title="Direct Alerts" 
-                description="All transactional signal activity"
+                title="Direct Comms" 
+                description="Transactional alert relay"
               >
-                <Switch checked={preferences.directAlerts} onCheckedChange={(val) => handlePreferenceToggle('directAlerts', val)} />
+                <Switch checked={preferences.directAlerts} onCheckedChange={(val) => handlePreferenceToggle('directAlerts', val)} className="scale-75 data-[state=checked]:bg-blue-600" />
               </SettingRow>
+              <Separator className="bg-white/5" />
               <SettingRow 
                 icon={Bell} 
-                title="Market Activity" 
-                description="Global market volume & trends"
+                title="Market Feed" 
+                description="Global asset fluctuations"
               >
-                <Switch checked={preferences.marketActivity} onCheckedChange={(val) => handlePreferenceToggle('marketActivity', val)} />
+                <Switch checked={preferences.marketActivity} onCheckedChange={(val) => handlePreferenceToggle('marketActivity', val)} className="scale-75 data-[state=checked]:bg-blue-600" />
               </SettingRow>
+              <Separator className="bg-white/5" />
               <SettingRow 
                 icon={Bell} 
-                title="Drops & Releases" 
-                description="New artistic uploads & auctions"
+                title="New Drops" 
+                description="Protocol mint notifications"
               >
-                <Switch checked={preferences.dropsAndReleases} onCheckedChange={(val) => handlePreferenceToggle('dropsAndReleases', val)} />
+                <Switch checked={preferences.dropsAndReleases} onCheckedChange={(val) => handlePreferenceToggle('dropsAndReleases', val)} className="scale-75 data-[state=checked]:bg-blue-600" />
               </SettingRow>
-              <SettingRow 
-                icon={Bell} 
-                title="Social Node" 
-                description="Follows, likes and mentions"
-              >
-                <Switch checked={preferences.socialSignals} onCheckedChange={(val) => handlePreferenceToggle('socialSignals', val)} />
-              </SettingRow>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.5em] px-1">Auction Signals</h3>
-            <div className="space-y-3">
-              <SettingRow 
-                icon={Bell} 
-                title="Bid Alerts" 
-                description="When you have been outbid"
-              >
-                <Switch checked={preferences.bidAlerts} onCheckedChange={(val) => handlePreferenceToggle('bidAlerts', val)} />
-              </SettingRow>
-              <SettingRow 
-                icon={Bell} 
-                title="Sale Events" 
-                description="Successful asset transfers"
-              >
-                <Switch checked={preferences.saleEvents} onCheckedChange={(val) => handlePreferenceToggle('saleEvents', val)} />
-              </SettingRow>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        {/* --- Interface Tab --- */}
-        <TabsContent value="interface" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.5em] px-1">Environment</h3>
-            <div className="space-y-3">
-              <SettingRow 
-                icon={theme === 'dark' ? Moon : Sun} 
-                title="Visual Interface" 
-                description="Select theme calibration"
-              >
-                <Select value={theme} onValueChange={(val: any) => setTheme(val)}>
-                  <SelectTrigger className="w-[120px] h-9 bg-muted/50 border-none rounded-xl text-[10px] font-black uppercase tracking-widest focus:ring-0">
-                    <SelectValue placeholder="Theme" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-none rounded-2xl shadow-2xl">
-                    <SelectItem value="light" className="text-[10px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl m-1">Light</SelectItem>
-                    <SelectItem value="dark" className="text-[10px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl m-1">Dark</SelectItem>
-                    <SelectItem value="system" className="text-[10px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl m-1">System</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingRow>
-
-              <SettingRow 
-                icon={Globe} 
-                title="Regional Node" 
-                description="Optimize latency per area"
-              >
-                <Select defaultValue="eu-west">
-                  <SelectTrigger className="w-[120px] h-9 bg-muted/50 border-none rounded-xl text-[10px] font-black uppercase tracking-widest focus:ring-0 text-left">
-                    <SelectValue placeholder="Region" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-none rounded-2xl shadow-2xl">
-                    <SelectItem value="eu-west" className="text-[10px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl m-1">Europe-West</SelectItem>
-                    <SelectItem value="us-east" className="text-[10px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl m-1">US-East</SelectItem>
-                    <SelectItem value="asia" className="text-[10px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-xl m-1">Asia-Pacific</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingRow>
-            </div>
-          </div>
+        <TabsContent value="interface" className="space-y-6">
+          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Environment Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+                <SettingRow 
+                    icon={theme === 'dark' ? Moon : Sun} 
+                    title="Visual Deck" 
+                    description="Interface spectral theme"
+                >
+                    <Select value={theme} onValueChange={(val: any) => setTheme(val)}>
+                    <SelectTrigger className="w-[100px] h-7 bg-muted/20 border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest focus:ring-1 focus:ring-blue-500/50">
+                        <SelectValue placeholder="Theme" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-white/5 rounded-2xl shadow-2xl">
+                        <SelectItem value="light" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Light</SelectItem>
+                        <SelectItem value="dark" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Dark</SelectItem>
+                        <SelectItem value="system" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Auto</SelectItem>
+                    </SelectContent>
+                    </Select>
+                </SettingRow>
+                <Separator className="bg-white/5" />
+                <SettingRow 
+                    icon={Globe} 
+                    title="Relay Region" 
+                    description="Optimize data latency"
+                >
+                    <Select defaultValue="eu-west">
+                    <SelectTrigger className="w-[100px] h-7 bg-muted/20 border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest focus:ring-1 focus:ring-blue-500/50">
+                        <SelectValue placeholder="Region" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-white/5 rounded-2xl shadow-2xl">
+                        <SelectItem value="eu-west" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">EUROPE</SelectItem>
+                        <SelectItem value="us-east" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">US-EAST</SelectItem>
+                        <SelectItem value="asia" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">ASIA</SelectItem>
+                    </SelectContent>
+                    </Select>
+                </SettingRow>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Logout section */}
-      <div className="pt-8 w-full">
+      <div className="pt-12 text-center">
         <Button 
-          variant="destructive" 
+          variant="ghost" 
           onClick={() => signOut()}
-          className="w-full h-14 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border-none shadow-none group"
+          className="w-full max-w-xs h-12 bg-red-500/5 hover:bg-red-500/10 text-red-500/60 hover:text-red-500 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all border border-red-500/10 group"
         >
           <LogOut className="h-4 w-4 mr-3 transition-transform group-hover:-translate-x-1" />
-          Terminate Session
+          Terminate session
         </Button>
+        <p className="mt-6 text-[8px] font-black text-muted-foreground/20 uppercase tracking-[0.5em]">System Build v2.4.0-Stable</p>
       </div>
     </div>
   );

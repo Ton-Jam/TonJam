@@ -7,8 +7,8 @@ const TONCENTER_API_KEY = ''; // Optional: Add your API key here
 const TON_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC';
 
 // Contract Addresses (Placeholders - would be replaced after deployment)
-export const TONJAM_COLLECTION_ADDRESS = localStorage.getItem('tonjam_collection_address') || "EQB_TONJAM_COLLECTION_ADDRESS";
-export const TONJAM_MARKETPLACE_ADDRESS = localStorage.getItem('tonjam_marketplace_address') || "EQB_TONJAM_MARKETPLACE_ADDRESS";
+export const TONJAM_COLLECTION_ADDRESS = localStorage.getItem('tonjam_collection_address') || "EQCA14o1-VWhS2asq9V5xYI--9664654_--_--_--_--_--_--";
+export const TONJAM_MARKETPLACE_ADDRESS = localStorage.getItem('tonjam_marketplace_address') || "EQCNZ_MARKETPLACE_ADDRESS_PLACEHOLDER_123456789";
 
 /**
  * Fetches Jetton balance for a given wallet address
@@ -165,6 +165,42 @@ export const buyNFTFromMarketplace = async (
 };
 
 /**
+ * Cancels an NFT sale on the TonJam Marketplace
+ */
+export const cancelNFTListing = async (
+  tonConnectUI: TonConnectUI,
+  nftAddress: string
+): Promise<boolean> => {
+  try {
+    // Construct the CancelSale message body
+    // message CancelSale { query_id: Int as uint64; nft_address: Address; }
+    const body = beginCell()
+      .storeUint(1393330205, 32) // Opcode for CancelSale (0x530c881d)
+      .storeUint(0, 64) // query_id
+      .storeAddress(Address.parse(nftAddress))
+      .endCell();
+
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: TONJAM_MARKETPLACE_ADDRESS,
+          amount: toNano("0.05").toString(), // Minimal gas fee
+          payload: body.toBoc().toString('base64'),
+        },
+      ],
+    };
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log("NFT Cancel Transaction sent:", result);
+    return true;
+  } catch (error) {
+    console.error("Error cancelling NFT listing:", error);
+    throw error;
+  }
+};
+
+/**
  * Mints a new TonJam NFT
  */
 export const mintTonJamNFT = async (
@@ -281,7 +317,7 @@ export const placeBid = async (
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: contractAddress || "EQB_PLATFORM_WALLET_ADDRESS", // Replace with actual auction contract
+          address: contractAddress || "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888", // Replace with actual auction contract
           amount: (parseFloat(amount) * 1000000000).toString(),
         },
       ],
@@ -308,7 +344,7 @@ export const acceptBid = async (
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: contractAddress || "EQB_PLATFORM_WALLET_ADDRESS", // Replace with actual auction contract
+          address: contractAddress || "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888", // Replace with actual auction contract
           amount: "10000000", // Minimal gas fee for accepting
         },
       ],
@@ -331,7 +367,7 @@ export const depositTON = async (
       validUntil: Math.floor(Date.now() / 1000) + 60, // 60 seconds
       messages: [
         {
-          address: "EQB_PLATFORM_WALLET_ADDRESS", // Replace with real platform wallet
+          address: "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888", // Replace with real platform wallet
           amount: (Number(amount) * 1e9).toString(), // Convert TON to nanoTON
           payload: "te6cckEBAQEAAgAAAEQ=", // Optional payload (e.g., 'Deposit')
         },
@@ -357,7 +393,7 @@ export const purchaseJAM = async (
       validUntil: Math.floor(Date.now() / 1000) + 60, // 60 seconds
       messages: [
         {
-          address: "EQB_PLATFORM_WALLET_ADDRESS", // Replace with real platform wallet
+          address: "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888", // Replace with real platform wallet
           amount: (parseFloat(amount) * 1000000000).toString(), // Convert to nanotons
         },
       ],
@@ -478,7 +514,7 @@ export const subscribePremium = async (
       validUntil: Math.floor(Date.now() / 1000) + 60,
       messages: [
         {
-          address: "EQB_PLATFORM_WALLET_ADDRESS",
+          address: "EQAA_PLATFORM_WALLET_ADDRESS_8888888888888888",
           amount: (parseFloat(amount) * 1000000000).toString(),
         },
       ],

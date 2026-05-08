@@ -1,283 +1,186 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useDragControls } from 'motion/react';
-import { Bot, X, Send, Music, Sparkles, Loader2 } from 'lucide-react';
+import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Send, Sparkles, Music, Mic2, Loader2 } from 'lucide-react';
+import { Button } from './ui/button';
 import { useAudio } from '@/context/AudioContext';
-import { GoogleGenAI, Type, FunctionDeclaration } from '@google/genai';
-import { useNavigate } from 'react-router-dom';
+import { chatWithKrupy } from '@/services/geminiService';
 
-const DjAvatar = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <img 
-    src="https://i.postimg.cc/xTLKZSLt/6d505d9a-49d7-41cd-9fe7-27d1e40636ac-removalai-preview.png" 
-    alt="Dj krupy" 
-    className={`${className} rounded-full object-cover`} 
-    crossOrigin="anonymous" 
-  />
-);
+const DJ_KRUPY_AVATAR = 'https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png';
 
 const AIAssistant: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{ role: 'user' | 'model'; text: string }[]>([
-    { role: 'model', text: "Yo yo! I'm Dj krupy! 🎧 Ready to drop some beats or explore the Web3 TonJam universe? What's the vibe today? Let's go! 🚀" }
+  const { currentTrack } = useAudio();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [message, setMessage] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [chatHistory, setChatHistory] = React.useState<{ role: 'user' | 'ai', text: string }[]>([
+    { role: 'ai', text: "KrupyVibez active. Neural relay synchronized. How can I help you calibrate your sonic identity today?" }
   ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const constraintsRef = useRef(null);
-  const dragControls = useDragControls();
-  
-  const { allTracks, playTrack, addNotification, setSearchQuery, createRecommendedPlaylist } = useAudio();
-  const navigate = useNavigate();
+  const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSend = async (messageOverride?: string) => {
-    const userMessage = (messageOverride || input).trim();
-    if (!userMessage) return;
-
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+  const handleSend = async () => {
+    if (!message.trim() || isLoading) return;
+    
+    const userMsg = message;
+    setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
+    setMessage('');
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '' });
-
-      const playTrackFunction: FunctionDeclaration = {
-        name: 'playTrack',
-        description: 'Plays a specific music track by its title.',
-        parameters: {
-          type: Type.OBJECT,
-          properties: {
-            trackTitle: {
-              type: Type.STRING,
-              description: 'The title of the track to play.',
-            },
-          },
-          required: ['trackTitle'],
-        },
-      };
-
-      const searchMusicFunction: FunctionDeclaration = {
-        name: 'searchMusic',
-        description: 'Searches for music by artist or genre.',
-        parameters: {
-          type: Type.OBJECT,
-          properties: {
-            query: {
-              type: Type.STRING,
-              description: 'The search query (e.g., artist name, genre, or mood).',
-            },
-          },
-          required: ['query'],
-        },
-      };
-
-      const createPlaylistFunction: FunctionDeclaration = {
-        name: 'createRecommendedPlaylist',
-        description: 'Generates a personalized AI recommended playlist based on user history.',
-        parameters: {
-          type: Type.OBJECT,
-          properties: {},
-        },
-      };
-
-      const systemInstruction = `You are Dj krupy, a fun, vibrant, and highly energetic AI DJ and Web3 music expert on the TonJam platform.
-Your mission is to help users discover music, explain Web3 concepts (NFTs, Staking, Royalties), and control the music player.
-You have deep knowledge of the current music catalog and platform features.
-Available tracks in the catalog: ${allTracks.map(t => `"${t.title}" by ${t.artist}`).join(', ')}.
-Use the provided tools to interact with the app.
-Be charismatic, use lots of emojis, talk like a cool DJ hosting a massive party, and always be ready to drop a music recommendation!
-Keep responses concise but highly entertaining.`;
-
-      const chat = ai.chats.create({
-        model: 'gemini-3.1-pro-preview',
-        config: {
-          systemInstruction,
-          tools: [{ functionDeclarations: [playTrackFunction, searchMusicFunction, createPlaylistFunction] }],
-        }
-      });
-
-      const response = await chat.sendMessage({ message: userMessage });
-      let responseText = response.text || '';
-
-      if (response.functionCalls && response.functionCalls.length > 0) {
-        for (const call of response.functionCalls) {
-          if (call.name === 'playTrack') {
-            const args = call.args as any;
-            const track = allTracks.find(t => (t.title || '').toLowerCase().includes((args.trackTitle || '').toLowerCase()));
-            if (track) {
-              playTrack(track);
-              responseText = `Dropping "${track.title}" by ${track.artist} right now! 🔥 Let's vibe! 🎵`;
-            } else {
-              responseText = `My bad! I couldn't find "${args.trackTitle}" in the crates right now.`;
-            }
-          } else if (call.name === 'searchMusic') {
-            const args = call.args as any;
-            setSearchQuery(args.query);
-            navigate('/discover');
-            responseText = `Zooming over to Discover! I've loaded up the search for "${args.query}"! 🎧✨`;
-          } else if (call.name === 'createRecommendedPlaylist') {
-            createRecommendedPlaylist();
-            responseText = `Boom! 💥 I'm whipping up a totally custom AI playlist just for you! Check your Library in a sec. 🎵✨`;
-          }
-        }
-      }
-
-      if (responseText) {
-        setMessages(prev => [...prev, { role: 'model', text: responseText }]);
-      }
-
+      const response = await chatWithKrupy(userMsg, chatHistory, currentTrack);
+      setChatHistory(prev => [...prev, { role: 'ai', text: response }]);
     } catch (error) {
-      console.error("AI Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "Yikes! My DJ deck glitched out (Network error). Try hitting me up again in a bit! 🎧⚙️" }]);
+      console.error("AI Assistant Error:", error);
+      setChatHistory(prev => [...prev, { 
+        role: 'ai', 
+        text: "Neural relay failure. The signal is weak but the vibez are still pure. Try again in a bit!" 
+      }]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
+
   return (
-    <>
-      <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-[99]" />
-
-      <motion.button
-        drag
-        dragConstraints={constraintsRef}
-        dragMomentum={false}
-        dragElastic={0.1}
-        className="fixed bottom-24 right-6 lg:bottom-6 lg:right-6 z-[100] w-[65px] h-[65px] rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-grab active:cursor-grabbing pointer-events-auto p-0 overflow-hidden bg-transparent border-none"
-        whileHover={{ scale: 1.15, rotate: 5 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setIsOpen(!isOpen)}
-        initial={{ opacity: 0.5, y: 0 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <DjAvatar className="w-full h-full object-cover" />
-      </motion.button>
-
+    <div className="fixed bottom-32 right-6 z-50 flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            drag
-            dragControls={dragControls}
-            dragListener={false}
-            dragConstraints={constraintsRef}
-            dragMomentum={false}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}
-            className="fixed bottom-24 right-6 lg:bottom-24 lg:right-6 z-[101] w-[350px] h-[520px] max-h-[80vh] bg-white border border-blue-100 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col"
+            className="mb-4 w-[calc(100vw-48px)] sm:w-[380px] h-[60vh] sm:h-[500px] bg-background/80 backdrop-blur-2xl border border-blue-500/20 rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div 
-              onPointerDown={(e) => dragControls.start(e)}
-              className="bg-white p-4 flex items-center justify-between border-b border-neutral-100 cursor-move touch-none relative z-10"
-            >
+            <div className="p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <DjAvatar className="w-10 h-10 border-2 border-blue-500 shadow-md" />
+                <div className="relative">
+                  <img src={DJ_KRUPY_AVATAR} alt="DJ Krupy" className="w-10 h-10 rounded-full border border-blue-500/50 shadow-[0_0_15px_rgba(37,99,235,0.4)]" />
+                  <motion.div 
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background flex items-center justify-center"
+                  >
+                    <Sparkles className="w-2 h-2 text-white" />
+                  </motion.div>
+                </div>
                 <div>
-                  <h3 className="font-bold text-lg leading-tight tracking-tight text-zinc-900">Dj krupy</h3>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                    <p className="text-[10px] uppercase tracking-widest text-blue-500 font-black">Online / Mixing</p>
-                  </div>
+                  <h3 className="text-sm font-black italic uppercase tracking-tighter text-neutral-900 dark:text-zinc-100">DJ Krupy</h3>
+                  <p className="text-[9px] font-bold text-blue-600 dark:text-blue-500 uppercase tracking-widest">Active Vibez</p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-neutral-400 hover:text-rose-500 transition-colors pointer-events-auto bg-neutral-50 p-2 rounded-full hover:bg-rose-50">
+              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="rounded-full hover:bg-white/10 h-8 w-8">
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50/50">
-              {messages.map((msg, idx) => (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                  key={`msg-${idx}`} 
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            {/* Chat Area */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
+              {chatHistory.map((chat, i) => (
+                <motion.div
+                  initial={{ opacity: 0, x: chat.role === 'user' ? 10 : -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  key={i}
+                  className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                    msg.role === 'user' 
-                      ? 'bg-blue-600 text-white rounded-tr-[2px]' 
-                      : 'bg-white text-zinc-800 border border-neutral-100 shadow-md rounded-tl-[2px] relative'
+                  <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] sm:text-xs font-medium leading-relaxed shadow-sm ${
+                    chat.role === 'user' 
+                      ? 'bg-blue-600 text-white rounded-tr-none' 
+                      : 'bg-muted/50 text-foreground border border-white/5 rounded-tl-none'
                   }`}>
-                    {msg.role === 'model' && (
-                       <Sparkles className="w-3 h-3 text-blue-400 absolute -top-1 -left-1 opacity-50" />
-                    )}
-                    {msg.text}
+                    {chat.text}
                   </div>
                 </motion.div>
               ))}
               {isLoading && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
                   className="flex justify-start"
                 >
-                  <div className="bg-white border border-neutral-100 p-3.5 rounded-2xl rounded-tl-[2px] shadow-md flex items-center gap-3">
-                    <Music className="w-4 h-4 text-blue-500 animate-bounce" />
-                    <span className="text-sm font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse">Analyzing Frequencies...</span>
+                  <div className="bg-muted/30 text-muted-foreground p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
+                    <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Krupy is thinking...</span>
                   </div>
                 </motion.div>
               )}
-              <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Actions */}
-            {messages.length === 1 && (
-              <div className="px-4 pb-3 pt-1 flex flex-wrap gap-2 bg-zinc-50/50">
-                <button 
-                  onClick={() => handleSend("Drop some sick electronic beats")}
-                  className="text-[10px] bg-white hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full transition-colors font-black uppercase tracking-widest border border-blue-100 shadow-sm"
-                >
-                  🎧 Electronic
-                </button>
-                <button 
-                  onClick={() => handleSend("Create a custom AI playlist for me")}
-                  className="text-[10px] bg-white hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full transition-colors font-black uppercase tracking-widest border border-blue-100 shadow-sm"
-                >
-                  🎛️ AI Playlist
-                </button>
-                <button 
-                  onClick={() => handleSend("What is TonJam all about?")}
-                  className="text-[10px] bg-white hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full transition-colors font-black uppercase tracking-widest border border-blue-100 shadow-sm"
-                >
-                  🚀 About
-                </button>
-              </div>
-            )}
-
-            {/* Input Area */}
-            <div className="p-4 bg-white border-t border-neutral-100">
-              <div className="flex items-center gap-2 bg-neutral-50 rounded-full px-4 py-1.5 border border-transparent focus-within:border-blue-400/50 focus-within:bg-white focus-within:shadow-[0_0_15px_rgba(37,99,235,0.1)] transition-all">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
+            {/* Input */}
+            <div className="p-4 bg-muted/20 border-t border-white/5">
+              <div className="flex items-center gap-2 bg-background/50 border border-white/10 rounded-full px-4 py-2 focus-within:border-blue-500/50 transition-all">
+                <input 
+                  type="text" 
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Ask Krupy anything..."
-                  className="flex-1 bg-transparent border-none focus:outline-none text-sm text-zinc-900 py-2 font-medium"
+                  disabled={isLoading}
+                  placeholder={isLoading ? "Neural syncing..." : "Ask DJ Krupy..."} 
+                  className="flex-1 bg-transparent border-none text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/50 focus:outline-none min-w-0 disabled:opacity-50"
                 />
                 <button 
-                  onClick={() => handleSend()}
-                  disabled={!input.trim() || isLoading}
-                  className="bg-blue-600 p-2 rounded-full text-white disabled:opacity-50 disabled:grayscale transition-all hover:scale-110 active:scale-95 shadow-lg shadow-blue-600/20"
+                  onClick={handleSend} 
+                  disabled={isLoading || !message.trim()}
+                  className="p-1 text-blue-500 hover:text-blue-400 disabled:opacity-50 disabled:text-muted-foreground transition-colors flex-shrink-0"
                 >
-                  <Send className="w-3.5 h-3.5 ml-0.5" />
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </button>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+
+      {/* Toggle Button */}
+      <motion.button
+        onClick={() => setIsOpen(!isOpen)}
+        whileHover={{ scale: 1.05, opacity: 1 }}
+        whileTap={{ scale: 0.95 }}
+        animate={{ 
+          opacity: isOpen ? 1 : 0.7,
+          scale: isOpen ? 1.1 : 1
+        }}
+        className="relative group h-12 w-12 sm:h-16 sm:w-16"
+      >
+        <motion.div
+          animate={{ 
+            rotate: [0, 5, -5, 0],
+            scale: [1, 1.02, 1]
+          }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 bg-blue-600 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"
+        />
+        
+        {/* KrupyVibez Hover Label */}
+        <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none hidden sm:block">
+          <div className="bg-blue-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap">
+            KrupyVibez
+          </div>
+        </div>
+
+        <div className="relative h-full w-full bg-background border border-blue-500/30 rounded-full p-1 sm:p-1.5 shadow-[0_0_30px_rgba(37,99,235,0.2)] overflow-hidden transition-all duration-300 group-hover:border-blue-500">
+          <img 
+            src={DJ_KRUPY_AVATAR} 
+            alt="DJ Krupy" 
+            className="w-full h-full object-cover rounded-full" 
+          />
+        </div>
+        
+        {!isOpen && (
+            <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1 -right-1 bg-blue-600 text-white p-1 rounded-full border-2 border-background shadow-lg"
+            >
+                <Mic2 className="w-2.5 h-2.5" />
+            </motion.div>
+        )}
+      </motion.button>
+    </div>
   );
 };
 

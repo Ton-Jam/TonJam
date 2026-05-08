@@ -15,7 +15,9 @@ import {
   MoreHorizontal,
   Play,
   Filter,
-  Grid2X2
+  Grid2X2,
+  FolderPlus,
+  Folder
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_USERS, MOCK_NFTS, MOCK_PLAYLISTS } from '@/constants';
@@ -24,6 +26,7 @@ import ArtistCard from '@/components/ArtistCard';
 import UserCard from '@/components/UserCard';
 import NFTCard from '@/components/NFTCard';
 import PlaylistCard from '@/components/PlaylistCard';
+import PlaylistFolderCard from '@/components/PlaylistFolderCard';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -51,6 +54,8 @@ const Library: React.FC = () => {
   const navigate = useNavigate();
   const { 
     playlists, 
+    playlistFolders,
+    createFolder,
     likedTrackIds, 
     followedUserIds, 
     userNFTs, 
@@ -78,7 +83,8 @@ const Library: React.FC = () => {
     let items: any[] = [];
 
     if (filter === 'all' || filter === 'playlists') {
-      items = [...items, ...playlists.map(p => ({ ...p, type: 'playlist' }))];
+      // Only show playlists that are NOT in any folder in the main list
+      items = [...items, ...playlists.filter(p => !p.folderId).map(p => ({ ...p, type: 'playlist' }))];
     }
 
     if (filter === 'all' || filter === 'artists') {
@@ -187,6 +193,13 @@ const Library: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+             <Button variant="outline" size="sm" onClick={() => {
+                const title = prompt("Enter Node Sector Label (Folder Name)");
+                if (title) createFolder(title);
+             }} className="h-10 rounded-xl gap-2 border-blue-500/20 text-blue-400 hover:bg-blue-500/10 transition-all">
+                <FolderPlus className="h-4 w-4" />
+                New Node Sector
+             </Button>
              <Button variant="outline" size="sm" onClick={() => setIsCreatePlaylistModalOpen(true)} className="h-10 rounded-xl gap-2">
                 <Plus className="h-4 w-4" />
                 New Node
@@ -266,6 +279,23 @@ const Library: React.FC = () => {
 
         {/* Main Content */}
         <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6" : "space-y-2"}>
+          {/* Playlist Folders */}
+          {(filter === 'all' || filter === 'playlists') && (
+            <div className={cn(
+              "col-span-full mb-2",
+              viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-2"
+            )}>
+              {playlistFolders.map(folder => (
+                <PlaylistFolderCard 
+                  key={folder.id} 
+                  folder={folder} 
+                  playlists={playlists} 
+                  viewMode={viewMode}
+                />
+              ))}
+            </div>
+          )}
+
           {/* Liked Songs Card */}
           {(filter === 'all' || filter === 'playlists') && (
             viewMode === 'grid' ? (

@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "motion/react";
 import { useAudio } from "@/context/AudioContext";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -161,10 +162,13 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
   );
 
   return (
-    <div
+    <motion.div
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
       className={cn(
-        "fixed left-0 right-0 z-[45] bg-background/60 backdrop-blur-2xl border-t border-border/40 px-4 py-2 flex flex-col items-stretch shadow-2xl h-18 lg:left-64 transition-all duration-300",
-        isMobileNavHidden ? "bottom-0" : "bottom-[80px] lg:bottom-0"
+        "fixed left-0 right-0 z-[48] bg-background/90 backdrop-blur-3xl border-t border-white/10 px-4 py-2 flex flex-col items-stretch shadow-[0_-20px_50px_rgba(0,0,0,0.5)] h-18 lg:left-64 transition-all duration-300",
+        isMobileNavHidden ? "bottom-0" : "bottom-[72px] lg:bottom-0"
       )}
     >
       {/* Top Progress Bar */}
@@ -201,18 +205,18 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           
           <div className="min-w-0 flex flex-col gap-0.5">
             <div className="flex items-center gap-2 overflow-hidden">
-              <h4 className="text-[10px] font-black truncate text-foreground uppercase tracking-tighter italic leading-none">
+              <h4 className="text-[9.5px] font-black truncate text-foreground uppercase tracking-tighter italic leading-none">
                 {currentTrack.title}
               </h4>
               {isHighFidelity && (
-                <span className="bg-blue-600 text-white text-[6px] font-black px-1 py-0.5 rounded-[2px] tracking-[0.2em] uppercase flex-shrink-0">
+                <span className="bg-blue-600 text-white text-[5.5px] font-black px-1 py-0.5 rounded-[1px] tracking-[0.2em] uppercase flex-shrink-0">
                   Hi-Fi
                 </span>
               )}
             </div>
             <button
               onClick={handleArtistClick}
-              className="text-[8px] text-muted-foreground/60 truncate uppercase font-black tracking-widest hover:text-blue-500 transition-colors text-left leading-none w-fit"
+              className="text-[7.5px] text-muted-foreground/60 truncate uppercase font-black tracking-widest hover:text-blue-500 transition-colors text-left leading-none w-fit"
             >
               {currentTrack.artist}
             </button>
@@ -342,7 +346,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

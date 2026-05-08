@@ -129,7 +129,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
                   className={`px-2 py-2 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all
                     ${isFollowing 
                       ? 'bg-muted text-foreground hover:bg-muted/80' 
-                      : 'bg-blue-600 text-foreground hover:bg-blue-500 shadow-lg shadow-blue-600/20'
+                      : 'bg-gradient-to-r from-blue-700 to-blue-500 text-white hover:opacity-90 shadow-lg shadow-blue-600/20'
                     }
                   `}
                 >

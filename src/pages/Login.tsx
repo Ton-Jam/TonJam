@@ -145,9 +145,9 @@ const Login: React.FC = () => {
         variant="ghost"
         size="icon"
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 text-muted-foreground hover:text-foreground z-20 group rounded-full"
+        className="absolute top-6 left-6 text-muted-foreground hover:text-foreground z-20 group rounded-[2px]"
       >
-        <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+        <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
       </Button>
 
       <motion.div
@@ -165,10 +165,10 @@ const Login: React.FC = () => {
           >
             <img src={APP_LOGO} className="w-12 h-12 relative z-10" alt="Logo" />
           </motion.div>
-          <h1 className="text-xl font-black text-foreground tracking-tighter uppercase italic leading-none mb-2">
+          <h1 className="text-lg font-bold text-foreground tracking-tighter uppercase italic leading-none mb-2">
             TON JAM
           </h1>
-          <p className="text-[9px] font-bold text-muted-foreground/60 tracking-[0.4em] uppercase">
+          <p className="text-[9px] font-semibold text-muted-foreground/60 tracking-[0.4em] uppercase">
             Audio Protocol
           </p>
         </div>
@@ -178,21 +178,21 @@ const Login: React.FC = () => {
           onValueChange={(val) => { reset(); setIsLogin(val === "login"); }}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2 bg-muted/50 border border-border/50 mb-6 h-11">
-            <TabsTrigger value="login" className="text-[10px] font-bold uppercase tracking-widest">
+          <TabsList className="grid w-full grid-cols-2 bg-muted/50 border border-border/50 mb-6 h-11 rounded-[2px]">
+            <TabsTrigger value="login" className="text-[10px] font-semibold uppercase tracking-widest rounded-[2px]">
               Log In
             </TabsTrigger>
-            <TabsTrigger value="register" className="text-[10px] font-bold uppercase tracking-widest">
+            <TabsTrigger value="register" className="text-[10px] font-semibold uppercase tracking-widest rounded-[2px]">
               Create Account
             </TabsTrigger>
           </TabsList>
 
-          <Card className="bg-white border-border/50 shadow-xl shadow-black/[0.03] relative overflow-hidden">
+          <Card className="bg-white border-border/50 shadow-xl shadow-black/[0.03] relative overflow-hidden rounded-[2px]">
             <CardHeader className="text-center pb-2 relative z-10">
-              <CardTitle className="text-lg font-black tracking-tight text-foreground italic">
+              <CardTitle className="text-base font-bold tracking-tight text-foreground italic">
                 {isLogin ? 'WELCOME BACK' : 'JOIN THE REVOLUTION'}
               </CardTitle>
-              <CardDescription className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">
+              <CardDescription className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/60">
                 {isLogin ? 'Login to access your jam' : 'Create your sonic node'}
               </CardDescription>
             </CardHeader>
@@ -208,7 +208,7 @@ const Login: React.FC = () => {
                       exit={{ opacity: 0, height: 0 }}
                       className="space-y-1.5 overflow-hidden"
                     >
-                      <Label htmlFor="username" className="text-[9px] font-black uppercase tracking-widest ml-1 text-muted-foreground/70">Username</Label>
+                      <Label htmlFor="username" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-muted-foreground/70">Username</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/40" />
                         <Input
@@ -224,7 +224,7 @@ const Login: React.FC = () => {
                 </AnimatePresence>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-[9px] font-black uppercase tracking-widest ml-1 text-muted-foreground/70">Email</Label>
+                  <Label htmlFor="email" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-muted-foreground/70">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/40" />
                     <Input
@@ -240,7 +240,7 @@ const Login: React.FC = () => {
 
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center px-1">
-                    <Label htmlFor="password" className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/70">Password</Label>
+                    <Label htmlFor="password" className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">Password</Label>
                     {isLogin && (
                       <button 
                         type="button" 
@@ -267,7 +267,7 @@ const Login: React.FC = () => {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden group"
+                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden group rounded-[2px]"
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (

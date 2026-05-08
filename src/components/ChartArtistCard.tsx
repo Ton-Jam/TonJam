@@ -37,10 +37,10 @@ const ChartArtistCard: React.FC<ChartArtistCardProps> = ({ artist, rank }) => {
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="text-[11px] font-bold text-foreground uppercase tracking-[0.05em] truncate group-hover:text-primary transition-colors flex items-center gap-1">
+        <h4 className="text-[10px] font-bold text-foreground uppercase tracking-[0.05em] truncate group-hover:text-primary transition-colors flex items-center gap-1">
           {artist.name}
           {artist.isVerifiedArtist && (
-            <div className="w-1.5 h-1.5 bg-primary rounded-full ml-1"></div>
+             <div className="w-1.5 h-1.5 bg-primary rounded-full ml-1 flex-shrink-0"></div>
           )}
         </h4>
         <div className="flex items-center gap-2 mt-2 min-w-0">

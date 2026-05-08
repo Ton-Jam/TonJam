@@ -61,7 +61,7 @@ const NFTAlphaCarousel: React.FC<NFTAlphaCarouselProps> = ({ nfts }) => {
               {/* Info Overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">@{nft.creator}</p>
+                  <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{nft.creator}</p>
                   <h3 className="text-xl font-black uppercase tracking-tight text-white group-hover:text-blue-400 transition-colors truncate">{nft.title}</h3>
                 </div>
                 

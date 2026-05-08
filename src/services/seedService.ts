@@ -1,21 +1,44 @@
 import { collection, getDocs, setDoc, doc, query, limit } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
-import { MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '../constants';
+import { MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS, MOCK_EVENTS } from '../constants';
 
-export const seedDatabase = async () => {
+export const seedDatabase = async (force = false) => {
   try {
+    // Check if events collection is empty
+    const eventsQuery = query(collection(db, 'events'), limit(1));
+    const eventsSnapshot = await getDocs(eventsQuery);
+
+    if (eventsSnapshot.empty || force) {
+      console.log('Seeding events...');
+      for (const event of MOCK_EVENTS) {
+        try {
+          console.log(`- Seeding event: ${event.id} (${event.title})`);
+          await setDoc(doc(db, 'events', event.id), {
+            ...event,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        } catch (err) {
+          console.error(`Failed to seed event ${event.id}:`, err);
+          throw err;
+        }
+      }
+    }
+
     // Check if tracks collection is empty
     const tracksQuery = query(collection(db, 'tracks'), limit(1));
     const tracksSnapshot = await getDocs(tracksQuery);
 
-    if (tracksSnapshot.empty) {
+    if (tracksSnapshot.empty || force) {
       console.log('Seeding tracks...');
       for (const track of MOCK_TRACKS) {
         try {
+          console.log(`- Seeding track: ${track.id} (${track.title})`);
           await setDoc(doc(db, 'tracks', track.id), {
             ...track,
             artistName: track.artist,
-            createdAt: new Date().toISOString(),
+            createdAt: force ? track.createdAt || new Date().toISOString() : new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           });
         } catch (err) {
           console.error(`Failed to seed track ${track.id}:`, err);
@@ -28,16 +51,18 @@ export const seedDatabase = async () => {
     const nftsQuery = query(collection(db, 'nfts'), limit(1));
     const nftsSnapshot = await getDocs(nftsQuery);
 
-    if (nftsSnapshot.empty) {
+    if (nftsSnapshot.empty || force) {
       console.log('Seeding nfts...');
       for (const nft of MOCK_NFTS) {
         try {
+          console.log(`- Seeding nft: ${nft.id}`);
           await setDoc(doc(db, 'nfts', nft.id), {
             ...nft,
             ownerName: nft.owner,
             ownerId: 'system', // Default owner for seeded NFTs
             isListed: true,
-            createdAt: new Date().toISOString(),
+            createdAt: force ? nft.createdAt || new Date().toISOString() : new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           });
         } catch (err) {
           console.error(`Failed to seed nft ${nft.id}:`, err);
@@ -50,17 +75,19 @@ export const seedDatabase = async () => {
     const postsQuery = query(collection(db, 'posts'), limit(1));
     const postsSnapshot = await getDocs(postsQuery);
 
-    if (postsSnapshot.empty) {
+    if (postsSnapshot.empty || force) {
       console.log('Seeding posts...');
       for (const post of MOCK_POSTS) {
         try {
+          console.log(`- Seeding post: ${post.id}`);
           await setDoc(doc(db, 'posts', post.id), {
             ...post,
             authorId: post.userId,
             authorName: post.userName,
             authorAvatar: post.userAvatar,
-            timestamp: new Date().toISOString(), // Always use a valid ISO string for seeding
-            createdAt: new Date().toISOString(),
+            timestamp: post.timestamp || new Date().toISOString(), // Always use a valid ISO string for seeding
+            createdAt: force ? post.createdAt || new Date().toISOString() : new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           });
         } catch (err) {
           console.error(`Failed to seed post ${post.id}:`, err);
@@ -73,10 +100,11 @@ export const seedDatabase = async () => {
     const usersQuery = query(collection(db, 'users'), limit(1));
     const usersSnapshot = await getDocs(usersQuery);
 
-    if (usersSnapshot.empty) {
+    if (usersSnapshot.empty || force) {
       console.log('Seeding artists into users collection...');
       for (const artist of MOCK_ARTISTS) {
         try {
+          console.log(`- Seeding artist user: ${artist.uid}`);
           await setDoc(doc(db, 'users', artist.uid), {
             uid: artist.uid,
             name: artist.name,
@@ -90,9 +118,9 @@ export const seedDatabase = async () => {
             walletAddress: artist.walletAddress || '',
             followers: artist.followers || 0,
             following: 0,
-            earnings: 0,
-            streamingEarnings: 0,
-            nftEarnings: 0,
+            earnings: artist.earnings?.total || 0,
+            streamingEarnings: artist.earnings?.streaming || 0,
+            nftEarnings: artist.earnings?.nftSales || 0,
             jamBalance: 500,
             stakedJam: 0,
             pendingJamRewards: 0,
@@ -111,7 +139,7 @@ export const seedDatabase = async () => {
     const proposalsQuery = query(collection(db, 'proposals'), limit(1));
     const proposalsSnapshot = await getDocs(proposalsQuery);
 
-    if (proposalsSnapshot.empty) {
+    if (proposalsSnapshot.empty || force) {
       console.log('Seeding proposals...');
       const MOCK_PROPOSALS = [
         {
@@ -162,7 +190,13 @@ export const seedDatabase = async () => {
       ];
 
       for (const proposal of MOCK_PROPOSALS) {
-        await setDoc(doc(db, 'proposals', proposal.id), proposal);
+        try {
+          console.log(`- Seeding proposal: ${proposal.id} (${proposal.title})`);
+          await setDoc(doc(db, 'proposals', proposal.id), proposal);
+        } catch (err) {
+          console.error(`Failed to seed proposal ${proposal.id}:`, err);
+          throw err;
+        }
       }
     }
 

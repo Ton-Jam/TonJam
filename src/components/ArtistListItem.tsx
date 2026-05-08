@@ -34,7 +34,7 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-3">
-          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
+          <h4 className="text-[10px] font-bold uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
             {artist.name}
           </h4>
           {artist.verified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
@@ -50,7 +50,7 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
           className={`px-4 py-2 rounded-[2px] flex items-center justify-center gap-2 transition-all text-[8px] font-bold uppercase tracking-widest
             ${isFollowing 
               ? 'bg-muted/50 text-muted-foreground/80 hover:bg-muted border border-border' 
-              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+              : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
             }
           `}
         >

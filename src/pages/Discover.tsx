@@ -376,7 +376,7 @@ const Discover: React.FC = () => {
                 >
                   <Command className="bg-transparent border-none">
                     <CommandList className="max-h-[300px]">
-                      <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-bold">No results identified</CommandEmpty>
+                  <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
                       
                       {searchHistory.length > 0 && (
                         <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
@@ -449,11 +449,11 @@ const Discover: React.FC = () => {
               <div className="absolute inset-0 bg-blue-500/5 pointer-events-none" />
               
               <SheetHeader className="p-8 border-b border-white/5 relative bg-background/50 backdrop-blur-xl">
-                <SheetTitle className="text-3xl font-black italic uppercase italic tracking-tighter flex items-center gap-3">
+                <SheetTitle className="text-3xl font-bold italic uppercase italic tracking-tighter flex items-center gap-3">
                   <Filter className="h-6 w-6 text-blue-500" />
                   Signal Filters
                 </SheetTitle>
-                <SheetDescription className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-2">
+                <SheetDescription className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.2em] mt-2">
                   Fine-tune your sensory exploration parameters
                 </SheetDescription>
               </SheetHeader>
@@ -463,7 +463,7 @@ const Discover: React.FC = () => {
                   {/* BPM Slider */}
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-black uppercase tracking-widest text-foreground">Tempo (BPM)</Label>
+                      <Label className="text-xs font-bold uppercase tracking-widest text-foreground">Tempo (BPM)</Label>
                       <span className="text-xs font-mono text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
                         {bpmRange[0]} - {bpmRange[1]}
                       </span>
@@ -487,7 +487,7 @@ const Discover: React.FC = () => {
 
                   {/* Keys Group */}
                   <div className="space-y-4">
-                    <Label className="text-xs font-black uppercase tracking-widest text-foreground block mb-4">Frequency Key</Label>
+                    <Label className="text-xs font-bold uppercase tracking-widest text-foreground block mb-4">Frequency Key</Label>
                     <div className="grid grid-cols-4 gap-2">
                       {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].map((k) => (
                         <button
@@ -515,7 +515,7 @@ const Discover: React.FC = () => {
                   <div className="space-y-6">
                     <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
                       <div className="space-y-1">
-                        <Label className="text-xs font-black uppercase tracking-widest text-foreground cursor-pointer" htmlFor="verified">Verified Entities</Label>
+                        <Label className="text-xs font-bold uppercase tracking-widest text-foreground cursor-pointer" htmlFor="verified">Verified Entities</Label>
                         <p className="text-[10px] text-muted-foreground font-medium">Only show signals from identified artists</p>
                       </div>
                       <Checkbox 
@@ -529,7 +529,7 @@ const Discover: React.FC = () => {
 
                   {/* Moods Section */}
                   <div className="space-y-4">
-                    <Label className="text-xs font-black uppercase tracking-widest text-foreground">Sensory Vibes</Label>
+                    <Label className="text-xs font-bold uppercase tracking-widest text-foreground">Sensory Vibes</Label>
                     <div className="flex flex-wrap gap-2 pt-2">
                       {MOODS.map((mood) => {
                         const isSelected = selectedMoods.includes(mood.name);
@@ -590,7 +590,7 @@ const Discover: React.FC = () => {
                   <TabsTrigger
                     key={filter}
                     value={filter}
-                    className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground data-[state=inactive]:bg-white/5 border-none shadow-none hover:data-[state=inactive]:bg-white/10 shrink-0"
+                    className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border border-transparent data-[state=active]:border-blue-400/30 hover:data-[state=inactive]:bg-white/10 shrink-0"
                   >
                     {filter}
                   </TabsTrigger>
@@ -626,7 +626,7 @@ const Discover: React.FC = () => {
               <section>
                 <Card 
                   onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
-                  className="relative h-64 md:h-80 rounded-[2.5rem] overflow-hidden cursor-pointer border-none shadow-2xl group transition-all duration-500"
+                  className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer border-none shadow-2xl group transition-all duration-500"
                 >
                   <img 
                     src={discoverWeekly.coverUrl} 
@@ -634,24 +634,24 @@ const Discover: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                  <CardContent className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex justify-between items-end">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <Badge className="bg-blue-600 hover:bg-blue-600 text-[9px] font-black uppercase tracking-[0.2em] rounded-sm py-1 border-none">
+                  <CardContent className="absolute bottom-0 left-0 p-6 md:p-12 w-full flex justify-between items-end">
+                    <div className="space-y-2 md:space-y-4 max-w-[70%]">
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <Badge className="bg-blue-600 hover:bg-blue-600 text-[7px] md:text-[9px] font-bold uppercase tracking-[0.2em] rounded-sm py-0.5 md:py-1 border-none">
                           Daily Frequency
                         </Badge>
-                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live.Sync_2026</span>
+                        <span className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live.Sync_2026</span>
                       </div>
                       <div>
-                        <h2 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
-                        <p className="text-sm text-white/50 font-medium max-w-md mt-4">Personalized frequency stream based on your unique neural listening patterns.</p>
+                        <h2 className="text-2xl md:text-6xl font-bold italic uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
+                        <p className="text-[10px] md:text-sm text-white/50 font-medium max-w-md mt-2 md:mt-4 line-clamp-2">Personalized frequency stream based on your unique neural listening patterns.</p>
                       </div>
                     </div>
                     <Button 
                       size="icon" 
-                      className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-2xl shadow-blue-600/40 hover:scale-110 transition-all border-none"
+                      className="h-10 w-10 md:h-16 md:w-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-2xl shadow-blue-600/40 hover:scale-110 transition-all border-none flex-shrink-0"
                     >
-                      <Play className="h-8 w-8 fill-current" />
+                      <Play className="h-5 w-5 md:h-8 md:w-8 fill-current" />
                     </Button>
                   </CardContent>
                 </Card>
@@ -661,7 +661,7 @@ const Discover: React.FC = () => {
             {searchHistory.length > 0 && (
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-neutral-800">Recent exploration</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800">Recent exploration</h2>
                   <Button variant="ghost" size="sm" onClick={clearSearchHistory} className="h-auto p-0 text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-foreground">
                     Clear all
                   </Button>
@@ -683,34 +683,36 @@ const Discover: React.FC = () => {
 
             {/* Browse Categories - Modern Bento Grid */}
             <section className="space-y-6">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-neutral-800">Browse Dimensions</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800">Browse Dimensions</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {BROWSE_CATEGORIES.map((category) => (
-                  <Card 
-                    key={category.id}
-                    onClick={() => setSearchQuery(category.title)}
-                    className={`${category.color} aspect-square relative overflow-hidden cursor-pointer border-none shadow-lg group transition-all duration-300 active:scale-95`}
-                  >
-                    <CardContent className="p-4 h-full flex flex-col justify-between">
-                      <h3 className="text-white font-black text-lg uppercase leading-[0.9] tracking-tighter opacity-80 group-hover:opacity-100 transition-opacity">
-                        {category.title}
-                      </h3>
-                      <div className="absolute -bottom-2 -right-4 w-32 h-32 group-hover:scale-110 transition-transform duration-500">
-                        <img 
-                          src={category.image} 
-                          alt=""
-                          className="w-full h-full object-cover rotate-[25deg] rounded-lg shadow-2xl opacity-60 group-hover:opacity-100"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div key={category.id} className="relative group">
+                    <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-600/50 to-cyan-400/50 rounded-xl opacity-0 group-hover:opacity-100 blur-[1px] transition-opacity duration-300"></div>
+                    <Card 
+                      onClick={() => setSearchQuery(category.title)}
+                      className={`${category.color} aspect-[16/9] relative overflow-hidden cursor-pointer border-none shadow-lg group transition-all duration-300 active:scale-95 rounded-xl`}
+                    >
+                      <CardContent className="p-4 h-full flex flex-col justify-between">
+                        <h3 className="text-white font-bold text-lg uppercase leading-[0.9] tracking-tighter opacity-80 group-hover:opacity-100 transition-opacity">
+                          {category.title}
+                        </h3>
+                        <div className="absolute -bottom-2 -right-4 w-32 h-32 group-hover:scale-110 transition-transform duration-500">
+                          <img 
+                            src={category.image} 
+                            alt=""
+                            className="w-full h-full object-cover rotate-[25deg] rounded-lg shadow-2xl opacity-60 group-hover:opacity-100"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 ))}
               </div>
             </section>
 
             {/* Albums Section */}
             <section className="space-y-6">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-neutral-800">Featured Albums</h2>
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800">Featured Albums</h2>
               <Carousel
                 opts={{
                   align: "start",
@@ -750,7 +752,7 @@ const Discover: React.FC = () => {
                     {/* Top Result */}
                     {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 0 && (
                       <section>
-                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60 mb-6">Discovery Identification</h2>
+                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-800/60 mb-6">Discovery Identification</h2>
                         <Card 
                           onClick={() => navigate(`/artist/${filteredResults.artists[0].uid}`)}
                           className="max-w-2xl bg-white/[0.02] hover:bg-white/[0.05] border-none transition-all p-8 rounded-[2rem] group cursor-pointer"
@@ -762,10 +764,10 @@ const Discover: React.FC = () => {
                             </Avatar>
                             <div className="flex-1 text-center md:text-left space-y-4">
                               <div>
-                                <Badge className="bg-blue-600/20 text-blue-500 hover:bg-blue-600/30 border-none text-[9px] font-black uppercase tracking-[0.2em] mb-2 px-3 py-1">
+                                <Badge className="bg-blue-600/20 text-blue-500 hover:bg-blue-600/30 border-none text-[9px] font-bold uppercase tracking-[0.2em] mb-2 px-3 py-1">
                                   Verified Entity
                                 </Badge>
-                                <h3 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter leading-[0.8] mb-2">
+                                <h3 className="text-4xl md:text-6xl font-bold italic uppercase tracking-tighter leading-[0.8] mb-2">
                                   {filteredResults.artists[0].name}
                                 </h3>
                                 <div className="flex items-center justify-center md:justify-start gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">
@@ -780,7 +782,7 @@ const Discover: React.FC = () => {
                                   </span>
                                 </div>
                               </div>
-                              <Button className="rounded-full px-8 bg-foreground text-background font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all">
+                              <Button className="rounded-full px-8 bg-foreground text-background font-bold uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all">
                                 Explore Archive
                               </Button>
                             </div>
@@ -793,7 +795,7 @@ const Discover: React.FC = () => {
                     {(activeFilter === 'all' || activeFilter === 'tracks') && filteredResults.tracks.length > 0 && (
                       <section className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60 font-black">Sonic Archive</h2>
+                          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-800/60 font-bold">Sonic Archive</h2>
                           {activeFilter === 'all' && filteredResults.tracks.length > 4 && (
                             <Button variant="ghost" onClick={() => setActiveFilter('tracks')} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
                               View all
@@ -846,7 +848,7 @@ const Discover: React.FC = () => {
                   {/* Users */}
                   {(activeFilter === 'all' || activeFilter === 'users') && filteredResults.users.length > 0 && (
                     <section className="space-y-8">
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60 font-black">Network Nodes</h2>
+                      <h2 className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-800/60">Network Nodes</h2>
                       <div className="flex flex-col gap-2">
                         {filteredResults.users.map((u) => (
                           <div 
@@ -860,7 +862,7 @@ const Discover: React.FC = () => {
                             </Avatar>
                             <div>
                               <h4 className="text-[11px] sm:text-[13px] font-semibold uppercase tracking-tight">{u.name}</h4>
-                              <p className="text-[9px] font-bold text-blue-500/80 uppercase tracking-widest">@{u.username}</p>
+                              <p className="text-[9px] font-bold text-blue-500/80 uppercase tracking-widest">{u.username.replace('@', '')}</p>
                             </div>
                           </div>
                         ))}
@@ -871,7 +873,7 @@ const Discover: React.FC = () => {
                   {/* NFTs */}
                   {(activeFilter === 'all' || activeFilter === 'nfts') && filteredResults.nfts.length > 0 && (
                     <section className="space-y-8">
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60 font-black">Digital Collectibles</h2>
+                      <h2 className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-800/60">Digital Collectibles</h2>
                       <div className="flex flex-col gap-2">
                         {filteredResults.nfts.map((nft) => (
                           <NFTCard key={nft.id} nft={nft} variant="row" />

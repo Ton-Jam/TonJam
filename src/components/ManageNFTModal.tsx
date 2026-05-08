@@ -73,57 +73,57 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-md bg-card rounded-[24px] p-4 shadow-2xl"
+            className="relative w-full max-md bg-[#0A0A0B]/95 backdrop-blur-xl border border-white/5 rounded-[2px] p-4 shadow-2xl"
           >
-            <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
-              <X className="h-5 w-5" />
+            <button onClick={onClose} className="absolute top-4 right-4 text-white/40 hover:text-white bg-white/5 p-1 rounded-[2px] transition-colors">
+              <X className="h-4 w-4" />
             </button>
-            <h2 className="text-xl font-bold text-foreground uppercase tracking-tighter mb-4">Manage Listing</h2>
+            <h2 className="text-sm font-bold text-white uppercase tracking-tight italic mb-4">Manage_Protocol</h2>
             
             <div className="space-y-4">
               <div className="flex gap-2 mb-4">
                 <button
                   type="button"
                   onClick={() => setListingType('fixed')}
-                  className={`flex-1 py-3 rounded-[12px] transition-all flex flex-col items-center justify-center gap-2 ${listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500 text-blue-500' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
+                  className={`flex-1 py-2.5 rounded-[2px] border transition-all flex flex-col items-center justify-center gap-1.5 ${listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500/30 text-blue-400' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
                 >
-                  <Tag className="h-4 w-4" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">Fixed Price</span>
+                  <Tag className="h-3.5 w-3.5" />
+                  <span className="text-[8px] font-bold uppercase tracking-widest italic">Fixed_Sale</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setListingType('auction')}
-                  className={`flex-1 py-3 rounded-[12px] transition-all flex flex-col items-center justify-center gap-2 ${listingType === 'auction' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
+                  className={`flex-1 py-2.5 rounded-[2px] border transition-all flex flex-col items-center justify-center gap-1.5 ${listingType === 'auction' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
                 >
-                  <Gavel className="h-4 w-4" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">Auction</span>
+                  <Gavel className="h-3.5 w-3.5" />
+                  <span className="text-[8px] font-bold uppercase tracking-widest italic">Auction_Sync</span>
                 </button>
               </div>
 
               {listingType === 'auction' ? (
                 <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block flex items-center gap-2">
-                      <Tag className="w-3 h-3" /> Starting Bid (TON)
+                    <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest mb-1.5 block flex items-center gap-2 italic">
+                      Opening_Bid (TON)
                     </label>
                     <input 
                       type="number" 
                       value={newPrice} 
                       onChange={(e) => setNewPrice(e.target.value)}
-                      className="w-full bg-muted/50 rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs outline-none focus:ring-1 focus:ring-amber-500 italic"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block flex items-center gap-2">
-                      <Calendar className="w-3 h-3" /> Auction End Date
+                    <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest mb-1.5 block flex items-center gap-2 italic">
+                      Protocol_Deadline
                     </label>
                     <input 
                       type="datetime-local" 
                       value={newEndDate} 
                       onChange={(e) => setNewEndDate(e.target.value)}
-                      className="w-full bg-muted/50 rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-[10px] outline-none focus:ring-1 focus:ring-amber-500 italic"
                     />
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-1.5 mt-2">
                       {['1', '3', '7', '14'].map((d) => (
                         <button
                           key={d}
@@ -133,7 +133,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                             const date = new Date(Date.now() + parseInt(d) * 24 * 60 * 60 * 1000);
                             setNewEndDate(date.toISOString().slice(0, 16));
                           }}
-                          className={`flex-1 py-2 rounded-[6px] text-[9px] font-bold transition-all ${duration === d ? 'bg-amber-500 text-black' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
+                          className={`flex-1 py-1.5 rounded-[2px] text-[8px] font-bold transition-all ${duration === d ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
                           {d}D
                         </button>
@@ -143,14 +143,14 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                 </div>
               ) : (
                 <div className="animate-in slide-in-from-top-2 duration-300">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block flex items-center gap-2">
-                    <Tag className="w-3 h-3" /> New Price (TON)
+                  <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest mb-1.5 block flex items-center gap-2 italic">
+                    Target_Value (TON)
                   </label>
                   <input 
                     type="number" 
                     value={newPrice} 
                     onChange={(e) => setNewPrice(e.target.value)}
-                    className="w-full bg-muted/50 rounded-[8px] p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs outline-none focus:ring-1 focus:ring-blue-500 italic"
                   />
                 </div>
               )}
@@ -159,16 +159,16 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                 <button 
                   onClick={handleUpdate}
                   disabled={isUpdating}
-                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[8px] font-bold text-[10px] uppercase tracking-widest transition-all"
+                  className="flex-[2] py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[2px] font-bold text-[8px] uppercase tracking-widest transition-all italic"
                 >
-                  {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Update Listing'}
+                  {isUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin mx-auto" /> : 'Apply_Changes'}
                 </button>
                 <button 
                   onClick={handleDelist}
                   disabled={isUpdating}
-                  className="flex-1 py-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-[8px] font-bold text-[10px] uppercase tracking-widest transition-all"
+                  className="flex-1 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-[2px] border border-red-500/20 font-bold text-[8px] uppercase tracking-widest transition-all italic"
                 >
-                  {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Delist'}
+                  {isUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin mx-auto" /> : 'Delist'}
                 </button>
               </div>
             </div>

@@ -47,10 +47,33 @@ import ArtistOnboarding from '@/pages/ArtistOnboarding';
 import ArtistAnalytics from '@/pages/ArtistAnalytics';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from 'motion/react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, limit, query } from 'firebase/firestore';
 import { seedDatabase } from '@/services/seedService';
+
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
+
+const getManifestUrl = () => {
+  try {
+    const manifest = {
+      url: "https://ton-jam.vercel.app",
+      name: "TonJam",
+      iconUrl: "https://i.postimg.cc/63GsZHzq/TonJam-icon.png",
+      description: "Web3 Music & NFT Marketplace on TON"
+    };
+
+    const jsonString = JSON.stringify(manifest);
+    const base64Manifest = btoa(unescape(encodeURIComponent(jsonString)));
+
+    return `data:application/json;base64,${base64Manifest}`;
+  } catch (e) {
+    return "/tonconnect-manifest.json";
+  }
+};
+
+const manifestUrl = getManifestUrl();
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -78,43 +101,44 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     // Test Firebase connection
-    const initBackend = async (retries = 3) => {
+    const initBackend = async (retries = 4) => {
       try {
         // Initial grace period for Firebase to settle
-        if (retries === 3) await new Promise(resolve => setTimeout(resolve, 1000));
+        if (retries === 4) await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Simple connection test - just read from the users collection
-        // We use getDocsFromCache first if possible, or just a very fast query
-        const q = query(collection(db, 'users'), limit(1));
+        // Simple connection test - just read from the test collection which we explicitly allowed
+        const q = query(collection(db, 'test'), limit(1));
         await getDocs(q);
-        console.log("Backend check successful");
+        console.log("[App] Backend reached successfully");
         setIsBackendReachable(true);
         setIsAppLoading(false);
       } catch (error: any) {
-        const isPermissionError = error instanceof Error && (
-          error.message.includes('permission-denied') || 
-          error.message.includes('Missing or insufficient permissions')
-        );
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorCode = error?.code;
+
+        const isPermissionError = errorCode === 'permission-denied' || 
+                                 errorMessage.includes('permission-denied') || 
+                                 errorMessage.includes('Missing or insufficient permissions');
         
         // If it's a permission error, it's reachable
         if (isPermissionError) {
-          console.log("Backend reached, but permissions limited (expected if not logged in)");
+          console.log("[App] Backend reached, permissions handled");
           setIsBackendReachable(true);
           setIsAppLoading(false);
           return;
         }
 
-        console.warn(`Backend connection attempt failed (${4 - retries}/3):`, error.message);
+        console.warn(`[App] Backend check failed (${5 - retries}/4): ${errorCode} - ${errorMessage}`);
         
         if (retries > 1) {
-          // exponentialish backoff
-          await new Promise(resolve => setTimeout(resolve, 2000 * (4 - retries)));
+          // exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 1500 * (5 - retries)));
           return initBackend(retries - 1);
         }
         
-        // Even if unreachable, we might want to let the app load in "offline" mode
-        // but for this specific UX we show an error.
-        setIsBackendReachable(false);
+        // Even if unreachable, we'll try to proceed as Firestore handles offline mode
+        // Only hard-block if it looks like a fatal configuration error
+        setIsBackendReachable(true); 
         setIsAppLoading(false);
       }
     };
@@ -208,21 +232,30 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <AuthProvider>
-          <AudioProvider>
-            <NotificationProvider>
-              <Toaster theme="light" position="top-right" />
-              <Router>
-                <ScrollToTop />
-                <AppContent />
-              </Router>
-            </NotificationProvider>
-          </AudioProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <TonConnectUIProvider 
+      manifestUrl={manifestUrl}
+      actionsConfiguration={{
+        twaReturnUrl: 'https://t.me/tonjam_bot'
+      }}
+    >
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <AuthProvider>
+            <AudioProvider>
+              <TooltipProvider>
+                <NotificationProvider>
+                  <Toaster theme="light" position="top-right" />
+                  <Router>
+                    <ScrollToTop />
+                    <AppContent />
+                  </Router>
+                </NotificationProvider>
+              </TooltipProvider>
+            </AudioProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </TonConnectUIProvider>
   );
 };
 

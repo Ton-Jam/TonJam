@@ -37,6 +37,8 @@ function useChart() {
   return context
 }
 
+const ResponsiveContainer = RechartsPrimitive.ResponsiveContainer as any
+
 function ChartContainer({
   id,
   className,
@@ -46,7 +48,9 @@ function ChartContainer({
   ...props
 }: React.ComponentProps<"div"> & {
   config: ChartConfig
-  children: any
+  children: React.ComponentProps<
+    any
+  >["children"]
   initialDimension?: {
     width: number
     height: number
@@ -67,12 +71,11 @@ function ChartContainer({
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        {/* @ts-ignore */}
-        <RechartsPrimitive.ResponsiveContainer
+        <ResponsiveContainer
           initialDimension={initialDimension}
         >
           {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        </ResponsiveContainer>
       </div>
     </ChartContext.Provider>
   )
@@ -159,8 +162,7 @@ function ChartTooltipContent({
     if (labelFormatter) {
       return (
         <div className={cn("font-medium", labelClassName)}>
-          {/* @ts-ignore */}
-          {labelFormatter(value, payload)}
+          {labelFormatter(value, payload) as React.ReactNode}
         </div>
       )
     }
@@ -189,7 +191,7 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        "grid min-w-32 items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
+        "grid min-w-32 items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs/relaxed shadow-xl",
         className
       )}
     >
@@ -210,9 +212,8 @@ function ChartTooltipContent({
                   indicator === "dot" && "items-center"
                 )}
               >
-                {/* @ts-ignore */}
                 {formatter && item?.value !== undefined && item.name ? (
-                  formatter(item.value, item.name, item, index, item.payload)
+                  formatter(item.value, item.name, item, index, item.payload) as React.ReactNode
                 ) : (
                   <>
                     {itemConfig?.icon ? (
@@ -253,7 +254,6 @@ function ChartTooltipContent({
                       </div>
                       {item.value != null && (
                         <span className="font-mono font-medium text-foreground tabular-nums">
-                          {/* @ts-ignore */}
                           {typeof item.value === "number"
                             ? item.value.toLocaleString()
                             : String(item.value)}

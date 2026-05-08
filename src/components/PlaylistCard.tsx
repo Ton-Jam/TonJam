@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
-import { Play, Music, Sparkles } from 'lucide-react';
+import { Play, Music, Sparkles, FolderPlus, MoreVertical, Trash2, Pencil, Folder } from 'lucide-react';
 import { Playlist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
 import PlaylistCoverGenerator from './PlaylistCoverGenerator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+
+import { motion } from 'motion/react';
 
 interface PlaylistCardProps {
   playlist: Playlist;
@@ -14,7 +27,7 @@ interface PlaylistCardProps {
 }
 
 const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'default', onClick }) => {
-  const { allTracks } = useAudio();
+  const { allTracks, playlistFolders, movePlaylistToFolder, deletePlaylist } = useAudio();
   const navigate = useNavigate();
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
 
@@ -85,7 +98,9 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
 
   if (variant === 'row') {
     return (
-      <div 
+      <motion.div 
+        whileHover={{ x: 4 }}
+        whileTap={{ scale: 0.98 }}
         onClick={onClick} 
         className="group flex items-center gap-2 p-2 rounded-[2px] hover:bg-muted/50 transition-all cursor-pointer w-full"
       >
@@ -93,22 +108,24 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
           {renderCover()}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold uppercase tracking-tight truncate text-neutral-800 group-hover:text-blue-400 transition-colors">
+          <h4 className="text-[11px] font-bold tracking-tight truncate text-foreground group-hover:text-primary transition-colors italic uppercase">
             {playlist.title}
           </h4>
-          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest truncate">
             {playlist.creator}
           </p>
         </div>
-        <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hidden sm:block">
+        <span className="text-[9px] font-semibold text-muted-foreground/50 uppercase tracking-widest hidden sm:block">
           {playlist.trackCount} Tracks
         </span>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div 
+    <motion.div 
+      whileHover={{ y: -4, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick} 
       className="group relative cursor-pointer p-2 rounded-[2px] w-full"
     >
@@ -145,11 +162,11 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       
       {/* Content Below Card */}
       <div className="px-3">
-        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-neutral-800 group-hover:text-blue-400 transition-colors">
+        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-foreground group-hover:text-primary transition-colors italic">
           {playlist.title}
         </h3>
         <p 
-          className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-3"
+          className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer inline-block mt-1.5"
           onClick={(e) => {
             e.stopPropagation();
             const artist = MOCK_ARTISTS.find(a => a.name === playlist.creator);
@@ -164,13 +181,96 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         </p>
         
         {/* Stats */}
-        <div className="flex items-center justify-between pt-2 mt-2">
-          <span className="text-[8px] font-bold text-foreground/30 uppercase tracking-widest">
+        <div className="flex items-center justify-between pt-2">
+          <span className="text-[8px] font-semibold text-foreground/30 uppercase tracking-widest">
             {playlist.trackCount} Tracks
           </span>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 rounded-[2px] hover:bg-black/5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-3 w-3 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-[#0A0A0A] border-white/[0.1] rounded-[2px] w-48">
+              <DropdownMenuItem 
+                onClick={(e) => { e.stopPropagation(); navigate(`/playlist/${playlist.id}`); }}
+                className="gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer"
+              >
+                <Play className="h-3 w-3" /> Play Sector
+              </DropdownMenuItem>
+
+              {isOwner && (
+                <>
+                  <DropdownMenuItem 
+                    onClick={(e) => { e.stopPropagation(); setIsGeneratorOpen(true); }}
+                    className="gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                  >
+                    <Sparkles className="h-3 w-3 text-blue-400" /> Neural Cover Gen
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer">
+                      <FolderPlus className="h-3 w-3" /> Link to Node
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="bg-[#0A0A0A] border-white/[0.1] rounded-[2px] w-48">
+                      {playlistFolders.length > 0 ? (
+                        <>
+                          {playlistFolders.map(folder => (
+                            <DropdownMenuItem
+                              key={folder.id}
+                              disabled={playlist.folderId === folder.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                movePlaylistToFolder(playlist.id, folder.id);
+                              }}
+                              className="gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                            >
+                              <Folder className="h-3 w-3" /> {folder.title}
+                            </DropdownMenuItem>
+                          ))}
+                          {playlist.folderId && (
+                            <>
+                              <DropdownMenuSeparator className="bg-white/5" />
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  movePlaylistToFolder(playlist.id, null);
+                                }}
+                                className="gap-2 text-[10px] font-black uppercase tracking-widest text-red-400 cursor-pointer"
+                              >
+                                <Trash2 className="h-3 w-3" /> Unlink from Node
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <div className="p-4 text-center">
+                          <p className="text-[8px] font-black uppercase tracking-widest text-white/20 italic">No node sectors found</p>
+                        </div>
+                      )}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+
+                  <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuItem 
+                    onClick={(e) => { e.stopPropagation(); deletePlaylist(playlist.id); }}
+                    className="gap-2 text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-400 cursor-pointer"
+                  >
+                    <Trash2 className="h-3 w-3" /> Deconstruct
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

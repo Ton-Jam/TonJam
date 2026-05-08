@@ -230,7 +230,7 @@ const TrackUploadModal: React.FC<TrackUploadModalProps> = ({ isOpen, onClose }) 
                             <Music className="h-8 w-8 text-blue-500" />
                           </div>
                           <p className="text-[10px] font-bold text-foreground uppercase tracking-widest text-center">Select Audio File</p>
-                          <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">MP3, WAV, FLAC (Max 50MB)</p>
+                          <p className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-2">MP3, WAV, FLAC, OGG, AAC, M4A (Max 50MB)</p>
                         </>
                       )}
                     </label>

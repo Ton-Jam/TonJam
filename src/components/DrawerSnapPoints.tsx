@@ -10,12 +10,8 @@ import {
   DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerPopup,
   DrawerTitle,
   DrawerTrigger,
-  DrawerPortal,
-  DrawerBackdrop,
-  DrawerViewport
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { ButtonGroupInput } from "@/components/ButtonGroupInput";
@@ -52,37 +48,32 @@ function SnapPointsDrawer() {
       <DrawerTrigger asChild>
         <Button variant="outline">Open snap drawer</Button>
       </DrawerTrigger>
-      <DrawerPortal>
-        <DrawerBackdrop />
-        <DrawerViewport>
-          <DrawerPopup className="pb-6 px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
-            <div className="pb-2 border-b px-2">
-              <DrawerTitle>Snap points</DrawerTitle>
-              <DrawerDescription>
-                Drag the sheet to snap between a compact peek and a near full-height
-                view.
-              </DrawerDescription>
+      <DrawerContent className="pb-6 px-4 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+        <div className="pb-2 border-b px-2">
+          <DrawerTitle>Snap points</DrawerTitle>
+          <DrawerDescription>
+            Drag the sheet to snap between a compact peek and a near full-height
+            view.
+          </DrawerDescription>
+        </div>
+        <div className="pt-2 px-2 flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+          <div className="max-w-lg mx-auto">
+            <div className="grid gap-2 mt-2 mb-2" aria-hidden>
+              {Array.from({ length: 20 }, (_, index) => (
+                <div
+                  key={index}
+                  className="h-12 rounded-xl border bg-muted/80 border-muted"
+                />
+              ))}
             </div>
-            <div className="pt-2 px-2 flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
-              <div className="max-w-lg mx-auto">
-                <div className="grid gap-2 mt-2 mb-2" aria-hidden>
-                  {Array.from({ length: 20 }, (_, index) => (
-                    <div
-                      key={index}
-                      className="h-12 rounded-xl border bg-muted/80 border-muted"
-                    />
-                  ))}
-                </div>
-                <div className="flex items-center justify-end gap-2">
-                  <DrawerClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </DrawerClose>
-                </div>
-              </div>
+            <div className="flex items-center justify-end gap-2">
+              <DrawerClose asChild>
+                <Button variant="outline">Close</Button>
+              </DrawerClose>
             </div>
-          </DrawerPopup>
-        </DrawerViewport>
-      </DrawerPortal>
+          </div>
+        </div>
+      </DrawerContent>
     </Drawer>
   );
 }
@@ -98,87 +89,82 @@ function CommentsDrawer() {
           Comments
         </Button>
       </DrawerTrigger>
-      <DrawerPortal>
-        <DrawerBackdrop />
-        <DrawerViewport>
-          <DrawerPopup className="pb-6 px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
-            <div className="relative pb-2 border-b">
-              <DrawerTitle className="text-sm">Comments</DrawerTitle>
-              <DrawerDescription className="sr-only">
-                Post comments
-              </DrawerDescription>
-            </div>
-            <div className="flex-1 w-full py-2 overflow-y-auto overscroll-contain">
-              <div className="max-w-md mx-auto">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="flex gap-2 px-2 py-2">
-                    <Avatar className="size-8">
-                      <AvatarImage src={comment.avatar} alt={comment.author} />
-                      <AvatarFallback>
-                        {comment.username.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px]">
-                        <span className="font-semibold">{comment.username}</span>
-                        <span className="text-muted-foreground text-xs ml-2">
-                          {comment.time}
-                        </span>
-                      </p>
-                      <p className="text-[13px] mt-3">{comment.text}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-[11px] text-muted-foreground font-medium">
-                          {comment.likes} likes
-                        </span>
-                        <button className="text-[11px] text-muted-foreground font-medium hover:text-foreground transition-colors">
-                          Reply
-                        </button>
-                      </div>
-                      {comment.replies > 0 && (
-                        <button className="mt-2 flex items-center gap-2 text-[12px] text-muted-foreground font-medium hover:text-foreground transition-colors">
-                          <span className="w-6 h-px bg-muted-foreground/40" />
-                          View {comment.replies}{" "}
-                          {comment.replies === 1 ? "reply" : "replies"}
-                        </button>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full shrink-0 self-start size-7 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 dark:hover:bg-red-500/20"
-                    >
-                      <HeartIcon className="size-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] px-2">
-              <div className="max-w-md w-full mx-auto bg-muted px-2 py-2 flex items-center gap-2 rounded-lg">
+      <DrawerContent className="pb-6 px-4 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+        <div className="relative pb-2 border-b">
+          <DrawerTitle className="text-sm">Comments</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            Post comments
+          </DrawerDescription>
+        </div>
+        <div className="flex-1 w-full py-2 overflow-y-auto overscroll-contain">
+          <div className="max-w-md mx-auto">
+            {comments.map((comment) => (
+              <div key={comment.id} className="flex gap-2 px-2 py-2">
                 <Avatar className="size-8">
-                  <AvatarImage
-                    src="https://github.com/akash3444.png"
-                    alt="akash3444"
-                  />
-                  <AvatarFallback>AK</AvatarFallback>
+                  <AvatarImage src={comment.avatar} alt={comment.author} />
+                  <AvatarFallback>
+                    {comment.username.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
-                <input
-                  type="text"
-                  placeholder="Add a comment..."
-                  className="flex-1 text-sm bg-transparent outline-none placeholder:text-muted-foreground"
-                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px]">
+                    <span className="font-semibold">{comment.username}</span>
+                    <span className="text-muted-foreground text-xs ml-2">
+                      {comment.time}
+                    </span>
+                  </p>
+                  <p className="text-[13px] mt-3">{comment.text}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      {comment.likes} likes
+                    </span>
+                    <button className="text-[11px] text-muted-foreground font-medium hover:text-foreground transition-colors">
+                      Reply
+                    </button>
+                  </div>
+                  {comment.replies > 0 && (
+                    <button className="mt-2 flex items-center gap-2 text-[12px] text-muted-foreground font-medium hover:text-foreground transition-colors">
+                      <span className="w-6 h-px bg-muted-foreground/40" />
+                      View {comment.replies}{" "}
+                      {comment.replies === 1 ? "reply" : "replies"}
+                    </button>
+                  )}
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7 text-primary hover:text-primary/80"
+                  className="rounded-full shrink-0 self-start size-7 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 dark:hover:bg-red-500/20"
                 >
-                  <SendIcon className="size-4" />
+                  <HeartIcon className="size-3" />
                 </Button>
               </div>
-            </div>
-          </DrawerPopup>
-        </DrawerViewport>
-      </DrawerPortal>
+            ))}
+          </div>
+        </div>
+        <div className="pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] px-2">
+          <div className="max-w-md w-full mx-auto bg-muted px-2 py-2 flex items-center gap-2 rounded-lg">
+            <Avatar className="size-8">
+              <AvatarImage
+                src="https://github.com/akash3444.png"
+                alt="akash3444"
+              />
+              <AvatarFallback>AK</AvatarFallback>
+            </Avatar>
+            <input
+              type="text"
+              placeholder="Add a comment..."
+              className="flex-1 text-sm bg-transparent outline-none placeholder:text-muted-foreground"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 text-primary hover:text-primary/80"
+            >
+              <SendIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+      </DrawerContent>
     </Drawer>
   );
 }
@@ -194,59 +180,54 @@ function ReactionsDrawer() {
           Reactions
         </Button>
       </DrawerTrigger>
-      <DrawerPortal>
-        <DrawerBackdrop />
-        <DrawerViewport>
-          <DrawerPopup className="pb-6 px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
-            <div className="will-change-transform px-2 pb-2 border-b">
-              <DrawerTitle className="text-sm">Reactions and plays</DrawerTitle>
-              <DrawerDescription className="text-xs">
-                <span className="font-medium text-foreground">12,847</span> likes
-                &middot; <span className="font-medium text-foreground">248K</span>{" "}
-                plays
-              </DrawerDescription>
+      <DrawerContent className="pb-6 px-4 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+        <div className="will-change-transform px-2 pb-2 border-b">
+          <DrawerTitle className="text-sm">Reactions and plays</DrawerTitle>
+          <DrawerDescription className="text-xs">
+            <span className="font-medium text-foreground">12,847</span> likes
+            &middot; <span className="font-medium text-foreground">248K</span>{" "}
+            plays
+          </DrawerDescription>
+        </div>
+        <div
+          className="will-change-transform flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
+          style={{
+            scrollbarGutter: "stable",
+          }}
+        >
+          <div className="max-w-md mx-auto">
+            <div className="px-2 pt-2 pb-2">
+              <ButtonGroupInput placeholder="Search" className="h-8 text-sm" />
             </div>
-            <div
-              className="will-change-transform flex-1 w-full overflow-y-auto overscroll-contain pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
-              style={{
-                scrollbarGutter: "stable",
-              }}
-            >
-              <div className="max-w-md mx-auto">
-                <div className="px-2 pt-2 pb-2">
-                  <ButtonGroupInput placeholder="Search" className="h-8 text-sm" />
+            {likers.map((liker) => (
+              <div key={liker.id} className="flex items-center gap-2 px-2 py-2">
+                <Avatar className="size-10">
+                  <AvatarImage src={liker.avatar} alt={liker.name} />
+                  <AvatarFallback>
+                    {liker.username.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold truncate">
+                    {liker.username}
+                  </p>
+                  <p className="text-[12px] text-muted-foreground truncate">
+                    {liker.name}
+                  </p>
                 </div>
-                {likers.map((liker) => (
-                  <div key={liker.id} className="flex items-center gap-2 px-2 py-2">
-                    <Avatar className="size-10">
-                      <AvatarImage src={liker.avatar} alt={liker.name} />
-                      <AvatarFallback>
-                        {liker.username.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold truncate">
-                        {liker.username}
-                      </p>
-                      <p className="text-[12px] text-muted-foreground truncate">
-                        {liker.name}
-                      </p>
-                    </div>
-                    <Button
-                      variant={liker.isFollowing ? "outline" : "default"}
-                      size="sm"
-                      className="h-8 text-xs rounded-lg"
-                    >
-                      {liker.isFollowing ? <UserCheckIcon /> : <UserPlusIcon />}
-                      {liker.isFollowing ? "Following" : "Follow"}
-                    </Button>
-                  </div>
-                ))}
+                <Button
+                  variant={liker.isFollowing ? "outline" : "default"}
+                  size="sm"
+                  className="h-8 text-xs rounded-lg"
+                >
+                  {liker.isFollowing ? <UserCheckIcon /> : <UserPlusIcon />}
+                  {liker.isFollowing ? "Following" : "Follow"}
+                </Button>
               </div>
-            </div>
-          </DrawerPopup>
-        </DrawerViewport>
-      </DrawerPortal>
+            ))}
+          </div>
+        </div>
+      </DrawerContent>
     </Drawer>
   );
 }
@@ -262,78 +243,73 @@ function ShareDrawer() {
           Share
         </Button>
       </DrawerTrigger>
-      <DrawerPortal>
-        <DrawerBackdrop />
-        <DrawerViewport>
-          <DrawerPopup className="pb-6 px-2 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
-            <div className="px-2 pb-2 border-b">
-              <DrawerTitle className="text-sm">Share</DrawerTitle>
-              <DrawerDescription className="sr-only">
-                Share this post
-              </DrawerDescription>
-              <div className="mt-2 max-w-md mx-auto px-2">
-                <ButtonGroupInput
-                  placeholder="Search people or groups"
-                  className="h-8 text-sm"
-                />
-              </div>
-            </div>
-            <div className="flex-1 w-full overflow-y-auto overscroll-contain">
-              <div className="max-w-md mx-auto px-2 py-2">
-                <div className="grid grid-cols-3 gap-2">
-                  {shareContacts.map((contact) => (
-                    <Button
-                      key={contact.id}
-                      variant="ghost"
-                      className="h-auto flex-col gap-2 py-2 px-2 rounded-xl"
+      <DrawerContent className="pb-6 px-4 max-h-dvh flex flex-col shadow-[0_2px_50px_rgb(0_0_0/0.15)] dark:shadow-[0_2px_200px_rgb(0_0_0/0.9)]">
+        <div className="px-2 pb-2 border-b">
+          <DrawerTitle className="text-sm">Share</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            Share this post
+          </DrawerDescription>
+          <div className="mt-2 max-w-md mx-auto px-2">
+            <ButtonGroupInput
+              placeholder="Search people or groups"
+              className="h-8 text-sm"
+            />
+          </div>
+        </div>
+        <div className="flex-1 w-full overflow-y-auto overscroll-contain">
+          <div className="max-w-md mx-auto px-2 py-2">
+            <div className="grid grid-cols-3 gap-2">
+              {shareContacts.map((contact) => (
+                <Button
+                  key={contact.id}
+                  variant="ghost"
+                  className="h-auto flex-col gap-2 py-2 px-2 rounded-xl"
+                >
+                  <Avatar className="size-14">
+                    <AvatarImage src={contact.avatar} alt={contact.name} />
+                    <AvatarFallback
+                      className={
+                        contact.isGroup
+                          ? "bg-primary/10 text-primary text-lg"
+                          : ""
+                      }
                     >
-                      <Avatar className="size-14">
-                        <AvatarImage src={contact.avatar} alt={contact.name} />
-                        <AvatarFallback
-                          className={
-                            contact.isGroup
-                              ? "bg-primary/10 text-primary text-lg"
-                              : ""
-                          }
-                        >
-                          {contact.isGroup ? (
-                            <UsersIcon className="size-5" />
-                          ) : (
-                            contact.username.slice(0, 2).toUpperCase()
-                          )}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-[11px] text-muted-foreground font-medium truncate w-full text-center">
-                        {contact.name}
-                      </span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
+                      {contact.isGroup ? (
+                        <UsersIcon className="size-5" />
+                      ) : (
+                        contact.username.slice(0, 2).toUpperCase()
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-[11px] text-muted-foreground font-medium truncate w-full text-center">
+                    {contact.name}
+                  </span>
+                </Button>
+              ))}
             </div>
-            <div className="border-t pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
-              <div className="max-w-md mx-auto px-2 pt-2">
-                <div className="flex items-center justify-around">
-                  {shareActions.map((action) => (
-                    <Button
-                      key={action.label}
-                      variant="ghost"
-                      className="h-auto flex-col gap-3 py-2 px-2 rounded-xl"
-                    >
-                      <div className="size-10 rounded-full bg-muted flex items-center justify-center">
-                        <action.icon className="size-4" />
-                      </div>
-                      <span className="text-[11px] font-medium">
-                        {action.label}
-                      </span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
+          </div>
+        </div>
+        <div className="border-t pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
+          <div className="max-w-md mx-auto px-2 pt-2">
+            <div className="flex items-center justify-around">
+              {shareActions.map((action) => (
+                <Button
+                  key={action.label}
+                  variant="ghost"
+                  className="h-auto flex-col gap-3 py-2 px-2 rounded-xl"
+                >
+                  <div className="size-10 rounded-full bg-muted flex items-center justify-center">
+                    <action.icon className="size-4" />
+                  </div>
+                  <span className="text-[11px] font-medium">
+                    {action.label}
+                  </span>
+                </Button>
+              ))}
             </div>
-          </DrawerPopup>
-        </DrawerViewport>
-      </DrawerPortal>
+          </div>
+        </div>
+      </DrawerContent>
     </Drawer>
   );
 }

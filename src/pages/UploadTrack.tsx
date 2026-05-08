@@ -267,12 +267,19 @@ export default function UploadTrackScreen() {
 
     setIsUploading(true);
     setUploadStep('uploading');
+    setUploadProgress(0);
 
     try {
-      // 1. Upload files (Using Firebase Storage as a proxy for IPFS for now)
+      // 1. Upload files
+      let audioProg = 0;
+      let coverProg = 0;
+      const updateOverallProgress = () => {
+        setUploadProgress(Math.round((audioProg + coverProg) / 2));
+      };
+
       const [audioRes, coverRes] = await Promise.all([
-        uploadAudio(audioFile),
-        uploadCover(coverFile)
+        uploadAudio(audioFile, (p) => { audioProg = p; updateOverallProgress(); }),
+        uploadCover(coverFile, (p) => { coverProg = p; updateOverallProgress(); })
       ]);
 
       // 2. Create and upload metadata
@@ -429,6 +436,7 @@ export default function UploadTrackScreen() {
                       <Upload className="w-6 h-6 text-white/20" />
                     </div>
                     <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Audio</p>
+                    <p className="mt-2 text-[8px] text-white/20 uppercase tracking-[0.2em] text-center">MP3, WAV, FLAC, OGG, AAC, M4A up to 50MB</p>
                   </>
                 )}
                 <input 
@@ -572,6 +580,7 @@ export default function UploadTrackScreen() {
                   <Upload className="w-6 h-6 text-white/20" />
                 </div>
                 <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Multiple Audio Files</p>
+                <p className="mt-2 text-[8px] text-white/20 uppercase tracking-[0.2em] text-center">MP3, WAV, FLAC, OGG, AAC, M4A up to 50MB per file</p>
                 <input 
                   type="file" 
                   ref={batchAudioInputRef} 

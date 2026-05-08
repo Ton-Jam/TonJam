@@ -119,6 +119,11 @@ const ArtistMinting: React.FC = () => {
       setLoadingType('mint');
       setLoadingMessage('Creating metadata artifact...');
 
+      const royaltySplitsDecimals = royaltySplits.map(s => ({
+        ...s,
+        percentage: s.percentage / 100
+      }));
+
       // Create and upload metadata
       const metadata = {
         name: trackData.title,
@@ -127,7 +132,7 @@ const ArtistMinting: React.FC = () => {
         animation_url: audioUrl,
         attributes: [
           { trait_type: "Genre", value: trackData.genre },
-          { trait_type: "RoyaltySplits", value: JSON.stringify(royaltySplits) },
+          { trait_type: "RoyaltySplits", value: JSON.stringify(royaltySplitsDecimals) },
           { trait_type: "Editions", value: trackData.editions }
         ]
       };
@@ -156,7 +161,7 @@ const ArtistMinting: React.FC = () => {
         artistVerified: true,
         price: trackData.price,
         editions: trackData.editions,
-        royaltySplits,
+        royaltySplits: royaltySplitsDecimals,
         minted: (selectedTrack?.minted || 0) + 1,
         metadataUrl: metadataRes.downloadUrl,
         updatedAt: new Date().toISOString()
@@ -179,7 +184,7 @@ const ArtistMinting: React.FC = () => {
         edition: `${(selectedTrack?.minted || 0) + 1} of ${trackData.editions}`,
         supply: parseInt(trackData.editions),
         minted: 1,
-        royaltySplits: royaltySplits,
+        royaltySplits: royaltySplitsDecimals,
         description: trackData.description,
         listingType: 'fixed',
         ipfsUrl: metadataRes.downloadUrl,
@@ -380,11 +385,35 @@ const ArtistMinting: React.FC = () => {
                 
                 <div className="space-y-3">
                   {royaltySplits.map((split, index) => (
-                    <div key={index} className="flex gap-4 items-center bg-white/5 p-4 rounded-2xl border border-white/10 animate-in fade-in duration-300">
-                      <input type="text" placeholder="TON Wallet Address" value={split.address} onChange={(e) => { const newSplits = [...royaltySplits]; newSplits[index].address = e.target.value; setRoyaltySplits(newSplits); }} className="flex-1 bg-transparent border-none outline-none text-xs font-bold p-0" />
-                      <div className="flex items-center gap-2 bg-black/20 px-3 py-2 rounded-xl">
-                        <input type="number" placeholder="0" value={split.percentage} onChange={(e) => { const newSplits = [...royaltySplits]; newSplits[index].percentage = Number(e.target.value); setRoyaltySplits(newSplits); }} className="w-12 bg-transparent border-none outline-none text-xs font-black p-0 text-right" />
-                        <span className="text-[10px] font-bold text-white/20">%</span>
+                    <div key={index} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-white/5 p-4 rounded-2xl border border-white/10 animate-in fade-in duration-300">
+                      <input 
+                        type="text" 
+                        placeholder="Role (e.g. Producer)" 
+                        value={split.label} 
+                        onChange={(e) => { const newSplits = [...royaltySplits]; newSplits[index].label = e.target.value; setRoyaltySplits(newSplits); }} 
+                        className="w-full sm:w-32 bg-transparent border-none outline-none text-xs font-bold p-0 text-cyan-500" 
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="TON Wallet Address" 
+                        value={split.address} 
+                        onChange={(e) => { const newSplits = [...royaltySplits]; newSplits[index].address = e.target.value; setRoyaltySplits(newSplits); }} 
+                        className="flex-1 bg-transparent border-none outline-none text-xs font-bold p-0 font-mono" 
+                      />
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 bg-black/20 px-3 py-2 rounded-xl">
+                          <input 
+                            type="number" 
+                            placeholder="0" 
+                            value={split.percentage} 
+                            onChange={(e) => { const newSplits = [...royaltySplits]; newSplits[index].percentage = Number(e.target.value); setRoyaltySplits(newSplits); }} 
+                            className="w-12 bg-transparent border-none outline-none text-xs font-black p-0 text-right" 
+                          />
+                          <span className="text-[10px] font-bold text-white/20">%</span>
+                        </div>
+                        <button type="button" onClick={() => setRoyaltySplits(royaltySplits.filter((_, i) => i !== index))} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                          <Plus className="w-4 h-4 rotate-45" />
+                        </button>
                       </div>
                     </div>
                   ))}

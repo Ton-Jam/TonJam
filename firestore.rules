@@ -76,10 +76,56 @@ service cloud.firestore {
         && data.status in ['pending', 'distributed'];
     }
 
+    function isValidEvent(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.artistId is string && data.artistId.size() <= 128
+        && data.title is string && data.title.size() <= 200
+        && data.venue is string && data.venue.size() <= 200;
+    }
+
+    function isValidListing(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.nftId is string && data.nftId.size() <= 128
+        && data.sellerId is string && data.sellerId.size() <= 128
+        && data.price is string && data.price.size() <= 20
+        && data.status in ['active', 'sold', 'cancelled'];
+    }
+
+    function isValidPlaylistFolder(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.title is string && data.title.size() <= 100
+        && data.creator is string && data.creator.size() <= 128;
+    }
+
+    function isValidJamMessage(data) {
+      return data.senderId is string && data.senderId.size() <= 128
+        && data.senderName is string && data.senderName.size() <= 100
+        && data.content is string && data.content.size() <= 1000
+        && data.timestamp is string;
+    }
+
+    // 🏷 MARKETPLACE LISTINGS
+    match /listings/{listingId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (isOwner(incoming().sellerId) || isAdmin()) && isValidListing(incoming()) && isValidId(listingId);
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          // Seller can cancel
+          isOwner(existing().sellerId) && incoming().status == 'cancelled' &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+        ) || (
+          // Buyer updates to 'sold' (System or user who paid)
+          incoming().status == 'sold' && 
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'buyerId', 'updatedAt'])
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
     // 👤 USERS
     match /users/{userId} {
       allow read: if true;
-      allow create: if isSignedIn() && isOwner(userId) && isValidUser(incoming()) && isValidId(userId);
+      allow create: if isSignedIn() && (isOwner(userId) || isAdmin()) && isValidUser(incoming()) && isValidId(userId);
       allow update: if isSignedIn() && (
         isAdmin() || (
           isOwner(userId) && isValidUser(incoming()) &&
@@ -120,7 +166,7 @@ service cloud.firestore {
     // 🖼 NFTS
     match /nfts/{nftId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidNFT(incoming()) && isValidId(nftId);
+      allow create: if isSignedIn() && isValidNFT(incoming()) && isValidId(nftId) && (isAdmin() || true); // Allow all signed in for now as per previous rule but isAdmin is explicit
       allow update: if isSignedIn() && (
         isAdmin() || (
           (isOwner(existing().ownerId) || isOwner(existing().owner)) &&
@@ -134,10 +180,23 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // 📅 EVENTS
+    match /events/{eventId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidEvent(incoming()) && isValidId(eventId) && (isOwner(incoming().artistId) || isAdmin());
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          isOwner(existing().artistId) && isValidEvent(incoming()) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'date', 'time', 'venue', 'location', 'ticketUrl', 'imageUrl', 'status'])
+        )
+      );
+      allow delete: if isAdmin() || isOwner(existing().artistId);
+    }
+
     // 🧠 POSTS & INTERACTIONS
     match /posts/{postId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidPost(incoming()) && isValidId(postId) && isOwner(incoming().userId);
+      allow create: if isSignedIn() && isValidPost(incoming()) && isValidId(postId) && (isOwner(incoming().userId) || isAdmin());
       allow update: if isSignedIn() && (
         isAdmin() || (
           isOwner(existing().userId) && 
@@ -206,7 +265,7 @@ service cloud.firestore {
 
     match /proposals/{id} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidProposal(incoming()) && isValidId(id) && isOwner(incoming().creatorId);
+      allow create: if isSignedIn() && isValidProposal(incoming()) && isValidId(id) && (isOwner(incoming().creatorId) || isAdmin());
       allow update: if isSignedIn() && (
         isAdmin() || (
           // Voting update (count and voters list)
@@ -230,7 +289,19 @@ service cloud.firestore {
     match /playlists/{playlistId} {
       allow read: if true;
       allow create: if isSignedIn() && isOwner(incoming().creator) && isValidId(playlistId);
-      allow update: if isSignedIn() && (isAdmin() || isOwner(existing().creator));
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          isOwner(existing().creator) && 
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'tracks', 'coverUrl', 'isPrivate', 'folderId', 'updatedAt'])
+        )
+      );
+      allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().creator));
+    }
+
+    match /playlistFolders/{folderId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isOwner(incoming().creator) && isValidId(folderId) && isValidPlaylistFolder(incoming());
+      allow update: if isSignedIn() && (isAdmin() || (isOwner(existing().creator) && isValidPlaylistFolder(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'playlistIds', 'updatedAt'])));
       allow delete: if isSignedIn() && (isAdmin() || isOwner(existing().creator));
     }
 
@@ -255,6 +326,12 @@ service cloud.firestore {
     match /messages/{id} {
       allow read: if true;
       allow write: if isSignedIn();
+    }
+    
+    match /jamRooms/{roomId}/messages/{messageId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidJamMessage(incoming()) && incoming().senderId == request.auth.uid;
+      allow delete: if isAdmin();
     }
     
     match /subscriptions/{id} {

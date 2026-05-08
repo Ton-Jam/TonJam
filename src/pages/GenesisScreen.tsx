@@ -36,9 +36,10 @@ const GenesisScreen: React.FC = () => {
     <div className="min-h-screen bg-[#050505] text-white selection:bg-blue-500/30 overflow-x-hidden">
       {/* Immersive Atmospheric background */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[1000px] h-[1000px] bg-blue-600/10 blur-[180px] rounded-full -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-purple-600/10 blur-[150px] rounded-full translate-y-1/2"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]"></div>
+        <div className="absolute top-0 left-1/4 w-[1000px] h-[1000px] bg-primary/10 blur-[180px] rounded-full -translate-y-1/2 animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full translate-y-1/2 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.02]"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
       </div>
 
       {/* Editorial Hero */}
@@ -50,14 +51,14 @@ const GenesisScreen: React.FC = () => {
           className="text-center space-y-8 max-w-5xl relative z-10"
         >
           <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="h-px w-12 bg-gradient-to-r from-transparent to-blue-500"></div>
-            <span className="text-[10px] font-black uppercase tracking-[0.6em] text-blue-500 italic">Protocol V.01 Initialized</span>
-            <div className="h-px w-12 bg-gradient-to-l from-transparent to-blue-500"></div>
+            <div className="h-px w-10 bg-gradient-to-r from-transparent to-primary"></div>
+            <span className="text-[9px] font-black uppercase tracking-[0.6em] text-primary italic">Protocol.v01_Initialized</span>
+            <div className="h-px w-10 bg-gradient-to-l from-transparent to-primary"></div>
           </div>
 
-          <h1 className="text-6xl md:text-9xl font-black uppercase tracking-tighter leading-[0.85] italic">
+          <h1 className="text-6xl md:text-8xl lg:text-[120px] font-black uppercase tracking-tighter leading-[0.8] italic">
             THE <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-amber-500 animate-pulse">GENESIS</span> <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-cyan-400">GENESIS</span> <br/>
             FORGE
           </h1>
 
@@ -92,19 +93,19 @@ const GenesisScreen: React.FC = () => {
       </section>
 
       {/* Stats Section - Technical Design */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-white/5 divide-x divide-y md:divide-y-0 border-collapse bg-white/[0.02] backdrop-blur-sm">
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 py-12 md:py-24">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-border/50 divide-x divide-y md:divide-y-0 border-collapse bg-white/[0.01] backdrop-blur-md rounded-2xl overflow-hidden">
           {[
-            { label: 'Supply Cap', value: '1,000', sub: 'Fixed Forever' },
-            { label: 'Forge Date', value: 'OCT 2023', sub: 'Inaugural Batch' },
-            { label: 'Protocol', value: 'TON NFT-2', sub: 'Compressed Storage' },
+            { label: 'Supply.Cap', value: '1,000', sub: 'Fixed Forever' },
+            { label: 'Forge.Date', value: 'OCT_23', sub: 'Inaugural Batch' },
+            { label: 'Protocol.Id', value: 'NFT_2.0', sub: 'Compressed Storage' },
             { label: 'Royalties', value: '7.5%', sub: 'Artist Perpetual' },
           ].map((stat, i) => (
-            <div key={i} className="p-8 md:p-12 flex flex-col justify-between group hover:bg-white/[0.03] transition-colors">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground group-hover:text-blue-500 transition-colors">{stat.label}</span>
-              <div className="mt-6">
-                <p className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter">{stat.value}</p>
-                <p className="text-[10px] text-muted-foreground/60 font-bold mt-1 uppercase tracking-widest">{stat.sub}</p>
+            <div key={i} className="p-8 md:p-10 flex flex-col justify-between group hover:bg-primary/[0.02] transition-colors h-full">
+              <span className="text-[9px] font-black uppercase tracking-[0.4em] text-muted-foreground/60 group-hover:text-primary transition-colors">{stat.label}</span>
+              <div className="mt-8">
+                <p className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-foreground">{stat.value}</p>
+                <p className="text-[9px] text-muted-foreground/40 font-bold mt-1.5 uppercase tracking-widest">{stat.sub}</p>
               </div>
             </div>
           ))}
@@ -112,15 +113,18 @@ const GenesisScreen: React.FC = () => {
       </section>
 
       {/* Featured Genesis Grid */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 space-y-16">
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24 space-y-12 md:space-y-16">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
-            <Badge className="bg-blue-600/10 text-blue-500 border-blue-500/20 font-black italic px-4">MASTERWORKS</Badge>
-            <h2 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter leading-none">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_10px_var(--primary)]"></div>
+              <span className="text-[9px] font-black tracking-[0.4em] uppercase text-primary italic">Consensus.Masterworks</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter leading-none mb-1">
               Artifact <br/> Showcase
             </h2>
           </div>
-          <p className="text-muted-foreground max-w-sm text-sm font-medium leading-relaxed">
+          <p className="text-muted-foreground max-w-sm text-sm font-medium leading-relaxed italic border-l border-primary/20 pl-6">
             Every Genesis NFT functions as a high-fidelity key. Owners receive governance rights, exclusive air-drops, and lifetime whitelist access.
           </p>
         </div>
@@ -141,29 +145,33 @@ const GenesisScreen: React.FC = () => {
       </section>
 
       {/* The Architects - Artist Highlight */}
-      <section className="bg-white/[0.01] border-y border-white/5 py-32 overflow-hidden">
-        <div className="w-full max-w-7xl mx-auto px-6 space-y-20">
+      <section className="bg-white/[0.01] border-y border-border/50 py-32 overflow-hidden relative">
+        <div className="absolute inset-0 bg-primary/[0.02] pointer-events-none"></div>
+        <div className="w-full max-w-7xl mx-auto px-6 space-y-20 relative z-10">
           <div className="text-center space-y-4">
-             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500">The Creators</span>
-             <h2 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter">Architects of Sound</h2>
+             <span className="text-[9px] font-black uppercase tracking-[0.5em] text-primary italic">Consensus.Architects</span>
+             <h2 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">Architects of Sound</h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             {featuredArtists.map((artist, i) => (
               <motion.div 
                 key={artist.uid}
-                whileHover={{ y: -10 }}
+                whileHover={{ y: -8 }}
                 className="flex flex-col items-center text-center space-y-6 group"
               >
                 <div className="relative">
-                  <div className="absolute inset-0 bg-blue-500 blur-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-blue-500/50 transition-colors">
-                    <img src={artist.avatarUrl} className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700" alt={artist.name} />
+                  <div className="absolute inset-0 bg-primary blur-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                  <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-all duration-500 p-1 bg-background shadow-2xl">
+                    <img src={artist.avatarUrl} className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt={artist.name} />
+                  </div>
+                  <div className="absolute -bottom-2 right-4 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-4 border-background opacity-0 group-hover:opacity-100 transition-opacity scale-0 group-hover:scale-100 duration-300">
+                    <ShieldCheck className="w-3 h-3 text-white" />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-xl font-black italic uppercase tracking-tight">{artist.name}</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{artist.genre} Pioneer</p>
+                  <h3 className="text-xl font-black italic uppercase tracking-tight text-foreground">{artist.name}</h3>
+                  <p className="text-[10px] text-muted-foreground/60 uppercase font-bold tracking-[0.2em] italic">Protocol_Pioneer</p>
                 </div>
               </motion.div>
             ))}

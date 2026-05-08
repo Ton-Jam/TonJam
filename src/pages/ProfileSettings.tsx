@@ -3,7 +3,7 @@ import { UserCircleIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { useAudio } from '@/context/AudioContext';
 import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react';
 import { GoogleGenAI } from '@google/genai';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, Twitter, Instagram, Globe } from 'lucide-react';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { uploadAvatar } from '@/services/storageService';
@@ -302,70 +302,78 @@ Return ONLY the bio text, nothing else.`;
                 <p className="mt-2 text-xs text-muted-foreground">Customize the look of your public profile page.</p>
               </div>
 
-              <div className="sm:col-span-2">
-                <label htmlFor="twitter" className="block text-sm font-medium text-foreground">
-                  Twitter
-                </label>
-                <div className="mt-2 flex rounded-xl bg-muted/20 focus-within:ring-2 focus-within:ring-foreground transition-all">
-                  <span className="flex select-none items-center pl-4 text-muted-foreground sm:text-sm">@</span>
-                  <input
-                    id="twitter"
-                    name="twitter"
-                    type="text"
-                    value={profile.twitter}
-                    onChange={(e) => setProfile({ ...profile, twitter: e.target.value })}
-                    className="block w-full min-w-0 grow bg-transparent py-3 pl-1 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-sm"
-                  />
+              <div className="col-span-full pt-6 border-t border-white/5">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="w-1.5 h-4 bg-foreground rounded-full" />
+                  <h3 className="text-sm font-bold text-foreground cursor-default uppercase tracking-widest">Connect Socials</h3>
                 </div>
-              </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Twitter / X */}
+                  <div className="group relative bg-muted/10 border border-white/5 rounded-2xl p-4 transition-all hover:bg-muted/20">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+                        <Twitter className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground">Twitter / X</h4>
+                        <p className="text-[10px] text-muted-foreground">@username</p>
+                      </div>
+                    </div>
+                    <input 
+                      id="twitter"
+                      name="twitter"
+                      type="text" 
+                      value={profile.twitter} 
+                      onChange={(e) => setProfile({ ...profile, twitter: e.target.value })} 
+                      className="w-full bg-background/50 rounded-xl py-2 px-3 text-xs outline-none focus:ring-1 focus:ring-blue-500 transition-all text-foreground" 
+                      placeholder="https://x.com/..." 
+                    />
+                  </div>
 
-              <div className="sm:col-span-2">
-                <label htmlFor="instagram" className="block text-sm font-medium text-foreground">
-                  Instagram
-                </label>
-                <div className="mt-2 flex rounded-xl bg-muted/20 focus-within:ring-2 focus-within:ring-foreground transition-all">
-                  <span className="flex select-none items-center pl-4 text-muted-foreground sm:text-sm">@</span>
-                  <input
-                    id="instagram"
-                    name="instagram"
-                    type="text"
-                    value={profile.instagram}
-                    onChange={(e) => setProfile({ ...profile, instagram: e.target.value })}
-                    className="block w-full min-w-0 grow bg-transparent py-3 pl-1 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-sm"
-                  />
-                </div>
-              </div>
+                  {/* Instagram */}
+                  <div className="group relative bg-muted/10 border border-white/5 rounded-2xl p-4 transition-all hover:bg-muted/20">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-500 group-hover:scale-110 transition-transform">
+                        <Instagram className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground">Instagram</h4>
+                        <p className="text-[10px] text-muted-foreground">@handle</p>
+                      </div>
+                    </div>
+                    <input 
+                      id="instagram"
+                      name="instagram"
+                      type="text" 
+                      value={profile.instagram} 
+                      onChange={(e) => setProfile({ ...profile, instagram: e.target.value })} 
+                      className="w-full bg-background/50 rounded-xl py-2 px-3 text-xs outline-none focus:ring-1 focus:ring-pink-500 transition-all text-foreground" 
+                      placeholder="https://instagram.com/..." 
+                    />
+                  </div>
 
-              <div className="sm:col-span-2">
-                <label htmlFor="location" className="block text-sm font-medium text-foreground">
-                  Location
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="location"
-                    name="location"
-                    type="text"
-                    value={profile.location}
-                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="sm:col-span-2">
-                <label htmlFor="website" className="block text-sm font-medium text-foreground">
-                  Website
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="website"
-                    name="website"
-                    type="url"
-                    placeholder="https://"
-                    value={profile.website}
-                    onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-                    className="block w-full rounded-xl bg-muted/20 px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-foreground transition-all sm:text-sm"
-                  />
+                  {/* Website */}
+                  <div className="group relative bg-muted/10 border border-white/5 rounded-2xl p-4 transition-all hover:bg-muted/20">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-400/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                        <Globe className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground">Website</h4>
+                        <p className="text-[10px] text-muted-foreground">https://...</p>
+                      </div>
+                    </div>
+                    <input 
+                      id="website"
+                      name="website"
+                      type="url" 
+                      value={profile.website} 
+                      onChange={(e) => setProfile({ ...profile, website: e.target.value })} 
+                      className="w-full bg-background/50 rounded-xl py-2 px-3 text-xs outline-none focus:ring-1 focus:ring-blue-400 transition-all text-foreground" 
+                      placeholder="https://..." 
+                    />
+                  </div>
                 </div>
               </div>
 

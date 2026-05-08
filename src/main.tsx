@@ -36,36 +36,9 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-const getManifestUrl = () => {
-  try {
-    const manifest = {
-      url: "https://ton-jam.vercel.app",
-      name: "TonJam",
-      iconUrl: "https://i.postimg.cc/63GsZHzq/TonJam-icon.png",
-      description: "Web3 Music & NFT Marketplace on TON"
-    };
-
-    const jsonString = JSON.stringify(manifest);
-    const base64Manifest = btoa(unescape(encodeURIComponent(jsonString)));
-
-    return `data:application/json;base64,${base64Manifest}`;
-  } catch (e) {
-    return "/tonconnect-manifest.json";
-  }
-};
-
-const manifestUrl = getManifestUrl();
-
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <TonConnectUIProvider 
-      manifestUrl={manifestUrl}
-      actionsConfiguration={{
-        twaReturnUrl: 'https://t.me/tonjam_bot'
-      }}
-    >
-      <App />
-    </TonConnectUIProvider>
+    <App />
   </React.StrictMode>
 );

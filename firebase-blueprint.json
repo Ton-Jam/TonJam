@@ -97,7 +97,21 @@
         "tracks": { "type": "array" },
         "description": { "type": "string" },
         "isPrivate": { "type": "boolean" },
-        "coverUrl": { "type": "string" }
+        "coverUrl": { "type": "string" },
+        "folderId": { "type": "string" }
+      }
+    },
+    "PlaylistFolder": {
+      "title": "PlaylistFolder",
+      "description": "User created folder for organizing playlists",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "creator": { "type": "string" },
+        "playlistIds": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       }
     },
     "Community": {
@@ -228,9 +242,65 @@
         "status": { "type": "string" },
         "timestamp": { "type": "string", "format": "date-time" }
       }
+    },
+    "JamRoomMessage": {
+      "title": "JamRoomMessage",
+      "description": "Message in a live JamSpace room",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "roomId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderAvatar": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "senderName", "content", "timestamp"]
+    },
+    "ArtistEvent": {
+      "title": "ArtistEvent",
+      "description": "Upcoming artist event or concert",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "artistId": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "venue": { "type": "string" },
+        "location": { "type": "string" },
+        "ticketUrl": { "type": "string" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["id", "artistId", "title", "date", "venue"]
+    },
+    "Listing": {
+      "title": "Listing",
+      "description": "NFT Marketplace listing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nftId": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "price": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "sold", "cancelled"] },
+        "buyerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "nftId", "sellerId", "price", "status"]
     }
   },
   "firestore": {
+    "/listings/{listingId}": {
+      "schema": "Listing",
+      "description": "Marketplace listings"
+    },
+    "/events/{eventId}": {
+      "schema": "ArtistEvent",
+      "description": "Artist events and tours"
+    },
     "/system/treasury": {
       "schema": "TreasuryStats",
       "description": "DAO Treasury state"
@@ -275,6 +345,10 @@
       "schema": "Playlist",
       "description": "User playlists"
     },
+    "/playlistFolders/{folderId}": {
+      "schema": "PlaylistFolder",
+      "description": "User playlist folders"
+    },
     "/communities/{communityId}": {
       "schema": "Community",
       "description": "Artist communities"
@@ -282,6 +356,10 @@
     "/follows/{followId}": {
       "schema": "Follow",
       "description": "Follow relationships"
+    },
+    "/jamRooms/{roomId}/messages/{messageId}": {
+      "schema": "JamRoomMessage",
+      "description": "Messages in a specific JamSpace room"
     },
     "/taskCompletions/{id}": {
       "schema": "TaskCompletion",

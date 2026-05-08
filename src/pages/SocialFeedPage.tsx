@@ -7,7 +7,7 @@ const SocialFeedPage: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4 text-foreground">Social Feed</h1>
+      <h1 className="text-xl font-black uppercase italic tracking-tighter mb-4 text-foreground">Social Feed</h1>
       <SocialFeed posts={posts} />
     </div>
   );

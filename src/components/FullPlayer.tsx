@@ -30,13 +30,16 @@ import {
   History,
   Maximize2,
   VolumeX,
-  Volume1
+  Volume1,
+  Sparkles,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_ARTISTS, MOCK_TRACKS } from '@/constants';
 import { useNavigate } from 'react-router-dom';
 import { getPlaceholderImage, shareContent, cn } from '@/lib/utils';
 import { fetchNFTMetadata } from '@/services/nftService';
+import { chatWithKrupy } from '@/services/geminiService';
 import { NFTItem } from '@/types';
 import BuyNFTModal from './BuyNFTModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -115,13 +118,63 @@ const FullPlayer: React.FC = () => {
     setOptionsTrack
   } = useAudio();
 
-  const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft'>('player');
+  const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy'>('player');
   const [showQueue, setShowQueue] = useState(false);
   const [comment, setComment] = useState("");
   const [showVolumeHUD, setShowVolumeHUD] = useState(false);
   const [currentNFT, setCurrentNFT] = useState<NFTItem | null>(null);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // DJ Krupy State
+  const [krupyMessage, setKrupyMessage] = useState('');
+  const [isKrupyLoading, setIsKrupyLoading] = useState(false);
+  const [krupyChat, setKrupyChat] = useState<{ role: 'user' | 'ai', text: string }[]>([]);
+  const krupyScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (krupyScrollRef.current) {
+      krupyScrollRef.current.scrollTop = krupyScrollRef.current.scrollHeight;
+    }
+  }, [krupyChat]);
+
+  const handleAskKrupy = async () => {
+    if (!krupyMessage.trim() || isKrupyLoading) return;
+    
+    const userMsg = krupyMessage;
+    setKrupyChat(prev => [...prev, { role: 'user', text: userMsg }]);
+    setKrupyMessage('');
+    setIsKrupyLoading(true);
+
+    try {
+      const response = await chatWithKrupy(userMsg, krupyChat, currentTrack);
+      setKrupyChat(prev => [...prev, { role: 'ai', text: response }]);
+    } catch (error) {
+      console.error("Krupy FullPlayer Error:", error);
+      setKrupyChat(prev => [...prev, { role: 'ai', text: "Signal lost in the nebula. Re-syncing..." }]);
+    } finally {
+      setIsKrupyLoading(false);
+    }
+  };
+
+  const initKrupyTrivia = async () => {
+    if (currentTrack) {
+      setIsKrupyLoading(true);
+      try {
+        const trivia = await chatWithKrupy(`Give me some cool trivia and vibez about this track: ${currentTrack.title} by ${currentTrack.artist}. Mention its genre and suggest something similar.`, [], currentTrack);
+        setKrupyChat([{ role: 'ai', text: trivia }]);
+      } catch (error) {
+        setKrupyChat([{ role: 'ai', text: "Yo! Ready to analyze this frequency. What do you want to know?" }]);
+      } finally {
+        setIsKrupyLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (activeView === 'krupy') {
+      initKrupyTrivia();
+    }
+  }, [activeView, currentTrack]);
   const volumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -249,8 +302,8 @@ const FullPlayer: React.FC = () => {
             <ChevronDown className="w-5 h-5" />
           </Button>
           <div className="text-center">
-            <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30">Now Playing</p>
-            <p className="text-[9px] font-black uppercase tracking-widest text-blue-500">Node Transmission</p>
+            <p className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30">Now Playing</p>
+            <p className="text-[8px] font-black uppercase tracking-widest text-blue-500">Node Transmission</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -338,10 +391,10 @@ const FullPlayer: React.FC = () => {
               {/* Info & Like */}
               <div className="flex justify-between items-center px-2">
                 <div className="flex-1 min-w-0 pr-4">
-                  <h1 className="text-xl font-black uppercase tracking-tight truncate mb-0.5">
+                  <h1 className="text-lg font-black uppercase tracking-tight truncate mb-0.5">
                     {currentTrack.title}
                   </h1>
-                  <p className="text-xs font-bold text-white uppercase tracking-widest italic cursor-pointer hover:text-blue-400 transition-colors" onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }}>
+                  <p className="text-[11px] font-bold text-white uppercase tracking-widest italic cursor-pointer hover:text-blue-400 transition-colors" onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }}>
                     {currentTrack.artist}
                   </p>
                 </div>
@@ -453,6 +506,14 @@ const FullPlayer: React.FC = () => {
                   <Separator orientation="vertical" className="h-4 bg-white/10" />
                   <Tooltip>
                     <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" onClick={() => setActiveView('krupy')} className="h-8 w-8 text-blue-500/50 hover:text-blue-500 hover:bg-blue-500/10">
+                        <Sparkles className="w-3.5 h-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>AI Insights</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                       <Button variant="ghost" size="icon" onClick={() => setShowQueue(true)} className="h-8 w-8 text-white/20 hover:text-white hover:bg-white/10">
                         <List className="w-3.5 h-3.5" />
                       </Button>
@@ -474,13 +535,21 @@ const FullPlayer: React.FC = () => {
 
           <TabsList className={cn(
             "grid w-full bg-white/5 border-none h-10 p-1 mb-6",
-            currentTrack.isNFT ? "grid-cols-5" : "grid-cols-4"
+            currentTrack.isNFT ? "grid-cols-6" : "grid-cols-5"
           )}>
             <TabsTrigger value="player" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40">
               <Music className="w-4 h-4" />
             </TabsTrigger>
             <TabsTrigger value="lyrics" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40">
               <Mic2 className="w-4 h-4" />
+            </TabsTrigger>
+            <TabsTrigger value="krupy" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 relative">
+              <Sparkles className="w-4 h-4" />
+              <motion.div 
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"
+              />
             </TabsTrigger>
             <TabsTrigger value="comments" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40">
               <MessageSquare className="w-4 h-4" />
@@ -494,6 +563,73 @@ const FullPlayer: React.FC = () => {
               </TabsTrigger>
             )}
           </TabsList>
+
+          <TabsContent value="krupy" className="flex-1 mt-0">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col h-[500px]"
+            >
+              <div className="flex items-center gap-3 p-4 bg-blue-500/10 rounded-t-[4px] border-b border-white/5">
+                <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center p-0.5 border border-white/10">
+                  <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full rounded-full object-cover" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-black uppercase italic tracking-widest text-blue-500">Neural Insights</h3>
+                  <p className="text-[8px] font-bold text-white uppercase tracking-widest">Active Relay: {currentTrack.title}</p>
+                </div>
+              </div>
+
+              <div ref={krupyScrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+                {krupyChat.map((chat, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-[85%] p-3 rounded-[4px] text-[10px] sm:text-xs font-bold leading-relaxed ${
+                      chat.role === 'user' 
+                        ? 'bg-blue-600 text-white rounded-tr-none' 
+                        : 'bg-white/5 text-white/80 border border-white/5 rounded-tl-none'
+                    }`}>
+                      {chat.text}
+                    </div>
+                  </motion.div>
+                ))}
+                {isKrupyLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white/5 p-3 rounded-[4px] rounded-tl-none flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-white/30">Syncing...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-b-[4px]">
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={krupyMessage}
+                    onChange={(e) => setKrupyMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAskKrupy()}
+                    placeholder="Ask DJ Krupy about this track..."
+                    className="w-full bg-black/40 border border-white/10 rounded-[4px] py-3 px-4 pr-12 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-white/20"
+                  />
+                  <Button 
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleAskKrupy}
+                    disabled={isKrupyLoading || !krupyMessage.trim()}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-blue-500 hover:text-blue-400 disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </TabsContent>
 
           <TabsContent value="lyrics" className="flex-1 mt-0">
             <motion.div 

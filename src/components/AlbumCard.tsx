@@ -19,30 +19,35 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index }) => {
       onClick={() => navigate(`/album/${album.id}`)}
       className="group relative w-full cursor-pointer"
     >
-      <div className="relative aspect-square rounded-[8px] overflow-hidden mb-3 bg-white/[0.05]">
+      <div className="relative aspect-square rounded-[4px] overflow-hidden mb-4 bg-white/[0.05] border border-white/5 group-hover:border-blue-500/30 transition-all shadow-2xl">
         {album.coverUrl ? (
           <img
             src={album.coverUrl}
             alt={album.title}
-            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Disc3 className="w-12 h-12 text-white/20" />
           </div>
         )}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <button className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center transform scale-90 group-hover:scale-100 transition-all shadow-lg shadow-blue-500/30">
-            <Play className="w-5 h-5 fill-current ml-1" />
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+          <button className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all shadow-2xl">
+            <Play className="w-6 h-6 fill-current ml-1" />
           </button>
         </div>
       </div>
-      <h3 className="text-white font-semibold text-sm truncate group-hover:text-blue-400 transition-colors">
-        {album.title}
-      </h3>
-      <p className="text-white/50 text-xs truncate mt-1">
-        Album • {album.trackIds?.length || 0} tracks
-      </p>
+      <div className="px-1">
+        <h3 className="text-white font-black text-[11px] uppercase italic tracking-tighter truncate group-hover:text-blue-400 transition-colors">
+          {album.title}
+        </h3>
+        <p className="text-blue-500 font-bold text-[9px] uppercase tracking-widest mt-0.5 truncate">
+          {album.artist}
+        </p>
+        <p className="text-white/30 text-[8px] font-bold uppercase tracking-widest mt-1 italic">
+          Collection • {album.trackIds?.length || 0} tracks
+        </p>
+      </div>
     </motion.div>
   );
 };
