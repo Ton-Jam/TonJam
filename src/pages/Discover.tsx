@@ -28,6 +28,7 @@ import { APP_LOGO } from '@/constants';
 import NFTCard from '@/components/NFTCard';
 import TrackCard from '@/components/TrackCard';
 import AlbumCard from '@/components/AlbumCard';
+import ArtistListItem from '@/components/ArtistListItem';
 import SkeletonCard from '@/components/SkeletonCard';
 import SonicSearchSection from '@/components/SonicSearchSection';
 import { useAudio } from '@/context/AudioContext';
@@ -449,7 +450,7 @@ const Discover: React.FC = () => {
               <div className="absolute inset-0 bg-blue-500/5 pointer-events-none" />
               
               <SheetHeader className="p-8 border-b border-white/5 relative bg-background/50 backdrop-blur-xl">
-                <SheetTitle className="text-3xl font-bold italic uppercase italic tracking-tighter flex items-center gap-3">
+                <SheetTitle className="text-3xl font-bold uppercase tracking-tighter flex items-center gap-3">
                   <Filter className="h-6 w-6 text-blue-500" />
                   Signal Filters
                 </SheetTitle>
@@ -643,7 +644,7 @@ const Discover: React.FC = () => {
                         <span className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live.Sync_2026</span>
                       </div>
                       <div>
-                        <h2 className="text-2xl md:text-6xl font-bold italic uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
+                        <h2 className="text-2xl md:text-6xl font-bold uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
                         <p className="text-[10px] md:text-sm text-white/50 font-medium max-w-md mt-2 md:mt-4 line-clamp-2">Personalized frequency stream based on your unique neural listening patterns.</p>
                       </div>
                     </div>
@@ -767,7 +768,7 @@ const Discover: React.FC = () => {
                                 <Badge className="bg-blue-600/20 text-blue-500 hover:bg-blue-600/30 border-none text-[9px] font-bold uppercase tracking-[0.2em] mb-2 px-3 py-1">
                                   Verified Entity
                                 </Badge>
-                                <h3 className="text-4xl md:text-6xl font-bold italic uppercase tracking-tighter leading-[0.8] mb-2">
+                                <h3 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter leading-[0.8] mb-2">
                                   {filteredResults.artists[0].name}
                                 </h3>
                                 <div className="flex items-center justify-center md:justify-start gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">
@@ -826,20 +827,7 @@ const Discover: React.FC = () => {
                       <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60">Similar Signals</h2>
                       <div className="flex flex-col gap-2">
                         {filteredResults.artists.slice(activeFilter === 'all' ? 1 : 0).map((artist) => (
-                          <div 
-                            key={artist.uid}
-                            onClick={() => navigate(`/artist/${artist.uid}`)}
-                            className="group flex items-center gap-4 p-3 rounded-[2px] bg-muted/10 hover:bg-muted/50 cursor-pointer transition-all"
-                          >
-                            <Avatar className="h-12 w-12 rounded-[2px] shadow-sm">
-                              <AvatarImage src={artist.avatarUrl || getPlaceholderImage(artist.name)} className="object-cover" />
-                              <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h4 className="text-[11px] sm:text-[13px] font-semibold uppercase tracking-tight">{artist.name}</h4>
-                              <p className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Protocol</p>
-                            </div>
-                          </div>
+                          <ArtistListItem key={artist.uid} artist={artist} />
                         ))}
                       </div>
                     </section>
@@ -898,7 +886,7 @@ const Discover: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black uppercase tracking-tighter text-foreground/80 italic">Void Detected</h3>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter text-foreground/80">Void Detected</h3>
                   <p className="text-muted-foreground max-w-xs text-sm font-medium">Spelling check required. No matching data streams found for your current query.</p>
                 </div>
                 <Button 

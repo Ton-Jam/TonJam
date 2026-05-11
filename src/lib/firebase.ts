@@ -6,11 +6,14 @@ import {
   doc, 
   getDocFromServer,
   CACHE_SIZE_UNLIMITED,
-  terminate
+  setLogLevel
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 import firebaseConfig from '../../firebase-applet-config.json';
+
+// Silence Firestore benign network errors 
+setLogLevel('error');
 
 const app = initializeApp(firebaseConfig);
 

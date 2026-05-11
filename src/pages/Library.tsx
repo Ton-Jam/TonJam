@@ -136,7 +136,7 @@ const Library: React.FC = () => {
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-black uppercase italic tracking-tighter text-foreground truncate">{title}</h4>
+            <h4 className="text-sm font-black uppercase tracking-tighter text-foreground truncate">{title}</h4>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5 opacity-60 truncate">{subtitle}</p>
           </div>
           <Button variant="ghost" size="icon" className="h-9 w-9 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
@@ -160,7 +160,7 @@ const Library: React.FC = () => {
             <img src={imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
           </div>
           <div className="space-y-0.5 px-1">
-            <h4 className="text-sm font-black uppercase italic tracking-tighter text-foreground truncate">{title}</h4>
+            <h4 className="text-sm font-black uppercase tracking-tighter text-foreground truncate">{title}</h4>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest truncate">{subtitle}</p>
           </div>
         </Card>
@@ -314,7 +314,7 @@ const Library: React.FC = () => {
                   <div className="w-14 h-14 rounded-[2px] bg-white flex items-center justify-center mb-2 shadow-2xl group-hover:rotate-6 transition-transform">
                     <Heart className="w-7 h-7 fill-red-500 text-red-500" />
                   </div>
-                  <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">Liked Tracks</h2>
+                  <h2 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">Liked Tracks</h2>
                   <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-blue-500/20 text-blue-400 bg-blue-500/10 px-3 py-1 rounded-[2px]">
                     {likedTracksCount} Recorded Signals
                   </Badge>
@@ -336,7 +336,7 @@ const Library: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-black uppercase italic tracking-tighter text-white truncate">Liked Tracks</h4>
+                    <h4 className="text-sm font-black uppercase tracking-tighter text-white truncate">Liked Tracks</h4>
                     <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mt-0.5 opacity-60 truncate">{likedTracksCount} Recorded Signals</p>
                   </div>
                   <Button variant="ghost" size="icon" className="h-9 w-9 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -364,7 +364,7 @@ const Library: React.FC = () => {
               <div className="w-24 h-24 rounded-[40px] bg-white/[0.02] border border-dashed border-white/[0.1] flex items-center justify-center mb-8 rotate-12">
                 <History className="w-10 h-10 text-zinc-800" />
               </div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter italic mb-3">Neural Vault Empty</h3>
+              <h3 className="text-2xl font-black uppercase tracking-tighter mb-3">Neural Vault Empty</h3>
               <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] max-w-sm leading-relaxed">
                 Connect your frequencies and capture sonic artifacts to populate this sector.
               </p>

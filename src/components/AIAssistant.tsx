@@ -69,7 +69,7 @@ const AIAssistant: React.FC = () => {
                   </motion.div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-black italic uppercase tracking-tighter text-neutral-900 dark:text-zinc-100">DJ Krupy</h3>
+                  <h3 className="text-sm font-black uppercase tracking-tighter text-neutral-900 dark:text-zinc-100">DJ Krupy</h3>
                   <p className="text-[9px] font-bold text-blue-600 dark:text-blue-500 uppercase tracking-widest">Active Vibez</p>
                 </div>
               </div>
@@ -104,7 +104,7 @@ const AIAssistant: React.FC = () => {
                 >
                   <div className="bg-muted/30 text-muted-foreground p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
                     <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Krupy is thinking...</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">DJ Krupy is thinking...</span>
                   </div>
                 </motion.div>
               )}

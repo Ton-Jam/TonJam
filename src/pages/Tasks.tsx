@@ -173,7 +173,7 @@ const Tasks: React.FC = () => {
                 <Target className="w-3.5 h-3.5" />
                 <span className="text-[10px] font-black uppercase tracking-[0.4em]">Protocol Node</span>
               </div>
-              <h1 className="text-4xl font-black uppercase tracking-tighter italic leading-none">Command Center</h1>
+              <h1 className="text-4xl font-black uppercase tracking-tighter leading-none">Command Center</h1>
             </div>
 
               <div className="flex flex-col items-end gap-2">
@@ -194,7 +194,7 @@ const Tasks: React.FC = () => {
                 <span className="text-xs font-mono font-bold text-blue-600/60 dark:text-white/60">{Math.round(stats.progress)}% to Level {stats.level + 1}</span>
               </div>
               <Progress value={stats.progress} className="h-2 bg-blue-100 dark:bg-white/5" />
-              <p className="text-[8px] font-bold text-blue-600/20 dark:text-white/20 uppercase tracking-[0.2em] mt-2 italic text-right">
+              <p className="text-[8px] font-bold text-blue-600/20 dark:text-white/20 uppercase tracking-[0.2em] mt-2 text-right">
                 {stats.xpToNext} XP required for next node expansion
               </p>
             </Card>
@@ -230,7 +230,7 @@ const Tasks: React.FC = () => {
                   <span className="text-4xl font-mono font-black tracking-[-0.08em] text-blue-600 dark:text-white tabular-nums leading-none">
                     {balance.toLocaleString()}
                   </span>
-                  <span className="text-sm font-black text-blue-500 italic uppercase tracking-tighter">TJ</span>
+                  <span className="text-sm font-black text-blue-500 uppercase tracking-tighter">TJ</span>
                 </div>
                 <div className="flex items-center gap-2">
                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500/40 animate-pulse" />
@@ -258,7 +258,7 @@ const Tasks: React.FC = () => {
                 <Flame className="w-4 h-4 fill-current" />
                 <span className="text-[10px] font-black uppercase tracking-wider">Sync Streak</span>
               </div>
-              <div className="text-2xl font-black italic tracking-tighter text-zinc-800 dark:text-white">{streak} Days</div>
+              <div className="text-2xl font-black tracking-tighter text-zinc-800 dark:text-white">{streak} Days</div>
               <p className="text-[10px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-1">
                 Next Sync: +{Math.min((streak + 1) * 10, 100)} TJ
               </p>
@@ -274,7 +274,7 @@ const Tasks: React.FC = () => {
                 <Sparkles className="w-4 h-4" />
                 <span className="text-[10px] font-black uppercase tracking-wider">Rewards</span>
               </div>
-              <div className="text-2xl font-black italic tracking-tighter text-zinc-800 dark:text-white">2.4K+ <span className="text-[10px] text-blue-600/30 dark:text-white/30 lowercase not-italic">total earned</span></div>
+              <div className="text-2xl font-black tracking-tighter text-zinc-800 dark:text-white">2.4K+ <span className="text-[10px] text-blue-600/30 dark:text-white/30 lowercase not-italic">total earned</span></div>
               <p className="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mt-1">
                 Top 15% of Nodes
               </p>

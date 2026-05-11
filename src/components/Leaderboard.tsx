@@ -75,12 +75,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                 <Crown className="w-5 h-5" />
               </div>
               <div>
-                <CardTitle className="text-lg font-black uppercase italic tracking-tighter text-foreground font-display">
+                <CardTitle className="text-lg font-black uppercase tracking-tighter text-foreground font-display">
                   {title}
                 </CardTitle>
-                <CardDescription className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground/60 leading-none">
-                  Universal_Sync.Protocol_Active
-                </CardDescription>
               </div>
             </div>
           </div>
@@ -146,33 +143,33 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                           </div>
                         ) : rank <= 3 ? (
                           <div className={cn(
-                            "w-8 h-8 flex items-center justify-center rounded-full font-black italic text-[11px] border border-border/50",
+                            "w-8 h-8 flex items-center justify-center rounded-full font-black text-[11px] border border-border/50",
                             rank === 2 ? "bg-slate-100 dark:bg-slate-800 text-slate-400" : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-500"
                           )}>
                             {rank}
                           </div>
                         ) : (
-                          <span className="text-[11px] font-black italic tracking-tighter text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors">
+                          <span className="text-[11px] font-black tracking-tighter text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors">
                             #{rank.toString().padStart(2, '0')}
                           </span>
                         )}
                       </div>
 
                       {/* Identity */}
-                      <Link to={`/artist/${artist.uid}`} className="flex items-center gap-2 flex-1 min-w-0">
+                      <Link to={`/artist/${artist.uid}`} className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
                         <div className="relative">
-                          <Avatar className="w-10 h-10 rounded-xl border border-border/50 group-hover:border-primary/50 transition-all duration-500 shadow-lg">
+                          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl border border-border/50 group-hover:border-primary/50 transition-all duration-500 shadow-lg">
                             <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} referrerPolicy="no-referrer" />
-                            <AvatarFallback className="bg-muted text-primary font-black text-[10px]">
+                            <AvatarFallback className="bg-muted text-primary font-black text-[9px]">
                               {artist.name.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                         </div>
                         <div className="min-w-0 space-y-0">
-                          <h4 className="text-[11px] font-bold uppercase italic tracking-tight text-foreground truncate group-hover:text-primary transition-colors leading-tight font-display">
+                          <h4 className="text-[9px] font-bold uppercase tracking-tight text-foreground truncate group-hover:text-primary transition-colors leading-tight font-display">
                             {artist.name.replace('//', '')}
                           </h4>
-                          <div className="flex items-center gap-1.5">
+                          <div className="hidden sm:flex items-center gap-1.5">
                              <span className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-widest">
                                LVL.{(artist.uid.length % 50) + 1}
                              </span>
@@ -186,26 +183,26 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
 
                       {/* Trends (Desktop) */}
                       <div className="hidden sm:flex flex-col items-end gap-0 min-w-[70px]">
-                        <div className={cn("flex items-center gap-0.5 text-[10px] font-black uppercase tracking-widest", trend.color)}>
+                        <div className={cn("flex items-center gap-0.5 text-[9px] font-black uppercase tracking-widest", trend.color)}>
                           {trend.type !== 'stable' ? (
                             <>
                               {trend.type === 'up' ? '+' : '-'}{trend.percentage}%
-                              {trend.type === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                              {trend.type === 'up' ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
                             </>
-                          ) : <Minus className="h-3 w-3 opacity-20" />}
+                          ) : <Minus className="h-2.5 w-2.5 opacity-20" />}
                         </div>
-                        <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-widest">Velocity</p>
+                        <p className="text-[7.5px] font-bold text-muted-foreground/30 uppercase tracking-widest">Velocity</p>
                       </div>
 
                       {/* Earnings */}
-                      <div className="text-right min-w-[70px]">
+                      <div className="text-right min-w-[60px] sm:min-w-[70px]">
                         <div className="flex items-center justify-end gap-1 flex-nowrap">
-                          <span className="text-[13px] font-black italic tracking-tighter text-foreground group-hover:text-primary transition-colors">
+                          <span className="text-[11px] sm:text-[13px] font-black tracking-tighter text-foreground group-hover:text-primary transition-colors">
                             {artist.earnings?.total.toLocaleString(undefined, { minimumFractionDigits: 1 }) || '0.0'}
                           </span>
                           <img src={TON_LOGO} alt="TON" className="w-2.5 h-2.5 opacity-80 dark:invert-0 light:invert" />
                         </div>
-                        <p className="text-[7.5px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-0.5">Credits</p>
+                        <p className="text-[7px] sm:text-[7.5px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-0.5">Credits</p>
                       </div>
                     </motion.div>
                   );

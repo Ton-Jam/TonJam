@@ -107,7 +107,7 @@ const Notifications: React.FC = () => {
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Protocol Logs</span>
             </div>
-            <h1 className="text-2xl font-black tracking-tighter uppercase italic text-foreground">Signals</h1>
+            <h1 className="text-2xl font-black tracking-tighter uppercase text-foreground">Signals</h1>
           </div>
           <div className="flex gap-2">
             <Button 
@@ -181,7 +181,7 @@ const Notifications: React.FC = () => {
                                             <span className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-widest">{item.time}</span>
                                         </div>
                                         <h4 className={cn(
-                                            "text-xs md:text-sm font-black tracking-tight uppercase italic truncate",
+                                            "text-xs md:text-sm font-black tracking-tight uppercase truncate",
                                             item.isRead ? "text-foreground/60" : "text-foreground"
                                         )}>{item.title}</h4>
                                         <p className={cn(

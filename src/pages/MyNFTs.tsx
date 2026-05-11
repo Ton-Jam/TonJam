@@ -40,10 +40,10 @@ const MyNFTs: React.FC = () => {
       <header className="space-y-4">
         <div className="flex items-center gap-4">
           <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500 italic">Financial Depot V.1</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500">Financial Depot V.1</span>
         </div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter uppercase italic leading-none">
+          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter uppercase leading-none">
             Digital <br /> Asset Vault
           </h1>
           

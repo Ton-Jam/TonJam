@@ -43,6 +43,7 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import PostOptionsModal from './PostOptionsModal';
 
 const ActivityIcon = ({ type }: { type?: string }) => {
   switch (type) {
@@ -75,6 +76,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
   const [activeReactionCommentId, setActiveReactionCommentId] = useState<string | null>(null);
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [isReposting, setIsReposting] = useState(false);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   const likesCount = post.likes || 0;
   const repostsCount = post.reposts || 0;
@@ -262,7 +264,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
               e.stopPropagation();
               navigate(`/discover?search=${encodeURIComponent(part)}`);
             }}
-            className="text-blue-500 hover:text-blue-400 font-bold italic transition-colors cursor-pointer"
+            className="text-blue-500 hover:text-blue-400 font-bold transition-colors cursor-pointer"
           >
             {part}
           </span>
@@ -298,7 +300,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 truncate">
                 <span 
-                  className="text-sm font-black italic uppercase tracking-tighter text-foreground hover:text-blue-500 transition-colors"
+                  className="text-sm font-black uppercase tracking-tighter text-foreground hover:text-blue-500 transition-colors"
                   onClick={handleProfileClick}
                 >
                   {isActivity ? 'Automated Log' : post.userName}
@@ -316,49 +318,23 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
               </div>
 
               {!isActivity && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-popover border-border rounded-xl w-48 shadow-lg">
-                    {!isOwnPost && (
-                      <DropdownMenuItem className="gap-3 rounded-lg focus:bg-primary focus:text-primary-foreground" onClick={(e) => { e.stopPropagation(); toggleFollowUser(post.userId); }}>
-                        <UserPlus className="h-4 w-4" />
-                        <span className="text-xs font-black uppercase tracking-widest">{isFollowing ? 'Disconnect' : 'Sync User'}</span>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem className="gap-3 rounded-lg focus:bg-primary focus:text-primary-foreground" onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }}>
-                      <ExternalLink className="h-4 w-4" />
-                      <span className="text-xs font-black uppercase tracking-widest">View Thread</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="gap-3 rounded-lg focus:bg-primary focus:text-primary-foreground" onClick={(e) => { e.stopPropagation(); handleShare(e); }}>
-                      <Share className="h-4 w-4" />
-                      <span className="text-xs font-black uppercase tracking-widest">Share Signal</span>
-                    </DropdownMenuItem>
-                    {!isOwnPost && (
-                      <DropdownMenuItem className="gap-3 rounded-lg focus:bg-destructive focus:text-destructive-foreground text-destructive">
-                        <Flag className="h-4 w-4" />
-                        <span className="text-xs font-black uppercase tracking-widest">Report Signal</span>
-                      </DropdownMenuItem>
-                    )}
-                    {isOwnPost && (
-                      <>
-                        <DropdownMenuSeparator className="bg-border" />
-                        <DropdownMenuItem className="gap-3 rounded-lg focus:bg-destructive focus:text-destructive-foreground text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(); }}>
-                          <Trash2 className="h-4 w-4" />
-                          <span className="text-xs font-black uppercase tracking-widest">Delete Log</span>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); setShowOptionsModal(true); }}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                  {showOptionsModal && (
+                    <PostOptionsModal 
+                      post={post} 
+                      onClose={() => setShowOptionsModal(false)}
+                      onDelete={onDelete}
+                    />
+                  )}
+                </>
               )}
             </div>
             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest opacity-40">
@@ -381,7 +357,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 </div>
                 <div className="flex flex-col">
                   <p className="text-[11px] font-bold leading-relaxed text-foreground opacity-90 truncate max-w-[200px] sm:max-w-md uppercase tracking-tight">
-                    <span className="text-blue-400 font-black italic">{post.userName}</span>
+                    <span className="text-blue-400 font-black">{post.userName}</span>
                     <span className="mx-1 opacity-60">·</span>
                     {post.content}
                     {post.artistName && (
@@ -435,7 +411,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h5 className="text-[10px] font-black uppercase italic tracking-tighter text-blue-400 truncate">{track.title}</h5>
+                    <h5 className="text-[10px] font-black uppercase tracking-tighter text-blue-400 truncate">{track.title}</h5>
                     <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-0.5 opacity-60 truncate">{track.artist}</p>
                   </div>
                   <Button 
@@ -459,7 +435,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-9 px-3 gap-2 rounded-xl hover:bg-blue-600/10 hover:text-blue-500 text-zinc-500 transition-all font-black uppercase italic"
+                  className="h-9 px-3 gap-2 rounded-xl hover:bg-blue-600/10 hover:text-blue-500 text-zinc-500 transition-all font-black uppercase"
                   onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -475,7 +451,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "h-9 px-3 gap-2 rounded-xl transition-all font-black uppercase italic text-zinc-500",
+                    "h-9 px-3 gap-2 rounded-xl transition-all font-black uppercase text-zinc-500",
                     post.isReposted ? "text-emerald-500 bg-emerald-500/10" : "hover:bg-emerald-600/10 hover:text-emerald-500"
                   )}
                   onClick={handleRepost}
@@ -494,7 +470,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "h-9 px-3 gap-2 rounded-xl transition-all font-black uppercase italic text-zinc-500",
+                    "h-9 px-3 gap-2 rounded-xl transition-all font-black uppercase text-zinc-500",
                     isLiked ? "text-rose-500 bg-rose-500/10" : "hover:bg-rose-600/10 hover:text-rose-500"
                   )}
                   onClick={handleLike}
@@ -546,7 +522,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder={replyingToId ? "Synthesizing reply..." : "Broadcast feedback..."}
-                    className="w-full bg-zinc-900 border border-white/5 rounded-2xl h-11 px-4 text-sm font-bold italic focus:ring-1 focus:ring-blue-500/30 transition-all outline-none placeholder:text-zinc-600"
+                    className="w-full bg-zinc-900 border border-white/5 rounded-2xl h-11 px-4 text-sm font-bold focus:ring-1 focus:ring-blue-500/30 transition-all outline-none placeholder:text-zinc-600"
                   />
                   <Button 
                     type="submit" 
@@ -581,7 +557,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 {comments.length === 0 && (
                   <div className="py-12 flex flex-col items-center gap-3 bg-white/[0.02] rounded-3xl border border-dashed border-white/5 text-center">
                     <MessageSquareOff className="h-8 w-8 text-zinc-700" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 italic">No feedback identified in sector</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">No feedback identified in sector</p>
                   </div>
                 )}
               </div>
@@ -670,7 +646,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
             <div className="flex items-center justify-between mb-2">
               <div className="flex flex-col">
                 <span 
-                  className="text-xs font-black uppercase italic tracking-tighter text-blue-500 hover:text-blue-400 cursor-pointer"
+                  className="text-xs font-black uppercase tracking-tighter text-blue-500 hover:text-blue-400 cursor-pointer"
                   onClick={(e) => onProfileClick(e, comment.userId)}
                 >
                   {comment.userName}
@@ -691,7 +667,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-auto p-0 text-[10px] font-black uppercase italic tracking-widest text-zinc-500 hover:text-blue-500"
+                className="h-auto p-0 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-blue-500"
                 onClick={() => onReply(comment.id)}
               >
                 Sync Reply

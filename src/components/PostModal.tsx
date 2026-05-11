@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
-import { motion } from "motion/react";
 import { X, Image, Share2, Sparkles, Music, Check, Send, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { MOCK_USER, APP_LOGO } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES, shareContent } from "@/lib/utils";
@@ -81,47 +81,16 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
   const selectedTrack = allTracks.find(t => t.id === selectedTrackId);
 
   return (
-    <div 
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-background/90 backdrop-blur-md"
-        onClick={onClose}
-      ></motion.div>
-      <motion.div 
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-lg glass bg-background rounded-t-[24px] sm:rounded-[12px] shadow-[0_0_50px_rgba(37,99,235,0.15)] overflow-hidden group focus-within:border-neutral-500/30 transition-all"
-      >
-        
-        {/* Handle for mobile drawer */}
-        <div className="sm:hidden flex justify-center pt-3 pb-1">
-          <div className="w-12 h-1.5 bg-muted rounded-full"></div>
-        </div>
-
-        <header className="flex justify-between items-center p-4">
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="p-0 overflow-hidden sm:max-w-lg">
+        <DialogHeader className="p-4 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <img src={APP_LOGO} className="w-4 h-4 object-contain" alt="" aria-hidden="true" />
             <h2 id="modal-title" className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground">
               New Signal
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="w-6 h-6 rounded-[6px] bg-muted/50 flex items-center justify-center text-foreground/30 hover:text-foreground hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-            aria-label="Close modal"
-          >
-            <X className="h-3 w-3" />
-          </button>
-        </header>
+        </DialogHeader>
         <div className="p-2">
           <div className="flex gap-2">
             <div className="flex-shrink-0">
@@ -292,8 +261,8 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             </button>
           </div>
         </footer>
-      </motion.div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

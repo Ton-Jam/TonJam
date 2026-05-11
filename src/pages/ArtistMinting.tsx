@@ -218,7 +218,7 @@ const ArtistMinting: React.FC = () => {
           <div className="flex items-center gap-4">
             <BackButton className="bg-white/5 hover:bg-white/10" />
             <div>
-              <h1 className="text-2xl font-black uppercase tracking-tighter italic">Protocol Forge</h1>
+              <h1 className="text-2xl font-black uppercase tracking-tighter">Protocol Forge</h1>
               <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Step {step} of 3: {step === 1 ? 'Selection' : step === 2 ? 'Metadata' : 'Minting'}</p>
             </div>
           </div>

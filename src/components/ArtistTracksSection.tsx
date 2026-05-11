@@ -73,7 +73,7 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
         <section className="bg-card rounded-[10px] p-5">
           <h3 className="text-lg font-bold text-foreground mb-4">Popular</h3>
           <div className="space-y-2">
-            {topTracks.map((track, idx) => (
+            {topTracks.slice(0, 3).map((track, idx) => (
               <TrackCard 
                 key={`top-${track.id}`}
                 track={track}
@@ -106,20 +106,21 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
             ))}
           </div>
         </div>
-        <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
+        <div className="flex flex-col gap-2">
           {artistTracks.filter(t => {
             if (trackFilter === 'All') return true;
             if (trackFilter === 'NFTs') return t.isNFT;
             if (trackFilter === 'Releases') return !t.isCollaboration;
             if (trackFilter === 'Collaborations') return t.isCollaboration;
             return true;
-          }).map(t => (
-            <div key={t.id} className="min-w-[280px] sm:min-w-[320px]">
-              <TrackCard 
-                track={t} 
-                onMint={isOwnProfile ? (track) => navigate('/mint', { state: { track } }) : undefined}
-              />
-            </div>
+          }).map((t, i) => (
+            <TrackCard 
+              key={t.id}
+              track={t} 
+              variant="row"
+              index={i}
+              onMint={isOwnProfile ? (track) => navigate('/mint', { state: { track } }) : undefined}
+            />
           ))}
         </div>
         {artistTracks.filter(t => {

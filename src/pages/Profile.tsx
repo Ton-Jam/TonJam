@@ -49,6 +49,7 @@ import SocialFeed from '@/components/SocialFeed';
 import UserCard from '@/components/UserCard';
 import SellNFTModal from '@/components/SellNFTModal';
 import ManageNFTModal from '@/components/ManageNFTModal';
+import EditUserProfileModal from '@/components/EditUserProfileModal';
 import UserArtistVerificationModal from '@/components/UserArtistVerificationModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { useAudio } from '@/context/AudioContext';
@@ -83,6 +84,7 @@ const Profile: React.FC = () => {
  } = useAudio();
  const { user } = useAuth();
  const [isEditing, setIsEditing] = useState(false);
+ const [isEditModalOpen, setIsEditModalOpen] = useState(false);
  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
  const [localUser, setLocalUser] = useState<UserProfile>(userProfile);
  const [isUploading, setIsUploading] = useState(false);
@@ -453,6 +455,22 @@ const Profile: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-4">
+
+          <button 
+             onClick={() => setIsEditModalOpen(true)}
+             className="p-2.5 bg-background text-foreground rounded-full font-black text-[10px] uppercase tracking-widest border border-border hover:bg-muted transition-all active:scale-95"
+          >
+             <Settings className="h-4 w-4" />
+          </button>
+
+          {isEditModalOpen && (
+            <EditUserProfileModal 
+              user={userProfile} 
+              onClose={() => setIsEditModalOpen(false)}
+              onUpdate={setUserProfile}
+            />
+          )}
+
           {isEditing && (
             <div className="flex gap-3">
               <button 

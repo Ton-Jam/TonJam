@@ -466,7 +466,7 @@ const TrackDetail: React.FC = () => {
                       className="space-y-4"
                     >
                       {track.lyrics ? (
-                        <div className="whitespace-pre-line text-lg md:text-xl font-medium text-muted-foreground/80 leading-relaxed font-serif italic">
+                        <div className="whitespace-pre-line text-lg md:text-xl font-medium text-muted-foreground/80 leading-relaxed font-serif">
                           {track.lyrics}
                         </div>
                       ) : (

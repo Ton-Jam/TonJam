@@ -82,7 +82,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
 
     // 2x2 Grid for 4 or more tracks
     return (
-      <div className={`${sizeClass} grid grid-cols-2 gap-3 group-hover:scale-105 transition-transform duration-700 bg-neutral-800`}>
+      <div className={`${sizeClass} grid grid-cols-2 gap-0 group-hover:scale-105 transition-transform duration-700 bg-neutral-800`}>
         {playlistTracks.map((track, i) => (
           <img 
             key={`${track?.id || 'empty'}-${i}`}
@@ -108,7 +108,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
           {renderCover()}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-[11px] font-bold tracking-tight truncate text-foreground group-hover:text-primary transition-colors italic uppercase">
+          <h4 className="text-[11px] font-bold tracking-tight truncate text-foreground group-hover:text-primary transition-colors uppercase">
             {playlist.title}
           </h4>
           <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest truncate">
@@ -162,7 +162,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       
       {/* Content Below Card */}
       <div className="px-3">
-        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-foreground group-hover:text-primary transition-colors italic">
+        <h3 className="text-[11px] font-bold uppercase tracking-tight truncate text-foreground group-hover:text-primary transition-colors">
           {playlist.title}
         </h3>
         <p 
@@ -251,7 +251,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
                         </>
                       ) : (
                         <div className="p-4 text-center">
-                          <p className="text-[8px] font-black uppercase tracking-widest text-white/20 italic">No node sectors found</p>
+                          <p className="text-[8px] font-black uppercase tracking-widest text-white/20">No node sectors found</p>
                         </div>
                       )}
                     </DropdownMenuSubContent>

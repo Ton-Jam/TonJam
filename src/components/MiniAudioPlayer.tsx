@@ -126,37 +126,37 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
 
   const PlayerMenuContent = () => (
     <>
-      <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4 italic">Neural Output</DropdownMenuLabel>
+      <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Neural Output</DropdownMenuLabel>
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={handleToggleLike} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Heart className={cn("h-4 w-4", isLiked && "fill-current text-red-500")} />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">{isLiked ? "Unlike Track" : "Like Track"}</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">{isLiked ? "Unlike Track" : "Like Track"}</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleAddToQueue} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <ListMusic className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Add to Queue</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Add to Queue</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={handleAddToPlaylist} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Plus className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Add to Playlist</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Add to Playlist</span>
       </DropdownMenuItem>
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={() => navigate(`/artist/${currentTrack.artistId}`)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <User className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">View Artist</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">View Artist</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={() => navigate(`/track/${currentTrack.id}`)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Info className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Track Intelligence</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Track Intelligence</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={() => navigate('/mint', { state: { track: currentTrack } })} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Gem className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Mint as NFT</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Mint as NFT</span>
       </DropdownMenuItem>
       <DropdownMenuSeparator className="bg-white/5" />
       <DropdownMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">Share Signal</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Share Signal</span>
       </DropdownMenuItem>
     </>
   );
@@ -205,7 +205,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           
           <div className="min-w-0 flex flex-col gap-0.5">
             <div className="flex items-center gap-2 overflow-hidden">
-              <h4 className="text-[9.5px] font-black truncate text-foreground uppercase tracking-tighter italic leading-none">
+              <h4 className="text-[9.5px] font-black truncate text-foreground uppercase tracking-tighter leading-none">
                 {currentTrack.title}
               </h4>
               {isHighFidelity && (

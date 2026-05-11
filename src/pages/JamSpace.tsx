@@ -213,11 +213,11 @@ const JamSpace: React.FC = () => {
                     className="justify-start h-14 rounded-full px-6 gap-5 group hover:bg-white/[0.05]"
                   >
                     <item.icon className="h-6 w-6 text-foreground group-hover:text-blue-500 transition-colors" strokeWidth={2.5} />
-                    <span className="text-lg font-black uppercase italic tracking-tighter">{item.label}</span>
+                    <span className="text-lg font-black uppercase tracking-tighter">{item.label}</span>
                   </Button>
                 ))}
                 
-                <Button className="mt-6 w-full rounded-full py-7 text-lg font-black uppercase italic tracking-widest bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all">
+                <Button className="mt-6 w-full rounded-full py-7 text-lg font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all">
                   Post Signal
                 </Button>
               </div>
@@ -292,7 +292,7 @@ const JamSpace: React.FC = () => {
               <div className="flex-1 space-y-4">
                 <Textarea 
                   placeholder="Broadcast your frequency..." 
-                  className="border-none bg-transparent text-lg resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-zinc-600 font-bold tracking-tight italic"
+                  className="border-none bg-transparent text-lg resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-zinc-600 font-bold tracking-tight"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                 />
@@ -313,7 +313,7 @@ const JamSpace: React.FC = () => {
                   <Button 
                     disabled={!postContent.trim() || isPosting}
                     onClick={handleCreatePost}
-                    className="rounded-full px-6 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase italic tracking-widest h-9 text-xs border-none shadow-lg shadow-blue-600/20"
+                    className="rounded-full px-6 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest h-9 text-xs border-none shadow-lg shadow-blue-600/20"
                   >
                     {isPosting ? 'Broadcasting...' : 'Signal'}
                   </Button>
@@ -370,7 +370,7 @@ const JamSpace: React.FC = () => {
                         <Cpu className="h-5 w-5 text-blue-500" />
                       </div>
                       <div>
-                        <CardTitle className="text-sm font-black uppercase italic tracking-tighter">Neural Pulse</CardTitle>
+                        <CardTitle className="text-sm font-black uppercase tracking-tighter">Neural Pulse</CardTitle>
                         <CardDescription className="text-[9px] font-black text-blue-500/60 uppercase tracking-[0.2em] mt-1">SI-v4 Engine</CardDescription>
                       </div>
                     </div>
@@ -381,7 +381,7 @@ const JamSpace: React.FC = () => {
                         <div className="flex gap-4 items-center bg-white/[0.03] p-3 rounded-2xl border border-white/5">
                           <img src={aiResult.playlist.coverUrl} className="h-12 w-12 rounded-lg shadow-2xl" alt="" />
                           <div className="min-w-0">
-                            <p className="text-[10px] font-black italic uppercase truncate text-blue-400">{aiResult.playlist.title}</p>
+                            <p className="text-[10px] font-black uppercase truncate text-blue-400">{aiResult.playlist.title}</p>
                             <p className="text-[9px] text-muted-foreground line-clamp-2 mt-0.5 leading-tight">{aiResult.explanation}</p>
                           </div>
                         </div>
@@ -398,11 +398,11 @@ const JamSpace: React.FC = () => {
                       </motion.div>
                     ) : (
                       <div className="space-y-4">
-                        <p className="text-[11px] text-zinc-500 leading-relaxed font-medium italic">Gemini is ready to synthesize a frequencies stream based on your neural footprint.</p>
+                        <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">Gemini is ready to synthesize a frequencies stream based on your neural footprint.</p>
                         <Button 
                           disabled={isGeneratingAI}
                           onClick={handleAIPlaylist}
-                          className="w-full rounded-2xl bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white h-10 text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all font-black uppercase italic tracking-tighter"
+                          className="w-full rounded-2xl bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white h-10 text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all font-black uppercase tracking-tighter"
                         >
                           {isGeneratingAI ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
                           Synthesize Now
@@ -415,7 +415,7 @@ const JamSpace: React.FC = () => {
                 {/* Trending */}
                 <Card className="bg-zinc-900/40 border-white/[0.05] rounded-[24px] overflow-hidden">
                   <CardHeader className="p-5 pb-2">
-                    <CardTitle className="text-xl font-black italic uppercase tracking-tighter">Hyper-Trending</CardTitle>
+                    <CardTitle className="text-xl font-black uppercase tracking-tighter">Hyper-Trending</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y divide-white/[0.03]">
@@ -439,7 +439,7 @@ const JamSpace: React.FC = () => {
                 {/* Recommendations */}
                 <Card className="bg-zinc-900/40 border-white/[0.05] rounded-[24px] overflow-hidden">
                   <CardHeader className="p-5 pb-2">
-                    <CardTitle className="text-xl font-black italic uppercase tracking-tighter">Echo Recs</CardTitle>
+                    <CardTitle className="text-xl font-black uppercase tracking-tighter">Echo Recs</CardTitle>
                   </CardHeader>
                   <CardContent className="p-2 space-y-1">
                     {artists.slice(0, 3).map(artist => (

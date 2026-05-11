@@ -137,7 +137,7 @@
 
 @layer components {
   .section-title {
-    @apply text-foreground font-black uppercase tracking-tighter italic;
+    @apply text-foreground font-black uppercase tracking-tighter;
   }
   .glass {
     @apply bg-background/80 backdrop-blur-xl border border-white/10 shadow-2xl;

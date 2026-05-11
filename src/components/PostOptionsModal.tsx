@@ -1,9 +1,11 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { X, Pencil, Trash2, Share2, ChevronRight } from 'lucide-react';
-import { Playlist } from '@/types';
+import { Share, ExternalLink, Trash2, Flag, UserPlus, ChevronRight } from 'lucide-react';
+import { Post } from '@/types';
+import { useAudio } from '@/context/AudioContext';
+import { useNavigate } from 'react-router-dom';
+import { getPlaceholderImage, shareContent, cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button"
-import { cn } from '@/lib/utils';
+import { motion } from 'motion/react';
 import {
   Drawer,
   DrawerClose,
@@ -13,53 +15,67 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 
-interface PlaylistOptionsModalProps {
-  playlist: Playlist;
+interface PostOptionsModalProps {
+  post: Post;
   onClose: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
+  onDelete?: (id: string) => void;
 }
 
-const PlaylistOptionsModal: React.FC<PlaylistOptionsModalProps> = ({ playlist, onClose, onEdit, onDelete }) => {
-  const options = [
-    { 
-      id: 'edit', 
-      icon: Pencil, 
-      label: 'Edit Playlist', 
-      color: 'text-foreground', 
-      iconColor: 'text-muted-foreground group-hover:text-blue-400', 
-      action: () => { onEdit(); onClose(); } 
-    },
-    { 
-      id: 'share', 
-      icon: Share2, 
-      label: 'Share Playlist', 
-      color: 'text-foreground', 
-      iconColor: 'text-muted-foreground group-hover:text-blue-400', 
-      action: () => {
-        const shareData = {
-          title: playlist.title,
-          text: `Check out this playlist: ${playlist.title} on TonJam!`,
-          url: window.location.href
-        };
-        if (navigator.share) {
-          navigator.share(shareData).catch(console.error);
-        } else {
-          navigator.clipboard.writeText(window.location.href);
-          alert('Link copied to clipboard!');
+const PostOptionsModal: React.FC<PostOptionsModalProps> = ({ post, onClose, onDelete }) => {
+  const navigate = useNavigate();
+  const { addNotification, userProfile, followedUserIds, toggleFollowUser } = useAudio();
+
+  const isOwnPost = post.userId === userProfile?.uid;
+  const isFollowing = followedUserIds.includes(post.userId);
+
+  const handleAction = async (action: string) => {
+    switch (action) {
+      case 'follow':
+        toggleFollowUser(post.userId);
+        onClose();
+        break;
+      case 'view':
+        navigate(`/post/${post.id}`);
+        onClose();
+        break;
+      case 'share':
+        const result = await shareContent({
+          title: `TON JAM Signal by ${post.userName}`,
+          text: post.content,
+          url: `${window.location.origin}/post/${post.id}`,
+        });
+        if (result.success && result.method === 'clipboard') {
+           addNotification("Signal link copied to local buffer", "success");
         }
         onClose();
-      } 
-    },
-    { 
-      id: 'delete', 
-      icon: Trash2, 
-      label: 'Delete Playlist', 
-      color: 'text-red-500', 
-      iconColor: 'text-red-500/40 group-hover:text-red-500', 
-      action: () => { onDelete(); onClose(); } 
+        break;
+      case 'report':
+        addNotification(`Signal reported`, 'success');
+        onClose();
+        break;
+      case 'delete':
+        if (onDelete) onDelete(post.id);
+        onClose();
+        break;
     }
-  ];
+  };
+
+  const options = [];
+  
+  if (!isOwnPost) {
+    options.push({ id: 'follow', icon: UserPlus, label: isFollowing ? 'Disconnect' : 'Sync User', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('follow') });
+  }
+  
+  options.push({ id: 'view', icon: ExternalLink, label: 'View Thread', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('view') });
+  options.push({ id: 'share', icon: Share, label: 'Share Signal', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: () => handleAction('share') });
+  
+  if (!isOwnPost) {
+    options.push({ id: 'report', icon: Flag, label: 'Report Signal', color: 'text-red-500', iconColor: 'text-red-500/40 group-hover:text-red-500', action: () => handleAction('report') });
+  }
+
+  if (isOwnPost && onDelete) {
+    options.push({ id: 'delete', icon: Trash2, label: 'Delete Log', color: 'text-red-500', iconColor: 'text-red-500/40 group-hover:text-red-500', action: () => handleAction('delete') });
+  }
 
   return (
     <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
@@ -78,21 +94,19 @@ const PlaylistOptionsModal: React.FC<PlaylistOptionsModalProps> = ({ playlist, o
               animate={{ scale: 1, opacity: 1 }}
               className="relative w-16 h-16 rounded-[4px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10 flex-shrink-0"
             >
-              {playlist.coverUrl ? (
-                <img src={playlist.coverUrl} alt={playlist.title} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-blue-500/20 flex items-center justify-center text-blue-500 font-bold text-2xl uppercase">
-                  {playlist.title.charAt(0)}
-                </div>
-              )}
+              <img 
+                src={post.userAvatar || getPlaceholderImage(`user-${post.userId}`)} 
+                className="w-full h-full object-cover" 
+                alt={post.userName} 
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </motion.div>
             <div className="flex-1 min-w-0">
               <DrawerTitle className="text-xl font-black text-white truncate leading-tight uppercase tracking-tighter">
-                {playlist.title}
+                {post.userName}
               </DrawerTitle>
               <DrawerDescription className="text-[10px] font-black text-blue-500 mt-1 uppercase tracking-[0.3em] truncate opacity-80">
-                // CREATOR: {playlist.creator}
+                // SIGNAL OPTIONS
               </DrawerDescription>
             </div>
           </DrawerHeader>
@@ -136,4 +150,4 @@ const PlaylistOptionsModal: React.FC<PlaylistOptionsModalProps> = ({ playlist, o
   );
 };
 
-export default PlaylistOptionsModal;
+export default PostOptionsModal;

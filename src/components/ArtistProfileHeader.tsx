@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import LikeButton from './LikeButton';
 import { Twitter, Instagram, Globe, Send, Disc, CheckCircle2, LayoutDashboard, Settings, Hammer, Edit2, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Artist } from '@/types';
@@ -47,95 +48,88 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-12 cursor-default w-full font-sans pb-4"
+      className="flex flex-col items-start text-left gap-6 cursor-default w-full font-sans pb-4"
     >
-      {/* Profile Picture Container */}
-      <div className="relative flex-shrink-0">
-        <div className="flex flex-col items-center md:items-start group/avatar">
+      {/* Profile Info */}
+      <div className="flex items-end gap-6">
+        <div className="relative group/avatar flex flex-col items-center">
           <div className="relative">
             <div className="absolute inset-0 bg-blue-500/20 blur-3xl opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-full" />
-            <Avatar className="w-24 h-24 sm:w-32 sm:h-32 md:w-44 md:h-44 border-4 border-background shadow-[0_0_50px_rgba(37,99,235,0.2)] relative z-10 transition-transform duration-700 group-hover/avatar:scale-[1.02]">
+            <Avatar className="w-24 h-24 sm:w-32 sm:h-32 md:w-32 md:h-32 border-4 border-background shadow-[0_0_50px_rgba(37,99,235,0.2)] relative z-10 transition-transform duration-700 group-hover/avatar:scale-[1.02]">
               <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="object-cover" />
-              <AvatarFallback className="bg-muted text-2xl sm:text-3xl md:text-5xl font-black">{artist.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarFallback className="bg-muted text-2xl sm:text-3xl font-black">{artist.name.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             {artist.verified && (
-              <div className="absolute bottom-2 right-2 bg-background rounded-full p-1 shadow-2xl z-20 border border-blue-500/20">
-                <CheckCircle2 className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-blue-500 fill-current" />
+              <div className="absolute bottom-1 right-1 bg-background rounded-full p-1 shadow-2xl z-20 border border-blue-500/20">
+                <CheckCircle2 className="w-5 h-5 text-blue-500 fill-current" />
               </div>
             )}
           </div>
-          
-          {/* Username below picture */}
-          {artist.username && (
-            <Badge variant="secondary" className="mt-4 bg-muted/40 backdrop-blur-md text-foreground/70 border-border/50 font-bold text-[10px] sm:text-xs tracking-widest px-4 py-1 rounded-full uppercase hover:bg-muted/60 transition-colors">
-              {artist.username.replace('@', '')}
-            </Badge>
-          )}
+        </div>
+
+        <div className="flex flex-col items-start gap-2">
+            {artist.username && (
+                <Badge variant="secondary" className="bg-muted/40 backdrop-blur-md text-foreground/70 border-border/50 font-bold text-[10px] tracking-widest px-4 py-1 rounded-full uppercase hover:bg-muted/60 transition-colors w-fit">
+                    {artist.username.replace('@', '')}
+                </Badge>
+            )}
+            <h1 id="artist-name-display" className="text-3xl sm:text-5xl md:text-7xl font-black tracking-[-0.04em] text-white uppercase leading-none">
+                {artist.name}
+            </h1>
         </div>
       </div>
       
-      <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
-        <div className="flex flex-col gap-2 mb-4">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-4">
-            <h1 id="artist-name-display" className="text-3xl sm:text-4xl md:text-7xl font-black tracking-[ -0.04em] text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] uppercase italic leading-none">
-              {artist.name}
-            </h1>
-            
-            {/* Social Icons near name - refined */}
-            <div id="artist-socials-group" className="flex items-center gap-1 p-1 bg-white/[0.03] hover:bg-white/[0.08] backdrop-blur-xl rounded-full border border-white/10 transition-all">
-              {artist.socials && Object.entries(artist.socials).map(([platform, url]) => {
+      {/* Social Icons & Stats - Spotify usually puts them below */}
+      <div className="flex items-center gap-6">
+        {/* Stats & Like */}
+        <div id="artist-header-actions" className="flex items-center gap-6">
+            <LikeButton targetId={artist.uid} targetType="artist" />
+            <div id="artist-header-stats" className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                    <span className="text-xl font-black text-white tracking-tight leading-none">
+                    {(artist.followers || 0).toLocaleString()}
+                    </span>
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black">Followers</span>
+                </div>
+                <div className="w-[1px] h-4 bg-white/20" />
+                <div className="flex items-center gap-2">
+                    <span className="text-xl font-black text-white tracking-tight leading-none">
+                    {(artist.playCount || 0).toLocaleString()}
+                    </span>
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black">Plays</span>
+                </div>
+            </div>
+        </div>
+
+        {/* Social Icons */}
+        <div id="artist-socials-group" className="flex items-center gap-3">
+            {artist.socials && Object.entries(artist.socials).map(([platform, url]) => {
                 if (!url) return null;
                 const Icon = getSocialIcon(platform);
                 return (
-                  <TooltipProvider key={platform}>
+                <TooltipProvider key={platform}>
                     <Tooltip>
-                      <TooltipTrigger asChild>
+                    <TooltipTrigger asChild>
                         <a 
-                          href={url as string}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 sm:p-2.5 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all active:scale-90"
-                          aria-label={platform}
+                        href={url as string}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all active:scale-90"
+                        aria-label={platform}
                         >
-                          <Icon className="w-4 h-4" />
+                        <Icon className="w-4 h-4" />
                         </a>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-black/90 backdrop-blur-md border-white/10 text-[10px] font-black uppercase tracking-widest text-white">
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-black/90 backdrop-blur-md border-white/10 text-[10px] font-black uppercase tracking-widest text-white">
                         <p>{platform}</p>
-                      </TooltipContent>
+                    </TooltipContent>
                     </Tooltip>
-                  </TooltipProvider>
+                </TooltipProvider>
                 );
-              })}
-              <div className="w-[1px] h-4 bg-white/10 mx-2" />
-              <button className="p-2 sm:p-2.5 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div id="artist-header-stats" className="flex items-center gap-8 sm:gap-12 mt-4">
-          <div className="flex flex-col items-start group/stat cursor-default">
-            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none group-hover/stat:text-blue-500 transition-colors">
-              {(artist.followers || 0).toLocaleString()}
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-black mt-2">Followers</span>
-          </div>
-          <div className="flex flex-col items-start pl-8 sm:pl-12 border-l border-white/10 group/stat cursor-default">
-            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none group-hover/stat:text-blue-500 transition-colors">
-              {(artist.playCount || 0).toLocaleString()}
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-black mt-2">Total Plays</span>
-          </div>
-          <div className="hidden sm:flex flex-col items-start pl-12 border-l border-white/10 group/stat cursor-default">
-            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none group-hover/stat:text-blue-500 transition-colors">
-              {artist.verified ? 'VERIFIED' : 'ACTIVE'}
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-black mt-2">Protocol Status</span>
-          </div>
+            })}
         </div>
       </div>
+
     </motion.div>
   );
 };

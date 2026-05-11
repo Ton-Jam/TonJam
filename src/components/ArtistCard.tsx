@@ -53,7 +53,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
           <Card onClick={handleCardClick} className={cn("group p-4 flex items-center gap-4 cursor-pointer hover:border-primary/50 transition-all", className)}>
             <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="w-12 h-12 rounded-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }} />
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-[12px] truncate italic uppercase">{artist.name}</h3>
+              <h3 className="font-bold text-[12px] truncate uppercase">{artist.name}</h3>
               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{artist.followers.toLocaleString()} LISTENERS</p>
             </div>
             <Button 
@@ -89,7 +89,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
       />
       <div className="space-y-0.5 max-w-full overflow-hidden min-w-0">
         <div className="flex items-center justify-center gap-1 max-w-full">
-            <h3 className="font-bold text-[10px] tracking-tight uppercase italic truncate">{artist.name}</h3>
+            <h3 className="font-bold text-[10px] tracking-tight uppercase truncate">{artist.name}</h3>
             {artist.verified && <CheckCircle2 className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
         </div>
         <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest">{artist.followers.toLocaleString()} Followers</p>
@@ -99,7 +99,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
         onClick={handleFollowClick}
         variant={isFollowing ? "outline" : "default"}
         className={cn(
-            "w-full rounded-[2px] h-7 text-[9px] font-bold uppercase tracking-widest",
+            "w-full rounded-full h-7 text-[9px] font-bold uppercase tracking-widest",
             !isFollowing && "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-lg shadow-blue-600/10"
           )}
       >

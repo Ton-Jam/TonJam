@@ -38,13 +38,13 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index }) => {
         </div>
       </div>
       <div className="px-1">
-        <h3 className="text-white font-black text-[11px] uppercase italic tracking-tighter truncate group-hover:text-blue-400 transition-colors">
+        <h3 className="text-white font-black text-[11px] uppercase tracking-tighter truncate group-hover:text-blue-400 transition-colors">
           {album.title}
         </h3>
         <p className="text-blue-500 font-bold text-[9px] uppercase tracking-widest mt-0.5 truncate">
           {album.artist}
         </p>
-        <p className="text-white/30 text-[8px] font-bold uppercase tracking-widest mt-1 italic">
+        <p className="text-white/30 text-[8px] font-bold uppercase tracking-widest mt-1">
           Collection • {album.trackIds?.length || 0} tracks
         </p>
       </div>

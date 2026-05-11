@@ -47,6 +47,7 @@ const TaskDashboard: React.FC = () => {
         <TaskDetailModal 
           task={selectedTask} 
           onClose={() => setSelectedTask(null)} 
+          onUpdate={handleToggle}
         />
       )}
     </div>

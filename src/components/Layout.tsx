@@ -84,6 +84,28 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const isHome = location.pathname === '/';
+  const isTasks = location.pathname === '/tasks';
+  const isMarketplace = location.pathname.startsWith('/marketplace');
+  const isJamspace = location.pathname.startsWith('/jamspace');
+  const isLibrary = location.pathname.startsWith('/library');
+  const isExplore = location.pathname.startsWith('/explore');
+  const isDiscover = location.pathname === '/discover';
+  const isSearch = location.pathname === '/search' || location.pathname === '/discover';
+  const isArtistProfile = location.pathname.startsWith('/artist/');
+  const isUserProfile = location.pathname.startsWith('/user/') || location.pathname === '/profile';
+  const isPostDetail = location.pathname.startsWith('/post/');
+  const isTrendingNFTs = location.pathname === '/trending-nfts';
+
+  const isNotifications = location.pathname === '/notifications';
+  const isWallet = location.pathname === '/wallet';
+  const isProfile = location.pathname === '/profile' || location.pathname.startsWith('/profile/');
+  const isProfileSettings = location.pathname === '/profile/settings';
+  const isGovernance = location.pathname.startsWith('/governance');
+  const isAdmin = location.pathname.startsWith('/admin');
+  const isLoginPage = location.pathname === '/login';
+
     const { 
     currentTrack, 
     isFullPlayerOpen, 
@@ -117,6 +139,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isTippingModalOpen, setIsTippingModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleTippingState = (e: any) => {
+      setIsTippingModalOpen(e.detail.open);
+    };
+    window.addEventListener('tippingModalState', handleTippingState as EventListener);
+    return () => window.removeEventListener('tippingModalState', handleTippingState as EventListener);
+  }, []);
+
 
   const filteredResults = useMemo(() => {
     if (!searchQuery.trim()) return null;
@@ -140,8 +172,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     return { tracks, nfts, artists: filteredArtists, users };
   }, [searchQuery, allTracks, allNFTs, artists, firestoreUsers]);
+  const artistId = location.pathname.split('/')[2];
+  const activeArtist = useMemo(() => artists.find(a => a.uid === artistId), [artists, artistId]);
+  
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
   const { scrollY } = useScroll();
+  
+  useEffect(() => {
+    // Only hide if not on artist profile, or change compact mode based on scroll
+    setIsHeaderHidden(false); // Make visible
+  }, [isArtistProfile]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isArtistProfile) {
+        setIsCompact(window.scrollY > 200);
+      } else {
+        setIsCompact(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isArtistProfile]);
   const headerOpacity = useTransform(scrollY, [0, 50], [0, 1]);
   const [isMobileNavHidden, setIsMobileNavHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -172,27 +225,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     localStorage.setItem('recentSearches', JSON.stringify(updated));
   };
   
-  const isHome = location.pathname === '/';
-  const isTasks = location.pathname === '/tasks';
-  const isMarketplace = location.pathname.startsWith('/marketplace');
-  const isJamspace = location.pathname.startsWith('/jamspace');
-  const isLibrary = location.pathname.startsWith('/library');
-  const isExplore = location.pathname.startsWith('/explore');
-  const isDiscover = location.pathname === '/discover';
-  const isSearch = location.pathname === '/search' || location.pathname === '/discover';
-  const isArtistProfile = location.pathname.startsWith('/artist/');
-  const isUserProfile = location.pathname.startsWith('/user/') || location.pathname === '/profile';
-  const isPostDetail = location.pathname.startsWith('/post/');
-  const isTrendingNFTs = location.pathname === '/trending-nfts';
-
-  const isNotifications = location.pathname === '/notifications';
-  const isWallet = location.pathname === '/wallet';
-  const isProfile = location.pathname === '/profile' || location.pathname.startsWith('/profile/');
-  const isProfileSettings = location.pathname === '/profile/settings';
-  const isGovernance = location.pathname.startsWith('/governance');
-  const isAdmin = location.pathname.startsWith('/admin');
-  const isLoginPage = location.pathname === '/login';
-
+  
   const getSearchPlaceholder = () => {
     const path = location.pathname;
     if (path.startsWith('/marketplace')) return 'Scan Network Protocols (NFTs)...';
@@ -299,13 +332,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isExplore && !isSearch && !isAuthModalOpen && (
+      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && (
         <motion.header 
-          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-transform duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'}`}
+          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md border-b border-border/40' : 'bg-transparent'}`}
         >
-          {/* Background with higher blur and subtle border */}
+          {/* Background with higher blur and subtle border - added conditional styling */}
           <motion.div 
-            className="absolute inset-0 bg-background -z-10 border-b border-border/40"
+            className={`absolute inset-0 bg-background -z-10 transition-opacity duration-300 ${isArtistProfile && !isCompact ? 'opacity-0' : 'opacity-100'} border-b border-border/40`}
           />
           
           <div className={`flex items-center ${headerTitle ? 'justify-center flex-1' : 'gap-4 flex-1'}`}>
@@ -329,6 +362,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <TooltipContent side="bottom">Open Navigation</TooltipContent>
                 </Tooltip>
               )
+            ) : isArtistProfile && isCompact && activeArtist ? (
+                <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 pl-2"
+                >
+                    <Avatar className="w-8 h-8 rounded-full border border-border/50">
+                        <AvatarImage src={activeArtist.avatarUrl} alt={activeArtist.name} />
+                        <AvatarFallback>{activeArtist.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-black tracking-tighter uppercase">{activeArtist.name}</span>
+                </motion.div>
             ) : (
               <div className={`flex items-center ${headerTitle ? 'w-full justify-center relative' : 'gap-2'}`}>
                 {!headerTitle && (
@@ -340,7 +385,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className={`${headerTitle ? 'flex' : 'lg:hidden'} flex-col justify-center items-center`}>
                   <span className={cn(
                     "font-bold uppercase tracking-widest truncate transition-all duration-300",
-                    headerTitle ? "text-sm italic" : "text-[12px] tracking-tighter max-w-[120px]"
+                    headerTitle ? "text-sm" : "text-[12px] tracking-tighter max-w-[120px]"
                   )}>
                     {headerTitle || (isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : isPostDetail ? 'Post' : isWallet ? 'Wallet' : isSearch ? 'Search' : isProfileSettings ? 'Settings' : isProfile ? 'Profile' : isDiscover ? 'Discover' : isTasks ? 'Tasks' : isGovernance ? 'Governance' : isAdmin ? 'Admin' : (location.pathname.split('/')[1] || '').replace('-', ' ')))}
                   </span>
@@ -358,7 +403,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="hidden lg:flex items-center gap-4 flex-1 ml-4 overflow-hidden">
                 <div className="flex items-center gap-3">
                    <div className="w-1 h-6 bg-blue-600 rounded-full" />
-                   <span className="font-bold text-xs uppercase tracking-tighter italic">
+                   <span className="font-bold text-xs uppercase tracking-tighter">
                      {isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Details')}
                    </span>
                 </div>
@@ -497,7 +542,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="flex items-center justify-between mb-2">
                 <Link to="/" onClick={() => setIsMobileSidebarOpen(false)} className="flex items-center gap-2">
                   <img src={APP_LOGO} alt="" className="w-8 h-8 object-contain" />
-                  <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">JamSpace</span>
+                  <span className="font-bold text-lg tracking-tight text-foreground uppercase">JamSpace</span>
                 </Link>
                 <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 rounded-full hover:bg-muted">
                   <ArrowLeftIcon className="h-5 w-5 text-zinc-700" />
@@ -563,7 +608,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {!isJamspace && <AIAssistant />}
 
         {/* Mobile Navigation */}
-      {!isPostDetail && !isAuthModalOpen && (
+      {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && (
         <div className={`lg:hidden fixed bottom-2 left-1/2 -translate-x-1/2 z-50 h-16 transition-all duration-300 w-[calc(100%-48px)] max-w-sm ${isMobileNavHidden ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}>
           <div className="absolute inset-0 rounded-[2px] p-[1px] bg-gradient-to-r from-blue-600/50 via-blue-400/50 to-blue-600/50">
             <nav className="h-full w-full bg-background/90 backdrop-blur-xl rounded-[2px] px-4 flex justify-around items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]" aria-label="Mobile Navigation">
@@ -606,7 +651,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           className="w-[44px] h-[44px] object-contain" 
           aria-hidden="true" 
         />
-        <span className="font-bold text-lg tracking-tight text-foreground uppercase italic">Discover</span>
+        <span className="font-bold text-lg tracking-tight text-foreground uppercase">Discover</span>
       </Link>
       <ModeToggle />
     </div>

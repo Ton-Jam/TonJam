@@ -107,7 +107,7 @@ const JamChat: React.FC = () => {
             <Radio className="h-5 w-5 text-blue-400" />
           </div>
           <div>
-            <h3 className="text-xs font-black uppercase italic tracking-tighter text-foreground leading-none">{activeJamRoom.name}</h3>
+            <h3 className="text-xs font-black uppercase tracking-tighter text-foreground leading-none">{activeJamRoom.name}</h3>
             <div className="flex items-center gap-2 mt-1">
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,1)]" />
               <span className="text-[9px] font-black text-blue-500/60 uppercase tracking-[0.2em] leading-none">Signal Active</span>
@@ -186,7 +186,7 @@ const JamChat: React.FC = () => {
         <form onSubmit={handleSendMessage} className="relative group">
           <Input 
             placeholder="Broadcast a signal..."
-            className="bg-zinc-900/50 border-white/[0.05] rounded-2xl h-12 pr-14 focus-visible:ring-blue-500/30 transition-all text-xs font-bold italic placeholder:text-zinc-600"
+            className="bg-zinc-900/50 border-white/[0.05] rounded-2xl h-12 pr-14 focus-visible:ring-blue-500/30 transition-all text-xs font-bold placeholder:text-zinc-600"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}

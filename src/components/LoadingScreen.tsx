@@ -27,7 +27,7 @@ const LoadingScreen: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <h1 className="text-[20px] md:text-[32px] font-black text-foreground tracking-[0.4em] uppercase italic">
+          <h1 className="text-[20px] md:text-[32px] font-black text-foreground tracking-[0.4em] uppercase">
             TonJam
           </h1>
         </motion.div>

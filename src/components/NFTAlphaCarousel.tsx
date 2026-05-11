@@ -68,7 +68,7 @@ const NFTAlphaCarousel: React.FC<NFTAlphaCarouselProps> = ({ nfts }) => {
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/5">
                     <img src={TON_LOGO} className="w-4 h-4" alt="TON" />
-                    <span className="text-sm font-black text-white italic">{nft.price} <span className="text-[10px] text-white/40 not-italic">TON</span></span>
+                    <span className="text-sm font-black text-white">{nft.price} <span className="text-[10px] text-white/40 not-italic">TON</span></span>
                   </div>
                   
                   <button className="p-3 bg-blue-600 rounded-xl text-white shadow-xl shadow-blue-600/30 hover:bg-blue-500 scale-90 group-hover:scale-100 transition-all">

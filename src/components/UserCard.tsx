@@ -114,7 +114,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
           {!isOwnProfile && (
             <button 
               onClick={handleFollow}
-              className={`follow-btn px-4 py-2 rounded-[2px] text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-muted/50 text-blue-400 border border-border' : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'}`}
+              className={`follow-btn px-4 py-2 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isFollowing ? 'bg-muted/50 text-blue-400 border border-border' : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'}`}
               aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
             >
               {isFollowing ? 'Synced' : 'Follow'}
@@ -151,7 +151,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       
       <div className="flex flex-col min-w-0 w-full mb-2 items-center text-center space-y-0.5">
         <div className="flex items-center gap-1 justify-center max-w-full">
-          <h3 className="text-[10px] font-bold text-foreground tracking-tight uppercase italic truncate">
+          <h3 className="text-[10px] font-bold text-foreground tracking-tight uppercase truncate">
             {user.name}
           </h3>
           {verified && <CheckCircle2 className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
@@ -165,7 +165,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       {!isOwnProfile && (
         <button 
           onClick={handleFollow}
-          className={`w-full py-1.5 text-[9px] rounded-[2px] flex items-center justify-center gap-2 transition-all font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600
+          className={`w-full py-1.5 text-[9px] rounded-full flex items-center justify-center gap-2 transition-all font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600
             ${isFollowing 
               ? 'bg-muted/50 text-muted-foreground/60 border border-border/50' 
               : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-lg shadow-blue-600/10'

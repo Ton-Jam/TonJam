@@ -615,7 +615,7 @@ const NFTDetail: React.FC = () => {
                 </div>
               </div>
 
-              <h1 className="text-[44px] md:text-[68px] font-bold tracking-tighter uppercase text-foreground leading-[0.85] mb-2">{localNft.title}</h1>
+              <h1 className="text-[32px] md:text-[48px] font-bold tracking-tighter uppercase text-foreground leading-[1] mb-2">{localNft.title}</h1>
               
               <ReactionsSection targetId={localNft.id} targetType="nft" />
 
@@ -645,10 +645,10 @@ const NFTDetail: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex items-baseline gap-4">
-                    <span className="text-[72px] md:text-[96px] font-black text-foreground tracking-tighter leading-none italic">
+                    <span className="text-[72px] md:text-[96px] font-black text-foreground tracking-tighter leading-none">
                       {isAuction ? (highestOfferPrice > 0 ? highestOfferPrice : (localNft.startingBid || localNft.price)) : localNft.price}
                     </span>
-                    <span className="text-[24px] font-black text-blue-500 uppercase tracking-tighter italic">TON</span>
+                    <span className="text-[24px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest px-4 py-2 bg-white/5 rounded-full border border-white/5">
@@ -664,7 +664,7 @@ const NFTDetail: React.FC = () => {
                     <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-4 flex items-center justify-end gap-2">
                        <Clock className="h-3 w-3" /> Min Next Step
                     </p>
-                    <p className="text-[28px] font-bold text-amber-500 tracking-tighter italic">+{minNextBid} <span className="text-sm">TON</span></p>
+                    <p className="text-[28px] font-bold text-amber-500 tracking-tighter">+{minNextBid} <span className="text-sm">TON</span></p>
                   </div>
                 )}
               </div>
@@ -836,7 +836,7 @@ const NFTDetail: React.FC = () => {
                           {dynamicMetadata.traits.map((trait) => (
                             <div key={trait.trait_type} className="bg-white/[0.03] border border-white/5 p-6 rounded-[20px] hover:border-blue-500/30 transition-all group">
                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] block mb-4">{trait.trait_type}</span>
-                              <span className="text-sm font-black text-foreground tracking-tight uppercase italic">{trait.value}</span>
+                              <span className="text-sm font-black text-foreground tracking-tight uppercase">{trait.value}</span>
                               <div className="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
                                 <div className="h-full bg-blue-500 w-2/3 group-hover:w-full transition-all duration-1000"></div>
                               </div>
@@ -857,7 +857,7 @@ const NFTDetail: React.FC = () => {
                             localNft.royaltySplits.map((split, i) => (
                               <div key={i} className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                  <span className="text-xs font-black text-foreground uppercase tracking-widest italic">{split.label || 'Collaborator'}</span>
+                                  <span className="text-xs font-black text-foreground uppercase tracking-widest">{split.label || 'Collaborator'}</span>
                                   <span className="text-sm font-black text-emerald-500">{(split.percentage * 100).toFixed(0)}%</span>
                                 </div>
                                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
@@ -870,7 +870,7 @@ const NFTDetail: React.FC = () => {
                               </div>
                             ))
                           ) : (
-                            <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest italic">Standard 100% Creator Share Protocol Active</div>
+                            <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Standard 100% Creator Share Protocol Active</div>
                           )}
                         </div>
                       </div>
@@ -885,15 +885,15 @@ const NFTDetail: React.FC = () => {
                           <div className="space-y-6">
                              <div className="flex flex-col gap-2">
                                <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Minted Date</span>
-                               <span className="text-sm font-black text-foreground uppercase tracking-tight italic">OCT 14, 2023</span>
+                               <span className="text-sm font-black text-foreground uppercase tracking-tight">OCT 14, 2023</span>
                              </div>
                              <div className="flex flex-col gap-2">
                                <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Standard</span>
-                               <span className="text-sm font-black text-purple-500 uppercase tracking-tight italic">TON NFT-v2</span>
+                               <span className="text-sm font-black text-purple-500 uppercase tracking-tight">TON NFT-v2</span>
                              </div>
                              <div className="flex flex-col gap-2">
                                <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Relay Layer</span>
-                               <span className="text-sm font-black text-foreground uppercase tracking-tight italic">Global Consensus</span>
+                               <span className="text-sm font-black text-foreground uppercase tracking-tight">Global Consensus</span>
                              </div>
                           </div>
                        </div>
@@ -922,11 +922,11 @@ const NFTDetail: React.FC = () => {
                             {h.event === 'Minted' ? <Wand2 className="h-6 w-6" /> : <Handshake className="h-6 w-6" />}
                           </div>
                           <div className="flex flex-col gap-2">
-                            <span className="text-base font-black text-foreground uppercase tracking-tight italic flex items-center gap-3">
+                            <span className="text-base font-black text-foreground uppercase tracking-tight flex items-center gap-3">
                               {h.event}
                               <div className={cn("w-1.5 h-1.5 rounded-full", h.event === 'Minted' ? "bg-blue-500" : "bg-emerald-500")}></div>
                             </span>
-                            <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest italic">
+                            <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
                               <span>Layer_Protocol: {h.event === 'Minted' ? 'MINT' : 'TRANSFER'}</span>
                               <div className="h-px w-4 bg-white/10"></div>
                               <span>{h.date}</span>
@@ -946,7 +946,7 @@ const NFTDetail: React.FC = () => {
                              <span className="text-[11px] font-mono text-primary font-black uppercase tracking-widest">@{h.to.slice(0, 8)}</span>
                              {h.price && (
                                <div className="flex items-center justify-end gap-2 mt-2">
-                                  <span className="text-xl font-black text-foreground tracking-tighter italic">{h.price}</span>
+                                  <span className="text-xl font-black text-foreground tracking-tighter">{h.price}</span>
                                   <span className="text-[10px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
                                </div>
                              )}
@@ -983,7 +983,7 @@ const NFTDetail: React.FC = () => {
                               </div>
                               <div className="flex flex-col gap-2 min-w-0">
                                 <div className="flex items-center gap-4">
-                                  <span className="text-base font-black text-foreground uppercase tracking-tight truncate max-w-[200px] italic">
+                                  <span className="text-base font-black text-foreground uppercase tracking-tight truncate max-w-[200px]">
                                     @{o.offerer.slice(0, 8)}...
                                   </span>
                                   {isTopBid && (
@@ -995,14 +995,14 @@ const NFTDetail: React.FC = () => {
                                     <Clock className="h-3 w-3 text-muted-foreground/50" />
                                     <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{o.timestamp}</span>
                                   </div>
-                                  <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest italic">Exp: {o.duration}</span>
+                                  <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest">Exp: {o.duration}</span>
                                 </div>
                               </div>
                             </div>
                             <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
                               <div className="text-right">
                                 <div className="flex items-center gap-4">
-                                  <span className={`text-[32px] font-black tracking-tighter italic ${isTopBid ? (isAuction ? 'text-amber-500' : 'text-blue-500') : 'text-muted-foreground/80'}`}>
+                                  <span className={`text-[32px] font-black tracking-tighter ${isTopBid ? (isAuction ? 'text-amber-500' : 'text-blue-500') : 'text-muted-foreground/80'}`}>
                                     {o.price}
                                   </span>
                                   <div className="flex flex-col items-center">
@@ -1014,7 +1014,7 @@ const NFTDetail: React.FC = () => {
                               {isOwner ? (
                                 <div className="flex gap-2">
                                   {o.offerer !== localNft.owner && (
-                                    <button onClick={() => handleAcceptOffer(o)} className={`h-14 px-6 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-3 italic ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`} >
+                                    <button onClick={() => handleAcceptOffer(o)} className={`h-14 px-6 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-3 ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`} >
                                       <Check className="h-4 w-4" /> ACCEPT
                                     </button>
                                   )}

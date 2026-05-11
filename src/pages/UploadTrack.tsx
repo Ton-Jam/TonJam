@@ -723,7 +723,7 @@ export default function UploadTrackScreen() {
               <div className="w-24 h-24 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-12 h-12 text-cyan-400" />
               </div>
-              <h2 className="text-3xl font-black uppercase tracking-tighter italic">Transmission Complete</h2>
+              <h2 className="text-3xl font-black uppercase tracking-tighter">Transmission Complete</h2>
               <p className="text-white/40 text-sm font-bold uppercase tracking-widest">
                 {mode === 'single' ? 'Your sonic artifact is now live.' : `${batchTracks.length} artifacts synchronized successfully.`}
               </p>

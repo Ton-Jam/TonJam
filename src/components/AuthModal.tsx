@@ -174,7 +174,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <img src={APP_LOGO} className="w-16 h-16 object-contain" alt="TonJam" />
             </motion.div>
             <div className="space-y-1">
-              <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase italic leading-none">
+              <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase leading-none">
                 {isLogin ? 'Welcome Back' : 'Join TonJam'}
               </h1>
               <p className="text-xs font-medium text-muted-foreground tracking-normal uppercase">
@@ -296,9 +296,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 className="text-xs font-bold text-muted-foreground tracking-tight hover:text-foreground transition-colors"
               >
                 {isLogin ? (
-                  <>Don't have an account? <span className="text-blue-500 font-black uppercase tracking-tighter italic">Register</span></>
+                  <>Don't have an account? <span className="text-blue-500 font-black uppercase tracking-tighter">Register</span></>
                 ) : (
-                  <>Already have an account? <span className="text-blue-500 font-black uppercase tracking-tighter italic">Sign In</span></>
+                  <>Already have an account? <span className="text-blue-500 font-black uppercase tracking-tighter">Sign In</span></>
                 )}
               </button>
             </div>

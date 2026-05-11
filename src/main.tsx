@@ -22,10 +22,28 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 });
 
+const originalConsoleWarn = console.warn;
+console.warn = (...args) => {
+  const message = args.join(' ');
+  if (
+    message.includes('Could not reach Cloud Firestore backend') ||
+    message.includes('auth/network-request-failed') ||
+    message.includes('The client will operate in offline mode')
+  ) {
+    return;
+  }
+  originalConsoleWarn.apply(console, args);
+};
+
 const originalConsoleError = console.error;
 console.error = (...args) => {
   const message = args.join(' ');
-  if (message.includes('TON_CONNECT_SDK') || message.includes('tonconnect')) {
+  if (
+    message.includes('TON_CONNECT_SDK') || 
+    message.includes('tonconnect') ||
+    message.includes('Could not reach Cloud Firestore backend') ||
+    message.includes('auth/network-request-failed')
+  ) {
     return;
   }
   originalConsoleError.apply(console, args);

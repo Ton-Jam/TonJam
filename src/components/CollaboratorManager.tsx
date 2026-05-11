@@ -81,7 +81,7 @@ export const CollaboratorManager: React.FC<CollaboratorManagerProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-black text-foreground tracking-tighter uppercase italic">Collaborator Registry</h3>
+        <h3 className="text-xl font-black text-foreground tracking-tighter uppercase">Collaborator Registry</h3>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="rounded-full bg-blue-600 hover:bg-blue-500 gap-2">
@@ -157,7 +157,7 @@ export const CollaboratorManager: React.FC<CollaboratorManagerProps> = ({
             </div>
           ))
         ) : (
-          <div className="p-8 border border-dashed rounded-xl text-center text-muted-foreground italic text-sm">
+          <div className="p-8 border border-dashed rounded-xl text-center text-muted-foreground text-sm">
             No active collaborators listed.
           </div>
         )}

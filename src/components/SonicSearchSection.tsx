@@ -75,7 +75,7 @@ const SonicSearchSection: React.FC = () => {
                 <Cpu className="h-5 w-5 text-white" />
               </div>
               <div>
-                <CardTitle className="text-3xl font-black italic uppercase tracking-tighter text-foreground leading-none">Sonic Core</CardTitle>
+                <CardTitle className="text-3xl font-black uppercase tracking-tighter text-foreground leading-none">Sonic Core</CardTitle>
                 <CardDescription className="text-[10px] font-black text-blue-500/60 uppercase tracking-[0.3em] mt-1.5 flex items-center gap-2">
                   <Terminal className="h-3 w-3" />
                   Neural Semantic Engine 4.0

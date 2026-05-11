@@ -153,7 +153,7 @@ const AuctionScreen: React.FC = () => {
               <Zap className="w-4 h-4 fill-blue-500" />
               <span>Live Auctions on TON</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none italic">
+            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none">
               Genesis <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Forge</span>
             </h1>
@@ -192,7 +192,7 @@ const AuctionScreen: React.FC = () => {
                   <div className="aspect-square relative">
                     <img src={featuredAuction.imageUrl} className="w-full h-full object-cover" alt={featuredAuction.title} />
                     <div className="absolute top-4 right-4 animate-pulse">
-                      <Badge className="bg-red-500 hover:bg-red-600 text-white border-none font-bold italic px-3">LIVE</Badge>
+                      <Badge className="bg-red-500 hover:bg-red-600 text-white border-none font-bold px-3">LIVE</Badge>
                     </div>
                   </div>
                   <div className="p-6 space-y-4">
@@ -292,7 +292,7 @@ const AuctionScreen: React.FC = () => {
         <section className="space-y-8">
            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter italic">Live Auctions</h2>
+                <h2 className="text-2xl font-black uppercase tracking-tighter">Live Auctions</h2>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                   <p className="text-xs text-muted-foreground font-bold tracking-widest uppercase">{auctionNFTs.length} Assets Found</p>
@@ -394,7 +394,7 @@ const AuctionScreen: React.FC = () => {
         <div className="max-w-4xl mx-auto text-center px-6 space-y-6">
           <div className="flex flex-col items-center gap-4">
              <img src={APP_LOGO} className="w-16 h-16" alt="TonJam" />
-             <h2 className="text-3xl font-black italic uppercase tracking-tighter">Ready to join the next drop?</h2>
+             <h2 className="text-3xl font-black uppercase tracking-tighter">Ready to join the next drop?</h2>
              <p className="text-muted-foreground">Don't miss out on exclusive limited edition NFTs from the world's most promising independent artists.</p>
           </div>
           <div className="flex items-center justify-center gap-4">

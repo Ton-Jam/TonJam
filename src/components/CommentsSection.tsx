@@ -18,7 +18,7 @@ interface Comment {
 
 interface CommentsSectionProps {
   targetId: string;
-  targetType: 'track' | 'nft';
+  targetType: 'track' | 'nft' | 'artist' | 'post';
 }
 
 export default function CommentsSection({ targetId, targetType }: CommentsSectionProps) {

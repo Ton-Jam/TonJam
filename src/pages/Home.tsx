@@ -423,7 +423,7 @@ const Home: React.FC = () => {
               value="overview"
               className="text-base sm:text-lg font-bold uppercase tracking-tight transition-all relative group focus:outline-none data-[state=active]:text-foreground text-foreground/30 hover:text-foreground/50 h-auto p-0 border-none bg-transparent dark:bg-transparent dark:data-[state=active]:bg-transparent"
             >
-              <span className="relative z-10 italic">Overview</span>
+              <span className="relative z-10">Overview</span>
               {activeTab === 'overview' && (
                 <motion.div layoutId="homeTabLine" className="absolute -bottom-1 left-0 right-0 h-1 bg-primary rounded-full shadow-[0_0_15px_rgba(37,99,235,0.8)]" />
               )}
@@ -432,7 +432,7 @@ const Home: React.FC = () => {
               value="discovery"
               className="text-base sm:text-lg font-bold uppercase tracking-tight transition-all relative flex items-center gap-2 group focus:outline-none data-[state=active]:text-foreground text-foreground/30 hover:text-foreground/50 h-auto p-0 border-none bg-transparent dark:bg-transparent dark:data-[state=active]:bg-transparent"
             >
-              <span className="relative z-10 italic">Discovery</span>
+              <span className="relative z-10">Discovery</span>
               <Sparkles className={`h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110 ${activeTab === 'discovery' ? 'text-primary' : 'text-foreground/20'}`} />
               {activeTab === 'discovery' && (
                 <motion.div layoutId="homeTabLine" className="absolute -bottom-1 left-0 right-0 h-1 bg-primary rounded-full shadow-[0_0_15px_rgba(37,99,235,0.8)]" />
@@ -537,7 +537,7 @@ const Home: React.FC = () => {
                           </Tooltip>
                           <span className="text-[10px] sm:text-xs font-bold text-white/40 uppercase tracking-[0.2em] hidden sm:block">Update_Synced.2024</span>
                         </div>
-                        <h2 className="text-4xl sm:text-7xl font-black italic uppercase tracking-tighter text-white leading-[0.8] drop-shadow-2xl">
+                        <h2 className="text-4xl sm:text-7xl font-black uppercase tracking-tighter text-white leading-[0.8] drop-shadow-2xl">
                           Discover<br />Weekly
                         </h2>
                         <p className="text-xs sm:text-lg text-white/60 font-medium leading-relaxed max-w-md line-clamp-2 sm:line-clamp-none">
@@ -597,7 +597,7 @@ const Home: React.FC = () => {
                       <div className="h-px w-20 sm:w-24 bg-blue-500/50"></div>
                     </div>
                   
-                  <p className="text-base sm:text-2xl text-blue-100/60 leading-relaxed font-medium max-w-lg italic font-display">
+                  <p className="text-base sm:text-2xl text-blue-100/60 leading-relaxed font-medium max-w-lg font-display">
                     Welcome to the nexus of decentralized sound. Forge rare artifacts and engage in global community frequencies via the TON blockchain.
                   </p>
                   
@@ -658,7 +658,7 @@ const Home: React.FC = () => {
                       <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full object-cover" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold uppercase italic tracking-tight text-neutral-900 dark:text-zinc-50 leading-none">DJ_KRUPY</h2>
+                      <h2 className="text-lg font-bold uppercase tracking-tight text-neutral-900 dark:text-zinc-50 leading-none">DJ_KRUPY</h2>
                       <p className="text-neutral-500 dark:text-zinc-400/50 text-[9px] font-bold uppercase tracking-widest mt-1">Neural_Relay_Active</p>
                     </div>
                   </div>
@@ -713,7 +713,7 @@ const Home: React.FC = () => {
                           SYNTHESIS_MAPPING
                         </Badge>
                       </div>
-                      <h3 className="text-2xl sm:text-5xl font-black italic uppercase tracking-tighter text-foreground leading-[0.9]">{aiResult.playlist.title}</h3>
+                      <h3 className="text-2xl sm:text-5xl font-black uppercase tracking-tighter text-foreground leading-[0.9]">{aiResult.playlist.title}</h3>
                       <p className="text-muted-foreground text-xs sm:text-base leading-relaxed max-w-2xl font-medium">
                         {aiResult.explanation}
                       </p>
@@ -751,8 +751,8 @@ const Home: React.FC = () => {
                     </div>
                     
                     <div className="space-y-3 relative z-10">
-                      <h4 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900 dark:text-white italic">KRUPY_SYNTHESIS</h4>
-                      <p className="text-neutral-600 dark:text-blue-100/40 text-xs sm:text-lg max-w-sm font-medium mx-auto italic leading-relaxed">Analyze your sonic identity and generate high-fidelity frequency streams instantly.</p>
+                      <h4 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900 dark:text-white">KRUPY_SYNTHESIS</h4>
+                      <p className="text-neutral-600 dark:text-blue-100/40 text-xs sm:text-lg max-w-sm font-medium mx-auto leading-relaxed">Analyze your sonic identity and generate high-fidelity frequency streams instantly.</p>
                     </div>
                     
                     <button 
@@ -769,12 +769,12 @@ const Home: React.FC = () => {
                     <div className="flex-1 bg-white/5 border border-white/5 rounded-3xl p-8 flex flex-col justify-center gap-4 group hover:bg-blue-600/10 transition-colors">
                       <Activity className="h-8 w-8 text-blue-500/40 group-hover:scale-110 transition-transform" />
                       <p className="text-[12px] font-black text-white uppercase tracking-[0.2em]">Neural_Relay</p>
-                      <p className="text-[10px] text-white/30 font-bold uppercase italic leading-relaxed">Multimodal BPM parsing and genre density calibration.</p>
+                      <p className="text-[10px] text-white/30 font-bold uppercase leading-relaxed">Multimodal BPM parsing and genre density calibration.</p>
                     </div>
                     <div className="flex-1 bg-white/5 border border-white/5 rounded-3xl p-8 flex flex-col justify-center gap-4 group hover:bg-purple-600/10 transition-colors">
                       <Globe className="h-8 w-8 text-purple-500/40 group-hover:scale-110 transition-transform" />
                       <p className="text-[12px] font-black text-white uppercase tracking-[0.2em]">TON_Nexus</p>
-                      <p className="text-[10px] text-white/30 font-bold uppercase italic leading-relaxed">Decentralized trend mapping across the entire protocol.</p>
+                      <p className="text-[10px] text-white/30 font-bold uppercase leading-relaxed">Decentralized trend mapping across the entire protocol.</p>
                     </div>
                   </div>
                 </div>
@@ -823,8 +823,8 @@ const Home: React.FC = () => {
                         </Badge>
                         <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Protocol_ID: #TJ-882</span>
                       </div>
-                      <h3 className="text-xl sm:text-2xl font-bold italic uppercase tracking-tight text-white leading-none">{featuredPlaylist.title}</h3>
-                      <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-xl font-medium italic">
+                      <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white leading-none">{featuredPlaylist.title}</h3>
+                      <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
                         {featuredPlaylist.description || "Synthesizing global network trends into a cohesive sonic stream for elite node participants."}
                       </p>
                     </div>
@@ -861,7 +861,7 @@ const Home: React.FC = () => {
                       <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
                       <span className="text-[10px] font-black uppercase tracking-[0.4em] text-foreground/40">Global.Pulse</span>
                     </div>
-                    <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tighter text-foreground leading-none italic">Trending_Pulse</h2>
+                    <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tighter text-foreground leading-none">Trending_Pulse</h2>
                   </div>
                   
                   <TabsList className="bg-zinc-100 dark:bg-white/5 p-1 rounded-full">
@@ -884,12 +884,12 @@ const Home: React.FC = () => {
                        <div className="bg-primary/5 rounded-3xl p-8 flex flex-col justify-center items-center text-center gap-4">
                           <Activity className="h-10 w-10 text-primary opacity-40" />
                           <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary">Neural_Trajectory</h4>
-                          <p className="text-[11px] font-medium text-primary/60 italic leading-relaxed">Streaming velocity in this segment has increased by 18.4% in the last 2 nodes.</p>
+                          <p className="text-[11px] font-medium text-primary/60 leading-relaxed">Streaming velocity in this segment has increased by 18.4% in the last 2 nodes.</p>
                        </div>
                        <Card className="bg-zinc-950 rounded-3xl p-6 overflow-hidden relative border-none">
                          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/10 blur-2xl" />
                          <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest mb-4">Node_Status: Optimal</p>
-                         <h5 className="text-white font-black uppercase tracking-tight italic mb-2">Network Hub</h5>
+                         <h5 className="text-white font-black uppercase tracking-tight mb-2">Network Hub</h5>
                          <p className="text-zinc-500 text-[10px] leading-relaxed">Participate in global frequencies and earn JAM rewards for every neural sync.</p>
                        </Card>
                     </div>
@@ -912,7 +912,7 @@ const Home: React.FC = () => {
                             </div>
                           </div>
                           <div className="space-y-1">
-                            <p className="text-lg font-black text-foreground uppercase italic tracking-tight">{artist.name}</p>
+                            <p className="text-lg font-black text-foreground uppercase tracking-tight">{artist.name}</p>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{artist.genre}</p>
                           </div>
                           <button className="mt-2 w-full py-2 bg-foreground text-background text-[9px] font-black uppercase tracking-widest rounded-full opacity-0 group-hover:opacity-100 transition-all">
@@ -939,7 +939,7 @@ const Home: React.FC = () => {
                           </div>
                         </div>
                         <div className="px-2 space-y-1">
-                          <p className="text-sm font-black truncate text-foreground uppercase italic tracking-tight leading-tight">{nft.title}</p>
+                          <p className="text-sm font-black truncate text-foreground uppercase tracking-tight leading-tight">{nft.title}</p>
                           <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.artist}</p>
                         </div>
                       </div>
@@ -956,8 +956,8 @@ const Home: React.FC = () => {
                   <Badge variant="outline" className="px-4 py-1 bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-white/40 text-[9px] font-black uppercase tracking-[0.3em] rounded-full">
                     Protocol_Documentation
                   </Badge>
-                  <h2 className="text-3xl font-black uppercase tracking-tighter italic text-foreground">Synthesis Mechanics</h2>
-                  <p className="text-muted-foreground text-sm font-medium italic">Understanding the decentralized frequency protocol.</p>
+                  <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground">Synthesis Mechanics</h2>
+                  <p className="text-muted-foreground text-sm font-medium">Understanding the decentralized frequency protocol.</p>
                 </div>
 
                 <Accordion type="single" collapsible className="w-full space-y-2">
@@ -972,7 +972,7 @@ const Home: React.FC = () => {
                       value={item.id} 
                       className="bg-secondary/20 rounded-2xl px-6 transition-all data-[state=open]:bg-secondary/40 overflow-hidden"
                     >
-                      <AccordionTrigger className="text-sm font-bold uppercase tracking-tight italic hover:no-underline py-5 text-foreground leading-none">
+                      <AccordionTrigger className="text-sm font-bold uppercase tracking-tight hover:no-underline py-5 text-foreground leading-none">
                         {item.q}
                       </AccordionTrigger>
                       <AccordionContent className="text-muted-foreground text-sm font-medium leading-relaxed pb-6 pr-8 border-t border-border/10 pt-4">
@@ -1075,8 +1075,8 @@ const Home: React.FC = () => {
                 {/* Decorative Stats Box */}
                 <div className="bg-gradient-to-br from-primary/10 via-background to-secondary/30 border border-border rounded-3xl p-6 text-center sm:text-left space-y-3">
                   <Activity className="h-6 w-6 text-primary mx-auto sm:mx-0" />
-                  <h4 className="text-base font-bold uppercase tracking-tight text-foreground italic">Protocol_Analytics</h4>
-                  <p className="text-muted-foreground text-[10px] font-medium italic">Streaming velocity is up 24.8% this cycle. Active node participation at peak efficiency.</p>
+                  <h4 className="text-base font-bold uppercase tracking-tight text-foreground">Protocol_Analytics</h4>
+                  <p className="text-muted-foreground text-[10px] font-medium">Streaming velocity is up 24.8% this cycle. Active node participation at peak efficiency.</p>
                   <Link to="/jamspace" className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-primary hover:text-primary/80 transition-colors">
                     View Network Map <ChevronRight className="h-3 w-3" />
                   </Link>

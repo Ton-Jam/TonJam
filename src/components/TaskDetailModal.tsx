@@ -1,14 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Zap, CheckCircle2 } from 'lucide-react';
 import { Task } from '@/types';
+import { Slider } from '@/components/ui/slider';
+import { Progress } from '@/components/ui/progress';
 
 interface TaskDetailModalProps {
   task: Task;
   onClose: () => void;
+  onUpdate: (id: string, progress: number) => void;
 }
 
-const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
+const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onUpdate }) => {
+  const [progress, setProgress] = useState(task.progress);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -16,6 +21,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  const handleProgressChange = (value: number[]) => {
+    const newProgress = value[0];
+    setProgress(newProgress);
+    onUpdate(task.id, newProgress);
+  };
+
+  const progressPercent = Math.min(100, (progress / task.total) * 100);
 
   return (
     <div 
@@ -81,6 +94,21 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
                 </div>
               </div>
             )}
+
+            <div className="space-y-4 pt-4">
+                <div className="flex justify-between items-center text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                    <span>Progress: {progress} / {task.total}</span>
+                </div>
+                <Progress value={progressPercent} className="h-3" />
+                {!task.completed && (
+                    <Slider 
+                        defaultValue={[progress]} 
+                        max={task.total} 
+                        step={1} 
+                        onValueChange={handleProgressChange}
+                    />
+                )}
+            </div>
 
             <div className="flex items-center justify-between pt-2">
               <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Reward</div>

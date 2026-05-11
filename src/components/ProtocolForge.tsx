@@ -44,13 +44,13 @@ const ProtocolForge: React.FC = () => {
       <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6 border border-primary/20 shadow-[0_0_30px_rgba(var(--primary-rgb),0.1)]">
         <Lock className="h-10 w-10 text-primary" />
       </div>
-      <h2 className="text-[26px] font-black text-foreground uppercase tracking-tighter mb-3 italic">Protocol Access Restricted</h2>
+      <h2 className="text-[26px] font-black text-foreground uppercase tracking-tighter mb-3">Protocol Access Restricted</h2>
       <p className="text-muted-foreground max-w-md leading-relaxed mb-8 font-medium">
-        The Protocol Forge is reserved for <span className="text-primary font-bold italic">Verified Architects</span>. Establish your sonic identity via verification to unlock genesis deployment capabilities.
+        The Protocol Forge is reserved for <span className="text-primary font-bold">Verified Architects</span>. Establish your sonic identity via verification to unlock genesis deployment capabilities.
       </p>
       <button 
         onClick={() => navigate('/settings')} 
-        className="px-8 py-3.5 bg-primary rounded-full font-black text-[10px] uppercase tracking-[0.3em] text-primary-foreground shadow-xl shadow-primary/20 active:scale-95 transition-all hover:brightness-110 italic"
+        className="px-8 py-3.5 bg-primary rounded-full font-black text-[10px] uppercase tracking-[0.3em] text-primary-foreground shadow-xl shadow-primary/20 active:scale-95 transition-all hover:brightness-110"
       >
         Initialize.Verification_Sequence
       </button>
@@ -148,15 +148,15 @@ const ProtocolForge: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_10px_var(--primary)]"></div>
-            <span className="text-[9px] font-black text-primary/80 uppercase tracking-[0.6em] italic">Genesis.Setup_Wizard</span>
+            <span className="text-[9px] font-black text-primary/80 uppercase tracking-[0.6em]">Genesis.Setup_Wizard</span>
           </div>
-          <h1 className="text-[42px] md:text-8xl font-black tracking-tighter uppercase text-foreground leading-[0.8] italic">
+          <h1 className="text-[42px] md:text-8xl font-black tracking-tighter uppercase text-foreground leading-[0.8]">
             Protocol <span className="text-primary">Forge</span>
           </h1>
         </div>
         <button
           onClick={handleFreshStart}
-          className="px-6 py-2.5 bg-destructive/10 border border-destructive/30 text-destructive rounded-full text-[9px] font-black uppercase tracking-[0.2em] hover:bg-destructive hover:text-white transition-all active:scale-95 italic"
+          className="px-6 py-2.5 bg-destructive/10 border border-destructive/30 text-destructive rounded-full text-[9px] font-black uppercase tracking-[0.2em] hover:bg-destructive hover:text-white transition-all active:scale-95"
         >
           Factory_Reset.bin
         </button>
@@ -170,19 +170,19 @@ const ProtocolForge: React.FC = () => {
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Hammer className="w-32 h-32 rotate-12" />
               </div>
-              <h3 className="text-[24px] font-black text-foreground uppercase tracking-tighter mb-4 italic">Initialize Neural Genesis</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-10 font-medium italic">
+              <h3 className="text-[24px] font-black text-foreground uppercase tracking-tighter mb-4">Initialize Neural Genesis</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-10 font-medium">
                 A fresh start begins by deploying the <span className="text-foreground">TonJam Genesis Contract</span>. This smart contract will govern all NFT mints, royalties, and artist verification on your personal node.
               </p>
               <button
                 onClick={handleDeploy}
-                className="w-full py-4 bg-primary rounded-full font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-primary/20 text-primary-foreground flex items-center justify-center gap-2 hover:brightness-110 italic"
+                className="w-full py-4 bg-primary rounded-full font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-primary/20 text-primary-foreground flex items-center justify-center gap-2 hover:brightness-110"
               >
                 <Hammer className="w-4 h-4" /> Forge_New_Genesis.lvl
               </button>
             </section>
             <div className="glass p-8 rounded-3xl border border-border/50 bg-secondary/30 backdrop-blur-md">
-              <h4 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em] mb-6 italic">Existing.Protocol_Mapping</h4>
+              <h4 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em] mb-6">Existing.Protocol_Mapping</h4>
               <div className="flex flex-col md:flex-row gap-3">
                 <input
                   type="text"
@@ -201,7 +201,7 @@ const ProtocolForge: React.FC = () => {
             </div>
           </div>
           <div className="bg-black/40 border border-border/30 rounded-3xl p-8 font-mono text-[11px] space-y-4 overflow-hidden shadow-2xl relative group">
-            <div className="absolute top-6 right-10 text-[9px] font-black text-primary/30 uppercase tracking-[0.4em] italic">Tact.Compiler_Preview</div>
+            <div className="absolute top-6 right-10 text-[9px] font-black text-primary/30 uppercase tracking-[0.4em]">Tact.Compiler_Preview</div>
             <pre className="text-primary/40 leading-relaxed overflow-x-auto p-4 bg-black/20 rounded-xl border border-white/5">
               {TACT_SNIPPET.trim()}
             </pre>
@@ -223,12 +223,12 @@ const ProtocolForge: React.FC = () => {
                     <Antenna className="text-primary-foreground text-2xl h-8 w-8" />
                   </div>
                   <div>
-                    <h3 className="text-[24px] font-black text-foreground uppercase tracking-tighter italic leading-none mb-2">
+                    <h3 className="text-[24px] font-black text-foreground uppercase tracking-tighter leading-none mb-2">
                       {isDeploying ? "Neural Forge Active" : "Genesis Online"}
                     </h3>
                     <div className="flex items-center gap-2">
                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                       <p className="text-[10px] font-black text-primary/80 uppercase tracking-widest italic">
+                       <p className="text-[10px] font-black text-primary/80 uppercase tracking-widest">
                         {isDeploying ? "Deploying Protocol..." : "Contract Synchronized"}
                       </p>
                     </div>
@@ -239,8 +239,8 @@ const ProtocolForge: React.FC = () => {
               {isDeploying && (
                 <div className="mb-6 space-y-4 relative z-10">
                   <div className="flex justify-between items-center px-2">
-                    <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] italic">System.Progress</span>
-                    <span className="text-[11px] font-black text-primary uppercase tracking-widest italic">{(deploymentStep * 33).toFixed(0)}%</span>
+                    <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em]">System.Progress</span>
+                    <span className="text-[11px] font-black text-primary uppercase tracking-widest">{(deploymentStep * 33).toFixed(0)}%</span>
                   </div>
                   <div className="h-4 bg-secondary/50 rounded-full overflow-hidden relative p-1 border border-white/5">
                     <motion.div
@@ -274,22 +274,22 @@ const ProtocolForge: React.FC = () => {
               {!isDeploying && (
                 <div className="space-y-6 relative z-10">
                   <div className="p-6 bg-background/50 border border-border/50 rounded-2xl backdrop-blur-sm group">
-                    <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] mb-3 italic">Blockchain.Identity_Address</p>
+                    <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] mb-3">Blockchain.Identity_Address</p>
                     <p className="text-xs font-mono text-primary break-all select-all font-bold group-hover:text-primary/100 transition-colors">{genesisContractAddress}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div className="p-6 bg-background/50 border border-border/50 rounded-2xl">
-                      <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] mb-2 italic">Network.Status</p>
-                      <p className="text-lg font-black text-foreground tracking-tighter italic">TON_TESTNET</p>
+                      <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] mb-2">Network.Status</p>
+                      <p className="text-lg font-black text-foreground tracking-tighter">TON_TESTNET</p>
                     </div>
                     <div className="p-6 bg-background/50 border border-border/50 rounded-2xl">
-                      <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] mb-2 italic">Protocol.Type</p>
-                      <p className="text-lg font-black text-foreground tracking-tighter italic">NFT_COLLECTION</p>
+                      <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] mb-2">Protocol.Type</p>
+                      <p className="text-lg font-black text-foreground tracking-tighter">NFT_COLLECTION</p>
                     </div>
                   </div>
                   <button
                     onClick={() => navigate('/mint')}
-                    className="w-full py-4 bg-primary rounded-full font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-primary/20 text-primary-foreground flex items-center justify-center gap-2 mt-4 italic hover:brightness-110"
+                    className="w-full py-4 bg-primary rounded-full font-black text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl shadow-primary/20 text-primary-foreground flex items-center justify-center gap-2 mt-4 hover:brightness-110"
                   >
                     <PlusCircle className="w-5 h-5" /> Initialize.Mint_Sequence
                   </button>
@@ -300,7 +300,7 @@ const ProtocolForge: React.FC = () => {
           <div className="lg:col-span-5 h-full">
             <div className="bg-black/60 border border-border/30 rounded-3xl p-8 font-mono text-[10px] space-y-3 h-[500px] overflow-y-auto no-scrollbar shadow-2xl relative">
               <div className="sticky top-0 -mt-2 mb-4 bg-black/40 backdrop-blur-sm p-3 rounded-xl border border-white/5 flex items-center justify-between">
-                 <span className="text-[9px] font-black text-primary/40 uppercase tracking-[0.2em] italic">System.Event_Log</span>
+                 <span className="text-[9px] font-black text-primary/40 uppercase tracking-[0.2em]">System.Event_Log</span>
                  <div className="flex gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-red-500/50"></div>
                     <div className="w-1.5 h-1.5 rounded-full bg-amber-500/50"></div>

@@ -79,8 +79,8 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
               <Tag className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white uppercase tracking-tight italic">Initiate_listing</h2>
-              <p className="text-[7px] font-bold text-white/20 uppercase tracking-widest italic">Asset Market Protocol</p>
+              <h2 className="text-sm font-bold text-white uppercase tracking-tight">Initiate_listing</h2>
+              <p className="text-[7px] font-bold text-white/20 uppercase tracking-widest">Asset Market Protocol</p>
             </div>
           </div>
           <button onClick={onClose} className="p-1.5 text-white/40 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 rounded-[2px] bg-white/5" aria-label="Close Sell NFT Modal">
@@ -97,7 +97,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
               aria-pressed={listingType === 'fixed'}
             >
               <Tag className="h-4 w-4 mx-auto" />
-              <p className="text-[8px] font-bold uppercase tracking-widest italic">Fixed_Sale</p>
+              <p className="text-[8px] font-bold uppercase tracking-widest">Fixed_Sale</p>
             </button>
             <button 
               type="button"
@@ -106,13 +106,13 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
               aria-pressed={listingType === 'auction'}
             >
               <Gavel className="h-4 w-4 mx-auto" />
-              <p className="text-[8px] font-bold uppercase tracking-widest italic">Auction_Sync</p>
+              <p className="text-[8px] font-bold uppercase tracking-widest">Auction_Sync</p>
             </button>
           </div>
 
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest ml-1 italic">
+              <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest ml-1">
                 {listingType === 'fixed' ? 'Target_Value' : 'Opening_Bid'}
               </label>
               <div className="relative">
@@ -132,7 +132,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
 
             {listingType === 'auction' && (
               <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest ml-1 italic">Protocol_Deadline</label>
+                <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest ml-1">Protocol_Deadline</label>
                 <input 
                   type="datetime-local" 
                   value={newEndDate} 
@@ -166,7 +166,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
 
           <div className="p-2 bg-blue-500/5 border border-blue-500/10 rounded-[2px] flex gap-2">
             <Info className="h-3.5 w-3.5 text-blue-400 flex-shrink-0 mt-0.5" />
-            <p className="text-[7px] text-white/30 leading-relaxed uppercase tracking-widest italic">
+            <p className="text-[7px] text-white/30 leading-relaxed uppercase tracking-widest">
               Network takes <span className="text-blue-400">2.5%</span> protocol fee. Royalties of <span className="text-white">{nft.royalty}%</span> applied on settlement.
             </p>
           </div>
@@ -175,14 +175,14 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
             <button 
               type="button"
               onClick={onClose}
-              className="flex-1 py-1.5 rounded-[2px] font-bold text-[8px] uppercase tracking-[0.15em] text-white/40 bg-white/5 hover:bg-white/10 transition-all active:scale-95 border border-white/5 italic"
+              className="flex-1 py-1.5 rounded-[2px] font-bold text-[8px] uppercase tracking-[0.15em] text-white/40 bg-white/5 hover:bg-white/10 transition-all active:scale-95 border border-white/5"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className={`flex-[1.5] py-1.5 rounded-[2px] font-bold text-[8px] uppercase tracking-[0.15em] text-white transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 italic
+              className={`flex-[1.5] py-1.5 rounded-[2px] font-bold text-[8px] uppercase tracking-[0.15em] text-white transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500
                 ${listingType === 'auction' ? 'bg-amber-500 hover:bg-amber-400 text-black focus-visible:ring-amber-500' : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/10'}
                 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
               `}

@@ -158,7 +158,7 @@ export default function ArtistDashboard() {
         
         {/* Welcome Section */}
         <div className="space-y-1">
-          <h2 className="text-2xl font-black uppercase tracking-tighter italic">Welcome back, Artist</h2>
+          <h2 className="text-2xl font-black uppercase tracking-tighter">Welcome back, Artist</h2>
           <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Manage your sonic artifacts and protocol earnings</p>
         </div>
 
@@ -225,7 +225,7 @@ export default function ArtistDashboard() {
                 <BarChart3 className="w-3 h-3 text-cyan-500" /> 
                 Recent Performance
               </h2>
-              <h3 className="text-sm font-black uppercase tracking-tight italic">Trending Audience Growth</h3>
+              <h3 className="text-sm font-black uppercase tracking-tight">Trending Audience Growth</h3>
             </div>
             <button 
               onClick={() => navigate('/artist-analytics')}

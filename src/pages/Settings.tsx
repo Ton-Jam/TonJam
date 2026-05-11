@@ -74,7 +74,7 @@ const Settings: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24 pt-8 animate-in fade-in duration-700">
       <div className="mb-10 text-center lg:text-left">
-        <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground italic flex items-center justify-center lg:justify-start gap-3">
+        <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground flex items-center justify-center lg:justify-start gap-3">
           <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
           Settings
         </h1>

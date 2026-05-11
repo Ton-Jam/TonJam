@@ -40,7 +40,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
             </div>
             
             <div className="text-center space-y-2">
-              <h3 className="text-xl font-black uppercase tracking-tighter text-foreground italic">
+              <h3 className="text-xl font-black uppercase tracking-tighter text-foreground">
                 {message}
               </h3>
               <div className="flex items-center justify-center gap-1.5">

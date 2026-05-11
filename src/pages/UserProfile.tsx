@@ -201,14 +201,14 @@ const UserProfile: React.FC = () => {
               </div>
               
               <div className="flex items-center gap-6">
-                <div className="flex flex-col items-center md:items-start">
+                <Link to={`/user/${id}/follows/followers`} className="flex flex-col items-center md:items-start group">
                   <span className="text-lg font-black text-white leading-none group-hover:text-blue-500 transition-colors">{(user.followers || 0).toLocaleString()}</span>
-                  <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-bold mt-1">Followers</span>
-                </div>
-                <div className="flex flex-col items-center md:items-start border-l border-white/10 pl-6">
+                  <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-bold mt-1 group-hover:text-blue-300">Followers</span>
+                </Link>
+                <Link to={`/user/${id}/follows/following`} className="flex flex-col items-center md:items-start border-l border-white/10 pl-6 group">
                   <span className="text-lg font-black text-white leading-none group-hover:text-blue-500 transition-colors">{(user.following || 0).toLocaleString()}</span>
-                  <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-bold mt-1">Following</span>
-                </div>
+                  <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-bold mt-1 group-hover:text-blue-300">Following</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -270,11 +270,11 @@ const UserProfile: React.FC = () => {
                       <button onClick={() => setActiveTab('network')} className="text-xs font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest">View All</button>
                     </div>
                     {user.followedArtists && user.followedArtists.length > 0 ? (
-                      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-                        {user.followedArtists.slice(0, 5).map(artistId => {
+                      <div className="space-y-4">
+                        {user.followedArtists.slice(0, 3).map(artistId => {
                           const artist = MOCK_ARTISTS.find(a => a.uid === artistId);
                           if (!artist) return null;
-                          return <div key={artist.uid} className="flex-shrink-0 w-40 sm:w-48"><ArtistListItem artist={artist} /></div>;
+                          return <ArtistListItem key={artist.uid} artist={artist} />;
                         })}
                       </div>
                     ) : (

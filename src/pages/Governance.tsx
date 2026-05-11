@@ -333,7 +333,7 @@ const Governance: React.FC = () => {
               Decentralized Governance
             </div>
             <h1 className="text-4xl lg:text-6xl font-black uppercase tracking-tighter leading-tight text-foreground">
-              TonJam <span className="text-primary italic">DAO</span>
+              TonJam <span className="text-primary">DAO</span>
             </h1>
             <p className="text-lg text-muted-foreground font-medium leading-relaxed">
               The future of the protocol is in your hands. Propose, debate, and vote on the core parameters and features of the TonJam ecosystem.

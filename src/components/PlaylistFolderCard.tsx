@@ -95,11 +95,11 @@ const PlaylistFolderCard: React.FC<PlaylistFolderCardProps> = ({ folder, playlis
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     onBlur={() => setIsRenaming(false)}
-                    className="w-full bg-white/10 border-b border-blue-500 outline-none p-1 text-sm font-black uppercase italic tracking-tighter"
+                    className="w-full bg-white/10 border-b border-blue-500 outline-none p-1 text-sm font-black uppercase tracking-tighter"
                   />
                 </form>
               ) : (
-                <h3 className="text-lg font-black uppercase italic tracking-tighter text-white truncate">
+                <h3 className="text-lg font-black uppercase tracking-tighter text-white truncate">
                   {folder.title}
                 </h3>
               )}
@@ -187,11 +187,11 @@ const PlaylistFolderCard: React.FC<PlaylistFolderCardProps> = ({ folder, playlis
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 onBlur={() => setIsRenaming(false)}
-                className="w-full bg-white/10 border-b border-blue-500 outline-none p-1 text-sm font-black uppercase italic tracking-tighter"
+                className="w-full bg-white/10 border-b border-blue-500 outline-none p-1 text-sm font-black uppercase tracking-tighter"
               />
             </form>
           ) : (
-            <h4 className="text-sm font-black uppercase italic tracking-tighter text-white truncate">
+            <h4 className="text-sm font-black uppercase tracking-tighter text-white truncate">
               {folder.title}
             </h4>
           )}
@@ -240,7 +240,7 @@ const PlaylistFolderCard: React.FC<PlaylistFolderCardProps> = ({ folder, playlis
                     <img src={playlist.coverUrl || getPlaceholderImage(playlist.title)} alt={playlist.title} 
                          className="w-10 h-10 rounded-[2px] object-cover border border-white/10" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black uppercase italic tracking-tighter text-white/80 truncate">{playlist.title}</p>
+                      <p className="text-xs font-black uppercase tracking-tighter text-white/80 truncate">{playlist.title}</p>
                       <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">{playlist.trackCount || 0} Signals</p>
                     </div>
                     <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover/item:opacity-100"
@@ -255,7 +255,7 @@ const PlaylistFolderCard: React.FC<PlaylistFolderCardProps> = ({ folder, playlis
               ))
             ) : (
               <div className="py-8 text-center">
-                <p className="text-[10px] font-black text-white/10 uppercase tracking-widest italic">No linked nodes in this sector</p>
+                <p className="text-[10px] font-black text-white/10 uppercase tracking-widest">No linked nodes in this sector</p>
               </div>
             )}
           </motion.div>

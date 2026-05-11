@@ -107,7 +107,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
                 <span className="text-[9px] font-bold text-muted-foreground/80 uppercase">Real-time Settlement Enabled</span>
               </div>
             </div>
-            <p className="text-[8px] text-foreground/30 mt-2 leading-relaxed italic">"Royalties are distributed automatically via the TonJam Forge protocol upon every successful transaction or stream event."</p>
+            <p className="text-[8px] text-foreground/30 mt-2 leading-relaxed">"Royalties are distributed automatically via the TonJam Forge protocol upon every successful transaction or stream event."</p>
           </div>
         </div>
       </div>

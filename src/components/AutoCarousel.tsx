@@ -61,7 +61,7 @@ const AutoCarousel: React.FC<AutoCarouselProps> = ({ items, interval = 4000, onC
                 
                 <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
                   <div className="space-y-1">
-                    <h3 className="text-xl sm:text-4xl font-black text-white uppercase tracking-tighter leading-none italic font-display">{item.title}</h3>
+                    <h3 className="text-xl sm:text-4xl font-black text-white uppercase tracking-tighter leading-none font-display">{item.title}</h3>
                     <p className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-[0.2em]">{item.subtitle}</p>
                   </div>
                   {onCtaClick && (

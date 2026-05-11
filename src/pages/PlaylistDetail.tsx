@@ -374,7 +374,7 @@ const PlaylistDetail: React.FC = () => {
               </div>
             ))}
             {playlistTracks.length === 0 && (
-              <div className="text-white/40 italic p-8 text-center bg-white/5 border border-white/5 mt-4 mx-4 rounded-xl">
+              <div className="text-white/40 p-8 text-center bg-white/5 border border-white/5 mt-4 mx-4 rounded-xl">
                 No tracks in this playlist yet.
               </div>
             )}

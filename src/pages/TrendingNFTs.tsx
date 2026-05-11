@@ -82,8 +82,8 @@ const TrendingNFTs: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-blue-500" />
-                <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic leading-none">
-                  Trending <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 italic">Artifacts</span>
+                <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none">
+                  Trending <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">Artifacts</span>
                 </h1>
               </div>
               <p className="text-xs text-muted-foreground font-medium max-w-xl uppercase tracking-wider">
@@ -114,7 +114,7 @@ const TrendingNFTs: React.FC = () => {
         {/* Active Collections */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-black uppercase tracking-tight italic">Active Collections</h2>
+            <h2 className="text-xl font-black uppercase tracking-tight">Active Collections</h2>
             <button className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">View All</button>
           </div>
           <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -151,7 +151,7 @@ const TrendingNFTs: React.FC = () => {
                 <div className="group flex flex-row items-center gap-3 py-2 px-3 hover:bg-white/[0.03] transition-colors overflow-hidden relative rounded-[2px] w-full">
                   {/* Ranking & Status */}
                   <div className="flex flex-col items-center justify-center w-6 flex-shrink-0">
-                    <span className={`text-[10px] font-black italic tracking-tighter ${idx < 3 ? 'text-blue-500' : 'text-white/20'}`}>
+                    <span className={`text-[10px] font-black tracking-tighter ${idx < 3 ? 'text-blue-500' : 'text-white/20'}`}>
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     {idx < 10 && (
@@ -223,7 +223,7 @@ const TrendingNFTs: React.FC = () => {
                     <div className="flex flex-col items-end gap-0.5 hidden sm:flex">
                       <div className="flex items-center gap-1 opacity-40">
                         <TrendingUp className="w-2 h-2 text-green-500" />
-                        <span className="text-[7px] font-black text-white italic">TRENDING</span>
+                        <span className="text-[7px] font-black text-white">TRENDING</span>
                         <span className="text-[7px] font-bold text-green-400 ml-0.5">+{Math.floor(Math.random() * 20) + 1}%</span>
                       </div>
                       <div className="flex items-center gap-1">

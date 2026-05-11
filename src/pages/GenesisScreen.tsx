@@ -52,11 +52,11 @@ const GenesisScreen: React.FC = () => {
         >
           <div className="flex items-center justify-center gap-4 mb-4">
             <div className="h-px w-10 bg-gradient-to-r from-transparent to-primary"></div>
-            <span className="text-[9px] font-black uppercase tracking-[0.6em] text-primary italic">Protocol.v01_Initialized</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.6em] text-primary">Protocol.v01_Initialized</span>
             <div className="h-px w-10 bg-gradient-to-l from-transparent to-primary"></div>
           </div>
 
-          <h1 className="text-6xl md:text-8xl lg:text-[120px] font-black uppercase tracking-tighter leading-[0.8] italic">
+          <h1 className="text-6xl md:text-8xl lg:text-[120px] font-black uppercase tracking-tighter leading-[0.8]">
             THE <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-cyan-400">GENESIS</span> <br/>
             FORGE
@@ -70,14 +70,14 @@ const GenesisScreen: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center gap-6 pt-8">
               <Button 
                 size="lg" 
-                className="rounded-full px-12 bg-white text-black hover:bg-white/90 font-black italic h-14 group"
+                className="rounded-full px-12 bg-white text-black hover:bg-white/90 font-black h-14 group"
               >
                 Enter Collection <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="rounded-full px-12 border-white/10 bg-white/5 backdrop-blur-xl hover:bg-white/10 font-black italic h-14"
+                className="rounded-full px-12 border-white/10 bg-white/5 backdrop-blur-xl hover:bg-white/10 font-black h-14"
               >
                 Whitepaper
               </Button>
@@ -104,7 +104,7 @@ const GenesisScreen: React.FC = () => {
             <div key={i} className="p-8 md:p-10 flex flex-col justify-between group hover:bg-primary/[0.02] transition-colors h-full">
               <span className="text-[9px] font-black uppercase tracking-[0.4em] text-muted-foreground/60 group-hover:text-primary transition-colors">{stat.label}</span>
               <div className="mt-8">
-                <p className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-foreground">{stat.value}</p>
+                <p className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-foreground">{stat.value}</p>
                 <p className="text-[9px] text-muted-foreground/40 font-bold mt-1.5 uppercase tracking-widest">{stat.sub}</p>
               </div>
             </div>
@@ -118,13 +118,13 @@ const GenesisScreen: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_10px_var(--primary)]"></div>
-              <span className="text-[9px] font-black tracking-[0.4em] uppercase text-primary italic">Consensus.Masterworks</span>
+              <span className="text-[9px] font-black tracking-[0.4em] uppercase text-primary">Consensus.Masterworks</span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter leading-none mb-1">
+            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-1">
               Artifact <br/> Showcase
             </h2>
           </div>
-          <p className="text-muted-foreground max-w-sm text-sm font-medium leading-relaxed italic border-l border-primary/20 pl-6">
+          <p className="text-muted-foreground max-w-sm text-sm font-medium leading-relaxed border-l border-primary/20 pl-6">
             Every Genesis NFT functions as a high-fidelity key. Owners receive governance rights, exclusive air-drops, and lifetime whitelist access.
           </p>
         </div>
@@ -149,8 +149,8 @@ const GenesisScreen: React.FC = () => {
         <div className="absolute inset-0 bg-primary/[0.02] pointer-events-none"></div>
         <div className="w-full max-w-7xl mx-auto px-6 space-y-20 relative z-10">
           <div className="text-center space-y-4">
-             <span className="text-[9px] font-black uppercase tracking-[0.5em] text-primary italic">Consensus.Architects</span>
-             <h2 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">Architects of Sound</h2>
+             <span className="text-[9px] font-black uppercase tracking-[0.5em] text-primary">Consensus.Architects</span>
+             <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">Architects of Sound</h2>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
@@ -170,8 +170,8 @@ const GenesisScreen: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-xl font-black italic uppercase tracking-tight text-foreground">{artist.name}</h3>
-                  <p className="text-[10px] text-muted-foreground/60 uppercase font-bold tracking-[0.2em] italic">Protocol_Pioneer</p>
+                  <h3 className="text-xl font-black uppercase tracking-tight text-foreground">{artist.name}</h3>
+                  <p className="text-[10px] text-muted-foreground/60 uppercase font-bold tracking-[0.2em]">Protocol_Pioneer</p>
                 </div>
               </motion.div>
             ))}
@@ -206,7 +206,7 @@ const GenesisScreen: React.FC = () => {
               <div className={cn("inline-flex p-4 rounded-2xl bg-white/[0.05]", item.color)}>
                 <item.icon className="w-8 h-8" />
               </div>
-              <h4 className="text-2xl font-black italic uppercase tracking-tight">{item.title}</h4>
+              <h4 className="text-2xl font-black uppercase tracking-tight">{item.title}</h4>
               <p className="text-muted-foreground text-sm font-medium leading-relaxed">{item.desc}</p>
             </div>
           ))}
@@ -219,14 +219,14 @@ const GenesisScreen: React.FC = () => {
         <div className="relative z-10 max-w-2xl mx-auto px-6 space-y-10">
           <div className="inline-flex flex-col items-center">
             <img src={TON_LOGO} className="w-12 h-12 mb-6 grayscale hover:grayscale-0 transition-all cursor-pointer" alt="TON" />
-            <h2 className="text-5xl font-black italic uppercase tracking-tighter">Secure the Alpha</h2>
+            <h2 className="text-5xl font-black uppercase tracking-tighter">Secure the Alpha</h2>
             <p className="text-muted-foreground text-lg font-medium">Genesis supply is 94% distributed. Final unique drops occurring soon.</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-             <Button size="lg" className="w-full sm:w-auto rounded-full px-12 bg-white text-black font-black italic h-14">
+             <Button size="lg" className="w-full sm:w-auto rounded-full px-12 bg-white text-black font-black h-14">
                 Browse Marketplace
              </Button>
-             <Button variant="ghost" size="lg" className="w-full sm:w-auto text-blue-500 hover:text-blue-400 font-black italic h-14">
+             <Button variant="ghost" size="lg" className="w-full sm:w-auto text-blue-500 hover:text-blue-400 font-black h-14">
                 Contract Proof <ExternalLink className="ml-2 w-4 h-4" />
              </Button>
           </div>

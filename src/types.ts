@@ -246,6 +246,7 @@ export interface Artist {
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   playCount?: number;
   location?: string;
+  verificationStatus?: 'unverified' | 'pending' | 'verified';
 }
 
 export interface PostComment {
@@ -385,6 +386,7 @@ export interface UserProfile {
   role?: 'artist' | 'collector' | 'admin';
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   isVerified?: boolean;
+  verificationStatus?: 'unverified' | 'pending' | 'verified';
   royaltyConfig?: {
     streamingSplits: RoyaltySplit[];
     nftSaleSplits: RoyaltySplit[];
@@ -399,6 +401,7 @@ export interface User {
   avatar?: string;
   verified?: boolean;
   followers: number;
+  walletAddress?: string;
 }
 
 export interface Royalty {

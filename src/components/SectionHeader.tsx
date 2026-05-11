@@ -23,8 +23,8 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ title, subtitle, viewAllL
           </div>
           <span className="text-[9px] font-black uppercase tracking-[0.5em] text-muted-foreground/40 font-mono">Stream_Access_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
         </div>
-        <h2 className="text-[11px] sm:text-[13px] font-black uppercase tracking-tighter text-foreground italic leading-none truncate font-display">{title}</h2>
-        {subtitle && <p className="text-[7.5px] font-bold text-muted-foreground uppercase tracking-[0.2em] italic max-w-md">{subtitle}</p>}
+        <h2 className="text-[11px] sm:text-[13px] font-black uppercase tracking-tighter text-foreground leading-none truncate font-display">{title}</h2>
+        {subtitle && <p className="text-[7.5px] font-bold text-muted-foreground uppercase tracking-[0.2em] max-w-md">{subtitle}</p>}
       </div>
       
       <div className="flex items-center gap-4">

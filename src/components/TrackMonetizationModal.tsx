@@ -123,7 +123,7 @@ const TrackMonetizationModal: React.FC<TrackMonetizationModalProps> = ({ track, 
               <Gem className="w-6 h-6 text-cyan-500" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-black uppercase tracking-tight italic">Asset Monetization Configuration</DialogTitle>
+              <DialogTitle className="text-xl font-black uppercase tracking-tight">Asset Monetization Configuration</DialogTitle>
               <DialogDescription className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mt-1">
                 Configure protocol parameters for "{track.title}"
               </DialogDescription>

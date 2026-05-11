@@ -325,6 +325,22 @@
       "schema": "Post",
       "description": "Social feed"
     },
+    "/tracks/{trackId}/likes/{likeId}": {
+      "schema": "Like",
+      "description": "Likes on a track"
+    },
+    "/tracks/{trackId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments on a track"
+    },
+    "/users/{userId}/likes/{likeId}": {
+      "schema": "Like",
+      "description": "Likes on an artist/user profile"
+    },
+    "/users/{userId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments on an artist/user profile"
+    },
     "/posts/{postId}/likes/{likeId}": {
       "schema": "Like",
       "description": "Likes on a post"

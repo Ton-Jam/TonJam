@@ -126,7 +126,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
 
   return (
     <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="bg-[#0A0A0B] border-none shadow-[0_-12px_40px_rgba(0,0,0,0.8)] backdrop-blur-3xl">
+      <DrawerContent className="bg-background border-none shadow-[0_-12px_40px_rgba(0,0,0,0.8)]">
         {/* Cyborg Tech Overlay */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.05] bg-[radial-gradient(circle_at_center,_transparent_0%,_#000_100%),linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_100%,100%_2px,3px_100%]" />
         
@@ -149,10 +149,10 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </motion.div>
             <div className="flex-1 min-w-0">
-              <DrawerTitle className="text-2xl font-black text-white truncate leading-none uppercase italic tracking-tighter">
+              <DrawerTitle className="text-2xl font-black text-white truncate leading-none uppercase tracking-tighter">
                 {track.title}
               </DrawerTitle>
-              <DrawerDescription className="text-[10px] font-black text-blue-500 mt-2 uppercase tracking-[0.3em] truncate italic opacity-80">
+              <DrawerDescription className="text-[10px] font-black text-blue-500 mt-2 uppercase tracking-[0.3em] truncate opacity-80">
                 // ARTIST: {track.artist}
               </DrawerDescription>
               <div className="flex items-center gap-2 mt-3">
@@ -182,7 +182,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
                   <option.icon className={cn("h-4 w-4 transition-all group-hover:scale-110", option.iconColor)} />
                 </div>
                 <div className="flex-1">
-                  <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] transition-colors italic", option.color)}>
+                  <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] transition-colors", option.color)}>
                     {option.label}
                   </span>
                 </div>
@@ -195,7 +195,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
             <DrawerClose asChild>
               <Button 
                 variant="ghost" 
-                className="w-full rounded-[4px] h-14 font-black text-[10px] uppercase tracking-[0.5em] text-white/30 hover:text-white hover:bg-white/5 transition-all border border-white/5 italic"
+                className="w-full rounded-[4px] h-14 font-black text-[10px] uppercase tracking-[0.5em] text-white/30 hover:text-white hover:bg-white/5 transition-all border border-white/5"
               >
                 Terminate_Interface
               </Button>

@@ -358,15 +358,15 @@ const Marketplace: React.FC = () => {
             <div className="mb-4 p-8 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-blue-600 text-white border-none font-black italic">ULTRA RARE</Badge>
+                  <Badge className="bg-blue-600 text-white border-none font-black">ULTRA RARE</Badge>
                   <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400">Protocol Level: 01</span>
                 </div>
-                <h3 className="text-3xl font-black italic uppercase tracking-tighter">The Genesis Forge is Active</h3>
+                <h3 className="text-3xl font-black uppercase tracking-tighter">The Genesis Forge is Active</h3>
                 <p className="text-muted-foreground text-sm max-w-lg">Enter the dedicated Genesis portal for a hardware-grade experience, deep lore, and high-fidelity artifact showcase.</p>
               </div>
               <Button 
                 onClick={() => navigate('/genesis-forge')}
-                className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black italic px-8 h-14 group shadow-xl shadow-blue-500/20"
+                className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black px-8 h-14 group shadow-xl shadow-blue-500/20"
               >
                 Go to Forge Fullscreen <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>

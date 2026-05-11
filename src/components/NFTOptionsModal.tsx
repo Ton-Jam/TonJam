@@ -117,7 +117,7 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
 
   return (
     <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="bg-[#0A0A0A] shadow-[0_-8px_40px_rgba(0,0,0,0.9)] backdrop-blur-2xl">
+      <DrawerContent className="bg-background shadow-[0_-8px_40px_rgba(0,0,0,0.9)] border-none">
         {/* Hardware style scanline */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
         

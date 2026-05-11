@@ -43,7 +43,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
           {/* Date Badge */}
           <div className="absolute top-4 left-4 bg-blue-500 text-white px-4 py-2 rounded-2xl flex flex-col items-center shadow-xl backdrop-blur-md">
             <span className="text-[10px] font-black uppercase tracking-widest">{eventDate.toLocaleDateString('en-US', { month: 'short' })}</span>
-            <span className="text-xl font-black italic tracking-tighter leading-none">{eventDate.getDate()}</span>
+            <span className="text-xl font-black tracking-tighter leading-none">{eventDate.getDate()}</span>
           </div>
 
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
@@ -55,7 +55,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
 
         {/* Event Details */}
         <div className="p-6 sm:p-8 flex-1 flex flex-col">
-          <h3 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tighter italic mb-4 group-hover:text-blue-400 transition-colors">
+          <h3 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tighter mb-4 group-hover:text-blue-400 transition-colors">
             {event.title}
           </h3>
 
@@ -66,7 +66,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
               </div>
               <div>
                 <p className="text-[10px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Venue</p>
-                <p className="text-xs font-bold text-white uppercase italic">{event.venue}, {event.location}</p>
+                <p className="text-xs font-bold text-white uppercase">{event.venue}, {event.location}</p>
               </div>
             </div>
 
@@ -76,7 +76,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
               </div>
               <div>
                 <p className="text-[10px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Schedule</p>
-                <p className="text-xs font-bold text-white uppercase italic">{formattedDate} @ {event.time}</p>
+                <p className="text-xs font-bold text-white uppercase">{formattedDate} @ {event.time}</p>
               </div>
             </div>
           </div>

@@ -165,7 +165,7 @@ const Login: React.FC = () => {
           >
             <img src={APP_LOGO} className="w-12 h-12 relative z-10" alt="Logo" />
           </motion.div>
-          <h1 className="text-lg font-bold text-foreground tracking-tighter uppercase italic leading-none mb-2">
+          <h1 className="text-lg font-bold text-foreground tracking-tighter uppercase leading-none mb-2">
             TON JAM
           </h1>
           <p className="text-[9px] font-semibold text-muted-foreground/60 tracking-[0.4em] uppercase">
@@ -189,7 +189,7 @@ const Login: React.FC = () => {
 
           <Card className="bg-white border-border/50 shadow-xl shadow-black/[0.03] relative overflow-hidden rounded-[2px]">
             <CardHeader className="text-center pb-2 relative z-10">
-              <CardTitle className="text-base font-bold tracking-tight text-foreground italic">
+              <CardTitle className="text-base font-bold tracking-tight text-foreground">
                 {isLogin ? 'WELCOME BACK' : 'JOIN THE REVOLUTION'}
               </CardTitle>
               <CardDescription className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/60">

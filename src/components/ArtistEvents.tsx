@@ -32,7 +32,7 @@ const ArtistEvents: React.FC<ArtistEventsProps> = ({ events }) => {
                   <div className="text-lg font-bold text-foreground">{new Date(event.date).getDate()}</div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-foreground group-hover:text-blue-400 transition-colors uppercase italic tracking-tight">{event.title}</h4>
+                  <h4 className="text-sm font-bold text-foreground group-hover:text-blue-400 transition-colors uppercase tracking-tight">{event.title}</h4>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground mt-1">
                     <div className="flex items-center gap-1 font-medium">
                       <MapPin className="h-3 w-3 text-blue-500/50" />

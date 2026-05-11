@@ -105,7 +105,7 @@ export const SearchBar: React.FC<SearchBarProps & { children?: React.ReactNode }
                         </div>
                       ))
                     ) : (
-                      <p className="px-2 text-xs text-muted-foreground italic">No recent searches</p>
+                      <p className="px-2 text-xs text-muted-foreground">No recent searches</p>
                     )}
                   </div>
                 </div>

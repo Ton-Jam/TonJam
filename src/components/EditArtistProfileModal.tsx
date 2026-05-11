@@ -341,7 +341,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
               </div>
 
               {events.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground italic ml-2">No events scheduled. Plan your next gig!</p>
+                <p className="text-[11px] text-muted-foreground ml-2">No events scheduled. Plan your next gig!</p>
               ) : (
                 <div className="space-y-4">
                   {events.map((event, index) => (

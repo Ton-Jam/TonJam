@@ -204,7 +204,7 @@ const PostDetail: React.FC = () => {
               e.stopPropagation();
               navigate(`/discover?search=${encodeURIComponent(part)}`);
             }}
-            className="text-blue-500 hover:text-blue-400 font-bold italic transition-colors cursor-pointer"
+            className="text-blue-500 hover:text-blue-400 font-bold transition-colors cursor-pointer"
           >
             {part}
           </span>
@@ -223,7 +223,7 @@ const PostDetail: React.FC = () => {
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="flex flex-col">
-            <h1 className="text-xs font-black uppercase tracking-[0.2em] italic">Signal Thread</h1>
+            <h1 className="text-xs font-black uppercase tracking-[0.2em]">Signal Thread</h1>
             <span className="text-[10px] text-blue-500/50 font-black uppercase tracking-widest leading-none">Sector-Log View</span>
           </div>
         </div>
@@ -247,7 +247,7 @@ const PostDetail: React.FC = () => {
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     <h3 
-                      className="text-sm font-black uppercase italic tracking-tighter text-foreground hover:text-blue-500 transition-colors cursor-pointer"
+                      className="text-sm font-black uppercase tracking-tighter text-foreground hover:text-blue-500 transition-colors cursor-pointer"
                       onClick={() => navigate(isMe ? '/profile' : `/user/${post.userId}`)}
                     >
                       {post.userName}
@@ -305,7 +305,7 @@ const PostDetail: React.FC = () => {
                   <img src={nft.imageUrl} alt={nft.title} className="w-full aspect-square object-cover" />
                   <div className="p-4 flex items-center justify-between">
                     <div>
-                      <h4 className="font-black uppercase italic tracking-tighter text-blue-400">{nft.title}</h4>
+                      <h4 className="font-black uppercase tracking-tighter text-blue-400">{nft.title}</h4>
                       <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mt-1">{nft.edition}</p>
                     </div>
                     <Badge variant="outline" className="border-blue-500/20 text-blue-500 h-6 px-3 rounded-full uppercase text-[9px] font-black">Collectible</Badge>
@@ -334,15 +334,15 @@ const PostDetail: React.FC = () => {
             {/* Stats Summary */}
             <div className="flex items-center gap-6 py-2">
               <div className="flex items-center gap-1.5 group cursor-pointer">
-                <span className="text-sm font-black italic text-foreground group-hover:text-emerald-500 transition-colors">{repostsCount}</span>
+                <span className="text-sm font-black text-foreground group-hover:text-emerald-500 transition-colors">{repostsCount}</span>
                 <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-emerald-500/50 transition-colors">Echos</span>
               </div>
               <div className="flex items-center gap-1.5 group cursor-pointer">
-                <span className="text-sm font-black italic text-foreground group-hover:text-blue-500 transition-colors">{comments.length}</span>
+                <span className="text-sm font-black text-foreground group-hover:text-blue-500 transition-colors">{comments.length}</span>
                 <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-blue-500/50 transition-colors">Responses</span>
               </div>
               <div className="flex items-center gap-1.5 group cursor-pointer">
-                <span className="text-sm font-black italic text-foreground group-hover:text-rose-500 transition-colors">{likesCount}</span>
+                <span className="text-sm font-black text-foreground group-hover:text-rose-500 transition-colors">{likesCount}</span>
                 <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-rose-500/50 transition-colors">Resonances</span>
               </div>
             </div>
@@ -460,7 +460,7 @@ const PostDetail: React.FC = () => {
 
             {/* Responses Section */}
             <div className="space-y-6">
-              <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] italic">Neural Log: {comments.length} Signals</h3>
+              <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Neural Log: {comments.length} Signals</h3>
               
               <form onSubmit={handleAddComment} className="flex gap-4">
                 <Avatar className="h-10 w-10 border border-white/5">
@@ -473,7 +473,7 @@ const PostDetail: React.FC = () => {
                     value={commentText} 
                     onChange={(e) => setCommentText(e.target.value)} 
                     placeholder="Broadcast your response..." 
-                    className="w-full bg-zinc-900 border border-white/10 rounded-2xl h-12 px-5 text-sm font-bold italic focus:ring-1 focus:ring-blue-500/30 transition-all outline-none placeholder:text-zinc-600" 
+                    className="w-full bg-zinc-900 border border-white/10 rounded-2xl h-12 px-5 text-sm font-bold focus:ring-1 focus:ring-blue-500/30 transition-all outline-none placeholder:text-zinc-600" 
                   />
                   <Button 
                     type="submit" 
@@ -561,7 +561,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <span 
-                className="text-xs font-black uppercase italic tracking-tighter text-blue-500 hover:text-blue-400 cursor-pointer"
+                className="text-xs font-black uppercase tracking-tighter text-blue-500 hover:text-blue-400 cursor-pointer"
                 onClick={(e) => onProfileClick(e, comment.userId)}
               >
                 {comment.userName}

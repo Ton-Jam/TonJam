@@ -17,7 +17,7 @@ const Footer: React.FC = () => {
               <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-all">
                 <img src={TON_LOGO} alt="TonJam" className="w-6 h-6" />
               </div>
-              <span className="text-xl font-black uppercase tracking-tighter italic">TonJam</span>
+              <span className="text-xl font-black uppercase tracking-tighter">TonJam</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               The premier decentralized music protocol and NFT marketplace built on the TON blockchain. Empowering artists and collectors in the next sonic evolution.

@@ -58,9 +58,9 @@ const LimitedNFTs: React.FC = () => {
         <div className="relative z-10 text-center space-y-6 px-6">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
-            <span className="text-[10px] font-black uppercase tracking-[0.6em] text-orange-500 italic">High Demand Sector</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.6em] text-orange-500">High Demand Sector</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic leading-none">
+          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
             Limited <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Editions</span>
           </h1>
           <p className="max-w-xl mx-auto text-muted-foreground text-sm font-medium leading-relaxed">
@@ -105,7 +105,7 @@ const LimitedNFTs: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-               <h2 className="text-xl font-black uppercase tracking-tight italic">{limitedNFTs.length} Artifacts Discovered</h2>
+               <h2 className="text-xl font-black uppercase tracking-tight">{limitedNFTs.length} Artifacts Discovered</h2>
             </div>
           </div>
 
@@ -151,7 +151,7 @@ const LimitedNFTs: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
              <div className="space-y-8">
                 <div className="space-y-2">
-                   <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic leading-none">Scarcity as a <br /> Protocol</h2>
+                   <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none">Scarcity as a <br /> Protocol</h2>
                    <p className="text-muted-foreground text-sm md:text-base font-medium leading-relaxed">
                      On TonJam, scarcity is not just a marketing tool. It's a fundamental attribute of the minted artifact, enforced by smart contracts on the TON blockchain.
                    </p>
@@ -181,20 +181,20 @@ const LimitedNFTs: React.FC = () => {
                 <div className="relative bg-black/40 border border-white/10 rounded-2xl p-8 space-y-6 backdrop-blur-xl">
                    <SectionHeader title="Verified Provenance" subtitle="On-chain Verification" />
                    <div className="space-y-4">
-                      <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between italic">
+                      <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
                          <span className="text-[10px] font-bold text-muted-foreground uppercase">Token Standard</span>
                          <span className="text-xs font-black text-blue-400">TON NFT-v2</span>
                       </div>
-                      <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between italic">
+                      <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
                          <span className="text-[10px] font-bold text-muted-foreground uppercase">Storage Protocol</span>
                          <span className="text-xs font-black text-purple-400">TON Storage</span>
                       </div>
-                      <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between italic">
+                      <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
                          <span className="text-[10px] font-bold text-muted-foreground uppercase">Rights Management</span>
                          <span className="text-xs font-black text-emerald-400">Embedded Metadata</span>
                       </div>
                    </div>
-                   <Button className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-700 font-black italic shadow-xl shadow-blue-500/20">
+                   <Button className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-700 font-black shadow-xl shadow-blue-500/20">
                       View Protocol Documentation
                    </Button>
                 </div>

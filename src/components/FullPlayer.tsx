@@ -325,28 +325,28 @@ const FullPlayer: React.FC = () => {
               align="end" 
               className="hidden lg:block bg-[#0A0A0B]/95 border-white/5 text-white shadow-[0_-16px_60px_rgba(0,0,0,0.8)] min-w-[220px] p-1 rounded-xl backdrop-blur-3xl"
             >
-              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4 italic">Neural Output</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Neural Output</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-white/5" />
               <DropdownMenuItem onClick={() => toggleLikeTrack(currentTrack.id)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
                 <Heart className={cn("h-4 w-4", isLiked && "fill-current text-red-500")} />
-                <span className="text-[10px] font-black uppercase tracking-widest italic">{isLiked ? "Unlike Track" : "Like Track"}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">{isLiked ? "Unlike Track" : "Like Track"}</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => addNotification('Added to queue!', 'success')} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
                 <ListMusic className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest italic">Add to Queue</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Add to Queue</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTrackToAddToPlaylist(currentTrack)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
                 <PlusCircle className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest italic">Add to Playlist</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Add to Playlist</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/5" />
               <DropdownMenuItem onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
                 <User className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest italic">View Artist</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">View Artist</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
                 <Share2 className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest italic">Share Signal</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Share Signal</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -394,7 +394,7 @@ const FullPlayer: React.FC = () => {
                   <h1 className="text-lg font-black uppercase tracking-tight truncate mb-0.5">
                     {currentTrack.title}
                   </h1>
-                  <p className="text-[11px] font-bold text-white uppercase tracking-widest italic cursor-pointer hover:text-blue-400 transition-colors" onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }}>
+                  <p className="text-[11px] font-bold text-white uppercase tracking-widest cursor-pointer hover:text-blue-400 transition-colors" onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }}>
                     {currentTrack.artist}
                   </p>
                 </div>
@@ -434,7 +434,7 @@ const FullPlayer: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-white/40 mt-3 px-2">
                   <span className="text-white">{formatTime(currentTime)}</span>
-                  <span className="text-blue-500/60 font-mono tracking-normal italic">LINK active</span>
+                  <span className="text-blue-500/60 font-mono tracking-normal">LINK active</span>
                   <span className="text-white">{formatTime(duration)}</span>
                 </div>
               </div>
@@ -575,7 +575,7 @@ const FullPlayer: React.FC = () => {
                   <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full rounded-full object-cover" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black uppercase italic tracking-widest text-blue-500">Neural Insights</h3>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-blue-500">Neural Insights</h3>
                   <p className="text-[8px] font-bold text-white uppercase tracking-widest">Active Relay: {currentTrack.title}</p>
                 </div>
               </div>
@@ -712,7 +712,7 @@ const FullPlayer: React.FC = () => {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-lg font-black uppercase italic tracking-tight text-white truncate">{artistData.name}</h4>
+                        <h4 className="text-lg font-black uppercase tracking-tight text-white truncate">{artistData.name}</h4>
                         {artistData.verified && <CheckCircle2 className="h-4 w-4 text-blue-500 flex-shrink-0" />}
                       </div>
                       <p className="text-[8px] font-black uppercase text-white/20 tracking-widest">{artistData.followers?.toLocaleString()} Listeners</p>
@@ -739,14 +739,14 @@ const FullPlayer: React.FC = () => {
                   <Clock className="w-4 h-4 text-blue-500/40" />
                   <div>
                     <p className="text-[8px] font-black uppercase tracking-widest text-white/20">Release</p>
-                    <p className="font-black italic uppercase tracking-tighter text-sm">{currentTrack.releaseDate ? new Date(currentTrack.releaseDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'MAR 2024'}</p>
+                    <p className="font-black uppercase tracking-tighter text-sm">{currentTrack.releaseDate ? new Date(currentTrack.releaseDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'MAR 2024'}</p>
                   </div>
                 </div>
                 <div className="bg-white/5 p-4 rounded-[4px] border-none flex items-center gap-3">
                   <Hash className="w-4 h-4 text-blue-500/40" />
                   <div>
                     <p className="text-[8px] font-black uppercase tracking-widest text-white/20">ID</p>
-                    <p className="font-black italic uppercase tracking-tighter text-sm">TJ-{currentTrack.id.slice(-4).toUpperCase()}</p>
+                    <p className="font-black uppercase tracking-tighter text-sm">TJ-{currentTrack.id.slice(-4).toUpperCase()}</p>
                   </div>
                 </div>
               </div>
@@ -764,10 +764,10 @@ const FullPlayer: React.FC = () => {
                 <div className="bg-white/5 border-none rounded-[4px] p-6 space-y-6">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-xl font-black uppercase italic tracking-tight text-white mb-1">Sonic Artifact</h3>
+                      <h3 className="text-xl font-black uppercase tracking-tight text-white mb-1">Sonic Artifact</h3>
                       <p className="text-[10px] font-black uppercase text-blue-500 tracking-[0.2em]">{currentNFT.edition} Edition</p>
                     </div>
-                    <Badge className="bg-blue-600 text-white shadow-lg shadow-blue-500/20 h-8 px-4 font-black italic tracking-tighter text-lg border-none">
+                    <Badge className="bg-blue-600 text-white shadow-lg shadow-blue-500/20 h-8 px-4 font-black tracking-tighter text-lg border-none">
                       {currentNFT.price} TON
                     </Badge>
                   </div>
@@ -809,7 +809,7 @@ const FullPlayer: React.FC = () => {
                   {currentNFT.traits?.slice(0, 4).map((trait, i) => (
                     <div key={i} className="bg-white/5 p-4 rounded-[4px] border-none">
                       <p className="text-[8px] font-black uppercase tracking-widest text-white/20 mb-1">{trait.trait_type}</p>
-                      <p className="font-black italic uppercase tracking-tighter text-sm text-white/80">{trait.value}</p>
+                      <p className="font-black uppercase tracking-tighter text-sm text-white/80">{trait.value}</p>
                     </div>
                   ))}
                 </div>
@@ -823,7 +823,7 @@ const FullPlayer: React.FC = () => {
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
                         <p className="text-[10px] font-bold text-white/60 uppercase">{item.event}</p>
                       </div>
-                      <p className="text-[10px] font-black text-white/20 italic">{item.date}</p>
+                      <p className="text-[10px] font-black text-white/20">{item.date}</p>
                     </div>
                   ))}
                 </div>
@@ -851,7 +851,7 @@ const FullPlayer: React.FC = () => {
             className="fixed inset-0 z-[70] bg-[#0B0F14]/95 backdrop-blur-3xl flex flex-col pt-10"
           >
             <div className="flex items-center justify-between p-6 mb-4">
-              <h3 className="text-2xl font-black uppercase italic tracking-tight">Transmission Queue</h3>
+              <h3 className="text-2xl font-black uppercase tracking-tight">Transmission Queue</h3>
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -869,7 +869,7 @@ const FullPlayer: React.FC = () => {
                     <AvatarImage src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} />
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="text-lg font-black uppercase italic text-blue-500 truncate">{currentTrack.title}</p>
+                    <p className="text-lg font-black uppercase text-blue-500 truncate">{currentTrack.title}</p>
                     <p className="text-xs font-bold text-white uppercase tracking-widest">{currentTrack.artist}</p>
                   </div>
                 </div>

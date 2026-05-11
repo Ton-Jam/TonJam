@@ -29,7 +29,7 @@ export default function ArtistAnalytics() {
 
       <div className="relative z-10 max-w-5xl mx-auto p-4 sm:p-6 space-y-8 mt-4">
         <div className="space-y-1">
-          <h2 className="text-2xl font-black uppercase tracking-tighter italic">Data Insights</h2>
+          <h2 className="text-2xl font-black uppercase tracking-tighter">Data Insights</h2>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Monitor your artifact performance and protocol revenue</p>
         </div>
 

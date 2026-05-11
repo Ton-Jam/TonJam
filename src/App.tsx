@@ -36,7 +36,7 @@ import Wallet from '@/pages/Wallet';
 import Login from '@/pages/Login';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Staking from '@/pages/Staking';
-import About from '@/pages/About';
+import FollowersFollowing from '@/pages/FollowersFollowing';
 import AlbumDetails from '@/pages/AlbumDetails';
 import Governance from '@/pages/Governance';
 import { AudioProvider } from '@/context/AudioContext';
@@ -221,7 +221,7 @@ const AppContent: React.FC = () => {
               <Route path="/social" element={<PageWrapper><SocialFeedPage /></PageWrapper>} />
               <Route path="/admin" element={<PageWrapper><ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute></PageWrapper>} />
               <Route path="/login" element={<Login />} />
-              <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
+              <Route path="/user/:id/follows/:type" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
             </Routes>
           </AnimatePresence>
         </Layout>
