@@ -82,6 +82,39 @@ async function startServer() {
     // Serve static files from public/uploads
     app.use('/uploads', express.static(uploadsDir));
 
+    // Explicitly serve and validate tonconnect-manifest.json
+    app.get('/tonconnect-manifest.json', (req, res) => {
+        try {
+            const manifestPath = path.join(process.cwd(), 'public', 'tonconnect-manifest.json');
+            const manifestData = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+            // Validation Mechanism as per Ton Connect Documentation
+            const errors: string[] = [];
+
+            if (!manifestData.url || typeof manifestData.url !== 'string') {
+                errors.push("Missing or invalid 'url'. Must be a string.");
+            }
+            if (!manifestData.name || typeof manifestData.name !== 'string') {
+                errors.push("Missing or invalid 'name'. Must be a string.");
+            }
+            if (!manifestData.iconUrl || typeof manifestData.iconUrl !== 'string') {
+                errors.push("Missing or invalid 'iconUrl'. Must be a string.");
+            }
+
+            if (errors.length > 0) {
+                console.error('Manifest validation errors:', errors);
+                return res.status(400).json({ error: 'App manifest content error', details: errors });
+            }
+
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.json(manifestData);
+        } catch (error: any) {
+            console.error('Failed to parse tonconnect-manifest.json:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+
     // API Routes
     app.post('/api/upload', upload.fields([
         { name: 'audio', maxCount: 1 },

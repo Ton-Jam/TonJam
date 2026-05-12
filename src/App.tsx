@@ -55,25 +55,10 @@ import { seedDatabase } from '@/services/seedService';
 
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
-const getManifestUrl = () => {
-  try {
-    const manifest = {
-      url: "https://ton-jam.vercel.app",
-      name: "TonJam",
-      iconUrl: "https://i.postimg.cc/63GsZHzq/TonJam-icon.png",
-      description: "Web3 Music & NFT Marketplace on TON"
-    };
-
-    const jsonString = JSON.stringify(manifest);
-    const base64Manifest = btoa(unescape(encodeURIComponent(jsonString)));
-
-    return `data:application/json;base64,${base64Manifest}`;
-  } catch (e) {
-    return "/tonconnect-manifest.json";
-  }
-};
-
-const manifestUrl = getManifestUrl();
+// Using a publicly accessible manifest URL hosted on GitHub pages to bypass the AI Studio authentication proxy.
+// Wallet apps and TonConnect UI cannot parse the localhost GUI HTML intercept return.
+// When deploying to production on a public URL, point this back to window.location.origin + '/tonconnect-manifest.json'.
+const manifestUrl = 'https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json';
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -235,7 +220,7 @@ const App: React.FC = () => {
     <TonConnectUIProvider 
       manifestUrl={manifestUrl}
       actionsConfiguration={{
-        twaReturnUrl: 'https://t.me/tonjam_bot'
+        twaReturnUrl: 'https://ais-dev-mfbg5o2augtyymzecgehh7-9697536059.europe-west2.run.app'
       }}
     >
       <ErrorBoundary>
