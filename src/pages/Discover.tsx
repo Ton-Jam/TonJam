@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { krupyVibesSearch } from '@/services/krupyVibesService';
 import { Joyride } from 'react-joyride';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -140,7 +141,9 @@ const Discover: React.FC = () => {
   );
 
   const [isVoiceSearchActive, setIsVoiceSearchActive] = useState(false);
+  const [isVibeSearch, setIsVibeSearch] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'tracks' | 'nfts' | 'artists' | 'playlists' | 'users'>('all');
+  const [aiVibeResults, setAiVibeResults] = useState<any[] | null>(null);
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
@@ -217,6 +220,9 @@ const Discover: React.FC = () => {
   };
 
   const filteredResults = useMemo(() => {
+    if (aiVibeResults) {
+      return { tracks: aiVibeResults, nfts: [], artists: [], users: [] };
+    }
     const query = searchQuery.toLowerCase();
     
     const sortPrioritizeFollowed = (a: any, b: any, getId: (item: any) => string | undefined) => {
@@ -275,12 +281,25 @@ const Discover: React.FC = () => {
     }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, usr => usr.uid));
 
     return { tracks, nfts, artists: filteredArtists, users };
-  }, [searchQuery, allTracks, artists, allNFTs, firestoreUsers, bpmRange, selectedKeys, selectedMoods, onlyVerified, followedUserIds]);
+  }, [searchQuery, allTracks, artists, allNFTs, firestoreUsers, bpmRange, selectedKeys, selectedMoods, onlyVerified, followedUserIds, aiVibeResults]);
 
   const hasResults = filteredResults.tracks.length > 0 || 
                      filteredResults.nfts.length > 0 || 
                      filteredResults.artists.length > 0 ||
                      filteredResults.users.length > 0;
+
+  useEffect(() => {
+    // Basic vibe detection: "mood", "vibe", "feeling", "like"
+    const vibeKeywords = ['mood', 'vibe', 'feeling', 'like', 'sounds like', 'atmosphere'];
+    const lowerQuery = searchQuery.toLowerCase();
+    const isVibeQuery = vibeKeywords.some(k => lowerQuery.includes(k)) || isVibeSearch;
+
+    if (isVibeQuery && searchQuery.length > 5) {
+       krupyVibesSearch(searchQuery, allTracks).then(setAiVibeResults);
+    } else {
+       setAiVibeResults(null);
+    }
+  }, [searchQuery, isVibeSearch, allTracks]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -314,7 +333,7 @@ const Discover: React.FC = () => {
       />
 
       {/* Search Header - Sticky & Atmospheric */}
-    <div className="fixed top-0 left-0 lg:left-64 right-0 z-30 bg-background/80 backdrop-blur-3xl pt-3 pb-3 px-[var(--page-margin)] md:px-[var(--page-margin-md)] lg:px-[var(--page-margin-lg)] border-b border-white/5">
+    <div className="fixed top-0 left-0 lg:left-64 right-0 z-30 bg-background/80 backdrop-blur-3xl pt-2 pb-2 px-[var(--page-margin)] md:px-[var(--page-margin-md)] lg:px-[var(--page-margin-lg)] border-b border-white/5">
         <div className="max-w-4xl mx-auto w-full flex items-center gap-3">
           <form 
             onSubmit={handleSearchSubmit} 
@@ -324,15 +343,17 @@ const Discover: React.FC = () => {
               <div className="absolute left-4 z-10 pointer-events-none">
                 <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
               </div>
-              <Input
-                type="text"
-                placeholder="Search artists, tracks, NFTs..."
-                value={searchQuery}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 pr-24 h-12 bg-white/5 border border-blue-500/20 focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-xl transition-all discover-search-input text-sm font-medium"
-              />
+              <div className="relative flex-1">
+                <Input
+                  type="text"
+                  placeholder="Search artists, tracks, NFTs..."
+                  value={searchQuery}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-11 pr-24 h-12 bg-white/5 border border-blue-500/20 focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[14px] transition-all discover-search-input text-sm font-medium"
+                />
+              </div>
               <div className="absolute right-1.5 flex items-center gap-1">
                 <AnimatePresence>
                   {searchQuery && (
@@ -583,15 +604,15 @@ const Discover: React.FC = () => {
         </div>
 
         {/* Filter Tabs - Pill Buttons */}
-        <div className="mt-3 flex justify-center filter-tabs">
-          <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full max-w-2xl">
-            <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start md:justify-center px-4">
-              <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
+        <div className="mt-1 flex flex-col items-center filter-tabs w-full max-w-2xl mx-auto px-4">
+          <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
+            <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start md:justify-center px-1 py-2">
+              <TabsList className="bg-transparent h-auto p-0 gap-3 flex flex-nowrap min-w-max">
                 {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
                   <TabsTrigger
                     key={filter}
                     value={filter}
-                    className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border border-transparent data-[state=active]:border-blue-400/30 hover:data-[state=inactive]:bg-white/10 shrink-0"
+                    className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0"
                   >
                     {filter}
                   </TabsTrigger>
@@ -602,7 +623,7 @@ const Discover: React.FC = () => {
         </div>
       </div>
 
-      <div className="page-container pt-[110px] pb-6 space-y-10">
+      <div className="page-container pt-[98px] pb-6 space-y-6">
         {isLoading ? (
           <div className="space-y-12">
             <div className="aspect-[2/1] w-full bg-muted rounded-[2.5rem] animate-pulse"></div>

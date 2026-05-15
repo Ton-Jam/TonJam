@@ -37,7 +37,7 @@ import { cn } from '@/lib/utils';
 
 const AuctionScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification } = useAudio();
+  const { addNotification, allNFTs } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [sortOrder, setSortOrder] = useState<'ending-soon' | 'price-low' | 'price-high' | 'newest'>('ending-soon');
@@ -46,15 +46,16 @@ const AuctionScreen: React.FC = () => {
 
   // Filter only auction listings and add synthetic items for infinite feel
   const auctionNFTs = useMemo(() => {
-    let baseItems = MOCK_NFTS.filter(nft => nft.listingType === 'auction');
+    let baseItems = allNFTs.filter(nft => nft.listingType === 'auction');
     
-    // Generate synthetic items if we have few auctions
-    if (baseItems.length < 24) {
+    // Generate synthetic items if we have few auctions for better UX demo
+    if (baseItems.length < 12 && MOCK_NFTS.some(n => n.listingType === 'auction')) {
+      const mockAuctions = MOCK_NFTS.filter(n => n.listingType === 'auction');
       const extraItems: NFTItem[] = Array.from({ length: 48 }).map((_, i) => ({
-        ...baseItems[i % baseItems.length],
+        ...mockAuctions[i % mockAuctions.length],
         id: `synthetic-${i}`,
-        title: `${baseItems[i % baseItems.length].title} (Resale #${i + 100})`,
-        price: (parseFloat(baseItems[i % baseItems.length].price) * (0.8 + Math.random() * 0.5)).toFixed(2),
+        title: `${mockAuctions[i % mockAuctions.length].title} (Resale #${i + 100})`,
+        price: (parseFloat(mockAuctions[i % mockAuctions.length].price) * (0.8 + Math.random() * 0.5)).toFixed(2),
         auctionEndTime: new Date(Date.now() + Math.random() * 1000 * 60 * 60 * 72).toISOString()
       }));
       baseItems = [...baseItems, ...extraItems];
@@ -224,8 +225,8 @@ const AuctionScreen: React.FC = () => {
       </header>
 
       {/* Main Controls */}
-      <div className="w-full max-w-7xl mx-auto px-6 -mt-8 relative z-20">
-        <div className="bg-card/80 backdrop-blur-xl border border-white/5 rounded-2xl p-4 shadow-2xl flex flex-col md:flex-row gap-4 items-center">
+      <div className="w-full relative z-20">
+        <div className="bg-card border-none rounded-none md:rounded-2xl p-4 md:shadow-2xl flex flex-col md:flex-row gap-4 items-center">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
@@ -238,10 +239,25 @@ const AuctionScreen: React.FC = () => {
           
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-background/40 p-1 rounded-xl">
-              <TabsList className="bg-transparent border-none">
-                <TabsTrigger value="all" className="rounded-lg text-xs font-bold px-4 data-[state=active]:bg-blue-600 data-[state=active]:text-white">All</TabsTrigger>
-                <TabsTrigger value="ending" className="rounded-lg text-xs font-bold px-4 data-[state=active]:bg-blue-600 data-[state=active]:text-white">Ending Soon</TabsTrigger>
-                <TabsTrigger value="premium" className="rounded-lg text-xs font-bold px-4 data-[state=active]:bg-blue-600 data-[state=active]:text-white">Premium</TabsTrigger>
+              <TabsList className="bg-transparent border-none p-0 gap-2 flex">
+                <TabsTrigger 
+                  value="all" 
+                  className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto"
+                >
+                  All
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="ending" 
+                  className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto"
+                >
+                  Ending Soon
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="premium" 
+                  className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto"
+                >
+                  Premium
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -300,18 +316,35 @@ const AuctionScreen: React.FC = () => {
               </div>
            </div>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           <div className="flex flex-col gap-3">
               <AnimatePresence mode="popLayout">
                 {auctionNFTs.slice(0, visibleCount).map((nft, index) => (
                   <motion.div
                     key={nft.id}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.4, delay: index % 4 * 0.1 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="group"
                   >
-                    <NFTCard nft={nft} className="h-full border border-white/5 shadow-lg hover:shadow-blue-500/10 transition-all" />
+                     <div className="bg-card border border-white/5 p-3 rounded-xl flex items-center gap-4 hover:border-blue-500/30 transition-all">
+                        <img src={nft.imageUrl} className="w-16 h-16 rounded-lg object-cover" alt={nft.title} />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-black uppercase tracking-tight text-[11px] truncate">{nft.title}</h3>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase truncate">{nft.creator}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-[8px] text-muted-foreground font-black uppercase">Bid</p>
+                          <p className="text-xs font-black">{nft.price} TON</p>
+                        </div>
+                        <Button 
+                          onClick={() => navigate(`/nft/${nft.id}`)}
+                          className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-[9px] uppercase shadow-lg h-7 px-3 flex-shrink-0"
+                        >
+                          Bid
+                        </Button>
+                     </div>
                   </motion.div>
                 ))}
               </AnimatePresence>

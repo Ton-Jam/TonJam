@@ -5,6 +5,12 @@ import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { placeBid } from '@/services/tonService';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import ConfirmationModal from './ConfirmationModal';
 
 interface BidModalProps {
@@ -27,6 +33,17 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
       addNotification("Connect wallet to place bid.", "warning");
       return;
     }
+
+    /* Verify auction is still active */
+    if (nft.auctionEndTime) {
+      const isEnded = new Date(nft.auctionEndTime).getTime() <= Date.now();
+      if (isEnded) {
+        addNotification("This auction has expired. Bids are no longer being accepted.", "error");
+        onClose();
+        return;
+      }
+    }
+
     if (parseFloat(bidAmount) < parseFloat(minBid)) {
       addNotification(`Minimum bid is ${minBid} TON`, "warning");
       return;
@@ -62,16 +79,12 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={onClose}></div>
-      <div className="relative w-full max-w-sm rounded-[16px] bg-card border border-border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="w-full max-w-sm rounded-[16px] bg-card border border-border shadow-2xl p-0 overflow-hidden">
         <div className="p-6">
-          <header className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-foreground">Place a Bid</h2>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-muted/80 transition-colors">
-              <X className="h-4 w-4" />
-            </button>
-          </header>
+          <DialogHeader className="flex flex-row justify-between items-center mb-6">
+            <DialogTitle className="text-lg font-bold text-foreground">Place a Bid</DialogTitle>
+          </DialogHeader>
           
           <div className="mb-6 space-y-4">
             <div className="flex justify-between text-xs font-medium text-muted-foreground">
@@ -110,7 +123,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
             {isProcessing ? 'PLACING BID...' : 'PLACE BID'}
           </button>
         </div>
-      </div>
+      </DialogContent>
 
       <ConfirmationModal
         isOpen={isConfirmOpen}
@@ -120,7 +133,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
         description={`Are you sure you want to place a bid of ${bidAmount} TON for "${nft.title}"? This action will broadcast your bid to the network.`}
         confirmText="Place Bid"
       />
-    </div>
+    </Dialog>
   );
 };
 

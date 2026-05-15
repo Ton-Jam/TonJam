@@ -335,21 +335,49 @@ const Marketplace: React.FC = () => {
         </section>
 
         {/* 3. REFINED CONTROLS - Clean Tab Filters */}
-        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/50 backdrop-blur-md py-4 w-full px-6 mb-8 border-b border-border">
-          <div className="max-w-[1600px] mx-auto flex items-center justify-between">
-            <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="bg-muted p-1">
+        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/50 backdrop-blur-md py-4 w-full px-4 mb-8 border-b border-border/50 md:border-none">
+          <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
+            <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full lg:w-auto">
+              <TabsList className="bg-transparent h-auto p-0 gap-3 flex flex-nowrap min-w-max">
                 {TABS.map(tab => (
                   <TabsTrigger 
                     key={tab} 
                     value={tab} 
-                    className="px-6 data-[state=active]:bg-background data-[state=active]:text-foreground"
+                    className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0"
                   >
                     {tab}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
+
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full text-[10px] uppercase font-black tracking-widest h-9" size="sm">
+                    {genreFilter}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {['All', 'Pop', 'Electronic', 'Jazz', 'Rock'].map(g => (
+                    <DropdownMenuItem key={g} onClick={() => setGenreFilter(g)}>{g}</DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full text-[10px] uppercase font-black tracking-widest h-9" size="sm">
+                    {rarityFilter}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {['All', 'Unique', 'Rare', 'Limited'].map(r => (
+                    <DropdownMenuItem key={r} onClick={() => setRarityFilter(r)}>{r}</DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 

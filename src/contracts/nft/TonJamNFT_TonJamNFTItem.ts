@@ -1337,6 +1337,8 @@ export type GetNftData = {
     collection_address: Address;
     owner_address: Address;
     individual_content: Cell;
+    original_owner: Address;
+    previous_owner: Address | null;
 }
 
 export function storeGetNftData(src: GetNftData) {
@@ -1347,6 +1349,10 @@ export function storeGetNftData(src: GetNftData) {
         b_0.storeAddress(src.collection_address);
         b_0.storeAddress(src.owner_address);
         b_0.storeRef(src.individual_content);
+        const b_1 = new Builder();
+        b_1.storeAddress(src.original_owner);
+        b_1.storeAddress(src.previous_owner);
+        b_0.storeRef(b_1.endCell());
     };
 }
 
@@ -1357,7 +1363,10 @@ export function loadGetNftData(slice: Slice) {
     const _collection_address = sc_0.loadAddress();
     const _owner_address = sc_0.loadAddress();
     const _individual_content = sc_0.loadRef();
-    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content };
+    const sc_1 = sc_0.loadRef().beginParse();
+    const _original_owner = sc_1.loadAddress();
+    const _previous_owner = sc_1.loadMaybeAddress();
+    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content, original_owner: _original_owner, previous_owner: _previous_owner };
 }
 
 export function loadTupleGetNftData(source: TupleReader) {
@@ -1366,7 +1375,9 @@ export function loadTupleGetNftData(source: TupleReader) {
     const _collection_address = source.readAddress();
     const _owner_address = source.readAddress();
     const _individual_content = source.readCell();
-    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content };
+    const _original_owner = source.readAddress();
+    const _previous_owner = source.readAddressOpt();
+    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content, original_owner: _original_owner, previous_owner: _previous_owner };
 }
 
 export function loadGetterTupleGetNftData(source: TupleReader) {
@@ -1375,7 +1386,9 @@ export function loadGetterTupleGetNftData(source: TupleReader) {
     const _collection_address = source.readAddress();
     const _owner_address = source.readAddress();
     const _individual_content = source.readCell();
-    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content };
+    const _original_owner = source.readAddress();
+    const _previous_owner = source.readAddressOpt();
+    return { $$type: 'GetNftData' as const, is_initialized: _is_initialized, index: _index, collection_address: _collection_address, owner_address: _owner_address, individual_content: _individual_content, original_owner: _original_owner, previous_owner: _previous_owner };
 }
 
 export function storeTupleGetNftData(source: GetNftData) {
@@ -1385,6 +1398,8 @@ export function storeTupleGetNftData(source: GetNftData) {
     builder.writeAddress(source.collection_address);
     builder.writeAddress(source.owner_address);
     builder.writeCell(source.individual_content);
+    builder.writeAddress(source.original_owner);
+    builder.writeAddress(source.previous_owner);
     return builder.build();
 }
 
@@ -1465,6 +1480,8 @@ export function dictValueParserTonJamCollection$Data(): DictionaryValue<TonJamCo
 export type TonJamNFTItem$Data = {
     $$type: 'TonJamNFTItem$Data';
     owner: Address;
+    original_owner: Address;
+    previous_owner: Address | null;
     collection_address: Address;
     item_index: bigint;
     content: Cell;
@@ -1475,44 +1492,57 @@ export function storeTonJamNFTItem$Data(src: TonJamNFTItem$Data) {
     return (builder: Builder) => {
         const b_0 = builder;
         b_0.storeAddress(src.owner);
-        b_0.storeAddress(src.collection_address);
-        b_0.storeUint(src.item_index, 64);
-        b_0.storeRef(src.content);
-        b_0.storeBit(src.is_initialized);
+        b_0.storeAddress(src.original_owner);
+        b_0.storeAddress(src.previous_owner);
+        const b_1 = new Builder();
+        b_1.storeAddress(src.collection_address);
+        b_1.storeUint(src.item_index, 64);
+        b_1.storeRef(src.content);
+        b_1.storeBit(src.is_initialized);
+        b_0.storeRef(b_1.endCell());
     };
 }
 
 export function loadTonJamNFTItem$Data(slice: Slice) {
     const sc_0 = slice;
     const _owner = sc_0.loadAddress();
-    const _collection_address = sc_0.loadAddress();
-    const _item_index = sc_0.loadUintBig(64);
-    const _content = sc_0.loadRef();
-    const _is_initialized = sc_0.loadBit();
-    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
+    const _original_owner = sc_0.loadAddress();
+    const _previous_owner = sc_0.loadMaybeAddress();
+    const sc_1 = sc_0.loadRef().beginParse();
+    const _collection_address = sc_1.loadAddress();
+    const _item_index = sc_1.loadUintBig(64);
+    const _content = sc_1.loadRef();
+    const _is_initialized = sc_1.loadBit();
+    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, original_owner: _original_owner, previous_owner: _previous_owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
 }
 
 export function loadTupleTonJamNFTItem$Data(source: TupleReader) {
     const _owner = source.readAddress();
+    const _original_owner = source.readAddress();
+    const _previous_owner = source.readAddressOpt();
     const _collection_address = source.readAddress();
     const _item_index = source.readBigNumber();
     const _content = source.readCell();
     const _is_initialized = source.readBoolean();
-    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
+    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, original_owner: _original_owner, previous_owner: _previous_owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
 }
 
 export function loadGetterTupleTonJamNFTItem$Data(source: TupleReader) {
     const _owner = source.readAddress();
+    const _original_owner = source.readAddress();
+    const _previous_owner = source.readAddressOpt();
     const _collection_address = source.readAddress();
     const _item_index = source.readBigNumber();
     const _content = source.readCell();
     const _is_initialized = source.readBoolean();
-    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
+    return { $$type: 'TonJamNFTItem$Data' as const, owner: _owner, original_owner: _original_owner, previous_owner: _previous_owner, collection_address: _collection_address, item_index: _item_index, content: _content, is_initialized: _is_initialized };
 }
 
 export function storeTupleTonJamNFTItem$Data(source: TonJamNFTItem$Data) {
     const builder = new TupleBuilder();
     builder.writeAddress(source.owner);
+    builder.writeAddress(source.original_owner);
+    builder.writeAddress(source.previous_owner);
     builder.writeAddress(source.collection_address);
     builder.writeNumber(source.item_index);
     builder.writeCell(source.content);
@@ -1550,7 +1580,7 @@ function initTonJamNFTItem_init_args(src: TonJamNFTItem_init_args) {
 }
 
 async function TonJamNFTItem_init(owner: Address, collection_address: Address, item_index: bigint, content: Cell) {
-    const __code = Cell.fromHex('b5ee9c724102090100022b000114ff00f4a413f4bcf2c80b01020162020702cad001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019dfa40fa40d33fd4d20055406c158e11fa40fa40810101d700d4553004d1550270e206925f06e004d70d1ff2e0822182105fcc3d14bae3020182102fcb26a2bae3025f06f2c082030602c631d33ffa40d72c01916d93fa4001e201f40431fa00f8416f2410235f032a9c20820090580ac70519f2f4239e38398130145376c705f2f47f5193e222c2009410386c41e30d246eb3923430e30d4034c87f01ca0055405045ce12cecb3fccca00c9ed54040500a2715446a3c85520821005138d915004cb1f12cb3fcecec91034185a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0004009870804003c8018210d53276db58cb1fcb3fc9103641605a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0000dad33f30f842708040543345c8552082108b7713455004cb1f12cb3fcbffcec941305a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405045ce12cecb3fccca00c9ed54015da11f9fda89a1a400033bf481f481a67fa9a400aa80d82b1c23f481f481020203ae01a8aa6009a2aa04e1c5b678d8ab08000a5470235374eae18d70');
+    const __code = Cell.fromHex('b5ee9c7241020b01000293000114ff00f4a413f4bcf2c80b01020162020903f8d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e22fa40fa40d72c01916d93fa4001e201d401d0fa40d33fd4d200301047104610456c178e15fa40fa40810101d700d4553004d15502236d552170e208925f08e006d70d1ff2e0822182105fcc3d14bae3020182102fcb26a2bae3025f0803060802f431d33ffa40d72c01916d93fa4001e201f40431fa00f8416f2410235f032c9c3882009058538ac705f2f4238e103a3b8130145396c705f2f47f51b3108ae222c2009410386c41e30d246eb3923430e30d403615c87f01ca0055605067ce14ce58206e9430cf84809201cee201c8ce12cb3f12cc12ca00cdc9ed54040500a2715446a3c85520821005138d915004cb1f12cb3fcecec91034185a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0004009870804003c8018210d53276db58cb1fcb3fc9103641605a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0001b6d33f30f842708040543345c8552082108b7713455004cb1f12cb3fcbffcec941305a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb001046551307004ec87f01ca0055605067ce14ce58206e9430cf84809201cee201c8ce12cb3f12cc12ca00cdc9ed540006f2c0820191a11f9fda89a1a400031c45f481f481ae580322db27f48003c403a803a1f481a67fa9a40060208e208c208ad82f1c2bf481f481020203ae01a8aa6009a2aa0446daaa42e1c5b678d8ef0a000e5470235479482a78abb245');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initTonJamNFTItem_init_args({ $$type: 'TonJamNFTItem_init_args', owner, collection_address, item_index, content })(builder);
@@ -1666,9 +1696,9 @@ const TonJamNFTItem_types: ABIType[] = [
     {"name":"ReportStaticData","header":2339836741,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"index_id","type":{"kind":"simple","type":"uint","optional":false,"format":256}},{"name":"collection","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"Mint","header":1048761405,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"CollectionData","header":null,"fields":[{"name":"next_item_index","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"collection_content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"owner_address","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"GetNftData","header":null,"fields":[{"name":"is_initialized","type":{"kind":"simple","type":"bool","optional":false}},{"name":"index","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"collection_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"individual_content","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"GetNftData","header":null,"fields":[{"name":"is_initialized","type":{"kind":"simple","type":"bool","optional":false}},{"name":"index","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"collection_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"individual_content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"original_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"previous_owner","type":{"kind":"simple","type":"address","optional":true}}]},
     {"name":"TonJamCollection$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"next_item_index","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"royalty_params","type":{"kind":"simple","type":"RoyaltyParams","optional":false}}]},
-    {"name":"TonJamNFTItem$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"collection_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"item_index","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"is_initialized","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"TonJamNFTItem$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"original_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"previous_owner","type":{"kind":"simple","type":"address","optional":true}},{"name":"collection_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"item_index","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"content","type":{"kind":"simple","type":"cell","optional":false}},{"name":"is_initialized","type":{"kind":"simple","type":"bool","optional":false}}]},
 ]
 
 const TonJamNFTItem_opcodes = {

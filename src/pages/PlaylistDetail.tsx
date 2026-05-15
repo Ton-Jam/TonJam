@@ -14,7 +14,7 @@ import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/ut
 const PlaylistDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist, reorderTrackInPlaylist, addNotification, likedTrackIds, userProfile, toggleLikeTrack, setHeaderTitle } = useAudio();
+  const { playlists, playTrack, allTracks, removeTrackFromPlaylist, deletePlaylist, updatePlaylist, reorderTrackInPlaylist, addNotification, likedTrackIds, userProfile, toggleLikeTrack, setHeaderTitle, playlistFolders, movePlaylistToFolder } = useAudio();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const playlist = useMemo(() => {
@@ -414,9 +414,11 @@ const PlaylistDetail: React.FC = () => {
         {isOptionsModalOpen && (
           <PlaylistOptionsModal
             playlist={playlist}
+            folders={playlistFolders}
             onClose={() => setIsOptionsModalOpen(false)}
             onEdit={startEditing}
             onDelete={handleDeletePlaylist}
+            onMoveToFolder={(folderId) => movePlaylistToFolder(playlist.id, folderId)}
           />
         )}
       </AnimatePresence>

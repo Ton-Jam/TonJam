@@ -55,48 +55,48 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
         <div className="relative group/avatar flex flex-col items-center">
           <div className="relative">
             <div className="absolute inset-0 bg-blue-500/20 blur-3xl opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-full" />
-            <Avatar className="w-24 h-24 sm:w-32 sm:h-32 md:w-32 md:h-32 border-4 border-background shadow-[0_0_50px_rgba(37,99,235,0.2)] relative z-10 transition-transform duration-700 group-hover/avatar:scale-[1.02]">
+            <Avatar className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-24 border-4 border-background shadow-[0_0_50px_rgba(37,99,235,0.2)] relative z-10 transition-transform duration-700 group-hover/avatar:scale-[1.02]">
               <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="object-cover" />
-              <AvatarFallback className="bg-muted text-2xl sm:text-3xl font-black">{artist.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarFallback className="bg-muted text-xl sm:text-2xl font-black">{artist.name.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             {artist.verified && (
               <div className="absolute bottom-1 right-1 bg-background rounded-full p-1 shadow-2xl z-20 border border-blue-500/20">
-                <CheckCircle2 className="w-5 h-5 text-blue-500 fill-current" />
+                <CheckCircle2 className="w-4 h-4 text-blue-500 fill-current" />
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col items-start gap-2">
+        <div className="flex flex-col items-start gap-1">
             {artist.username && (
-                <Badge variant="secondary" className="bg-muted/40 backdrop-blur-md text-foreground/70 border-border/50 font-bold text-[10px] tracking-widest px-4 py-1 rounded-full uppercase hover:bg-muted/60 transition-colors w-fit">
+                <Badge variant="secondary" className="bg-muted/40 backdrop-blur-md text-foreground/70 border-border/50 font-bold text-[9px] tracking-widest px-3 py-0.5 rounded-full uppercase hover:bg-muted/60 transition-colors w-fit">
                     {artist.username.replace('@', '')}
                 </Badge>
             )}
-            <h1 id="artist-name-display" className="text-3xl sm:text-5xl md:text-7xl font-black tracking-[-0.04em] text-white uppercase leading-none">
+            <h1 id="artist-name-display" className="text-2xl sm:text-4xl md:text-5xl font-black tracking-[-0.04em] text-white uppercase leading-none">
                 {artist.name}
             </h1>
         </div>
       </div>
       
       {/* Social Icons & Stats - Spotify usually puts them below */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         {/* Stats & Like */}
-        <div id="artist-header-actions" className="flex items-center gap-6">
+        <div id="artist-header-actions" className="flex items-center gap-4">
             <LikeButton targetId={artist.uid} targetType="artist" />
-            <div id="artist-header-stats" className="flex items-center gap-6">
+            <div id="artist-header-stats" className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                    <span className="text-xl font-black text-white tracking-tight leading-none">
+                    <span className="text-lg font-black text-white tracking-tight leading-none">
                     {(artist.followers || 0).toLocaleString()}
                     </span>
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black">Followers</span>
+                    <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-black">Followers</span>
                 </div>
-                <div className="w-[1px] h-4 bg-white/20" />
+                <div className="w-[1px] h-3 bg-white/20" />
                 <div className="flex items-center gap-2">
-                    <span className="text-xl font-black text-white tracking-tight leading-none">
+                    <span className="text-lg font-black text-white tracking-tight leading-none">
                     {(artist.playCount || 0).toLocaleString()}
                     </span>
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-black">Plays</span>
+                    <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-black">Plays</span>
                 </div>
             </div>
         </div>

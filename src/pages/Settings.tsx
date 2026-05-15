@@ -72,24 +72,24 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-24 pt-8 animate-in fade-in duration-700">
-      <div className="mb-10 text-center lg:text-left">
-        <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground flex items-center justify-center lg:justify-start gap-3">
-          <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-          Settings
-        </h1>
-        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Neural Interface Parameters</p>
+    <div className="max-w-2xl mx-auto px-4 pb-24 pt-4 animate-in fade-in duration-700">
+      <div className="mb-6 text-center lg:text-left flex items-center justify-between opacity-40">
+        <div className="flex items-center gap-2">
+           <ShieldCheck className="h-3 w-3 text-blue-500" />
+           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Neural Interface Parameters</span>
+        </div>
+        <span className="text-[8px] font-mono">v2.4.0-STABLE</span>
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="bg-muted/10 p-1 rounded-full mb-8 flex border border-white/5 h-auto">
-          <TabsTrigger value="general" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+        <TabsList className="bg-transparent p-0 mb-8 flex border-none h-auto gap-3">
+          <TabsTrigger value="general" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
             Identity
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+          <TabsTrigger value="notifications" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
             Signals
           </TabsTrigger>
-          <TabsTrigger value="interface" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+          <TabsTrigger value="interface" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
             System
           </TabsTrigger>
         </TabsList>

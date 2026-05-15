@@ -330,8 +330,10 @@ const JamSpace: React.FC = () => {
                   size="sm"
                   onClick={() => setFilterType(filter)}
                   className={cn(
-                    "rounded-full h-7 text-[9px] font-black uppercase tracking-[0.2em] border-white/5",
-                    filterType === filter ? "bg-blue-600 border-blue-500 shadow-lg shadow-blue-600/20" : "bg-white/[0.03] text-muted-foreground"
+                    "px-6 py-2 rounded-full h-8 text-[10px] font-bold uppercase tracking-[0.2em] transition-all shrink-0",
+                    filterType === filter 
+                      ? "bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)] border-2 border-blue-400/50" 
+                      : "text-muted-foreground/60 bg-white/5 border-2 border-blue-500/30 hover:bg-white/10"
                   )}
                 >
                   {filter}

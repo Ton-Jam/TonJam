@@ -18,6 +18,9 @@ interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
+  isAdmin: boolean;
+  isArtist: boolean;
+  isCollector: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ user?: User; error?: any }>;
   signUpWithEmail: (email: string, password: string, metadata?: { username?: string }) => Promise<{ user?: User; error?: any }>;
@@ -31,6 +34,9 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   userProfile: null,
   loading: true,
+  isAdmin: false,
+  isArtist: false,
+  isCollector: true,
   signInWithGoogle: async () => {},
   signInWithEmail: async () => ({ error: 'Not implemented' }),
   signUpWithEmail: async () => ({ error: 'Not implemented' }),
@@ -46,6 +52,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isAdmin = userProfile?.role === 'admin';
+  const isArtist = userProfile?.role === 'artist';
+  const isCollector = userProfile?.role === 'collector' || !userProfile?.role;
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -197,6 +207,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user, 
       userProfile, 
       loading, 
+      isAdmin,
+      isArtist,
+      isCollector,
       signInWithGoogle, 
       signInWithEmail,
       signUpWithEmail,

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { X, Image, Share2, Sparkles, Music, Check, Send, Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MOCK_USER, APP_LOGO } from "@/constants";
 import { useAudio } from "@/context/AudioContext";
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES, shareContent } from "@/lib/utils";
@@ -86,9 +86,9 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
         <DialogHeader className="p-4 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <img src={APP_LOGO} className="w-4 h-4 object-contain" alt="" aria-hidden="true" />
-            <h2 id="modal-title" className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground">
+            <DialogTitle className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground">
               New Signal
-            </h2>
+            </DialogTitle>
           </div>
         </DialogHeader>
         <div className="p-2">

@@ -247,40 +247,40 @@ const Tasks: React.FC = () => {
           </button>
         </div>
 
-        {/* STREAK BENTO */}
-        <div className="grid grid-cols-2 gap-4">
-          <motion.div whileHover={{ y: -2 }} className="transition-all">
-            <Card className="p-5 rounded-3xl relative overflow-hidden group bg-blue-50/20 dark:bg-white/5 border-blue-100 dark:border-white/5 shadow-none h-full">
-              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Flame className="w-8 h-8 text-orange-500" />
-              </div>
-              <div className="flex items-center gap-2 text-orange-500 mb-3">
-                <Flame className="w-4 h-4 fill-current" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Sync Streak</span>
-              </div>
-              <div className="text-2xl font-black tracking-tighter text-zinc-800 dark:text-white">{streak} Days</div>
-              <p className="text-[10px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-1">
-                Next Sync: +{Math.min((streak + 1) * 10, 100)} TJ
-              </p>
-            </Card>
-          </motion.div>
+            {/* STREAK BENTO */}
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div whileHover={{ scale: 1.02 }} className="transition-all">
+                <Card className="p-5 rounded-3xl relative overflow-hidden group bg-gradient-to-br from-orange-500/5 to-transparent border-orange-500/10 shadow-none h-full">
+                  <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                    <Flame className="w-8 h-8 text-orange-500" />
+                  </div>
+                  <div className="flex items-center gap-2 text-orange-500 mb-3">
+                    <Flame className="w-4 h-4 fill-current animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-wider text-orange-600 dark:text-orange-400">Sync Streak</span>
+                  </div>
+                  <div className="text-2xl font-black tracking-tighter text-zinc-800 dark:text-white">{streak} <span className="text-sm font-medium opacity-50">Days</span></div>
+                  <p className="text-[10px] font-bold text-orange-600/40 dark:text-orange-400/40 uppercase tracking-widest mt-1">
+                    Next Sync: +{Math.min((streak + 1) * 10, 100)} TJ
+                  </p>
+                </Card>
+              </motion.div>
 
-          <motion.div whileHover={{ y: -2 }} className="transition-all">
-            <Card className="p-5 rounded-3xl relative overflow-hidden group bg-blue-50/20 dark:bg-white/5 border-blue-100 dark:border-white/5 shadow-none h-full">
-              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Sparkles className="w-8 h-8 text-blue-400" />
-              </div>
-              <div className="flex items-center gap-2 text-blue-400 mb-3">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Rewards</span>
-              </div>
-              <div className="text-2xl font-black tracking-tighter text-zinc-800 dark:text-white">2.4K+ <span className="text-[10px] text-blue-600/30 dark:text-white/30 lowercase not-italic">total earned</span></div>
-              <p className="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mt-1">
-                Top 15% of Nodes
-              </p>
-            </Card>
-          </motion.div>
-        </div>
+              <motion.div whileHover={{ scale: 1.02 }} className="transition-all">
+                <Card className="p-5 rounded-3xl relative overflow-hidden group bg-gradient-to-br from-blue-500/5 to-transparent border-blue-500/10 shadow-none h-full">
+                  <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                    <Sparkles className="w-8 h-8 text-blue-400" />
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-400 mb-3">
+                    <Sparkles className="w-4 h-4 animate-spin-slow" />
+                    <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">Rewards</span>
+                  </div>
+                  <div className="text-2xl font-black tracking-tighter text-zinc-800 dark:text-white">2.4K+ <span className="text-[9px] font-medium opacity-50">earned</span></div>
+                  <p className="text-[10px] font-bold text-blue-600/40 dark:text-blue-400/40 uppercase tracking-widest mt-1">
+                    Top 15% of Nodes
+                  </p>
+                </Card>
+              </motion.div>
+            </div>
 
         {/* NAVIGATION RAIL AND CONTENT */}
         <Tabs defaultValue="quest" value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full space-y-6">
@@ -294,7 +294,7 @@ const Tasks: React.FC = () => {
               <TabsTrigger 
                 key={tab.id}
                 value={tab.id}
-                className="flex items-center justify-center gap-2 py-2 rounded-xl transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white shadow-none data-[state=active]:shadow-lg data-[state=active]:shadow-blue-600/30"
+                className="flex items-center justify-center gap-2 py-2 rounded-full transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white shadow-none data-[state=active]:shadow-lg data-[state=active]:shadow-blue-600/30 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5"
               >
                 <tab.icon className="w-3.5 h-3.5" />
                 <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{tab.label}</span>
@@ -314,64 +314,71 @@ const Tasks: React.FC = () => {
                   const taskColor = task.color || 'blue';
 
                   return (
-                    <Card key={task.id} className={cn(
-                      "group hover:bg-white/[0.03] transition-all border-white/5 shadow-none bg-white/5 overflow-hidden",
-                      task.claimed && 'opacity-50 grayscale pointer-events-none'
-                    )}>
-                      <CardContent className="p-4 flex justify-between items-center bg-transparent">
-                        <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "w-12 h-12 rounded-[12px] flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner",
-                            `bg-${taskColor}-500/10 text-${taskColor}-500`
-                          )}>
-                            <TaskIcon className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <h3 className="font-black uppercase text-[11px] tracking-tight text-zinc-800 dark:text-white">{task.title}</h3>
-                            <p className="text-[8px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-0.5">{task.subtitle || task.description}</p>
-                            <div className="flex items-center gap-3 mt-2">
-                              <div className="flex items-center gap-1">
-                                <img src={TJ_COIN_ICON} className="w-3 h-3 grayscale opacity-30" alt="" />
-                                <span className={cn("text-[10px] font-mono font-bold", `text-${taskColor}-500`)}>+{task.reward}</span>
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                    >
+                      <Card className={cn(
+                        "group hover:bg-white/[0.05] hover:border-blue-500/30 transition-all border-white/5 shadow-none bg-white/5 overflow-hidden",
+                        task.claimed && 'opacity-50 grayscale pointer-events-none'
+                      )}>
+                        <CardContent className="p-4 flex justify-between items-center bg-transparent">
+                          <div className="flex items-center gap-4">
+                            <div className={cn(
+                              "w-12 h-12 rounded-[12px] flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner",
+                              `bg-${taskColor}-500/10 text-${taskColor}-500`
+                            )}>
+                              <TaskIcon className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h3 className="font-black uppercase text-[11px] tracking-tight text-zinc-800 dark:text-white">{task.title}</h3>
+                              <p className="text-[8px] font-bold text-blue-600/40 dark:text-white/40 uppercase tracking-widest mt-0.5">{task.subtitle || task.description}</p>
+                              <div className="flex items-center gap-3 mt-2">
+                                <div className="flex items-center gap-1">
+                                  <img src={TJ_COIN_ICON} className="w-3 h-3 grayscale opacity-30" alt="" />
+                                  <span className={cn("text-[10px] font-mono font-bold", `text-${taskColor}-500`)}>+{task.reward}</span>
+                                </div>
+                                <div className="w-1 h-1 rounded-full bg-blue-100 dark:bg-white/10" />
+                                <span className="text-[10px] font-mono font-bold text-blue-600/40 dark:text-white/40">+{task.points || 0} XP</span>
                               </div>
-                              <div className="w-1 h-1 rounded-full bg-blue-100 dark:bg-white/10" />
-                              <span className="text-[10px] font-mono font-bold text-blue-600/40 dark:text-white/40">+{task.points || 0} XP</span>
                             </div>
                           </div>
-                        </div>
 
-                        <div>
-                          {!task.completed && (
-                            <Button 
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleStart(task.id)}
-                              className="h-10 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white/5 border-white/10 hover:border-blue-500/50 hover:bg-white/10 text-white"
-                            >
-                              Execute
-                            </Button>
-                          )}
+                          <div>
+                            {!task.completed && (
+                              <Button 
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleStart(task.id)}
+                                className="h-10 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white/5 border-white/10 hover:border-blue-500/50 hover:bg-white/10 text-white"
+                              >
+                                Execute
+                              </Button>
+                            )}
 
-                          {task.completed && !task.claimed && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleClaim(task.id)}
-                              disabled={isClaiming === task.id}
-                              className="h-10 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-blue-600/30 disabled:opacity-50 disabled:scale-100 border-none"
-                            >
-                              {isClaiming === task.id ? 'Syncing...' : 'Claim'}
-                            </Button>
-                          )}
+                            {task.completed && !task.claimed && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleClaim(task.id)}
+                                disabled={isClaiming === task.id}
+                                className="h-10 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-blue-600/30 disabled:opacity-50 disabled:scale-100 border-none"
+                              >
+                                {isClaiming === task.id ? 'Syncing...' : 'Claim'}
+                              </Button>
+                            )}
 
-                          {task.claimed && (
-                            <div className="flex items-center gap-2 pr-2">
-                              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                              <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Protocol Sync</span>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                            {task.claimed && (
+                              <div className="flex items-center gap-2 pr-2">
+                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Protocol Sync</span>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   )
                 })}
               </div>

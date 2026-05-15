@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { NFTItem } from '@/types';
 import { useAudio } from '@/context/AudioContext';
-import { X, Tag, Gavel, Loader2, Calendar } from 'lucide-react';
+import { X, Tag, Gavel, Loader2, Calendar, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import ConfirmationModal from './ConfirmationModal';
 
 interface ManageNFTModalProps {
@@ -59,26 +65,13 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-          />
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-md bg-[#0A0A0B]/95 backdrop-blur-xl border border-white/5 rounded-[2px] p-4 shadow-2xl"
-          >
-            <button onClick={onClose} className="absolute top-4 right-4 text-white/40 hover:text-white bg-white/5 p-1 rounded-[2px] transition-colors">
-              <X className="h-4 w-4" />
-            </button>
-            <h2 className="text-sm font-bold text-white uppercase tracking-tight mb-4">Manage_Protocol</h2>
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="w-full max-sm:max-w-[95vw] sm:max-w-md bg-[#0A0A0B]/95 backdrop-blur-xl border border-white/5 rounded-[2px] p-0 overflow-hidden shadow-2xl">
+          <div className="p-6">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-sm font-bold text-white uppercase tracking-tight">Manage_Protocol</DialogTitle>
+            </DialogHeader>
             
             <div className="space-y-4">
               <div className="flex gap-2 mb-4">
@@ -115,14 +108,20 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                   </div>
                   <div>
                     <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest mb-1.5 block flex items-center gap-2">
-                      Protocol_Deadline
+                      Bid_Expiration_Protocol
                     </label>
-                    <input 
-                      type="datetime-local" 
-                      value={newEndDate} 
-                      onChange={(e) => setNewEndDate(e.target.value)}
-                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-[10px] outline-none focus:ring-1 focus:ring-amber-500"
-                    />
+                    <div className="relative group">
+                      <input 
+                        type="datetime-local" 
+                        value={newEndDate} 
+                        onChange={(e) => setNewEndDate(e.target.value)}
+                        className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 pr-10 text-white text-[10px] outline-none focus:ring-1 focus:ring-amber-500"
+                      />
+                      <Clock className="absolute right-3 top-[10px] h-3.5 w-3.5 text-white/20 group-hover:text-amber-500 transition-colors" />
+                    </div>
+                    <p className="text-[7px] text-white/10 uppercase tracking-widest px-1 mt-1.5">
+                      Protocol will auto-resolve if zero signals detected by deadline.
+                    </p>
                     <div className="flex gap-1.5 mt-2">
                       {['1', '3', '7', '14'].map((d) => (
                         <button
@@ -159,22 +158,22 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                 <button 
                   onClick={handleUpdate}
                   disabled={isUpdating}
-                  className="flex-[2] py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[2px] font-bold text-[8px] uppercase tracking-widest transition-all"
+                  className="flex-[2] py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[2px] font-bold text-[8px] uppercase tracking-widest transition-all h-9"
                 >
-                  {isUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin mx-auto" /> : 'Apply_Changes'}
+                  {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Apply_Changes'}
                 </button>
                 <button 
                   onClick={handleDelist}
                   disabled={isUpdating}
-                  className="flex-1 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-[2px] border border-red-500/20 font-bold text-[8px] uppercase tracking-widest transition-all"
+                  className="flex-1 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-[2px] border border-red-500/20 font-bold text-[8px] uppercase tracking-widest transition-all h-9"
                 >
-                  {isUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin mx-auto" /> : 'Delist'}
+                  {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Delist'}
                 </button>
               </div>
             </div>
-          </motion.div>
-        </div>
-      )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmationModal
         isOpen={isDelistConfirmOpen}
@@ -185,7 +184,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
         confirmText="Delist NFT"
         variant="destructive"
       />
-    </AnimatePresence>
+    </>
   );
 };
 

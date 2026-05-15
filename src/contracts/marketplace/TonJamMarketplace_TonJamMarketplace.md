@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: TonJamMarketplace
-BoC Size: 1197 bytes
+BoC Size: 1258 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 20
+Total structures: 21
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -61,6 +61,10 @@ Signature: `FactoryDeploy{queryId:uint64,cashback:address}`
 TL-B: `_ owner:address price:coins = Listing`
 Signature: `Listing{owner:address,price:coins}`
 
+### NFTHistory
+TL-B: `_ previous_owner:address forward_payload:^cell = NFTHistory`
+Signature: `NFTHistory{previous_owner:address,forward_payload:^cell}`
+
 ### ListNFT
 TL-B: `list_nft#1e20d98e query_id:uint64 nft_address:address price:coins = ListNFT`
 Signature: `ListNFT{query_id:uint64,nft_address:address,price:coins}`
@@ -82,8 +86,8 @@ TL-B: `transfer#4e33fd18 query_id:uint64 new_owner:address response_destination:
 Signature: `Transfer{query_id:uint64,new_owner:address,response_destination:address,custom_payload:Maybe ^cell,forward_amount:coins,forward_payload:remainder<slice>}`
 
 ### TonJamMarketplace$Data
-TL-B: `_ owner:address fee_destination:address fee_percentage:uint16 listings:dict<address, ^Listing{owner:address,price:coins}> = TonJamMarketplace`
-Signature: `TonJamMarketplace{owner:address,fee_destination:address,fee_percentage:uint16,listings:dict<address, ^Listing{owner:address,price:coins}>}`
+TL-B: `_ owner:address fee_destination:address fee_percentage:uint16 listings:dict<address, ^Listing{owner:address,price:coins}> nft_histories:dict<address, ^NFTHistory{previous_owner:address,forward_payload:^cell}> = TonJamMarketplace`
+Signature: `TonJamMarketplace{owner:address,fee_destination:address,fee_percentage:uint16,listings:dict<address, ^Listing{owner:address,price:coins}>,nft_histories:dict<address, ^NFTHistory{previous_owner:address,forward_payload:^cell}>}`
 
 ## Get methods
 Total get methods: 2

@@ -126,14 +126,14 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
-                      className="group flex items-center gap-3 py-3 px-2 hover:bg-primary/5 transition-all rounded-3xl cursor-pointer"
+                      className="group flex items-center gap-2 py-2 px-1 hover:bg-primary/5 transition-all rounded-xl cursor-pointer"
                     >
                       {/* Rank Indicator */}
-                      <div className="w-10 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-8 flex-shrink-0 flex items-center justify-center">
                         {rank === 1 ? (
                           <div className="relative">
-                            <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                              <Award className="w-5 h-5 text-yellow-500" />
+                            <div className="w-6 h-6 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                              <Award className="w-4 h-4 text-yellow-500" />
                             </div>
                             <motion.div 
                               animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.4, 1] }}
@@ -143,13 +143,13 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                           </div>
                         ) : rank <= 3 ? (
                           <div className={cn(
-                            "w-8 h-8 flex items-center justify-center rounded-full font-black text-[11px] border border-border/50",
+                            "w-6 h-6 flex items-center justify-center rounded-full font-black text-[9px] border border-border/50",
                             rank === 2 ? "bg-slate-100 dark:bg-slate-800 text-slate-400" : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-500"
                           )}>
                             {rank}
                           </div>
                         ) : (
-                          <span className="text-[11px] font-black tracking-tighter text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors">
+                          <span className="text-[9px] font-black tracking-tighter text-muted-foreground/30 group-hover:text-muted-foreground/50 transition-colors">
                             #{rank.toString().padStart(2, '0')}
                           </span>
                         )}
@@ -158,7 +158,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                       {/* Identity */}
                       <Link to={`/artist/${artist.uid}`} className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
                         <div className="relative">
-                          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl border border-border/50 group-hover:border-primary/50 transition-all duration-500 shadow-lg">
+                          <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-border/50 group-hover:border-primary/50 transition-all duration-500 shadow-lg">
                             <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} referrerPolicy="no-referrer" />
                             <AvatarFallback className="bg-muted text-primary font-black text-[9px]">
                               {artist.name.substring(0, 2).toUpperCase()}
@@ -166,7 +166,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                           </Avatar>
                         </div>
                         <div className="min-w-0 space-y-0">
-                          <h4 className="text-[9px] font-bold uppercase tracking-tight text-foreground truncate group-hover:text-primary transition-colors leading-tight font-display">
+                          <h4 className="text-[8px] font-bold uppercase tracking-tight text-foreground truncate group-hover:text-primary transition-colors leading-tight font-display">
                             {artist.name.replace('//', '')}
                           </h4>
                           <div className="hidden sm:flex items-center gap-1.5">
@@ -196,13 +196,13 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
 
                       {/* Earnings */}
                       <div className="text-right min-w-[60px] sm:min-w-[70px]">
-                        <div className="flex items-center justify-end gap-1 flex-nowrap">
-                          <span className="text-[11px] sm:text-[13px] font-black tracking-tighter text-foreground group-hover:text-primary transition-colors">
+                        <div className="flex items-center justify-end gap-0.5 flex-nowrap">
+                          <span className="text-[10px] sm:text-[11px] font-black tracking-tighter text-foreground group-hover:text-primary transition-colors">
                             {artist.earnings?.total.toLocaleString(undefined, { minimumFractionDigits: 1 }) || '0.0'}
                           </span>
-                          <img src={TON_LOGO} alt="TON" className="w-2.5 h-2.5 opacity-80 dark:invert-0 light:invert" />
+                          <img src={TON_LOGO} alt="TON" className="w-2 h-2 opacity-80 dark:invert-0 light:invert" />
                         </div>
-                        <p className="text-[7px] sm:text-[7.5px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-0.5">Credits</p>
+                        <p className="text-[6px] sm:text-[7px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-0">Credits</p>
                       </div>
                     </motion.div>
                   );

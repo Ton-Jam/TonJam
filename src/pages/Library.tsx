@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
-  Search,
   List,
   LayoutGrid,
   Heart,
@@ -17,15 +16,18 @@ import {
   Filter,
   Grid2X2,
   FolderPlus,
-  Folder
+  Folder,
+  UserPlus,
+  ChevronRight
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
-import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_USERS, MOCK_NFTS, MOCK_PLAYLISTS } from '@/constants';
+import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_USERS, MOCK_NFTS, MOCK_PLAYLISTS, MOCK_ALBUMS } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import ArtistCard from '@/components/ArtistCard';
 import UserCard from '@/components/UserCard';
 import NFTCard from '@/components/NFTCard';
 import PlaylistCard from '@/components/PlaylistCard';
+import AlbumCard from '@/components/AlbumCard';
 import PlaylistFolderCard from '@/components/PlaylistFolderCard';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn, getPlaceholderImage } from '@/lib/utils';
@@ -56,6 +58,8 @@ const Library: React.FC = () => {
     playlists, 
     playlistFolders,
     createFolder,
+    renameFolder,
+    deleteFolder,
     likedTrackIds, 
     followedUserIds, 
     userNFTs, 
@@ -63,8 +67,8 @@ const Library: React.FC = () => {
     userTracks, 
     userProfile, 
     artists,
-    setIsCreatePlaylistModalOpen,
-    recentlyPlayed
+    setIsHeaderSearchOpen,
+    searchQuery
   } = useAudio();
 
   const [filter, setFilter] = useState<LibraryFilter>('all');
@@ -101,14 +105,35 @@ const Library: React.FC = () => {
       items = [...items, ...myNFTs.map(n => ({ ...n, type: 'nft' }))];
     }
 
-    if (sortBy === 'alphabetical') {
-      items.sort((a, b) => (a.title || a.name || '').localeCompare(b.title || b.name || ''));
-    } else if (sortBy === 'recently-added') {
-      items.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    // Apply Search Filtering
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      items = items.filter(item => {
+        const title = (item.title || item.name || '').toLowerCase();
+        const artist = (item.artist || '').toLowerCase();
+        return title.includes(query) || artist.includes(query);
+      });
+
+      // Sort by Suggestion (Starts with query first)
+      items.sort((a, b) => {
+        const aTitle = (a.title || a.name || '').toLowerCase();
+        const bTitle = (b.title || b.name || '').toLowerCase();
+        const query = searchQuery.toLowerCase();
+        
+        if (aTitle.startsWith(query) && !bTitle.startsWith(query)) return -1;
+        if (!aTitle.startsWith(query) && bTitle.startsWith(query)) return 1;
+        return aTitle.localeCompare(bTitle);
+      });
+    } else {
+      if (sortBy === 'alphabetical') {
+        items.sort((a, b) => (a.title || a.name || '').localeCompare(b.title || b.name || ''));
+      } else if (sortBy === 'recently-added') {
+        items.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      }
     }
 
     return items;
-  }, [filter, playlists, artists, followedUserIds, allNFTs, userProfile, userNFTs, sortBy]);
+  }, [filter, playlists, artists, followedUserIds, allNFTs, userProfile, userNFTs, sortBy, searchQuery]);
 
   const renderLibraryItem = (item: any) => {
     const isArtist = item.type === 'artist';
@@ -174,209 +199,284 @@ const Library: React.FC = () => {
     { type: 'playlist', data: MOCK_PLAYLISTS[0] },
     { type: 'nft', data: MOCK_NFTS[0] },
     { type: 'user', data: MOCK_USERS[0] },
+    { type: 'album', data: MOCK_ALBUMS[0] },
     { type: 'track', data: MOCK_TRACKS[1] },
   ], []);
 
+  const suggestedItems = useMemo(() => [
+    { type: 'track', data: MOCK_TRACKS[2] },
+    { type: 'nft', data: MOCK_NFTS[2] },
+    { type: 'artist', data: MOCK_ARTISTS[1] },
+  ], []);
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header Section */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border px-6 py-4 sm:px-12">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <History className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Neural Vault</h1>
-              <p className="text-sm text-muted-foreground mt-1">Your curated collection of digital assets and frequencies.</p>
-            </div>
+    <div className="min-h-screen bg-background text-foreground pb-4">
+      <div className="px-4 py-3 sm:px-6 max-w-7xl mx-auto space-y-6">
+        
+        {/* Folders Section - List Layout */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-500/50 flex items-center gap-2">
+              <Folder className="h-3 w-3" />
+              Neural Vault
+            </h3>
+            <Button variant="ghost" size="sm" onClick={() => createFolder('New Folder')}>
+              <FolderPlus className="h-3 w-3 mr-2" />
+              Add Folder
+            </Button>
           </div>
-
-          <div className="flex items-center gap-3">
-             <Button variant="outline" size="sm" onClick={() => {
-                const title = prompt("Enter Node Sector Label (Folder Name)");
-                if (title) createFolder(title);
-             }} className="h-10 rounded-xl gap-2 border-blue-500/20 text-blue-400 hover:bg-blue-500/10 transition-all">
-                <FolderPlus className="h-4 w-4" />
-                New Node Sector
-             </Button>
-             <Button variant="outline" size="sm" onClick={() => setIsCreatePlaylistModalOpen(true)} className="h-10 rounded-xl gap-2">
-                <Plus className="h-4 w-4" />
-                New Node
-             </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-6 py-8 sm:px-12 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-            <Tabs 
-                value={filter} 
-                onValueChange={(v) => setFilter(v as LibraryFilter)}
+          
+          <div className="flex flex-col gap-1">
+            {playlistFolders.map(folder => (
+               <motion.div
+                 key={folder.id}
+                 whileHover={{ x: 4 }}
+                 className={cn(
+                   "flex items-center gap-4 p-4 rounded-[2px] transition-all cursor-pointer group border border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+                 )}
+               >
+                 <div className="w-12 h-12 rounded-[2px] bg-blue-600/20 flex items-center justify-center shadow-lg">
+                   <Folder className="h-5 w-5 text-blue-500" />
+                 </div>
+                 <div className="flex-1 min-w-0" onClick={() => navigate(`/playlist-folder/${folder.id}`)}>
+                   <h4 className="text-xs font-black uppercase tracking-tighter">{folder.title}</h4>
+                   <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                     {folder.playlistIds.length} Playlists
+                   </p>
+                 </div>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => renameFolder(folder.id, prompt('Enter new title:', folder.title) || folder.title)}>Rename</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => deleteFolder(folder.id)} className="text-red-500">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                 </DropdownMenu>
+               </motion.div>
+            ))}
+            
+            {/* My Playlists Folder (System Default) */}
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => setFilter('playlists')}
+              className={cn(
+                "flex items-center gap-4 p-4 rounded-[2px] transition-all cursor-pointer group border border-white/5",
+                filter === 'playlists' ? "bg-blue-600/10 border-blue-500/40" : "bg-white/[0.02] hover:bg-white/[0.04]"
+              )}
             >
-                <TabsList className="bg-muted p-1 h-12 rounded-2xl">
-                  <TabsTrigger value="all" className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm">All</TabsTrigger>
-                  <TabsTrigger value="playlists" className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm">Nodes</TabsTrigger>
-                  <TabsTrigger value="artists" className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm">Entities</TabsTrigger>
-                  <TabsTrigger value="nfts" className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm">Artifacts</TabsTrigger>
-                </TabsList>
-            </Tabs>
+              <div className="w-12 h-12 rounded-[2px] bg-blue-600/20 flex items-center justify-center shadow-lg">
+                <Music2 className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-black uppercase tracking-tighter">My Playlists</h4>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                  {playlists.length} Compiled Nodes
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground opacity-20 group-hover:opacity-100 transition-opacity" />
+            </motion.div>
 
-            <div className="flex items-center gap-3">
-                <div className="relative w-full md:w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input 
-                        type="text" 
-                        placeholder="Search assets..." 
-                        className="w-full bg-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                </div>
-                <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as 'grid' | 'list')} className="bg-secondary/50 p-1 rounded-2xl h-10">
-                    <ToggleGroupItem value="list" className="rounded-xl w-10 h-8 data-[state=on]:bg-background data-[state=on]:text-primary">
-                        <List className="h-4 w-4" />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="grid" className="rounded-xl w-10 h-8 data-[state=on]:bg-background data-[state=on]:text-primary">
-                        <LayoutGrid className="h-4 w-4" />
-                    </ToggleGroupItem>
-                </ToggleGroup>
-            </div>
-        </div>
+            {/* My NFTs Folder */}
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => navigate('/my-nfts')}
+              className={cn(
+                "flex items-center gap-4 p-4 rounded-[2px] transition-all cursor-pointer group border border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+              )}
+            >
+              <div className="w-12 h-12 rounded-[2px] bg-purple-600/20 flex items-center justify-center shadow-lg">
+                <Zap className="h-5 w-5 text-purple-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-black uppercase tracking-tighter">My NFTs</h4>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                   Artifact Collection
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground opacity-20 group-hover:opacity-100 transition-opacity" />
+            </motion.div>
 
+            {/* Favorite Tracks Folder */}
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => navigate('/favorite-tracks')}
+              className="flex items-center gap-4 p-4 rounded-[2px] bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 transition-all cursor-pointer group"
+            >
+              <div className="w-12 h-12 rounded-[2px] bg-pink-600/20 flex items-center justify-center shadow-lg">
+                <Heart className="h-5 w-5 text-pink-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-black uppercase tracking-tighter">Favorite Tracks</h4>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                  {likedTrackIds.length} Signals Locked
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground opacity-20 group-hover:opacity-100 transition-opacity" />
+            </motion.div>
 
-        {/* Horizontal Recents */}
-        {filter === 'all' && (
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/50 flex items-center gap-2">
-                <History className="h-3 w-3" />
-                Recent Interlinks
+            {/* Favorite Artists Folder */}
+            <motion.div
+              whileHover={{ x: 4 }}
+              onClick={() => navigate('/favorite-artists')}
+              className="flex items-center gap-4 p-4 rounded-[2px] bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 transition-all cursor-pointer group"
+            >
+              <div className="w-12 h-12 rounded-[2px] bg-emerald-600/20 flex items-center justify-center shadow-lg">
+                <Users className="h-5 w-5 text-emerald-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-black uppercase tracking-tighter">Favorite Artists</h4>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                  {followedUserIds.length} Entities Tracked
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground opacity-20 group-hover:opacity-100 transition-opacity" />
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Global Recommendations or Sector Results */}
+        <div className="space-y-6">
+          {filter !== 'all' ? (
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 flex items-center gap-2">
+                  <Grid2X2 className="h-3.5 w-3.5" />
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)} Results
+                </h3>
+                <Button 
+                   variant="ghost" 
+                   size="sm" 
+                   onClick={() => setFilter('all')}
+                   className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white"
+                >
+                  Clear Filter
+                </Button>
+              </div>
+              
+              <div className={cn(
+                viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" : "space-y-2"
+              )}>
+                <AnimatePresence mode="popLayout">
+                  {isLoading ? (
+                    Array.from({ length: 8 }).map((_, i) => (
+                      <div key={`loading-${i}`} className={viewMode === 'grid' ? "aspect-square" : "w-full"}>
+                        <SkeletonCard variant={viewMode === 'grid' ? 'default' : 'row'} />
+                      </div>
+                    ))
+                  ) : (
+                    libraryItems.map(item => renderLibraryItem(item))
+                  )}
+                </AnimatePresence>
+                
+                {!isLoading && libraryItems.length === 0 && (
+                  <div className="col-span-full py-20 text-center">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">No signals found in this sector.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          ) : null}
+
+        {/* Recent Activities */}
+        <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 flex items-center gap-2">
+                <History className="h-3.5 w-3.5" />
+                Recent Activities
               </h3>
             </div>
             <ScrollArea className="w-full">
-              <div className="flex gap-4 pb-6">
+              <div className="flex gap-6 pb-6">
                 {isLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
-                    <div key={`recent-loading-${i}`} className="w-[180px] shrink-0">
+                    <div key={`recent-loading-${i}`} className="w-[190px] shrink-0">
                       <SkeletonCard />
                     </div>
                   ))
                 ) : (
                   recentItems.map((item, i) => (
-                    <div key={i} className="w-[180px] shrink-0 hover:scale-[1.02] transition-transform duration-500">
+                    <div key={i} className="w-[200px] shrink-0 hover:scale-[1.02] transition-transform duration-500">
                       {item.type === 'artist' && <ArtistCard artist={item.data as any} />}
                       {item.type === 'track' && <TrackCard track={item.data as any} />}
                       {item.type === 'playlist' && <PlaylistCard playlist={item.data as any} />}
                       {item.type === 'user' && <UserCard user={item.data as any} />}
                       {item.type === 'nft' && <NFTCard nft={item.data as any} />}
+                      {item.type === 'album' && <AlbumCard album={item.data as any} index={i} />}
                     </div>
                   ))
                 )}
               </div>
               <ScrollBar orientation="horizontal" className="bg-white/[0.02]" />
             </ScrollArea>
-          </div>
-        )}
+          </section>
 
-        {/* Main Content */}
-        <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6" : "space-y-2"}>
-          {/* Playlist Folders */}
-          {(filter === 'all' || filter === 'playlists') && (
-            <div className={cn(
-              "col-span-full mb-2",
-              viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-2"
-            )}>
-              {playlistFolders.map(folder => (
-                <PlaylistFolderCard 
-                  key={folder.id} 
-                  folder={folder} 
-                  playlists={playlists} 
-                  viewMode={viewMode}
-                />
-              ))}
+          {/* Suggested Tracks & NFTs */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-500 flex items-center gap-2">
+                <Zap className="h-3.5 w-3.5" />
+                Featured Picks
+              </h3>
             </div>
-          )}
-
-          {/* Liked Songs Card */}
-          {(filter === 'all' || filter === 'playlists') && (
-            viewMode === 'grid' ? (
-              <motion.div
-                layout
-                onClick={() => navigate('/playlist/liked-songs')}
-                className="col-span-2 sm:col-span-2 p-8 rounded-[2px] bg-gradient-to-br from-blue-900/40 via-blue-800/10 to-black/40 flex flex-col justify-end gap-6 cursor-pointer group relative overflow-hidden h-[260px] border border-blue-500/10 hover:border-blue-500/30 transition-all shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-              >
-                <div className="absolute -top-12 -right-12 opacity-5 group-hover:opacity-10 group-hover:scale-110 transition-all duration-1000 rotate-12">
-                  <Heart className="w-64 h-64 fill-blue-500 text-transparent" />
-                </div>
-                {/* GFX Grid */}
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.05] pointer-events-none" />
-                
-                <div className="relative z-10 space-y-2">
-                  <div className="w-14 h-14 rounded-[2px] bg-white flex items-center justify-center mb-2 shadow-2xl group-hover:rotate-6 transition-transform">
-                    <Heart className="w-7 h-7 fill-red-500 text-red-500" />
+            <ScrollArea className="w-full">
+              <div className="flex gap-6 pb-6">
+                {MOCK_TRACKS.slice(0, 6).map((track, i) => (
+                  <div key={`s-track-${i}`} className="w-[220px] shrink-0 hover:scale-[1.02] transition-transform duration-500">
+                    <TrackCard track={track as any} />
                   </div>
-                  <h2 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">Liked Tracks</h2>
-                  <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-blue-500/20 text-blue-400 bg-blue-500/10 px-3 py-1 rounded-[2px]">
-                    {likedTracksCount} Recorded Signals
-                  </Badge>
-                </div>
-                <div className="absolute bottom-8 right-8 w-16 h-16 bg-blue-600 rounded-[2px] flex items-center justify-center opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-[0_15px_40px_rgba(37,99,235,0.6)]">
-                  <Play className="w-8 h-8 text-white fill-white ml-1" />
-                </div>
-              </motion.div>
-            ) : (
-                <motion.div
-                  layout
-                  onClick={() => navigate('/playlist/liked-songs')}
-                  className="flex items-center gap-4 p-3 rounded-[2px] bg-gradient-to-r from-blue-900/10 to-transparent hover:bg-white/[0.05] border border-blue-500/10 transition-all cursor-pointer group w-full"
-                >
-                  <div className="w-14 h-14 rounded-[2px] bg-blue-600/20 border border-blue-500/20 flex items-center justify-center shadow-lg relative overflow-hidden">
-                    <Heart className="w-6 h-6 fill-blue-500 text-blue-500 relative z-10 group-hover:scale-110 transition-transform" />
-                    <div className="absolute inset-0 bg-blue-600/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
-                       <Play className="w-6 h-6 text-white fill-white" />
-                    </div>
+                ))}
+                {MOCK_NFTS.slice(0, 6).map((nft, i) => (
+                  <div key={`s-nft-${i}`} className="w-[220px] shrink-0 hover:scale-[1.02] transition-transform duration-500">
+                    <NFTCard nft={nft as any} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-black uppercase tracking-tighter text-white truncate">Liked Tracks</h4>
-                    <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mt-0.5 opacity-60 truncate">{likedTracksCount} Recorded Signals</p>
-                  </div>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </motion.div>
-            )
-          )}
-
-          {/* Library Items List/Grid */}
-          <AnimatePresence mode="popLayout">
-            {isLoading ? (
-              Array.from({ length: 12 }).map((_, i) => (
-                <div key={`loading-${i}`} className={viewMode === 'grid' ? "aspect-square" : "w-full"}>
-                  <SkeletonCard variant={viewMode === 'grid' ? 'default' : 'row'} />
-                </div>
-              ))
-            ) : (
-              libraryItems.map(item => renderLibraryItem(item))
-            )}
-          </AnimatePresence>
-
-          {!isLoading && libraryItems.length === 0 && (
-            <div className="col-span-full py-40 text-center flex flex-col items-center">
-              <div className="w-24 h-24 rounded-[40px] bg-white/[0.02] border border-dashed border-white/[0.1] flex items-center justify-center mb-8 rotate-12">
-                <History className="w-10 h-10 text-zinc-800" />
+                ))}
               </div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter mb-3">Neural Vault Empty</h3>
-              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] max-w-sm leading-relaxed">
-                Connect your frequencies and capture sonic artifacts to populate this sector.
-              </p>
-              <Button 
-                variant="outline" 
-                className="mt-10 rounded-2xl border-blue-500/20 text-blue-500 text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all h-12 px-8"
-                onClick={() => navigate('/discover')}
-              >
-                Scan Networks
-              </Button>
+              <ScrollBar orientation="horizontal" className="bg-white/[0.02]" />
+            </ScrollArea>
+          </section>
+
+          {/* Recommended Playlists */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 flex items-center gap-2">
+                <Disc className="h-3.5 w-3.5" />
+                Curated Nodes
+              </h3>
             </div>
-          )}
+            <ScrollArea className="w-full">
+              <div className="flex gap-6 pb-6">
+                {MOCK_PLAYLISTS.slice(0, 8).map((playlist, i) => (
+                  <div key={`r-playlist-${i}`} className="w-[200px] shrink-0 hover:scale-[1.02] transition-transform duration-500">
+                    <PlaylistCard playlist={playlist as any} />
+                  </div>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" className="bg-white/[0.02]" />
+            </ScrollArea>
+          </section>
+
+          {/* Recommended Artists */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500 flex items-center gap-2">
+                <Users className="h-3.5 w-3.5" />
+                Sonic Entities
+              </h3>
+            </div>
+            <ScrollArea className="w-full">
+              <div className="flex gap-6 pb-6">
+                {MOCK_ARTISTS.slice(0, 10).map((artist, i) => (
+                  <div key={`r-artist-${i}`} className="w-[180px] shrink-0 hover:scale-[1.02] transition-transform duration-500">
+                    <ArtistCard artist={artist as any} />
+                  </div>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" className="bg-white/[0.02]" />
+            </ScrollArea>
+          </section>
         </div>
       </div>
     </div>

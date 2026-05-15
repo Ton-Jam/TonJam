@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { Play, Disc3 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Play, Disc3, MoreHorizontal } from 'lucide-react';
 import { Album } from '@/types';
+import AlbumOptionsModal from '@/components/AlbumOptionsModal';
 
 interface AlbumCardProps {
   album: Album;
@@ -11,7 +12,10 @@ interface AlbumCardProps {
 
 const AlbumCard: React.FC<AlbumCardProps> = ({ album, index }) => {
   const navigate = useNavigate();
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
+  
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -36,19 +40,31 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index }) => {
             <Play className="w-6 h-6 fill-current ml-1" />
           </button>
         </div>
+        <button 
+            onClick={(e) => { e.stopPropagation(); setIsOptionsModalOpen(true); }}
+            className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+            <MoreHorizontal className="w-4 h-4" />
+        </button>
       </div>
       <div className="px-1">
-        <h3 className="text-white font-black text-[11px] uppercase tracking-tighter truncate group-hover:text-blue-400 transition-colors">
+        <h3 className="text-white font-black text-xs uppercase tracking-tighter truncate group-hover:text-blue-400 transition-colors">
           {album.title}
         </h3>
-        <p className="text-blue-500 font-bold text-[9px] uppercase tracking-widest mt-0.5 truncate">
+        <p className="text-white/70 font-bold text-[10px] uppercase tracking-wide mt-0.5 truncate">
           {album.artist}
         </p>
-        <p className="text-white/30 text-[8px] font-bold uppercase tracking-widest mt-1">
-          Collection • {album.trackIds?.length || 0} tracks
+        <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest mt-1">
+          {album.trackIds?.length || 0} tracks
         </p>
       </div>
     </motion.div>
+    <AnimatePresence>
+        {isOptionsModalOpen && (
+            <AlbumOptionsModal album={album} onClose={() => setIsOptionsModalOpen(false)} />
+        )}
+    </AnimatePresence>
+    </>
   );
 };
 

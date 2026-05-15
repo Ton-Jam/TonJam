@@ -128,14 +128,14 @@ const UserProfile: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
         
         {/* Extreme Left Actions ON Cover Picture */}
-        <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 flex items-center gap-2 sm:gap-3">
+        <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3">
           <button 
             onClick={handleFollow} 
             className={cn(
-              "px-5 sm:px-6 py-1.5 sm:py-2.5 rounded-[2px] font-black text-[9px] sm:text-[10px] uppercase tracking-widest transition-all shadow-2xl backdrop-blur-md active:scale-95",
+              "px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95",
               isFollowing 
-                ? "bg-white/10 text-white" 
-                : "bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-blue-600/40"
+                ? "bg-white/20 text-white hover:bg-white/30 backdrop-blur-md" 
+                : "bg-white text-black hover:bg-white/90 shadow-white/20"
             )}
           >
             {isFollowing ? 'Following' : 'Follow'}
@@ -148,9 +148,9 @@ const UserProfile: React.FC = () => {
                   addNotification("Link copied", "success");
                 });
             }}
-            className="p-2 sm:p-3 bg-white/10 text-white rounded-full hover:bg-blue-600 transition-all border border-white/10 backdrop-blur-md shadow-xl active:scale-90"
+            className="p-3 bg-black/40 text-white rounded-full hover:bg-black/60 transition-all border border-white/10 backdrop-blur-md shadow-lg"
           >
-            <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
+            <Share2 className="h-5 w-5" />
           </button>
         </div>
         
@@ -165,52 +165,52 @@ const UserProfile: React.FC = () => {
         )}
       </div>
 
-      {/* 2. IDENTITY & ACTIONS (Audiomack Style) */}
+      {/* 2. IDENTITY & ACTIONS (Refined) */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-30">
-        <div className="flex flex-col md:flex-row-reverse items-center md:items-end justify-between gap-4 sm:gap-8 -mt-8 md:-mt-12 pb-6 sm:pb-10 border-b border-white/5">
-          <div className="flex flex-col md:flex-row-reverse items-center md:items-end gap-4 sm:gap-8 w-full font-sans">
-            {/* Profile Picture (Overlapping) */}
-            <div className="relative flex-shrink-0 md:mr-[-48px]">
-              <div 
-                className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 overflow-hidden border-2 sm:border-4 border-background shadow-2xl bg-blue-900/20"
-                style={{ borderRadius: '100px' }}
-              >
-                <img 
-                  src={user.avatar || getPlaceholderImage(`user-${user.uid}`)} 
-                  className="w-full h-full object-cover" 
-                  alt={user.name} 
-                />
+        <div className="flex flex-col md:flex-row items-end gap-6 sm:gap-8 -mt-16 sm:-mt-24 pb-10 border-b border-border/50">
+          {/* Profile Picture (Refined Overlap) */}
+          <div className="relative flex-shrink-0">
+            <div 
+              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 overflow-hidden border-4 border-background shadow-2xl bg-muted"
+              style={{ borderRadius: '24px' }}
+            >
+              <img 
+                src={user.avatar || getPlaceholderImage(`user-${user.uid}`)} 
+                className="w-full h-full object-cover" 
+                alt={user.name} 
+              />
+            </div>
+          </div>
+          
+          <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
+            <div className="flex flex-col gap-1 mb-6">
+              <div className="flex items-center gap-3 justify-center md:justify-start">
+                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
+                  {user.name}
+                </h1>
+                {user.isVerified && (
+                  <div className="text-blue-500">
+                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6" />
+                  </div>
+                )}
               </div>
+              <span className="text-muted-foreground font-medium text-sm md:text-base">
+                @{user.username || (user.name || 'user').toLowerCase().replace(/\s+/g, '')}
+              </span>
             </div>
             
-            <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-4">
-              <div className="flex flex-col gap-2 mb-6">
-                <div className="flex items-center gap-3 justify-center md:justify-start">
-                  <h1 className="text-xl md:text-4xl font-black tracking-tighter text-white drop-shadow-2xl">
-                    {user.name}
-                  </h1>
-                  {user.isVerified && (
-                    <div className="bg-blue-500 rounded-full p-1 shadow-lg shadow-blue-500/20">
-                      <CheckCircle className="h-3.5 w-3.5 md:h-4 w-4 text-white" />
-                    </div>
-                  )}
-                </div>
-                <span className="text-blue-400 font-bold text-xs md:text-sm tracking-wide uppercase">
-                  @{user.username || (user.name || 'user').toLowerCase().replace(/\s+/g, '')}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-6">
-                <Link to={`/user/${id}/follows/followers`} className="flex flex-col items-center md:items-start group">
-                  <span className="text-lg font-black text-white leading-none group-hover:text-blue-500 transition-colors">{(user.followers || 0).toLocaleString()}</span>
-                  <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-bold mt-1 group-hover:text-blue-300">Followers</span>
-                </Link>
-                <Link to={`/user/${id}/follows/following`} className="flex flex-col items-center md:items-start border-l border-white/10 pl-6 group">
-                  <span className="text-lg font-black text-white leading-none group-hover:text-blue-500 transition-colors">{(user.following || 0).toLocaleString()}</span>
-                  <span className="text-[8px] uppercase tracking-[0.2em] text-white/40 font-bold mt-1 group-hover:text-blue-300">Following</span>
-                </Link>
-              </div>
-            </div>
+            {/* Action buttons could go here in a refined layout too */}
+          </div>
+
+          <div className="flex items-center gap-6 pb-2">
+            <Link to={`/user/${id}/follows/followers`} className="flex flex-col items-center group">
+              <span className="text-xl font-black text-foreground">{(user.followers || 0).toLocaleString()}</span>
+              <span className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">Followers</span>
+            </Link>
+            <Link to={`/user/${id}/follows/following`} className="flex flex-col items-center group">
+              <span className="text-xl font-black text-foreground">{(user.following || 0).toLocaleString()}</span>
+              <span className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">Following</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -390,20 +390,20 @@ const UserProfile: React.FC = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-6">
-            <section className="bg-muted/20 p-6 rounded-2xl">
-              <h3 className="text-sm font-black uppercase tracking-wider mb-4">About</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+            <div className="bg-card p-8 rounded-3xl border border-border shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-widest mb-4 text-muted-foreground">About</h3>
+              <p className="text-sm text-foreground leading-relaxed mb-6">
                 {user.bio || "No biography available."}
               </p>
 
               {(user.socials?.x || user.socials?.instagram || user.socials?.website || user.socials?.telegram) && (
-                <div className="flex flex-wrap gap-3 pt-6 border-t border-white/5">
+                <div className="flex flex-wrap gap-3 pt-6 border-t border-border">
                   {user.socials?.x && (
                     <a 
                       href={user.socials.x} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="p-2.5 bg-white/5 hover:bg-blue-500/20 text-muted-foreground hover:text-blue-500 rounded-xl transition-all group"
+                      className="p-3 bg-muted hover:bg-muted/80 text-foreground rounded-full transition-all"
                       title="Twitter / X"
                     >
                       <Twitter className="h-4 w-4" />
@@ -414,7 +414,7 @@ const UserProfile: React.FC = () => {
                       href={user.socials.instagram} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="p-2.5 bg-white/5 hover:bg-pink-500/20 text-muted-foreground hover:text-pink-500 rounded-xl transition-all group"
+                      className="p-3 bg-muted hover:bg-muted/80 text-foreground rounded-full transition-all"
                       title="Instagram"
                     >
                       <Instagram className="h-4 w-4" />
@@ -425,7 +425,7 @@ const UserProfile: React.FC = () => {
                       href={user.socials.website} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="p-2.5 bg-white/5 hover:bg-blue-400/20 text-muted-foreground hover:text-blue-400 rounded-xl transition-all group"
+                      className="p-3 bg-muted hover:bg-muted/80 text-foreground rounded-full transition-all"
                       title="Website"
                     >
                       <Globe className="h-4 w-4" />
@@ -436,7 +436,7 @@ const UserProfile: React.FC = () => {
                       href={user.socials.telegram} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="p-2.5 bg-white/5 hover:bg-sky-500/20 text-muted-foreground hover:text-sky-500 rounded-xl transition-all group"
+                      className="p-3 bg-muted hover:bg-muted/80 text-foreground rounded-full transition-all"
                       title="Telegram"
                     >
                       <Send className="h-4 w-4" />
@@ -444,7 +444,7 @@ const UserProfile: React.FC = () => {
                   )}
                 </div>
               )}
-            </section>
+            </div>
           </div>
         </div>
       </div>

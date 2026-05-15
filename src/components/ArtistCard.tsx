@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, UserPlus, UserCheck } from 'lucide-react';
+import { CheckCircle2, UserPlus, UserCheck, MoreHorizontal } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { cn, getPlaceholderImage } from '@/lib/utils';
@@ -16,9 +16,10 @@ interface ArtistCardProps {
   variant?: 'default' | 'row' | 'compact';
   className?: string;
   isLoading?: boolean;
+  onMoreClick?: (artist: Artist) => void;
 }
 
-const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', className = '', isLoading = false }) => {
+const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', className = '', isLoading = false, onMoreClick }) => {
   const navigate = useNavigate();
   const { followedUserIds, toggleFollowUser } = useAudio();
 
@@ -37,6 +38,11 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleFollowUser(artist.uid);
+  };
+  
+  const handleMoreClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onMoreClick && onMoreClick(artist);
   };
 
   const handleCardClick = () => {
@@ -66,6 +72,11 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
                 onClick={handleFollowClick} size="sm">
               {isFollowing ? 'Following' : 'Follow'}
             </Button>
+            {onMoreClick && (
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleMoreClick}>
+                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            )}
           </Card>
         </motion.div>
       )
@@ -81,12 +92,22 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
         onClick={handleCardClick}
         className={cn("group flex flex-col items-center text-center p-3 space-y-2 cursor-pointer hover:border-primary/50 transition-all bg-muted/20 border-border/50 shadow-none rounded-[2px]", className)}
       >
-      <img 
-        src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
-        alt={artist.name} 
-        className="w-14 h-14 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform"
-        onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }}
-      />
+      <div className="relative">
+          <img 
+            src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
+            alt={artist.name} 
+            className="w-14 h-14 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform"
+            onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }}
+          />
+          {onMoreClick && (
+            <button
+               className="absolute -top-1 -right-1 p-1 bg-background rounded-full border border-border shadow-sm"
+               onClick={handleMoreClick}
+            >
+              <MoreHorizontal className="h-3 w-3" />
+            </button>
+          )}
+      </div>
       <div className="space-y-0.5 max-w-full overflow-hidden min-w-0">
         <div className="flex items-center justify-center gap-1 max-w-full">
             <h3 className="font-bold text-[10px] tracking-tight uppercase truncate">{artist.name}</h3>

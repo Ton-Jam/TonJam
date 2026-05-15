@@ -14,6 +14,7 @@ export interface ButtonGroupInputProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
   className?: string
   inputClassName?: string
+  autoFocus?: boolean
 }
 
 export function ButtonGroupInput({ 
@@ -24,7 +25,8 @@ export function ButtonGroupInput({
   onFocus,
   onKeyDown,
   className,
-  inputClassName
+  inputClassName,
+  autoFocus
 }: ButtonGroupInputProps) {
   return (
     <ButtonGroup className={className}>
@@ -34,6 +36,7 @@ export function ButtonGroupInput({
         onChange={onChange}
         onFocus={onFocus}
         onKeyDown={onKeyDown}
+        autoFocus={autoFocus}
         className={cn("rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0", inputClassName)}
       />
       <Button 

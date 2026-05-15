@@ -22,6 +22,7 @@ import {
 import { motion } from "motion/react";
 import { BackButton } from "@/components/BackButton";
 import { useAudio } from "@/context/AudioContext";
+import { useAuth } from "@/context/AuthContext";
 import { getPlaceholderImage } from "@/lib/utils";
 import TrackMonetizationModal from "@/components/TrackMonetizationModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
@@ -40,8 +41,9 @@ import {
 export default function ArtistDashboard() {
   const navigate = useNavigate();
   const { getEarnings } = useAudio();
-  const [tracks, setTracks] = useState<any[]>([]);
+  const { user, isArtist, loading } = useAuth();
   const [nfts, setNFTs] = useState<any[]>([]);
+  const [tracks, setTracks] = useState<any[]>([]);
   const [albums, setAlbums] = useState<any[]>([]);
   const [earnings, setEarnings] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,16 +54,16 @@ export default function ArtistDashboard() {
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
-  const user = auth.currentUser;
-
   useEffect(() => {
-    if (!user) {
+    if (!loading && (!user || !isArtist)) {
       navigate('/');
       return;
     }
 
-    fetchData();
-  }, [user, navigate]);
+    if (user) {
+      fetchData();
+    }
+  }, [user, isArtist, loading, navigate]);
 
   const fetchData = async () => {
     setIsLoading(true);

@@ -18,12 +18,20 @@ interface EditUserProfileModalProps {
   onUpdate: (updatedUser: UserProfileType) => void;
 }
 
+const AVATAR_OPTIONS = [
+  'https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png',
+  'https://image.pollinations.ai/prompt/young%20woman%20avatar%20with%20cool%20glasses%20and%20headphones?width=400&height=400&nologo=true',
+  'https://image.pollinations.ai/prompt/young%20man%20avatar%20with%20streetwear%20and%20cap?width=400&height=400&nologo=true',
+  'https://image.pollinations.ai/prompt/digital%20humanoid%20avatar%20glitch%20art?width=400&height=400&nologo=true',
+];
+
 const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ user, onClose, onUpdate }) => {
   const { addNotification } = useAudio();
   const [name, setName] = useState(user.name);
   const [username, setUsername] = useState(user.username || '');
   const [bio, setBio] = useState(user.bio || '');
   const [avatarUrl, setAvatarUrl] = useState(user.avatar || '');
+  const [socials, setSocials] = useState(user.socials || {});
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,7 +69,8 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ user, onClo
         name,
         username,
         bio,
-        avatar: avatarUrl || user.avatar || ''
+        avatar: avatarUrl || user.avatar || '',
+        socials
       };
 
       // Persist to Firebase
@@ -106,6 +115,19 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ user, onClo
               </div>
               <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" accept={ALLOWED_IMAGE_TYPES.join(',')} />
             </div>
+            
+            <div className="flex gap-2">
+              {AVATAR_OPTIONS.map((avatar) => (
+                <button
+                  key={avatar}
+                  type="button"
+                  className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all ${avatarUrl === avatar ? 'border-blue-500' : 'border-transparent'}`}
+                  onClick={() => setAvatarUrl(avatar)}
+                >
+                  <img src={avatar} alt="Avatar Option" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -120,6 +142,14 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ user, onClo
             <div className="space-y-1">
               <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Bio</Label>
               <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
+            </div>
+            <div className="space-y-4">
+              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Social Media</Label>
+              <Input type="text" placeholder="X (Twitter) URL" value={socials.x || ''} onChange={(e) => setSocials({...socials, x: e.target.value})} />
+              <Input type="text" placeholder="Instagram URL" value={socials.instagram || ''} onChange={(e) => setSocials({...socials, instagram: e.target.value})} />
+              <Input type="text" placeholder="Website URL" value={socials.website || ''} onChange={(e) => setSocials({...socials, website: e.target.value})} />
+              <Input type="text" placeholder="Telegram URL" value={socials.telegram || ''} onChange={(e) => setSocials({...socials, telegram: e.target.value})} />
+              <Input type="text" placeholder="Spotify URL" value={socials.spotify || ''} onChange={(e) => setSocials({...socials, spotify: e.target.value})} />
             </div>
           </div>
 

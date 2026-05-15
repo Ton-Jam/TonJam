@@ -95,7 +95,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
   return (
     <div className="w-full mx-auto relative group discover-search-bar">
       {/* Main Container */}
-      <ButtonGroup className={`relative bg-muted/50 backdrop-blur-xl border rounded-full transition-all duration-300 flex items-center px-2 ${isFocused ? 'border-blue-500/50 bg-foreground/[0.08] shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+      <ButtonGroup className={`relative bg-muted/50 backdrop-blur-xl border-2 rounded-[34px] transition-all duration-300 flex items-center px-2 ${isFocused ? 'border-blue-500 bg-foreground/[0.08] shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'border-blue-500/50 group-hover:border-blue-500'}`}>
         <SearchIcon className="h-4 w-4 text-muted-foreground ml-2" />
         <Input
           ref={inputRef}
@@ -142,7 +142,7 @@ const DiscoverSearchBar: React.FC<DiscoverSearchBarProps> = ({
       </ButtonGroup>
 
       {/* Bottom Progress Bar (Animated) */}
-      <div className="h-[1px] w-full bg-muted/50 relative overflow-hidden mt-[-1px] z-10 rounded-b-full">
+      <div className="h-[3px] w-full bg-muted/50 relative overflow-hidden mt-[-1px] z-10 rounded-b-full">
         {isTyping && (
           <motion.div 
             initial={{ x: '-100%' }}

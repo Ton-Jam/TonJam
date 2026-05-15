@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { BackButton } from '@/components/BackButton';
+import { Button } from '@/components/ui/button';
 import { 
   ArrowLeft, 
   Pause, 
@@ -31,8 +32,11 @@ import {
   Coins,
   TrendingUp,
   Activity,
-  Award
+  Award,
+  ArrowUpDown,
+  Users
 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -106,6 +110,7 @@ const NFTDetail: React.FC = () => {
   }, [searchParams, isOwner, localNft, setSearchParams]);
   const [showManageModal, setShowManageModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<NFTOffer | null>(null);
+  const [relatedSort, setRelatedSort] = useState<'default' | 'bids'>('default');
   const [isCancelListingConfirmOpen, setIsCancelListingConfirmOpen] = useState(false);
   const [offerToDecline, setOfferToDecline] = useState<string | null>(null);
   const [offerToAccept, setOfferToAccept] = useState<NFTOffer | null>(null);
@@ -142,6 +147,40 @@ const NFTDetail: React.FC = () => {
   const isAuction = useMemo(() => {
     return localNft?.listingType === 'auction';
   }, [localNft]);
+
+  const isAuctionEnded = useMemo(() => {
+    if (!isAuction || !localNft?.auctionEndTime) return false;
+    return new Date(localNft.auctionEndTime).getTime() <= Date.now();
+  }, [isAuction, localNft?.auctionEndTime]);
+
+  const [timeRemaining, setTimeRemaining] = useState<string>('');
+  
+  useEffect(() => {
+    if (!isAuction || !localNft?.auctionEndTime) return;
+    
+    const calculateTimeRemaining = () => {
+      const end = new Date(localNft.auctionEndTime!).getTime();
+      const now = new Date().getTime();
+      const distance = end - now;
+
+      if (distance < 0) {
+        setTimeRemaining('Auction Ended');
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+    };
+
+    calculateTimeRemaining();
+    const timer = setInterval(calculateTimeRemaining, 1000);
+
+    return () => clearInterval(timer);
+  }, [isAuction, localNft?.auctionEndTime]);
 
   const minNextBid = useMemo(() => {
     if (!localNft?.price) return '0';
@@ -186,8 +225,15 @@ const NFTDetail: React.FC = () => {
     const relatedTrackIds = MOCK_TRACKS
       .filter(t => t.genre === associatedTrack.genre)
       .map(t => t.id);
-    return allNFTs.filter(n => relatedTrackIds.includes(n.trackId) && n.id !== localNft.id).slice(0, 4);
-  }, [localNft, associatedTrack, allNFTs]);
+    
+    let filtered = allNFTs.filter(n => relatedTrackIds.includes(n.trackId) && n.id !== localNft.id);
+
+    if (relatedSort === 'bids') {
+      filtered = [...filtered].sort((a, b) => (b.offers?.length || 0) - (a.offers?.length || 0));
+    }
+
+    return filtered.slice(0, 4);
+  }, [localNft, associatedTrack, allNFTs, relatedSort]);
 
   const priceHistoryData = useMemo(() => {
     if (!localNft) return [];
@@ -238,6 +284,11 @@ const NFTDetail: React.FC = () => {
     const bidValue = parseFloat(inlineBidAmount);
     const minBidValue = parseFloat(minNextBid);
     
+    if (isAuctionEnded) {
+      addNotification("Auction session expired. Signal rejection.", "error");
+      return;
+    }
+
     if (isNaN(bidValue) || bidValue < minBidValue) {
       addNotification(`Minimum bid is ${minNextBid} TON`, "warning");
       return;
@@ -454,9 +505,15 @@ const NFTDetail: React.FC = () => {
                 </div>
 
                 {/* Edition Badge */}
-                <div className="absolute top-6 left-6">
+                <div className="absolute top-6 left-6 flex flex-col gap-2">
                   <div className="px-4 py-4 bg-background/60 backdrop-blur-xl border border-border rounded-[8px] text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
                     {localNft.edition} <span className="text-muted-foreground ml-4">Edition</span>
+                  </div>
+                  <div className="px-4 py-4 bg-background/60 backdrop-blur-xl border border-border rounded-[8px] text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                    {localNft.minted || 0} <span className="text-muted-foreground ml-2">Minted / {localNft.supply || 0} Total</span>
+                  </div>
+                  <div className="px-4 py-4 bg-background/60 backdrop-blur-xl border border-border rounded-[8px] text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                    {(localNft.supply || 0) - (localNft.minted || 0)} <span className="text-muted-foreground ml-2">Remaining</span>
                   </div>
                 </div>
 
@@ -469,8 +526,8 @@ const NFTDetail: React.FC = () => {
                         <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Live Auction Bidding Active</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">Status Protocol</span>
-                        <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Neural Sync Live</span>
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">Time Remaining</span>
+                        <span className="text-[12px] font-black text-amber-500 uppercase tracking-widest">{timeRemaining || 'Loading...'}</span>
                       </div>
                     </div>
                   </div>
@@ -612,10 +669,18 @@ const NFTDetail: React.FC = () => {
                       {isOwner ? 'You (Vault)' : localNft.owner ? `${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}` : 'Unknown'}
                     </span>
                   </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-6 text-[8px] uppercase tracking-widest">Holders</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {["Wallet 1", "Wallet 2", "Wallet 3"].map(h => <DropdownMenuItem key={h} className="text-[8px] uppercase">{h}</DropdownMenuItem>)}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 
-              <h1 className="text-[32px] md:text-[48px] font-bold tracking-tighter uppercase text-foreground leading-[1] mb-2">{localNft.title}</h1>
+              <h1 className="text-[24px] md:text-[36px] font-bold tracking-tighter uppercase text-foreground leading-[1] mb-2">{localNft.title}</h1>
               
               <ReactionsSection targetId={localNft.id} targetType="nft" />
 
@@ -636,51 +701,59 @@ const NFTDetail: React.FC = () => {
             <div className="bg-white/5 backdrop-blur-xl rounded-[2px] p-8 mb-4 border border-white/10 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000"><Zap className="h-64 w-64 text-blue-500" /></div>
               
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 relative z-10">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-3 h-3 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_15px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]'}`}></div>
-                    <span className="text-[12px] font-black text-muted-foreground uppercase tracking-[0.5em]">
-                      {isAuction ? 'Current Highest Bid' : 'Valuation Protocol V.4'}
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`}></div>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
+                      {isAuction ? 'Current Highest Bid' : 'Valuation Protocol'}
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-4">
-                    <span className="text-[72px] md:text-[96px] font-black text-foreground tracking-tighter leading-none">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-[48px] md:text-[64px] font-black text-foreground tracking-tighter leading-none">
                       {isAuction ? (highestOfferPrice > 0 ? highestOfferPrice : (localNft.startingBid || localNft.price)) : localNft.price}
                     </span>
-                    <span className="text-[24px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
+                    <span className="text-[18px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest px-4 py-2 bg-white/5 rounded-full border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest px-3 py-1.5 bg-white/5 rounded-full border border-white/5">
                       ≈ ${(parseFloat(localNft.price) * 5.2).toLocaleString()} USD
                     </p>
-                    <div className="h-px w-12 bg-white/10"></div>
-                    <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Floor +12%</p>
+                    <div className="h-px w-8 bg-white/10"></div>
+                    <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">+12.4% Vol</p>
                   </div>
                 </div>
 
                 {isAuction && (
-                  <div className="bg-white/5 backdrop-blur-md p-6 rounded-[2px] border border-white/5 text-right min-w-[240px] shadow-2xl">
-                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-4 flex items-center justify-end gap-2">
-                       <Clock className="h-3 w-3" /> Min Next Step
+                  <div className="bg-white/5 backdrop-blur-md p-4 rounded-[2px] border border-white/5 text-right min-w-[200px] shadow-2xl">
+                    <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-2 flex items-center justify-end gap-2">
+                       <Clock className="h-2.5 w-2.5" /> Time Left
                     </p>
-                    <p className="text-[28px] font-bold text-amber-500 tracking-tighter">+{minNextBid} <span className="text-sm">TON</span></p>
+                    <p className="text-[12px] font-bold text-amber-500 tracking-tighter">
+                      {timeRemaining || '00:00:00'}
+                    </p>
+                    <div className="mt-3 pt-3 border-t border-white/5">
+                      <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-1">
+                        Min Step
+                      </p>
+                      <p className="text-[14px] font-bold text-amber-500 tracking-tighter">+{minNextBid} <span className="text-[10px]">TON</span></p>
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="mt-4 flex flex-col sm:flex-row gap-4 relative z-10">
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 relative z-10">
                 {isOwner ? (
                   <>
-                    <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[2px] font-bold text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
-                      {localNft.listingType ? 'Manage Listing' : 'Sell NFT'}
+                    <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
+                      {localNft.listingType ? 'Manage' : 'Sell'}
                     </button>
-                    <button onClick={() => setShowSendModal(true)} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-4 border border-white/10" >
-                      <Send className="h-4 w-4" /> Send Asset
+                    <button onClick={() => setShowSendModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10" >
+                      <Send className="h-3.5 w-3.5" /> Send
                     </button>
                     {localNft.listingType && (
-                      <button onClick={handleCancelListing} className="flex-1 py-4 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[2px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 hover:border-red-500/20" >
-                        Cancel Listing
+                      <button onClick={handleCancelListing} className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 hover:border-red-500/20" >
+                        Cancel
                       </button>
                     )}
                   </>
@@ -692,37 +765,42 @@ const NFTDetail: React.FC = () => {
                           type="number"
                           value={inlineBidAmount}
                           onChange={(e) => setInlineBidAmount(e.target.value)}
-                          placeholder={`Min: ${minNextBid}`}
-                          className="w-1/3 bg-white/5 border border-white/10 rounded-[2px] px-4 text-white font-bold outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-all text-sm"
+                          placeholder={`${minNextBid}+`}
+                          className="w-1/4 bg-white/5 border border-white/10 rounded-[2px] px-3 text-white font-bold outline-none focus-visible:ring-1 focus-visible:ring-amber-500 transition-all text-xs"
                         />
                         <button 
                           onClick={handleInlineBid} 
-                          disabled={isPlacingBid}
-                          className="flex-1 py-4 rounded-[2px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20 border-orange-400/30 disabled:opacity-50 flex items-center justify-center gap-2" 
+                          disabled={isPlacingBid || isAuctionEnded}
+                          className={cn(
+                            "flex-1 py-3 rounded-[2px] font-bold text-[9px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-2xl border flex items-center justify-center gap-2",
+                            isAuctionEnded 
+                              ? "bg-white/5 border-white/5 text-white/20 cursor-not-allowed" 
+                              : "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/10 border-orange-400/20"
+                          )}
                         >
-                          {isPlacingBid ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Place Bid Signal'}
+                          {isPlacingBid ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isAuctionEnded ? 'EXPIRED' : 'Place Bid'}
                         </button>
                       </div>
                     ) : (
-                      <button onClick={handleAction} className="flex-[2] py-4 rounded-[2px] font-bold text-xs uppercase tracking-[0.4em] active:scale-95 transition-all shadow-2xl border bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-blue-600/30 border-blue-400/30" >
-                        Acquire Asset Now
+                      <button onClick={handleAction} className="flex-[2] py-3 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-2xl border bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-blue-600/20 border-blue-400/20" >
+                        {isAuction ? 'Place Bid' : 'Acquire Asset'}
                       </button>
                     )}
                     {!isAuction && (
-                      <button onClick={() => setShowBidModal(true)} className="flex-1 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[2px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-blue-400/30 shadow-lg shadow-blue-500/20" >
-                        Make Offer
+                      <button onClick={() => setShowBidModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
+                        Offer
                       </button>
                     )}
                     {userOffer && (
-                      <button onClick={handleCancelBid} className="flex-1 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[2px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-blue-400/30 shadow-lg shadow-blue-500/20" >
-                        Withdraw Bid
+                      <button onClick={handleCancelBid} className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-red-500/20" >
+                        Retract
                       </button>
                     )}
                     <button 
                       onClick={() => setIsTipping(true)}
-                      className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-4 border border-white/10"
+                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
                     >
-                      <Coins className="h-4 w-4 text-blue-400" /> Tip Creator
+                      <Coins className="h-3.5 w-3.5 text-blue-400" /> Support
                     </button>
                   </>
                 )}
@@ -1145,9 +1223,35 @@ const NFTDetail: React.FC = () => {
                   <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">Sonic Affinities</p>
                 </div>
               </div>
-              <button onClick={() => navigate('/explore/nfts?title=Related Vibes')} className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group" >
-                EXPLORE GENRE <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="flex bg-white/5 rounded-full p-1 border border-white/10 gap-2">
+                  <button 
+                    onClick={() => setRelatedSort('default')}
+                    className={cn(
+                      "px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border-2",
+                      relatedSort === 'default' 
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 border-blue-400/50" 
+                        : "text-muted-foreground hover:text-foreground bg-white/5 border-blue-500/30 hover:bg-white/10"
+                    )}
+                  >
+                    Default
+                  </button>
+                  <button 
+                    onClick={() => setRelatedSort('bids')}
+                    className={cn(
+                      "px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 border-2",
+                      relatedSort === 'bids' 
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 border-blue-400/50" 
+                        : "text-muted-foreground hover:text-foreground bg-white/5 border-blue-500/30 hover:bg-white/10"
+                    )}
+                  >
+                    <ArrowUpDown className="h-3 w-3" /> Most Bids
+                  </button>
+                </div>
+                <button onClick={() => navigate('/explore/nfts?title=Related Vibes')} className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group" >
+                  EXPLORE GENRE <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {relatedNfts.map((nft) => (

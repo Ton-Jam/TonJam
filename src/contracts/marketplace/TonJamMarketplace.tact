@@ -8,6 +8,18 @@ struct Listing {
     price: Int as coins;
 }
 
+struct Auction {
+    seller: Address;
+    highestBidder: Address?;
+    highestBid: Int as coins;
+    endTime: Int as uint64;
+}
+
+struct NFTHistory {
+    previous_owner: Address;
+    forward_payload: Cell;
+}
+
 message ListNFT {
     query_id: Int as uint64;
     nft_address: Address;
@@ -20,6 +32,23 @@ message BuyNFT {
 }
 
 message CancelSale {
+    query_id: Int as uint64;
+    nft_address: Address;
+}
+
+message StartAuction {
+    query_id: Int as uint64;
+    nft_address: Address;
+    startPrice: Int as coins;
+    duration: Int as uint64;
+}
+
+message PlaceBid {
+    query_id: Int as uint64;
+    nft_address: Address;
+}
+
+message ResolveAuction {
     query_id: Int as uint64;
     nft_address: Address;
 }
@@ -44,6 +73,8 @@ contract TonJamMarketplace with Deployable {
     fee_destination: Address;
     fee_percentage: Int as uint16; // e.g., 250 for 2.5%
     listings: map<Address, Listing>;
+    auctions: map<Address, Auction>;
+    nft_histories: map<Address, NFTHistory>;
 
     init(owner: Address, fee_destination: Address, fee_percentage: Int) {
         self.owner = owner;
@@ -54,6 +85,9 @@ contract TonJamMarketplace with Deployable {
     // Custodial listing: NFT is transferred to the marketplace
     receive(msg: OwnershipAssigned) {
         let nft_address: Address = sender();
+        let payload: Cell = beginCell().storeSlice(msg.forward_payload).endCell();
+        self.nft_histories.set(nft_address, NFTHistory{previous_owner: msg.prev_owner, forward_payload: payload});
+
         let slice: Slice = msg.forward_payload;
         
         // We expect the price to be in the forward_payload
@@ -145,6 +179,113 @@ contract TonJamMarketplace with Deployable {
 
         // Remove listing
         self.listings.set(msg.nft_address, null);
+    }
+
+    receive(msg: StartAuction) {
+        let ctx: Context = context();
+        let history: NFTHistory? = self.nft_histories.get(msg.nft_address);
+        require(history != null, "NFT not held by marketplace");
+        
+        // Ensure not already listed
+        require(self.listings.get(msg.nft_address) == null, "NFT already listed for sale");
+        
+        // Ensure not already an auction
+        require(self.auctions.get(msg.nft_address) == null, "NFT already in auction");
+
+        let h: NFTHistory = history!!;
+        require(ctx.sender == h.previous_owner || ctx.sender == self.owner, "Unauthorized");
+
+        self.auctions.set(msg.nft_address, Auction{
+            seller: h.previous_owner,
+            highestBidder: null,
+            highestBid: msg.startPrice,
+            endTime: now() + msg.duration
+        });
+    }
+
+    receive(msg: PlaceBid) {
+        let ctx: Context = context();
+        let auction: Auction? = self.auctions.get(msg.nft_address);
+        require(auction != null, "Auction not found");
+        let a: Auction = auction!!;
+        require(now() < a.endTime, "Auction ended");
+        require(ctx.value > a.highestBid, "Bid too low");
+
+        // Refund previous bidder
+        if (a.highestBidder != null) {
+            send(SendParameters{
+                to: a.highestBidder!!,
+                value: a.highestBid,
+                mode: SendPayGasSeparately
+            });
+        }
+
+        // Update auction
+        self.auctions.set(msg.nft_address, Auction{
+            seller: a.seller,
+            highestBidder: ctx.sender,
+            highestBid: ctx.value,
+            endTime: a.endTime
+        });
+    }
+
+    receive(msg: ResolveAuction) {
+        let ctx: Context = context();
+        let auction: Auction? = self.auctions.get(msg.nft_address);
+        require(auction != null, "Auction not found");
+        let a: Auction = auction!!;
+        require(now() >= a.endTime, "Auction not ended");
+
+        if (a.highestBidder == null) {
+            // No bids, return to seller
+            send(SendParameters{
+                to: msg.nft_address,
+                value: 0,
+                mode: SendRemainingValue,
+                body: Transfer{
+                    query_id: msg.query_id,
+                    new_owner: a.seller,
+                    response_destination: a.seller,
+                    custom_payload: null,
+                    forward_amount: 0,
+                    forward_payload: emptySlice()
+                }.toCell()
+            });
+        } else {
+            // Transfer to winner
+            let b: Address = a.highestBidder!!;
+            
+            let fee: Int = (a.highestBid * self.fee_percentage) / 10000;
+            let seller_amount: Int = a.highestBid - fee;
+
+            send(SendParameters{
+                to: a.seller,
+                value: seller_amount,
+                mode: SendPayGasSeparately
+            });
+            send(SendParameters{
+                to: self.fee_destination,
+                value: fee,
+                mode: SendPayGasSeparately
+            });
+            
+            send(SendParameters{
+                to: msg.nft_address,
+                value: 0,
+                mode: SendRemainingValue,
+                body: Transfer{
+                    query_id: msg.query_id,
+                    new_owner: b,
+                    response_destination: b,
+                    custom_payload: null,
+                    forward_amount: 0,
+                    forward_payload: emptySlice()
+                }.toCell()
+            });
+        }
+        
+        // Remove auction
+        self.auctions.set(msg.nft_address, null);
     }
 
     get fun get_listing(nft_address: Address): Listing? {

@@ -807,6 +807,57 @@ export function dictValueParserListing(): DictionaryValue<Listing> {
     }
 }
 
+export type NFTHistory = {
+    $$type: 'NFTHistory';
+    previous_owner: Address;
+    forward_payload: Cell;
+}
+
+export function storeNFTHistory(src: NFTHistory) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeAddress(src.previous_owner);
+        b_0.storeRef(src.forward_payload);
+    };
+}
+
+export function loadNFTHistory(slice: Slice) {
+    const sc_0 = slice;
+    const _previous_owner = sc_0.loadAddress();
+    const _forward_payload = sc_0.loadRef();
+    return { $$type: 'NFTHistory' as const, previous_owner: _previous_owner, forward_payload: _forward_payload };
+}
+
+export function loadTupleNFTHistory(source: TupleReader) {
+    const _previous_owner = source.readAddress();
+    const _forward_payload = source.readCell();
+    return { $$type: 'NFTHistory' as const, previous_owner: _previous_owner, forward_payload: _forward_payload };
+}
+
+export function loadGetterTupleNFTHistory(source: TupleReader) {
+    const _previous_owner = source.readAddress();
+    const _forward_payload = source.readCell();
+    return { $$type: 'NFTHistory' as const, previous_owner: _previous_owner, forward_payload: _forward_payload };
+}
+
+export function storeTupleNFTHistory(source: NFTHistory) {
+    const builder = new TupleBuilder();
+    builder.writeAddress(source.previous_owner);
+    builder.writeCell(source.forward_payload);
+    return builder.build();
+}
+
+export function dictValueParserNFTHistory(): DictionaryValue<NFTHistory> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeNFTHistory(src)).endCell());
+        },
+        parse: (src) => {
+            return loadNFTHistory(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type ListNFT = {
     $$type: 'ListNFT';
     query_id: bigint;
@@ -1114,6 +1165,7 @@ export type TonJamMarketplace$Data = {
     fee_destination: Address;
     fee_percentage: bigint;
     listings: Dictionary<Address, Listing>;
+    nft_histories: Dictionary<Address, NFTHistory>;
 }
 
 export function storeTonJamMarketplace$Data(src: TonJamMarketplace$Data) {
@@ -1123,6 +1175,7 @@ export function storeTonJamMarketplace$Data(src: TonJamMarketplace$Data) {
         b_0.storeAddress(src.fee_destination);
         b_0.storeUint(src.fee_percentage, 16);
         b_0.storeDict(src.listings, Dictionary.Keys.Address(), dictValueParserListing());
+        b_0.storeDict(src.nft_histories, Dictionary.Keys.Address(), dictValueParserNFTHistory());
     };
 }
 
@@ -1132,7 +1185,8 @@ export function loadTonJamMarketplace$Data(slice: Slice) {
     const _fee_destination = sc_0.loadAddress();
     const _fee_percentage = sc_0.loadUintBig(16);
     const _listings = Dictionary.load(Dictionary.Keys.Address(), dictValueParserListing(), sc_0);
-    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings };
+    const _nft_histories = Dictionary.load(Dictionary.Keys.Address(), dictValueParserNFTHistory(), sc_0);
+    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings, nft_histories: _nft_histories };
 }
 
 export function loadTupleTonJamMarketplace$Data(source: TupleReader) {
@@ -1140,7 +1194,8 @@ export function loadTupleTonJamMarketplace$Data(source: TupleReader) {
     const _fee_destination = source.readAddress();
     const _fee_percentage = source.readBigNumber();
     const _listings = Dictionary.loadDirect(Dictionary.Keys.Address(), dictValueParserListing(), source.readCellOpt());
-    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings };
+    const _nft_histories = Dictionary.loadDirect(Dictionary.Keys.Address(), dictValueParserNFTHistory(), source.readCellOpt());
+    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings, nft_histories: _nft_histories };
 }
 
 export function loadGetterTupleTonJamMarketplace$Data(source: TupleReader) {
@@ -1148,7 +1203,8 @@ export function loadGetterTupleTonJamMarketplace$Data(source: TupleReader) {
     const _fee_destination = source.readAddress();
     const _fee_percentage = source.readBigNumber();
     const _listings = Dictionary.loadDirect(Dictionary.Keys.Address(), dictValueParserListing(), source.readCellOpt());
-    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings };
+    const _nft_histories = Dictionary.loadDirect(Dictionary.Keys.Address(), dictValueParserNFTHistory(), source.readCellOpt());
+    return { $$type: 'TonJamMarketplace$Data' as const, owner: _owner, fee_destination: _fee_destination, fee_percentage: _fee_percentage, listings: _listings, nft_histories: _nft_histories };
 }
 
 export function storeTupleTonJamMarketplace$Data(source: TonJamMarketplace$Data) {
@@ -1157,6 +1213,7 @@ export function storeTupleTonJamMarketplace$Data(source: TonJamMarketplace$Data)
     builder.writeAddress(source.fee_destination);
     builder.writeNumber(source.fee_percentage);
     builder.writeCell(source.listings.size > 0 ? beginCell().storeDictDirect(source.listings, Dictionary.Keys.Address(), dictValueParserListing()).endCell() : null);
+    builder.writeCell(source.nft_histories.size > 0 ? beginCell().storeDictDirect(source.nft_histories, Dictionary.Keys.Address(), dictValueParserNFTHistory()).endCell() : null);
     return builder.build();
 }
 
@@ -1188,7 +1245,7 @@ function initTonJamMarketplace_init_args(src: TonJamMarketplace_init_args) {
 }
 
 async function TonJamMarketplace_init(owner: Address, fee_destination: Address, fee_percentage: bigint) {
-    const __code = Cell.fromHex('b5ee9c72410212010004a1000114ff00f4a413f4bcf2c80b01020162020d04dcd001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019cfa40fa40d30ff40455306c149ffa40fa40810101d700552003d1586de205925f05e003d70d1ff2e082218210e1cbed05bae30221821006b33514bae302218210530c881dbae302018210946a98b6ba0306090c02fe31d33ffa40f84221d749c21f8e6d317080406d228b0826105804075520c8555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec943305a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0003e30d43300405004433fa00300181010b02c85902ce01fa02c9103612206e953059f45930944133f413e20024c87f01ca0055305034cececb0ff400c9ed5401fe31d33ffa4030f8416f2430322781010b2459f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e28200d085216eb3f2f46f228200ca2a5141be14f2f45327a8812710a9045133a1716d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f4000701fcc901fb005242716d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb007080406d228b0825105804065520c8555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec92244445a6d6d40037fc8cf85800800d0ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0081010b6dc8216e925b6d9b016f22585902ce01fa02c9e2103612206e953059f45930944133f413e24330c87f01ca0055305034cececb0ff400c9ed5401b831d33ffa4030f8416f2410235f032681010b2359f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e28200d085216eb3f2f46f22308200c2415321c70592327f945126c705e212f2f47080406d228b0825105804065520c80a01ee555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec92244445a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0081010b6dc8216e925b6d9b016f22585902ce01fa02c9e21036120b0044206e953059f45930944133f413e24330c87f01ca0055305034cececb0ff400c9ed5400a28e49d33f30c8018210aff90f5758cb1fcb3fc9443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055305034cececb0ff400c9ed54e05f05f2c0820201200e100155bcdb876a268690000ce7d207d206987fa022a98360a4ffd207d20408080eb802a9001e8ac36f16d9e3620c0f0018c824cf1623cf165220cb0fc9017bbeb9176a268690000ce7d207d206987fa022a98360a4ffd207d20408080eb802a9001e8ac36f12a81ed9e36209037491836ca37913781711037491836ef411003e81010b220259f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e2d39873a5');
+    const __code = Cell.fromHex('b5ee9c72410211010004de000114ff00f4a413f4bcf2c80b01020162020c04e4d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019efa40fa40d30ff404f40455406c158e10fa40fa40810101d700552003d1586d6de206925f06e004d70d1ff2e082218210e1cbed05bae30221821006b33514bae302218210530c881dbae302018210946a98b6ba0305080b01da31d33ffa40f842c822cf16c92381010b02c85902ceccc922103b01206e953059f45930944133f413e221d749c21f8e2333fa00300181010b02c85902ce01fa02c910364170206e953059f45930944133f413e2e30e440302c87f01ca0055405045ce12cecb0ff400f400c9ed540400dc317080406d228b0826105804075520c8555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec91843305a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000301fe31d33ffa4030f8416f2430322781010b2459f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e28200d085216eb3f2f46f228200ca2a5141be14f2f45325a8812710a9045133a1716d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f4000601fcc901fb005252716d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb007080406d228b0825105804065520c8555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec92244445a6d6d40037fc8cf85800700d8ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0081010b6dc8216e925b6d9b016f22585902ce01fa02c9e2103612206e953059f45930944133f413e2440302c87f01ca0055405045ce12cecb0ff400f400c9ed5401b831d33ffa4030f8416f2410235f032681010b2359f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e28200d085216eb3f2f46f22308200c2415321c70592327f945127c705e212f2f47080406d228b0825105804065520c80901ee555082104e33fd185007cb1f15cb3f13ce01206e9430cf84809201cee2f40001fa02cec92244445a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0081010b6dc8216e925b6d9b016f22585902ce01fa02c9e21036120a004c206e953059f45930944133f413e2440302c87f01ca0055405045ce12cecb0ff400f400c9ed5400aa8e4dd33f30c8018210aff90f5758cb1fcb3fc910354430f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055405045ce12cecb0ff400f400c9ed54e05f06f2c0820201200d0f015dbcdb876a268690000cf7d207d206987fa027a022aa0360ac7087d207d20408080eb802a9001e8ac36b6f16d9e3628c0e0018c825cf1624cf165230cb0fc90183beb9176a268690000cf7d207d206987fa027a022aa0360ac7087d207d20408080eb802a9001e8ac36b6f12a826d9e36289037491836ca37913781711037491836ef410003e81010b230259f40b6fa192306ddf206e92306d9ad0fa40fa00596c126f02e2a9137081');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initTonJamMarketplace_init_args({ $$type: 'TonJamMarketplace_init_args', owner, fee_destination, fee_percentage })(builder);
@@ -1295,12 +1352,13 @@ const TonJamMarketplace_types: ABIType[] = [
     {"name":"DeployOk","header":2952335191,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"Listing","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"price","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
+    {"name":"NFTHistory","header":null,"fields":[{"name":"previous_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"forward_payload","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"ListNFT","header":505469326,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"nft_address","type":{"kind":"simple","type":"address","optional":false}},{"name":"price","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"BuyNFT","header":112407828,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"nft_address","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"CancelSale","header":1393330205,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"nft_address","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"OwnershipAssigned","header":3788238085,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"prev_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"Transfer","header":1312029976,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"new_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"custom_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"forward_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"TonJamMarketplace$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"fee_destination","type":{"kind":"simple","type":"address","optional":false}},{"name":"fee_percentage","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"listings","type":{"kind":"dict","key":"address","value":"Listing","valueFormat":"ref"}}]},
+    {"name":"TonJamMarketplace$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"fee_destination","type":{"kind":"simple","type":"address","optional":false}},{"name":"fee_percentage","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"listings","type":{"kind":"dict","key":"address","value":"Listing","valueFormat":"ref"}},{"name":"nft_histories","type":{"kind":"dict","key":"address","value":"NFTHistory","valueFormat":"ref"}}]},
 ]
 
 const TonJamMarketplace_opcodes = {

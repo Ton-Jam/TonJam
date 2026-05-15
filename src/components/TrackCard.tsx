@@ -95,9 +95,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const handleOptions = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.innerWidth < 1024) {
-      setOptionsTrack(track, { onRemove, onMoveUp, onMoveDown });
-    }
+    setOptionsTrack(track, { onRemove, onMoveUp, onMoveDown });
   };
 
   const handleShare = async (e?: React.MouseEvent) => {
@@ -243,23 +241,13 @@ const TrackCard: React.FC<TrackCardProps> = ({
   );
 
   const MoreOptionsButton = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button 
-          onClick={(e) => { e.stopPropagation(); if (window.innerWidth < 1024) handleOptions(e); }}
-          className="p-1.5 rounded-xl transition-all hover:bg-white/5 text-muted-foreground/30 hover:text-blue-400 flex-shrink-0 active:scale-90"
-          aria-label="Track options"
-        >
-          <MoreVertical className="h-4 w-4" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="hidden lg:block bg-[#0A0A0B]/95 border-white/5 text-white shadow-[0_16px_60px_rgba(0,0,0,0.8)] min-w-[220px] p-1 rounded-xl backdrop-blur-3xl animate-in fade-in zoom-in-95 duration-200"
-      >
-        <TrackMenuContent />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <button 
+      onClick={handleOptions}
+      className="p-1.5 rounded-xl transition-all hover:bg-white/5 text-muted-foreground/30 hover:text-blue-400 flex-shrink-0 active:scale-90"
+      aria-label="Track options"
+    >
+      <MoreVertical className="h-4 w-4" />
+    </button>
   );
 
   const handleCardClickInner = (e: React.MouseEvent) => {

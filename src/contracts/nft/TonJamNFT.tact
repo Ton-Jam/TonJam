@@ -67,6 +67,8 @@ struct GetNftData {
     collection_address: Address;
     owner_address: Address;
     individual_content: Cell;
+    original_owner: Address;
+    previous_owner: Address?;
 }
 
 contract TonJamCollection with Deployable {
@@ -145,6 +147,8 @@ contract TonJamCollection with Deployable {
 
 contract TonJamNFTItem {
     owner: Address;
+    original_owner: Address;
+    previous_owner: Address?;
     collection_address: Address;
     item_index: Int as uint64;
     content: Cell;
@@ -152,6 +156,8 @@ contract TonJamNFTItem {
 
     init(owner: Address, collection_address: Address, item_index: Int, content: Cell) {
         self.owner = owner;
+        self.original_owner = owner;
+        self.previous_owner = null;
         self.collection_address = collection_address;
         self.item_index = item_index;
         self.content = content;
@@ -167,6 +173,7 @@ contract TonJamNFTItem {
             self.owner = msg.new_owner;
         } else {
             require(ctx.sender == self.owner, "Only owner can transfer");
+            self.previous_owner = self.owner;
             self.owner = msg.new_owner;
         }
 
@@ -199,7 +206,9 @@ contract TonJamNFTItem {
             index: self.item_index,
             collection_address: self.collection_address,
             owner_address: self.owner,
-            individual_content: self.content
+            individual_content: self.content,
+            original_owner: self.original_owner,
+            previous_owner: self.previous_owner
         };
     }
 

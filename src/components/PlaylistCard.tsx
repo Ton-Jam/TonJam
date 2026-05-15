@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
 import PlaylistCoverGenerator from './PlaylistCoverGenerator';
+import PlaylistOptionsModal from './PlaylistOptionsModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   const { allTracks, playlistFolders, movePlaylistToFolder, deletePlaylist } = useAudio();
   const navigate = useNavigate();
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
 
   const isOwner = playlist.creator === MOCK_USER.name;
 
@@ -37,6 +39,10 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
     e.stopPropagation();
     if (onClick) onClick();
   };
+
+  const handleDelete = () => {
+      deletePlaylist(playlist.id);
+  }
 
   // Get cover images from the first 4 tracks
   const playlistTracks = (playlist.trackIds || [])
@@ -123,6 +129,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
   }
 
   return (
+    <>
     <motion.div 
       whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
@@ -186,91 +193,28 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
             {playlist.trackCount} Tracks
           </span>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 rounded-[2px] hover:bg-black/5"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="h-3 w-3 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-[#0A0A0A] border-white/[0.1] rounded-[2px] w-48">
-              <DropdownMenuItem 
-                onClick={(e) => { e.stopPropagation(); navigate(`/playlist/${playlist.id}`); }}
-                className="gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer"
-              >
-                <Play className="h-3 w-3" /> Play Sector
-              </DropdownMenuItem>
-
-              {isOwner && (
-                <>
-                  <DropdownMenuItem 
-                    onClick={(e) => { e.stopPropagation(); setIsGeneratorOpen(true); }}
-                    className="gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer"
-                  >
-                    <Sparkles className="h-3 w-3 text-blue-400" /> Neural Cover Gen
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer">
-                      <FolderPlus className="h-3 w-3" /> Link to Node
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="bg-[#0A0A0A] border-white/[0.1] rounded-[2px] w-48">
-                      {playlistFolders.length > 0 ? (
-                        <>
-                          {playlistFolders.map(folder => (
-                            <DropdownMenuItem
-                              key={folder.id}
-                              disabled={playlist.folderId === folder.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                movePlaylistToFolder(playlist.id, folder.id);
-                              }}
-                              className="gap-2 text-[10px] font-black uppercase tracking-widest cursor-pointer"
-                            >
-                              <Folder className="h-3 w-3" /> {folder.title}
-                            </DropdownMenuItem>
-                          ))}
-                          {playlist.folderId && (
-                            <>
-                              <DropdownMenuSeparator className="bg-white/5" />
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  movePlaylistToFolder(playlist.id, null);
-                                }}
-                                className="gap-2 text-[10px] font-black uppercase tracking-widest text-red-400 cursor-pointer"
-                              >
-                                <Trash2 className="h-3 w-3" /> Unlink from Node
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </>
-                      ) : (
-                        <div className="p-4 text-center">
-                          <p className="text-[8px] font-black uppercase tracking-widest text-white/20">No node sectors found</p>
-                        </div>
-                      )}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-
-                  <DropdownMenuSeparator className="bg-white/5" />
-                  <DropdownMenuItem 
-                    onClick={(e) => { e.stopPropagation(); deletePlaylist(playlist.id); }}
-                    className="gap-2 text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-400 cursor-pointer"
-                  >
-                    <Trash2 className="h-3 w-3" /> Deconstruct
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6 rounded-[2px] hover:bg-black/5"
+            onClick={(e) => { e.stopPropagation(); setIsOptionsModalOpen(true); }}
+          >
+            <MoreVertical className="h-3 w-3 text-muted-foreground" />
+          </Button>
         </div>
       </div>
     </motion.div>
+    {isOptionsModalOpen && (
+      <PlaylistOptionsModal
+        playlist={playlist}
+        folders={playlistFolders}
+        onClose={() => setIsOptionsModalOpen(false)}
+        onEdit={() => {}}
+        onDelete={handleDelete}
+        onMoveToFolder={(folderId) => movePlaylistToFolder(playlist.id, folderId)}
+      />
+    )}
+    </>
   );
 };
 

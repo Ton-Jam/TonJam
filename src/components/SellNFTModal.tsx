@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Tag, Gavel, Info, AlertTriangle } from 'lucide-react';
+import { X, Tag, Gavel, Info, AlertTriangle, Clock } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO } from '@/constants';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
@@ -52,6 +52,7 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
           listingType: listingType,
           isAuction: listingType === 'auction',
           price: price,
+          startingBid: listingType === 'auction' ? price : undefined,
           auctionEndTime: listingType === 'auction' ? auctionEnd : undefined,
           auctionEndDate: listingType === 'auction' ? auctionEnd : undefined
         });
@@ -132,17 +133,23 @@ const SellNFTModal: React.FC<SellNFTModalProps> = ({ nft, onClose }) => {
 
             {listingType === 'auction' && (
               <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest ml-1">Protocol_Deadline</label>
-                <input 
-                  type="datetime-local" 
-                  value={newEndDate} 
-                  onChange={(e) => {
-                    setNewEndDate(e.target.value);
-                    setDuration(''); // Clear duration buttons when custom date is picked
-                  }}
-                  className="w-full bg-white/5 border border-white/5 rounded-[2px] py-1.5 px-2 text-white font-bold outline-none focus-visible:ring-1 focus-visible:ring-amber-500 transition-all text-[10px] mb-2"
-                  aria-label="Auction End Date"
-                />
+                <label className="text-[7px] font-bold text-white/20 uppercase tracking-widest ml-1">Bid_Expiration_Protocol</label>
+                <div className="relative group">
+                  <input 
+                    type="datetime-local" 
+                    value={newEndDate} 
+                    onChange={(e) => {
+                      setNewEndDate(e.target.value);
+                      setDuration(''); // Clear duration buttons when custom date is picked
+                    }}
+                    className="w-full bg-white/5 border border-white/5 rounded-[2px] py-2 px-3 text-white font-bold outline-none focus-visible:ring-1 focus-visible:ring-amber-500 transition-all text-[10px] mb-2 pr-10"
+                    aria-label="Auction Expiration Time"
+                  />
+                  <Clock className="absolute right-3 top-[10px] h-3.5 w-3.5 text-white/20 group-hover:text-amber-500 transition-colors" />
+                </div>
+                <p className="text-[7px] text-white/10 uppercase tracking-widest px-1">
+                  Auction will terminate automatically if no bids are received by this epoch.
+                </p>
                 <div className="flex gap-1.5 mb-2">
                   {['1', '3', '7', '14'].map((d) => (
                     <button

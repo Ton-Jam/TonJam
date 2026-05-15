@@ -1,5 +1,6 @@
 // automatically generated from `@stdlib/std/stdlib.fc` `/app/applet/src/contracts/nft/TonJamNFT_TonJamNFTItem.fc` 
 PROGRAM{
+  DECLPROC __tact_store_address_opt
   DECLPROC __tact_context_get
   DECLPROC __tact_context_get_sender
   DECLPROC $OwnershipAssigned$_store
@@ -15,7 +16,7 @@ PROGRAM{
   DECLPROC $TonJamNFTItem$_contract_init
   DECLPROC $TonJamNFTItem$_contract_load
   DECLPROC $TonJamNFTItem$_contract_store
-  DECLPROC $GetNftData$_constructor_is_initialized_index_collection_address_owner_address_individual_content
+  DECLPROC $GetNftData$_constructor_is_initialized_index_collection_address_owner_address_individual_content_original_owner_previous_owner
   DECLPROC $TonJamNFTItem$_fun_get_nft_data
   DECLPROC $SendParameters$_constructor_to_value_mode_body
   DECLPROC $OwnershipAssigned$_constructor_query_id_prev_owner_forward_payload
@@ -27,6 +28,17 @@ PROGRAM{
   DECLGLOBVAR __tact_context_sender
   DECLGLOBVAR __tact_child_contract_codes
   DECLGLOBVAR __tact_randomized
+  __tact_store_address_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      b{00} STSLICECONST
+    }>ELSE<{
+      SWAP
+      STSLICE
+    }>
+  }>
   __tact_context_get PROCINLINE:<{
     __tact_context GETGLOB
     4 UNTUPLE
@@ -74,21 +86,45 @@ PROGRAM{
     ENDC
   }>
   $TonJamNFTItem$_store PROCINLINE:<{
-    s4 s5 XCHG2
+    s6 s7 XCHG2
+    STSLICE
+    s1 s4 XCHG
+    STSLICE
+    ROT
+    __tact_store_address_opt INLINECALLDICT
+    SWAP
+    NEWC
     STSLICE
     s1 s2 XCHG
-    STSLICE
     64 STU
+    s1 s2 XCHG
     STREF
+    s1 s2 XCHG
     1 STI
+    STBREFR
   }>
   $TonJamNFTItem$_load PROCINLINE:<{
     LDMSGADDR
     LDMSGADDR
+                b{00} SDBEGINSQ
+                IF:<{
+                  PUSHNULL
+                }>ELSE<{
+                  LDMSGADDR
+                  SWAP
+                }>
+    SWAP
+    LDREF
+    SWAP
+    CTOS
+    LDMSGADDR
     64 LDU
     LDREF
     1 LDI
-    5 -ROLL
+    DROP
+    s4 s7 XCHG
+    s4 s6 XCHG
+    s4 s5 XCHG
   }>
   $GetNftData$_to_external PROCINLINE:<{
   }>
@@ -101,6 +137,9 @@ PROGRAM{
     4 -ROLL
   }>
   $TonJamNFTItem$_contract_init PROCINLINE:<{
+    s3 PUSH
+    PUSHNULL
+    3 2 BLKSWAP
     FALSE
   }>
   $TonJamNFTItem$_contract_load PROCINLINE:<{
@@ -110,7 +149,7 @@ PROGRAM{
     SWAP
     IF:<{
       $TonJamNFTItem$_load INLINECALLDICT
-      1 5 BLKDROP2
+      1 7 BLKDROP2
     }>ELSE<{
       $TonJamNFTItem$init$_load INLINECALLDICT
       s0 s4 XCHG
@@ -124,17 +163,18 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
-    5 -ROLL
+    7 -ROLL
     $TonJamNFTItem$_store INLINECALLDICT
     ENDC
     c4 POP
   }>
-  $GetNftData$_constructor_is_initialized_index_collection_address_owner_address_individual_content PROCINLINE:<{
+  $GetNftData$_constructor_is_initialized_index_collection_address_owner_address_individual_content_original_owner_previous_owner PROCINLINE:<{
   }>
   $TonJamNFTItem$_fun_get_nft_data PROCREF:<{
     s0 s2 s3 PUSH3
-    s7 s4 PUSH2
-    $GetNftData$_constructor_is_initialized_index_collection_address_owner_address_individual_content INLINECALLDICT
+    s9 s4 s8 PUSH3
+    s10 PUSH
+    $GetNftData$_constructor_is_initialized_index_collection_address_owner_address_individual_content_original_owner_previous_owner INLINECALLDICT
   }>
   $SendParameters$_constructor_to_value_mode_body PROCINLINE:<{
     2SWAP
@@ -152,7 +192,7 @@ PROGRAM{
   %get_nft_data PROC:<{
     $TonJamNFTItem$_contract_load INLINECALLDICT
     $TonJamNFTItem$_fun_get_nft_data INLINECALLDICT
-    5 5 BLKDROP2
+    7 7 BLKDROP2
     $GetNftData$_to_external INLINECALLDICT
   }>
   recv_internal PROC:<{
@@ -171,11 +211,11 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     $TonJamNFTItem$_contract_load INLINECALLDICT
-    s0 s6 XCHG
+    s0 s8 XCHG
     IFJMP:<{
-      6 BLKDROP
+      8 BLKDROP
     }>
-    s0 s4 XCHG
+    s0 s6 XCHG
     32 LDUQ 130 THROWIFNOT
     OVER
     1607220500 PUSHINT
@@ -198,24 +238,24 @@ PROGRAM{
       __tact_context_get INLINECALLDICT
       s2 s3 XCHG
       3 BLKDROP
-      s10 PUSH
+      s12 PUSH
       IF:<{
-        DUP
+        s8 POP
         36952 PUSHINT
-        s0 s10 XCHG
+        s8 s10 PUSH2
         SDEQ
-        s1 s9 XCHG
         THROWANYIFNOT
         s3 PUSH
       }>ELSE<{
-        s8 POP
-        s9 POP
+        s10 POP
+        s11 POP
         12308 PUSHINT
-        s7 s6 PUSH2
+        s9 s6 PUSH2
         SDEQ
         THROWANYIFNOT
         TRUE
-        s9 s3 XCPU
+        s11 s3 XCPU
+        s8 s10 XCHG
       }>
       s2 PUSH
       0 GTINT
@@ -382,7 +422,8 @@ PROGRAM{
         s4 POP
         DROP
       }>
-      s0 s3 s4 XCHG3
+      s0 s3 s6 XCHG3
+      s1 s5 XCHG
       $TonJamNFTItem$_contract_store INLINECALLDICT
     }>
     SWAP
@@ -466,10 +507,11 @@ PROGRAM{
           // Group 5: Sending the message, with `mode` on top
           SWAP
           SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-      s0 s3 s4 XCHG3
+      s4 s6 XCHG
+      2 4 BLKSWAP
       $TonJamNFTItem$_contract_store INLINECALLDICT
     }>
-    6 BLKDROP
+    8 BLKDROP
     130 THROW
   }>
 }END>c

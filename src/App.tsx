@@ -21,6 +21,8 @@ import Notifications from '@/pages/Notifications';
 import UploadTrack from '@/pages/UploadTrack';
 import MintNFT from '@/pages/MintNFT';
 import MyNFTs from '@/pages/MyNFTs';
+import FavoriteTracks from '@/pages/FavoriteTracks';
+import FavoriteArtists from '@/pages/FavoriteArtists';
 import ArtistMinting from '@/pages/ArtistMinting';
 import TrendingNFTs from '@/pages/TrendingNFTs';
 import AuctionScreen from '@/pages/AuctionScreen';
@@ -52,6 +54,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, limit, query } from 'firebase/firestore';
 import { seedDatabase } from '@/services/seedService';
+import { resolveEndedAuctions } from '@/services/auctionService';
 
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
@@ -144,6 +147,20 @@ const AppContent: React.FC = () => {
     checkAndSeed();
   }, [user, userProfile]);
 
+  useEffect(() => {
+    if (!isBackendReachable) return;
+    
+    // Initial check for expired auctions
+    resolveEndedAuctions();
+
+    // Check periodically (every 1 minute)
+    const interval = setInterval(() => {
+      resolveEndedAuctions();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [isBackendReachable]);
+
   if (!isBackendReachable) {
     return (
       <div className="flex items-center justify-center h-screen bg-background text-foreground">
@@ -190,6 +207,8 @@ const AppContent: React.FC = () => {
               <Route path="/upload" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><UploadTrack /></ProtectedRoute></PageWrapper>} />
               <Route path="/mint" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><MintNFT /></ProtectedRoute></PageWrapper>} />
               <Route path="/my-nfts" element={<PageWrapper><ProtectedRoute><MyNFTs /></ProtectedRoute></PageWrapper>} />
+              <Route path="/favorite-tracks" element={<PageWrapper><ProtectedRoute><FavoriteTracks /></ProtectedRoute></PageWrapper>} />
+              <Route path="/favorite-artists" element={<PageWrapper><ProtectedRoute><FavoriteArtists /></ProtectedRoute></PageWrapper>} />
               <Route path="/artist-minting" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistMinting /></ProtectedRoute></PageWrapper>} />
               <Route path="/library" element={<PageWrapper><ProtectedRoute><Library /></ProtectedRoute></PageWrapper>} />
               <Route path="/wallet" element={<PageWrapper><ProtectedRoute><Wallet /></ProtectedRoute></PageWrapper>} />

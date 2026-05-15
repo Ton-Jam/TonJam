@@ -14,6 +14,8 @@ PROGRAM{
   DECLPROC $Listing$_load
   DECLPROC $Listing$_as_optional
   DECLPROC $Listing$_load_opt
+  DECLPROC $NFTHistory$_store
+  DECLPROC $NFTHistory$_store_cell
   DECLPROC $Transfer$_store
   DECLPROC $Transfer$_store_cell
   DECLPROC $TonJamMarketplace$_store
@@ -30,6 +32,7 @@ PROGRAM{
   DECLPROC $TonJamMarketplace$_fun_get_marketplace_data
   DECLPROC $MessageParameters$_constructor_bounce_to_value_mode_body
   DECLPROC $TonJamMarketplace$_fun_notify
+  DECLPROC $NFTHistory$_constructor_previous_owner_forward_payload
   DECLPROC $Listing$_constructor_owner_price
   DECLPROC $SendParameters$_constructor_to_value_mode_body
   DECLPROC $Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload
@@ -141,6 +144,16 @@ PROGRAM{
       $Listing$_as_optional INLINECALLDICT
     }>
   }>
+  $NFTHistory$_store PROCINLINE:<{
+    s0 s2 XCHG
+    STSLICE
+    STREF
+  }>
+  $NFTHistory$_store_cell PROCINLINE:<{
+    -ROT
+    $NFTHistory$_store INLINECALLDICT
+    ENDC
+  }>
   $Transfer$_store PROCINLINE:<{
     1312029976 PUSHINT
     s0 s7 XCHG2
@@ -162,10 +175,12 @@ PROGRAM{
     ENDC
   }>
   $TonJamMarketplace$_store PROCINLINE:<{
-    s3 s4 XCHG2
+    s4 s5 XCHG2
     STSLICE
+    s1 s2 XCHG
     STSLICE
     16 STU
+    STDICT
     STDICT
   }>
   $TonJamMarketplace$_load PROCINLINE:<{
@@ -173,7 +188,8 @@ PROGRAM{
     LDMSGADDR
     16 LDU
     LDDICT
-    4 -ROLL
+    LDDICT
+    5 -ROLL
   }>
   $Context$_get_value PROCINLINE:<{
     s1 s3 XCHG
@@ -212,6 +228,7 @@ PROGRAM{
   }>
   $TonJamMarketplace$_contract_init PROCINLINE:<{
     PUSHNULL
+    PUSHNULL
   }>
   $TonJamMarketplace$_contract_load PROCINLINE:<{
     c4 PUSH
@@ -220,7 +237,7 @@ PROGRAM{
     SWAP
     IF:<{
       $TonJamMarketplace$_load INLINECALLDICT
-      1 4 BLKDROP2
+      1 5 BLKDROP2
     }>ELSE<{
       $TonJamMarketplace$init$_load INLINECALLDICT
       s0 s3 XCHG
@@ -234,25 +251,25 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
-    4 -ROLL
+    5 -ROLL
     $TonJamMarketplace$_store INLINECALLDICT
     ENDC
     c4 POP
   }>
   $TonJamMarketplace$_fun_get_listing PROCREF:<{
     267 PUSHINT
-    s2 PUSH
+    s3 PUSH
     s0 s2 XCHG
     __tact_dict_get_slice_cell INLINECALLDICT
     $Listing$_load_opt INLINECALLDICT
   }>
   $TonJamMarketplace$_fun_get_marketplace_data PROCREF:<{
         NEWC
+    s5 PUSH
+        STSLICER
     s4 PUSH
         STSLICER
-    s3 PUSH
-        STSLICER
-    s2 s(-1) PUXC
+    s3 s(-1) PUXC
     16 STU
         ENDC
   }>
@@ -286,6 +303,8 @@ PROGRAM{
         SWAP
         SENDRAWMSG
   }>
+  $NFTHistory$_constructor_previous_owner_forward_payload PROCINLINE:<{
+  }>
   $Listing$_constructor_owner_price PROCINLINE:<{
   }>
   $SendParameters$_constructor_to_value_mode_body PROCINLINE:<{
@@ -309,15 +328,15 @@ PROGRAM{
   }>
   %get_listing PROC:<{
     $TonJamMarketplace$_contract_load INLINECALLDICT
-    4 ROLL
+    5 ROLL
     $TonJamMarketplace$_fun_get_listing INLINECALLDICT
-    4 1 BLKDROP2
+    5 1 BLKDROP2
     $Listing$_to_opt_external INLINECALLDICT
   }>
   %get_marketplace_data PROC:<{
     $TonJamMarketplace$_contract_load INLINECALLDICT
     $TonJamMarketplace$_fun_get_marketplace_data INLINECALLDICT
-    4 1 BLKDROP2
+    5 1 BLKDROP2
   }>
   recv_internal PROC:<{
     SWAP
@@ -335,11 +354,11 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     $TonJamMarketplace$_contract_load INLINECALLDICT
-    s0 s5 XCHG
+    s0 s6 XCHG
     IFJMP:<{
-      5 BLKDROP
+      6 BLKDROP
     }>
-    s0 s3 XCHG
+    s0 s4 XCHG
     32 LDUQ 130 THROWIFNOT
     OVER
     3788238085 PUSHINT
@@ -349,6 +368,20 @@ PROGRAM{
       64 LDU
       LDMSGADDR
       __tact_context_get_sender INLINECALLDICT
+          NEWC
+      s2 PUSH
+          STSLICER
+          ENDC
+      s3 PUSH
+      267 PUSHINT
+      s0 s2 XCHG
+      $NFTHistory$_constructor_previous_owner_forward_payload INLINECALLDICT
+      NEWC
+      $NFTHistory$_store_cell INLINECALLDICT
+      s2 PUSH
+      s3 s11 XCHG
+      SWAP
+      __tact_dict_set_slice_cell INLINECALLDICT
       OVER
           SBITS
       31 GTINT
@@ -363,7 +396,7 @@ PROGRAM{
         NEWC
         $Listing$_store_cell INLINECALLDICT
         s3 s6 XCHG
-        s1 s2 XCHG
+        s1 s7 s0 XCHG3
         __tact_dict_set_slice_cell INLINECALLDICT
       }>ELSE<{
         NIP
@@ -380,6 +413,7 @@ PROGRAM{
         $Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload INLINECALLDICT
         NEWC
         $Transfer$_store_cell INLINECALLDICT
+        s1 s8 XCHG
         s3 s3 s0 XCHG3
         $SendParameters$_constructor_to_value_mode_body INLINECALLDICT
             NEWC
@@ -450,7 +484,8 @@ PROGRAM{
             SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
         s0 s3 XCHG
       }>
-      s3 s3 s0 XCHG3
+      s4 s0 s3 XCHG3
+      s0 s2 XCHG
       $TonJamMarketplace$_contract_store INLINECALLDICT
     }>
     OVER
@@ -480,7 +515,7 @@ PROGRAM{
       GEQ
       s1 s4 XCHG
       THROWANYIFNOT
-      s2 s7 PUSH2
+      s2 s5 PUSH2
       MUL
       10000 PUSHINT
       DIV
@@ -554,7 +589,7 @@ PROGRAM{
           // Group 5: Sending the message, with `mode` on top
           SWAP
           SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-      s4 s1 PUXC
+      s5 s1 PUXC
       1 PUSHINT
       $SendParameters$_constructor_to_value_mode INLINECALLDICT
           NEWC
@@ -712,7 +747,8 @@ PROGRAM{
       s3 s6 XCHG
       s1 s2 XCHG
       __tact_dict_set_slice_cell INLINECALLDICT
-      s3 s3 s0 XCHG3
+      s4 s0 s3 XCHG3
+      s0 s2 XCHG
       $TonJamMarketplace$_contract_store INLINECALLDICT
     }>
     OVER
@@ -745,7 +781,7 @@ PROGRAM{
         s2 POP
         TRUE
       }>ELSE<{
-        s2 s6 XCPU
+        s2 s7 XCPU
         SDEQ
       }>
       s1 s2 XCHG
@@ -839,7 +875,8 @@ PROGRAM{
       s3 s6 XCHG
       s1 s2 XCHG
       __tact_dict_set_slice_cell INLINECALLDICT
-      s3 s3 s0 XCHG3
+      s4 s0 s3 XCHG3
+      s0 s2 XCHG
       $TonJamMarketplace$_contract_store INLINECALLDICT
     }>
     SWAP
@@ -851,12 +888,12 @@ PROGRAM{
       $DeployOk$_constructor_queryId INLINECALLDICT
       NEWC
       $DeployOk$_store_cell INLINECALLDICT
+      s3 s5 XCHG
       s4 s3 s0 XCHG3
-      s1 s2 XCHG
       $TonJamMarketplace$_fun_notify INLINECALLDICT
       $TonJamMarketplace$_contract_store INLINECALLDICT
     }>
-    5 BLKDROP
+    6 BLKDROP
     130 THROW
   }>
 }END>c

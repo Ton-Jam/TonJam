@@ -435,7 +435,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-9 px-3 gap-2 rounded-xl hover:bg-blue-600/10 hover:text-blue-500 text-zinc-500 transition-all font-black uppercase"
+                  className="h-9 px-3 gap-2 rounded-xl hover:bg-blue-600/10 hover:text-blue-500 text-zinc-500 transition-all font-bold uppercase"
                   onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -451,7 +451,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "h-9 px-3 gap-2 rounded-xl transition-all font-black uppercase text-zinc-500",
+                    "h-9 px-3 gap-2 rounded-xl transition-all font-bold uppercase text-zinc-500",
                     post.isReposted ? "text-emerald-500 bg-emerald-500/10" : "hover:bg-emerald-600/10 hover:text-emerald-500"
                   )}
                   onClick={handleRepost}
@@ -470,7 +470,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "h-9 px-3 gap-2 rounded-xl transition-all font-black uppercase text-zinc-500",
+                    "h-9 px-3 gap-2 rounded-xl transition-all font-bold uppercase text-zinc-500",
                     isLiked ? "text-rose-500 bg-rose-500/10" : "hover:bg-rose-600/10 hover:text-rose-500"
                   )}
                   onClick={handleLike}
@@ -684,7 +684,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                         size="sm"
                         onClick={() => onReaction(comment.id, emoji)} 
                         className={cn(
-                          "h-6 px-2 rounded-full gap-1.5 transition-all text-[9px] font-bold",
+                          "h-6 px-2 rounded-full gap-1.5 transition-all text-[9px] font-medium",
                           isActive ? "bg-blue-600/20 text-blue-400 border border-blue-500/20" : "bg-white/5 text-zinc-500"
                         )}
                       >

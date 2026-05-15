@@ -121,6 +121,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setIsCreatePlaylistModalOpen, 
     isDiscoverFiltersOpen, 
     setIsDiscoverFiltersOpen,
+    isHeaderSearchOpen,
+    setIsHeaderSearchOpen,
+    playlists,
     marketplaceFilters,
     setMarketplaceFilters,
     jamspaceFilters,
@@ -154,24 +157,40 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (!searchQuery.trim()) return null;
 
     const query = searchQuery.toLowerCase();
+    
+    const sortFn = (a: string, b: string) => {
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+      if (aLower.startsWith(query) && !bLower.startsWith(query)) return -1;
+      if (!aLower.startsWith(query) && bLower.startsWith(query)) return 1;
+      return aLower.localeCompare(bLower);
+    };
+
     const tracks = allTracks.filter(t => 
       (t.title || '').toLowerCase().includes(query) || 
       (t.artist || '').toLowerCase().includes(query)
-    ).slice(0, 5);
+    ).sort((a, b) => sortFn(a.title, b.title)).slice(0, 5);
+
     const nfts = allNFTs.filter(n => 
       (n.title || '').toLowerCase().includes(query) || 
       n.artist?.toLowerCase().includes(query)
-    ).slice(0, 5);
+    ).sort((a, b) => sortFn(a.title, b.title)).slice(0, 5);
+
     const filteredArtists = artists.filter(a => 
       (a.name || '').toLowerCase().includes(query)
-    ).slice(0, 5);
+    ).sort((a, b) => sortFn(a.name, b.name)).slice(0, 5);
+
     const users = firestoreUsers.filter(u => 
       (u.name || '').toLowerCase().includes(query) ||
       (u.username || '').toLowerCase().includes(query)
-    ).slice(0, 5);
+    ).sort((a, b) => sortFn(a.name || a.username || '', b.name || b.username || '')).slice(0, 5);
 
-    return { tracks, nfts, artists: filteredArtists, users };
-  }, [searchQuery, allTracks, allNFTs, artists, firestoreUsers]);
+    const filteredPlaylists = playlists.filter(p => 
+      (p.title || '').toLowerCase().includes(query)
+    ).sort((a, b) => sortFn(a.title, b.title)).slice(0, 5);
+
+    return { tracks, nfts, artists: filteredArtists, users, playlists: filteredPlaylists };
+  }, [searchQuery, allTracks, allNFTs, artists, firestoreUsers, playlists]);
   const artistId = location.pathname.split('/')[2];
   const activeArtist = useMemo(() => artists.find(a => a.uid === artistId), [artists, artistId]);
   
@@ -198,7 +217,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const headerOpacity = useTransform(scrollY, [0, 50], [0, 1]);
   const [isMobileNavHidden, setIsMobileNavHidden] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isFabActive, setIsFabActive] = useState(true);
   const [activeFilterSubMenu, setActiveFilterSubMenu] = useState<string | null>(null);
@@ -378,7 +396,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className={`flex items-center ${headerTitle ? 'w-full justify-center relative' : 'gap-2'}`}>
                 {!headerTitle && (
                   <BackButton 
-                    className={`p-2 rounded-[2px] bg-muted/30 hover:bg-muted transition-all ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
+                    className={`p-2 rounded-[2px] bg-transparent hover:bg-white/5 transition-all ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
                     ariaLabel="Go back"
                   />
                 )}
@@ -392,7 +410,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
                 {headerTitle && !isHome && (
                   <BackButton 
-                    className="absolute left-0 p-2 rounded-[2px] bg-muted/10 hover:bg-muted/20 transition-all text-foreground"
+                    className="absolute left-0 p-2 rounded-[2px] bg-transparent hover:bg-white/5 transition-all text-foreground"
                     ariaLabel="Go back"
                   />
                 )}
@@ -400,15 +418,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
 
             {!isHome && !isDiscover && !headerTitle && (
-              <div className="hidden lg:flex items-center gap-4 flex-1 ml-4 overflow-hidden">
-                <div className="flex items-center gap-3">
-                   <div className="w-1 h-6 bg-blue-600 rounded-full" />
-                   <span className="font-bold text-xs uppercase tracking-tighter">
-                     {isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Details')}
-                   </span>
-                </div>
+              <div className={cn(
+                "hidden lg:flex items-center gap-4 flex-1 ml-4 overflow-hidden",
+                isHeaderSearchOpen && isLibrary && "flex absolute inset-0 bg-background z-50 px-4"
+              )}>
+                {isHeaderSearchOpen && isLibrary && (
+                  <button 
+                    onClick={() => setIsHeaderSearchOpen(false)}
+                    className="p-2 mr-2 rounded-full hover:bg-muted"
+                  >
+                    <XMarkIcon className="h-5 w-5" />
+                  </button>
+                )}
+                {!isHeaderSearchOpen && (
+                  <div className="flex items-center gap-3">
+                     <div className="w-1 h-6 bg-blue-600 rounded-full" />
+                     <span className="font-bold text-xs uppercase tracking-tighter">
+                       {isTrendingNFTs ? 'Trending NFTs' : (isJamspace ? 'JamSpace' : isLibrary ? 'Library' : isMarketplace ? 'Marketplace' : 'Details')}
+                     </span>
+                  </div>
+                )}
                 
-                <Separator orientation="vertical" className="h-4 bg-border/40" />
+                {!isHeaderSearchOpen && <Separator orientation="vertical" className="h-4 bg-border/40" />}
 
                 <SearchBar
                   searchQuery={searchQuery}
@@ -421,17 +452,119 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   removeRecentSearch={removeRecentSearch}
                   trendingTopics={trendingTopics}
                   placeholder={getSearchPlaceholder()}
-                  className={`flex-1 relative transition-all duration-500 max-w-xl`}
-                  inputClassName={`border border-border/40 bg-muted/20 rounded-[2px] py-1.5 pl-4 pr-10 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-muted-foreground/30`}
-                />
+                  className={cn("flex-1 relative transition-all duration-500", isLibrary ? "max-w-none" : "max-w-xl")}
+                  inputClassName={`border border-border/40 bg-muted/20 rounded-[4px] py-1.5 pl-4 pr-10 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-muted-foreground/30`}
+                  autoFocus={isHeaderSearchOpen && isLibrary}
+                >
+                  {filteredResults && (
+                    <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-2 space-y-4">
+                      {filteredResults.tracks.length > 0 && (
+                        <div>
+                          <h4 className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-blue-500/50">Signals</h4>
+                          {filteredResults.tracks.map(track => (
+                            <button
+                              key={track.id}
+                              onClick={() => {
+                                playTrack(track);
+                                setIsSearchOpen(false);
+                              }}
+                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all text-left group"
+                            >
+                              <div className="w-8 h-8 rounded-sm overflow-hidden bg-muted flex-shrink-0">
+                                <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-bold uppercase tracking-tighter truncate">{track.title}</p>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{track.artist}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {filteredResults.playlists.length > 0 && (
+                        <div>
+                          <h4 className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-purple-500/50">Nodes (Playlists)</h4>
+                          {filteredResults.playlists.map(playlist => (
+                            <button
+                              key={playlist.id}
+                              onClick={() => {
+                                navigate(`/playlist/${playlist.id}`);
+                                setIsSearchOpen(false);
+                              }}
+                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all text-left group"
+                            >
+                              <div className="w-8 h-8 rounded-sm bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                <RectangleStackIcon className="h-4 w-4 text-purple-500" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-bold uppercase tracking-tighter truncate">{playlist.title}</p>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{playlist.trackIds?.length || 0} Layers</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {filteredResults.artists.length > 0 && (
+                        <div>
+                          <h4 className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500/50">Entities</h4>
+                          {filteredResults.artists.map(artist => (
+                            <button
+                              key={artist.uid}
+                              onClick={() => {
+                                navigate(`/artist/${artist.uid}`);
+                                setIsSearchOpen(false);
+                              }}
+                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all text-left group"
+                            >
+                              <Avatar className="w-8 h-8 rounded-full">
+                                <AvatarImage src={artist.avatarUrl} className="object-cover" />
+                                <AvatarFallback>{artist.name[0]}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-bold uppercase tracking-tighter truncate">{artist.name}</p>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{artist.followers?.toLocaleString()} Verified</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {filteredResults.nfts.length > 0 && (
+                        <div>
+                          <h4 className="px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-amber-500/50">Artifacts</h4>
+                          {filteredResults.nfts.map(nft => (
+                            <button
+                              key={nft.id}
+                              onClick={() => {
+                                navigate(`/nft/${nft.id}`);
+                                setIsSearchOpen(false);
+                              }}
+                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all text-left group"
+                            >
+                              <div className="w-8 h-8 rounded-sm overflow-hidden bg-muted flex-shrink-0 border border-amber-500/20">
+                                <img src={nft.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-bold uppercase tracking-tighter truncate">{nft.title}</p>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.price} TON</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </SearchBar>
               </div>
             )}
           </div>
 
-          <div className={cn("items-center gap-2 transition-all duration-300", headerTitle ? "hidden" : "flex")}>
+          <div className={cn("items-center gap-[3px] transition-all duration-300", headerTitle ? "hidden" : "flex")}>
             {/* JAM Balance Badge */}
-            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-2 bg-blue-600/5 border border-blue-600/10 px-3 py-1.5 rounded-[2px] hover:bg-blue-600/10 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
-               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-5 h-5 object-contain" />
+            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] hover:bg-white/5 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
+               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[35px] h-[35px] object-contain" />
                <div className="flex flex-col items-start hidden sm:flex">
                   <span className="text-[7px] font-bold uppercase tracking-widest text-blue-500 opacity-60">Balance (Tasks)</span>
                   <span className="text-[9px] font-bold tracking-tighter">{parseFloat(String(userProfile.jamBalance || '0')).toLocaleString()} JAM</span>
@@ -440,12 +573,38 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-[1px]">
               {!isMarketplace && !isDiscover && !isLibrary && !isTrendingNFTs && (
                 <NotificationBell />
               )}
 
-              {userAddress ? (
+              {isLibrary ? (
+              <div className="flex items-center gap-[1px]">
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button 
+                        onClick={() => setIsHeaderSearchOpen(!isHeaderSearchOpen)}
+                        className={`p-2.5 rounded-[2px] transition-all flex items-center gap-2 ${isHeaderSearchOpen ? 'text-blue-500 bg-blue-500/10' : 'text-muted-foreground hover:bg-muted'}`}
+                      >
+                        <MagnifyingGlassIcon className="h-5 w-5" strokeWidth={2.5} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Search Library</TooltipContent>
+                 </Tooltip>
+
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button 
+                        onClick={() => setIsCreatePlaylistModalOpen(true)}
+                        className="p-2.5 rounded-[2px] hover:bg-muted transition-all text-muted-foreground"
+                      >
+                        <PlusIcon className="h-5 w-5" strokeWidth={2.5} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>New Playlist</TooltipContent>
+                 </Tooltip>
+              </div>
+            ) : userAddress ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
@@ -478,7 +637,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               
               <Separator orientation="vertical" className="h-4 bg-border/40 mx-1" />
 
-              {user ? (
+              {user && !isLibrary ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link to="/profile" className={`flex items-center gap-2 p-1 rounded-[2px] hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
@@ -496,7 +655,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </TooltipTrigger>
                   <TooltipContent>Your Profile</TooltipContent>
                 </Tooltip>
-              ) : (
+              ) : !user && !isLibrary ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
@@ -508,7 +667,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </TooltipTrigger>
                   <TooltipContent>Sign In</TooltipContent>
                 </Tooltip>
-              )}
+              ) : null}
             </div>
           </div>
         </motion.header>
@@ -555,7 +714,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden pb-24 min-h-screen`}>
+      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden pb-40 min-h-screen`}>
         <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>
@@ -609,16 +768,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Navigation */}
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && (
-        <div className={`lg:hidden fixed bottom-2 left-1/2 -translate-x-1/2 z-50 h-16 transition-all duration-300 w-[calc(100%-48px)] max-w-sm ${isMobileNavHidden ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <div className="absolute inset-0 rounded-[2px] p-[1px] bg-gradient-to-r from-blue-600/50 via-blue-400/50 to-blue-600/50">
-            <nav className="h-full w-full bg-background/90 backdrop-blur-xl rounded-[2px] px-4 flex justify-around items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]" aria-label="Mobile Navigation">
-              <MobileNavItem to="/" icon={HomeIcon} label="Home" />
-              <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
-              <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jam" />
-              <MobileNavItem to="/library" icon={RectangleStackIcon} label="Vault" />
-              <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Asset" />
-            </nav>
-          </div>
+        <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-600/20 via-blue-500/50 to-blue-600/20 z-10" />
+          <nav className="h-full w-full bg-background/95 backdrop-blur-xl border-t border-white/5 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.4)]" aria-label="Mobile Navigation">
+            <MobileNavItem to="/" icon={HomeIcon} label="Home" />
+            <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
+            <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jam" />
+            <MobileNavItem to="/library" icon={RectangleStackIcon} label="Vault" />
+            <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Asset" />
+          </nav>
         </div>
       )}
 
@@ -627,7 +785,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <button 
           onClick={() => setIsPostModalOpen(true)}
           className={`lg:hidden fixed right-6 z-[100] w-14 h-14 rounded-full bg-primary shadow-2xl flex items-center justify-center transition-all duration-300 ${isFabActive ? 'opacity-100 scale-100' : 'opacity-40 scale-95'} hover:opacity-100 hover:scale-110 active:scale-95 ${
-            currentTrack && !isFullPlayerOpen ? 'bottom-36' : 'bottom-20'
+            currentTrack && !isFullPlayerOpen ? 'bottom-40' : 'bottom-24'
           }`}
           aria-label="Create Post"
         >
@@ -790,8 +948,8 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label
         to={to} 
         aria-label={label}
         className={({ isActive }) => `
-          flex-1 flex flex-col items-center justify-center transition-all gap-1.5 h-12 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 mobile-nav-item
-          ${isActive ? 'text-blue-500 scale-110' : 'text-muted-foreground hover:text-foreground hover:bg-muted/10'}
+          flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[2px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
+          ${isActive ? 'text-blue-500' : 'text-muted-foreground hover:text-foreground hover:bg-muted/5'}
         `}
       >
           {({ isActive }) => (

@@ -22,6 +22,7 @@ import { SearchCommandDialog } from '@/components/SearchCommandDialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -332,7 +333,7 @@ const Home: React.FC = () => {
   );
 
   return (
-    <div className="page-container w-full pt-8 sm:pt-12 bg-white text-neutral-950 min-h-screen">
+    <div className="page-container w-full pt-[30px] sm:pt-[46px] bg-white text-neutral-950 min-h-screen">
       <div className="absolute top-0 left-0 right-0 h-10 bg-zinc-100 border-b border-zinc-200 flex items-center overflow-hidden pointer-events-none z-50">
         <motion.div 
           animate={{ x: [0, -1000] }}
@@ -415,7 +416,7 @@ const Home: React.FC = () => {
       <Tabs 
         value={activeTab} 
         onValueChange={(v) => setActiveTab(v as 'overview' | 'discovery')}
-        className="max-w-4xl mx-auto w-full relative z-20 mb-6 sm:mb-10"
+        className="max-w-4xl mx-auto w-full relative z-20 mb-[18px] sm:mb-[34px]"
       >
         <div className="flex items-center justify-between mb-4 px-2">
           <TabsList variant="line" className="bg-transparent gap-4 sm:gap-8">
@@ -651,29 +652,29 @@ const Home: React.FC = () => {
 
             {/* AI Dj Krupy Section - Neural Synthesis Interface */}
             <section className="mb-12 relative">
-              <div className="flex items-center justify-between mb-6 px-2">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-9 h-9 rounded-full overflow-hidden border border-primary/20 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+              <Card className="mb-6 mx-2">
+                <CardContent className="p-4 flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/20 shadow-[0_0_10px_rgba(37,99,235,0.2)]">
                       <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full object-cover" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold uppercase tracking-tight text-neutral-900 dark:text-zinc-50 leading-none">DJ_KRUPY</h2>
-                      <p className="text-neutral-500 dark:text-zinc-400/50 text-[9px] font-bold uppercase tracking-widest mt-1">Neural_Relay_Active</p>
+                      <h2 className="text-sm font-bold uppercase tracking-tight text-foreground leading-none">DJ_KRUPY</h2>
+                      <p className="text-muted-foreground text-[8px] font-bold uppercase tracking-widest mt-0.5">Neural_Relay_Active</p>
                     </div>
                   </div>
-                </div>
-                {!aiResult && (
-                  <button 
-                    onClick={handleGenerateAIPlaylist}
-                    disabled={isGeneratingAI}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-50 shadow-[0_5px_15px_rgba(37,99,235,0.3)] active:scale-95 group sm:px-6 sm:py-3 sm:text-[10px]"
-                  >
-                    {isGeneratingAI ? <Loader2 className="h-3 w-3 animate-spin sm:h-4 sm:w-4" /> : <Sparkles className="h-3 w-3 text-white group-hover:rotate-12 transition-transform sm:h-4 sm:w-4" />}
-                    {isGeneratingAI ? "CALIBRATING..." : "KRUPYVIBEZ"}
-                  </button>
-                )}
-              </div>
+                  {!aiResult && (
+                    <Button 
+                      onClick={handleGenerateAIPlaylist}
+                      disabled={isGeneratingAI}
+                      className="self-start gap-1.5 h-8 text-[10px] font-black uppercase tracking-widest"
+                    >
+                      {isGeneratingAI ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                      {isGeneratingAI ? "CALIBRATING..." : "KRUPYVIBEZ"}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
 
               {aiResult ? (
                 <motion.div 
@@ -741,26 +742,25 @@ const Home: React.FC = () => {
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <div className="lg:col-span-2 bg-neutral-900/40 dark:bg-slate-900/50 backdrop-blur-xl border border-blue-500/10 rounded-[2.5rem] p-6 sm:p-12 flex flex-col justify-center items-center text-center space-y-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/15 blur-[100px] rounded-full opacity-50 group-hover:scale-150 transition-transform duration-1000"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-400/5 blur-[100px] rounded-full opacity-50"></div>
+                  <div className="lg:col-span-2 bg-neutral-900/60 dark:bg-slate-900/40 backdrop-blur-xl border border-blue-500/10 rounded-2xl p-6 flex flex-row items-center gap-6 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-blue-600/5 blur-3xl opacity-50 group-hover:scale-110 transition-transform duration-1000"></div>
                     
-                    <div className="h-20 w-20 rounded-[2rem] overflow-hidden border border-blue-500/40 relative shadow-[0_0_40px_rgba(37,99,235,0.3)] hover:border-blue-400 transition-colors">
+                    <div className="h-16 w-16 rounded-xl overflow-hidden border border-blue-500/40 relative shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:border-blue-400 transition-colors flex-shrink-0">
                       <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full object-cover" />
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-[#0a0a0a] animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0a0a0a] animate-pulse shadow-[0_0_6px_rgba(16,185,129,0.5)]"></div>
                     </div>
                     
-                    <div className="space-y-3 relative z-10">
-                      <h4 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900 dark:text-white">KRUPY_SYNTHESIS</h4>
-                      <p className="text-neutral-600 dark:text-blue-100/40 text-xs sm:text-lg max-w-sm font-medium mx-auto leading-relaxed">Analyze your sonic identity and generate high-fidelity frequency streams instantly.</p>
+                    <div className="space-y-1.5 relative z-10 flex-1">
+                      <h4 className="text-sm font-black uppercase tracking-tight text-white">KRUPY_SYNTHESIS</h4>
+                      <p className="text-blue-100/40 text-[9px] font-medium leading-relaxed max-w-sm">Analyze your sonic identity and generate high-fidelity frequency streams instantly.</p>
                     </div>
                     
                     <button 
                       onClick={handleGenerateAIPlaylist}
                       disabled={isGeneratingAI}
-                      className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-3 shadow-[0_10px_30px_rgba(37,99,235,0.4)] active:scale-95 sm:px-10 sm:py-4 sm:text-[11px] relative z-10"
+                      className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg active:scale-95 relative z-10 flex-shrink-0"
                     >
-                      {isGeneratingAI ? <Loader2 className="h-3 w-3 animate-spin text-white sm:h-4 sm:w-4" /> : <Sparkles className="h-3 w-3 text-white sm:h-4 sm:w-4" />}
+                      {isGeneratingAI ? <Loader2 className="h-3 w-3 animate-spin text-white" /> : <Sparkles className="h-3 w-3 text-white" />}
                       {isGeneratingAI ? "SYNTHESIZING..." : "KRUPYVIBEZ"}
                     </button>
                   </div>
@@ -864,10 +864,10 @@ const Home: React.FC = () => {
                     <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tighter text-foreground leading-none">Trending_Pulse</h2>
                   </div>
                   
-                  <TabsList className="bg-zinc-100 dark:bg-white/5 p-1 rounded-full">
-                    <TabsTrigger value="tracks" className="rounded-full text-[10px] font-black uppercase tracking-widest px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-primary shadow-sm transition-all h-auto">Tracks</TabsTrigger>
-                    <TabsTrigger value="artists" className="rounded-full text-[10px] font-black uppercase tracking-widest px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-primary shadow-sm transition-all h-auto">Artists</TabsTrigger>
-                    <TabsTrigger value="nfts" className="rounded-full text-[10px] font-black uppercase tracking-widest px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-primary shadow-sm transition-all h-auto">NFTs</TabsTrigger>
+                  <TabsList className="bg-transparent h-auto p-0 gap-3 flex flex-nowrap min-w-max">
+                    <TabsTrigger value="tracks" className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto">Tracks</TabsTrigger>
+                    <TabsTrigger value="artists" className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto">Artists</TabsTrigger>
+                    <TabsTrigger value="nfts" className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto">NFTs</TabsTrigger>
                   </TabsList>
                 </div>
 

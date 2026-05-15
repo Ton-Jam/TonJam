@@ -384,25 +384,25 @@ const ArtistProfile: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 -mt-8 relative z-30">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Card className="bg-muted/30 rounded-[24px] p-6 sm:p-8 border-none">
-               <div className="flex items-center gap-3 mb-6">
-                 <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-                 <h3 className="text-xl font-black text-foreground uppercase tracking-tighter">About</h3>
+            <Card className="bg-muted/30 rounded-[20px] p-4 sm:p-6 border-none">
+               <div className="flex items-center gap-2 mb-4">
+                 <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                 <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">About</h3>
                </div>
 
-               <div className="space-y-6">
-                 <p className="text-muted-foreground text-sm leading-relaxed tracking-tight font-medium max-w-2xl">
+               <div className="space-y-4">
+                 <p className="text-muted-foreground text-xs leading-relaxed tracking-tight font-medium max-w-2xl">
                    {artist.bio || "No narrative provided for this entity."}
                  </p>
                  
-                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6 border-t border-border">
+                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-4 border-t border-border">
                    <div className="space-y-0.5">
                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Origin</span>
-                     <p className="text-[11px] font-black text-foreground uppercase">{artist.location || 'Global'}</p>
+                     <p className="text-[10px] font-black text-foreground uppercase">{artist.location || 'Global'}</p>
                    </div>
                    <div className="space-y-0.5">
                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Genre</span>
-                     <p className="text-[11px] font-black text-blue-500 uppercase">{artist.genre || 'Electronic'}</p>
+                     <p className="text-[10px] font-black text-blue-500 uppercase">{artist.genre || 'Electronic'}</p>
                    </div>
                    <div className="space-y-0.5">
                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Verified</span>
@@ -416,16 +416,16 @@ const ArtistProfile: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <Card className="bg-blue-600 rounded-[24px] p-6 flex flex-col items-center justify-center text-center text-white border-none">
+            <Card className="bg-blue-600 rounded-[20px] p-4 flex flex-col items-center justify-center text-center text-white border-none">
               <span className="text-[9px] font-black uppercase tracking-[0.3em] mb-1 opacity-80">Followers</span>
-              <div className="text-3xl font-black tracking-tighter">
+              <div className="text-xl font-black tracking-tighter">
                 {(artist.followers || 0).toLocaleString()}
               </div>
             </Card>
             
-            <Card className="bg-muted rounded-[24px] p-6 flex flex-col items-center justify-center text-center text-foreground border-none">
+            <Card className="bg-muted rounded-[20px] p-4 flex flex-col items-center justify-center text-center text-foreground border-none">
               <span className="text-[9px] font-black uppercase tracking-[0.3em] mb-1 opacity-80">Plays</span>
-              <div className="text-3xl font-black tracking-tighter">
+              <div className="text-xl font-black tracking-tighter">
                 {(artist.playCount || 0).toLocaleString()}
               </div>
             </Card>
@@ -529,12 +529,12 @@ const ArtistProfile: React.FC = () => {
         <Tabs defaultValue="discography" value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
           <div className="sticky top-[64px] sm:top-[72px] z-30 mb-8 sm:mb-20">
             <div className="bg-background/80 backdrop-blur-2xl py-4 border-b border-border/40">
-              <TabsList className="h-auto p-1 bg-muted/40 rounded-full w-fit mx-auto lg:mx-0 overflow-x-auto no-scrollbar shadow-2xl flex items-center gap-1">
+              <TabsList className="h-auto p-0 bg-transparent rounded-full w-fit mx-auto lg:mx-0 overflow-x-auto no-scrollbar shadow-none flex items-center gap-3">
                 {(['discography', 'music_nfts', 'collection', 'signals', 'fan_club', 'events', 'about', 'comments'] as TabType[]).map((tab) => (
                   <TabsTrigger
                     key={tab}
                     value={tab}
-                    className="px-3 sm:px-8 py-2 sm:py-3 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all whitespace-nowrap"
+                    className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto"
                   >
                     {tab.replace('_', ' ').replace('music nfts', 'NFTs')}
                   </TabsTrigger>

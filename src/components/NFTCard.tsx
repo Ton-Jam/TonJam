@@ -56,6 +56,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const isOwner = nft.owner === userProfile.walletAddress;
   const isAnthem = userProfile.anthemId === nft.id;
   
+  const isAuctionEnded = React.useMemo(() => {
+    if (nft.listingType !== 'auction' || !nft.auctionEndTime) return false;
+    return new Date(nft.auctionEndTime).getTime() <= Date.now();
+  }, [nft.listingType, nft.auctionEndTime]);
+
   const handleSetAnthem = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     setAnthem(isAnthem ? null : nft.id);
@@ -71,9 +76,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
 
   const handleOptionsClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.innerWidth < 1024) {
-      setIsOptionsOpen(true);
-    }
+    setIsOptionsOpen(true);
   };
 
   const handleQuickViewClick = (e?: React.MouseEvent) => {
@@ -157,7 +160,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleSendClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
             <Send className="h-4 w-4" />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Transit Asset</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">Send NFT</span>
           </DropdownMenuItem>
           {nft.listingType ? (
             <DropdownMenuItem onClick={handleManageClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
@@ -178,7 +181,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           <DropdownMenuSeparator className="bg-white/5" />
           <DropdownMenuItem onClick={handleBuyClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
             <Wallet className="h-4 w-4" />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Acquire Asset</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">{nft.listingType === 'auction' ? 'Place Bid' : 'Acquire Asset'}</span>
           </DropdownMenuItem>
         </>
       )}
@@ -216,23 +219,13 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   );
 
   const MoreOptionsButton = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button 
-          onClick={handleOptionsClick}
-          className="p-2 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white/60 hover:text-white transition-all active:scale-95"
-          aria-label="NFT Options"
-        >
-          <MoreVertical className="h-4 w-4" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="hidden lg:block bg-[#0A0A0B]/95 border-white/5 text-white shadow-[0_16px_60px_rgba(0,0,0,0.8)] min-w-[220px] p-1 rounded-xl backdrop-blur-3xl animate-in fade-in zoom-in-95 duration-200"
-      >
-        <NFTMenuContent />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <button 
+      onClick={handleOptionsClick}
+      className="p-2 rounded-full text-white/60 hover:text-white transition-all active:scale-95"
+      aria-label="NFT Options"
+    >
+      <MoreVertical className="h-4 w-4" />
+    </button>
   );
 
   const getRarityColor = (rarity?: string) => {
@@ -307,13 +300,17 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                <div className="flex items-center gap-2">
                   <button 
                     onClick={handleActionClick}
-                    className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.1em] transition-all active:scale-95 shadow-sm flex items-center gap-1.5
-                      ${isOwner 
+                    disabled={!isOwner && isAuctionEnded}
+                    className={cn(
+                      "px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.1em] transition-all active:scale-95 shadow-sm flex items-center gap-1.5",
+                      isOwner 
                         ? 'bg-white/10 text-foreground hover:bg-white/20 border border-white/5' 
-                        : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/20 border-none'}
-                    `}
+                        : (isAuctionEnded 
+                            ? 'bg-white/5 text-white/20 border border-white/5 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/20 border-none')
+                    )}
                   >
-                    {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? 'BID' : 'BUY')}
+                    {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : 'BUY')}
                   </button>
                   <MoreOptionsButton />
                </div>
@@ -418,13 +415,17 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   
                   <button 
                     onClick={handleActionClick} 
-                    className={`h-[26px] px-3 rounded-full text-[8px] font-black uppercase tracking-[0.05em] transition-all active:scale-95 shadow-sm
-                      ${isOwner 
+                    disabled={!isOwner && isAuctionEnded}
+                    className={cn(
+                      "h-[26px] px-3 rounded-full text-[8px] font-black uppercase tracking-[0.05em] transition-all active:scale-95 shadow-sm",
+                      isOwner 
                         ? 'bg-muted/50 text-foreground hover:bg-muted/80 border border-border/10' 
-                        : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/20 border-none'}
-                    `}
+                        : (isAuctionEnded
+                            ? 'bg-white/5 text-white/20 border border-white/5 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/20 border-none')
+                    )}
                   >
-                    {isOwner ? (nft.listingType ? 'CONFIG' : 'SELL') : (nft.listingType === 'auction' ? 'BID' : 'BUY')}
+                    {isOwner ? (nft.listingType ? 'CONFIG' : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : 'BUY')}
                   </button>
                </div>
             </CardContent>

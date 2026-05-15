@@ -94,13 +94,13 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
         <div className="w-12 h-1 mx-auto my-2 rounded-full bg-muted sm:hidden" />
 
         {/* Header */}
-        <div className="px-2 py-2 border-b border-border/50 flex items-center justify-between flex-shrink-0">
+        <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between flex-shrink-0">
           <div>
-            <h2 className="text-lg font-bold text-black tracking-tighter uppercase">
-              {step === 2 ? 'Sync Complete' : 'Initialize New Sync'}
+            <h2 className="text-lg font-black text-black tracking-tighter uppercase leading-none">
+              {step === 2 ? 'Sync Successful' : 'Create New Playlist'}
             </h2>
-            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-3">
-              {step === 1 ? 'Configure Playlist Parameters' : 'Sequence Established'}
+            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-1.5">
+              {step === 1 ? 'Configure Neural Parameters' : 'Protocol Established'}
             </p>
           </div>
           <button onClick={resetAndClose} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close Create Playlist Modal">
@@ -108,7 +108,7 @@ const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen, onClo
           </button>
         </div>
 
-        <div className="px-2 py-2 overflow-y-auto custom-scrollbar">
+        <div className="px-5 py-5 overflow-y-auto custom-scrollbar">
           {step === 1 && (
             <form onSubmit={handleCreate} className="space-y-2">
               <div className="flex flex-col gap-2">

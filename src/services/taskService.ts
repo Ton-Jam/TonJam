@@ -40,7 +40,11 @@ export const claimTaskReward = async (taskId: string, rewardAmount: number, poin
       rewardEarned: rewardAmount
     });
 
-    // 2. Update user balance
+    // 2. Mark the task itself as claimed
+    const taskRef = doc(db, `users/${userId}/tasks`, taskId);
+    await updateDoc(taskRef, { claimed: true });
+
+    // 3. Update user balance
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
       tjBalance: increment(rewardAmount),

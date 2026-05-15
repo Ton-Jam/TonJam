@@ -50,6 +50,12 @@ tuple $Listing$_as_optional((slice, int) v) inline;
 ;; $Listing$_load_opt
 tuple $Listing$_load_opt(cell cl) inline;
 
+;; $NFTHistory$_store
+builder $NFTHistory$_store(builder build_0, (slice, cell) v) inline;
+
+;; $NFTHistory$_store_cell
+cell $NFTHistory$_store_cell((slice, cell) v, builder b) inline;
+
 ;; $Transfer$_store
 builder $Transfer$_store(builder build_0, (int, slice, slice, cell, int, slice) v) inline;
 
@@ -57,10 +63,10 @@ builder $Transfer$_store(builder build_0, (int, slice, slice, cell, int, slice) 
 cell $Transfer$_store_cell((int, slice, slice, cell, int, slice) v, builder b) inline;
 
 ;; $TonJamMarketplace$_store
-builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int, cell) v) inline;
+builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int, cell, cell) v) inline;
 
 ;; $TonJamMarketplace$_load
-(slice, ((slice, slice, int, cell))) $TonJamMarketplace$_load(slice sc_0) inline;
+(slice, ((slice, slice, int, cell, cell))) $TonJamMarketplace$_load(slice sc_0) inline;
 
 ;; $Context$_get_value
 _ $Context$_get_value((int, slice, int, slice) v) inline;
@@ -78,25 +84,28 @@ tuple $Listing$_to_opt_external(tuple v) inline;
 (slice, ((slice, slice, int))) $TonJamMarketplace$init$_load(slice sc_0) inline;
 
 ;; $TonJamMarketplace$_contract_init
-(slice, slice, int, cell) $TonJamMarketplace$_contract_init(slice $owner, slice $fee_destination, int $fee_percentage) impure inline;
+(slice, slice, int, cell, cell) $TonJamMarketplace$_contract_init(slice $owner, slice $fee_destination, int $fee_percentage) impure inline;
 
 ;; $TonJamMarketplace$_contract_load
-(slice, slice, int, cell) $TonJamMarketplace$_contract_load() impure inline;
+(slice, slice, int, cell, cell) $TonJamMarketplace$_contract_load() impure inline;
 
 ;; $TonJamMarketplace$_contract_store
-() $TonJamMarketplace$_contract_store((slice, slice, int, cell) v) impure inline;
+() $TonJamMarketplace$_contract_store((slice, slice, int, cell, cell) v) impure inline;
 
 ;; $TonJamMarketplace$_fun_get_listing
-((slice, slice, int, cell), tuple) $TonJamMarketplace$_fun_get_listing((slice, slice, int, cell) $self, slice $nft_address) impure inline_ref;
+((slice, slice, int, cell, cell), tuple) $TonJamMarketplace$_fun_get_listing((slice, slice, int, cell, cell) $self, slice $nft_address) impure inline_ref;
 
 ;; $TonJamMarketplace$_fun_get_marketplace_data
-((slice, slice, int, cell), cell) $TonJamMarketplace$_fun_get_marketplace_data((slice, slice, int, cell) $self) impure inline_ref;
+((slice, slice, int, cell, cell), cell) $TonJamMarketplace$_fun_get_marketplace_data((slice, slice, int, cell, cell) $self) impure inline_ref;
 
 ;; $MessageParameters$_constructor_bounce_to_value_mode_body
 ((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
 
 ;; $TonJamMarketplace$_fun_notify
-((slice, slice, int, cell), ()) $TonJamMarketplace$_fun_notify((slice, slice, int, cell) $self, cell $body) impure inline;
+((slice, slice, int, cell, cell), ()) $TonJamMarketplace$_fun_notify((slice, slice, int, cell, cell) $self, cell $body) impure inline;
+
+;; $NFTHistory$_constructor_previous_owner_forward_payload
+((slice, cell)) $NFTHistory$_constructor_previous_owner_forward_payload(slice $previous_owner, cell $forward_payload) inline;
 
 ;; $Listing$_constructor_owner_price
 ((slice, int)) $Listing$_constructor_owner_price(slice $owner, int $price) inline;
@@ -287,6 +296,10 @@ int $global_myBalance() impure asm """
     SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
 """;
 
+builder $Builder$_fun_storeSlice(builder $self, slice $slice) impure asm """
+    STSLICER
+""";
+
 cell $Builder$_fun_endCell(builder $self) impure asm """
     ENDC
 """;
@@ -303,8 +316,8 @@ int $Slice$_fun_bits(slice $self) impure asm """
     SBITS
 """;
 
-((slice, slice, int, cell), ()) $TonJamMarketplace$_fun_notify((slice, slice, int, cell) $self, cell $body) impure inline {
-    var (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings)) = $self;
+((slice, slice, int, cell, cell), ()) $TonJamMarketplace$_fun_notify((slice, slice, int, cell, cell) $self, cell $body) impure inline {
+    var (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories)) = $self;
     slice $to = __tact_context_get_sender();
     int $bounce = false;
     if (false) {
@@ -313,11 +326,11 @@ int $Slice$_fun_bits(slice $self) impure asm """
         if (($balanceBeforeMessage < 0)) {
             $global_nativeReserve(0, 0);
             $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
-            return (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings), ());
+            return (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories), ());
         }
     }
     $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
-    return (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings), ());
+    return (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories), ());
 }
 
 ;; TonJamMarketplace_TonJamMarketplace.storage.fc
@@ -445,6 +458,26 @@ tuple $Listing$_to_opt_external(tuple v) inline {
 }
 
 ;;
+;; Type: NFTHistory
+;; TLB: _ previous_owner:address forward_payload:^cell = NFTHistory
+;;
+
+builder $NFTHistory$_store(builder build_0, (slice, cell) v) inline {
+    var (v'previous_owner, v'forward_payload) = v;
+    build_0 = build_0.store_slice(v'previous_owner);
+    build_0 = build_0.store_ref(v'forward_payload);
+    return build_0;
+}
+
+cell $NFTHistory$_store_cell((slice, cell) v, builder b) inline {
+    return $NFTHistory$_store(b, v).end_cell();
+}
+
+((slice, cell)) $NFTHistory$_constructor_previous_owner_forward_payload(slice $previous_owner, cell $forward_payload) inline {
+    return ($previous_owner, $forward_payload);
+}
+
+;;
 ;; Type: Transfer
 ;; Header: 0x4e33fd18
 ;; TLB: transfer#4e33fd18 query_id:uint64 new_owner:address response_destination:address custom_payload:Maybe ^cell forward_amount:coins forward_payload:remainder<slice> = Transfer
@@ -472,24 +505,26 @@ cell $Transfer$_store_cell((int, slice, slice, cell, int, slice) v, builder b) i
 
 ;;
 ;; Type: TonJamMarketplace
-;; TLB: _ owner:address fee_destination:address fee_percentage:uint16 listings:dict<address, ^Listing{owner:address,price:coins}> = TonJamMarketplace
+;; TLB: _ owner:address fee_destination:address fee_percentage:uint16 listings:dict<address, ^Listing{owner:address,price:coins}> nft_histories:dict<address, ^NFTHistory{previous_owner:address,forward_payload:^cell}> = TonJamMarketplace
 ;;
 
-builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int, cell) v) inline {
-    var (v'owner, v'fee_destination, v'fee_percentage, v'listings) = v;
+builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int, cell, cell) v) inline {
+    var (v'owner, v'fee_destination, v'fee_percentage, v'listings, v'nft_histories) = v;
     build_0 = build_0.store_slice(v'owner);
     build_0 = build_0.store_slice(v'fee_destination);
     build_0 = build_0.store_uint(v'fee_percentage, 16);
     build_0 = build_0.store_dict(v'listings);
+    build_0 = build_0.store_dict(v'nft_histories);
     return build_0;
 }
 
-(slice, ((slice, slice, int, cell))) $TonJamMarketplace$_load(slice sc_0) inline {
+(slice, ((slice, slice, int, cell, cell))) $TonJamMarketplace$_load(slice sc_0) inline {
     var v'owner = sc_0~load_msg_addr();
     var v'fee_destination = sc_0~load_msg_addr();
     var v'fee_percentage = sc_0~load_uint(16);
     var v'listings = sc_0~load_dict();
-    return (sc_0, (v'owner, v'fee_destination, v'fee_percentage, v'listings));
+    var v'nft_histories = sc_0~load_dict();
+    return (sc_0, (v'owner, v'fee_destination, v'fee_percentage, v'listings, v'nft_histories));
 }
 
 (slice, ((slice, slice, int))) $TonJamMarketplace$init$_load(slice sc_0) inline {
@@ -499,7 +534,7 @@ builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int, cell) v) 
     return (sc_0, (v'owner, v'fee_destination, v'fee_percentage));
 }
 
-(slice, slice, int, cell) $TonJamMarketplace$_contract_load() impure inline {
+(slice, slice, int, cell, cell) $TonJamMarketplace$_contract_load() impure inline {
     slice $sc = get_data().begin_parse();
     int $loaded = $sc~load_int(1);
     if ($loaded) {
@@ -512,7 +547,7 @@ builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int, cell) v) 
     }
 }
 
-() $TonJamMarketplace$_contract_store((slice, slice, int, cell) v) impure inline {
+() $TonJamMarketplace$_contract_store((slice, slice, int, cell, cell) v) impure inline {
     builder b = begin_cell();
     b = b.store_int(true, 1);
     b = $TonJamMarketplace$_store(b, v);
@@ -523,24 +558,24 @@ builder $TonJamMarketplace$_store(builder build_0, (slice, slice, int, cell) v) 
 ;; Contract TonJamMarketplace functions
 ;;
 
-(slice, slice, int, cell) $TonJamMarketplace$_contract_init(slice $owner, slice $fee_destination, int $fee_percentage) impure inline {
-    var (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings)) = (null(), null(), null(), null());
+(slice, slice, int, cell, cell) $TonJamMarketplace$_contract_init(slice $owner, slice $fee_destination, int $fee_percentage) impure inline {
+    var (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories)) = (null(), null(), null(), null(), null());
     $self'owner = $owner;
     $self'fee_destination = $fee_destination;
     $self'fee_percentage = $fee_percentage;
-    return ($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings);
+    return ($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories);
 }
 
-((slice, slice, int, cell), tuple) $TonJamMarketplace$_fun_get_listing((slice, slice, int, cell) $self, slice $nft_address) impure inline_ref {
-    var (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings)) = $self;
+((slice, slice, int, cell, cell), tuple) $TonJamMarketplace$_fun_get_listing((slice, slice, int, cell, cell) $self, slice $nft_address) impure inline_ref {
+    var (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories)) = $self;
     var $fresh$ret_10 = $Listing$_load_opt(__tact_dict_get_slice_cell($self'listings, 267, $nft_address));
-    return (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings), $fresh$ret_10);
+    return (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories), $fresh$ret_10);
 }
 
-((slice, slice, int, cell), cell) $TonJamMarketplace$_fun_get_marketplace_data((slice, slice, int, cell) $self) impure inline_ref {
-    var (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings)) = $self;
+((slice, slice, int, cell, cell), cell) $TonJamMarketplace$_fun_get_marketplace_data((slice, slice, int, cell, cell) $self) impure inline_ref {
+    var (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories)) = $self;
     var $fresh$ret_11 = $Builder$_fun_endCell(store_uint($Builder$_fun_storeAddress($Builder$_fun_storeAddress($global_beginCell(), $self'owner), $self'fee_destination), $self'fee_percentage, 16));
-    return (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings), $fresh$ret_11);
+    return (($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories), $fresh$ret_11);
 }
 
 ;;
@@ -580,7 +615,7 @@ _ %get_marketplace_data() method_id(72560) {
     __tact_context_sender = msg_sender_addr;
     
     ;; Load contract data
-    var ($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings) = $TonJamMarketplace$_contract_load();
+    var ($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories) = $TonJamMarketplace$_contract_load();
     
     ;; Handle bounced messages
     if (msg_bounced) { return (); }
@@ -591,6 +626,8 @@ _ %get_marketplace_data() method_id(72560) {
         var $msg'prev_owner = in_msg~load_msg_addr();
         var $msg'forward_payload = in_msg;
         slice $nft_address = __tact_context_get_sender();
+        cell $payload = $Builder$_fun_endCell($Builder$_fun_storeSlice($global_beginCell(), $msg'forward_payload));
+        $self'nft_histories~__tact_dict_set_slice_cell(267, $nft_address, $NFTHistory$_store_cell($NFTHistory$_constructor_previous_owner_forward_payload($msg'prev_owner, $payload), begin_cell()));
         slice $slice = $msg'forward_payload;
         if (($Slice$_fun_bits($slice) >= 32)) {
             int $price = $slice~$Slice$_fun_loadCoins();
@@ -598,7 +635,7 @@ _ %get_marketplace_data() method_id(72560) {
         } else {
             $global_send($SendParameters$_constructor_to_value_mode_body($nft_address, 0, 64, $Transfer$_store_cell($Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload($msg'query_id, $msg'prev_owner, $msg'prev_owner, null(), 0, $global_emptySlice()), begin_cell())));
         }
-        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings));
+        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories));
         return ();
     }
     
@@ -617,7 +654,7 @@ _ %get_marketplace_data() method_id(72560) {
         $global_send($SendParameters$_constructor_to_value_mode($self'fee_destination, $fee, 1));
         $global_send($SendParameters$_constructor_to_value_mode_body($msg'nft_address, 0, 64, $Transfer$_store_cell($Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload($msg'query_id, $ctx'sender, $ctx'sender, null(), 0, $global_emptySlice()), begin_cell())));
         $self'listings~__tact_dict_set_slice_cell(267, $msg'nft_address, $Listing$_store_opt(null(), begin_cell()));
-        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings));
+        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories));
         return ();
     }
     
@@ -632,15 +669,15 @@ _ %get_marketplace_data() method_id(72560) {
         throw_unless(49729, ( (( equal_slices_bits($ctx'sender, $l'owner) )) ? (true) : (( equal_slices_bits($ctx'sender, $self'owner) )) ));
         $global_send($SendParameters$_constructor_to_value_mode_body($msg'nft_address, 0, 64, $Transfer$_store_cell($Transfer$_constructor_query_id_new_owner_response_destination_custom_payload_forward_amount_forward_payload($msg'query_id, $l'owner, $l'owner, null(), 0, $global_emptySlice()), begin_cell())));
         $self'listings~__tact_dict_set_slice_cell(267, $msg'nft_address, $Listing$_store_opt(null(), begin_cell()));
-        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings));
+        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories));
         return ();
     }
     
     ;; Receive Deploy message
     if (op == 0x946a98b6) {
         var $deploy'queryId = in_msg~load_uint(64);
-        ($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings)~$TonJamMarketplace$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
-        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings));
+        ($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories)~$TonJamMarketplace$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+        $TonJamMarketplace$_contract_store(($self'owner, $self'fee_destination, $self'fee_percentage, $self'listings, $self'nft_histories));
         return ();
     }
     

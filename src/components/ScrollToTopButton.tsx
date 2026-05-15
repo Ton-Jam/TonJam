@@ -36,19 +36,20 @@ const ScrollToTopButton: React.FC<ScrollToTopButtonProps> = ({ isMobileNavHidden
     });
   };
 
-  // Hide if bottom nav is visible (mobile) or mini player is visible
-  const shouldHide = isDesktop ? hasMiniPlayer : (!isMobileNavHidden || hasMiniPlayer);
+  const bottomOffset = isDesktop 
+    ? (hasMiniPlayer ? 'bottom-28' : 'bottom-8') 
+    : (hasMiniPlayer ? 'bottom-44' : (!isMobileNavHidden ? 'bottom-24' : 'bottom-8'));
 
   return (
     <button
       type="button"
       onClick={scrollToTop}
-      className={`fixed bottom-8 right-8 z-50 p-3 rounded-full bg-blue-600 text-white shadow-lg transition-all duration-300 hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-        isVisible && !shouldHide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+      className={`fixed ${bottomOffset} right-6 lg:right-8 z-50 p-3 rounded-[2px] bg-blue-600 text-white shadow-lg transition-all duration-300 hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
       }`}
       aria-label="Scroll to top"
     >
-      <ArrowUp className="h-6 w-6" />
+      <ArrowUp className="h-5 w-5" />
     </button>
   );
 };

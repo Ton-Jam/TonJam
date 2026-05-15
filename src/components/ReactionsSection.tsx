@@ -87,7 +87,7 @@ export default function ReactionsSection({ targetId, targetType }: ReactionsSect
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => handleReact(label)}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-normal transition-colors ${
             hasReacted 
               ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
               : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent'

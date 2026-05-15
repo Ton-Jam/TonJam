@@ -6,8 +6,9 @@ import { Track, Playlist, PlaylistFolder, UserProfile, NFTItem, Artist, Transact
 import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_POSTS, CURATED_PLAYLISTS, JAM_JETTON_MASTER } from '@/constants';
 import * as tonService from '@/services/tonService';
 import * as royaltyService from '@/services/royaltyService';
+import { audioCacheService } from '@/services/audioCacheService';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
-import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or, arrayUnion } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or, arrayUnion, deleteField } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getPlaceholderImage } from '@/lib/utils';
 import { useAudioStore } from '@/store/audioStore';
@@ -141,11 +142,15 @@ interface AudioContextType {
   headerTitle: string;
   setHeaderTitle: (title: string) => void;
   activeJamRoom: { id: string, name: string, listeners: number, currentTrack: Track | null } | null;
+  isOffline: boolean;
+  toggleOfflineMode: () => void;
   joinJamRoom: (roomId: string) => void;
   leaveJamRoom: () => void;
   allPlaylists: Playlist[];
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  isHeaderSearchOpen: boolean;
+  setIsHeaderSearchOpen: (isOpen: boolean) => void;
   isDiscoverFiltersOpen: boolean;
   setIsDiscoverFiltersOpen: (isOpen: boolean) => void;
   isCreatePlaylistModalOpen: boolean;
@@ -242,7 +247,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
 
   const [activeJamRoom, setActiveJamRoom] = useState<{ id: string, name: string, listeners: number, currentTrack: Track | null } | null>(null);
+
+  const [isOffline, setIsOffline] = useState(false);
+  const toggleOfflineMode = useCallback(() => {
+    setIsOffline(prev => {
+      addNotification(!prev ? "Offline mode enabled" : "Offline mode disabled", "info");
+      return !prev;
+    });
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
+  const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
   const [isDiscoverFiltersOpen, setIsDiscoverFiltersOpen] = useState(false);
   const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false);
   const [marketplaceFilters, setMarketplaceFilters] = useState<{
@@ -733,8 +748,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [firestoreUsers]);
 
   const allTracks = React.useMemo(() => {
-    const combined = [...firestoreTracks, ...MOCK_TRACKS];
-    // De-duplicate by ID
+    const combined = [...MOCK_TRACKS, ...firestoreTracks];
+    // De-duplicate by ID, later entries (Firestore) overwrite earlier ones (Mock)
     const unique = Array.from(new Map(combined.map(t => [t.id, t])).values());
     return unique;
   }, [firestoreTracks]);
@@ -778,8 +793,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [playlists, featuredPlaylist]);
 
   const allNFTs = React.useMemo(() => {
-    const combined = [...firestoreNFTs, ...MOCK_NFTS];
-    // De-duplicate by ID
+    const combined = [...MOCK_NFTS, ...firestoreNFTs];
+    // De-duplicate by ID, later entries (Firestore) overwrite earlier ones (Mock)
     const unique = Array.from(new Map(combined.map(n => [n.id, n])).values());
     return unique;
   }, [firestoreNFTs]);
@@ -947,7 +962,24 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const cleanUpdates = Object.fromEntries(
         Object.entries(updates).filter(([_, v]) => v !== undefined)
       );
-      await updateDoc(doc(db, 'nfts', nftId), cleanUpdates);
+      
+      const nftRef = doc(db, 'nfts', nftId);
+      const nftSnap = await getDoc(nftRef);
+      
+      if (!nftSnap.exists()) {
+        // If it doesn't exist in Firestore, it must be a mock NFT
+        // We find the full mock object and merge with updates using setDoc(merge: true)
+        // because merge: true correctly handles deleteField()
+        const fullNft = allNFTs.find(n => n.id === nftId);
+        if (fullNft) {
+          await setDoc(nftRef, { ...fullNft, ...cleanUpdates }, { merge: true });
+        } else {
+          await setDoc(nftRef, cleanUpdates, { merge: true });
+        }
+      } else {
+        await updateDoc(nftRef, cleanUpdates);
+      }
+      
       if (!silent) addNotification("Asset protocol updated", "success");
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `nfts/${nftId}`);
@@ -1205,6 +1237,52 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       clearInterval(syncInterval);
     };
   }, [userProfile.stakedJam, syncStakingRewards]);
+
+  // Handle expired auctions without bids
+  useEffect(() => {
+    const checkExpiredAuctions = async () => {
+      // Find NFTs that are auctions, have ended, and have no bids
+      const expiredEmptyAuctions = allNFTs.filter(nft => 
+        nft.listingType === 'auction' && 
+        nft.auctionEndTime && 
+        new Date(nft.auctionEndTime).getTime() <= Date.now() &&
+        (!nft.offers || nft.offers.length === 0)
+      );
+
+      if (expiredEmptyAuctions.length === 0) return;
+
+      for (const nft of expiredEmptyAuctions) {
+        console.log(`Auto-returning NFT ${nft.id} because auction ended without bids.`);
+        
+        // Remove listingType to "return" the NFT to the owner's vault
+        // We use silent=true to avoid multiple notifications if many expire, 
+        // but we'll show one specific notification if the current user is the owner
+        await updateNFT(nft.id, { 
+          // Use deleteField() for Firestore or null for Local
+          listingType: deleteField() as any,
+          // Clear auction metadata
+          auctionStartTime: deleteField() as any,
+          auctionEndTime: deleteField() as any,
+          auctionEndDate: deleteField() as any,
+          startingBid: deleteField() as any
+        }, true);
+        
+        // Add a notification if the current user is the owner
+        const currentWallet = tonAddress || userProfile.walletAddress;
+        if (nft.owner === currentWallet || nft.owner === userProfile.uid) {
+          addNotification(`Auction for "${nft.title}" ended without bids. Asset returned to your vault.`, 'info');
+        }
+      }
+    };
+
+    // Check periodically
+    const interval = setInterval(checkExpiredAuctions, 15000); // Check every 15 seconds
+    
+    // Also check on mount
+    checkExpiredAuctions();
+
+    return () => clearInterval(interval);
+  }, [allNFTs, userProfile.walletAddress, userProfile.uid, tonAddress, updateNFT]);
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -1966,6 +2044,24 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }).catch(console.warn);
       
       let sourceUrl = track.audioUrl || 'https://storage.googleapis.com/media-session/sintel/snow-fight.mp3';
+      
+      if (isOffline) {
+        const cachedUrl = await audioCacheService.getCachedTrack(track.id);
+        if (cachedUrl) {
+          sourceUrl = cachedUrl;
+          addNotification("Playing from cache", "info");
+        } else {
+          addNotification("Track not available offline", "error");
+          return;
+        }
+      } else {
+        // Cache if not already cached
+        const isCached = await audioCacheService.isTrackCached(track.id);
+        if (!isCached) {
+          audioCacheService.cacheTrack(track.id, sourceUrl).catch(console.error);
+        }
+      }
+      
       let highFidelity = false;
       let exclusive = null;
 
@@ -2946,7 +3042,7 @@ Return a JSON object with the following structure:
       posts, createPost, addCommentToPost, toggleLikePost, deletePost, updatePost,
       playlistFolders, createFolder, renameFolder, deleteFolder, movePlaylistToFolder,
       sponsoredPosts, tasks, addTask, updateTaskProgress, completeTask, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, mintNFT, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
-      searchQuery, setSearchQuery, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
+      searchQuery, setSearchQuery, isHeaderSearchOpen, setIsHeaderSearchOpen, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
       featuredPlaylist,
       updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters, jamspaceFilters, setJamspaceFilters,
       isLoading, deleteTrack, isHighFidelity, exclusiveContent,
@@ -2956,6 +3052,8 @@ Return a JSON object with the following structure:
       submitSponsorship,
       approveSponsorship,
       rejectSponsorship,
+      isOffline,
+      toggleOfflineMode,
       getEarnings,
       purchaseTrack,
       userAddress: tonAddress,

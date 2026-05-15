@@ -1,6 +1,6 @@
 # Tact compilation report
 Contract: TonJamNFTItem
-BoC Size: 567 bytes
+BoC Size: 671 bytes
 
 ## Structures (Structs and Messages)
 Total structures: 26
@@ -98,16 +98,16 @@ TL-B: `_ next_item_index:int257 collection_content:^cell owner_address:address =
 Signature: `CollectionData{next_item_index:int257,collection_content:^cell,owner_address:address}`
 
 ### GetNftData
-TL-B: `_ is_initialized:bool index:int257 collection_address:address owner_address:address individual_content:^cell = GetNftData`
-Signature: `GetNftData{is_initialized:bool,index:int257,collection_address:address,owner_address:address,individual_content:^cell}`
+TL-B: `_ is_initialized:bool index:int257 collection_address:address owner_address:address individual_content:^cell original_owner:address previous_owner:address = GetNftData`
+Signature: `GetNftData{is_initialized:bool,index:int257,collection_address:address,owner_address:address,individual_content:^cell,original_owner:address,previous_owner:address}`
 
 ### TonJamCollection$Data
 TL-B: `_ owner:address next_item_index:uint64 content:^cell royalty_params:RoyaltyParams{numerator:uint16,denominator:uint16,destination:address} = TonJamCollection`
 Signature: `TonJamCollection{owner:address,next_item_index:uint64,content:^cell,royalty_params:RoyaltyParams{numerator:uint16,denominator:uint16,destination:address}}`
 
 ### TonJamNFTItem$Data
-TL-B: `_ owner:address collection_address:address item_index:uint64 content:^cell is_initialized:bool = TonJamNFTItem`
-Signature: `TonJamNFTItem{owner:address,collection_address:address,item_index:uint64,content:^cell,is_initialized:bool}`
+TL-B: `_ owner:address original_owner:address previous_owner:address collection_address:address item_index:uint64 content:^cell is_initialized:bool = TonJamNFTItem`
+Signature: `TonJamNFTItem{owner:address,original_owner:address,previous_owner:address,collection_address:address,item_index:uint64,content:^cell,is_initialized:bool}`
 
 ## Get methods
 Total get methods: 1

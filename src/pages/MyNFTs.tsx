@@ -36,41 +36,33 @@ const MyNFTs: React.FC = () => {
   );
 
   return (
-    <div className="p-4 lg:p-8 space-y-8 animate-in fade-in duration-700 pb-24">
-      <header className="space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500">Financial Depot V.1</span>
-        </div>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter uppercase leading-none">
-            Digital <br /> Asset Vault
-          </h1>
-          
+    <div className="min-h-screen bg-background text-foreground pb-20">
+      <main className="px-5 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <Tabs 
             value={activeTab} 
             onValueChange={(v) => setActiveTab(v as any)}
             className="w-full md:w-auto"
           >
-            <TabsList className="bg-muted/30 p-1 h-12 rounded-xl border border-white/5">
+            <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
               <TabsTrigger 
                 value="owned" 
-                className="rounded-lg px-6 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full transition-all"
+                className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0"
               >
                 Collection
                 {userNFTs && userNFTs.length > 0 && (
-                  <Badge className="ml-2 h-5 min-w-[20px] px-1 bg-white/20 hover:bg-white/30 text-white border-none text-[9px]">
+                  <Badge className="ml-2 h-4 min-w-[16px] px-1 bg-white/20 hover:bg-white/30 text-white border-none text-[8px]">
                     {userNFTs.length}
                   </Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger 
                 value="bids" 
-                className="rounded-lg px-6 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-purple-600 data-[state=active]:text-white h-full transition-all"
+                className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0"
               >
-                My Bids
+                Bids
                 {userBids && userBids.length > 0 && (
-                  <Badge className="ml-2 h-5 min-w-[20px] px-1 bg-white/20 hover:bg-white/30 text-white border-none text-[9px]">
+                  <Badge className="ml-2 h-4 min-w-[16px] px-1 bg-white/20 hover:bg-white/30 text-white border-none text-[8px]">
                     {userBids.length}
                   </Badge>
                 )}
@@ -78,36 +70,32 @@ const MyNFTs: React.FC = () => {
             </TabsList>
           </Tabs>
         </div>
-      </header>
-
-      <Tabs value={activeTab} className="mt-0">
-        <TabsContent value="owned" className="mt-0 focus-visible:outline-none">
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {userNFTs && userNFTs.length > 0 ? (
-              userNFTs.map((nft) => (
-                <NFTCard 
-                  key={nft.id} 
-                  nft={nft} 
-                  // onAction={() => handleManage(nft)}
-                />
-              ))
-            ) : renderEmptyState('owned')}
-          </section>
-        </TabsContent>
-        
-        <TabsContent value="bids" className="mt-0 focus-visible:outline-none">
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {userBids && userBids.length > 0 ? (
-              userBids.map((nft) => (
-                <NFTCard 
-                  key={nft.id} 
-                  nft={nft}
-                />
-              ))
-            ) : renderEmptyState('bids')}
-          </section>
-        </TabsContent>
-      </Tabs>
+        <Tabs value={activeTab} className="mt-0">
+          <TabsContent value="owned" className="mt-0 focus-visible:outline-none">
+            <div className="space-y-2">
+              {userNFTs && userNFTs.length > 0 ? (
+                userNFTs.map((nft) => (
+                  <div key={nft.id} className="w-full">
+                    <NFTCard nft={nft} variant="row" />
+                  </div>
+                ))
+              ) : renderEmptyState('owned')}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="bids" className="mt-0 focus-visible:outline-none">
+            <div className="space-y-2">
+              {userBids && userBids.length > 0 ? (
+                userBids.map((nft) => (
+                  <div key={nft.id} className="w-full">
+                    <NFTCard nft={nft} variant="row" />
+                  </div>
+                ))
+              ) : renderEmptyState('bids')}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
 
       {selectedNFT && (
         <ManageNFTModal 

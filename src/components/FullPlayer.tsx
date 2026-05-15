@@ -115,7 +115,9 @@ const FullPlayer: React.FC = () => {
     allTracks,
     setTrackToAddToPlaylist,
     updateTrack,
-    setOptionsTrack
+    setOptionsTrack,
+    isOffline,
+    toggleOfflineMode
   } = useAudio();
 
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy'>('player');
@@ -305,51 +307,15 @@ const FullPlayer: React.FC = () => {
             <p className="text-[7px] font-black uppercase tracking-[0.3em] text-white/30">Now Playing</p>
             <p className="text-[8px] font-black uppercase tracking-widest text-blue-500">Node Transmission</p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white/50 hover:text-white hover:bg-white/5 outline-none"
-                onClick={(e) => {
-                  if (window.innerWidth < 1024) {
-                    e.stopPropagation();
-                    setOptionsTrack(currentTrack);
-                  }
-                }}
-              >
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="end" 
-              className="hidden lg:block bg-[#0A0A0B]/95 border-white/5 text-white shadow-[0_-16px_60px_rgba(0,0,0,0.8)] min-w-[220px] p-1 rounded-xl backdrop-blur-3xl"
-            >
-              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Neural Output</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/5" />
-              <DropdownMenuItem onClick={() => toggleLikeTrack(currentTrack.id)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-                <Heart className={cn("h-4 w-4", isLiked && "fill-current text-red-500")} />
-                <span className="text-[10px] font-black uppercase tracking-widest">{isLiked ? "Unlike Track" : "Like Track"}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => addNotification('Added to queue!', 'success')} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-                <ListMusic className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Add to Queue</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTrackToAddToPlaylist(currentTrack)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-                <PlusCircle className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Add to Playlist</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/5" />
-              <DropdownMenuItem onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-                <User className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest">View Artist</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-                <Share2 className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Share Signal</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setOptionsTrack(currentTrack);
+            }}
+            className="p-2 rounded-full text-white/50 hover:text-white hover:bg-white/5 outline-none"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
         </div>
 
         <Tabs defaultValue="player" value={activeView} onValueChange={(v) => setActiveView(v as any)} className="w-full flex-1 flex flex-col">
@@ -504,6 +470,14 @@ const FullPlayer: React.FC = () => {
                     className="flex-1"
                   />
                   <Separator orientation="vertical" className="h-4 bg-white/10" />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" onClick={toggleOfflineMode} className={cn("h-8 w-8 transition-colors", isOffline ? "text-red-500 hover:bg-red-500/10" : "text-white/20 hover:text-white hover:bg-white/10")}>
+                        <Zap className={cn("w-3.5 h-3.5", isOffline && "fill-current")} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Offline Mode</TooltipContent>
+                  </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button variant="ghost" size="icon" onClick={() => setActiveView('krupy')} className="h-8 w-8 text-blue-500/50 hover:text-blue-500 hover:bg-blue-500/10">

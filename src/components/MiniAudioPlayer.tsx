@@ -87,12 +87,10 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
 
   const handleOptionsClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.innerWidth < 1024) {
-      if (onOptionsClick) {
-        onOptionsClick();
-      } else {
-        setOptionsTrack(currentTrack);
-      }
+    if (onOptionsClick) {
+      onOptionsClick();
+    } else {
+      setOptionsTrack(currentTrack);
     }
   };
 
@@ -167,8 +165,8 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       className={cn(
-        "fixed left-0 right-0 z-[48] bg-background/90 backdrop-blur-3xl border-t border-white/10 px-4 py-2 flex flex-col items-stretch shadow-[0_-20px_50px_rgba(0,0,0,0.5)] h-18 lg:left-64 transition-all duration-300",
-        isMobileNavHidden ? "bottom-0" : "bottom-[72px] lg:bottom-0"
+        "fixed left-0 right-0 z-[48] bg-background/95 backdrop-blur-3xl border-t border-white/10 px-4 py-2 flex flex-col items-stretch shadow-[0_-10px_40px_rgba(0,0,0,0.3)] h-18 lg:left-64 transition-all duration-300",
+        isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
       )}
     >
       {/* Top Progress Bar */}
@@ -315,25 +313,12 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               <TooltipContent>Open Full Player</TooltipContent>
             </Tooltip>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 rounded-[2px] text-muted-foreground/40 hover:text-foreground outline-none"
-                  onClick={handleOptionsClick}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="end" 
-                side="top"
-                className="hidden lg:block bg-[#0A0A0B]/95 border-white/5 text-white shadow-[0_-16px_60px_rgba(0,0,0,0.8)] min-w-[220px] p-1 rounded-xl backdrop-blur-3xl"
-              >
-                <PlayerMenuContent />
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button 
+              onClick={handleOptionsClick}
+              className="h-8 w-8 flex items-center justify-center rounded-[2px] text-muted-foreground/40 hover:text-foreground outline-none"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
 
             <Button 
               variant="ghost" 
