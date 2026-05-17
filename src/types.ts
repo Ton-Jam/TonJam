@@ -68,6 +68,7 @@ export class Track {
   royaltySplits?: RoyaltySplit[];
   lyrics?: string = '';
   isExclusive?: boolean;
+  isExplicit?: boolean;
   recommendationReason?: string;
   recommendationScore?: number;
   isCollaboration?: boolean;

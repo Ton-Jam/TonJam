@@ -361,7 +361,7 @@ const Profile: React.FC = () => {
  return (
  <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
  {/* Banner Section */}
- <div className="relative h-[15vh] sm:h-[25vh] md:h-[40vh] w-full overflow-hidden bg-blue-950 border-b-[4px] border-blue-600/30">
+ <div className="relative h-[15vh] sm:h-[25vh] md:h-[40vh] w-full overflow-hidden bg-blue-950 border-b-[2px] border-blue-600/30">
  <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.uid}`, 1200, 400)} className="w-full h-full object-cover opacity-80" alt="" />
  <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
  

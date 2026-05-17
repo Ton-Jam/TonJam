@@ -727,18 +727,14 @@ const NFTDetail: React.FC = () => {
                 </div>
 
                 {isAuction && (
-                  <div className="bg-white/5 backdrop-blur-md p-4 rounded-[2px] border border-white/5 text-right min-w-[200px] shadow-2xl">
-                    <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-2 flex items-center justify-end gap-2">
-                       <Clock className="h-2.5 w-2.5" /> Time Left
-                    </p>
-                    <p className="text-[12px] font-bold text-amber-500 tracking-tighter">
-                      {timeRemaining || '00:00:00'}
-                    </p>
-                    <div className="mt-3 pt-3 border-t border-white/5">
-                      <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-1">
-                        Min Step
-                      </p>
-                      <p className="text-[14px] font-bold text-amber-500 tracking-tighter">+{minNextBid} <span className="text-[10px]">TON</span></p>
+                  <div className="flex flex-col gap-3 bg-white/5 backdrop-blur-md p-4 rounded-[2px] border border-white/10 text-right min-w-[220px] shadow-lg">
+                    <div className="flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                       <span>Highest Bid</span>
+                       <span className="flex items-center gap-1"><Clock className="h-2.5 w-2.5" /> Time Remaining</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[14px] font-black tracking-tighter">
+                       <span className="text-foreground">{highestOfferPrice} <span className="text-[10px] font-bold text-muted-foreground">TON</span></span>
+                       <span className="text-amber-500 tabular-nums">{timeRemaining || '00:00:00'}</span>
                     </div>
                   </div>
                 )}

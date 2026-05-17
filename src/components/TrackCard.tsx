@@ -394,15 +394,15 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 <div className="hidden md:flex items-center gap-8">
                     <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
                       <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Popularity</span>
-                      <span className="text-[11px] font-medium text-foreground uppercase group-hover/row:text-red-500">{(track.likes || 0).toLocaleString()}</span>
+                      <span className="text-[9px] font-medium text-foreground uppercase group-hover/row:text-red-500">{(track.likes || 0).toLocaleString()}</span>
                     </div>
                     <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
                       <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Frequency</span>
-                      <span className="text-[11px] font-medium text-foreground uppercase group-hover/row:text-blue-400">{formatNumber(track.playCount || 0)}</span>
+                      <span className="text-[9px] font-medium text-foreground uppercase group-hover/row:text-blue-400">{formatNumber(track.playCount || 0)}</span>
                     </div>
                     <div className="flex flex-col items-end min-w-[60px] opacity-40 group-hover/row:opacity-100 transition-opacity">
                       <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Length</span>
-                      <span className="text-[11px] font-medium text-foreground">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                      <span className="text-[9px] font-medium text-foreground">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
                     </div>
                 </div>
 
@@ -550,11 +550,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
+                <div className="flex items-center gap-1.5 text-[8px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
                     <Headphones className="w-3.5 h-3.5" />
                     {formatNumber(track.playCount || 0)}
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
+                <div className="flex items-center gap-1.5 text-[8px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
                     <Clock className="w-3.5 h-3.5" />
                     {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
                 </div>
