@@ -1,24 +1,89 @@
 import React, { useMemo } from 'react';
-import { Sparkles, TrendingUp, Zap, Gem } from 'lucide-react';
+import { Sparkles, TrendingUp, Zap, Gem, Play } from 'lucide-react';
 import { PlayIcon, ShoppingBagIcon } from '@heroicons/react/24/solid';
 import { useAudio } from '@/context/AudioContext';
 import TrackCard from './TrackCard';
 import NFTCard from './NFTCard';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
+import { Badge } from './ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 const DiscoveryFeed: React.FC = () => {
-  const { getRecommendations, playAll } = useAudio();
+  const { getRecommendations, playAll, discoverWeekly } = useAudio();
   const navigate = useNavigate();
   
   const { recommendedTracks, recommendedNFTs } = useMemo(() => getRecommendations(), [getRecommendations]);
 
-  if (recommendedTracks.length === 0 && recommendedNFTs.length === 0) {
-    return null;
-  }
-
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pt-6">
-      <div className="flex flex-col md:flex-row gap-6">
+      {/* Discover Weekly Banner - High Fidelity */}
+      {discoverWeekly && (
+        <section className="mb-4">
+          <div 
+            onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
+            className="relative h-40 sm:h-72 rounded-3xl overflow-hidden cursor-pointer group shadow-2xl border border-white/5"
+          >
+            <img 
+              src={discoverWeekly.coverUrl} 
+              alt="Discover Weekly" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+            
+            {/* Neural Grid Overlay */}
+            <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
+
+            <div className="absolute inset-0 p-6 sm:p-12 flex flex-col justify-end">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                <div className="space-y-2 sm:space-y-4 max-w-xl">
+                  <div className="flex items-center gap-3">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge className="bg-blue-600 hover:bg-blue-700 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] rounded-md text-white shadow-lg shadow-blue-600/40 px-3 py-1 border-none cursor-help">
+                          Neural.Protocol_07
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-zinc-950 border-white/10 text-[9px] font-bold uppercase tracking-widest p-2">
+                        Proprietary AI synthesis algorithm v7.2.4
+                      </TooltipContent>
+                    </Tooltip>
+                    <span className="text-[10px] sm:text-xs font-bold text-white/40 uppercase tracking-[0.2em] hidden sm:block">Update_Synced.2024</span>
+                  </div>
+                  <h2 className="text-4xl sm:text-7xl font-black uppercase tracking-tighter text-white leading-[0.8] drop-shadow-2xl">
+                    Discover<br />Weekly
+                  </h2>
+                  <p className="text-xs sm:text-lg text-white/60 font-medium leading-relaxed max-w-md line-clamp-2 sm:line-clamp-none">
+                    Personalized frequency stream synthesized from your unique neural listening patterns and collection data.
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="hidden sm:flex flex-col items-end gap-1">
+                    <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">Active Relay</span>
+                    <span className="text-[10px] font-bold text-white/80">{discoverWeekly.trackIds?.length || 0} Artists Synced</span>
+                  </div>
+                  <button className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group/play">
+                    <Play className="h-6 w-6 sm:h-10 sm:w-10 fill-black translate-x-0.5 group-hover:scale-110 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Progress Line */}
+            <div className="absolute bottom-0 left-0 h-1 bg-blue-600/30 w-full overflow-hidden">
+              <motion.div 
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="h-full w-1/3 bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,1)]"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {recommendedTracks.length === 0 && recommendedNFTs.length === 0 ? null : (
+        <div className="flex flex-col md:flex-row gap-6">
         {/* Personalized Tracks Feed */}
         <section className="flex-1">
           <div className="flex items-center justify-between mb-2">
@@ -85,6 +150,7 @@ const DiscoveryFeed: React.FC = () => {
           </div>
         </section>
       </div>
+      )}
 
       {/* Discovery Insights / Social Signals */}
       <section className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">

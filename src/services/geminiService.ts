@@ -59,7 +59,7 @@ export const semanticSearchTracks = async (query: string, allTracks: Track[]) =>
 
     const model = "gemini-3.1-pro-preview";
     const prompt = `The user is searching for music with the query: "${query}".
-    Here is a list of available tracks: ${JSON.stringify(allTracks.map(t => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist })))}.
+    Here is a list of available tracks: ${JSON.stringify(allTracks.map(t => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist, mood: t.mood })))}.
     Return a JSON array of track IDs that best match the user's intent, ordered by relevance.`;
 
     const response = await ai.models.generateContent({
@@ -100,7 +100,7 @@ export const globalAISearch = async (
     Query: "${query}"
     
     Database Context:
-    - Tracks: ${JSON.stringify(context.tracks.slice(0, 50).map(t => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre })))}
+    - Tracks: ${JSON.stringify(context.tracks.slice(0, 50).map(t => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood })))}
     - Artists: ${JSON.stringify(context.artists.slice(0, 50).map(a => ({ id: a.uid, name: a.name, genre: a.genre })))}
     - NFTs: ${JSON.stringify(context.nfts.slice(0, 50).map(n => ({ id: n.id, name: n.title, artist: n.artist })))}
 
@@ -218,11 +218,56 @@ export const analyzeRelatedArtists = async (artistName: string, allArtists: Arti
   }
 };
 
+export const getKrupyRecommendations = async (currentTrack: Track, allTracks: Track[], allArtists: Artist[]) => {
+  try {
+    const ai = getClient();
+    if (!ai) throw new Error("No API Key");
+
+    const model = "gemini-3.1-pro-preview";
+    const prompt = `Based on the current track "${currentTrack.title}" by ${currentTrack.artist} (Genre: ${currentTrack.genre}), 
+    suggest 3 similar tracks and 2 similar artists from this available library:
+    - Tracks: ${allTracks.map(t => t.title).join(", ")}
+    - Artists: ${allArtists.map(a => a.name).join(", ")}
+    
+    Return a JSON object with:
+    - tracks: array of track titles.
+    - artists: array of artist names.
+    - reasoning: a short DJ Krupy style explanation (1 sentence).`;
+
+    const response = await ai.models.generateContent({
+      model,
+      contents: [{ parts: [{ text: prompt }] }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            tracks: { type: Type.ARRAY, items: { type: Type.STRING } },
+            artists: { type: Type.ARRAY, items: { type: Type.STRING } },
+            reasoning: { type: Type.STRING }
+          },
+          required: ["tracks", "artists", "reasoning"]
+        }
+      }
+    });
+
+    return JSON.parse(response.text || "{}");
+  } catch (error) {
+    console.warn("Krupy recommendations fallback:", error);
+    return { tracks: [], artists: [], reasoning: "Neural relay interrupted. Stay tuned for the next frequency." };
+  }
+};
+
+export interface ChatAssistantResponse {
+  text?: string;
+  toolCalls?: any[];
+}
+
 export const chatWithKrupy = async (
   message: string, 
   history: { role: 'user' | 'ai', text: string }[],
   currentTrack: Track | null
-) => {
+): Promise<ChatAssistantResponse> => {
   try {
     const ai = getClient();
     if (!ai) throw new Error("No API Key");
@@ -232,27 +277,19 @@ export const chatWithKrupy = async (
     let contextPrompt = "";
     if (currentTrack) {
       contextPrompt = `
-      CURRENTLY PLAYING:
+      CURRENTLY PLAYING (Neural Data):
       - Title: ${currentTrack.title}
       - Artist: ${currentTrack.artist}
       - Genre: ${currentTrack.genre || 'Unknown'}
-      - Mood/Vibe: ${currentTrack.isNFT ? 'Exclusive NFT Artifact' : 'Standard Stream'}
+      - Mood: ${currentTrack.mood || 'Sonic Flux'}
       `;
     }
 
     const prompt = `You are DJ Krupy, a futuristic, high-energy AI music assistant on TonJam. 
-    Your personality is cyberpunk, enthusiastic about TON ecosystem, and deeply knowledgeable about music trends.
+    Your personality is cyberpunk, enthusiastic about the TON ecosystem, and deeply knowledgeable about music trends.
     ${contextPrompt}
     
-    User says: "${message}"
-    
-    Guidelines:
-    1. If a track is playing, reference its genre/mood in your trivia or suggestions.
-    2. Suggest similar tracks or artists if the user asks for music.
-    3. Keep responses concise (under 3 sentences) and full of "Krupy Vibez".
-    4. Mention "Neural Relay" or "TON network" occasionally to fit the theme.
-    
-    Return the response as a plain string.`;
+    User says: "${message}"`;
 
     const response = await ai.models.generateContent({
       model,
@@ -262,13 +299,39 @@ export const chatWithKrupy = async (
           parts: [{ text: h.text }]
         })),
         { role: 'user', parts: [{ text: prompt }] }
-      ]
-    });
+      ],
+      config: {
+        tools: [{
+          functionDeclarations: [
+            {
+              name: "play_song",
+              description: "Plays a song based on a mood or keyword.",
+              parameters: {
+                type: Type.OBJECT,
+                properties: {
+                  mood_or_keyword: { type: Type.STRING, description: "The mood or keyword (e.g., 'energetic', 'calm', 'cyberpunk')." }
+                },
+                required: ["mood_or_keyword"]
+              }
+            },
+            {
+              name: "get_fun_fact",
+              description: "Provides a fun fact about the current track.",
+              parameters: { type: Type.OBJECT, properties: {}, required: [] }
+            }
+          ]
+        }]
+      }
+    }) as any;
 
-    return response.text || "Neural connection interrupted. Re-syncing the vibez...";
+    if (response.toolCalls && response.toolCalls.length > 0) {
+      return { toolCalls: response.toolCalls };
+    }
+
+    return { text: response.text || "Neural connection interrupted. Re-syncing the vibez..." };
   } catch (error) {
     console.error("DJ Krupy Chat error:", error);
-    return `Krupy Vibez incoming! Regarding your message, I'd say stay tuned for the next drop. The algorithm is heating up! (AI offline: ${error instanceof Error ? error.message : 'Unknown'})`;
+    throw error;
   }
 };
 

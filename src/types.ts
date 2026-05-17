@@ -40,7 +40,7 @@ export class Track {
   audioUrl!: string;
   duration!: number; // in seconds
   genre: string = 'Unknown';
-  mood?: string = 'Unknown';
+  mood?: 'chill' | 'energetic' | 'focus' | 'happy' | 'melancholic' | 'Unknown' | string = 'Unknown';
   isNFT!: boolean;
   artistVerified?: boolean;
   price?: string; 
@@ -246,7 +246,7 @@ export interface Artist {
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   playCount?: number;
   location?: string;
-  verificationStatus?: 'unverified' | 'pending' | 'verified';
+  verificationStatus?: 'unverified' | 'pending' | 'verified' | 'rejected';
 }
 
 export interface PostComment {
@@ -386,12 +386,34 @@ export interface UserProfile {
   role?: 'artist' | 'collector' | 'admin';
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   isVerified?: boolean;
-  verificationStatus?: 'unverified' | 'pending' | 'verified';
+  verificationStatus?: 'unverified' | 'pending' | 'verified' | 'rejected';
   royaltyConfig?: {
     streamingSplits: RoyaltySplit[];
     nftSaleSplits: RoyaltySplit[];
   };
   collaborators?: Collaborator[];
+}
+
+export interface ArtistVerificationRequest {
+  id: string;
+  userId: string;
+  artistName: string;
+  email: string;
+  bio: string;
+  statement?: string; // New field
+  genre: string;
+  socialLinks: {
+    x?: string;
+    spotify?: string;
+    instagram?: string;
+    website?: string;
+    soundcloud?: string;
+  };
+  portfolioUrls: string[];
+  status: 'pending' | 'approved' | 'rejected';
+  reviewerNotes?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface User {

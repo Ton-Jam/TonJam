@@ -5,6 +5,7 @@ import { getPlaceholderImage } from './lib/utils';
 export const APP_LOGO = "https://i.postimg.cc/63GsZHzq/TonJam-icon.png"; 
 export const TJ_COIN_ICON = "https://i.postimg.cc/s2QHHMSF/TonjamCoin.png"; 
 export const TON_LOGO = "https://i.postimg.cc/jj7HksNw/ton-symbol.png";
+export const DJ_KRUPY_AVATAR = "https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png";
 
 // Placeholder price for TJ Coin (JAM) in USD
 export const JAM_PRICE_USD = 0.052;

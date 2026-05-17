@@ -58,6 +58,7 @@ const {
 import BuyNFTModal from '@/components/BuyNFTModal';
 import SellNFTModal from '@/components/SellNFTModal';
 import BidModal from '@/components/BidModal';
+import PlaceOfferModal from '@/components/PlaceOfferModal';
 import BidAcceptanceModal from '@/components/BidAcceptanceModal';
 import ManageNFTModal from '@/components/ManageNFTModal';
 import NFTCard from '@/components/NFTCard';
@@ -92,6 +93,7 @@ const NFTDetail: React.FC = () => {
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
   const [showBidModal, setShowBidModal] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -787,7 +789,7 @@ const NFTDetail: React.FC = () => {
                       </button>
                     )}
                     {!isAuction && (
-                      <button onClick={() => setShowBidModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
+                      <button onClick={() => setShowOfferModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
                         Offer
                       </button>
                     )}
@@ -1016,12 +1018,12 @@ const NFTDetail: React.FC = () => {
                           <div className="text-right hidden md:block">
                             <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-2">Sync_Origin</p>
                             <span className="text-[11px] font-mono text-primary font-black uppercase tracking-widest">
-                               {h.from === 'Vault' ? 'GENESIS_VAULT' : `@${h.from.slice(0, 8)}`}
+                               {h.from === 'Vault' ? 'GENESIS_VAULT' : `@${(h.from || '').slice(0, 8)}`}
                             </span>
                           </div>
                           <div className="text-right">
                              <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-2">Recipient_Node</p>
-                             <span className="text-[11px] font-mono text-primary font-black uppercase tracking-widest">@{h.to.slice(0, 8)}</span>
+                             <span className="text-[11px] font-mono text-primary font-black uppercase tracking-widest">@{(h.to || '').slice(0, 8)}</span>
                              {h.price && (
                                <div className="flex items-center justify-end gap-2 mt-2">
                                   <span className="text-xl font-black text-foreground tracking-tighter">{h.price}</span>
@@ -1062,7 +1064,7 @@ const NFTDetail: React.FC = () => {
                               <div className="flex flex-col gap-2 min-w-0">
                                 <div className="flex items-center gap-4">
                                   <span className="text-base font-black text-foreground uppercase tracking-tight truncate max-w-[200px]">
-                                    @{o.offerer.slice(0, 8)}...
+                                    @{(o.offerer || '').slice(0, 8)}...
                                   </span>
                                   {isTopBid && (
                                     <span className={`text-[8px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${isAuction ? 'bg-amber-500 text-black' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)]'}`}>Top Signal</span>
@@ -1264,6 +1266,7 @@ const NFTDetail: React.FC = () => {
 
       {/* Conditional Modals */}
       {showBuyModal && <BuyNFTModal nft={localNft} onClose={() => setShowBuyModal(false)} />}
+      {showOfferModal && <PlaceOfferModal nft={localNft} onClose={() => setShowOfferModal(false)} />}
       {showListModal && <SellNFTModal nft={localNft} onClose={() => setShowListModal(false)} />}
       {showBidModal && <BidModal nft={localNft} onClose={() => setShowBidModal(false)} />}
       {showSendModal && <SendNFTModal nft={localNft} isOpen={showSendModal} onClose={() => setShowSendModal(false)} />}

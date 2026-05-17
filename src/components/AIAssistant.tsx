@@ -1,39 +1,91 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Send, Sparkles, Music, Mic2, Loader2 } from 'lucide-react';
+import { X, Send, Sparkles, Music, Mic2, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAudio } from '@/context/AudioContext';
-import { chatWithKrupy } from '@/services/geminiService';
+import { chatWithKrupy, ChatAssistantResponse } from '@/services/geminiService';
+import { toast } from 'sonner';
 
 const DJ_KRUPY_AVATAR = 'https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png';
 
+interface ChatMessage {
+  role: 'user' | 'ai';
+  text: string;
+  isError?: boolean;
+}
+
 const AIAssistant: React.FC = () => {
-  const { currentTrack } = useAudio();
+  const { currentTrack, playTrack, searchTracks } = useAudio();
   const [isOpen, setIsOpen] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
-  const [chatHistory, setChatHistory] = React.useState<{ role: 'user' | 'ai', text: string }[]>([
+  const [chatHistory, setChatHistory] = React.useState<ChatMessage[]>([
     { role: 'ai', text: "KrupyVibez active. Neural relay synchronized. How can I help you calibrate your sonic identity today?" }
   ]);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  const handleSend = async () => {
-    if (!message.trim() || isLoading) return;
+  const handleSend = async (retryText?: string) => {
+    const textToSend = retryText || message;
+    if (!textToSend.trim() || isLoading) return;
     
-    const userMsg = message;
-    setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
-    setMessage('');
+    if (!retryText) {
+      setChatHistory(prev => [...prev, { role: 'user', text: textToSend }]);
+      setMessage('');
+    } else {
+      setChatHistory(prev => {
+        const last = prev[prev.length - 1];
+        if (last && last.role === 'ai' && last.isError) {
+          return prev.slice(0, -1);
+        }
+        return prev;
+      });
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await chatWithKrupy(userMsg, chatHistory, currentTrack);
-      setChatHistory(prev => [...prev, { role: 'ai', text: response }]);
-    } catch (error) {
+      const response: ChatAssistantResponse = await chatWithKrupy(textToSend, chatHistory.filter(h => !h.isError), currentTrack);
+      
+      if ('toolCalls' in response && response.toolCalls) {
+        // Handle tool calls
+        for (const toolCall of response.toolCalls) {
+          if (toolCall.name === 'play_song') {
+            const mood = toolCall.args.mood_or_keyword;
+            const tracks = await searchTracks(mood); // or similar function
+            if (tracks && tracks.length > 0) {
+              await playTrack(tracks[0]);
+              setChatHistory(prev => [...prev, { role: 'ai', text: `Initiating ${mood} protocols. Playing ${tracks[0].title}.` }]);
+            } else {
+              setChatHistory(prev => [...prev, { role: 'ai', text: `No sonic signals matched ${mood}. Trying default frequency.` }]);
+            }
+          } else if (toolCall.name === 'get_fun_fact') {
+             if (currentTrack) {
+               setChatHistory(prev => [...prev, { role: 'ai', text: `Did you know? ${currentTrack.title} is known for its ${currentTrack.mood} vibe!` }]);
+             } else {
+               setChatHistory(prev => [...prev, { role: 'ai', text: "No track playing to extract facts from. Let's start the vibe!" }]);
+             }
+          }
+        }
+      } else if ('text' in response) {
+        if (typeof response.text === 'string') {
+          setChatHistory(prev => [...prev, { role: 'ai', text: response.text }]);
+        } else {
+          console.error("RESPONSE TEXT IS NOT A STRING:", response.text);
+          setChatHistory(prev => [...prev, { role: 'ai', text: JSON.stringify(response.text) }]);
+        }
+      }
+    } catch (error: any) {
       console.error("AI Assistant Error:", error);
+      const errorMessage = error?.message?.includes('quota') 
+        ? "Neural bandwidth exceeded."
+        : "Neural relay failure.";
+      
       setChatHistory(prev => [...prev, { 
         role: 'ai', 
-        text: "Neural relay failure. The signal is weak but the vibez are still pure. Try again in a bit!" 
+        text: errorMessage,
+        isError: true
       }]);
+      toast.error("Sonic communication failed.");
     } finally {
       setIsLoading(false);
     }
@@ -85,14 +137,32 @@ const AIAssistant: React.FC = () => {
                   initial={{ opacity: 0, x: chat.role === 'user' ? 10 : -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   key={i}
-                  className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex flex-col ${chat.role === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] sm:text-xs font-medium leading-relaxed shadow-sm ${
                     chat.role === 'user' 
                       ? 'bg-blue-600 text-white rounded-tr-none' 
-                      : 'bg-muted/50 text-foreground border border-white/5 rounded-tl-none'
+                      : chat.isError 
+                        ? 'bg-red-500/10 text-red-500 border border-red-500/20 rounded-tl-none'
+                        : 'bg-muted/50 text-foreground border border-white/5 rounded-tl-none'
                   }`}>
+                    {chat.isError && <AlertCircle className="w-3 h-3 mb-1 inline-block mr-1" />}
                     {chat.text}
+                    
+                    {chat.isError && (
+                      <button 
+                        onClick={() => {
+                          const lastUserMsg = [...chatHistory].reverse().find(h => h.role === 'user');
+                          if (lastUserMsg) {
+                            handleSend(lastUserMsg.text);
+                          }
+                        }}
+                        className="mt-2 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors bg-red-500/10 px-2 py-1 rounded-full w-fit"
+                      >
+                        <RefreshCw className="w-2.5 h-2.5" />
+                        Retry Mission
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -123,7 +193,7 @@ const AIAssistant: React.FC = () => {
                   className="flex-1 bg-transparent border-none text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/50 focus:outline-none min-w-0 disabled:opacity-50"
                 />
                 <button 
-                  onClick={handleSend} 
+                  onClick={() => handleSend()} 
                   disabled={isLoading || !message.trim()}
                   className="p-1 text-blue-500 hover:text-blue-400 disabled:opacity-50 disabled:text-muted-foreground transition-colors flex-shrink-0"
                 >

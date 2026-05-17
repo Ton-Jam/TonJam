@@ -5,6 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function formatNumber(num: number): string {
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return num.toString();
+}
+
 export function getPlaceholderImage(seed: string, width = 600, height = 400) {
   return `https://image.pollinations.ai/prompt/music%20art%20${encodeURIComponent(seed)}%20abstract%20digital?width=${width}&height=${height}&nologo=true`;
 }

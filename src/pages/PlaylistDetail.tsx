@@ -146,13 +146,6 @@ const PlaylistDetail: React.FC = () => {
     setIsEditing(false);
   };
 
-  const handleMoveTrack = (e: React.MouseEvent, trackId: string, direction: 'up' | 'down') => {
-    e.stopPropagation();
-    if (playlist) {
-      reorderTrackInPlaylist(playlist.id, trackId, direction);
-    }
-  };
-
   const handleTrackClick = (trackId: string) => {
     const track = playlistTracks.find(t => t.id === trackId);
     if (track) playTrack(track);
@@ -366,8 +359,6 @@ const PlaylistDetail: React.FC = () => {
                         ? () => toggleLikeTrack(track.id)
                         : () => handleRemoveTrack(null as any, track.id)
                     }
-                    onMoveUp={id !== 'liked-songs' && index > 0 ? () => handleMoveTrack(null as any, track.id, 'up') : undefined}
-                    onMoveDown={id !== 'liked-songs' && index < playlistTracks.length - 1 ? () => handleMoveTrack(null as any, track.id, 'down') : undefined}
                     className="bg-transparent border-none shadow-none hover:bg-white/5 !p-2 !rounded-none"
                   />
                 </div>

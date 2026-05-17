@@ -77,7 +77,7 @@ interface AudioContextType {
   toggleRepeat: () => void;
   addNotification: (message: string, type?: 'success' | 'info' | 'error' | 'warning', duration?: number) => void;
   setTrackToAddToPlaylist: (track: Track | null) => void;
-  setOptionsTrack: (track: Track | null, callbacks?: { onRemove?: () => void, onMoveUp?: () => void, onMoveDown?: () => void }) => void;
+  setOptionsTrack: (track: Track | null, callbacks?: { onRemove?: () => void }) => void;
   setActivePlaylistId: (id: string | null) => void;
   addTrackToPlaylist: (playlistId: string, track: Track) => void;
   removeTrackFromPlaylist: (playlistId: string, trackId: string) => void;
@@ -91,6 +91,7 @@ interface AudioContextType {
   generateDiscoverWeekly: () => void;
   createRecommendedPlaylist: () => void;
   clearRecentlyPlayed: () => void;
+  discoverWeekly: Playlist | null;
   setUserProfile: (profile: UserProfile | ((prev: UserProfile) => UserProfile)) => void;
   setAnthem: (nftId: string | null) => Promise<void>;
   setGenesisContractAddress: (address: string | null) => void;
@@ -235,11 +236,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [optionsTrack, setOptionsTrackState] = useState<Track | null>(null);
   const [optionsCallbacks, setOptionsCallbacks] = useState<{
     onRemove?: () => void;
-    onMoveUp?: () => void;
-    onMoveDown?: () => void;
   } | null>(null);
 
-  const setOptionsTrack = useCallback((track: Track | null, callbacks?: { onRemove?: () => void, onMoveUp?: () => void, onMoveDown?: () => void }) => {
+  const setOptionsTrack = useCallback((track: Track | null, callbacks?: { onRemove?: () => void }) => {
     setOptionsTrackState(track);
     setOptionsCallbacks(callbacks || null);
   }, []);
@@ -791,6 +790,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const allPlaylists = useMemo(() => {
     return [featuredPlaylist, ...CURATED_PLAYLISTS, ...playlists];
   }, [playlists, featuredPlaylist]);
+
+  const discoverWeekly = useMemo(() => 
+    allPlaylists.find(p => p.title.toLowerCase().includes('discover weekly')),
+    [allPlaylists]
+  );
 
   const allNFTs = React.useMemo(() => {
     const combined = [...MOCK_NFTS, ...firestoreNFTs];
@@ -2291,6 +2295,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       setLikedTrackIds(newLikedTrackIds);
       
+      // Update local firestoreTracks state
+      setFirestoreTracks(prev => prev.map(t => 
+        t.id === trackId ? { ...t, likes: (t.likes || 0) + (isLiked ? -1 : 1) } : t
+      ));
+
+      // Update currentTrack if it's the one being liked
+      if (currentTrack?.id === trackId) {
+        setCurrentTrack(prev => prev ? { ...prev, likes: (prev.likes || 0) + (isLiked ? -1 : 1) } : null);
+      }
+
       if (auth.currentUser) {
         const userRef = doc(db, 'users', auth.currentUser.uid);
         await updateDoc(userRef, { likedTrackIds: newLikedTrackIds });
@@ -3041,7 +3055,7 @@ Return a JSON object with the following structure:
       allTracks, allNFTs, artists, firestoreUsers, setArtists, addUserTrack, updateTrack, addUserNFT, updateNFT, recordTransaction, depositTON, withdrawTON, purchaseJAM, subscribePremium, stakeJam, unstakeJam, claimJamRewards, transactions, audioElement: audioRef.current, analyser: analyserRef.current,
       posts, createPost, addCommentToPost, toggleLikePost, deletePost, updatePost,
       playlistFolders, createFolder, renameFolder, deleteFolder, movePlaylistToFolder,
-      sponsoredPosts, tasks, addTask, updateTaskProgress, completeTask, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, mintNFT, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists,
+      sponsoredPosts, tasks, addTask, updateTaskProgress, completeTask, claimTaskReward, updateUserRole, getTrendingTracks, getTopNFTTracks, getTracksByGenre, getRecommendations, jamTrack, mintNFT, activeJamRoom, joinJamRoom, leaveJamRoom, allPlaylists, discoverWeekly,
       searchQuery, setSearchQuery, isHeaderSearchOpen, setIsHeaderSearchOpen, isDiscoverFiltersOpen, setIsDiscoverFiltersOpen, isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen,
       featuredPlaylist,
       updateRoyaltyConfig, marketplaceFilters, setMarketplaceFilters, jamspaceFilters, setJamspaceFilters,
@@ -3077,4 +3091,14 @@ export const useAudio = () => {
   const context = useContext(AudioContext);
   if (!context) throw new Error('useAudio must be used within an AudioProvider');
   return context;
+};
+
+export const useUserRole = () => {
+  const { userProfile } = useAudio();
+  return useMemo(() => ({
+    isAdmin: userProfile.role === 'admin',
+    isArtist: userProfile.role === 'artist',
+    isCollector: userProfile.role === 'collector',
+    role: userProfile.role,
+  }), [userProfile.role]);
 };

@@ -52,6 +52,7 @@ import ManageNFTModal from '@/components/ManageNFTModal';
 import EditUserProfileModal from '@/components/EditUserProfileModal';
 import UserArtistVerificationModal from '@/components/UserArtistVerificationModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import VerificationTracker from '@/components/VerificationTracker';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { NFTItem, UserProfile } from '@/types';
@@ -360,7 +361,7 @@ const Profile: React.FC = () => {
  return (
  <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
  {/* Banner Section */}
- <div className="relative h-[15vh] sm:h-[25vh] md:h-[40vh] w-full overflow-hidden bg-blue-950">
+ <div className="relative h-[15vh] sm:h-[25vh] md:h-[40vh] w-full overflow-hidden bg-blue-950 border-b-[4px] border-blue-600/30">
  <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.uid}`, 1200, 400)} className="w-full h-full object-cover opacity-80" alt="" />
  <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
  
@@ -377,828 +378,462 @@ const Profile: React.FC = () => {
  </div>
 
   {/* IDENTITY SECTION */}
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-2 -mt-10 sm:-mt-12 relative z-30 flex flex-col md:flex-row-reverse items-center md:items-end w-full gap-4 sm:gap-8 text-neutral-900 dark:text-white font-sans">
-    {/* Profile Picture */}
-    <div className="relative group flex-shrink-0 md:mr-[-48px]">
-      <div 
-        className="relative overflow-hidden border-4 border-background shadow-2xl bg-muted w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36"
-        style={{ borderRadius: '40px' }}
-      >
-        <Avatar className="w-full h-full rounded-none">
-          <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} className="object-cover" alt={localUser.name} />
-          <AvatarFallback className="text-3xl font-black">{localUser.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        
-        {isEditing && (
+  <div className="w-full max-w-7xl mx-auto px-4 relative z-30 flex flex-col items-start text-neutral-900 dark:text-white font-sans">
+    <div className="flex justify-between items-end w-full mb-4">
+      {/* Profile Picture */}
+      <div className="relative group -mt-12 sm:-mt-16 md:-mt-24">
+        <div 
+          className="relative overflow-hidden border-[4px] border-background bg-muted w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full"
+        >
+          <Avatar className="w-full h-full rounded-none">
+            <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} className="object-cover" alt={localUser.name} />
+            <AvatarFallback className="text-3xl font-black">{(localUser.name || '?').charAt(0)}</AvatarFallback>
+          </Avatar>
+          
+          {isEditing && (
+            <button 
+              onClick={() => avatarInputRef.current?.click()} 
+              className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Camera className="text-white h-8 w-8"/>
+            </button>
+          )}
+        </div>
+        {isSpotifyVerified && (
+          <div className="absolute bottom-2 right-2 z-10 bg-background rounded-full p-0.5 border-2 border-background">
+            <CheckCircle className="w-5 h-5 md:w-6 h-6 text-blue-500 fill-current"/>
+          </div>
+        )}
+        <input type="file" hidden ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
+      </div>
+
+      {/* Action Button (Extreme Right) */}
+      <div className="flex items-center gap-3">
+        {isEditing ? (
+          <>
+            <button 
+              onClick={() => setIsEditing(false)} 
+              className="px-5 py-2 bg-white/5 text-white rounded-full font-black text-[11px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleSave} 
+              className="px-5 py-2 bg-white text-black rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl"
+            >
+              Save
+            </button>
+          </>
+        ) : (
           <button 
-            onClick={() => avatarInputRef.current?.click()} 
-            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={() => setIsEditModalOpen(true)}
+            className="px-6 py-2 bg-background text-foreground rounded-full font-black text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
           >
-            <Camera className="text-white h-8 w-8"/>
+            Edit Profile
           </button>
         )}
+
+        {isEditModalOpen && (
+          <EditUserProfileModal 
+            user={userProfile} 
+            onClose={() => setIsEditModalOpen(false)}
+            onUpdate={setUserProfile}
+          />
+        )}
       </div>
-      {isSpotifyVerified && (
-        <div className="absolute bottom-1.5 right-1.5 z-10 bg-[#0A0A0A] rounded-full p-1 shadow-xl flex gap-1 border border-white/5">
-          <CheckCircle className="w-4 h-4 md:w-5 h-5 text-blue-500 fill-current"/>
-          {isVercelVerified && <Globe className="w-4 h-4 md:w-5 h-5 text-blue-500"/>}
-        </div>
-      )}
-      <input type="file" hidden ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
     </div>
 
-    {/* Name, Handle, Stats, and Actions */}
-    <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full pb-1 sm:pb-2">
-      <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-4 sm:gap-6 mb-4 sm:mb-8">
-        {/* Name & Handle */}
-        <div className="w-full md:w-auto">
-          {isEditing ? (
-            <div className="space-y-4 w-full max-w-lg">
-              <input 
-                type="text" 
-                value={localUser.name} 
-                onChange={(e) => setLocalUser({...localUser, name: e.target.value})} 
-                className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-2xl font-black outline-none text-white w-full focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-white/20"
-                placeholder="Display Name"
-              />
-              <input 
-                type="text" 
-                value={localUser.username} 
-                onChange={(e) => setLocalUser({...localUser, username: e.target.value})} 
-                className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm font-bold outline-none text-blue-400 w-full focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-blue-400/20"
-                placeholder="@username"
-              />
-            </div>
-          ) : (
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 justify-center md:justify-start">
-                <h1 className="text-xl md:text-3xl font-black tracking-tighter text-neutral-900 dark:text-white drop-shadow-sm uppercase leading-none">
-                  {localUser.name}
-                </h1>
-              </div>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                <span className="text-blue-600 dark:text-blue-400 font-bold text-[10px] md:text-xs tracking-widest uppercase">
-                  {localUser.username?.replace('@', '') || 'user'}
-                </span>
-                <span className={cn(
-                  "px-3 py-0.5 rounded-full text-[7px] font-black uppercase tracking-[0.2em] backdrop-blur-md border",
-                  localUser.role === 'admin' ? "bg-red-500/10 text-red-600 border-red-500/20" :
-                  localUser.role === 'artist' ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
-                  "bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-white/60 border-neutral-200 dark:border-white/10"
-                )}>
-                  {localUser.role || 'collector'}
-                </span>
-              </div>
-            </div>
+    {/* Name, Handle, Bio */}
+    <div className="space-y-1 mt-2">
+      <div className="flex items-center gap-1.5">
+        <h1 className="text-xl md:text-2xl font-black tracking-tight text-neutral-900 dark:text-white uppercase leading-tight">
+          {localUser.name}
+        </h1>
+      </div>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground font-medium text-sm md:text-base">
+            {localUser.username || `@${(localUser.uid || '').slice(0, 8)}`}
+          </span>
+          <span className={cn(
+            "px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-wider",
+            localUser.role === 'admin' ? "bg-red-500/10 text-red-600" :
+            localUser.role === 'artist' ? "bg-blue-500/10 text-blue-500" :
+            "bg-white/5 text-white/40"
+          )}>
+            {localUser.role || 'collector'}
+          </span>
+        </div>
+        
+        {/* Bio */}
+        <p className="text-sm text-foreground/90 max-w-xl leading-relaxed whitespace-pre-wrap">
+          {localUser.bio || "Digital architect of frequencies. Constructing reality through sound."}
+        </p>
+
+        {/* Info Icons (Location/Join Date/Website) */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-xs md:text-sm font-medium">
+          {localUser.socials?.website && (
+            <a href={localUser.socials.website} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-blue-500 hover:underline">
+              <Globe className="w-4 h-4" />
+              {localUser.socials.website.replace(/^https?:\/\//, '')}
+            </a>
           )}
+          <div className="flex items-center gap-1.5 grayscale opacity-60">
+            <Plus className="w-4 h-4 rotate-45" />
+            Joined May 2026
+          </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-4">
-
-          <button 
-             onClick={() => setIsEditModalOpen(true)}
-             className="p-2.5 bg-background text-foreground rounded-full font-black text-[10px] uppercase tracking-widest border border-border hover:bg-muted transition-all active:scale-95"
-          >
-             <Settings className="h-4 w-4" />
+        {/* Stats (Following/Followers) */}
+        <div className="flex items-center gap-5 pt-2">
+          <button className="flex items-center gap-1 text-sm hover:underline group">
+            <span className="font-black text-foreground">{(localUser.following || 0).toLocaleString()}</span>
+            <span className="text-muted-foreground font-medium">Following</span>
           </button>
-
-          {isEditModalOpen && (
-            <EditUserProfileModal 
-              user={userProfile} 
-              onClose={() => setIsEditModalOpen(false)}
-              onUpdate={setUserProfile}
-            />
-          )}
-
-          {isEditing && (
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setIsEditing(false)} 
-                className="px-6 py-2.5 bg-white/5 text-white rounded-full font-black text-[10px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all active:scale-95"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleSave} 
-                className="px-6 py-2.5 bg-blue-600 text-white rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 active:scale-95"
-              >
-                Save Changes
-              </button>
-            </div>
-          )}
+          <button className="flex items-center gap-1 text-sm hover:underline group">
+            <span className="font-black text-foreground">{(localUser.followers || 0).toLocaleString()}</span>
+            <span className="text-muted-foreground font-medium">Followers</span>
+          </button>
         </div>
-      </div>
-
-      {/* Stats Cluster */}
-      <div className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 pt-2 sm:pt-3 border-t border-neutral-100 dark:border-white/5">
-        <div className="flex flex-col items-center md:items-start group cursor-pointer">
-          <span className="text-sm sm:text-base font-black text-neutral-900 dark:text-white tracking-tight group-hover:text-blue-600 transition-colors">
-            {(localUser.followers || 0).toLocaleString()}
-          </span>
-          <span className="text-[6px] sm:text-[7px] uppercase tracking-[0.2em] text-neutral-400 dark:text-white/30 font-bold mt-0.5 sm:mt-1">Followers</span>
-        </div>
-        <div className="flex flex-col items-center md:items-start pl-4 sm:pl-6 border-l border-neutral-100 dark:border-white/10 group cursor-pointer">
-          <span className="text-sm sm:text-base font-black text-neutral-900 dark:text-white tracking-tight group-hover:text-blue-600 transition-colors">
-            {(localUser.following || 0).toLocaleString()}
-          </span>
-          <span className="text-[6px] sm:text-[7px] uppercase tracking-[0.2em] text-neutral-400 dark:text-white/30 font-bold mt-0.5 sm:mt-1">Following</span>
-        </div>
-        <Link 
-          to="/settings" 
-          className="p-2 sm:p-3 bg-white/5 rounded-full hover:bg-blue-600 transition-all ml-2 sm:ml-4 border border-white/10 group active:scale-90"
-          title="Settings"
-        >
-          <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white group-hover:rotate-90 transition-transform" />
-        </Link>
       </div>
     </div>
- </div>
-
- {/* Tab Navigation */}
- <div className="sticky top-[var(--header-height,64px)] z-40 bg-background/95 backdrop-blur-xl mb-3 sm:mb-8 mt-3 sm:mt-6">
- <div className="max-w-7xl mx-auto px-4 md:px-8">
- <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar">
- {[
- { id: 'overview', label: 'Overview' },
- { id: 'inventory', label: 'Collection' },
- { id: 'feed', label: 'Feed' },
- { id: 'releases', label: 'Tracks', hidden: !userProfile.isVerifiedArtist },
- { id: 'sequences', label: 'Playlists' },
- { id: 'activity', label: 'Activity' },
- { id: 'network', label: 'Network' },
- { id: 'staking', label: 'Staking' }
- ].filter(t => !t.hidden).map(tab => (
- <button 
- key={tab.id} 
- onClick={() => setActiveTab(tab.id as any)} 
- className={cn(
-"py-3 sm:py-4 text-[11px] sm:text-sm font-bold transition-all relative whitespace-nowrap",
- activeTab === tab.id ?"text-blue-500":"text-muted-foreground hover:text-foreground"
- )} 
- >
- {tab.label}
- {activeTab === tab.id && (
- <motion.div 
- layoutId="activeTabProfile"
- className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-t-full"
- />
- )}
- </button>
- ))}
- </div>
- </div>
- </div>
-
- {/* Featured Collectibles Section */}
- {ownedNfts.length > 0 && (
- <NFTVaultSection nfts={ownedNfts} />
- )}
-
- {/* Main Dashboard Layout */}
- <div className="max-w-7xl mx-auto px-4 md:px-4">
- <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
- {/* Left Sidebar */}
- <div className="lg:col-span-4 space-y-4">
-<div className="bg-background p-5 rounded-2xl shadow-sm border border-neutral-100 dark:border-white/5">
- <div className="flex items-center gap-3 mb-6">
- <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
- <h3 className="text-xs font-bold text-zinc-800 dark:text-foreground uppercase tracking-wider">Stats</h3>
- </div>
- <div className="grid grid-cols-2 gap-6">
- <StatBlock label="Earnings"value={(localUser.earnings || 0).toString()} subValue="TON"icon="gem"/>
- <StatBlock label="JAM Balance"value={(userProfile?.jamBalance || 0).toLocaleString()} subValue="JAM"icon="coins"/>
- </div>
- </div>
-
- <div className="bg-background p-6 rounded-2xl shadow-sm">
- <div className="flex items-center gap-3 mb-6">
- <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
- <h3 className="text-[10px] font-bold text-neutral-800 dark:text-foreground uppercase tracking-widest">Bio</h3>
- </div>
- 
- {isEditing ? (
- <div className="space-y-6">
- <textarea value={localUser.bio} onChange={(e) => setLocalUser({...localUser, bio: e.target.value})} className="w-full rounded-xl p-4 text-sm text-foreground outline-none h-40 leading-relaxed bg-muted/50 focus:-blue-500 transition-all resize-none"placeholder="Tell us about yourself..."/>
- 
- <div className="space-y-4">
- <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Favorite Genres</p>
- <div className="flex flex-wrap gap-2">
- {GENRES.map(genre => {
- const isSelected = localUser.favoriteGenres?.includes(genre.name);
- return (
- <button
- key={genre.id}
- onClick={() => {
- const current = localUser.favoriteGenres || [];
- const updated = isSelected 
- ? current.filter(g => g !== genre.name)
- : [...current, genre.name];
- setLocalUser({...localUser, favoriteGenres: updated});
- }}
- className={cn(
- "relative p-[2px] rounded-full text-[10px] font-bold uppercase tracking-wider transition-all group",
- isSelected ? "text-white" : "text-muted-foreground"
- )}
- >
- <div className={cn(
-  "absolute inset-0 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-opacity",
-  isSelected ? "opacity-100 shadow-[0_0_10px_rgba(37,99,235,0.3)]" : "opacity-20 group-hover:opacity-100"
- )}></div>
- <div className={cn(
-  "relative px-3 py-1.5 rounded-full transition-colors font-bold",
-  isSelected ? "bg-blue-600/80 group-hover:bg-transparent" : "bg-muted dark:bg-[#0A0A0A] group-hover:bg-transparent"
- )}>
- {genre.name}
- </div>
- </button>
- );
- })}
- </div>
- </div>
-
- <div className="space-y-4">
- <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Social Links</p>
- <div className="grid grid-cols-1 gap-3">
- {['x', 'instagram', 'telegram', 'spotify', 'website'].map(platform => (
- <input 
- key={`social-${platform}`}
- type="text"
- placeholder={`${platform.toUpperCase()} URL`} 
- value={(localUser.socials as any)?.[platform] || ''} 
- onChange={(e) => handleSocialChange(platform, e.target.value)}
- className="w-full bg-muted/50 rounded-xl px-4 py-2.5 text-xs text-foreground outline-none focus:-blue-500 transition-all"
- />
- ))}
- </div>
- </div>
- </div>
- ) : (
-   <div className="space-y-6">
-  <div onClick={() => setIsEditing(true)} className="cursor-pointer group/bio">
-   <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors whitespace-pre-wrap">
- {localUser.bio ||"No bio yet."}
- </p>
-  <div className="mt-4 flex items-center justify-between">
-  <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest text-[#5773ff]">ID: {localUser?.uid?.slice(0, 8) || '...'}</span>
-  <Pencil className="h-3 w-3 text-[#5773ff] opacity-0 group-hover/bio:opacity-100 transition-opacity"/>
-  </div>
   </div>
 
-  {(localUser.socials?.x || localUser.socials?.instagram || localUser.socials?.website || localUser.socials?.telegram) && (
-  <div className="flex flex-wrap gap-3 pt-6 border-t border-white/5 transition-all animate-in fade-in slide-in-from-bottom-2 duration-700">
-  {localUser.socials?.x && (
-  <a 
-  href={localUser.socials.x} 
-  target="_blank" 
-  rel="noopener noreferrer" 
-  className="p-2.5 bg-white/5 hover:bg-[#1DA1F2]/20 text-muted-foreground hover:text-[#1DA1F2] rounded-xl transition-all group scale-100 hover:scale-110 active:scale-95"
-  title="Twitter / X"
-  >
-  <Twitter className="h-4 w-4" />
-  </a>
-  )}
-  {localUser.socials?.instagram && (
-  <a 
-  href={localUser.socials.instagram} 
-  target="_blank" 
-  rel="noopener noreferrer" 
-  className="p-2.5 bg-white/5 hover:bg-pink-500/20 text-muted-foreground hover:text-pink-500 rounded-xl transition-all group scale-100 hover:scale-110 active:scale-95"
-  title="Instagram"
-  >
-  <Instagram className="h-4 w-4" />
-  </a>
-  )}
-  {localUser.socials?.website && (
-  <a 
-  href={localUser.socials.website} 
-  target="_blank" 
-  rel="noopener noreferrer" 
-  className="p-2.5 bg-white/5 hover:bg-blue-400/20 text-muted-foreground hover:text-blue-400 rounded-xl transition-all group scale-100 hover:scale-110 active:scale-95"
-  title="Website"
-  >
-  <Globe className="h-4 w-4" />
-  </a>
-  )}
-  {localUser.socials?.telegram && (
-  <a 
-  href={localUser.socials.telegram} 
-  target="_blank" 
-  rel="noopener noreferrer" 
-  className="p-2.5 bg-white/5 hover:bg-sky-500/20 text-muted-foreground hover:text-sky-500 rounded-xl transition-all group scale-100 hover:scale-110 active:scale-95"
-  title="Telegram"
-  >
-  <Send className="h-4 w-4" />
-  </a>
-  )}
+
+
+  {/* Tab Navigation */}
+  <div className="sticky top-[var(--header-height,64px)] z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 mb-6 py-2">
+    <div className="max-w-7xl mx-auto px-4">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        {[
+          { id: 'feed', label: 'Activity' },
+          { id: 'overview', label: 'Overview' },
+          { id: 'inventory', label: 'Inventory' },
+          { id: 'releases', label: 'Releases', hidden: !userProfile.isVerifiedArtist },
+          { id: 'sequences', label: 'Playlists' },
+          { id: 'staking', label: 'Staking' }
+        ].filter(t => !t.hidden).map(tab => (
+          <button 
+            key={tab.id} 
+            onClick={() => setActiveTab(tab.id as any)} 
+            className={cn(
+              "px-5 py-2.5 text-xs font-bold transition-all rounded-full whitespace-nowrap",
+              activeTab === tab.id 
+                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-md" 
+                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+            )} 
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+    </div>
   </div>
-  )}
- </div>
- )}
- </div>
- 
- {!isSpotifyVerified && localUser.role === 'collector' && (
- <button onClick={() => setIsVerificationModalOpen(true)} className="w-full py-4 bg-blue-500/10 rounded-2xl text-blue-500 text-xs font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center gap-3 shadow-sm">
- <CheckCircle className="h-5 w-5"/> Become an Artist
- </button>
- )}
- 
- {localUser.role === 'artist' && (
- <button onClick={() => handleSwitchRole('collector')} className="w-full py-4 bg-blue-500/10 rounded-2xl text-blue-500 text-xs font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center gap-3 shadow-sm">
- <User className="h-5 w-5"/> Switch to Collector
- </button>
- )}
- </div>
 
- {/* Right Content */}
- <div className="lg:col-span-8 space-y-4">
- {activeTab === 'overview' && (
- <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
- {/* Anthem Highlight */}
- {anthemNft && (
- <div className="bg-background p-6 rounded-2xl shadow-sm overflow-hidden relative group">
- <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
- <Star className="h-24 w-24 text-blue-500 fill-blue-500"/>
- </div>
- <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
- <div className="w-48 h-48 rounded-xl overflow-hidden shadow-xl flex-shrink-0">
- <img src={anthemNft.imageUrl || getPlaceholderImage(`nft-${anthemNft.id}`)} className="w-full h-full object-cover"alt={anthemNft.title} />
- </div>
- <div className="flex-1 text-center md:text-left">
- <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
- <span className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-full text-[10px] font-bold uppercase tracking-widest">
- Profile Anthem
- </span>
- </div>
- <h2 className="text-2xl md:text-3xl font-black text-neutral-900 dark:text-foreground mb-1">
-{anthemNft.title}
-</h2>
-<p className="text-[10px] sm:text-xs font-bold text-neutral-500 dark:text-muted-foreground mb-4">
-by {anthemNft.creator}
-</p>
- <div className="flex flex-wrap justify-center md:justify-start gap-3">
- <button 
- onClick={() => {
- const track = allTracks.find(t => t.id === anthemNft.trackId);
- if (track) playTrack(track);
- }}
- className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
- >
- <Zap className="h-4 w-4"/> Play Anthem
- </button>
- <button 
- onClick={() => navigate(`/nft/${anthemNft.id}`)}
- className="px-8 py-3 bg-muted hover:bg-muted/80 text-foreground rounded-full text-xs font-bold transition-all"
- >
- View Details
- </button>
- </div>
- </div>
- </div>
- </div>
- )}
+  {/* Main Dashboard Layout */}
+  <div className="max-w-7xl mx-auto px-0 md:px-4">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-8">
+      {/* Main Column (Feed/Content) */}
+      <div className="lg:col-span-8 border-x border-white/5 bg-background/50 min-h-screen">
+        {activeTab === 'feed' && (
+          <div className="animate-in fade-in duration-500">
+            {/* Quick Share (X style) */}
+            <div className="px-5 py-4 border-b border-white/5 bg-background/40 backdrop-blur-md">
+              <form onSubmit={handleSharePost} className="flex gap-4">
+                <Avatar className="w-12 h-12 border border-white/5">
+                  <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} />
+                </Avatar>
+                <div className="flex-1 space-y-3">
+                  <textarea 
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                    placeholder="What is happening?!"
+                    className="w-full bg-transparent text-xl text-white outline-none resize-none pt-2 placeholder:text-muted-foreground/30 min-h-[50px]"
+                  />
+                  <div className="flex justify-between items-center border-t border-white/5 pt-3">
+                    <div className="flex items-center gap-2">
+                       {currentTrack && (
+                         <div className="flex items-center gap-2 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                           <Disc className="h-3 w-3 text-blue-500 animate-spin-slow" />
+                           <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{currentTrack.title}</span>
+                         </div>
+                       )}
+                    </div>
+                    <button 
+                      type="submit"
+                      disabled={!newPostContent.trim() && !currentTrack}
+                      className="px-6 py-2 bg-blue-500 text-white rounded-full font-black text-xs uppercase tracking-widest disabled:opacity-50 hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20"
+                    >
+                      Post
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            
+            <SocialFeed posts={feedPosts} onDeletePost={deletePost} emptyMessage="No activity posts found." />
+          </div>
+        )}
 
- <SectionHeader title="Followed Artists"onAction={() => setActiveTab('network')} actionLabel="View All"/>
- <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
- {localUser.followedArtists && localUser.followedArtists.length > 0 ? (
- localUser.followedArtists.slice(0, 5).map(artistId => {
- const artist = MOCK_ARTISTS.find(a => a.uid === artistId);
- if (!artist) return null;
- return <div key={artist.uid} className="flex-shrink-0 w-40 sm:w-48"><UserCard user={artist} variant="compact"/></div>;
- })
- ) : (
- <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest py-4">No followed artists.</p>
- )}
- </div>
+        {/* Network Tab (New) */}
+        {activeTab === 'network' && (
+          <div className="p-8 animate-in fade-in duration-500">
+            <h2 className="text-xl font-black uppercase tracking-widest mb-6">Network</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Followers</p>
+                <h3 className="text-3xl font-black">{(localUser.followers || 0).toLocaleString()}</h3>
+              </div>
+              <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Following</p>
+                <h3 className="text-3xl font-black">{(localUser.following || 0).toLocaleString()}</h3>
+              </div>
+            </div>
+          </div>
+        )}
 
- <SectionHeader title="Created Playlists"onAction={() => setActiveTab('sequences')} actionLabel="View All"/>
- <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
- {(playlists || []).slice(0, 5).map(pl => (
- <div key={pl.id} className="flex-shrink-0 w-40 sm:w-48"><PlaylistCard playlist={pl} onClick={() => navigate(`/playlist/${pl.id}`)} /></div>
- ))}
- </div>
+        {/* ... remaining tabs content ... */}
+        {activeTab === 'overview' && (
+          <div className="space-y-0 animate-in fade-in slide-in-from-bottom-4 duration-500 last:border-b-0">
+            {/* Anthem Highlight */}
+            {anthemNft && (
+              <div className="bg-background p-6 border-b border-white/5 relative group">
+                <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                  <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 border border-white/10">
+                    <img src={anthemNft.imageUrl || getPlaceholderImage(`nft-${anthemNft.id}`)} className="w-full h-full object-cover" alt={anthemNft.title} />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                      <span className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-full text-[10px] font-black uppercase tracking-widest">
+                        Profile Anthem
+                      </span>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-black text-white mb-1 uppercase tracking-tighter">
+                      {anthemNft.title}
+                    </h2>
+                    <p className="text-xs font-bold text-muted-foreground mb-6 uppercase tracking-widest">
+                      by {anthemNft.creator}
+                    </p>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                      <button 
+                        onClick={() => {
+                          const track = allTracks.find(t => t.id === anthemNft.trackId);
+                          if (track) playTrack(track);
+                        }}
+                        className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20"
+                      >
+                        Listen Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
- <SectionHeader title="Owned/Listed NFTs"onAction={() => setActiveTab('inventory')} actionLabel="View All"/>
- <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
- {(ownedNfts || []).slice(0, 5).map(nft => (
- <div key={nft.id} className="min-w-[280px] sm:min-w-[320px]"><NFTCard nft={nft} onAction={handleNFTAction} /></div>
- ))}
- </div>
+            <div className="p-4 space-y-8">
+              <SectionHeader title="Followed Artists" onAction={() => setActiveTab('staking')} />
+              <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                {localUser.followedArtists && localUser.followedArtists.length > 0 ? (
+                  localUser.followedArtists.slice(0, 5).map(artistId => {
+                    const artist = MOCK_ARTISTS.find(a => a.uid === artistId);
+                    return artist ? <div key={artist.uid} className="flex-shrink-0 w-48"><UserCard user={artist} variant="compact" /></div> : null;
+                  })
+                ) : (
+                  <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">No artists tracked.</p>
+                )}
+              </div>
 
- <SectionHeader title="My Activity"onAction={() => setActiveTab('activity')} actionLabel="View All"/>
- <div className="space-y-4">
- {userPosts.slice(0, 3).map(post => (
- <PostCard key={post.id} post={post as any} />
- ))}
- {userPosts.length === 0 && (
- <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest py-4">No recent activity.</p>
- )}
- </div>
- </div>
- )}
+              <SectionHeader title="Recently Collected" onAction={() => setActiveTab('inventory')} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(ownedNfts || []).slice(0, 2).map(nft => (
+                  <NFTCard key={nft.id} nft={nft} onAction={handleNFTAction} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
- {activeTab === 'feed' && (
- <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
- <SectionHeader title="Activity Feed"/>
- <div className="space-y-4">
- {/* Filtered Feed: Tracks, NFTs, and Posts from followed accounts */}
- {[
- ...allTracks.filter(t => followedUserIds.includes(t.artistId) || userProfile.followedArtists?.includes(t.artistId)).map(t => ({ ...t, type: 'track' as const, timestamp: t.releaseDate || 'Just now' })),
- ...allNFTs.filter(n => followedUserIds.includes(n.artistId || '') || userProfile.followedArtists?.includes(n.artistId || '')).map(n => ({ ...n, type: 'nft' as const, timestamp: 'Just now' })),
- ...posts.filter(p => followedUserIds.includes(p.userId)).map(p => ({ ...p, type: 'post' as const }))
- ].sort((a, b) => (b as any).id.localeCompare((a as any).id)).map((item, idx) => {
- if (item.type === 'post') {
- return (
- <div key={`feed-post-${item.id}`} className="mb-4">
- <PostCard post={item as any} />
- </div>
- );
- }
- return (
- <div key={`feed-${item.type}-${item.id}`} className="bg-background p-4 rounded-2xl flex items-center gap-4 group hover:bg-muted/30 transition-all mb-4 shadow-sm">
- <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
- <img src={(item as any).coverUrl || (item as any).imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"alt=""/>
- </div>
- <div className="flex-1">
- <div className="flex items-center gap-3 mb-2">
- <span className={cn(
-"text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest",
- item.type === 'track' ?"bg-blue-500/10 text-blue-500":"bg-purple-500/10 text-purple-500"
- )}>
- {item.type === 'track' ? 'New Release' : 'NFT Drop'}
- </span>
- <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Just now</span>
- </div>
- <h4 className="text-base font-bold text-foreground truncate">{(item as any).title}</h4>
- <p className="text-xs font-medium text-muted-foreground">{(item as any).artist || (item as any).creator}</p>
- </div>
- <button 
- onClick={() => item.type === 'track' ? playTrack(item as any) : navigate(`/nft/${item.id}`)}
- className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-full text-xs font-bold text-white transition-all shadow-sm"
- >
- {item.type === 'track' ? 'Listen' : 'View'}
- </button>
- </div>
- )})}
- {followedUserIds.length === 0 && (userProfile.followedArtists?.length || 0) === 0 && (
- <div className="py-12 text-center flex flex-col items-center justify-center bg-muted/30 rounded-3xl">
- <p className="text-muted-foreground font-medium text-sm max-w-xs">Your feed is empty. Follow artists to see their latest releases and updates.</p>
- <button onClick={() => navigate('/discover')} className="mt-6 px-8 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-500/20">Find Artists</button>
- </div>
- )}
- </div>
- </section>
- )}
+        {/* Activity Tab (standard posts feed) */}
+        {activeTab === 'feed' && (
+          <div className="animate-in fade-in duration-500">
+            {/* Quick Share (X style) */}
+            <div className="px-5 py-4 border-b border-white/5 bg-background/40 backdrop-blur-md">
+              <form onSubmit={handleSharePost} className="flex gap-4">
+                <Avatar className="w-12 h-12 border border-white/5">
+                  <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} />
+                </Avatar>
+                <div className="flex-1 space-y-3">
+                  <textarea 
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                    placeholder="What is happening?!"
+                    className="w-full bg-transparent text-xl text-white outline-none resize-none pt-2 placeholder:text-muted-foreground/30 min-h-[50px]"
+                  />
+                  <div className="flex justify-between items-center border-t border-white/5 pt-3">
+                    <div className="flex items-center gap-2">
+                       {currentTrack && (
+                         <div className="flex items-center gap-2 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                           <Disc className="h-3 w-3 text-blue-500 animate-spin-slow" />
+                           <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{currentTrack.title}</span>
+                         </div>
+                       )}
+                    </div>
+                    <button 
+                      type="submit"
+                      disabled={!newPostContent.trim() && !currentTrack}
+                      className="px-6 py-2 bg-blue-500 text-white rounded-full font-black text-xs uppercase tracking-widest disabled:opacity-50 hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20"
+                    >
+                      Post
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            
+            <SocialFeed posts={feedPosts} onDeletePost={deletePost} emptyMessage="No activity posts found." />
+          </div>
+        )}
 
- {activeTab === 'inventory' && (
- <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
- <SectionHeader title="Digital Collection"actionLabel="Manage"onAction={() => navigate('/library')} />
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
- {ownedNfts.length > 0 ? (
- ownedNfts.map(nft => (
- <NFTCard key={nft.id} nft={nft} onAction={handleNFTAction} />
- ))
- ) : (
- <div className="col-span-full py-12 flex flex-col items-center justify-center rounded-3xl bg-muted/30">
- <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
- <Box className="h-8 w-8 text-muted-foreground/40"/>
- </div>
- <p className="text-muted-foreground font-medium">No items in your collection yet.</p>
- <button onClick={() => navigate('/marketplace')} className="mt-6 px-8 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-500/20"> Browse Marketplace </button>
- </div>
- )}
- </div>
- </section>
- )}
+        {/* Collection Tab */}
+        {activeTab === 'inventory' && (
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-500">
+            {ownedNfts.length > 0 ? (
+              ownedNfts.map(nft => (
+                <NFTCard key={nft.id} nft={nft} onAction={handleNFTAction} />
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center flex flex-col items-center justify-center bg-white/5 rounded-3xl">
+                <Box className="h-10 w-10 text-muted-foreground/30 mb-4" />
+                <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest">No collectibles found.</p>
+              </div>
+            )}
+          </div>
+        )}
 
- {activeTab === 'releases' && (
- <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
- <section>
- <SectionHeader title="My Releases"/>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
- {allTracks.filter(t => t.artistId === localUser.uid).map(track => (
- <TrackCard key={track.id} track={track} variant="row"/>
- ))}
- </div>
- </section>
- <section className="bg-background p-6 rounded-2xl shadow-sm relative overflow-hidden group">
- <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><BarChart3 className="h-16 w-16 text-blue-500"/></div>
- <SectionHeader title="Earnings Dashboard"/>
- <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 relative z-10">
- <div>
- <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Total Earned</span>
- <span className="text-2xl font-black text-foreground">{royaltyStats.total} <span className="text-xs text-blue-500">TON</span></span>
- </div>
- <div>
- <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">Streaming</span>
- <span className="text-2xl font-black text-foreground">{royaltyStats.streaming} <span className="text-xs text-blue-500">TON</span></span>
- </div>
- <div>
- <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">NFT Royalties</span>
- <span className="text-2xl font-black text-foreground">{royaltyStats.nft} <span className="text-xs text-blue-500">TON</span></span>
- </div>
- <div>
- <span className="text-[10px] font-bold text-blue-500/60 uppercase tracking-widest block mb-2">Pending</span>
- <span className="text-2xl font-black text-blue-500">{royaltyStats.pending} <span className="text-xs">TON</span></span>
- </div>
- </div>
- <div className="relative z-10">
- <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Recent Transactions</h4>
- <div className="space-y-3">
- {[
- { id: 1, type: 'Streaming', amount: '2.4', date: 'Today, 14:30', track: 'Solar Pulse' },
- { id: 2, type: 'NFT Resale', amount: '0.9', date: 'Yesterday', track: 'Deep Horizon #042' },
- { id: 3, type: 'Streaming', amount: '1.1', date: 'Oct 24', track: 'Cyber Drift' }
- ].map(tx => (
- <div key={`tx-${tx.id}`} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors /50">
- <div className="flex items-center gap-4">
- <div className={cn(
-"w-10 h-10 rounded-full flex items-center justify-center",
- tx.type === 'Streaming' ?"bg-blue-500/10 text-blue-500":"bg-purple-500/10 text-purple-500"
- )}>
- {tx.type === 'Streaming' ? <Disc className="h-5 w-5"/> : <Gem className="h-5 w-5"/>}
- </div>
- <div>
- <p className="text-xs font-bold text-foreground">{tx.type} Revenue</p>
- <p className="text-[10px] text-muted-foreground font-medium">{tx.track}</p>
- </div>
- </div>
- <div className="text-right">
- <p className="text-sm font-bold text-emerald-500">+{tx.amount} TON</p>
- <p className="text-[10px] text-muted-foreground font-medium">{tx.date}</p>
- </div>
- </div>
- ))}
- </div>
- <button className="w-full mt-6 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-blue-500/20"> Withdraw to Wallet </button>
- </div>
- </section>
- </div>
- )}
+        {/* Releases Tab */}
+        {activeTab === 'releases' && (
+          <div className="p-4 space-y-4 animate-in fade-in duration-500">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {allTracks.filter(t => t.artistId === localUser.uid).map(track => (
+                <TrackCard key={track.id} track={track} variant="row" />
+              ))}
+            </div>
+          </div>
+        )}
 
- {activeTab === 'sequences' && (
- <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
- <div>
- <SectionHeader title="My Playlists"onAction={() => navigate('/library')} actionLabel="Manage"/>
- <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
- {playlists.map(pl => (
- <PlaylistCard key={pl.id} playlist={pl} onClick={() => navigate(`/playlist/${pl.id}`)} />
- ))}
- <button onClick={() => navigate('/library')} className="aspect-square rounded-2xl flex flex-col items-center justify-center group cursor-pointer transition-all bg-muted/30 hover:">
- <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4 group-hover:bg-blue-500/10 transition-colors">
- <Plus className="text-muted-foreground/40 group-hover:text-blue-500 transition-colors h-6 w-6"/>
- </div>
- <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">New Playlist</span>
- </button>
- </div>
- </div>
+        {/* Playlists Tab */}
+        {activeTab === 'sequences' && (
+          <div className="p-4 grid grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in duration-500">
+            {playlists.map(pl => (
+              <PlaylistCard key={pl.id} playlist={pl} onClick={() => navigate(`/playlist/${pl.id}`)} />
+            ))}
+          </div>
+        )}
 
- {recentlyPlayed.length > 0 && (
- <div>
- <SectionHeader title="Recently Played"actionLabel="Clear"onAction={clearRecentlyPlayed} />
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- {recentlyPlayed.map(track => (
- <TrackCard key={`recent-${track.id}`} track={track} variant="row"/>
- ))}
- </div>
- </div>
- )}
- </section>
- )}
+        {/* Staking/Governance Tab */}
+        {activeTab === 'staking' && (
+          <div className="p-4 animate-in fade-in duration-500">
+            <div className="bg-white/5 border border-white/5 p-8 rounded-3xl mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Staked Capital</p>
+                  <h3 className="text-4xl font-black text-white">{(stakedBalance || 0).toLocaleString()} <span className="text-sm text-blue-500">TJ</span></h3>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Rewards</p>
+                  <h3 className="text-4xl font-black text-emerald-500">{pendingRewards.toFixed(2)} <span className="text-sm">TJ</span></h3>
+                </div>
+                <button onClick={handleClaimRewards} className="bg-blue-500 text-white rounded-full font-black text-xs uppercase tracking-widest px-8 h-12 self-end">Claim</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
- {activeTab === 'activity' && (
- <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
- <SectionHeader title="My Activity"onAction={() => navigate('/jamspace')} />
- 
- {/* Share Track Feature */}
- <div className="bg-background p-6 rounded-2xl shadow-sm mb-6">
- <form onSubmit={handleSharePost}>
- <textarea 
- value={newPostContent}
- onChange={(e) => setNewPostContent(e.target.value)}
- placeholder={currentTrack ? `Share your thoughts on ${currentTrack.title}...` :"What's on your mind?"}
- className="w-full bg-muted/30 rounded-xl p-4 text-sm text-foreground outline-none focus:-blue-500 transition-all resize-none h-32 mb-4"
- />
- <div className="flex justify-between items-center">
- <div className="flex items-center gap-3">
- {currentTrack ? (
- <div className="flex items-center gap-2 bg-blue-500/10 px-4 py-2 rounded-full">
- <Disc className="h-4 w-4 text-blue-500"/>
- <span className="text-xs font-bold text-blue-500 truncate max-w-[200px]">
- {currentTrack.title}
- </span>
- </div>
- ) : (
- <span className="text-xs font-medium text-muted-foreground">
- Play a track to share it
- </span>
- )}
- </div>
- <button 
- type="submit"
- disabled={!newPostContent.trim() && !currentTrack}
- className="px-8 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-500/20"
- >
- Post
- </button>
- </div>
- </form>
- </div>
+      {/* Right Sidebar (X style) */}
+      <div className="lg:col-span-4 space-y-4 px-4 py-4 hidden lg:block sticky top-[var(--header-height,64px)] self-start h-fit">
+        <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
+          <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-6">Asset Registry</h3>
+          
+          <div className="space-y-6">
+            <div className="flex justify-between items-center group cursor-pointer" onClick={() => setActiveTab('staking')}>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Earnings</span>
+              <span className="text-lg font-black text-white group-hover:text-blue-500 transition-colors">
+                {(localUser.earnings || 0).toLocaleString()} <span className="text-[10px] text-blue-500">TON</span>
+              </span>
+            </div>
+            <div className="flex justify-between items-center group cursor-pointer" onClick={() => setActiveTab('staking')}>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">JAM Balance</span>
+              <span className="text-lg font-black text-white group-hover:text-amber-500 transition-colors">
+                {(userProfile?.jamBalance || 0).toLocaleString()} <span className="text-[10px] text-amber-500">JAM</span>
+              </span>
+            </div>
+          </div>
 
- <SocialFeed posts={feedPosts} onDeletePost={deletePost} emptyMessage="No activity signals detected."/>
- </section>
- )}
+          <div className="mt-10 pt-10 border-t border-white/5">
+            <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-6">Identity Protocols</h4>
+            {localUser.isVerifiedArtist ? (
+              <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Verified Architect</span>
+              </div>
+            ) : localUser.verificationStatus && localUser.verificationStatus !== 'unverified' ? (
+              <div className="space-y-4">
+                 <VerificationTracker />
+                 {localUser.verificationStatus === 'rejected' && (
+                    <button 
+                      onClick={() => navigate('/settings')}
+                      className="w-full py-3 bg-white/5 text-white hover:bg-white/10 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border border-white/5"
+                    >
+                      Resubmit in Settings
+                    </button>
+                 )}
+              </div>
+            ) : (
+              <button 
+                onClick={() => navigate('/settings')}
+                className="w-full py-4 bg-blue-500 text-white hover:bg-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
+              >
+                Apply for Verification
+              </button>
+            )}
+          </div>
+        </div>
 
- {activeTab === 'network' && (
- <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
- <div>
- <SectionHeader title="Following"onAction={() => navigate('/explore/artists')} actionLabel="Find More"/>
- <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
- {localUser.followedArtists && localUser.followedArtists.length > 0 ? (
- localUser.followedArtists.map(artistId => {
- const artist = MOCK_ARTISTS.find(a => a.uid === artistId);
- if (!artist) return null;
- return (
- <UserCard key={artist.uid} user={artist} variant="compact"/>
- );
- })
- ) : (
- <div className="col-span-full py-12 text-center bg-muted/30 rounded-3xl">
- <p className="text-muted-foreground font-medium">Not following anyone yet.</p>
- </div>
- )}
- </div>
- </div>
+        <div className="bg-white/5 border border-white/5 rounded-3xl p-6 mt-4">
+          <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-6">Who to Follow</h4>
+          <div className="space-y-6">
+            {MOCK_ARTISTS.slice(0, 3).map(artist => (
+              <div key={artist.uid} className="flex items-center justify-between group cursor-pointer" onClick={() => navigate(`/artist/${artist.uid}`)}>
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-10 h-10 border border-white/5">
+                    <AvatarImage src={artist.avatarUrl} />
+                  </Avatar>
+                  <div>
+                    <p className="text-[11px] font-black text-white uppercase leading-none group-hover:underline">{artist.name}</p>
+                    <p className="text-[9px] font-medium text-muted-foreground mt-1">@architect_id</p>
+                  </div>
+                </div>
+                <button className="px-4 py-1.5 bg-white text-black rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white/90 transition-all">
+                  Follow
+                </button>
+              </div>
+            ))}
+          </div>
+          <button 
+            onClick={() => navigate('/explore')}
+            className="w-full mt-8 text-[10px] font-black text-blue-500 uppercase tracking-widest hover:underline text-left"
+          >
+            Show more
+          </button>
+        </div>
 
- <div>
- <SectionHeader title="Friends"onAction={() => navigate('/explore/artists')} />
- <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
- {localUser.friends && localUser.friends.length > 0 ? (
- localUser.friends.map(friendId => {
- const friend = MOCK_USERS.find(u => u.uid === friendId);
- if (!friend) return null;
- return (
- <UserCard key={friend.uid} user={friend} variant="compact"/>
- );
- })
- ) : (
- <div className="col-span-full py-12 text-center bg-muted/30 rounded-3xl">
- <p className="text-muted-foreground font-medium">No friends added yet.</p>
- </div>
- )}
- </div>
- </div>
- </section>
- )}
-
- {activeTab === 'staking' && (
- <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
- <div className="bg-background p-8 rounded-3xl shadow-sm relative overflow-hidden">
- <div className="absolute top-0 right-0 p-8 opacity-5"><Coins className="h-40 w-40 text-blue-500"/></div>
- 
- <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
- <div className="space-y-2">
- <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Staked</p>
- <div className="flex items-baseline gap-2">
- <h3 className="text-4xl font-black text-foreground">
- {(stakedBalance || 0).toLocaleString()}
- </h3>
- <span className="text-sm font-bold text-blue-500">TJ</span>
- </div>
- <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
- <TrendingUp className="h-3 w-3"/> +2.4%
- </div>
- </div>
- 
- <div className="space-y-2">
- <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Current APY</p>
- <div className="flex items-baseline gap-2">
- <h3 className="text-4xl font-black text-emerald-500">
- 12.5
- </h3>
- <span className="text-sm font-bold text-emerald-500">%</span>
- </div>
- <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground/60">
- <Zap className="h-3 w-3"/> Boosted
- </div>
- </div>
- 
- <div className="space-y-2">
- <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rewards</p>
- <div className="flex items-baseline gap-2">
- <h3 className="text-4xl font-black text-blue-500">
- {pendingRewards.toFixed(2)}
- </h3>
- <span className="text-sm font-bold text-blue-500">TJ</span>
- </div>
- <button onClick={handleClaimRewards} disabled={pendingRewards <= 0} className={cn(
-"mt-4 px-6 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2",
- pendingRewards > 0 ?"bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 shadow-lg shadow-blue-500/20":"bg-muted text-muted-foreground cursor-not-allowed"
- )} >
- <Gift className="h-4 w-4"/> Claim
- </button>
- </div>
- </div>
-
- <div className="relative z-10 p-4 bg-muted/30 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 /50">
- <div className="flex items-center gap-4">
- <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
- <BarChart3 className="h-6 w-6 text-blue-500"/>
- </div>
- <div>
- <p className="text-sm font-bold text-foreground">Governance Active</p>
- <p className="text-xs text-muted-foreground">Your stake grants voting power in protocol upgrades</p>
- </div>
- </div>
- <button className="px-6 py-2 bg-background rounded-full text-xs font-bold text-foreground hover:bg-muted transition-all">
- Governance Portal
- </button>
- </div>
- </div>
-
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
- <div className="bg-background p-6 rounded-3xl shadow-sm">
- <div className="flex items-center gap-3 mb-6">
- <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
- <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Stake TJ</h4>
- </div>
- 
- <div className="space-y-6">
- <div className="space-y-2">
- <div className="flex justify-between items-center px-1">
- <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Amount</span>
- <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Balance: {(walletBalance || 0).toLocaleString()} TJ</span>
- </div>
- <div className="relative">
- <input type="number"value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="0.00"className="w-full bg-muted/30 rounded-2xl p-4 text-2xl font-black text-foreground outline-none focus:-blue-500 transition-all"/>
- <button onClick={() => setStakeAmount(walletBalance.toString())} className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 rounded-full text-[10px] font-bold text-blue-500 uppercase tracking-widest transition-all"> MAX </button>
- </div>
- </div>
- 
- <button onClick={handleStake} className="w-full py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-2xl text-sm font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all active:scale-95"> 
- Stake Now 
- </button>
- </div>
- </div>
-
- <div className="bg-background p-6 rounded-3xl shadow-sm">
- <div className="flex items-center gap-3 mb-6">
- <div className="w-1 h-4 bg-red-500 rounded-full"></div>
- <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Unstake TJ</h4>
- </div>
- 
- <div className="space-y-6">
- <div className="space-y-2">
- <div className="flex justify-between items-center px-1">
- <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Amount</span>
- <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Staked: {(stakedBalance || 0).toLocaleString()} TJ</span>
- </div>
- <div className="relative">
- <input type="number"value={unstakeAmount} onChange={(e) => setUnstakeAmount(e.target.value)} placeholder="0.00"className="w-full bg-muted/30 rounded-2xl p-4 text-2xl font-black text-foreground outline-none focus:-red-500 transition-all"/>
- <button onClick={() => setUnstakeAmount(stakedBalance.toString())} className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-full text-[10px] font-bold text-red-500 uppercase tracking-widest transition-all"> MAX </button>
- </div>
- </div>
- 
- <button onClick={handleUnstake} className="w-full py-4 bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-2xl text-sm font-bold uppercase tracking-widest transition-all active:scale-95"> 
- Unstake 
- </button>
- </div>
- </div>
- </div>
- </section>
- )}
-
- {/* RECOMMENDATIONS SECTION */}
- <section className="bg-background p-8 rounded-3xl shadow-sm relative overflow-hidden mt-8">
- <div className="absolute top-0 right-0 p-8 opacity-5"><Satellite className="h-32 w-32 text-blue-500"/></div>
- 
- <SectionHeader title="Suggestions"/>
- 
- <div className="space-y-8 relative z-10">
- <div>
- <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">Artists to Follow</h4>
- <div className="flex overflow-x-auto no-scrollbar gap-6 pb-4">
- {MOCK_ARTISTS.slice(0, 4).map(artist => (
- <div key={artist.uid} className="flex-shrink-0 w-56">
- <UserCard user={artist} variant="compact"/>
- </div>
- ))}
- </div>
- </div>
- 
- <div>
- <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">Recommended Tracks</h4>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- {MOCK_TRACKS.slice(0, 4).map(track => (
- <TrackCard key={track.id} track={track} variant="row"/>
- ))}
- </div>
- </div>
- </div>
- </section>
- </div>
- </div>
- </div>
+        <p className="px-4 text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest leading-relaxed">
+          Terms of Service Privacy Policy Cookie Policy Accessibility Ads info © 2026 TonJam.
+        </p>
+      </div>
+    </div>
+  </div>
 
  {/* Modals */}
  {selectedNftForListing && (

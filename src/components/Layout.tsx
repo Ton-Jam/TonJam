@@ -31,7 +31,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Sparkles as SparklesLucide } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
+import { useAudio, useUserRole } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
@@ -47,8 +47,6 @@ import { NotificationBell } from './NotificationBell';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import CreatePlaylistModal from './CreatePlaylistModal';
 import AuthModal from './AuthModal';
-import ScrollToTopButton from './ScrollToTopButton';
-import AIAssistant from './AIAssistant';
 import { Button } from "@/components/ui/button"
 import { ButtonGroupInput } from './ButtonGroupInput';
 import {
@@ -105,6 +103,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isGovernance = location.pathname.startsWith('/governance');
   const isAdmin = location.pathname.startsWith('/admin');
   const isLoginPage = location.pathname === '/login';
+  const isDJKrupy = location.pathname === '/dj-krupy';
 
     const { 
     currentTrack, 
@@ -350,7 +349,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && (
+      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
         <motion.header 
           className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md border-b border-border/40' : 'bg-transparent'}`}
         >
@@ -714,14 +713,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden pb-40 min-h-screen`}>
+      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
         <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>
       </main>
 
       {/* Audio Player */}
-      {currentTrack && !isFullPlayerOpen && <MiniAudioPlayer isMobileNavHidden={isMobileNavHidden} />}
+      {currentTrack && !isFullPlayerOpen && !isDJKrupy && <MiniAudioPlayer isMobileNavHidden={isMobileNavHidden} />}
       <AnimatePresence>
         {isFullPlayerOpen && <FullPlayer />}
       </AnimatePresence>
@@ -738,8 +737,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           track={optionsTrack} 
           onClose={() => setOptionsTrack(null)} 
           onRemove={optionsCallbacks?.onRemove}
-          onMoveUp={optionsCallbacks?.onMoveUp}
-          onMoveDown={optionsCallbacks?.onMoveDown}
         />
       )}
 
@@ -763,11 +760,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
       </AnimatePresence>
-      <ScrollToTopButton isMobileNavHidden={isMobileNavHidden} hasMiniPlayer={!!currentTrack && !isFullPlayerOpen} />
-      {!isJamspace && <AIAssistant />}
-
+      <div className="lg:hidden">
         {/* Mobile Navigation */}
-      {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && (
+      {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
         <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-600/20 via-blue-500/50 to-blue-600/20 z-10" />
           <nav className="h-full w-full bg-background/95 backdrop-blur-xl border-t border-white/5 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.4)]" aria-label="Mobile Navigation">
@@ -793,12 +788,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </button>
       )}
     </div>
-      )}
+    </div>
+    )}
     </TooltipProvider>
   );
 };
 
-const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void }) => (
+const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any; userProfile: any; signOut: () => void; onNavigate?: () => void }) => {
+  const { isArtist, isAdmin } = useUserRole();
+  return (
   <>
     <div className="flex items-center justify-between mb-2">
       <Link to="/" onClick={onNavigate} className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm" aria-label="TonJam Home">
@@ -817,7 +815,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
     <nav className="flex-1 space-y-3" aria-label="Main Navigation">
       <NavItem to="/" icon={HomeIcon} label="Home" onClick={onNavigate} />
       <NavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" onClick={onNavigate} />
-      <NavItem to="/discover#sonic" icon={SparklesLucide} label="Sonic AI" onClick={onNavigate} className="text-blue-500 bg-blue-500/5 border border-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.1)]" />
+      <NavItem to="/dj-krupy" icon={SparklesLucide} label="DJ Krupy AI" onClick={onNavigate} className="text-blue-500 bg-blue-500/5 border border-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.1)]" />
       <NavItem to="/jamspace" icon={PaperAirplaneIcon} label="JamSpace" onClick={onNavigate} />
       <NavItem to="/auctions" icon={StarIcon} label="Auctions" onClick={onNavigate} />
       <NavItem to="/genesis-forge" icon={TicketIcon} label="Genesis" onClick={onNavigate} />
@@ -857,7 +855,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
         )}
       </div>
 
-      {userProfile.isVerifiedArtist ? (
+      {(isArtist || isAdmin || userProfile.isVerifiedArtist) ? (
         <div className="pt-2 space-y-2">
           <Link 
             to="/upload"
@@ -921,6 +919,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
     </nav>
   </>
 );
+};
 
 const NavItem = ({ to, icon: Icon, label, onClick, className = "" }: { to: string; icon: any; label: string; onClick?: () => void; className?: string }) => (
   <NavLink 

@@ -9,13 +9,15 @@ export interface GenerateAIPlaylistResult {
   explanation: string;
 }
 
-export async function generateAIPlaylist(userDescription?: string): Promise<GenerateAIPlaylistResult> {
-  const userContext = {
-    name: MOCK_USER.name,
-    bio: MOCK_USER.bio,
-    followedArtists: MOCK_USER.followedArtists,
-    customRequest: userDescription
-  };
+export interface UserContext {
+  likedTracks: string[];
+  recentlyPlayed: Track[];
+  followedArtistIds: string[];
+  userDescription?: string;
+}
+
+export async function generateAIPlaylist(userContext: UserContext): Promise<GenerateAIPlaylistResult> {
+  const { likedTracks, recentlyPlayed, followedArtistIds, userDescription } = userContext;
 
   const availableTracks = MOCK_TRACKS.map(t => ({
     id: t.id,
@@ -27,13 +29,13 @@ export async function generateAIPlaylist(userDescription?: string): Promise<Gene
 
   const prompt = `
     You are TonJam's "Dj Krupy" AI curator. 
-    Your goal is to create a highly personalized 5-track playlist for a user based on their profile and available tracks in our library.
+    Your goal is to create a highly personalized 5-track playlist for a user based on their profile, listening history, and available tracks in our library.
 
-    USER PROFILE:
-    - Name: ${userContext.name}
-    - Bio: ${userContext.bio}
-    - Followed Artists: ${userContext.followedArtists.join(', ')}
-    ${userContext.customRequest ? `- User's custom vibe request: "${userContext.customRequest}"` : ''}
+    USER CONTEXT:
+    - Liked Tracks (IDs): ${likedTracks.join(', ')}
+    - Recently Played Tracks (Titles): ${recentlyPlayed.slice(0, 5).map(t => t.title).join(', ')}
+    - Followed Artists (IDs): ${followedArtistIds.join(', ')}
+    ${userDescription ? `- User's custom vibe request: "${userDescription}"` : ''}
 
     AVAILABLE TRACKS LIBRARY:
     ${JSON.stringify(availableTracks, null, 2)}

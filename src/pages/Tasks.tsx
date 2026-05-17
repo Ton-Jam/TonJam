@@ -34,7 +34,7 @@ import ReferralPanel from '@/components/ReferralPanel';
 import BuyTJModal from '@/components/BuyTJModal';
 
 import { useTaskStore } from '@/store/taskStore';
-import { claimTaskReward, getTasks } from '@/services/taskService';
+import { claimTaskReward, getTasks, completeTask } from '@/services/taskService';
 import { useUserStore } from '@/store/userStore';
 
 import { 
@@ -44,12 +44,14 @@ import {
   CardTitle, 
   CardDescription 
 } from '@/components/ui/card';
+import TaskDetailModal from '@/components/TaskDetailModal';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { Task } from '@/types';
 
 const ICONS: Record<string, React.FC<any>> = {
   'ShieldCheck': ShieldCheck,
@@ -64,13 +66,23 @@ const Tasks: React.FC = () => {
   const { user } = useAuth();
   const tasks = useTaskStore(state => state.tasks);
   const setTasks = useTaskStore(state => state.setTasks);
+  const updateTaskProgress = useTaskStore(state => state.updateTaskProgress);
   const claimTaskLocal = useTaskStore(state => state.claimTaskLocal);
   const completeTaskLocal = useTaskStore(state => state.completeTaskLocal);
   
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'quest' | 'staking' | 'referral' | 'leaderboard'>('quest');
   const [isClaiming, setIsClaiming] = useState<string | null>(null);
+  
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+  };
+
+  const handleTaskProgressUpdate = (id: string, progress: number) => {
+    updateTaskProgress(id, progress);
+  };
 
   useEffect(() => {
     // Fetch live tasks if authenticated
@@ -144,14 +156,18 @@ const Tasks: React.FC = () => {
     }
   };
 
-  const handleStart = (id: string) => {
+  const handleStart = async (id: string) => {
     toast.info("Task Sequence Initialized", {
       description: "Return after completing the neural protocol."
     });
-    // Mock local completion for demo purposes
-    setTimeout(() => {
+    // For now simulate completion
+    try {
+      await completeTask(id);
       completeTaskLocal(id);
-    }, 2000);
+      toast.success("Task Completed!");
+    } catch (e) {
+      toast.error("Failed to update task status");
+    }
   };
 
 
@@ -202,7 +218,7 @@ const Tasks: React.FC = () => {
             {/* BALANCE BLOCK */}
             <button onClick={() => setShowBuyModal(true)} className="relative group text-left w-full transition-transform active:scale-95">
               <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
-              <div className="relative flex items-center gap-5 bg-white dark:bg-[#0A0A0C]/80 backdrop-blur-3xl border border-blue-100 dark:border-white/10 px-6 py-6 rounded-3xl shadow-xl overflow-hidden min-h-[110px]">
+              <div className="relative flex items-center gap-5 bg-white dark:bg-[#0A0A0C]/80 border border-blue-100 dark:border-white/10 px-6 py-6 rounded-3xl shadow-xl overflow-hidden min-h-[110px]">
                 <div className="absolute inset-0 opacity-[0.03] dark:opacity-5 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
                 
                 {isVIP && (
@@ -284,7 +300,7 @@ const Tasks: React.FC = () => {
 
         {/* NAVIGATION RAIL AND CONTENT */}
         <Tabs defaultValue="quest" value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full space-y-6">
-          <TabsList className="bg-blue-50/50 dark:bg-white/5 p-1 rounded-2xl border border-blue-100 dark:border-white/5 h-14 w-full grid grid-cols-4">
+          <TabsList className="bg-zinc-100 p-1.5 rounded-2xl h-14 w-full grid grid-cols-4">
             {[
               { id: 'quest', label: 'Quests', icon: Target },
               { id: 'staking', label: 'Vault', icon: Layers },
@@ -294,7 +310,7 @@ const Tasks: React.FC = () => {
               <TabsTrigger 
                 key={tab.id}
                 value={tab.id}
-                className="flex items-center justify-center gap-2 py-2 rounded-full transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white shadow-none data-[state=active]:shadow-lg data-[state=active]:shadow-blue-600/30 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5"
+                className="flex items-center justify-center gap-2 py-2 rounded-xl transition-all data-[state=active]:bg-white data-[state=active]:text-blue-600 shadow-sm data-[state=inactive]:text-zinc-500"
               >
                 <tab.icon className="w-3.5 h-3.5" />
                 <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{tab.label}</span>
@@ -320,8 +336,10 @@ const Tasks: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
                     >
-                      <Card className={cn(
-                        "group hover:bg-white/[0.05] hover:border-blue-500/30 transition-all border-white/5 shadow-none bg-white/5 overflow-hidden",
+                      <Card
+                        onClick={() => handleTaskClick(task)}
+                        className={cn(
+                        "group hover:bg-white/[0.05] hover:border-blue-500/30 transition-all border-white/5 shadow-none bg-white/5 overflow-hidden cursor-pointer",
                         task.claimed && 'opacity-50 grayscale pointer-events-none'
                       )}>
                         <CardContent className="p-4 flex justify-between items-center bg-transparent">
@@ -358,22 +376,20 @@ const Tasks: React.FC = () => {
                               </Button>
                             )}
 
-                            {task.completed && !task.claimed && (
+                            {task.completed && (
                               <Button
                                 size="sm"
                                 onClick={() => handleClaim(task.id)}
-                                disabled={isClaiming === task.id}
-                                className="h-10 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-blue-600/30 disabled:opacity-50 disabled:scale-100 border-none"
+                                disabled={isClaiming === task.id || task.claimed}
+                                className={cn(
+                                  "h-10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg border-none",
+                                  task.claimed 
+                                    ? "bg-emerald-600/20 text-emerald-500" 
+                                    : "bg-blue-600 text-white hover:scale-105 shadow-blue-600/30"
+                                )}
                               >
-                                {isClaiming === task.id ? 'Syncing...' : 'Claim'}
+                                {isClaiming === task.id ? 'Syncing...' : task.claimed ? 'Claimed' : 'Claim'}
                               </Button>
-                            )}
-
-                            {task.claimed && (
-                              <div className="flex items-center gap-2 pr-2">
-                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Protocol Sync</span>
-                              </div>
                             )}
                           </div>
                         </CardContent>
@@ -402,6 +418,13 @@ const Tasks: React.FC = () => {
       
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       {showBuyModal && <BuyTJModal onClose={() => setShowBuyModal(false)} onSuccess={() => {}} />}
+      {selectedTask && (
+        <TaskDetailModal 
+          task={selectedTask} 
+          onClose={() => setSelectedTask(null)}
+          onUpdate={handleTaskProgressUpdate}
+        />
+      )}
     </div>
   );
 };

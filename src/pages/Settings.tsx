@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Bell, 
   Shield, 
@@ -13,7 +13,9 @@ import {
   ShieldCheck,
   UserCircle,
   Eye,
-  Key
+  Key,
+  ShieldAlert,
+  Plus
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
@@ -21,6 +23,8 @@ import { useNotification } from '@/context/NotificationContext';
 import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 import { NotificationPreferences } from '@/types';
+import VerificationTracker from '@/components/VerificationTracker';
+import VerifyArtistModal from '@/components/VerifyArtistModal';
 
 // shadcn/ui components
 import { Switch } from '@/components/ui/switch';
@@ -39,10 +43,25 @@ import { motion } from 'motion/react';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, userProfile, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   
   const { preferences, updatePreferences } = useNotification();
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'general');
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const modal = searchParams.get('modal');
+    if (tab) {
+      setActiveTab(tab);
+    }
+    if (modal === 'verify') {
+      setIsVerifyModalOpen(true);
+    }
+  }, [searchParams]);
 
   const handlePreferenceToggle = (key: keyof NotificationPreferences, value: boolean) => {
     updatePreferences({ ...preferences, [key]: value });
@@ -81,10 +100,13 @@ const Settings: React.FC = () => {
         <span className="text-[8px] font-mono">v2.4.0-STABLE</span>
       </div>
 
-      <Tabs defaultValue="general" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="bg-transparent p-0 mb-8 flex border-none h-auto gap-3">
           <TabsTrigger value="general" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
             Identity
+          </TabsTrigger>
+          <TabsTrigger value="verification" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
+            Verification
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
             Signals
@@ -146,6 +168,37 @@ const Settings: React.FC = () => {
               >
                 <Switch defaultChecked className="scale-75 data-[state=checked]:bg-blue-600" />
               </SettingRow>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="verification" className="space-y-6">
+          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Artist verification</CardTitle>
+              <CardDescription className="text-[9px] font-bold uppercase tracking-widest opacity-40">Establish your sonic identity on-chain</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-blue-600/5 border border-blue-500/10 rounded-[24px]">
+                <div className="flex items-center gap-4 text-center sm:text-left">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-white uppercase tracking-tight">Become Verified Artist</h4>
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-1 opacity-50">Identity protocols and blue badge</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => setIsVerifyModalOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-[9px] uppercase tracking-widest px-6 h-10 group"
+                >
+                  <Plus className="w-3 h-3 mr-2 group-hover:rotate-90 transition-transform" />
+                  New Request
+                </Button>
+              </div>
+
+              <VerificationTracker />
             </CardContent>
           </Card>
         </TabsContent>
@@ -238,6 +291,13 @@ const Settings: React.FC = () => {
         </Button>
         <p className="mt-6 text-[8px] font-black text-muted-foreground/20 uppercase tracking-[0.5em]">System Build v2.4.0-Stable</p>
       </div>
+
+      {isVerifyModalOpen && (
+        <VerifyArtistModal 
+            onClose={() => setIsVerifyModalOpen(false)} 
+            artistName={userProfile?.name || 'New Artist'} 
+        />
+      )}
     </div>
   );
 };

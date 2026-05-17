@@ -15,7 +15,13 @@ import {
   CheckCircle2,
   AlertCircle,
   XCircle,
-  Clock
+  Clock,
+  Mail,
+  UserCheck,
+  Database, 
+  RefreshCw, 
+  Trash2, 
+  CheckCircle
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { TON_LOGO } from '@/constants';
@@ -26,11 +32,10 @@ import { deployTonJamCollection, deployTonJamMarketplace, TONJAM_COLLECTION_ADDR
 import { toast } from 'sonner';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { SponsoredContent, UserProfile, TreasuryStats, GrantAllocation } from '@/types';
-import { doc, updateDoc, setDoc, deleteDoc, getDocs, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, deleteDoc, getDocs, collection, onSnapshot, query, orderBy, writeBatch } from 'firebase/firestore';
 import { governanceService } from '@/services/governanceService';
 import { treasuryService } from '@/services/treasuryService';
 import { seedDatabase } from '@/services/seedService';
-import { Database, RefreshCw, Trash2, CheckCircle } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -44,6 +49,9 @@ const AdminDashboard: React.FC = () => {
   const [isDeployingMarketplace, setIsDeployingMarketplace] = useState(false);
   const [deployedCollection, setDeployedCollection] = useState(localStorage.getItem('tonjam_collection_address') || TONJAM_COLLECTION_ADDRESS);
   const [deployedMarketplace, setDeployedMarketplace] = useState(localStorage.getItem('tonjam_marketplace_address') || TONJAM_MARKETPLACE_ADDRESS);
+
+  const [verificationRequests, setVerificationRequests] = useState<any[]>([]);
+  const [isVerifying, setIsVerifying] = useState<string | null>(null);
 
   const [allSponsorships, setAllSponsorships] = useState<SponsoredContent[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
@@ -132,8 +140,84 @@ const AdminDashboard: React.FC = () => {
       },
       (error) => handleFirestoreError(error, OperationType.LIST, 'users')
     );
-    return () => unsub();
+
+    const unsubVerifications = onSnapshot(
+      query(collection(db, 'verificationRequests'), orderBy('submittedAt', 'desc')),
+      (snap) => {
+        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setVerificationRequests(data);
+      },
+      (error) => handleFirestoreError(error, OperationType.LIST, 'verificationRequests')
+    );
+
+    return () => {
+      unsub();
+      unsubVerifications();
+    };
   }, []);
+
+  const handleApproveVerification = async (request: any) => {
+    setIsVerifying(request.id);
+    try {
+      const batch = writeBatch(db);
+      
+      // 1. Update user profile to verified artist
+      const userRef = doc(db, 'users', request.userId);
+      batch.update(userRef, {
+        isVerified: true,
+        isVerifiedArtist: true,
+        role: 'artist',
+        verificationStatus: 'verified',
+        bio: request.metadata?.bio || '',
+        genre: request.metadata?.genre || '',
+        socials: {
+          x: request.socialLinks?.find((s: any) => s.platform === 'twitter')?.url || '',
+          instagram: request.socialLinks?.find((s: any) => s.platform === 'instagram')?.url || '',
+          website: request.portfolioUrl || '',
+          spotify: request.socialLinks?.find((s: any) => s.platform === 'spotify')?.url || ''
+        }
+      });
+
+      // 2. Update the verification request status
+      const requestRef = doc(db, 'verificationRequests', request.id);
+      batch.update(requestRef, { 
+        status: 'approved',
+        resolvedAt: new Date().toISOString()
+      });
+
+      await batch.commit();
+      toast.success(`Artist ${request.artistName} verified!`);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to approve verification');
+    } finally {
+      setIsVerifying(null);
+    }
+  };
+
+  const handleRejectVerification = async (request: any) => {
+    setIsVerifying(request.id);
+    try {
+      const batch = writeBatch(db);
+      
+      const userRef = doc(db, 'users', request.userId);
+      batch.update(userRef, { verificationStatus: 'rejected' });
+
+      const requestRef = doc(db, 'verificationRequests', request.id);
+      batch.update(requestRef, { 
+        status: 'rejected',
+        resolvedAt: new Date().toISOString()
+      });
+
+      await batch.commit();
+      toast.success('Verification rejected');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to reject verification');
+    } finally {
+      setIsVerifying(null);
+    }
+  };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     setUpdatingUserUid(userId);
@@ -243,6 +327,12 @@ const AdminDashboard: React.FC = () => {
                 className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Users
+              </button>
+              <button 
+                onClick={() => setActiveTab('verifications')}
+                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'verifications' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Verifications
               </button>
               <button 
                 onClick={() => setActiveTab('treasury')}
@@ -627,6 +717,73 @@ const AdminDashboard: React.FC = () => {
               ) : (
                 <div className="py-12 text-center">
                   <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">No users found</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'verifications' && (
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6 mb-4">
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">Artist Verification Requests</h2>
+            <div className="space-y-4">
+              {verificationRequests.length > 0 ? (
+                verificationRequests.map((req) => (
+                  <div key={req.id} className="p-4 bg-muted/30 rounded-xl border border-border/30 flex flex-col md:flex-row gap-4 justify-between">
+                    <div className="space-y-2">
+                       <div className="flex items-center gap-2">
+                         <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
+                           req.status === 'approved' ? 'bg-green-500/10 text-green-500' : 
+                           req.status === 'pending' ? 'bg-amber-500/10 text-amber-500' : 
+                           'bg-red-500/10 text-red-500'
+                         }`}>
+                           {req.status}
+                         </span>
+                         <span className="text-sm font-bold text-foreground">{req.artistName}</span>
+                       </div>
+                       <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                         {req.metadata?.genre} • {req.metadata?.bio?.substring(0, 100)}...
+                       </p>
+                       <div className="flex gap-4">
+                         {req.socialLinks?.map((s: any) => s.url && (
+                           <a key={s.platform} href={s.url} target="_blank" rel="noreferrer" className="text-[9px] text-blue-400 hover:underline flex items-center gap-1 uppercase font-bold">
+                             {s.platform} <ExternalLink className="w-2 h-2" />
+                           </a>
+                         ))}
+                         {req.portfolioUrl && (
+                           <a href={req.portfolioUrl} target="_blank" rel="noreferrer" className="text-[9px] text-purple-400 hover:underline flex items-center gap-1 uppercase font-bold">
+                             Portfolio <ExternalLink className="w-2 h-2" />
+                           </a>
+                         )}
+                       </div>
+                    </div>
+                    
+                    {req.status === 'pending' && (
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleRejectVerification(req)}
+                          disabled={isVerifying === req.id}
+                          className="border-red-500/20 text-red-500 hover:bg-red-500/10 text-[10px] uppercase font-bold h-10 px-4"
+                        >
+                          Reject
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleApproveVerification(req)}
+                          disabled={isVerifying === req.id}
+                          className="bg-green-600 hover:bg-green-500 text-white text-[10px] uppercase font-bold h-10 px-4"
+                        >
+                          {isVerifying === req.id ? 'Approving...' : 'Approve & Verify'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="py-12 text-center text-muted-foreground/50 uppercase font-bold text-[10px] tracking-widest">
+                  No verification requests in queue
                 </div>
               )}
             </div>

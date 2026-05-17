@@ -164,8 +164,28 @@ export default function ArtistDashboard() {
           <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Manage your sonic artifacts and protocol earnings</p>
         </div>
 
+        {/* Easy Start Guide */}
+        <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-white/10 p-6 rounded-3xl">
+          <h3 className="text-sm font-black uppercase tracking-widest mb-4">Easy Steps to Monetize</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-black/20 p-4 rounded-xl">
+              <span className="text-2xl font-black text-blue-500 mb-2 block">1</span>
+              <p className="text-xs font-bold uppercase tracking-widest">Upload your best track</p>
+            </div>
+            <div className="bg-black/20 p-4 rounded-xl">
+              <span className="text-2xl font-black text-purple-500 mb-2 block">2</span>
+              <p className="text-xs font-bold uppercase tracking-widest">Add art & description</p>
+            </div>
+            <div className="bg-black/20 p-4 rounded-xl">
+              <span className="text-2xl font-black text-cyan-500 mb-2 block">3</span>
+              <p className="text-xs font-bold uppercase tracking-widest">Mint as NFT</p>
+            </div>
+          </div>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+[diff_block_end]
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

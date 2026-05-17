@@ -175,10 +175,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </motion.div>
             <div className="space-y-1">
               <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase leading-none">
-                {isLogin ? 'Welcome Back' : 'Join TonJam'}
+                {isLogin ? 'Welcome Back' : 'Sign Up'}
               </h1>
               <p className="text-xs font-medium text-muted-foreground tracking-normal uppercase">
-                {isLogin ? 'Sign in to access your jamspace' : 'Create an account to start your journey'}
+                {isLogin ? 'Sign in to access your music' : 'Create an account to start listening'}
               </p>
             </div>
           </div>
@@ -296,7 +296,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 className="text-xs font-bold text-muted-foreground tracking-tight hover:text-foreground transition-colors"
               >
                 {isLogin ? (
-                  <>Don't have an account? <span className="text-blue-500 font-black uppercase tracking-tighter">Register</span></>
+                  <>Don't have an account? <span className="text-blue-500 font-black uppercase tracking-tighter">Sign Up</span></>
                 ) : (
                   <>Already have an account? <span className="text-blue-500 font-black uppercase tracking-tighter">Sign In</span></>
                 )}

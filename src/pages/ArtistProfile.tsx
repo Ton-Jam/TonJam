@@ -288,11 +288,11 @@ const ArtistProfile: React.FC = () => {
   return (
     <div className="w-full bg-background min-h-screen">
       {/* Cover Image Area */}
-      <div className="relative h-[250px] sm:h-[350px] md:h-[550px] w-full overflow-hidden">
+      <div className="relative h-[200px] sm:h-[280px] md:h-[400px] w-full">
         {/* Dynamic Background Elements */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 blur-[120px] rounded-full animate-pulse delay-700" />
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-600/20 blur-[100px] rounded-full animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-600/20 blur-[100px] rounded-full animate-pulse delay-700" />
         </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent z-10"></div>
@@ -306,86 +306,32 @@ const ArtistProfile: React.FC = () => {
         {isOwnProfile && (
           <button 
             onClick={() => setShowEditModal(true)}
-            className="absolute top-4 right-4 z-30 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/70 hover:text-white transition-all border border-white/10 group active:scale-95"
+            className="absolute top-4 right-4 z-30 p-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/70 hover:text-white transition-all border border-white/10 group active:scale-95"
             title="Edit Banner"
           >
-            <Edit2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+            <Edit2 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
           </button>
         )}
         
-        {/* Header Overlay */}
-        <div className="absolute bottom-0 left-0 w-full z-20 px-4 pb-8 sm:px-6 sm:pb-12 md:px-12 md:pb-16">
-          <div className="max-w-7xl mx-auto flex flex-col gap-8">
+        {/* Header Overlay - Positioned to center profile pic on bottom edge */}
+        <div className="absolute bottom-0 left-0 w-full z-20 px-4 translate-y-1/2 sm:px-6 md:px-12">
+          <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:gap-6">
             <ArtistProfileHeader 
               artist={artist} 
               onTip={() => setShowTipModal(true)}
               onEditProfile={() => setShowEditModal(true)}
               isOwnProfile={isOwnProfile}
             />
-            
-            {/* Action Bar / Command Center */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4">
-              {!isOwnProfile ? (
-                 <>
-                  <button 
-                    onClick={handleFollow}
-                    className={cn(
-                      "group relative px-6 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center gap-2 overflow-hidden",
-                      isFollowing 
-                        ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 hover:bg-blue-600/20" 
-                        : "bg-blue-600 text-white hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(37,99,235,0.3)]"
-                    )}
-                  >
-                    {!isFollowing && (
-                      <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    )}
-                    {isFollowing ? (
-                      <>
-                        <UserCheck className="h-3.5 w-3.5" />
-                        Following
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="h-3.5 w-3.5" />
-                        Follow
-                      </>
-                    )}
-                  </button>
-                  
-                  <button 
-                    onClick={() => setShowTipModal(true)}
-                    className="px-6 py-2.5 bg-background text-foreground hover:bg-muted border border-border rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 active:scale-95"
-                  >
-                    <Zap className="h-3.5 w-3.5 text-blue-500 fill-blue-500" />
-                    Tip
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button 
-                    onClick={() => setShowEditModal(true)}
-                    className="px-5 py-2.5 bg-blue-600 text-white hover:bg-blue-500 rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 active:scale-95"
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                    Edit Profile
-                  </button>
-                </>
-              )}
-              
-              <button className="p-3 text-foreground hover:text-blue-500 transition-all active:scale-90">
-                <Share2 className="h-4 w-4" />
-              </button>
-            </div>
           </div>
         </div>
       </div>
       
-      {/* Biometric Identity / About Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 -mt-8 relative z-30">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Biometric Identity / About Section - Adjusted margin for better overlap */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mt-16 sm:mt-24 relative z-30">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
-            <Card className="bg-muted/30 rounded-[20px] p-4 sm:p-6 border-none">
-               <div className="flex items-center gap-2 mb-4">
+            <Card className="bg-muted/30 rounded-[20px] p-4 sm:p-5 border-none">
+               <div className="flex items-center gap-2 mb-3">
                  <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
                  <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">About</h3>
                </div>
@@ -434,12 +380,12 @@ const ArtistProfile: React.FC = () => {
       </div>
 
       {/* Dedicated Sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mt-12 space-y-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mt-8 space-y-16 sm:space-y-20">
             {artist.events && artist.events.length > 0 && (
               <section>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-                  <h3 className="text-xl font-black text-foreground uppercase tracking-tighter">Upcoming Sequences</h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                  <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">Upcoming Sequences</h3>
                 </div>
                 <div className="flex flex-col gap-2">
                   {artist.events.slice(0, 3).map((event) => (
@@ -450,9 +396,9 @@ const ArtistProfile: React.FC = () => {
             )}
 
             <section>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
-                <h3 className="text-xl font-black text-foreground uppercase tracking-tighter">Minted Artifacts</h3>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-1 h-5 bg-amber-500 rounded-full"></div>
+                <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">Minted Artifacts</h3>
               </div>
               <div className="flex flex-col gap-2">
                 {artistNFTs.slice(0, 3).map((nft) => (
@@ -462,9 +408,9 @@ const ArtistProfile: React.FC = () => {
             </section>
 
             <section>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-                  <h3 className="text-xl font-black text-foreground uppercase tracking-tighter">Discography</h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                  <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">Discography</h3>
                 </div>
                 <ArtistTracksSection 
                   artist={artist}
@@ -477,23 +423,23 @@ const ArtistProfile: React.FC = () => {
                 />
             </section>
             <section>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-                  <h3 className="text-xl font-black text-foreground uppercase tracking-tighter">Activity</h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                  <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">Activity</h3>
                 </div>
                 <ArtistActivitySection artistPosts={artistSignals} />
             </section>
       </div>
 
       {/* Profile Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12 md:px-12 space-y-12 sm:space-y-20 relative">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 md:px-12 space-y-12 sm:space-y-16 relative">
         
         {/* Profile Refinement Suggestion (Only for own profile) */}
         {isOwnProfile && (!artist.bio || !artist.socials?.x || !artist.username || (!artist.bannerUrl && !artist.bannerImageUrl) || artist.verificationStatus === 'unverified' || !artist.verified) && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full bg-blue-500/10 rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden"
+            className="w-full bg-blue-500/10 rounded-[32px] p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
               <TrendingUp className="w-48 h-48" />

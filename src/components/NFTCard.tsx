@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, Heart, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag } from 'lucide-react';
+import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -400,16 +400,16 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                     {nft.title}
                   </h3>
                   <div className="flex items-center gap-2">
-                     <p className="text-[7.5px] font-black text-foreground/80 uppercase tracking-[0.1em]">{nft.creator}</p>
+                     <p className="text-[7.5px] font-medium text-foreground/80 uppercase tracking-[0.1em]">{nft.creator}</p>
                   </div>
                </div>
 
                <div className="flex items-end justify-between mt-1">
                   <div className="space-y-0.5">
-                     <p className="text-[6px] font-bold text-muted-foreground/20 uppercase tracking-[0.1em]">Val_Artifact</p>
+                     <p className="text-[6px] font-medium text-muted-foreground/20 uppercase tracking-[0.1em]">Val_Artifact</p>
                      <div className="flex items-center gap-1 bg-muted/30 py-0.5 px-2 rounded-[2px] border border-border/10">
                         <img src={TON_LOGO} className="w-2.5 h-2.5" alt="TON" />
-                        <span className="text-[11px] font-bold text-foreground tracking-tighter">{nft.price}</span>
+                        <span className="text-[11px] font-medium text-foreground tracking-tighter">{nft.price}</span>
                      </div>
                   </div>
                   

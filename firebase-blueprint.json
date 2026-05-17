@@ -13,9 +13,30 @@
         "avatar": { "type": "string" },
         "bio": { "type": "string" },
         "isVerifiedArtist": { "type": "boolean" },
+        "verificationStatus": { "type": "string", "enum": ["unverified", "pending", "verified"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "name", "email"]
+    },
+    "ArtistVerificationRequest": {
+      "title": "ArtistVerificationRequest",
+      "description": "Request for artist verification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "artistName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "bio": { "type": "string" },
+        "statement": { "type": "string", "description": "Brief artist statement" },
+        "socialLinks": { "type": "object" },
+        "portfolioUrls": { "type": "array" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "submittedAt": { "type": "string", "format": "date-time" },
+        "reviewedAt": { "type": "string", "format": "date-time" },
+        "reviewerNotes": { "type": "string" }
+      },
+      "required": ["id", "userId", "artistName", "status", "submittedAt"]
     },
     "Track": {
       "title": "Track",
@@ -380,6 +401,10 @@
     "/taskCompletions/{id}": {
       "schema": "TaskCompletion",
       "description": "Task completions"
+    },
+    "/verificationRequests/{requestId}": {
+      "schema": "ArtistVerificationRequest",
+      "description": "Artist verification requests"
     },
     "/proposals/{id}": {
       "schema": "Proposal",

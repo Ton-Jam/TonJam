@@ -337,24 +337,30 @@ const Discover: React.FC = () => {
         <div className="max-w-4xl mx-auto w-full flex items-center gap-3">
           <form 
             onSubmit={handleSearchSubmit} 
-            className="relative flex-1"
+            className="relative flex-1 group"
           >
-            <div className="relative flex items-center group">
+            {/* Shiny Gradient Border Effect */}
+            <div className={`absolute -inset-[1px] rounded-[17px] bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[6px] scale-[1.01]' : 'group-hover:opacity-40 blur-[4px]'}`} />
+            
+            <div className={`relative flex items-center h-12 bg-background border-[3px] transition-all rounded-[16px] overflow-hidden ${isFocused ? 'border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
               <div className="absolute left-4 z-10 pointer-events-none">
                 <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
               </div>
-              <div className="relative flex-1">
-                <Input
-                  type="text"
-                  placeholder="Search artists, tracks, NFTs..."
-                  value={searchQuery}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 pr-24 h-12 bg-white/5 border border-blue-500/20 focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[14px] transition-all discover-search-input text-sm font-medium"
-                />
-              </div>
-              <div className="absolute right-1.5 flex items-center gap-1">
+              
+              {/* Shiny Sweep Effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-blue-400/10 to-transparent -translate-x-full pointer-events-none z-0" />
+
+              <Input
+                type="text"
+                placeholder="Search artists, tracks, NFTs..."
+                value={searchQuery}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-sm font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
+              />
+
+              <div className="absolute right-1.5 flex items-center gap-1 z-20">
                 <AnimatePresence>
                   {searchQuery && (
                     <motion.div
@@ -367,7 +373,7 @@ const Discover: React.FC = () => {
                         size="icon"
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-lg"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -380,7 +386,7 @@ const Discover: React.FC = () => {
                   size="icon"
                   type="button"
                   onClick={handleVoiceSearch}
-                  className={`h-9 w-9 rounded-lg transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`h-8 w-8 rounded-lg transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
@@ -757,10 +763,7 @@ const Discover: React.FC = () => {
               </Carousel>
             </section>
 
-            {/* AI Dj Krupy Section moved to end */}
-            <div id="sonic" className="mt-12">
-              <SonicSearchSection />
-            </div>
+            {/* AI Dj Krupy Section removed to avoid duplication on Home screen context */}
           </>
         ) : (
           <div className="space-y-12">

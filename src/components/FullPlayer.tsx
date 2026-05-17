@@ -32,15 +32,16 @@ import {
   VolumeX,
   Volume1,
   Sparkles,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import { motion, AnimatePresence } from 'motion/react';
-import { MOCK_ARTISTS, MOCK_TRACKS } from '@/constants';
+import { MOCK_ARTISTS, MOCK_TRACKS, DJ_KRUPY_AVATAR } from '@/constants';
 import { useNavigate } from 'react-router-dom';
 import { getPlaceholderImage, shareContent, cn } from '@/lib/utils';
 import { fetchNFTMetadata } from '@/services/nftService';
-import { chatWithKrupy } from '@/services/geminiService';
-import { NFTItem } from '@/types';
+import { chatWithKrupy, getKrupyRecommendations, ChatAssistantResponse } from '@/services/geminiService';
+import { NFTItem, Track, Artist } from '@/types';
 import BuyNFTModal from './BuyNFTModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -63,6 +64,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+
+import DynamicVisualizer from './DynamicVisualizer';
 
 const LyricsView: React.FC<{ lyrics: string }> = ({ lyrics }) => {
   const lines = lyrics.split('\n');
@@ -121,7 +124,32 @@ const FullPlayer: React.FC = () => {
   } = useAudio();
 
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy'>('player');
+  const [visualizerVariant, setVisualizerVariant] = useState<'bars' | 'circle' | 'particles' | 'waves'>('bars');
   const [showQueue, setShowQueue] = useState(false);
+  
+  // Dynamic color based on mood and variant
+  const visualizerColor = useMemo(() => {
+    if (!currentTrack) return '#3b82f6';
+    
+    // Mood color mapping
+    const moodColors: Record<string, string> = {
+      'chill': '#a78bfa', // Purple
+      'energetic': '#f59e0b', // Amber
+      'focus': '#10b981', // Emerald
+      'happy': '#fbbf24', // Yellow
+      'melancholic': '#6366f1', // Indigo
+      'unknown': '#3b82f6', // Blue
+    };
+
+    const moodKey = (currentTrack.mood || 'unknown').toLowerCase();
+    const baseColor = moodColors[moodKey] || moodColors['unknown'];
+
+    if (visualizerVariant === 'circle') return '#60a5fa';
+    if (visualizerVariant === 'particles') return '#3b82f6';
+    if (visualizerVariant === 'waves') return '#ffffff';
+    return baseColor;
+  }, [currentTrack?.mood, visualizerVariant]);
+
   const [comment, setComment] = useState("");
   const [showVolumeHUD, setShowVolumeHUD] = useState(false);
   const [currentNFT, setCurrentNFT] = useState<NFTItem | null>(null);
@@ -132,6 +160,9 @@ const FullPlayer: React.FC = () => {
   const [krupyMessage, setKrupyMessage] = useState('');
   const [isKrupyLoading, setIsKrupyLoading] = useState(false);
   const [krupyChat, setKrupyChat] = useState<{ role: 'user' | 'ai', text: string }[]>([]);
+  const [recommendations, setRecommendations] = useState<{ tracks: string[], artists: string[], reasoning: string } | null>(null);
+  const [isRecsLoading, setIsRecsLoading] = useState(false);
+
   const krupyScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (krupyScrollRef.current) {
@@ -139,17 +170,17 @@ const FullPlayer: React.FC = () => {
     }
   }, [krupyChat]);
 
-  const handleAskKrupy = async () => {
-    if (!krupyMessage.trim() || isKrupyLoading) return;
+  const handleAskKrupy = async (overrideMessage?: string) => {
+    const textToSend = overrideMessage || krupyMessage;
+    if (!textToSend.trim() || isKrupyLoading) return;
     
-    const userMsg = krupyMessage;
-    setKrupyChat(prev => [...prev, { role: 'user', text: userMsg }]);
-    setKrupyMessage('');
+    setKrupyChat(prev => [...prev, { role: 'user', text: textToSend }]);
+    if (!overrideMessage) setKrupyMessage('');
     setIsKrupyLoading(true);
 
     try {
-      const response = await chatWithKrupy(userMsg, krupyChat, currentTrack);
-      setKrupyChat(prev => [...prev, { role: 'ai', text: response }]);
+      const response: ChatAssistantResponse = await chatWithKrupy(textToSend, krupyChat, currentTrack);
+      setKrupyChat(prev => [...prev, { role: 'ai', text: response.text || "Signal lost..." }]);
     } catch (error) {
       console.error("Krupy FullPlayer Error:", error);
       setKrupyChat(prev => [...prev, { role: 'ai', text: "Signal lost in the nebula. Re-syncing..." }]);
@@ -158,12 +189,26 @@ const FullPlayer: React.FC = () => {
     }
   };
 
+  const fetchRecommendations = async () => {
+    if (!currentTrack) return;
+    setIsRecsLoading(true);
+    try {
+      const recs = await getKrupyRecommendations(currentTrack, allTracks, MOCK_ARTISTS as any);
+      setRecommendations(recs);
+    } catch (error) {
+      console.error("Recs error:", error);
+    } finally {
+      setIsRecsLoading(false);
+    }
+  };
+
   const initKrupyTrivia = async () => {
     if (currentTrack) {
       setIsKrupyLoading(true);
       try {
-        const trivia = await chatWithKrupy(`Give me some cool trivia and vibez about this track: ${currentTrack.title} by ${currentTrack.artist}. Mention its genre and suggest something similar.`, [], currentTrack);
-        setKrupyChat([{ role: 'ai', text: trivia }]);
+        const trivia: ChatAssistantResponse = await chatWithKrupy(`Give me some cool trivia and vibez about this track: ${currentTrack.title} by ${currentTrack.artist}. Mention its genre.`, [], currentTrack);
+        setKrupyChat([{ role: 'ai', text: trivia.text || "Yo! Ready to analyze this frequency. What do you want to know?" }]);
+        fetchRecommendations();
       } catch (error) {
         setKrupyChat([{ role: 'ai', text: "Yo! Ready to analyze this frequency. What do you want to know?" }]);
       } finally {
@@ -187,15 +232,7 @@ const FullPlayer: React.FC = () => {
     }
   }, [currentTrack]);
 
-  useEffect(() => {
-    // Only show HUD after initial mount and when volume actually changes
-    const isInitial = !volumeTimeoutRef.current && volume === 1;
-    if (!isInitial) {
-      setShowVolumeHUD(true);
-      if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
-      volumeTimeoutRef.current = setTimeout(() => setShowVolumeHUD(false), 2000);
-    }
-  }, [volume]);
+  /* Removed automatic HUD display */
 
   // Waveform logic
   const waveformHeights = useMemo(() => {
@@ -326,19 +363,56 @@ const FullPlayer: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="space-y-6"
             >
-              {/* Cover Art */}
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/10 rounded-[2px] blur-2xl -z-10 animate-pulse"></div>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="w-[280px] h-[280px] mx-auto overflow-hidden rounded-[4px] shadow-2xl border border-white/5"
-                >
-                  <img
-                    src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
-                    className="w-full h-full object-cover"
-                    alt={currentTrack.title}
-                  />
-                </motion.div>
+              {/* Cover Art & Dynamic Visualizer */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-[2px] blur-3xl -z-10 animate-pulse"></div>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className="relative w-[280px] h-[280px] mx-auto overflow-hidden rounded-[8px] shadow-2xl border border-white/5 cursor-pointer"
+                      onClick={() => {
+                        const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
+                        const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
+                        setVisualizerVariant(variants[nextIndex]);
+                        addNotification(`Visualizer morphed to ${variants[nextIndex]}`, 'info', 1000);
+                      }}
+                    >
+                      <img
+                        src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
+                        className={cn(
+                          "w-full h-full object-cover transition-opacity duration-700",
+                          visualizerVariant === 'circle' ? "opacity-30 blur-sm scale-110" : 
+                          visualizerVariant === 'particles' ? "opacity-20 blur-md" : 
+                          visualizerVariant === 'waves' ? "opacity-40 blur-[2px]" : "opacity-100"
+                        )}
+                        alt={currentTrack.title}
+                      />
+                      
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <DynamicVisualizer 
+                          variant={visualizerVariant as any} 
+                          className="w-full h-full"
+                          color={visualizerColor}
+                          interactive={false}
+                        />
+                      </div>
+                      
+                      {/* Floating UI over visualizer */}
+                      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity">
+                         <div className="flex flex-col gap-0.5">
+                            <span className="text-[6px] font-black uppercase tracking-[0.2em] text-blue-400">Morph Active</span>
+                            <span className="text-[8px] font-black uppercase tracking-widest text-white/40">{visualizerVariant.toUpperCase()} DATA</span>
+                         </div>
+                         <div className="p-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
+                            <Maximize2 className="w-3 h-3 text-white/50" />
+                         </div>
+                      </div>
+                    </motion.div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-[8px] font-black uppercase tracking-widest bg-blue-600 border-none">Tap to change visualization protocol</TooltipContent>
+                </Tooltip>
               </div>
 
               {/* Technical Overlay Badges */}
@@ -366,35 +440,59 @@ const FullPlayer: React.FC = () => {
                 </div>
                 <Button 
                   variant="ghost" 
-                  size="icon"
+                  size="sm"
                   onClick={() => toggleLikeTrack(currentTrack.id)}
                   className={cn(
-                    "rounded-[4px] bg-white/5 backdrop-blur-md transition-all active:scale-90",
+                    "rounded-[4px] bg-white/5 backdrop-blur-md transition-all active:scale-90 gap-2 px-3",
                     isLiked ? 'text-blue-500 hover:text-blue-400' : 'text-white/20 hover:text-white'
                   )}
                 >
                   <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{(currentTrack.likes || 0).toLocaleString()}</span>
                 </Button>
               </div>
 
               {/* Waveform Progress Profile */}
               <div>
                 <div 
-                  className="h-10 flex items-end gap-[2px] cursor-pointer relative px-2"
+                  className="h-10 flex items-end gap-[1px] cursor-pointer relative px-2"
                   onClick={handleWaveformClick}
                 >
+                  <DynamicVisualizer 
+                    variant="bars" 
+                    color={visualizerColor} 
+                    className="absolute inset-0 opacity-20 pointer-events-none"
+                    interactive={false}
+                  />
+                  {/* Floating Playhead Glow */}
+                  <motion.div 
+                    className="absolute bottom-0 h-full w-[2px] bg-blue-400 z-10 shadow-[0_0_10px_#60a5fa] pointer-events-none"
+                    style={{ left: `${progress}%` }}
+                    animate={{ opacity: isPlaying ? [0.4, 0.8, 0.4] : 0.6 }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  />
                   {waveformHeights.map((height, i) => {
                     const barProgress = (i / waveformHeights.length) * 100;
                     const isActive = barProgress <= progress;
                     return (
                       <div 
                         key={i}
-                        className="flex-1 rounded-t-sm transition-all duration-300"
+                        className={cn(
+                          "flex-1 rounded-t-sm transition-all duration-300",
+                          isActive ? "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]" : "bg-white/10"
+                        )}
                         style={{ 
                           height: `${height * 0.8}%`,
-                          backgroundColor: isActive ? '#3b82f6' : 'rgba(255,255,255,0.1)'
                         }}
-                      />
+                      >
+                         {isActive && isPlaying && (
+                           <motion.div 
+                             animate={{ height: ['40%', '100%', '40%'] }}
+                             transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.02 }}
+                             className="w-full bg-blue-300/30 rounded-t-sm"
+                           />
+                         )}
+                      </div>
                     );
                   })}
                 </div>
@@ -461,6 +559,14 @@ const FullPlayer: React.FC = () => {
 
                 {/* Bottom Tools */}
                 <div className="flex items-center gap-3 bg-white/5 p-3 rounded-[4px] border-none mx-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setShowVolumeHUD(!showVolumeHUD)} 
+                    className="h-8 w-8 text-white/50 hover:text-white"
+                  >
+                    <Volume2 className="h-4 w-4" />
+                  </Button>
                   <Slider 
                     min={0} 
                     max={100} 
@@ -546,7 +652,7 @@ const FullPlayer: React.FC = () => {
             >
               <div className="flex items-center gap-3 p-4 bg-blue-500/10 rounded-t-[4px] border-b border-white/5">
                 <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center p-0.5 border border-white/10">
-                  <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full rounded-full object-cover" />
+                  <img src={DJ_KRUPY_AVATAR} alt="DJ Krupy" className="w-full h-full rounded-full object-cover" />
                 </div>
                 <div>
                   <h3 className="text-xs font-black uppercase tracking-widest text-blue-500">Neural Insights</h3>
@@ -555,6 +661,80 @@ const FullPlayer: React.FC = () => {
               </div>
 
               <div ref={krupyScrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+                {/* Recommendations Section */}
+                {recommendations && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">Neural Recommendations</h4>
+                      {isRecsLoading && <Loader2 className="w-2.5 h-2.5 animate-spin text-blue-500" />}
+                    </div>
+                    
+                    <div className="flex flex-col gap-2">
+                       <p className="text-[10px] text-white/60 font-medium italic">"{recommendations.reasoning}"</p>
+                       
+                       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                          {recommendations.tracks.map((trackTitle, idx) => {
+                            const track = allTracks.find(t => t.title.toLowerCase() === trackTitle.toLowerCase());
+                            return (
+                              <button 
+                                key={idx}
+                                onClick={() => track && playTrack(track)}
+                                className="flex-shrink-0 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[4px] px-3 py-2 transition-all"
+                              >
+                                <p className="text-[10px] font-black uppercase tracking-tighter text-white truncate max-w-[120px]">{trackTitle}</p>
+                                <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Track</p>
+                              </button>
+                            );
+                          })}
+                          {recommendations.artists.map((artistName, idx) => (
+                            <button 
+                              key={idx}
+                              onClick={() => {
+                                const artist = MOCK_ARTISTS.find(a => a.name.toLowerCase() === artistName.toLowerCase());
+                                if (artist) {
+                                  setFullPlayerOpen(false);
+                                  navigate(`/artist/${artist.uid}`);
+                                }
+                              }}
+                              className="flex-shrink-0 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 rounded-[4px] px-3 py-2 transition-all"
+                            >
+                              <p className="text-[10px] font-black uppercase tracking-tighter text-blue-500 truncate max-w-[120px]">{artistName}</p>
+                              <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest">Artist</p>
+                            </button>
+                          ))}
+                       </div>
+                    </div>
+                    <Separator className="bg-white/5" />
+                  </motion.div>
+                )}
+
+                {/* Quick Actions */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <button 
+                    onClick={() => handleAskKrupy("Show me some trivia about this track!")}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all"
+                  >
+                    Get Trivia
+                  </button>
+                  <button 
+                    onClick={fetchRecommendations}
+                    className="bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-blue-500 transition-all flex items-center gap-1.5"
+                  >
+                    <RefreshCw className={cn("w-2.5 h-2.5", isRecsLoading && "animate-spin")} />
+                    Refresh Recs
+                  </button>
+                  <button 
+                    onClick={() => handleAskKrupy("Describe the mood of this track.")}
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all"
+                  >
+                    Vibe Check
+                  </button>
+                </div>
+
                 {krupyChat.map((chat, i) => (
                   <motion.div
                     key={i}
@@ -594,7 +774,7 @@ const FullPlayer: React.FC = () => {
                   <Button 
                     size="icon"
                     variant="ghost"
-                    onClick={handleAskKrupy}
+                    onClick={() => handleAskKrupy()}
                     disabled={isKrupyLoading || !krupyMessage.trim()}
                     className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-blue-500 hover:text-blue-400 disabled:opacity-50"
                   >
@@ -682,7 +862,7 @@ const FullPlayer: React.FC = () => {
                   <div className="flex items-center gap-4">
                     <Avatar className="w-16 h-16 rounded-[4px] border-2 border-blue-600/20 shadow-xl">
                       <AvatarImage src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.uid}`)} referrerPolicy="no-referrer" className="object-cover" />
-                      <AvatarFallback className="bg-blue-600/10 text-blue-500 font-black">{artistData.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback className="bg-blue-600/10 text-blue-500 font-black">{(artistData.name || '').slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -720,7 +900,7 @@ const FullPlayer: React.FC = () => {
                   <Hash className="w-4 h-4 text-blue-500/40" />
                   <div>
                     <p className="text-[8px] font-black uppercase tracking-widest text-white/20">ID</p>
-                    <p className="font-black uppercase tracking-tighter text-sm">TJ-{currentTrack.id.slice(-4).toUpperCase()}</p>
+                    <p className="font-black uppercase tracking-tighter text-sm">TJ-{currentTrack.id?.slice(-4).toUpperCase()}</p>
                   </div>
                 </div>
               </div>
@@ -860,7 +1040,7 @@ const FullPlayer: React.FC = () => {
                     >
                       <Avatar className="w-10 h-10 rounded-lg">
                         <AvatarImage src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="object-cover" />
-                        <AvatarFallback className="rounded-lg bg-white/5">{track.title.slice(0, 1)}</AvatarFallback>
+                        <AvatarFallback className="rounded-lg bg-white/5">{(track.title || '').slice(0, 1)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-white truncate group-hover:text-blue-400 transition-colors">{track.title}</p>

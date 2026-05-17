@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, Heart, TrendingUp, TrendingDown } from 'lucide-react';
+import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_ARTISTS, TJ_COIN_ICON } from '@/constants';
-import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
+import { cn, getPlaceholderImage, shareContent, formatNumber } from '@/lib/utils';
 import confetti from 'canvas-confetti';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import SkeletonCard from './SkeletonCard';
@@ -39,8 +39,6 @@ interface TrackCardProps {
   index?: number;
   onMint?: (track: Track) => void;
   onRemove?: () => void;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
   className?: string;
   isLoading?: boolean;
 }
@@ -51,8 +49,6 @@ const TrackCard: React.FC<TrackCardProps> = ({
   index,
   onMint, 
   onRemove,
-  onMoveUp,
-  onMoveDown,
   className = '', 
   isLoading = false 
 }) => {
@@ -95,7 +91,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const handleOptions = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setOptionsTrack(track, { onRemove, onMoveUp, onMoveDown });
+    setOptionsTrack(track, { onRemove });
   };
 
   const handleShare = async (e?: React.MouseEvent) => {
@@ -149,10 +145,6 @@ const TrackCard: React.FC<TrackCardProps> = ({
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         <span className="text-[10px] font-bold uppercase tracking-widest">Play Track</span>
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={handleToggleLike} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-        <Heart className={cn("h-4 w-4", isLiked && "fill-current text-red-500")} />
-        <span className="text-[10px] font-bold uppercase tracking-widest">{isLiked ? "Unlike Track" : "Like Track"}</span>
-      </DropdownMenuItem>
       <DropdownMenuItem onClick={handleAddToQueue} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         <ListMusic className="h-4 w-4" />
         <span className="text-[10px] font-black uppercase tracking-widest">Add to Queue</span>
@@ -180,27 +172,13 @@ const TrackCard: React.FC<TrackCardProps> = ({
         <span className="text-[10px] font-bold uppercase tracking-widest">Share Signal</span>
       </DropdownMenuItem>
       
-      {(onRemove || onMoveUp || onMoveDown) && (
+      {onRemove && (
         <>
           <DropdownMenuSeparator className="bg-white/5" />
-          {onMoveUp && (
-            <DropdownMenuItem onClick={onMoveUp} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-              <ArrowUp className="h-4 w-4" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Shift Up</span>
-            </DropdownMenuItem>
-          )}
-          {onMoveDown && (
-            <DropdownMenuItem onClick={onMoveDown} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-              <ArrowDown className="h-4 w-4" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Shift Down</span>
-            </DropdownMenuItem>
-          )}
-          {onRemove && (
-            <DropdownMenuItem onClick={onRemove} className="flex items-center gap-3 py-3 px-4 cursor-pointer text-red-500 focus:bg-red-600 focus:text-white transition-colors">
-              <Trash2 className="h-4 w-4" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Terminate Signal</span>
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem onClick={onRemove} className="flex items-center gap-3 py-3 px-4 cursor-pointer text-red-500 focus:bg-red-600 focus:text-white transition-colors">
+            <Trash2 className="h-4 w-4" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Terminate Signal</span>
+          </DropdownMenuItem>
         </>
       )}
     </>
@@ -213,10 +191,6 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenuItem onClick={handlePlay} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         <span className="text-[10px] font-bold uppercase tracking-widest">Execute Playback</span>
-      </ContextMenuItem>
-      <ContextMenuItem onClick={handleToggleLike} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
-        <Heart className={cn("h-4 w-4", isLiked && "fill-current text-red-500")} />
-        <span className="text-[10px] font-bold uppercase tracking-widest">{isLiked ? "Remove Like" : "Initialize Like"}</span>
       </ContextMenuItem>
       <ContextMenuSeparator className="bg-white/5" />
       <ContextMenuItem onClick={handleAddToQueue} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 rounded-lg">
@@ -419,12 +393,16 @@ const TrackCard: React.FC<TrackCardProps> = ({
               <div className="flex items-center gap-4 sm:gap-6 pr-1">
                 <div className="hidden md:flex items-center gap-8">
                     <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Popularity</span>
+                      <span className="text-[11px] font-medium text-foreground uppercase group-hover/row:text-red-500">{(track.likes || 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex flex-col items-end opacity-40 group-hover/row:opacity-100 transition-opacity">
                       <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Frequency</span>
-                      <span className="text-[11px] font-bold text-foreground uppercase group-hover/row:text-blue-400">{(track.playCount || 0).toLocaleString()}</span>
+                      <span className="text-[11px] font-medium text-foreground uppercase group-hover/row:text-blue-400">{formatNumber(track.playCount || 0)}</span>
                     </div>
                     <div className="flex flex-col items-end min-w-[60px] opacity-40 group-hover/row:opacity-100 transition-opacity">
                       <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Length</span>
-                      <span className="text-[11px] font-bold text-foreground">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                      <span className="text-[11px] font-medium text-foreground">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
                     </div>
                 </div>
 
@@ -572,16 +550,16 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
                     <Headphones className="w-3.5 h-3.5" />
-                    {(track.playCount || 0).toLocaleString()}
+                    {formatNumber(track.playCount || 0)}
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
                     <Clock className="w-3.5 h-3.5" />
                     {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
                 </div>
                 {!track.isNFT && track.price && (
-                    <div className="flex items-center gap-1.5 text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">
+                    <div className="flex items-center gap-1.5 text-[10px] font-medium text-amber-500 uppercase tracking-[0.2em]">
                         <Coins className="w-3.5 h-3.5" />
                         {track.price} TON
                     </div>

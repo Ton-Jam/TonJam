@@ -8,7 +8,7 @@ import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, in
  * This service handles the calculation and distribution of royalties.
  */
 
-export const PLATFORM_FEE_PERCENTAGE = 0.05; // 5% platform fee
+export const PLATFORM_FEE_PERCENTAGE = 0.10; // 10% platform fee (5% from buyer + 5% from seller equivalent for off-chain calcs)
 
 export interface DistributionResult {
   platformFee: number;

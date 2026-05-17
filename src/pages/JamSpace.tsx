@@ -66,6 +66,8 @@ const JamSpace: React.FC = () => {
   const { 
     addNotification, 
     followedUserIds, 
+    likedTrackIds,
+    recentlyPlayed,
     artists, 
     posts, 
     createPost, 
@@ -90,7 +92,11 @@ const JamSpace: React.FC = () => {
   const handleAIPlaylist = async () => {
     setIsGeneratingAI(true);
     try {
-      const result = await generateAIPlaylist();
+      const result = await generateAIPlaylist({
+        likedTracks: likedTrackIds,
+        recentlyPlayed: recentlyPlayed,
+        followedArtistIds: followedUserIds
+      });
       setAiResult(result);
       addNotification('Neural mix generated', 'success');
     } catch (e) {

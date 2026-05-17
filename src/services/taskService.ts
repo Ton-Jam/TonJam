@@ -24,6 +24,17 @@ export const updateTaskProgress = async (taskId: string, progress: number) => {
   }
 };
 
+export const completeTask = async (taskId: string) => {
+  if (!auth.currentUser) return;
+  try {
+    const taskRef = doc(db, `users/${auth.currentUser.uid}/tasks`, taskId);
+    await updateDoc(taskRef, { completed: true, completedAt: serverTimestamp() });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `users/${auth.currentUser.uid}/tasks`);
+    throw error;
+  }
+};
+
 export const claimTaskReward = async (taskId: string, rewardAmount: number, points: number) => {
   if (!auth.currentUser) return;
   const userId = auth.currentUser.uid;

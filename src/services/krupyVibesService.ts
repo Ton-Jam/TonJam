@@ -21,7 +21,7 @@ export const krupyVibesSearch = async (
     const model = "gemini-3.1-pro-preview";
     const prompt = `You are a DJ Krupy's "Neural Vibe Engine".
     The user is looking for music using this mood/vibe query: "${moodQuery}".
-    Here is the list of available tracks: ${JSON.stringify(allTracks.map(t => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist })))}.
+    Here is the list of available tracks: ${JSON.stringify(allTracks.map(t => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist, mood: t.mood })))}.
     
     Instructions:
     1. Analyze the query for mood, style, tempo, or atmospheric implications.

@@ -135,6 +135,8 @@ export const buyNFTFromMarketplace = async (
 ): Promise<boolean> => {
   try {
     const priceInNanotons = toNano(price);
+    const buyerFee = (priceInNanotons * 5n) / 100n;
+    const totalAmount = priceInNanotons + buyerFee + toNano("0.1"); // Price + 5% Fee + Gas
     
     // Construct the BuyNFT message body
     // message BuyNFT { query_id: Int as uint64; nft_address: Address; }
@@ -149,7 +151,7 @@ export const buyNFTFromMarketplace = async (
       messages: [
         {
           address: TONJAM_MARKETPLACE_ADDRESS,
-          amount: (priceInNanotons + toNano("0.1")).toString(), // Price + Gas
+          amount: totalAmount.toString(),
           payload: body.toBoc().toString('base64'),
         },
       ],

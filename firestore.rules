@@ -83,6 +83,18 @@ service cloud.firestore {
         && data.venue is string && data.venue.size() <= 200;
     }
 
+    function isValidVerificationRequest(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.artistName is string && data.artistName.size() <= 100
+        && data.status in ['pending', 'approved', 'rejected']
+        && (!data.keys().contains('email') || (data.email is string && data.email.size() <= 256))
+        && (!data.keys().contains('bio') || (data.bio is string && data.bio.size() <= 1000))
+        && (!data.keys().contains('statement') || (data.statement is string && data.statement.size() <= 2000))
+        && (!data.keys().contains('socialLinks') || data.socialLinks is map)
+        && (!data.keys().contains('portfolioUrls') || data.portfolioUrls is list);
+    }
+
     function isValidListing(data) {
       return data.id is string && data.id.size() <= 128
         && data.nftId is string && data.nftId.size() <= 128
@@ -135,11 +147,12 @@ service cloud.firestore {
             'name', 'username', 'bio', 'avatar', 'bannerUrl', 'socials', 'walletAddress', 'anthemId', 
             'likedTrackIds', 'followedUserIds', 'role', 'isVerifiedArtist', 'following', 
             'earnings', 'streamingEarnings', 'nftEarnings', 'jamBalance', 'stakedJam', 
-            'pendingJamRewards', 'tjBalance', 'lastStakingUpdate', 'isPremium', 'royaltyConfig'
+            'pendingJamRewards', 'tjBalance', 'lastStakingUpdate', 'isPremium', 'royaltyConfig',
+            'isVerified', 'verificationStatus'
           ])
         ) || (
           // System/Public updates across users (like following, stream earnings)
-          incoming().diff(existing()).affectedKeys().hasOnly(['followers', 'earnings', 'streamingEarnings', 'nftEarnings'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['followers', 'earnings', 'streamingEarnings', 'nftEarnings', 'verificationStatus'])
         )
       );
       allow delete: if isAdmin();
@@ -256,6 +269,13 @@ service cloud.firestore {
     match /taskCompletions/{id} {
       allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
       allow create: if isSignedIn() && isOwner(incoming().userId);
+    }
+
+    match /verificationRequests/{requestId} {
+      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidVerificationRequest(incoming()) && isValidId(requestId);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /task_completions/{id} {

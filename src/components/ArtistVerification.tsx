@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Artist } from '@/types';
 import { CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
@@ -14,38 +15,15 @@ const ArtistVerification: React.FC<ArtistVerificationProps> = ({ artist }) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const { addNotification, setArtists } = useAudio();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const status = artist.verificationStatus || (artist.verified ? 'verified' : 'unverified');
   const isOwnProfile = user?.uid === artist.uid;
 
-  const handleVerify = async (e: React.MouseEvent) => {
+  const handleVerify = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsVerifying(true);
-    
-    // Simulate verification process
-    try {
-      if (isOwnProfile && user) {
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, { 
-          verificationStatus: 'pending',
-          updatedAt: new Date().toISOString()
-        });
-      }
-
-      // Update artist verification status in local state
-      setArtists(prev => prev.map(a => 
-        a.uid === artist.uid 
-          ? { ...a, verified: false, verificationStatus: 'pending' } 
-          : a
-      ));
-      
-      addNotification("Verification request submitted! Current status: PENDING.", "success");
-    } catch (error) {
-      console.error('Error submitting verification:', error);
-      handleFirestoreError(error, OperationType.UPDATE, `users/${artist.uid}/verification`);
-      addNotification("Failed to submit verification request. Try again.", "error");
-    } finally {
-      setIsVerifying(false);
+    if (isOwnProfile) {
+      navigate('/settings?tab=verification&modal=verify');
     }
   };
 

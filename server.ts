@@ -9,6 +9,7 @@ import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
 import FormData from 'form-data';
+import { verifyFirebaseToken, AuthRequest } from './src/middleware/authMiddleware';
 
 dotenv.config();
 
@@ -116,6 +117,10 @@ async function startServer() {
     });
 
     // API Routes
+    app.get('/api/auth/me', verifyFirebaseToken, (req: AuthRequest, res) => {
+        res.json({ user: req.user });
+    });
+
     app.post('/api/upload', upload.fields([
         { name: 'audio', maxCount: 1 },
         { name: 'cover', maxCount: 1 }

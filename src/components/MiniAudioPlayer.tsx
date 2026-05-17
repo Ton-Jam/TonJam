@@ -23,6 +23,7 @@ import {
   Gem
 } from "lucide-react";
 import { getPlaceholderImage, cn, shareContent } from "@/lib/utils";
+import DynamicVisualizer from "./DynamicVisualizer";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
@@ -177,7 +178,17 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
         />
       </div>
 
-      <div className="flex items-center justify-between h-full pt-1">
+      {/* Subtle Background Visualizer */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
+        <DynamicVisualizer 
+          variant="bars" 
+          color="#3b82f6" 
+          className="w-full h-full"
+          interactive={false}
+        />
+      </div>
+
+      <div className="flex items-center justify-between h-full pt-1 relative z-10">
         {/* Track Info */}
         <div 
           className="flex items-center gap-3 w-[45%] sm:w-[50%] cursor-pointer group"

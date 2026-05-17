@@ -10,6 +10,7 @@ import { auth } from '@/lib/firebase';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import ArtistCard from '@/components/ArtistCard';
+import TaskCard from '@/components/TaskCard';
 import PlaylistCard from '@/components/PlaylistCard';
 import GenreCard from '@/components/GenreCard';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -116,6 +117,8 @@ const Home: React.FC = () => {
     artists, 
     userProfile, 
     recentlyPlayed, 
+    likedTrackIds,
+    followedUserIds,
     getTrendingTracks, 
     getTopNFTTracks, 
     allPlaylists, 
@@ -145,7 +148,7 @@ const Home: React.FC = () => {
     // Combine with default featured tracks, ensuring uniqueness if needed (though IDs might differ)
     return [...approvedSponsorships, ...FEATURED_TRACKS_CAROUSEL];
   }, [sponsoredPosts]);
-  
+
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'discovery'>('overview');
   const [showWelcome, setShowWelcome] = useState(false);
@@ -158,7 +161,11 @@ const Home: React.FC = () => {
   const handleGenerateAIPlaylist = async () => {
     setIsGeneratingAI(true);
     try {
-      const result = await generateAIPlaylist();
+      const result = await generateAIPlaylist({
+        likedTracks: likedTrackIds,
+        recentlyPlayed,
+        followedArtistIds: followedUserIds
+      });
       setAiResult(result);
     } catch (error) {
       console.error(error);
@@ -261,6 +268,26 @@ const Home: React.FC = () => {
 
   const topNFTsForCarousel = useMemo(() => trendingNFTs.slice(0, 10), [trendingNFTs]);
 
+  const trendingCarouselItems = useMemo(() => {
+    const trackItems = trendingTracks.slice(0, 5).map(track => ({
+      id: `track-${track.id}`,
+      title: track.title,
+      subtitle: `${track.artist} (Track)`,
+      imageUrl: track.coverUrl,
+      link: `/track/${track.id}`,
+      cta: 'Listen'
+    }));
+    const nftItems = trendingNFTs.slice(0, 5).map(nft => ({
+      id: `nft-${nft.id}`,
+      title: nft.title,
+      subtitle: `${nft.artist} (NFT - ${nft.price} TON)`,
+      imageUrl: nft.imageUrl,
+      link: `/nft/${nft.id}`,
+      cta: 'View'
+    }));
+    return [...trackItems, ...nftItems];
+  }, [trendingTracks, trendingNFTs]);
+
   const topNFTTracks = useMemo(() => {
     let tracks = getTopNFTTracks();
     if (selectedGenre) {
@@ -327,10 +354,7 @@ const Home: React.FC = () => {
     return nfts.slice(2, 7);
   }, [allNFTs, selectedGenre]);
 
-  const discoverWeekly = useMemo(() => 
-    allPlaylists.find(p => p.title === 'Discover Weekly'),
-    [allPlaylists]
-  );
+  /* Removed local discoverWeekly memo as it is now in useAudio() */
 
   return (
     <div className="page-container w-full pt-[30px] sm:pt-[46px] bg-white text-neutral-950 min-h-screen">
@@ -505,73 +529,9 @@ const Home: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Discover Weekly Banner - High Fidelity */}
-            {auth.currentUser && discoverWeekly && (
-              <section className="mb-8">
-                <div 
-                  onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
-                  className="relative h-40 sm:h-72 rounded-3xl overflow-hidden cursor-pointer group shadow-2xl border border-white/5"
-                >
-                  <img 
-                    src={discoverWeekly.coverUrl} 
-                    alt="Discover Weekly" 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                  
-                  {/* Neural Grid Overlay */}
-                  <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
-
-                  <div className="absolute inset-0 p-6 sm:p-12 flex flex-col justify-end">
-                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-                      <div className="space-y-2 sm:space-y-4 max-w-xl">
-                        <div className="flex items-center gap-3">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge className="bg-blue-600 hover:bg-blue-700 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] rounded-md text-white shadow-lg shadow-blue-600/40 px-3 py-1 border-none cursor-help">
-                                Neural.Protocol_07
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-zinc-950 border-white/10 text-[9px] font-bold uppercase tracking-widest p-2">
-                              Proprietary AI synthesis algorithm v7.2.4
-                            </TooltipContent>
-                          </Tooltip>
-                          <span className="text-[10px] sm:text-xs font-bold text-white/40 uppercase tracking-[0.2em] hidden sm:block">Update_Synced.2024</span>
-                        </div>
-                        <h2 className="text-4xl sm:text-7xl font-black uppercase tracking-tighter text-white leading-[0.8] drop-shadow-2xl">
-                          Discover<br />Weekly
-                        </h2>
-                        <p className="text-xs sm:text-lg text-white/60 font-medium leading-relaxed max-w-md line-clamp-2 sm:line-clamp-none">
-                          Personalized frequency stream synthesized from your unique neural listening patterns and collection data.
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex flex-col items-end gap-1">
-                          <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">Active Relay</span>
-                          <span className="text-[10px] font-bold text-white/80">324 Artists Synced</span>
-                        </div>
-                        <button className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group/play">
-                          <Play className="h-6 w-6 sm:h-10 sm:w-10 fill-black translate-x-0.5 group-hover:scale-110 transition-transform" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Progress Line */}
-                  <div className="absolute bottom-0 left-0 h-1 bg-blue-600/30 w-full overflow-hidden">
-                    <motion.div 
-                      animate={{ x: ['-100%', '100%'] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                      className="h-full w-1/3 bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,1)]"
-                    />
-                  </div>
-                </div>
-              </section>
-            )}
-
             {/* Featured Sponsored Posts Carousel */}
             <div className="mt-4">
+              <SectionHeader title="Featured" viewAllLink="/explore" />
               <AutoCarousel items={carouselItems} onCtaClick={handleCtaClick} />
             </div>
 
@@ -651,39 +611,15 @@ const Home: React.FC = () => {
             </section>
 
             {/* AI Dj Krupy Section - Neural Synthesis Interface */}
-            <section className="mb-12 relative">
-              <Card className="mb-6 mx-2">
-                <CardContent className="p-4 flex flex-col gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/20 shadow-[0_0_10px_rgba(37,99,235,0.2)]">
-                      <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full object-cover" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm font-bold uppercase tracking-tight text-foreground leading-none">DJ_KRUPY</h2>
-                      <p className="text-muted-foreground text-[8px] font-bold uppercase tracking-widest mt-0.5">Neural_Relay_Active</p>
-                    </div>
-                  </div>
-                  {!aiResult && (
-                    <Button 
-                      onClick={handleGenerateAIPlaylist}
-                      disabled={isGeneratingAI}
-                      className="self-start gap-1.5 h-8 text-[10px] font-black uppercase tracking-widest"
-                    >
-                      {isGeneratingAI ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                      {isGeneratingAI ? "CALIBRATING..." : "KRUPYVIBEZ"}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-
+            <section className="mb-12 relative px-2 sm:px-0">
               {aiResult ? (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-blue-600/10 via-black/40 to-transparent rounded-[2.5rem] p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden"
+                  className="bg-gradient-to-br from-blue-600/20 via-slate-900 to-black rounded-[2.5rem] p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden border border-blue-500/20 shadow-2xl"
                 >
                   {/* Digital particles effect */}
-                  <div className="absolute inset-0 opacity-20 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]"></div>
+                  <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
                   
                   <div className="relative w-48 h-48 sm:w-56 sm:h-56 flex-shrink-0 group">
                     <div className="absolute inset-0 bg-blue-600 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
@@ -709,13 +645,13 @@ const Home: React.FC = () => {
                   <div className="flex-1 text-center lg:text-left space-y-4 lg:space-y-6">
                     <div className="space-y-3 lg:space-y-4">
                       <div className="inline-flex items-center gap-3">
-                        <Badge variant="outline" className="px-3 py-1 bg-primary/10 border-primary/20 text-primary text-[9px] font-black uppercase tracking-[0.2em] rounded-full">
+                        <Badge variant="outline" className="px-3 py-1 bg-blue-500/10 border-blue-500/20 text-blue-400 text-[9px] font-black uppercase tracking-[0.2em] rounded-full">
                           <Sparkle className="h-3 w-3 animate-pulse" />
                           SYNTHESIS_MAPPING
                         </Badge>
                       </div>
-                      <h3 className="text-2xl sm:text-5xl font-black uppercase tracking-tighter text-foreground leading-[0.9]">{aiResult.playlist.title}</h3>
-                      <p className="text-muted-foreground text-xs sm:text-base leading-relaxed max-w-2xl font-medium">
+                      <h3 className="text-2xl sm:text-5xl font-black uppercase tracking-tighter text-white leading-[0.9]">{aiResult.playlist.title}</h3>
+                      <p className="text-blue-100/60 text-xs sm:text-base leading-relaxed max-w-2xl font-medium">
                         {aiResult.explanation}
                       </p>
                     </div>
@@ -726,9 +662,9 @@ const Home: React.FC = () => {
                           const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
                           playAll(tracks);
                         }}
-                        className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-black font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center gap-3 active:scale-95"
+                        className="px-8 py-3 sm:px-10 sm:py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-blue-500 shadow-lg shadow-blue-600/20 flex items-center gap-3 active:scale-95"
                       >
-                        <Play className="h-4 w-4 fill-black" />
+                        <Play className="h-4 w-4 fill-white" />
                         Initiate
                       </button>
                       <button 
@@ -741,40 +677,57 @@ const Home: React.FC = () => {
                   </div>
                 </motion.div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <div className="lg:col-span-2 bg-neutral-900/60 dark:bg-slate-900/40 backdrop-blur-xl border border-blue-500/10 rounded-2xl p-6 flex flex-row items-center gap-6 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-blue-600/5 blur-3xl opacity-50 group-hover:scale-110 transition-transform duration-1000"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2 bg-gradient-to-br from-blue-600/10 via-zinc-950 to-black border border-blue-500/20 rounded-3xl p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group shadow-2xl">
+                    <div className="absolute inset-0 bg-blue-600/10 blur-[100px] opacity-30 group-hover:scale-110 transition-transform duration-1000"></div>
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
                     
-                    <div className="h-16 w-16 rounded-xl overflow-hidden border border-blue-500/40 relative shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:border-blue-400 transition-colors flex-shrink-0">
-                      <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full object-cover" />
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0a0a0a] animate-pulse shadow-[0_0_6px_rgba(16,185,129,0.5)]"></div>
+                    <div className="h-32 w-32 rounded-2xl overflow-hidden border-2 border-blue-500/30 relative shadow-[0_0_30px_rgba(37,99,235,0.3)] group-hover:border-blue-400 transition-all flex-shrink-0">
+                      <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-blue-600/20 to-transparent"></div>
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-black animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
                     </div>
                     
-                    <div className="space-y-1.5 relative z-10 flex-1">
-                      <h4 className="text-sm font-black uppercase tracking-tight text-white">KRUPY_SYNTHESIS</h4>
-                      <p className="text-blue-100/40 text-[9px] font-medium leading-relaxed max-w-sm">Analyze your sonic identity and generate high-fidelity frequency streams instantly.</p>
+                    <div className="space-y-4 relative z-10 flex-1 text-center sm:text-left">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 justify-center sm:justify-start">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce"></div>
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500">Neural.Relay_Active</h4>
+                        </div>
+                        <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-white">KRUPY_CO_PILOT</h3>
+                      </div>
+                      <p className="text-blue-100/40 text-[10px] sm:text-xs font-medium leading-relaxed max-w-sm uppercase tracking-wider">Your personal generative host. Synching vibes, parsing lyrics, and forging custom frequency streams.</p>
+                      
+                      <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+                        <button 
+                          onClick={handleGenerateAIPlaylist}
+                          disabled={isGeneratingAI}
+                          className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] active:scale-95"
+                        >
+                          {isGeneratingAI ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                          {isGeneratingAI ? "SYNTHESIZING..." : "GENERATE_VIBE"}
+                        </button>
+                        <Link 
+                          to="/dj-krupy"
+                          className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2 group"
+                        >
+                          <Brain className="h-3.5 w-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
+                          Launch DJ Krupy
+                        </Link>
+                      </div>
                     </div>
-                    
-                    <button 
-                      onClick={handleGenerateAIPlaylist}
-                      disabled={isGeneratingAI}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg active:scale-95 relative z-10 flex-shrink-0"
-                    >
-                      {isGeneratingAI ? <Loader2 className="h-3 w-3 animate-spin text-white" /> : <Sparkles className="h-3 w-3 text-white" />}
-                      {isGeneratingAI ? "SYNTHESIZING..." : "KRUPYVIBEZ"}
-                    </button>
                   </div>
 
-                  <div className="hidden lg:flex flex-col gap-6">
-                    <div className="flex-1 bg-white/5 border border-white/5 rounded-3xl p-8 flex flex-col justify-center gap-4 group hover:bg-blue-600/10 transition-colors">
-                      <Activity className="h-8 w-8 text-blue-500/40 group-hover:scale-110 transition-transform" />
-                      <p className="text-[12px] font-black text-white uppercase tracking-[0.2em]">Neural_Relay</p>
-                      <p className="text-[10px] text-white/30 font-bold uppercase leading-relaxed">Multimodal BPM parsing and genre density calibration.</p>
+                  <div className="hidden lg:flex flex-col gap-4">
+                    <div className="flex-1 bg-zinc-950 border border-white/5 rounded-3xl p-6 flex flex-col justify-center gap-3 group hover:border-blue-500/30 transition-all shadow-xl">
+                      <Activity className="h-6 w-6 text-blue-500/40 group-hover:scale-110 transition-transform" />
+                      <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Neural_Relay</p>
+                      <p className="text-[9px] text-zinc-500 font-bold uppercase leading-relaxed tracking-wider">Multimodal BPM parsing and genre density calibration.</p>
                     </div>
-                    <div className="flex-1 bg-white/5 border border-white/5 rounded-3xl p-8 flex flex-col justify-center gap-4 group hover:bg-purple-600/10 transition-colors">
-                      <Globe className="h-8 w-8 text-purple-500/40 group-hover:scale-110 transition-transform" />
-                      <p className="text-[12px] font-black text-white uppercase tracking-[0.2em]">TON_Nexus</p>
-                      <p className="text-[10px] text-white/30 font-bold uppercase leading-relaxed">Decentralized trend mapping across the entire protocol.</p>
+                    <div className="flex-1 bg-zinc-950 border border-white/5 rounded-3xl p-6 flex flex-col justify-center gap-3 group hover:border-purple-500/30 transition-all shadow-xl">
+                      <Globe className="h-6 w-6 text-purple-500/40 group-hover:scale-110 transition-transform" />
+                      <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">TON_Nexus</p>
+                      <p className="text-[9px] text-zinc-500 font-bold uppercase leading-relaxed tracking-wider">Decentralized trend mapping across the entire protocol.</p>
                     </div>
                   </div>
                 </div>
@@ -985,6 +938,15 @@ const Home: React.FC = () => {
                   ))}
                 </Accordion>
               </div>
+            </section>
+
+            {/* Tasks */}
+            <section className="section-container mt-10 mb-10 px-2 sm:px-0">
+               <SectionHeader title="Tasks" viewAllLink="/tasks" />
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {/* Placeholder for tasks */}
+                 <p className="text-muted-foreground text-sm">No active tasks at the moment.</p>
+               </div>
             </section>
 
             {/* Recently Played */}

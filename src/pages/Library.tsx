@@ -29,6 +29,8 @@ import NFTCard from '@/components/NFTCard';
 import PlaylistCard from '@/components/PlaylistCard';
 import AlbumCard from '@/components/AlbumCard';
 import PlaylistFolderCard from '@/components/PlaylistFolderCard';
+import FolderModal from '@/components/FolderModal';
+import PlaylistOptionsModal from '@/components/PlaylistOptionsModal';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -48,6 +50,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+
+import { Playlist, PlaylistFolder } from '@/types';
 
 type LibraryFilter = 'all' | 'playlists' | 'artists' | 'nfts';
 type SortOption = 'recents' | 'recently-added' | 'alphabetical';
@@ -75,6 +79,11 @@ const Library: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [sortBy, setSortBy] = useState<SortOption>('recents');
   const [isLoading, setIsLoading] = useState(true);
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [selectedFolderForEdit, setSelectedFolderForEdit] = useState<any>(null);
+  const [selectedPlaylistForOptions, setSelectedPlaylistForOptions] = useState<Playlist | null>(null);
+
+  const { movePlaylistToFolder, deletePlaylist } = useAudio();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
@@ -164,10 +173,30 @@ const Library: React.FC = () => {
             <h4 className="text-sm font-black uppercase tracking-tighter text-foreground truncate">{title}</h4>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5 opacity-60 truncate">{subtitle}</p>
           </div>
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          {item.type === 'playlist' ? (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-9 w-9 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity" 
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedPlaylistForOptions(item);
+              }}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          )}
         </motion.div>
+      );
+    }
+
+    if (item.type === 'playlist') {
+      return (
+        <PlaylistCard key={item.id} playlist={item} />
       );
     }
 
@@ -220,7 +249,10 @@ const Library: React.FC = () => {
               <Folder className="h-3 w-3" />
               Neural Vault
             </h3>
-            <Button variant="ghost" size="sm" onClick={() => createFolder('New Folder')}>
+            <Button variant="ghost" size="sm" onClick={() => {
+              setSelectedFolderForEdit(null);
+              setIsFolderModalOpen(true);
+            }}>
               <FolderPlus className="h-3 w-3 mr-2" />
               Add Folder
             </Button>
@@ -228,34 +260,12 @@ const Library: React.FC = () => {
           
           <div className="flex flex-col gap-1">
             {playlistFolders.map(folder => (
-               <motion.div
-                 key={folder.id}
-                 whileHover={{ x: 4 }}
-                 className={cn(
-                   "flex items-center gap-4 p-4 rounded-[2px] transition-all cursor-pointer group border border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
-                 )}
-               >
-                 <div className="w-12 h-12 rounded-[2px] bg-blue-600/20 flex items-center justify-center shadow-lg">
-                   <Folder className="h-5 w-5 text-blue-500" />
-                 </div>
-                 <div className="flex-1 min-w-0" onClick={() => navigate(`/playlist-folder/${folder.id}`)}>
-                   <h4 className="text-xs font-black uppercase tracking-tighter">{folder.title}</h4>
-                   <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
-                     {folder.playlistIds.length} Playlists
-                   </p>
-                 </div>
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => renameFolder(folder.id, prompt('Enter new title:', folder.title) || folder.title)}>Rename</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => deleteFolder(folder.id)} className="text-red-500">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                 </DropdownMenu>
-               </motion.div>
+               <PlaylistFolderCard 
+                 key={folder.id} 
+                 folder={folder} 
+                 playlists={playlists} 
+                 viewMode="list" 
+               />
             ))}
             
             {/* My Playlists Folder (System Default) */}
@@ -479,6 +489,26 @@ const Library: React.FC = () => {
           </section>
         </div>
       </div>
+
+      <FolderModal 
+        isOpen={isFolderModalOpen} 
+        onClose={() => {
+          setIsFolderModalOpen(false);
+          setSelectedFolderForEdit(null);
+        }}
+        folder={selectedFolderForEdit}
+      />
+
+      {selectedPlaylistForOptions && (
+        <PlaylistOptionsModal
+          playlist={selectedPlaylistForOptions}
+          folders={playlistFolders}
+          onClose={() => setSelectedPlaylistForOptions(null)}
+          onEdit={() => {}}
+          onDelete={() => deletePlaylist(selectedPlaylistForOptions.id)}
+          onMoveToFolder={(folderId) => movePlaylistToFolder(selectedPlaylistForOptions.id, folderId)}
+        />
+      )}
     </div>
   );
 };

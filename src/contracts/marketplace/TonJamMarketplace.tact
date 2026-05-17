@@ -117,10 +117,16 @@ contract TonJamMarketplace with Deployable {
         let listing: Listing? = self.listings.get(msg.nft_address);
         require(listing != null, "NFT not listed");
         let l: Listing = listing!!;
-        require(ctx.value >= l.price, "Insufficient funds");
         
-        let fee: Int = (l.price * self.fee_percentage) / 10000;
-        let seller_amount: Int = l.price - fee;
+        // Base Price P = l.price
+        // Buyer pays P + 5% = P * 105 / 100
+        let required_value: Int = (l.price * 105) / 100;
+        require(ctx.value >= required_value, "Insufficient funds including buyer fee");
+        
+        // Platform gets 10% (5% from buyer + 5% from seller)
+        let platform_fee: Int = (l.price * 10) / 100;
+        // Seller gets 95% (Price - 5% fee)
+        let seller_amount: Int = (l.price * 95) / 100;
 
         // Transfer funds to seller
         send(SendParameters{
@@ -132,7 +138,7 @@ contract TonJamMarketplace with Deployable {
         // Transfer fee to platform
         send(SendParameters{
             to: self.fee_destination,
-            value: fee,
+            value: platform_fee,
             mode: SendPayGasSeparately
         });
 
@@ -255,8 +261,17 @@ contract TonJamMarketplace with Deployable {
             // Transfer to winner
             let b: Address = a.highestBidder!!;
             
-            let fee: Int = (a.highestBid * self.fee_percentage) / 10000;
-            let seller_amount: Int = a.highestBid - fee;
+            // For auctions, the highestBid is what the winner sent (including buyer fee if we treated it that way)
+            // But usually the bidder sends exactly what they bid.
+            // If bid = 100, we want 10 to platform and 90 to seller? No, prompt says 5% + 5% = 10%.
+            // Let's stick to the same ratio.
+            // If highestBid is T (Total), then Base P = T / 1.05
+            // platform_fee = P * 0.10
+            // seller_amount = P * 0.95
+            
+            let base_price: Int = (a.highestBid * 100) / 105;
+            let platform_fee: Int = (base_price * 10) / 100;
+            let seller_amount: Int = a.highestBid - platform_fee; 
 
             send(SendParameters{
                 to: a.seller,
@@ -265,7 +280,7 @@ contract TonJamMarketplace with Deployable {
             });
             send(SendParameters{
                 to: self.fee_destination,
-                value: fee,
+                value: platform_fee,
                 mode: SendPayGasSeparately
             });
             

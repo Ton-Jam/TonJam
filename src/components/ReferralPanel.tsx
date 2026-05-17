@@ -38,7 +38,7 @@ const ReferralPanel: React.FC = () => {
 
   return (
     <div className="space-y-1">
-      <div className="glass bg-foreground/[0.01] rounded-xl p-2">
+      <div className="bg-white rounded-xl p-3 border border-zinc-100 shadow-sm">
         <div className="flex flex-col gap-1">
           <div className="flex-1 space-y-1">
             <div className="inline-flex items-center gap-1 px-1.5 py-1 rounded-full bg-muted/50 text-muted-foreground text-[8px] font-bold uppercase tracking-widest mb-1">
@@ -64,7 +64,7 @@ const ReferralPanel: React.FC = () => {
               </div>
               <button 
                 onClick={handleShare}
-                className="bg-blue-600 hover:bg-blue-500 text-foreground p-2 rounded-lg font-bold text-[9px] uppercase tracking-widest transition-all flex items-center justify-center"
+                className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg font-bold text-[9px] uppercase tracking-widest transition-all flex items-center justify-center"
               >
                 <Share2 className="w-4 h-4" />
               </button>

@@ -21,11 +21,9 @@ interface TrackOptionsModalProps {
   track: Track;
   onClose: () => void;
   onRemove?: () => void;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
 }
 
-const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, onRemove, onMoveUp, onMoveDown }) => {
+const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, onRemove }) => {
   const navigate = useNavigate();
   const { addNotification, addToQueue, likedTrackIds, toggleLikeTrack, userProfile } = useAudio();
   const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
@@ -112,15 +110,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
   ];
 
   if (onRemove) {
-    options.push({ id: 'remove', icon: Trash2, label: 'Remove from Queue', color: 'text-red-500', iconColor: 'text-red-500/40 group-hover:text-red-500', action: async () => { onRemove(); onClose(); } });
-  }
-
-  if (onMoveUp) {
-    options.push({ id: 'move-up', icon: ArrowUp, label: 'Move Up', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: async () => { onMoveUp(); onClose(); } });
-  }
-
-  if (onMoveDown) {
-    options.push({ id: 'move-down', icon: ArrowDown, label: 'Move Down', color: 'text-foreground', iconColor: 'text-muted-foreground group-hover:text-blue-400', action: async () => { onMoveDown(); onClose(); } });
+    options.push({ id: 'remove', icon: Trash2, label: 'Remove Signal', color: 'text-red-500', iconColor: 'text-red-500/40 group-hover:text-red-500', action: async () => { onRemove(); onClose(); } });
   }
 
   return (

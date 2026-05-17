@@ -38,6 +38,7 @@ import Wallet from '@/pages/Wallet';
 import Login from '@/pages/Login';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Staking from '@/pages/Staking';
+import DJKrupy from '@/pages/DJKrupy';
 import FollowersFollowing from '@/pages/FollowersFollowing';
 import AlbumDetails from '@/pages/AlbumDetails';
 import Governance from '@/pages/Governance';
@@ -220,6 +221,7 @@ const AppContent: React.FC = () => {
               <Route path="/profile-settings" element={<PageWrapper><ProtectedRoute><ProfileSettings /></ProtectedRoute></PageWrapper>} />
               <Route path="/tasks" element={<PageWrapper><ProtectedRoute><Tasks /></ProtectedRoute></PageWrapper>} />
               <Route path="/governance" element={<PageWrapper><Governance /></PageWrapper>} />
+              <Route path="/dj-krupy" element={<PageWrapper><DJKrupy /></PageWrapper>} />
               <Route path="/notifications" element={<PageWrapper><ProtectedRoute><Notifications /></ProtectedRoute></PageWrapper>} />
               <Route path="/post/:id" element={<PageWrapper><PostDetail /></PageWrapper>} />
               <Route path="/social" element={<PageWrapper><SocialFeedPage /></PageWrapper>} />
