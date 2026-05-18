@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Silence Firestore benign network errors 
@@ -37,7 +38,17 @@ export const db = initializeFirestore(app, {
 
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+export const functions = getFunctions(app);
 export const googleProvider = new GoogleAuthProvider();
+
+// Connect to emulator in development mode (optional)
+if (process.env.NODE_ENV === 'development' && location.hostname === 'localhost') {
+  try {
+    connectFunctionsEmulator(functions, 'localhost', 5001);
+  } catch (error) {
+    // Emulator already connected
+  }
+}
 
 // Add a specific test for the provided database ID
 async function testConnection(retries = 3) {
