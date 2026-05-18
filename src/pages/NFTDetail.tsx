@@ -727,13 +727,13 @@ const NFTDetail: React.FC = () => {
                 </div>
 
                 {isAuction && (
-                  <div className="flex flex-col gap-3 bg-white/5 backdrop-blur-md p-4 rounded-[2px] border border-white/10 text-right min-w-[220px] shadow-lg">
-                    <div className="flex justify-between items-center text-[8px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                  <div className="flex flex-col gap-1.5 bg-white/5 backdrop-blur-md p-3 rounded-[2px] border border-white/10 text-right min-w-[200px] shadow-lg">
+                    <div className="flex justify-between items-center text-[7px] font-bold uppercase tracking-widest text-muted-foreground/60">
                        <span>Highest Bid</span>
-                       <span className="flex items-center gap-1"><Clock className="h-2.5 w-2.5" /> Time Remaining</span>
+                       <span className="flex items-center gap-0.5"><Clock className="h-2 w-2" /> Time Remaining</span>
                     </div>
-                    <div className="flex justify-between items-center text-[14px] font-black tracking-tighter">
-                       <span className="text-foreground">{highestOfferPrice} <span className="text-[10px] font-bold text-muted-foreground">TON</span></span>
+                    <div className="flex justify-between items-center text-[12px] font-black tracking-tighter">
+                       <span className="text-foreground">{highestOfferPrice} <span className="text-[8px] font-bold text-muted-foreground">TON</span></span>
                        <span className="text-amber-500 tabular-nums">{timeRemaining || '00:00:00'}</span>
                     </div>
                   </div>
