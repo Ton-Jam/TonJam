@@ -8,6 +8,7 @@ import Discover from '@/pages/Discover';
 import JamSpace from '@/pages/JamSpace';
 import Marketplace from '@/pages/Marketplace';
 import Profile from '@/pages/Profile';
+import EditProfile from '@/pages/EditProfile';
 import UserProfile from '@/pages/UserProfile';
 import ArtistProfile from '@/pages/ArtistProfile';
 import ArtistDashboard from '@/pages/ArtistDashboard';
@@ -200,6 +201,7 @@ const AppContent: React.FC = () => {
               <Route path="/nft/:id" element={<PageWrapper><NFTDetail /></PageWrapper>} />
               <Route path="/explore/:type" element={<PageWrapper><ExploreList /></PageWrapper>} />
               <Route path="/profile" element={<PageWrapper><ProtectedRoute><Profile /></ProtectedRoute></PageWrapper>} />
+              <Route path="/edit-profile" element={<PageWrapper><ProtectedRoute><EditProfile /></ProtectedRoute></PageWrapper>} />
               <Route path="/user/:id" element={<PageWrapper><UserProfile /></PageWrapper>} />
               <Route path="/artist/:id" element={<PageWrapper><ArtistProfile /></PageWrapper>} />
               <Route path="/artist-dashboard" element={<PageWrapper><ProtectedRoute allowedRoles={['artist', 'admin']}><ArtistDashboard /></ProtectedRoute></PageWrapper>} />

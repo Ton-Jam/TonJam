@@ -29,8 +29,13 @@ import {
  Globe,
  Twitter,
  Instagram,
- Send
+ Send,
+ Search,
+ SlidersHorizontal,
+ Clock3,
+ Music2
 } from 'lucide-react';
+import { BackButton } from '@/components/BackButton';
 import { Avatar, AvatarImage, AvatarFallback } from"@/components/ui/avatar";
 import { 
   Tabs, 
@@ -49,7 +54,6 @@ import SocialFeed from '@/components/SocialFeed';
 import UserCard from '@/components/UserCard';
 import SellNFTModal from '@/components/SellNFTModal';
 import ManageNFTModal from '@/components/ManageNFTModal';
-import EditUserProfileModal from '@/components/EditUserProfileModal';
 import UserArtistVerificationModal from '@/components/UserArtistVerificationModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import VerificationTracker from '@/components/VerificationTracker';
@@ -94,6 +98,9 @@ const Profile: React.FC = () => {
  const [selectedNftForManaging, setSelectedNftForManaging] = useState<NFTItem | null>(null);
  const [newPostContent, setNewPostContent] = useState('');
  const [isUnstakeModalOpen, setIsUnstakeModalOpen] = useState(false);
+ const [searchQuery, setSearchQuery] = useState('');
+ const [sortOption, setSortOption] = useState<'newest' | 'popular' | 'price-low' | 'price-high'>('newest');
+ const [showFilters, setShowFilters] = useState(false);
 
  /* Check for Spotify verification */
  const isSpotifyVerified = useMemo(() => {
@@ -202,6 +209,16 @@ const Profile: React.FC = () => {
  setIsUploading(false);
  }
  };
+
+ const userReleases = useMemo(() => {
+  let tracks = allTracks.filter(t => t.artistId === localUser.uid);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    tracks = tracks.filter(t => t.title.toLowerCase().includes(q) || t.artist?.toLowerCase().includes(q));
+  }
+  if (sortOption === 'popular') tracks.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+  return tracks;
+ }, [allTracks, localUser.uid, searchQuery, sortOption]);
 
  const feedPosts = useMemo(() => {
  return posts.filter(p => p.userId === userProfile.uid || followedUserIds.includes(p.userId));
@@ -361,7 +378,8 @@ const Profile: React.FC = () => {
  return (
  <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
  {/* Banner Section */}
- <div className="relative h-[15vh] sm:h-[25vh] md:h-[40vh] w-full overflow-hidden bg-blue-950 border-b-[2px] border-blue-600/30">
+ <div className="relative h-[25vh] sm:h-[40vh] md:h-[50vh] w-full overflow-hidden bg-blue-950">
+ <BackButton className="absolute top-4 left-4 z-50 bg-black/50 text-white hover:bg-black/70" />
  <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.uid}`, 1200, 400)} className="w-full h-full object-cover opacity-80" alt="" />
  <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
  
@@ -426,19 +444,11 @@ const Profile: React.FC = () => {
           </>
         ) : (
           <button 
-            onClick={() => setIsEditModalOpen(true)}
+            onClick={() => navigate('/edit-profile')}
             className="px-6 py-2 bg-background text-foreground rounded-full font-black text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
           >
             Edit Profile
           </button>
-        )}
-
-        {isEditModalOpen && (
-          <EditUserProfileModal 
-            user={userProfile} 
-            onClose={() => setIsEditModalOpen(false)}
-            onUpdate={setUserProfile}
-          />
         )}
       </div>
     </div>
@@ -502,31 +512,95 @@ const Profile: React.FC = () => {
 
 
   {/* Tab Navigation */}
-  <div className="sticky top-[var(--header-height,64px)] z-40 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 mb-6 py-2">
+  <div className="w-full sticky top-[0px] z-40 bg-background/95 backdrop-blur-md border-b border-border/10 mb-2">
     <div className="max-w-7xl mx-auto px-4">
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-        {[
-          { id: 'feed', label: 'Activity' },
-          { id: 'overview', label: 'Overview' },
-          { id: 'inventory', label: 'Inventory' },
-          { id: 'releases', label: 'Releases', hidden: !userProfile.isVerifiedArtist },
-          { id: 'sequences', label: 'Playlists' },
-          { id: 'staking', label: 'Staking' }
-        ].filter(t => !t.hidden).map(tab => (
-          <button 
-            key={tab.id} 
-            onClick={() => setActiveTab(tab.id as any)} 
-            className={cn(
-              "px-5 py-2.5 text-xs font-bold transition-all rounded-full whitespace-nowrap",
-              activeTab === tab.id 
-                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-md" 
-                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-            )} 
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="flex items-center justify-between py-2">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'feed', label: 'Activity' },
+            { id: 'overview', label: 'Overview' },
+            { id: 'inventory', label: 'Inventory' },
+            { id: 'releases', label: 'Releases', hidden: !userProfile.isVerifiedArtist },
+            { id: 'sequences', label: 'Playlists' },
+            { id: 'staking', label: 'Staking' }
+          ].filter(t => !t.hidden).map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={cn(
+                "relative px-4 py-2 text-[11px] font-black uppercase tracking-widest transition-all rounded-full whitespace-nowrap",
+                activeTab === tab.id ? "text-white" : "text-muted-foreground hover:text-white"
+              )}
+            >
+              {tab.label}
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="profile-tab-blob"
+                  className="absolute inset-0 bg-blue-600 rounded-full -z-10 shadow-lg shadow-blue-600/30"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
+        
+        <button 
+          onClick={() => setShowFilters(!showFilters)}
+          className={cn(
+            "p-2 rounded-full transition-all border",
+            showFilters ? "bg-white text-black border-white" : "bg-white/5 text-white/40 border-white/5 hover:border-white/20"
+          )}
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+        </button>
       </div>
+
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="py-4 border-t border-white/5 flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1 group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
+                <input 
+                  type="text"
+                  placeholder="Search inside content..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all font-medium"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                {[
+                  { id: 'newest', label: 'Newest', icon: Clock3 },
+                  { id: 'popular', label: 'Popular', icon: Zap },
+                  { id: 'price-low', label: 'Price: Low', icon: ArrowDown, hidden: activeTab !== 'inventory' },
+                  { id: 'price-high', label: 'Price: High', icon: ArrowUp, hidden: activeTab !== 'inventory' }
+                ].filter(o => !o.hidden).map(opt => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setSortOption(opt.id as any)}
+                    className={cn(
+                      "px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border whitespace-nowrap",
+                      sortOption === opt.id 
+                        ? "bg-white/10 border-white/20 text-white" 
+                        : "bg-transparent border-white/5 text-white/40 hover:border-white/10"
+                    )}
+                  >
+                    <opt.icon className="w-3.5 h-3.5" />
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   </div>
 
@@ -714,10 +788,16 @@ const Profile: React.FC = () => {
         {activeTab === 'releases' && (
           <div className="p-4 space-y-4 animate-in fade-in duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {allTracks.filter(t => t.artistId === localUser.uid).map(track => (
+              {userReleases.map(track => (
                 <TrackCard key={track.id} track={track} variant="row" />
               ))}
             </div>
+            {userReleases.length === 0 && (
+               <div className="py-20 text-center flex flex-col items-center justify-center bg-white/5 rounded-3xl">
+                <Music2 className="h-10 w-10 text-muted-foreground/30 mb-4" />
+                <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest">No releases found.</p>
+              </div>
+            )}
           </div>
         )}
 

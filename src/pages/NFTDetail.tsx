@@ -727,14 +727,14 @@ const NFTDetail: React.FC = () => {
                 </div>
 
                 {isAuction && (
-                  <div className="flex flex-col gap-1.5 bg-white/5 backdrop-blur-md p-3 rounded-[2px] border border-white/10 text-right min-w-[200px] shadow-lg">
-                    <div className="flex justify-between items-center text-[7px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                       <span>Highest Bid</span>
-                       <span className="flex items-center gap-0.5"><Clock className="h-2 w-2" /> Time Remaining</span>
+                  <div className="bg-white/5 backdrop-blur-md p-2 rounded-[2px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
+                    <div className="flex flex-col items-start">
+                        <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60">Highest Bid</span>
+                        <span className="text-[10px] font-black tracking-tighter text-foreground">{highestOfferPrice} TON</span>
                     </div>
-                    <div className="flex justify-between items-center text-[12px] font-black tracking-tighter">
-                       <span className="text-foreground">{highestOfferPrice} <span className="text-[8px] font-bold text-muted-foreground">TON</span></span>
-                       <span className="text-amber-500 tabular-nums">{timeRemaining || '00:00:00'}</span>
+                    <div className="flex flex-col items-end">
+                        <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-0.5"><Clock className="h-2 w-2" /> Time</span>
+                        <span className="text-[10px] font-black tracking-tighter text-amber-500 tabular-nums">{timeRemaining || '00:00:00'}</span>
                     </div>
                   </div>
                 )}
@@ -901,7 +901,7 @@ const NFTDetail: React.FC = () => {
                       </div>
                     )}
                     
-                    {dynamicMetadata && dynamicMetadata.traits && (
+                    {(localNft.traits || (dynamicMetadata && dynamicMetadata.traits)) && (
                       <div className="col-span-full space-y-4">
                         <div className="flex items-center gap-4">
                           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-blue-500/20"></div>
@@ -909,7 +909,7 @@ const NFTDetail: React.FC = () => {
                           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-blue-500/20"></div>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {dynamicMetadata.traits.map((trait) => (
+                          {(localNft.traits || dynamicMetadata!.traits!).map((trait) => (
                             <div key={trait.trait_type} className="bg-white/[0.03] border border-white/5 p-6 rounded-[20px] hover:border-blue-500/30 transition-all group">
                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] block mb-4">{trait.trait_type}</span>
                               <span className="text-sm font-black text-foreground tracking-tight uppercase">{trait.value}</span>

@@ -349,7 +349,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
+      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isProfile && !isUserProfile && (
         <motion.header 
           className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md border-b border-border/40' : 'bg-transparent'}`}
         >

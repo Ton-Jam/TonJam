@@ -2,12 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BackButton } from "@/components/BackButton";
 import { Activity, TrendingUp, BarChart2, Coins } from "lucide-react";
-import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
-import { ChartRevenue } from "@/components/ChartRevenue";
-import { ChartArtifacts } from "@/components/ChartArtifacts";
+import { FloorPriceChart } from "@/components/FloorPriceChart";
+import { StreamingStatsChart } from "@/components/StreamingStatsChart";
+import { NFTChart } from "@/components/NFTChart";
+import { ArtistAnalyticsChart } from "@/components/ArtistAnalyticsChart";
 
 export default function ArtistAnalytics() {
   const navigate = useNavigate();
+
+  // Mock data for charts
+  const floorPriceData = [{ date: "May 1", price: 1.2 }, { date: "May 2", price: 1.5 }, { date: "May 3", price: 1.3 }, { date: "May 4", price: 1.8 }];
+  const streamingData = [{ day: "Mon", plays: 1200 }, { day: "Tue", plays: 1800 }, { day: "Wed", plays: 1500 }, { day: "Thu", plays: 2200 }];
+  const nftData = [{ date: "May 1", value: 100 }, { date: "May 2", value: 120 }, { date: "May 3", value: 110 }, { date: "May 4", value: 150 }];
+  const performanceData = [{ subject: 'Reach', A: 80 }, { subject: 'Sales', A: 70 }, { subject: 'Growth', A: 90 }, { subject: 'Engagement', A: 85 }];
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 relative overflow-x-hidden">
@@ -29,43 +36,15 @@ export default function ArtistAnalytics() {
 
       <div className="relative z-10 max-w-5xl mx-auto p-4 sm:p-6 space-y-8 mt-4">
         <div className="space-y-1">
-          <h2 className="text-2xl font-black uppercase tracking-tighter">Data Insights</h2>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Monitor your artifact performance and protocol revenue</p>
+          <h2 className="text-2xl font-black uppercase tracking-tighter">TonJam Insights</h2>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Monitor your artifact performance, streaming stats, and protocol revenue</p>
         </div>
 
-        {/* Popularity Trends */}
-        <section className="space-y-4">
-          <h3 className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Popularity Trends
-          </h3>
-          <div className="glass p-1 rounded-xl">
-             <ChartAreaInteractive />
-          </div>
-        </section>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Revenue Breakdown */}
-          <section className="space-y-4">
-            <h3 className="text-sm font-black uppercase tracking-widest text-emerald-400 flex items-center gap-2">
-              <Coins className="w-4 h-4" />
-              Revenue Breakdown
-            </h3>
-            <div className="glass p-1 rounded-xl">
-               <ChartRevenue />
-            </div>
-          </section>
-
-          {/* Performance of Artifacts */}
-          <section className="space-y-4">
-            <h3 className="text-sm font-black uppercase tracking-widest text-purple-400 flex items-center gap-2">
-              <BarChart2 className="w-4 h-4" />
-              Artifact Performance
-            </h3>
-            <div className="glass p-1 rounded-xl">
-              <ChartArtifacts />
-            </div>
-          </section>
+          <FloorPriceChart data={floorPriceData} />
+          <StreamingStatsChart data={streamingData} />
+          <NFTChart data={nftData} />
+          <ArtistAnalyticsChart data={performanceData} />
         </div>
       </div>
     </div>

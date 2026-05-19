@@ -83,10 +83,16 @@ const Login: React.FC = () => {
   const getErrorMessage = (error: any) => {
     const code = error.code || error.message || '';
     if (code.includes('auth/invalid-credential')) {
+      if (error.message?.includes('invalid_client') || error.message?.includes('client secret')) {
+        return 'Firebase Google Auth is misconfigured (Invalid Client Secret). Please check Google Auth settings in Firebase Console.';
+      }
       return 'Incorrect email or password.';
     }
     if (code.includes('auth/user-not-found')) {
       return 'No account found with this email.';
+    }
+    if (code.includes('auth/operation-not-allowed')) {
+      return 'This sign-in method is not enabled in Firebase Console.';
     }
     return error.message || 'An error occurred during authentication.';
   };
@@ -297,7 +303,15 @@ const Login: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2.5">
                   <Button
                     variant="outline"
-                    onClick={() => signInWithGoogle()}
+                    disabled={isLoading}
+                    onClick={async () => {
+                      setIsLoading(true);
+                      try {
+                        await signInWithGoogle();
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
                     className="h-10 border-border/50 hover:bg-muted/50 text-foreground font-bold text-[9px] uppercase tracking-widest gap-2"
                   >
                     <Chrome className="h-3.5 w-3.5 text-amber-500" />

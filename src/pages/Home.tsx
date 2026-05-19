@@ -1,4 +1,5 @@
 import GetFreeTokensModal from '@/components/GetFreeTokensModal';
+import BuyTJModal from '@/components/BuyTJModal';
 import CompleteProfilePrompt from '@/components/CompleteProfilePrompt';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -19,6 +20,8 @@ import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
 import NFTAlphaCarousel from '@/components/NFTAlphaCarousel';
 import SectionHeader from '@/components/SectionHeader';
 import DiscoveryFeed from '@/components/DiscoveryFeed';
+import ArtistSlider from '@/components/ArtistSlider';
+import TrendingBannerCarousel from '@/components/TrendingBannerCarousel';
 import { SearchCommandDialog } from '@/components/SearchCommandDialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -153,6 +156,7 @@ const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'discovery'>('overview');
   const [showWelcome, setShowWelcome] = useState(false);
   const [isTokensModalOpen, setIsTokensModalOpen] = useState(false);
+  const [isBuyTJModalOpen, setIsBuyTJModalOpen] = useState(false);
   const [visibleNFTCount, setVisibleNFTCount] = useState(4);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
@@ -357,7 +361,12 @@ const Home: React.FC = () => {
   /* Removed local discoverWeekly memo as it is now in useAudio() */
 
   return (
-    <div className="page-container w-full pt-[30px] sm:pt-[46px] bg-white text-neutral-950 min-h-screen">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="page-container w-full pt-[30px] sm:pt-[46px] bg-white text-neutral-950 min-h-screen"
+    >
       <div className="absolute top-0 left-0 right-0 h-10 bg-zinc-100 border-b border-zinc-200 flex items-center overflow-hidden pointer-events-none z-50">
         <motion.div 
           animate={{ x: [0, -1000] }}
@@ -371,6 +380,7 @@ const Home: React.FC = () => {
       </div>
       
       <GetFreeTokensModal isOpen={isTokensModalOpen} onClose={() => setIsTokensModalOpen(false)} />
+      {isBuyTJModalOpen && <BuyTJModal onClose={() => setIsBuyTJModalOpen(false)} onSuccess={() => setIsBuyTJModalOpen(false)} />}
       <AnimatePresence>
         {showWelcome && (
           <motion.div
@@ -532,7 +542,14 @@ const Home: React.FC = () => {
             {/* Featured Sponsored Posts Carousel */}
             <div className="mt-4">
               <SectionHeader title="Featured" viewAllLink="/explore" />
-              <AutoCarousel items={carouselItems} onCtaClick={handleCtaClick} />
+              <TrendingBannerCarousel 
+                banners={carouselItems.map(item => ({
+                  id: item.id,
+                  title: item.title,
+                  image: item.imageUrl,
+                  link: item.link
+                }))} 
+              />
             </div>
 
             {/* Hero Section - Neural Protocol Aesthetic */}
@@ -577,6 +594,13 @@ const Home: React.FC = () => {
                       <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400 group-hover:rotate-12 transition-transform" />
                       Market
                     </Link>
+                    <button 
+                      onClick={() => setIsBuyTJModalOpen(true)}
+                      className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-purple-600/10 border border-purple-500/30 hover:bg-purple-600/20 text-white font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 backdrop-blur-md text-[11px] sm:text-base"
+                    >
+                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400 group-hover:rotate-12 transition-transform" />
+                      Buy Jam Token
+                    </button>
                   </div>
                 </div>
 
@@ -1104,13 +1128,10 @@ const Home: React.FC = () => {
                 ))}
               </HomeSection>
             ) : (
-              <HomeSection title="Rising Stars" icon={UserCheck} link="/explore/artists?title=Rising Stars&filter=rising">
-                {recommendedArtists.map(artist => (
-                  <div key={`artist-${artist.uid}`} className="flex-shrink-0 w-[140px] sm:w-[160px] snap-start">
-                    <ArtistCard artist={artist} />
-                  </div>
-                ))}
-              </HomeSection>
+              <section className="section-container">
+                <SectionHeader title="Rising Stars" viewAllLink="/explore/artists?title=Rising Stars&filter=rising" />
+                <ArtistSlider artists={recommendedArtists} />
+              </section>
             )}
 
             {/* Recommended NFTs */}
@@ -1233,7 +1254,7 @@ const Home: React.FC = () => {
         </p>
       </section>
       <SearchCommandDialog />
-    </div>
+    </motion.div>
   );
 };
 

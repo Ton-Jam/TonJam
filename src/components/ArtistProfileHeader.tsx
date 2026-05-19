@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import LikeButton from './LikeButton';
-import { Twitter, Instagram, Globe, Send, Disc, CheckCircle2, LayoutDashboard, Settings, Hammer, Edit2, Zap } from 'lucide-react';
+import { Twitter, Instagram, Globe, Send, Disc, CheckCircle2, LayoutDashboard, Settings, Hammer, Edit2, Zap, UserPlus, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAudio } from '@/context/AudioContext';
 import { toast } from 'sonner';
@@ -146,13 +146,23 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
               <Button 
                 onClick={handleFollow}
                 className={cn(
-                  "px-6 h-9 rounded-full font-black text-[9px] uppercase tracking-widest transition-all active:scale-95",
+                  "px-6 h-9 rounded-full font-black text-[9px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2",
                   isFollowing 
                     ? "bg-muted text-foreground border border-border hover:bg-muted/80" 
                     : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg"
                 )}
               >
-                {isFollowing ? "Following" : "Follow"}
+                {isFollowing ? (
+                  <>
+                    <UserCheck className="w-3 h-3" />
+                    Following
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-3 h-3" />
+                    Follow
+                  </>
+                )}
               </Button>
               <Button 
                 onClick={onTip}
