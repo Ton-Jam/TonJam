@@ -505,29 +505,29 @@ const NFTDetail: React.FC = () => {
                 </div>
 
                 {/* Edition Badge */}
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
-                  <div className="px-4 py-4 bg-background/60 backdrop-blur-xl border border-border rounded-[8px] text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {localNft.edition} <span className="text-muted-foreground ml-4">Edition</span>
+                <div className="absolute top-4 left-4 flex flex-col gap-1.5 sm:top-6 sm:left-6">
+                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                    {localNft.edition} <span className="text-muted-foreground ml-2 sm:ml-4">Edition</span>
                   </div>
-                  <div className="px-4 py-4 bg-background/60 backdrop-blur-xl border border-border rounded-[8px] text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {localNft.minted || 0} <span className="text-muted-foreground ml-2">Minted / {localNft.supply || 0} Total</span>
+                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                    {localNft.minted || 0} <span className="text-muted-foreground ml-1.5 sm:ml-2">Minted / {localNft.supply || 0} Total</span>
                   </div>
-                  <div className="px-4 py-4 bg-background/60 backdrop-blur-xl border border-border rounded-[8px] text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {(localNft.supply || 0) - (localNft.minted || 0)} <span className="text-muted-foreground ml-2">Remaining</span>
+                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                    {(localNft.supply || 0) - (localNft.minted || 0)} <span className="text-muted-foreground ml-1.5 sm:ml-2">Remaining</span>
                   </div>
                 </div>
 
                 {/* Live Auction Badge */}
                 {isAuction && (
-                  <div className="absolute bottom-6 left-6 right-6">
-                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-4 py-4 rounded-[12px] flex items-center justify-between shadow-2xl flex-wrap gap-4">
-                      <div className="flex items-center gap-4 px-4 py-4 bg-orange-500 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)]">
-                        <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-                        <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Live Auction Bidding Active</span>
+                  <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
+                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-3 py-2 sm:px-4 sm:py-4 rounded-[12px] flex items-center justify-between shadow-2xl flex-wrap gap-2 sm:gap-4">
+                      <div className="flex items-center gap-2 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-4 bg-orange-500 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)]">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+                        <span className="text-[8px] sm:text-[10px] font-bold text-white uppercase tracking-[0.2em]">Live Auction Active</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">Time Remaining</span>
-                        <span className="text-[12px] font-black text-amber-500 uppercase tracking-widest">{timeRemaining || 'Loading...'}</span>
+                        <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5 sm:mb-1">Time Remaining</span>
+                        <span className="text-[10px] sm:text-[12px] font-black text-amber-500 uppercase tracking-widest">{timeRemaining || 'Loading...'}</span>
                       </div>
                     </div>
                   </div>
@@ -680,14 +680,14 @@ const NFTDetail: React.FC = () => {
                 </div>
               </div>
 
-              <h1 className="text-[24px] md:text-[36px] font-bold tracking-tighter uppercase text-foreground leading-[1] mb-2">{localNft.title}</h1>
+              <h1 className="text-[18px] sm:text-[24px] md:text-[36px] font-bold tracking-tighter uppercase text-foreground leading-[1] mb-2">{localNft.title}</h1>
               
               <ReactionsSection targetId={localNft.id} targetType="nft" />
 
-              <div className="flex items-center justify-between py-4 mt-2">
+              <div className="flex items-center justify-between py-2 sm:py-4 mt-1 sm:mt-2">
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Protocol ID</span>
-                  <span className="text-[10px] font-mono text-blue-500/60 uppercase tracking-widest">{localNft.id.toUpperCase()}</span>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Protocol ID</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono text-blue-500/60 uppercase tracking-widest">{localNft.id.toUpperCase()}</span>
                 </div>
                 {localNft.contractAddress && (
                   <a href={`https://tonviewer.com/${localNft.contractAddress}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-blue-400 transition-colors" >
@@ -698,29 +698,29 @@ const NFTDetail: React.FC = () => {
             </header>
 
             {/* Pricing Section - Hardware Style */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-[2px] p-8 mb-4 border border-white/10 relative overflow-hidden group">
+            <div className="bg-white/5 backdrop-blur-xl rounded-[2px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000"><Zap className="h-64 w-64 text-blue-500" /></div>
               
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
-                <div className="space-y-4">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 relative z-10">
+                <div className="space-y-2 sm:space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`}></div>
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
+                    <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`}></div>
+                    <span className="text-[8px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
                       {isAuction ? 'Current Highest Bid' : 'Valuation Protocol'}
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-[48px] md:text-[64px] font-black text-foreground tracking-tighter leading-none">
+                  <div className="flex items-baseline gap-2 sm:gap-3">
+                    <span className="text-[32px] sm:text-[48px] md:text-[64px] font-black text-foreground tracking-tighter leading-none">
                       {isAuction ? (highestOfferPrice > 0 ? highestOfferPrice : (localNft.startingBid || localNft.price)) : localNft.price}
                     </span>
-                    <span className="text-[18px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
+                    <span className="text-[14px] sm:text-[18px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest px-3 py-1.5 bg-white/5 rounded-full border border-white/5">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest px-2.5 py-1 sm:px-3 sm:py-1.5 bg-white/5 rounded-full border border-white/5">
                       ≈ ${(parseFloat(localNft.price) * 5.2).toLocaleString()} USD
                     </p>
-                    <div className="h-px w-8 bg-white/10"></div>
-                    <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">+12.4% Vol</p>
+                    <div className="h-px w-6 sm:w-8 bg-white/10"></div>
+                    <p className="text-[8px] sm:text-[9px] font-bold text-emerald-500 uppercase tracking-widest">+12.4% Vol</p>
                   </div>
                 </div>
 
@@ -984,44 +984,44 @@ const NFTDetail: React.FC = () => {
                     className="space-y-3"
                   >
                     {[...(localNft.history || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((h, i) => (
-                      <div key={`history-${i}`} className="flex items-center justify-between p-6 bg-white/[0.02] rounded-[24px] hover:bg-white/[0.04] transition-all group overflow-hidden relative">
+                      <div key={`history-${i}`} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-[16px] hover:bg-white/[0.04] transition-all group overflow-hidden relative">
                         {/* Hardware scanline effect */}
                         <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
                         
-                        <div className="flex items-center gap-6 relative z-10">
+                        <div className="flex items-center gap-3 relative z-10">
                           <div className={cn(
-                            "w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-lg",
+                            "w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-lg",
                             h.event === 'Minted' ? "bg-blue-500/10 text-blue-500" : "bg-emerald-500/10 text-emerald-500"
                           )}>
-                            {h.event === 'Minted' ? <Wand2 className="h-6 w-6" /> : <Handshake className="h-6 w-6" />}
+                            {h.event === 'Minted' ? <Wand2 className="h-4 w-4" /> : <Handshake className="h-4 w-4" />}
                           </div>
-                          <div className="flex flex-col gap-2">
-                            <span className="text-base font-black text-foreground uppercase tracking-tight flex items-center gap-3">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-black text-foreground uppercase tracking-tight flex items-center gap-2">
                               {h.event}
-                              <div className={cn("w-1.5 h-1.5 rounded-full", h.event === 'Minted' ? "bg-blue-500" : "bg-emerald-500")}></div>
+                              <div className={cn("w-1 h-1 rounded-full", h.event === 'Minted' ? "bg-blue-500" : "bg-emerald-500")}></div>
                             </span>
-                            <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                              <span>Layer_Protocol: {h.event === 'Minted' ? 'MINT' : 'TRANSFER'}</span>
-                              <div className="h-px w-4 bg-white/10"></div>
+                            <div className="flex items-center gap-2 text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                              <span>Layer: {h.event === 'Minted' ? 'MINT' : 'TRANSFER'}</span>
+                              <div className="h-px w-2 bg-white/10"></div>
                               <span>{h.date}</span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-12 relative z-10">
+                        <div className="flex items-center gap-6 relative z-10">
                           <div className="text-right hidden md:block">
-                            <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-2">Sync_Origin</p>
-                            <span className="text-[11px] font-mono text-primary font-black uppercase tracking-widest">
-                               {h.from === 'Vault' ? 'GENESIS_VAULT' : `@${(h.from || '').slice(0, 8)}`}
+                            <p className="text-[7px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-0.5">Origin</p>
+                            <span className="text-[9px] font-mono text-primary font-black uppercase tracking-widest">
+                               {h.from === 'Vault' ? 'GENESIS' : `@${(h.from || '').slice(0, 6)}`}
                             </span>
                           </div>
                           <div className="text-right">
-                             <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-2">Recipient_Node</p>
-                             <span className="text-[11px] font-mono text-primary font-black uppercase tracking-widest">@{(h.to || '').slice(0, 8)}</span>
+                             <p className="text-[7px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-0.5">Recipient</p>
+                             <span className="text-[9px] font-mono text-primary font-black uppercase tracking-widest">@{(h.to || '').slice(0, 6)}</span>
                              {h.price && (
-                               <div className="flex items-center justify-end gap-2 mt-2">
-                                  <span className="text-xl font-black text-foreground tracking-tighter">{h.price}</span>
-                                  <span className="text-[10px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
+                               <div className="flex items-center justify-end gap-1 mt-0.5">
+                                  <span className="text-[10px] font-black text-foreground tracking-tighter">{h.price}</span>
+                                  <span className="text-[7px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
                                </div>
                              )}
                           </div>
@@ -1043,7 +1043,7 @@ const NFTDetail: React.FC = () => {
                       localNft.offers.map((o) => {
                         const isTopBid = parseFloat(o.price) === highestOfferPrice;
                         return (
-                          <div key={o.id} className={`group p-6 bg-white/[0.02] border transition-all rounded-[24px] flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? 'border-amber-500/50 bg-amber-500/[0.05]' : 'border-blue-500/50 bg-blue-500/[0.05]') : 'border-white/5 opacity-80 hover:opacity-100'}`} >
+                          <div key={o.id} className={`group p-4 bg-white/[0.02] border transition-all rounded-[16px] flex flex-col md:flex-row items-center justify-between gap-4 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? 'border-amber-500/50 bg-amber-500/[0.05]' : 'border-blue-500/50 bg-blue-500/[0.05]') : 'border-white/5 opacity-80 hover:opacity-100'}`} >
                             <div className="flex items-center gap-6 w-full md:w-auto">
                               <div className="relative">
                                 <div className={`w-20 h-20 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-2xl`}>

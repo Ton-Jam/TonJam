@@ -403,38 +403,50 @@ const TrackDetail: React.FC = () => {
           {/* Right Column: Metadata & Content */}
           <div className="lg:col-span-7 space-y-4">
             <header>
-              <h1 className="text-[32px] md:text-[56px] font-black tracking-tighter uppercase text-foreground leading-[0.9] mb-2">
-                {track.title}
-              </h1>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h1 className="text-[32px] md:text-[56px] font-black tracking-tighter uppercase text-foreground leading-[0.9]">
+                  {track.title}
+                </h1>
+                {track.isExplicit && (
+                  <span className="inline-block bg-red-500/15 text-red-500 border border-red-500/30 px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-[0.2em] select-none shadow-lg shadow-red-500/5">
+                    EXPLICIT
+                  </span>
+                )}
+              </div>
               
               <ReactionsSection targetId={track.id} targetType="track" />
 
-              <div className="flex flex-wrap gap-4 mt-2">
-                <div className="flex items-center gap-4">
-                  <Activity className="h-4 w-4 text-muted-foreground/50" />
-                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">{track.playCount?.toLocaleString() || '0'} Streams</span>
+              <div className="flex flex-wrap gap-2 md:gap-3 mt-4">
+                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
+                  <Activity className="h-3 w-3 text-cyan-500" />
+                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{track.playCount?.toLocaleString() || '0'} Streams</span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <Clock className="h-4 w-4 text-muted-foreground/50" />
-                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
+                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
+                  <Clock className="h-3 w-3 text-purple-500" />
+                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <Music2 className="h-4 w-4 text-muted-foreground/50" />
-                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">{track.genre}</span>
+                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
+                  <Music2 className="h-3 w-3 text-pink-500" />
+                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{track.genre}</span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">BPM: {track.bpm || 'N/A'}</span>
+                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
+                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">BPM: <span className="text-cyan-400 font-extrabold">{track.bpm || '120'}</span></span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">Key: {track.key || 'N/A'}</span>
+                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
+                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">Key: <span className="text-purple-400 font-extrabold">{track.key || 'C# min'}</span></span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">Bitrate: {track.bitrate || 'N/A'}</span>
+                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-400">Bitrate: {track.bitrate || 'FLAC'}</span>
+                </div>
+                <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
+                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-foreground/90">
+                    Rating: <span className={track.isExplicit ? 'text-red-500 font-extrabold' : 'text-green-500 font-extrabold'}>{track.isExplicit ? 'EXPLICIT (18+)' : 'CLEAN'}</span>
+                  </span>
                 </div>
                 {track.mood && (
-                  <div className="flex items-center gap-4">
-                    <Sparkles className="h-4 w-4 text-muted-foreground/50" />
-                    <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">{track.mood}</span>
+                  <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
+                    <Sparkles className="h-3 w-3 text-amber-500" />
+                    <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{track.mood}</span>
                   </div>
                 )}
               </div>
@@ -492,6 +504,7 @@ const TrackDetail: React.FC = () => {
                             <DetailItem label="Key" value={track.key || 'C# Minor'} />
                             <DetailItem label="Bitrate" value={track.bitrate || 'FLAC'} />
                             <DetailItem label="Mood" value={track.mood || 'Not Specified'} />
+                            <DetailItem label="Content Rating" value={track.isExplicit ? 'Explicit (18+)' : 'Clean Version'} />
                           </AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="metadata">

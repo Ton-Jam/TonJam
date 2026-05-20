@@ -522,7 +522,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder={replyingToId ? "Synthesizing reply..." : "Broadcast feedback..."}
-                    className="w-full bg-zinc-900 border border-white/5 rounded-2xl h-11 px-4 text-sm font-bold focus:ring-1 focus:ring-blue-500/30 transition-all outline-none placeholder:text-zinc-600"
+                    className="w-full bg-white border border-blue-500/40 rounded-2xl h-11 pl-4 pr-12 text-sm font-bold text-blue-600 focus:ring-1 focus:ring-blue-500/50 transition-all outline-none placeholder:text-blue-500/50"
                   />
                   <Button 
                     type="submit" 

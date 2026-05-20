@@ -16,13 +16,13 @@ const DiscoveryFeed: React.FC = () => {
   const { recommendedTracks, recommendedNFTs } = useMemo(() => getRecommendations(), [getRecommendations]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pt-6">
+    <div className="space-y-8 animate-in fade-in duration-700 pt-0">
       {/* Discover Weekly Banner - High Fidelity */}
       {discoverWeekly && (
         <section className="mb-4">
           <div 
             onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
-            className="relative h-40 sm:h-72 rounded-3xl overflow-hidden cursor-pointer group shadow-2xl border border-white/5"
+            className="relative h-40 sm:h-72 rounded-3xl overflow-hidden cursor-pointer group shadow-none border border-white/5 bg-background"
           >
             <img 
               src={discoverWeekly.coverUrl} 
@@ -40,7 +40,7 @@ const DiscoveryFeed: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Badge className="bg-blue-600 hover:bg-blue-700 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] rounded-md text-white shadow-lg shadow-blue-600/40 px-3 py-1 border-none cursor-help">
+                        <Badge className="bg-blue-600 hover:bg-blue-700 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] rounded-md text-white px-3 py-1 border-none cursor-help">
                           Neural.Protocol_07
                         </Badge>
                       </TooltipTrigger>
@@ -50,10 +50,10 @@ const DiscoveryFeed: React.FC = () => {
                     </Tooltip>
                     <span className="text-[10px] sm:text-xs font-bold text-white/40 uppercase tracking-[0.2em] hidden sm:block">Update_Synced.2024</span>
                   </div>
-                  <h2 className="text-4xl sm:text-7xl font-black uppercase tracking-tighter text-white leading-[0.8] drop-shadow-2xl">
+                  <h2 className="text-4xl sm:text-7xl font-black uppercase tracking-tighter text-white leading-[0.8]">
                     Discover<br />Weekly
                   </h2>
-                  <p className="text-xs sm:text-lg text-white/60 font-medium leading-relaxed max-w-md line-clamp-2 sm:line-clamp-none">
+                  <p className="text-xs sm:text-lg text-blue-400 font-extrabold leading-relaxed max-w-md line-clamp-2 sm:line-clamp-none">
                     Personalized frequency stream synthesized from your unique neural listening patterns and collection data.
                   </p>
                 </div>
@@ -63,7 +63,7 @@ const DiscoveryFeed: React.FC = () => {
                     <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">Active Relay</span>
                     <span className="text-[10px] font-bold text-white/80">{discoverWeekly.trackIds?.length || 0} Artists Synced</span>
                   </div>
-                  <button className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group/play">
+                  <button className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-500 group/play">
                     <Play className="h-6 w-6 sm:h-10 sm:w-10 fill-black translate-x-0.5 group-hover:scale-110 transition-transform" />
                   </button>
                 </div>

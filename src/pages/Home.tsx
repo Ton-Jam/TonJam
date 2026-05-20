@@ -381,6 +381,11 @@ const Home: React.FC = () => {
       
       <GetFreeTokensModal isOpen={isTokensModalOpen} onClose={() => setIsTokensModalOpen(false)} />
       {isBuyTJModalOpen && <BuyTJModal onClose={() => setIsBuyTJModalOpen(false)} onSuccess={() => setIsBuyTJModalOpen(false)} />}
+      <div className="max-w-4xl mx-auto w-full relative z-20 mb-4 px-3">
+        <h1 className="text-lg sm:text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-800 bg-clip-text text-transparent">
+          Hello Jamies!
+        </h1>
+      </div>
       <AnimatePresence>
         {showWelcome && (
           <motion.div

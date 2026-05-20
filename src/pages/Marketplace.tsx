@@ -230,7 +230,7 @@ const Marketplace: React.FC = () => {
               { label: 'Market Volume', val: allNFTs.reduce((sum, nft) => sum + parseFloat(nft.price), 0).toLocaleString(undefined, { maximumFractionDigits: 0 }), unit: 'TON', color: 'text-purple-500', icon: Zap, desc: 'Total Liquidity' },
               { label: 'Active Auctions', val: allNFTs.filter(nft => nft.listingType === 'auction').length, unit: 'Assets', color: 'text-blue-500', icon: Bell, desc: 'Live Bidding' },
             ].map((card, i) => (
-              <Card key={i} className="bg-card border-border/10 shadow-none overflow-hidden transition-all hover:border-primary/20">
+              <Card key={i} className="bg-card border border-border/60 shadow-none overflow-hidden transition-all hover:border-primary/40">
                 <CardContent className="p-4">
                   <p className="market-label mb-1">{card.label}</p>
                   <div className="flex items-baseline gap-1.5">
@@ -400,7 +400,7 @@ const Marketplace: React.FC = () => {
             </section>
 
             {/* Network Top Earners Leaderboard */}
-            <section className="bg-card/30 rounded-3xl border border-border/10 p-6 md:p-10 my-8 shadow-sm">
+            <section className="bg-card/30 rounded-3xl border border-border/60 p-6 md:p-10 my-8 shadow-sm">
               <Leaderboard artists={MOCK_ARTISTS} limit={5} title="Market Top Earners" />
             </section>
 

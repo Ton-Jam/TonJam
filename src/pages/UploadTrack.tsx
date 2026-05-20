@@ -13,7 +13,8 @@ import {
   ArrowLeft,
   Loader2,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Activity
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/context/AudioContext";
@@ -40,6 +41,10 @@ export default function UploadTrackScreen() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+  const [bpm, setBpm] = useState("120");
+  const [key, setKey] = useState("C Min");
+  const [isExplicit, setIsExplicit] = useState(false);
 
   // Batch Mode State
   const [batchTracks, setBatchTracks] = useState<Array<{
@@ -197,6 +202,9 @@ export default function UploadTrackScreen() {
           royaltySplits,
           minted: 0,
           isNFT: false,
+          bpm: parseInt(bpm) || 120,
+          key: key || "C Min",
+          isExplicit: isExplicit,
           createdAt: Date.now()
         };
 
@@ -234,6 +242,9 @@ export default function UploadTrackScreen() {
             editions: editions,
             minted: 0,
             isNFT: false,
+            bpm: parseInt(bpm) || 120,
+            key: key || "C Min",
+            isExplicit: isExplicit,
             createdAt: Date.now()
           };
 
@@ -501,6 +512,55 @@ export default function UploadTrackScreen() {
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10 h-48 resize-none"
                   placeholder="Add your lyrics here..."
                 />
+              </div>
+
+              {/* Musical Properties */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-white/[0.05]">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    <Activity className="w-3 h-3 text-cyan-500" /> Tempo (BPM)
+                  </label>
+                  <input
+                    type="number"
+                    value={bpm}
+                    onChange={(e) => setBpm(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10"
+                    placeholder="120"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    <Music className="w-3 h-3 text-cyan-500" /> Harmonic Key
+                  </label>
+                  <input
+                    type="text"
+                    value={key}
+                    onChange={(e) => setKey(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10"
+                    placeholder="C Min"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    Explicit content
+                  </label>
+                  <div className="flex items-center h-[54px]">
+                    <label className="relative flex items-center gap-3 cursor-pointer select-none">
+                      <input 
+                        type="checkbox"
+                        checked={isExplicit}
+                        onChange={(e) => setIsExplicit(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-10 h-6 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500/80 border border-white/10" />
+                      <span className="text-xs font-bold text-white/80 uppercase tracking-wide">
+                        {isExplicit ? "Explicit content" : "Clean Version"}
+                      </span>
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">

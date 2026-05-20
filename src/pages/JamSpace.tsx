@@ -290,28 +290,28 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Composer */}
-            <div className="p-4 flex gap-4 border-b border-white/[0.05]">
-              <Avatar className="h-10 w-10 border border-white/10 ring-2 ring-blue-500/10">
+            <div className="m-4 p-4 flex gap-4 bg-white border border-blue-500/30 rounded-2xl shadow-md">
+              <Avatar className="h-10 w-10 border border-blue-500/20 ring-2 ring-blue-500/10">
                 <AvatarImage src={userProfile.avatar} />
                 <AvatarFallback>{userProfile.name?.[0]}</AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-4">
                 <Textarea 
                   placeholder="Broadcast your frequency..." 
-                  className="border-none bg-transparent text-lg resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-zinc-600 font-bold tracking-tight"
+                  className="border-none bg-transparent text-lg text-blue-600 resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-blue-500/60 font-bold tracking-tight"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                 />
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     {[
-                      { icon: ImageIcon, color: 'text-blue-500' },
-                      { icon: Gift, color: 'text-rose-500' },
-                      { icon: List, color: 'text-amber-500' },
-                      { icon: Smile, color: 'text-yellow-500' },
-                      { icon: Calendar, color: 'text-emerald-500' },
+                      { icon: ImageIcon, color: 'text-blue-500 hover:bg-blue-50' },
+                      { icon: Gift, color: 'text-rose-500 hover:bg-rose-50' },
+                      { icon: List, color: 'text-amber-500 hover:bg-amber-50' },
+                      { icon: Smile, color: 'text-yellow-500 hover:bg-yellow-50' },
+                      { icon: Calendar, color: 'text-emerald-500 hover:bg-emerald-50' },
                     ].map((tool, i) => (
-                      <Button key={i} variant="ghost" size="icon" className={cn("h-8 w-8 rounded-full hover:bg-white/5", tool.color)}>
+                      <Button key={i} variant="ghost" size="icon" className={cn("h-8 w-8 rounded-full", tool.color)}>
                         <tool.icon className={cn("h-4 w-4", tool.color)} />
                       </Button>
                     ))}
@@ -327,10 +327,10 @@ const JamSpace: React.FC = () => {
               </div>
             </div>
 
-            {/* Feed Filters */}
-            <div className="py-3 border-b border-blue-500/20 bg-background/50 backdrop-blur-sm">
+            {/* Feed Filters - Sticky & Atmospheric matching Marketplace */}
+            <div className="sticky top-14 z-[37] bg-background/80 backdrop-blur-md py-4 px-4 border-b border-white/[0.05] mb-4">
               <Tabs value={filterType} onValueChange={setFilterType} className="w-full">
-                <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start px-4">
+                <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth">
                   {[
                     { name: 'All', icon: Sparkles },
                     { name: 'Tracks', icon: Disc },
@@ -342,11 +342,7 @@ const JamSpace: React.FC = () => {
                       <TabsTrigger
                         key={filter.name}
                         value={filter.name}
-                        className={cn(
-                          "px-4 py-2 rounded-[4px] h-9 text-[10px] font-black uppercase tracking-[0.15em] transition-all shrink-0 border flex items-center gap-2",
-                          "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-500/40 data-[state=active]:shadow-md",
-                          "text-muted-foreground bg-muted/20 border-border/40 hover:bg-muted/40 hover:text-foreground"
-                        )}
+                        className="px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border bg-card border-white/5 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:border-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-600/20 shrink-0 font-ui cursor-pointer flex items-center gap-2"
                       >
                         <Icon className="h-3.5 w-3.5" />
                         {filter.name}

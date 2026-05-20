@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { io } from 'socket.io-client';
 import { db, auth, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { useAudio } from '@/context/AudioContext';
@@ -31,6 +32,37 @@ const JamChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<any>(null);
+
+  useEffect(() => {
+    socketRef.current = io();
+
+    if (activeJamRoom) {
+      socketRef.current.emit('join-room', activeJamRoom.id);
+      
+      socketRef.current.on('new-message', (data: any) => {
+        const msg: Message = {
+            id: data.id,
+            content: data.text,
+            senderId: data.user.id,
+            senderName: data.user.name,
+            senderAvatar: data.user.avatar,
+            timestamp: new Date(data.timestamp)
+        };
+        setMessages(prev => {
+          if (prev.some(m => m.id === msg.id)) return prev;
+          return [...prev, msg];
+        });
+      });
+    }
+
+    return () => {
+      if (activeJamRoom) {
+        socketRef.current.emit('leave-room', activeJamRoom.id);
+      }
+      socketRef.current.disconnect();
+    };
+  }, [activeJamRoom?.id]);
 
   useEffect(() => {
     if (!activeJamRoom) return;
@@ -72,6 +104,18 @@ const JamChat: React.FC = () => {
     setInput('');
 
     try {
+        // Emit to Socket.IO for instant broadcast
+        socketRef.current.emit('send-message', { 
+            roomId: activeJamRoom.id, 
+            message: messageContent, 
+            user: {
+                id: userProfile.uid,
+                name: userProfile.name,
+                avatar: userProfile.avatar
+            }
+        });
+
+      // Persist to FIrestore
       await addDoc(collection(db, 'jamRooms', activeJamRoom.id, 'messages'), {
         content: messageContent,
         senderId: userProfile.uid,

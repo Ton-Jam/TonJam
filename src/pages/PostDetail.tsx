@@ -389,7 +389,7 @@ const PostDetail: React.FC = () => {
                     size="icon" 
                     className={cn(
                       "h-10 w-10 rounded-full transition-all text-zinc-500",
-                      liked ? "text-rose-500 bg-rose-500/10" : "hover:bg-rose-600/10 hover:text-rose-500"
+                      liked ? "text-rose-500 bg-transparent hover:bg-transparent" : "hover:bg-transparent hover:text-rose-500"
                     )}
                     onClick={handleLike}
                   >

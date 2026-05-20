@@ -115,7 +115,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
 
   return (
     <Drawer open={true} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="bg-background border-none shadow-[0_-12px_40px_rgba(0,0,0,0.8)]">
+      <DrawerContent className="bg-background border-none shadow-[0_-12px_40px_rgba(0,0,0,0.8)] rounded-t-3xl">
         <div className="mx-auto w-full max-w-md relative z-10 px-4 pb-12">
           <div className="flex justify-center pt-2 pb-1">
             <div className="w-12 h-1 rounded-full bg-white/10" />

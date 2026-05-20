@@ -75,7 +75,8 @@ const Library: React.FC = () => {
     userProfile, 
     artists,
     setIsHeaderSearchOpen,
-    searchQuery
+    searchQuery,
+    playAll
   } = useAudio();
 
   const [filter, setFilter] = useState<LibraryFilter>('all');
@@ -246,8 +247,8 @@ const Library: React.FC = () => {
       <div className="px-4 py-3 sm:px-6 max-w-7xl mx-auto space-y-6">
         
         {/* Global Filter Pills & Grid Toggle controls block */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3 border-b border-blue-500/20 bg-background/50 backdrop-blur-sm px-1">
-          <Tabs value={filter} onValueChange={(v: any) => setFilter(v)} className="w-full md:w-auto">
+        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full px-4 mb-6 border-b border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4 -mx-4 sm:-mx-6">
+          <Tabs value={filter} onValueChange={(v: any) => setFilter(v)} className="w-full md:w-auto px-4 sm:px-6">
             <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth">
               {[
                 { id: 'all', label: 'All Symbols', icon: Layers },
@@ -258,7 +259,7 @@ const Library: React.FC = () => {
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
-                  className="flex items-center gap-2 px-4 py-2 rounded-[4px] text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border bg-muted/20 border-border/40 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:border-blue-500/40 data-[state=active]:text-white shrink-0 font-ui"
+                  className="px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border bg-card border-white/5 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:border-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-600/20 shrink-0 font-ui cursor-pointer flex items-center gap-2"
                 >
                   <tab.icon className="w-3.5 h-3.5" />
                   {tab.label}
@@ -268,7 +269,7 @@ const Library: React.FC = () => {
           </Tabs>
 
           {/* Sorters and List/Grid switches */}
-          <div className="flex items-center gap-3 justify-end shrink-0">
+          <div className="flex items-center gap-3 justify-end shrink-0 pr-4 sm:pr-6">
             {/* View Switching buttons */}
             <div className="flex items-center bg-muted/20 border border-border/40 p-1 rounded-[4px] gap-1">
               <Button
@@ -417,20 +418,23 @@ const Library: React.FC = () => {
 
         {/* Global Recommendations or Sector Results */}
         <div className="space-y-6">
-          {filter !== 'all' ? (
+          {(filter !== 'all' || searchQuery.trim()) ? (
             <section className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 flex items-center gap-2">
                   <Grid2X2 className="h-3.5 w-3.5" />
-                  {filter.charAt(0).toUpperCase() + filter.slice(1)} Results
+                  {searchQuery.trim() ? 'Search Results' : `${filter.charAt(0).toUpperCase() + filter.slice(1)} Results`}
                 </h3>
                 <Button 
                    variant="ghost" 
                    size="sm" 
-                   onClick={() => setFilter('all')}
+                   onClick={() => {
+                     setFilter('all');
+                     if (setIsHeaderSearchOpen) setIsHeaderSearchOpen(false);
+                   }}
                    className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white"
                 >
-                  Clear Filter
+                  Clear search/filter
                 </Button>
               </div>
               
@@ -498,6 +502,14 @@ const Library: React.FC = () => {
                 <Zap className="h-3.5 w-3.5" />
                 Featured Picks
               </h3>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => playAll(MOCK_TRACKS.slice(0, 6))}
+                className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-white"
+              >
+                Play All Featured
+              </Button>
             </div>
             <ScrollArea className="w-full">
               <div className="flex gap-6 pb-6">

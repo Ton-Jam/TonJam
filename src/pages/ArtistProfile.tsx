@@ -29,8 +29,15 @@ import {
   Zap,
   MapPin,
   Ticket,
-  Calendar
+  Calendar,
+  ArrowLeft,
+  CheckCircle2
 } from 'lucide-react';
+import { 
+  Avatar,
+  AvatarImage,
+  AvatarFallback
+} from "@/components/ui/avatar";
 import ArtistProfileHeader from '@/components/ArtistProfileHeader';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
@@ -47,6 +54,7 @@ import { CollaboratorManager } from '@/components/CollaboratorManager';
 import EventCard from '@/components/EventCard';
 import EditArtistProfileModal from '@/components/EditArtistProfileModal';
 import TipArtistModal from '@/components/TipArtistModal';
+import ArtistOptionsModal from '@/components/ArtistOptionsModal';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { subscribeToCommunity } from '@/services/fanEngagementService';
@@ -59,6 +67,12 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
+import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from "@/components/ui/accordion";
 import { 
   Card, 
   CardContent, 
@@ -109,6 +123,7 @@ const ArtistProfile: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
+  const [showArtistOptions, setShowArtistOptions] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [isFanClubMember, setIsFanClubMember] = useState(false);
 
@@ -288,14 +303,25 @@ const ArtistProfile: React.FC = () => {
   return (
     <div className="w-full bg-background min-h-screen">
       {/* Cover Image Area */}
-      <div className="relative h-[200px] sm:h-[280px] md:h-[400px] w-full">
+      <div className="relative h-[220px] sm:h-[280px] md:h-[360px] w-full">
+        {/* Floating Custom Navigation Bar */}
+        <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="p-2 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all border border-white/10 active:scale-95 flex items-center justify-center cursor-pointer shadow-lg"
+            aria-label="Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        </div>
+
         {/* Dynamic Background Elements */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-600/20 blur-[100px] rounded-full animate-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-600/20 blur-[100px] rounded-full animate-pulse delay-700" />
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent z-10"></div>
         <img 
           src={artist.bannerImageUrl || artist.bannerUrl || getPlaceholderImage(`cover-${artist.uid}`, 1500, 500)} 
           className="w-full h-full object-cover transition-transform duration-[3s] hover:scale-105" 
@@ -313,52 +339,133 @@ const ArtistProfile: React.FC = () => {
           </button>
         )}
         
-        {/* Header Overlay - Positioned to center profile pic on bottom edge */}
-        <div className="absolute bottom-0 left-0 w-full z-20 px-4 translate-y-1/2 sm:px-6 md:px-12">
-          <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:gap-6">
-            <ArtistProfileHeader 
-              artist={artist} 
-              onTip={() => setShowTipModal(true)}
-              onEditProfile={() => setShowEditModal(true)}
-              isOwnProfile={isOwnProfile}
+// Three dot menu button (Artist Options)
+        <button 
+                onClick={() => setShowArtistOptions(true)}
+                className="absolute top-4 right-4 z-30 p-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all border border-white/10 active:scale-95"
+            >
+                <MoreVertical className="w-4 h-4" />
+        </button>
+
+        {/* Artist Options Modal */}
+        {showArtistOptions && artist && (
+            <ArtistOptionsModal 
+                artist={artist}
+                onClose={() => setShowArtistOptions(false)}
             />
+        )}
+
+        {/* Follow/Tip buttons (middle right of cover) */}
+        <div className="absolute top-1/2 right-6 z-30 flex flex-col gap-3 -translate-y-1/2 items-center">
+             <button 
+                onClick={handleFollow}
+                className={cn(
+                  "p-3 rounded-full font-black text-[9px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center",
+                  isFollowing 
+                    ? "bg-muted text-foreground border border-border hover:bg-muted/80" 
+                    : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg"
+                )}
+              >
+                  {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+             </button>
+             <button 
+                onClick={() => setShowTipModal(true)}
+                className="p-3 rounded-full font-black text-[9px] uppercase tracking-widest border border-white/20 bg-black/50 backdrop-blur-md hover:bg-black/70 text-white transition-all active:scale-95"
+              >
+                <Zap className="w-4 h-4 text-blue-500 fill-current" />
+             </button>
+        </div>
+
+        {/* Header Overlay - Positioned to center profile pic on bottom edge */}
+        <div className="absolute bottom-0 left-0 w-full z-20 px-4 translate-y-1/2 sm:translate-y-1/2 sm:px-6 md:px-12 flex justify-start items-end gap-4 sm:gap-6">
+          
+          {/* Avatar (to the left side boundary line - dropping down half over) */}
+          <div className="relative group/avatar">
+            <div className="absolute inset-0 bg-blue-500/20 blur-3xl opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-full" />
+            <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-background shadow-2xl relative z-10 transition-transform duration-700 group-hover/avatar:scale-[1.02] bg-background">
+              <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="object-cover rounded-full" />
+            </Avatar>
+            {artist.verified && (
+              <div className="absolute bottom-0 right-0 bg-background rounded-full p-0.5 shadow-xl z-20 border border-blue-500/20">
+                <CheckCircle2 className="w-4 h-4 text-blue-500 fill-current" />
+              </div>
+            )}
           </div>
+
+          <div className="max-w-7xl mx-auto flex flex-col gap-2 sm:gap-3 flex-1 pb-2">
+              <ArtistProfileHeader 
+                artist={artist} 
+                onTip={() => setShowTipModal(true)}
+                onEditProfile={() => setShowEditModal(true)}
+                isOwnProfile={isOwnProfile}
+              />
+          </div>
+        </div>
+
+        {/* Subtle blue boundary line */}
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-blue-500/30 z-10" />
+        
+        {/* Followers / Following Stats below boundary */}
+        <div className="absolute bottom-[-30px] left-6 flex items-center gap-4 text-white text-[8px] font-black uppercase tracking-widest z-20">
+            <button onClick={() => navigate(`/followers/${artist.uid}`)} className="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                <span className="text-white">{(artist.followers || 0).toLocaleString()}</span>
+                <span className="text-white/40 font-normal">Followers</span>
+            </button>
+            <button onClick={() => navigate(`/following/${artist.uid}`)} className="flex items-center gap-1 hover:text-blue-400 transition-colors">
+                <span className="text-white">{(0).toLocaleString()}</span>
+                <span className="text-white/40 font-normal">Following</span>
+            </button>
         </div>
       </div>
       
+      {/* Name Section below cover */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mt-12 relative z-30">
+        <h1 id="artist-name-display" className="text-2xl sm:text-3xl md:text-5xl font-black tracking-[-0.04em] text-foreground dark:text-white uppercase leading-none drop-shadow-md">
+                {artist.name}
+        </h1>
+        {artist.username && (
+            <div className="mt-2 text-blue-500 font-black text-sm tracking-widest uppercase">
+                {artist.username}
+            </div>
+        )}
+      </div>
+      
       {/* Biometric Identity / About Section - Adjusted margin for better overlap */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mt-16 sm:mt-24 relative z-30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mt-12 sm:mt-16 md:mt-20 relative z-30">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
-            <Card className="bg-muted/30 rounded-[20px] p-4 sm:p-5 border-none">
-               <div className="flex items-center gap-2 mb-3">
-                 <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
-                 <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">About</h3>
-               </div>
-
-               <div className="space-y-4">
-                 <p className="text-muted-foreground text-xs leading-relaxed tracking-tight font-medium max-w-2xl">
-                   {artist.bio || "No narrative provided for this entity."}
-                 </p>
-                 
-                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-4 border-t border-border">
-                   <div className="space-y-0.5">
-                     <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Origin</span>
-                     <p className="text-[10px] font-black text-foreground uppercase">{artist.location || 'Global'}</p>
-                   </div>
-                   <div className="space-y-0.5">
-                     <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Genre</span>
-                     <p className="text-[10px] font-black text-blue-500 uppercase">{artist.genre || 'Electronic'}</p>
-                   </div>
-                   <div className="space-y-0.5">
-                     <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Verified</span>
-                     <div className="pt-0.5">
-                       <ArtistVerification artist={artist} />
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </Card>
+            <Accordion type="single" collapsible className="bg-muted/30 rounded-[24px] px-6 border-none">
+              <AccordionItem value="about" className="border-none">
+                <AccordionTrigger className="hover:no-underline py-5">
+                  <div className="flex items-center gap-2">
+                      <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+                      <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">About</h3>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-5">
+                  <p className="text-muted-foreground text-xs leading-relaxed tracking-tight font-medium max-w-2xl">
+                    {artist.bio || "No narrative provided for this entity."}
+                  </p>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-4 border-t border-border">
+                    <div className="space-y-0.5">
+                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Origin</span>
+                      <p className="text-[10px] font-black text-foreground uppercase">{artist.location || 'Global'}</p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Genre</span>
+                      <p className="text-[10px] font-black text-blue-500 uppercase">{artist.genre || 'Electronic'}</p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Verified</span>
+                      <div className="pt-0.5">
+                        <ArtistVerification artist={artist} />
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
 
           <div className="space-y-3">
@@ -473,7 +580,7 @@ const ArtistProfile: React.FC = () => {
         
         {/* Navigation Tabs */}
         <Tabs defaultValue="discography" value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
-          <div className="sticky top-[64px] sm:top-[72px] z-30 mb-8 sm:mb-20">
+          <div className="sticky top-0 z-30 mb-6 sm:mb-12">
             <div className="bg-background/80 backdrop-blur-2xl py-4 border-b border-border/40">
               <TabsList className="h-auto p-0 bg-transparent rounded-full w-fit mx-auto lg:mx-0 overflow-x-auto no-scrollbar shadow-none flex items-center gap-3">
                 {(['discography', 'music_nfts', 'collection', 'signals', 'fan_club', 'events', 'about', 'comments'] as TabType[]).map((tab) => (
@@ -530,14 +637,12 @@ const ArtistProfile: React.FC = () => {
                       { label: 'Artifacts', value: artistTracks.length.toString() },
                       { label: 'Market Cap', value: '~4.5K TON' }
                     ].map((metric) => (
-                      <Card key={metric.label} className="bg-muted/30 border-border/50 rounded-2xl sm:rounded-[32px] overflow-hidden group hover:border-blue-500/30 transition-all">
-                        <CardHeader className="p-4 sm:p-6 pb-0 flex flex-col items-center text-center">
-                          <CardDescription className="text-[8px] sm:text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest group-hover:text-blue-500 transition-colors">{metric.label}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-4 sm:p-8 pt-2">
-                          <CardTitle className="text-2xl sm:text-4xl font-black text-foreground tracking-tighter uppercase text-center">{metric.value}</CardTitle>
+                    <Card key={metric.label} className="bg-muted/30 border-border/50 rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all p-3">
+                        <CardContent className="p-0 flex flex-col items-center text-center">
+                          <span className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest">{metric.label}</span>
+                          <span className="text-xl font-black text-foreground tracking-tighter uppercase">{metric.value}</span>
                         </CardContent>
-                      </Card>
+                    </Card>
                     ))}
                   </div>
                 </section>

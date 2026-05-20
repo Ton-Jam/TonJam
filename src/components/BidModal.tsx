@@ -5,6 +5,7 @@ import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { placeBid } from '@/services/tonService';
+import { getPlaceholderImage } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -80,47 +81,73 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-full max-w-sm rounded-[16px] bg-card border border-border shadow-2xl p-0 overflow-hidden">
-        <div className="p-6">
+      <DialogContent className="w-full max-w-sm rounded-2xl bg-black/95 border border-blue-500/30 text-white shadow-[0_0_50px_rgba(37,99,235,0.15)] p-0 overflow-hidden backdrop-blur-3xl">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-600"></div>
+        <div className="p-6 relative">
           <DialogHeader className="flex flex-row justify-between items-center mb-6">
-            <DialogTitle className="text-lg font-bold text-foreground">Place a Bid</DialogTitle>
-          </DialogHeader>
-          
-          <div className="mb-6 space-y-4">
-            <div className="flex justify-between text-xs font-medium text-muted-foreground">
-              <span>Current Highest</span>
-              <span>Min Next Bid</span>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-muted/50 p-4 rounded-[12px] text-center">
-                <p className="text-xl font-bold text-foreground">{currentBid} <span className="text-xs text-muted-foreground">TON</span></p>
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-blue-500/10 rounded-lg border border-blue-500/20 text-blue-400">
+                <Gavel className="h-4 w-4" />
               </div>
-              <div className="bg-primary/10 p-4 rounded-[12px] text-center">
-                <p className="text-xl font-bold text-primary">{minBid} <span className="text-xs text-primary/70">TON</span></p>
+              <DialogTitle className="text-sm font-black uppercase tracking-widest text-foreground">Auction Bid Terminal</DialogTitle>
+            </div>
+            <button 
+              onClick={onClose}
+              className="p-1 text-muted-foreground hover:text-white rounded-full hover:bg-white/5 transition-colors absolute top-5 right-5"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </DialogHeader>
+
+          {/* Asset Preview Mini Banner */}
+          <div className="mb-6 p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-neutral-900">
+              <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} alt={nft.title} className="w-full h-full object-cover" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[7.5px] font-black uppercase tracking-[0.3em] text-blue-400 block mb-0.5">TARGET FREQUENCY</span>
+              <h4 className="text-[11px] font-black uppercase tracking-wider text-white truncate m-0">{nft.title}</h4>
+              <p className="text-[9px] font-bold text-muted-foreground tracking-tight m-0 truncate">By {nft.creator}</p>
+            </div>
+          </div>
+          
+          <div className="mb-6 space-y-3">
+            <div className="flex justify-between text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 px-1">
+              <span>CURRENT WATERMARK</span>
+              <span>MINIMUM INCREMENT</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-zinc-900/80 border border-white/5 p-3 rounded-xl text-center">
+                <p className="text-[14px] font-black text-foreground font-mono tracking-tight">{currentBid} <span className="text-[9px] font-bold text-muted-foreground">TON</span></p>
+                <span className="text-[7px] font-bold text-muted-foreground/45 uppercase tracking-widest">High Offer</span>
+              </div>
+              <div className="bg-blue-500/5 border border-blue-500/20 p-3 rounded-xl text-center">
+                <p className="text-[14px] font-black text-blue-400 font-mono tracking-tight">{minBid} <span className="text-[9px] font-bold text-blue-400/70">TON</span></p>
+                <span className="text-[7px] font-bold text-blue-400/50 uppercase tracking-widest">Required</span>
               </div>
             </div>
           </div>
 
           <div className="space-y-2 mb-6">
-            <label className="text-xs font-medium text-muted-foreground">Your Bid Amount</label>
-            <div className="relative">
+            <label className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 block px-1">SPECIFY BID MAGNITUDE</label>
+            <div className="relative group">
               <input
                 type="number"
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
                 step="0.1"
-                className="w-full bg-muted/50 border border-border py-3 px-4 rounded-[12px] text-lg font-bold text-foreground outline-none focus:border-primary transition-all"
+                className="w-full bg-zinc-900/90 border border-white/10 py-3.5 pl-4 pr-16 rounded-xl text-lg font-mono font-black text-white outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">TON</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-400 uppercase tracking-wide">TON</span>
             </div>
           </div>
 
           <button
             onClick={handlePlaceBid}
             disabled={isProcessing}
-            className="w-full py-3 bg-orange-500 hover:bg-orange-600 rounded-[2px] text-sm font-bold text-white shadow-lg shadow-orange-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-blue-400/20">
             {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gavel className="h-4 w-4" />}
-            {isProcessing ? 'PLACING BID...' : 'PLACE BID'}
+            {isProcessing ? 'BROADCASTING...' : 'PLACE BID VIA TON CONNECT'}
           </button>
         </div>
       </DialogContent>

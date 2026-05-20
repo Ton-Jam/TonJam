@@ -209,7 +209,7 @@ const PlaylistDetail: React.FC = () => {
           )}
           
           {/* Cover Image / Collage */}
-          <div className="relative group w-48 h-48 md:w-64 md:h-64 flex-shrink-0 rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.6)] bg-neutral-900 mx-auto md:mx-0">
+          <div className={`relative group w-48 h-48 md:w-64 md:h-64 flex-shrink-0 rounded-xl overflow-hidden bg-neutral-900 mx-auto md:mx-0 ${playlist.title === 'Discover Weekly' ? '' : 'shadow-[0_20px_40px_rgba(0,0,0,0.6)]'}`}>
             {playlist.coverUrl ? (
               <img src={playlist.coverUrl} alt={playlist.title} className="w-full h-full object-cover" />
             ) : (
@@ -288,11 +288,11 @@ const PlaylistDetail: React.FC = () => {
               </div>
             ) : (
               <>
-                <h1 className="text-[32px] md:text-[56px] font-black text-blue-500 tracking-tighter leading-tight drop-shadow-lg mb-2">{playlist.title}</h1>
+                <h1 className={`text-[32px] md:text-[56px] font-black text-blue-500 tracking-tighter leading-tight mb-2 ${playlist.title === 'Discover Weekly' ? '' : 'drop-shadow-lg'}`}>{playlist.title}</h1>
                 {playlist.description && (
-                  <p className="text-blue-200/70 text-sm md:text-base mb-4 max-w-2xl mx-auto md:mx-0 drop-shadow">{playlist.description}</p>
+                  <p className={`text-sm md:text-base mb-4 max-w-2xl mx-auto md:mx-0 ${playlist.title === 'Discover Weekly' ? 'text-blue-400 font-extrabold tracking-wide' : 'text-blue-200/70 drop-shadow'}`}>{playlist.description}</p>
                 )}
-                <div className="flex items-center justify-center md:justify-start gap-3 text-blue-100/60 text-sm font-medium mb-6 drop-shadow">
+                <div className={`flex items-center justify-center md:justify-start gap-3 text-sm font-medium mb-6 ${playlist.title === 'Discover Weekly' ? 'text-blue-400/80' : 'text-blue-100/60 drop-shadow'}`}>
                   <span className="font-bold text-blue-400">{playlist.creator}</span>
                   <span className="opacity-50">•</span>
                   <span>{playlistTracks.length} tracks</span>

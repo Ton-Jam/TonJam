@@ -335,7 +335,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           >
             <Card
               onClick={handleCardClick}
-              className={`group relative cursor-pointer transition-all duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[2px] overflow-hidden bg-muted/10 border-white/5 w-full shadow-none ${className}`}
+              className={`group relative cursor-pointer transition-all duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] overflow-hidden bg-muted/10 border border-border/60 hover:border-blue-500/40 w-full shadow-none ${className}`}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();

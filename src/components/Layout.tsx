@@ -286,7 +286,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      if (currentScrollY > lastScrollY && currentScrollY > 50 && !isJamspace) {
          setIsMobileNavHidden(true); // Scrolling down
       } else {
          setIsMobileNavHidden(false); // Scrolling up
@@ -313,7 +313,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(fabTimeout);
     };
-  }, [lastScrollY, isFabActive]);
+  }, [lastScrollY, isFabActive, isJamspace]);
 
   const optionsNFT = useMemo(() => {
     if (!optionsTrack || !optionsTrack.isNFT) return null;
@@ -734,7 +734,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
+      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy || isArtistProfile ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
         <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>

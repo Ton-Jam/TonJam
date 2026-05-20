@@ -138,7 +138,7 @@ const GenesisScreen: React.FC = () => {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
-              <NFTCard nft={nft} className="bg-white/[0.02] border-white/5 shadow-2xl hover:bg-white/[0.05]" />
+              <NFTCard nft={nft} className="bg-white/[0.02] border border-border/60 hover:border-blue-500/45 shadow-2xl hover:bg-white/[0.05]" />
             </motion.div>
           ))}
         </div>
@@ -202,7 +202,7 @@ const GenesisScreen: React.FC = () => {
               color: "text-purple-500"
             },
           ].map((item, i) => (
-            <div key={i} className="bg-white/[0.03] border border-white/5 rounded-3xl p-10 space-y-6 hover:border-white/20 transition-all">
+            <div key={i} className="bg-white/[0.03] border border-border/60 rounded-3xl p-10 space-y-6 hover:border-blue-500/40 transition-all">
               <div className={cn("inline-flex p-4 rounded-2xl bg-white/[0.05]", item.color)}>
                 <item.icon className="w-8 h-8" />
               </div>

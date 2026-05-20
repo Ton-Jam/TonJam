@@ -151,16 +151,9 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 animate-in fade-in duration-300">
       <div className="absolute inset-0 backdrop-blur-md" onClick={onClose}></div>
       <div className="relative glass w-full max-w-2xl rounded-[10px] p-2 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-600/10 blur-3xl rounded-full"></div>
         <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-12 h-12 bg-purple-600 rounded-[10px] flex items-center justify-center shadow-lg shadow-purple-600/20">
-              <UserPen className="text-foreground h-6 w-6" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold uppercase tracking-tighter text-foreground">Edit Neural Profile</h2>
-              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">Update your identity on the TON network</p>
-            </div>
+          <div>
+            <h2 className="text-xl font-bold uppercase tracking-tighter text-foreground">Edit Profile</h2>
           </div>
           <button onClick={onClose} className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Close Edit Profile Modal">
             <X className="h-5 w-5" />
@@ -169,16 +162,16 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
         <form onSubmit={handleSave} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 no-scrollbar">
           <div className="space-y-4">
             
-            {/* Banner Upload Section - Moved to top and made full-width */}
+            {/* Banner Upload Section */}
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Profile Banner</label>
-              <div className="relative w-full h-48 rounded-[10px] overflow-hidden group bg-muted/50">
+              <div className="relative w-full h-32 rounded-[10px] overflow-hidden group bg-muted/50">
                 <img src={bannerImageUrl || bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1500, 500)} alt="Banner Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-6 py-3 bg-blue-600 rounded-full text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg hover:bg-blue-500 transition-all"
+                    className="px-4 py-2 bg-blue-600 rounded-full text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg hover:bg-blue-500 transition-all"
                     disabled={isUploading}
                   >
                     {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
@@ -193,24 +186,23 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                   accept={ALLOWED_IMAGE_TYPES.join(',')} 
                 />
               </div>
-              <p className="text-[8px] text-foreground/30 ml-2">Recommended size: 1500x500px. Max 5MB.</p>
             </div>
 
             {/* Avatar Upload Section */}
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Avatar</label>
-              <div className="relative w-24 h-24 rounded-full overflow-hidden group bg-muted/50">
+              <div className="relative w-20 h-20 rounded-full overflow-hidden group bg-muted/50">
                 <img src={avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt="Avatar Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
                     type="button"
                     onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = ALLOWED_IMAGE_TYPES.join(',');
-                      input.onchange = (e) => handleAvatarUpload(e as any);
-                      input.click();
-                    }}
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = ALLOWED_IMAGE_TYPES.join(',');
+                        input.onchange = (e) => handleAvatarUpload(e as any);
+                        input.click();
+                      }}
                     className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg hover:bg-blue-500 transition-all"
                     disabled={isAvatarUploading}
                   >

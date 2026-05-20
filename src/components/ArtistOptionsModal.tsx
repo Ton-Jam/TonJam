@@ -25,7 +25,7 @@ const ArtistOptionsModal: React.FC<ArtistOptionsModalProps> = ({ artist, onClose
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-sm bg-card border border-border rounded-[24px] p-6 shadow-2xl"
+          className="w-full max-w-sm bg-card border border-border rounded-3xl p-6 shadow-2xl"
         >
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-black uppercase tracking-tight">Artist Options</h3>

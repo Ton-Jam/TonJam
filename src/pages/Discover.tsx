@@ -336,16 +336,16 @@ const Discover: React.FC = () => {
       />
 
       {/* Search Header - Sticky & Atmospheric */}
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 px-4 border-b border-blue-500/20 w-full">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-0 px-4 w-full">
         <div className="max-w-2xl mx-auto w-full flex items-center gap-3">
           <form 
             onSubmit={handleSearchSubmit} 
             className="relative flex-1 group"
           >
             {/* Shiny Gradient Border Effect */}
-            <div className={`absolute -inset-[1px] rounded-[5px] bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
+            <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
             
-            <div className={`relative flex items-center h-11 bg-background border transition-all rounded-[4px] overflow-hidden ${isFocused ? 'border-blue-500' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+            <div className={`relative flex items-center h-11 bg-background border transition-all rounded-full overflow-hidden ${isFocused ? 'border-blue-500' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
               <div className="absolute left-4 z-10 pointer-events-none">
                 <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
               </div>
@@ -360,7 +360,7 @@ const Discover: React.FC = () => {
                 className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
               />
 
-              <div className="absolute right-1.5 flex items-center gap-1 z-20">
+              <div className="absolute right-3 flex items-center gap-1.5 z-20">
                 <AnimatePresence>
                   {searchQuery && (
                     <motion.div
@@ -373,7 +373,7 @@ const Discover: React.FC = () => {
                         size="icon"
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-[2px]"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -386,7 +386,7 @@ const Discover: React.FC = () => {
                   size="icon"
                   type="button"
                   onClick={handleVoiceSearch}
-                  className={`h-8 w-8 rounded-[2px] transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`h-8 w-8 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
@@ -473,9 +473,11 @@ const Discover: React.FC = () => {
           </Button>
 
         </div>
+      </div>
 
-        {/* Filter Tabs - Pill Buttons */}
-        <div className="mt-4 flex flex-col items-center filter-tabs w-full max-w-2xl mx-auto px-4">
+      {/* Filter Tabs - Sticky & Atmospheric */}
+      <div className="sticky top-[3.5rem] z-20 bg-background/95 backdrop-blur-md pb-4 px-4 border-b border-blue-500/20 w-full">
+        <div className="flex flex-col items-center filter-tabs w-full max-w-2xl mx-auto">
           <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
             <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start md:justify-center px-1 py-1">
               <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
@@ -483,7 +485,7 @@ const Discover: React.FC = () => {
                   <TabsTrigger
                     key={filter}
                     value={filter}
-                    className="px-4 py-2 rounded-[4px] text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-muted/20 border border-border/40 data-[state=active]:border-blue-500 hover:data-[state=inactive]:bg-muted/40 shrink-0 font-ui cursor-pointer"
+                    className="px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-muted/20 border border-border/40 data-[state=active]:border-blue-500 hover:data-[state=inactive]:bg-muted/40 shrink-0 font-ui cursor-pointer"
                   >
                     {filter}
                   </TabsTrigger>
@@ -494,7 +496,8 @@ const Discover: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 pt-6 pb-24 space-y-6">
+
+      <div className="max-w-5xl mx-auto px-4 pb-24 space-y-6">
         {isLoading ? (
           <div className="space-y-12">
             <div className="aspect-[2/1] w-full bg-muted rounded-[2.5rem] animate-pulse"></div>
@@ -519,14 +522,14 @@ const Discover: React.FC = () => {
               <section>
                 <Card 
                   onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
-                  className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer border-none shadow-2xl group transition-all duration-500"
+                  className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer border-none shadow-none group transition-all duration-500 bg-background"
                 >
                   <img 
                     src={discoverWeekly.coverUrl} 
                     alt="Discover Weekly" 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
                   <CardContent className="absolute bottom-0 left-0 p-6 md:p-12 w-full flex justify-between items-end">
                     <div className="space-y-2 md:space-y-4 max-w-[70%]">
                       <div className="flex items-center gap-2 md:gap-3">
@@ -537,12 +540,12 @@ const Discover: React.FC = () => {
                       </div>
                       <div>
                         <h2 className="text-2xl md:text-6xl font-bold uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
-                        <p className="text-[10px] md:text-sm text-white/50 font-medium max-w-md mt-2 md:mt-4 line-clamp-2">Personalized frequency stream based on your unique neural listening patterns.</p>
+                        <p className="text-[10px] md:text-sm text-blue-400 font-extrabold max-w-md mt-2 md:mt-4 line-clamp-2">Personalized frequency stream based on your unique neural listening patterns.</p>
                       </div>
                     </div>
                     <Button 
                       size="icon" 
-                      className="h-10 w-10 md:h-16 md:w-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-2xl shadow-blue-600/40 hover:scale-110 transition-all border-none flex-shrink-0"
+                      className="h-10 w-10 md:h-16 md:w-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white hover:scale-110 transition-all border-none flex-shrink-0"
                     >
                       <Play className="h-5 w-5 md:h-8 md:w-8 fill-current" />
                     </Button>
