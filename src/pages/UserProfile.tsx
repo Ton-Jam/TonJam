@@ -171,12 +171,11 @@ const UserProfile: React.FC = () => {
           {/* Profile Picture (Refined Overlap) */}
           <div className="relative flex-shrink-0">
             <div 
-              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 overflow-hidden border-4 border-background shadow-2xl bg-muted"
-              style={{ borderRadius: '24px' }}
+              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 overflow-hidden border-4 border-background shadow-2xl bg-muted rounded-full"
             >
               <img 
                 src={user.avatar || getPlaceholderImage(`user-${user.uid}`)} 
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-cover rounded-full" 
                 alt={user.name} 
               />
             </div>

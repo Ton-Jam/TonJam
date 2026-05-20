@@ -67,9 +67,9 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
         <div className="relative group/avatar flex flex-col items-center">
           <div className="relative">
             <div className="absolute inset-0 bg-blue-500/20 blur-3xl opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-full" />
-            <Avatar className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 border-4 border-background shadow-2xl relative z-10 transition-transform duration-700 group-hover/avatar:scale-[1.02] bg-background">
-              <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="object-cover" />
-              <AvatarFallback className="bg-muted text-xl sm:text-2xl font-black">{artist.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <Avatar className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-background shadow-2xl relative z-10 transition-transform duration-700 group-hover/avatar:scale-[1.02] bg-background">
+              <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="object-cover rounded-full" />
+              <AvatarFallback className="bg-muted rounded-full text-xl sm:text-2xl font-black">{artist.name.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             {artist.verified && (
               <div className="absolute bottom-1 right-1 bg-background rounded-full p-1 shadow-2xl z-20 border border-blue-500/20">
@@ -174,13 +174,24 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
               </Button>
             </>
           ) : (
-            <Button 
-              onClick={onEditProfile}
-              className="px-6 h-9 bg-blue-600 text-white hover:bg-blue-500 rounded-full font-black text-[9px] uppercase tracking-widest transition-all active:scale-95 shadow-lg"
-            >
-              <Edit2 className="w-3 h-3 mr-1.5" />
-              Edit Profile
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => navigate('/settings')}
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 rounded-full border-border/50 hover:bg-muted transition-all active:scale-[0.97]"
+                title="Settings"
+              >
+                <Settings className="w-3.5 h-3.5" />
+              </Button>
+              <Button 
+                onClick={onEditProfile}
+                className="px-6 h-9 bg-blue-600 text-white hover:bg-blue-500 rounded-full font-black text-[9px] uppercase tracking-widest transition-all active:scale-95 shadow-lg"
+              >
+                <Edit2 className="w-3 h-3 mr-1.5" />
+                Edit Profile
+              </Button>
+            </div>
           )}
         </div>
       </div>

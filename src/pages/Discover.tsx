@@ -32,6 +32,7 @@ import AlbumCard from '@/components/AlbumCard';
 import ArtistListItem from '@/components/ArtistListItem';
 import SkeletonCard from '@/components/SkeletonCard';
 import SonicSearchSection from '@/components/SonicSearchSection';
+import { FilterSection } from '@/components/FilterSection';
 import { useAudio } from '@/context/AudioContext';
 import Autoplay from "embla-carousel-autoplay";
 import {
@@ -103,7 +104,9 @@ const Discover: React.FC = () => {
     artists, 
     firestoreUsers,
     playTrack,
-    followedUserIds
+    followedUserIds,
+    isDiscoverFiltersOpen,
+    setIsDiscoverFiltersOpen
   } = useAudio();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -333,23 +336,20 @@ const Discover: React.FC = () => {
       />
 
       {/* Search Header - Sticky & Atmospheric */}
-    <div className="fixed top-0 left-0 lg:left-64 right-0 z-30 bg-background/80 backdrop-blur-3xl pt-2 pb-2 px-[var(--page-margin)] md:px-[var(--page-margin-md)] lg:px-[var(--page-margin-lg)] border-b border-white/5">
-        <div className="max-w-4xl mx-auto w-full flex items-center gap-3">
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 px-4 border-b border-blue-500/20 w-full">
+        <div className="max-w-2xl mx-auto w-full flex items-center gap-3">
           <form 
             onSubmit={handleSearchSubmit} 
             className="relative flex-1 group"
           >
             {/* Shiny Gradient Border Effect */}
-            <div className={`absolute -inset-[1px] rounded-[17px] bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[6px] scale-[1.01]' : 'group-hover:opacity-40 blur-[4px]'}`} />
+            <div className={`absolute -inset-[1px] rounded-[5px] bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
             
-            <div className={`relative flex items-center h-12 bg-background border-[3px] transition-all rounded-[16px] overflow-hidden ${isFocused ? 'border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+            <div className={`relative flex items-center h-11 bg-background border transition-all rounded-[4px] overflow-hidden ${isFocused ? 'border-blue-500' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
               <div className="absolute left-4 z-10 pointer-events-none">
                 <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
               </div>
               
-              {/* Shiny Sweep Effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-blue-400/10 to-transparent -translate-x-full pointer-events-none z-0" />
-
               <Input
                 type="text"
                 placeholder="Search artists, tracks, NFTs..."
@@ -357,7 +357,7 @@ const Discover: React.FC = () => {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-sm font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
+                className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
               />
 
               <div className="absolute right-1.5 flex items-center gap-1 z-20">
@@ -373,7 +373,7 @@ const Discover: React.FC = () => {
                         size="icon"
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-[2px]"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -386,7 +386,7 @@ const Discover: React.FC = () => {
                   size="icon"
                   type="button"
                   onClick={handleVoiceSearch}
-                  className={`h-8 w-8 rounded-lg transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`h-8 w-8 rounded-[2px] transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
@@ -400,11 +400,11 @@ const Discover: React.FC = () => {
                   initial={{ opacity: 0, y: 4, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-background border border-white/5 shadow-2xl rounded-2xl overflow-hidden z-50 p-2"
+                  className="absolute top-full left-0 right-0 mt-2 bg-background border border-border/40 shadow-none rounded-[4px] overflow-hidden z-50 p-2"
                 >
                   <Command className="bg-transparent border-none">
                     <CommandList className="max-h-[300px]">
-                  <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
+                      <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
                       
                       {searchHistory.length > 0 && (
                         <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
@@ -415,7 +415,7 @@ const Discover: React.FC = () => {
                                 setSearchQuery(item);
                                 setIsFocused(false);
                               }}
-                              className="rounded-xl flex items-center justify-between group cursor-pointer"
+                              className="rounded-[2px] flex items-center justify-between group cursor-pointer"
                             >
                               <div className="flex items-center gap-3">
                                 <Search className="h-3.5 w-3.5 text-zinc-500" />
@@ -447,7 +447,7 @@ const Discover: React.FC = () => {
                               setSearchQuery(topic);
                               setIsFocused(false);
                             }}
-                            className="rounded-xl flex items-center gap-3 cursor-pointer"
+                            className="rounded-[2px] flex items-center gap-3 cursor-pointer"
                           >
                             <Zap className="h-3.5 w-3.5 text-blue-500" />
                             <span className="text-sm font-medium">{topic}</span>
@@ -463,162 +463,27 @@ const Discover: React.FC = () => {
           </form>
 
           {/* Advanced Filters Sheet */}
-          <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
-            <SheetTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon"
-                className="h-12 w-12 rounded-xl bg-white/5 border-white/5 hover:bg-white/10 hover:border-blue-500/30 transition-all shadow-none shrink-0"
-              >
-                <ListFilter className="h-5 w-5 text-foreground" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="w-full sm:max-w-md bg-background border-l border-white/10 p-0 overflow-hidden flex flex-col">
-              <div className="absolute inset-0 bg-blue-500/5 pointer-events-none" />
-              
-              <SheetHeader className="p-8 border-b border-white/5 relative bg-background/50 backdrop-blur-xl">
-                <SheetTitle className="text-3xl font-bold uppercase tracking-tighter flex items-center gap-3">
-                  <Filter className="h-6 w-6 text-blue-500" />
-                  Signal Filters
-                </SheetTitle>
-                <SheetDescription className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.2em] mt-2">
-                  Fine-tune your sensory exploration parameters
-                </SheetDescription>
-              </SheetHeader>
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => setIsDiscoverFiltersOpen(true)}
+            className="h-11 w-11 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
+          >
+            <ListFilter className="h-4 w-4 text-foreground" />
+          </Button>
 
-              <ScrollArea className="flex-1 p-8">
-                <div className="space-y-10">
-                  {/* BPM Slider */}
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-foreground">Tempo (BPM)</Label>
-                      <span className="text-xs font-mono text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
-                        {bpmRange[0]} - {bpmRange[1]}
-                      </span>
-                    </div>
-                    <Slider
-                      defaultValue={[60, 180]}
-                      max={220}
-                      min={40}
-                      step={1}
-                      value={bpmRange}
-                      onValueChange={setBpmRange}
-                      className="py-4"
-                    />
-                    <div className="flex justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-widest pt-1">
-                      <span>Ambient</span>
-                      <span>Extreme</span>
-                    </div>
-                  </div>
-
-                  <Separator className="bg-white/5" />
-
-                  {/* Keys Group */}
-                  <div className="space-y-4">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-foreground block mb-4">Frequency Key</Label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].map((k) => (
-                        <button
-                          key={k}
-                          onClick={() => {
-                            setSelectedKeys(prev => 
-                              prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]
-                            );
-                          }}
-                          className={`py-2 rounded-lg text-xs font-bold transition-all border ${
-                            selectedKeys.includes(k) 
-                              ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20' 
-                              : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10'
-                          }`}
-                        >
-                          {k}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Separator className="bg-white/5" />
-
-                  {/* Toggles */}
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
-                      <div className="space-y-1">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-foreground cursor-pointer" htmlFor="verified">Verified Entities</Label>
-                        <p className="text-[10px] text-muted-foreground font-medium">Only show signals from identified artists</p>
-                      </div>
-                      <Checkbox 
-                        id="verified" 
-                        checked={onlyVerified} 
-                        onCheckedChange={(v) => setOnlyVerified(!!v)}
-                        className="h-5 w-5 border-white/20 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Moods Section */}
-                  <div className="space-y-4">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-foreground">Sensory Vibes</Label>
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {MOODS.map((mood) => {
-                        const isSelected = selectedMoods.includes(mood.name);
-                        return (
-                          <Badge 
-                            key={mood.id}
-                            variant={isSelected ? "default" : "outline"}
-                            onClick={() => {
-                              setSelectedMoods(prev => 
-                                isSelected ? prev.filter(m => m !== mood.name) : [...prev, mood.name]
-                              );
-                            }}
-                            className={`px-4 py-2 cursor-pointer text-[10px] font-bold uppercase tracking-widest rounded-full transition-all ${
-                              isSelected 
-                                ? "bg-blue-600 border-blue-500 text-white" 
-                                : "bg-transparent border-white/10 hover:border-blue-500/50 hover:bg-blue-500/5"
-                            }`}
-                          >
-                            {mood.name}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </ScrollArea>
-
-              <SheetFooter className="p-8 border-t border-white/5 bg-background relative z-10 sm:flex-row gap-3">
-                <Button 
-                  variant="ghost" 
-                  className="flex-1 rounded-xl text-[10px] font-black uppercase tracking-widest"
-                  onClick={() => {
-                    setBpmRange([60, 180]);
-                    setSelectedKeys([]);
-                    setSelectedMoods([]);
-                    setOnlyVerified(false);
-                  }}
-                >
-                  Reset Parameters
-                </Button>
-                <Button 
-                  className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-600/20"
-                  onClick={() => setIsFilterSheetOpen(false)}
-                >
-                  Engage Filters
-                </Button>
-              </SheetFooter>
-            </SheetContent>
-          </Sheet>
         </div>
 
         {/* Filter Tabs - Pill Buttons */}
-        <div className="mt-1 flex flex-col items-center filter-tabs w-full max-w-2xl mx-auto px-4">
+        <div className="mt-4 flex flex-col items-center filter-tabs w-full max-w-2xl mx-auto px-4">
           <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
-            <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start md:justify-center px-1 py-2">
-              <TabsList className="bg-transparent h-auto p-0 gap-3 flex flex-nowrap min-w-max">
+            <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start md:justify-center px-1 py-1">
+              <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
                 {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
                   <TabsTrigger
                     key={filter}
                     value={filter}
-                    className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0"
+                    className="px-4 py-2 rounded-[4px] text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-muted/20 border border-border/40 data-[state=active]:border-blue-500 hover:data-[state=inactive]:bg-muted/40 shrink-0 font-ui cursor-pointer"
                   >
                     {filter}
                   </TabsTrigger>
@@ -629,7 +494,7 @@ const Discover: React.FC = () => {
         </div>
       </div>
 
-      <div className="page-container pt-[98px] pb-6 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 pt-6 pb-24 space-y-6">
         {isLoading ? (
           <div className="space-y-12">
             <div className="aspect-[2/1] w-full bg-muted rounded-[2.5rem] animate-pulse"></div>
@@ -711,17 +576,23 @@ const Discover: React.FC = () => {
 
             {/* Browse Categories - Modern Bento Grid */}
             <section className="space-y-6">
-              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800">Browse Dimensions</h2>
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800 font-ui">Browse Dimensions</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                {BROWSE_CATEGORIES.map((category) => (
-                  <div key={category.id} className="relative group">
+                {BROWSE_CATEGORIES.map((category, idx) => (
+                  <motion.div 
+                    key={category.id} 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="relative group"
+                  >
                     <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-600/50 to-cyan-400/50 rounded-xl opacity-0 group-hover:opacity-100 blur-[1px] transition-opacity duration-300"></div>
                     <Card 
                       onClick={() => setSearchQuery(category.title)}
                       className={`${category.color} aspect-[16/9] relative overflow-hidden cursor-pointer border-none shadow-lg group transition-all duration-300 active:scale-95 rounded-xl`}
                     >
                       <CardContent className="p-4 h-full flex flex-col justify-between">
-                        <h3 className="text-white font-bold text-lg uppercase leading-[0.9] tracking-tighter opacity-80 group-hover:opacity-100 transition-opacity">
+                        <h3 className="text-white font-bold text-lg uppercase leading-[0.9] tracking-tighter opacity-80 group-hover:opacity-100 transition-opacity font-display">
                           {category.title}
                         </h3>
                         <div className="absolute -bottom-2 -right-4 w-32 h-32 group-hover:scale-110 transition-transform duration-500">
@@ -733,7 +604,7 @@ const Discover: React.FC = () => {
                         </div>
                       </CardContent>
                     </Card>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </section>

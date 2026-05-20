@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { useAudio } from '@/context/AudioContext';
@@ -37,7 +38,7 @@ const SongRequests: React.FC<SongRequestsProps> = ({ artistId }) => {
     }
   };
 
-  if (loading) return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>;
+  if (loading) return <div className="flex justify-center p-8"><LoadingSpinner size={32} /></div>;
 
   return (
     <div className="space-y-4">

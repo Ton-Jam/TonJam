@@ -128,7 +128,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   return (
     <div 
       onClick={handleClick}
-      className="flex flex-col items-center text-center h-full w-full p-3 rounded-[2px] bg-muted/20 border border-border/50 hover:bg-muted/30 transition-all min-w-[130px] cursor-pointer group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 shadow-none hover:border-primary/50"
+      className="flex flex-col items-center text-center h-full w-full p-3 rounded-[2px] bg-muted/20 hover:bg-muted/30 transition-all min-w-[130px] cursor-pointer group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 shadow-none"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -165,10 +165,10 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       {!isOwnProfile && (
         <button 
           onClick={handleFollow}
-          className={`w-full py-1.5 text-[9px] rounded-full flex items-center justify-center gap-2 transition-all font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600
+          className={`w-auto px-5 py-1.5 text-[9px] rounded-full mx-auto flex items-center justify-center gap-2 transition-all font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600
             ${isFollowing 
               ? 'bg-muted/50 text-muted-foreground/60 border border-border/50' 
-              : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-lg shadow-blue-600/10'
+              : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white'
             }
           `}
           aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}

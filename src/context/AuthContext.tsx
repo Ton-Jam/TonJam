@@ -3,6 +3,8 @@ import {
   User, 
   onAuthStateChanged, 
   signInWithPopup, 
+  signInWithCredential,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -119,11 +121,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-        console.error('Error signing in with Google:', error);
+      // 1. Get the auth URL from our backend
+      const response = await fetch('/api/auth/google/url');
+      if (!response.ok) throw new Error('Failed to get Google Auth URL');
+      const { url } = await response.json();
+      
+      // 2. Open popup
+      const width = 500;
+      const height = 600;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      const popup = window.open(url, 'google-auth', `width=${width},height=${height},left=${left},top=${top}`);
+      
+      if (!popup) {
+        throw new Error('Popup blocked. Please allow popups for this site.');
       }
+
+      // 3. Listen for message from callback
+      return new Promise<void>((resolve, reject) => {
+        const handleMessage = async (event: MessageEvent) => {
+          if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+            try {
+              const { idToken } = event.data;
+              const credential = GoogleAuthProvider.credential(idToken);
+              await signInWithCredential(auth, credential);
+              window.removeEventListener('message', handleMessage);
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          }
+        };
+        window.addEventListener('message', handleMessage);
+
+        // Cleanup if popup is closed manually
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            window.removeEventListener('message', handleMessage);
+            // We don't reject here because the user might have finished or just closed it
+          }
+        }, 1000);
+      });
+    } catch (error: any) {
+      console.error('Error signing in with Google:', error);
+      throw error;
     }
   };
 

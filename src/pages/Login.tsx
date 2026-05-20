@@ -296,35 +296,23 @@ const Login: React.FC = () => {
               </div>
 
               <div className="space-y-2.5">
-                <div className="flex justify-center w-full">
-                  <TonConnectButton className="w-full [&>button]:w-full [&>button]:h-10 [&>button]:rounded-md [&>button]:bg-muted/50 [&>button]:text-foreground [&>button]:hover:bg-muted/70 [&>button]:transition-all [&>button]:font-bold [&>button]:text-[9px] [&>button]:uppercase [&>button]:tracking-widest [&>button]:border [&>button]:border-border/50" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2.5">
-                  <Button
-                    variant="outline"
-                    disabled={isLoading}
-                    onClick={async () => {
-                      setIsLoading(true);
-                      try {
-                        await signInWithGoogle();
-                      } finally {
-                        setIsLoading(false);
-                      }
-                    }}
-                    className="h-10 border-border/50 hover:bg-muted/50 text-foreground font-bold text-[9px] uppercase tracking-widest gap-2"
-                  >
-                    <Chrome className="h-3.5 w-3.5 text-amber-500" />
-                    Google
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-10 border-border/50 hover:bg-muted/50 text-foreground font-bold text-[9px] uppercase tracking-widest gap-2"
-                  >
-                    <Github className="h-3.5 w-3.5" />
-                    GitHub
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  disabled={isLoading}
+                  type="button"
+                  onClick={async () => {
+                    setIsLoading(true);
+                    try {
+                      await signInWithGoogle();
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  className="w-full h-11 border-border/50 hover:bg-muted/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-2 rounded-[2px]"
+                >
+                  <Chrome className="h-4 w-4 text-blue-500" />
+                  Continue with Google
+                </Button>
               </div>
             </CardContent>
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Loader2, Music, Zap, Sparkles } from 'lucide-react';
 
+import { LoadingSpinner } from './LoadingSpinner';
+
 interface LoadingOverlayProps {
   isVisible: boolean;
   message?: string;
@@ -18,7 +20,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
       case 'transaction': return <Zap className="w-10 h-10 text-yellow-400 animate-pulse" />;
       case 'upload': return <Music className="w-10 h-10 text-blue-400 animate-bounce" />;
       case 'mint': return <Sparkles className="w-10 h-10 text-purple-400 animate-spin" />;
-      default: return <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />;
+      default: return <LoadingSpinner size={48} />;
     }
   };
 

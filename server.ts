@@ -221,6 +221,64 @@ async function startServer() {
     const VERCEL_CLIENT_ID = process.env.VERCEL_CLIENT_ID;
     const VERCEL_CLIENT_SECRET = process.env.VERCEL_CLIENT_SECRET;
 
+    // Google OAuth Config (Used to bypass broken Firebase Console config)
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+    const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+
+    app.get('/api/auth/google/url', (req, res) => {
+        if (!GOOGLE_CLIENT_ID) {
+            return res.status(500).json({ error: 'Google Client ID not configured' });
+        }
+        const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl(req)}/api/auth/google/callback`;
+        const scopes = 'openid email profile';
+        const url = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${GOOGLE_CLIENT_ID}&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(redirectUri)}&prompt=select_account`;
+        res.json({ url });
+    });
+
+    app.get('/api/auth/google/callback', async (req, res) => {
+        const { code } = req.query;
+        if (!code) return res.status(400).send('No code provided');
+
+        if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+            return res.status(500).send('Google credentials not configured');
+        }
+
+        const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl(req)}/api/auth/google/callback`;
+
+        try {
+            const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+                code: code as string,
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                redirect_uri: redirectUri,
+                grant_type: 'authorization_code'
+            });
+
+            const { id_token } = tokenResponse.data;
+
+            const html = `
+                <html>
+                    <body>
+                        <script>
+                            if (window.opener) {
+                                window.opener.postMessage({ type: 'GOOGLE_AUTH_SUCCESS', idToken: '${id_token}' }, '*');
+                                window.close();
+                            } else {
+                                document.body.innerHTML = '<h1>Authentication Successful</h1><p>You can close this window now.</p>';
+                            }
+                        </script>
+                        <h1>Verifying...</h1>
+                    </body>
+                </html>
+            `;
+            res.send(html);
+
+        } catch (error: any) {
+            console.error('Google Auth Error:', error.response?.data || error.message);
+            res.status(500).send('Authentication failed');
+        }
+    });
+
     app.get('/api/auth/vercel/url', (req, res) => {
         if (!VERCEL_CLIENT_ID) {
             return res.status(500).json({ error: 'Vercel Client ID not configured' });

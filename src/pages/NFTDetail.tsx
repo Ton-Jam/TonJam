@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem, Track, NFTOffer } from '@/types';
@@ -464,11 +465,8 @@ const NFTDetail: React.FC = () => {
 
       {isFetchingMetadata && (
         <div className="fixed inset-0 z-50 bg-background/60 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-300">
-          <div className="relative">
-            <Loader2 className="h-16 w-16 text-blue-500 animate-spin mb-4" />
-            <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
-          </div>
-          <p className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em] animate-pulse">Syncing Neural Relay...</p>
+          <LoadingSpinner size={64} />
+          <p className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em] animate-pulse mt-8">Syncing Neural Relay...</p>
         </div>
       )}
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-4 pt-4">

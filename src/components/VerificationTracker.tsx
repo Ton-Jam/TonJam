@@ -8,9 +8,9 @@ import {
   ExternalLink,
   ChevronRight,
   AlertCircle,
-  Loader2,
   FileText
 } from 'lucide-react';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { ArtistVerificationRequest } from '@/types';
@@ -45,7 +45,7 @@ const VerificationTracker: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <LoadingSpinner size={32} />
         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Querying Identity Registry...</p>
       </div>
     );

@@ -18,7 +18,10 @@ import {
   FolderPlus,
   Folder,
   UserPlus,
-  ChevronRight
+  ChevronRight,
+  Layers,
+  ListMusic,
+  ShoppingBag
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_USERS, MOCK_NFTS, MOCK_PLAYLISTS, MOCK_ALBUMS } from '@/constants';
@@ -76,7 +79,7 @@ const Library: React.FC = () => {
   } = useAudio();
 
   const [filter, setFilter] = useState<LibraryFilter>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('recents');
   const [isLoading, setIsLoading] = useState(true);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
@@ -242,6 +245,71 @@ const Library: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground pb-4">
       <div className="px-4 py-3 sm:px-6 max-w-7xl mx-auto space-y-6">
         
+        {/* Global Filter Pills & Grid Toggle controls block */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3 border-b border-blue-500/20 bg-background/50 backdrop-blur-sm px-1">
+          <Tabs value={filter} onValueChange={(v: any) => setFilter(v)} className="w-full md:w-auto">
+            <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth">
+              {[
+                { id: 'all', label: 'All Symbols', icon: Layers },
+                { id: 'playlists', label: 'Playlists', icon: ListMusic },
+                { id: 'artists', label: 'Artists', icon: Users },
+                { id: 'nfts', label: 'NFTs', icon: ShoppingBag }
+              ].map((tab) => (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="flex items-center gap-2 px-4 py-2 rounded-[4px] text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border bg-muted/20 border-border/40 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:border-blue-500/40 data-[state=active]:text-white shrink-0 font-ui"
+                >
+                  <tab.icon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+
+          {/* Sorters and List/Grid switches */}
+          <div className="flex items-center gap-3 justify-end shrink-0">
+            {/* View Switching buttons */}
+            <div className="flex items-center bg-muted/20 border border-border/40 p-1 rounded-[4px] gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('grid')}
+                className={cn("h-7 w-7 p-0 rounded-[2px]", viewMode === 'grid' ? "bg-blue-600 text-white hover:bg-blue-500" : "text-muted-foreground hover:text-foreground")}
+                title="Grid representation"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('list')}
+                className={cn("h-7 w-7 p-0 rounded-[2px]", viewMode === 'list' ? "bg-blue-600 text-white hover:bg-blue-500" : "text-muted-foreground hover:text-foreground")}
+                title="List representation"
+              >
+                <List className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+
+            {/* Nice Sorting dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 border border-border/40 bg-muted/20 rounded-[4px] text-[10px] font-black uppercase tracking-widest gap-2">
+                  <ArrowUpDown className="h-3.5 w-3.5 text-blue-500" />
+                  Sort: {sortBy === 'recents' ? 'Recents' : sortBy === 'recently-added' ? 'Newest' : 'A-Z'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background border border-border/40 rounded-[2px] text-[10px] font-black uppercase tracking-wider">
+                <DropdownMenuRadioGroup value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+                  <DropdownMenuRadioItem value="recents" className="cursor-pointer">Recents</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="recently-added" className="cursor-pointer">Recently Added</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="alphabetical" className="cursor-pointer">Alphabetical</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
         {/* Folders Section - List Layout */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">

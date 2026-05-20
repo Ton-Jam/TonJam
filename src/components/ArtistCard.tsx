@@ -90,7 +90,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
     >
       <Card 
         onClick={handleCardClick}
-        className={cn("group flex flex-col items-center text-center p-3 space-y-2 cursor-pointer hover:border-primary/50 transition-all bg-muted/20 border-border/50 shadow-none rounded-[2px]", className)}
+        className={cn("group flex flex-col items-center text-center p-3 space-y-2 cursor-pointer transition-all bg-muted/20 border-none shadow-none rounded-[2px]", className)}
       >
       <div className="relative">
           <img 
@@ -120,8 +120,8 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
         onClick={handleFollowClick}
         variant={isFollowing ? "outline" : "default"}
         className={cn(
-            "w-full rounded-full h-7 text-[9px] font-bold uppercase tracking-widest",
-            !isFollowing && "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white shadow-lg shadow-blue-600/10"
+            "w-auto px-5 mx-auto rounded-full h-7 text-[9px] font-bold uppercase tracking-widest",
+            !isFollowing && "bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white"
           )}
       >
         {isFollowing ? 'SYNCED' : 'FOLLOW'}

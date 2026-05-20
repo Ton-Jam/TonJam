@@ -46,6 +46,7 @@ import { ModeToggle } from './ModeToggle';
 import { NotificationBell } from './NotificationBell';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import CreatePlaylistModal from './CreatePlaylistModal';
+import { FilterSection } from './FilterSection';
 import AuthModal from './AuthModal';
 import { Button } from "@/components/ui/button"
 import { ButtonGroupInput } from './ButtonGroupInput';
@@ -349,13 +350,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isProfile && !isUserProfile && (
+      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isProfile && !isUserProfile && !isArtistProfile && (
         <motion.header 
-          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md border-b border-border/40' : 'bg-transparent'}`}
+          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md border-b border-blue-500/20' : 'bg-transparent'}`}
         >
           {/* Background with higher blur and subtle border - added conditional styling */}
           <motion.div 
-            className={`absolute inset-0 bg-background -z-10 transition-opacity duration-300 ${isArtistProfile && !isCompact ? 'opacity-0' : 'opacity-100'} border-b border-border/40`}
+            className={`absolute inset-0 bg-background -z-10 transition-opacity duration-300 ${isArtistProfile && !isCompact ? 'opacity-0' : 'opacity-100'} border-b border-blue-500/20`}
           />
           
           <div className={`flex items-center ${headerTitle ? 'justify-center flex-1' : 'gap-4 flex-1'}`}>
@@ -561,6 +562,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <div className={cn("items-center gap-[3px] transition-all duration-300", headerTitle ? "hidden" : "flex")}>
+            {/* Global Filter Icon for Discovery/Marketplace/Library */}
+            {(isMarketplace || isDiscover || isLibrary || isJamspace) && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={() => setIsDiscoverFiltersOpen(true)}
+                    className={cn(
+                      "p-2.5 rounded-[2px] transition-all flex items-center gap-2",
+                      isDiscoverFiltersOpen ? "text-blue-500 bg-blue-500/10" : "text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    <AdjustmentsHorizontalIcon className="h-5 w-5" strokeWidth={2.5} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Signal Filters</TooltipContent>
+              </Tooltip>
+            )}
+
+            <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
+
             {/* JAM Balance Badge */}
             <button onClick={() => navigate('/tasks')} className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] hover:bg-white/5 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
                <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[35px] h-[35px] object-contain" />
@@ -748,6 +769,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       <CreatePlaylistModal isOpen={isCreatePlaylistModalOpen} onClose={() => setIsCreatePlaylistModalOpen(false)} />
+      
+      <FilterSection 
+        isOpen={isDiscoverFiltersOpen}
+        onOpenChange={setIsDiscoverFiltersOpen}
+        activeFilter={isMarketplace ? 'nfts' : isDiscover ? 'tracks' : 'all'}
+        setActiveFilter={() => {}} 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        sortOption={isMarketplace ? marketplaceFilters.sortBy : 'newest'}
+        setSortOption={(opt) => {
+          if (isMarketplace) setMarketplaceFilters(prev => ({ ...prev, sortBy: opt }));
+        }}
+        filters={{
+          priceRange: isMarketplace ? marketplaceFilters.priceRange : undefined,
+          setPriceRange: isMarketplace ? ((range) => setMarketplaceFilters(prev => ({ ...prev, priceRange: range }))) : undefined,
+          rarity: isMarketplace ? marketplaceFilters.rarity : undefined,
+          setRarity: isMarketplace ? ((rarity) => setMarketplaceFilters(prev => ({ ...prev, rarity }))) : undefined,
+          selectedGenres: isMarketplace ? [marketplaceFilters.genre] : undefined,
+          setSelectedGenres: isMarketplace ? ((genres) => setMarketplaceFilters(prev => ({ ...prev, genre: genres[0] || 'All' }))) : undefined,
+        }}
+      />
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       <AnimatePresence>
         {isPostModalOpen && (

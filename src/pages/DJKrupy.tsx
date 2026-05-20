@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Send, Sparkles, Music, Mic2, Loader2, RefreshCw, 
@@ -252,7 +253,7 @@ const DJKrupy: React.FC = () => {
               >
                 <div className="bg-zinc-900/50 backdrop-blur-sm text-muted-foreground px-6 py-4 rounded-[20px] rounded-tl-none flex items-center gap-4 border border-white/5 shadow-lg group">
                   <div className="relative">
-                    <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                    <LoadingSpinner size={20} />
                     <div className="absolute inset-0 bg-blue-500 blur-md opacity-20 group-hover:opacity-40 transition-opacity"></div>
                   </div>
                   <div className="space-y-1">

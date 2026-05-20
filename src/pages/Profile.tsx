@@ -33,8 +33,10 @@ import {
  Search,
  SlidersHorizontal,
  Clock3,
- Music2
+ Music2,
+ X
 } from 'lucide-react';
+import { FilterSection } from '@/components/FilterSection';
 import { BackButton } from '@/components/BackButton';
 import { Avatar, AvatarImage, AvatarFallback } from"@/components/ui/avatar";
 import { 
@@ -58,6 +60,8 @@ import UserArtistVerificationModal from '@/components/UserArtistVerificationModa
 import ConfirmationModal from '@/components/ConfirmationModal';
 import VerificationTracker from '@/components/VerificationTracker';
 import { useAudio } from '@/context/AudioContext';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useAuth } from '@/context/AuthContext';
 import { NFTItem, UserProfile } from '@/types';
 import { useTonAddress } from '@tonconnect/ui-react';
@@ -403,15 +407,15 @@ const Profile: React.FC = () => {
         <div 
           className="relative overflow-hidden border-[4px] border-background bg-muted w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full"
         >
-          <Avatar className="w-full h-full rounded-none">
-            <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} className="object-cover" alt={localUser.name} />
+          <Avatar className="w-full h-full rounded-full">
+            <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} className="object-cover rounded-full" alt={localUser.name} />
             <AvatarFallback className="text-3xl font-black">{(localUser.name || '?').charAt(0)}</AvatarFallback>
           </Avatar>
           
           {isEditing && (
             <button 
               onClick={() => avatarInputRef.current?.click()} 
-              className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
             >
               <Camera className="text-white h-8 w-8"/>
             </button>
@@ -427,6 +431,14 @@ const Profile: React.FC = () => {
 
       {/* Action Button (Extreme Right) */}
       <div className="flex items-center gap-3">
+        {localUser.role !== 'artist' && !isEditing && (
+          <button 
+            onClick={() => handleSwitchRole('artist')}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-[11px] uppercase tracking-widest transition-all shadow-none"
+          >
+            Become Artist
+          </button>
+        )}
         {isEditing ? (
           <>
             <button 
@@ -443,12 +455,21 @@ const Profile: React.FC = () => {
             </button>
           </>
         ) : (
-          <button 
-            onClick={() => navigate('/edit-profile')}
-            className="px-6 py-2 bg-background text-foreground rounded-full font-black text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
-          >
-            Edit Profile
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => navigate('/settings')}
+              className="p-2.5 bg-background text-foreground rounded-full border border-white/20 hover:bg-white/5 transition-all shadow-sm flex items-center justify-center cursor-pointer"
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={() => navigate('/edit-profile')}
+              className="px-6 py-2 bg-background text-foreground rounded-full font-black text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
+            >
+              Edit Profile
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -514,8 +535,9 @@ const Profile: React.FC = () => {
   {/* Tab Navigation */}
   <div className="w-full sticky top-[0px] z-40 bg-background/95 backdrop-blur-md border-b border-border/10 mb-2">
     <div className="max-w-7xl mx-auto px-4">
-      <div className="flex items-center justify-between py-2">
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+      <div className="flex items-center justify-between py-2 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
+          <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-1 justify-start scroll-smooth">
           {[
             { id: 'feed', label: 'Activity' },
             { id: 'overview', label: 'Overview' },
@@ -524,83 +546,54 @@ const Profile: React.FC = () => {
             { id: 'sequences', label: 'Playlists' },
             { id: 'staking', label: 'Staking' }
           ].filter(t => !t.hidden).map(tab => (
-            <button
+            <TabsTrigger
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              value={tab.id}
               className={cn(
-                "relative px-4 py-2 text-[11px] font-black uppercase tracking-widest transition-all rounded-full whitespace-nowrap",
-                activeTab === tab.id ? "text-white" : "text-muted-foreground hover:text-white"
+                "relative px-4 py-2 text-[11px] font-black uppercase tracking-widest transition-all rounded-full whitespace-nowrap shadow-none border border-transparent shrink-0 font-ui",
+                "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-600/30",
+                "text-muted-foreground hover:text-white"
               )}
             >
               {tab.label}
-              {activeTab === tab.id && (
-                <motion.div
-                  layoutId="profile-tab-blob"
-                  className="absolute inset-0 bg-blue-600 rounded-full -z-10 shadow-lg shadow-blue-600/30"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-            </button>
+            </TabsTrigger>
           ))}
-        </div>
+          </TabsList>
+        </Tabs>
         
         <button 
-          onClick={() => setShowFilters(!showFilters)}
+          onClick={() => setShowFilters(true)}
           className={cn(
-            "p-2 rounded-full transition-all border",
-            showFilters ? "bg-white text-black border-white" : "bg-white/5 text-white/40 border-white/5 hover:border-white/20"
+            "p-2.5 rounded-full transition-all border",
+            showFilters ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20" : "bg-white/5 text-white/40 border-white/5 hover:border-white/20"
           )}
         >
-          <SlidersHorizontal className="w-4 h-4" />
+          <SlidersHorizontal className="w-5 h-5" />
         </button>
       </div>
 
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="py-4 border-t border-white/5 flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
-                <input 
-                  type="text"
-                  placeholder="Search inside content..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all font-medium"
-                />
-              </div>
-              
-              <div className="flex gap-2">
-                {[
-                  { id: 'newest', label: 'Newest', icon: Clock3 },
-                  { id: 'popular', label: 'Popular', icon: Zap },
-                  { id: 'price-low', label: 'Price: Low', icon: ArrowDown, hidden: activeTab !== 'inventory' },
-                  { id: 'price-high', label: 'Price: High', icon: ArrowUp, hidden: activeTab !== 'inventory' }
-                ].filter(o => !o.hidden).map(opt => (
-                  <button
-                    key={opt.id}
-                    onClick={() => setSortOption(opt.id as any)}
-                    className={cn(
-                      "px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border whitespace-nowrap",
-                      sortOption === opt.id 
-                        ? "bg-white/10 border-white/20 text-white" 
-                        : "bg-transparent border-white/5 text-white/40 hover:border-white/10"
-                    )}
-                  >
-                    <opt.icon className="w-3.5 h-3.5" />
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <FilterSection 
+        isOpen={showFilters}
+        onOpenChange={setShowFilters}
+        activeFilter={activeTab}
+        setActiveFilter={setActiveTab as any}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        sortOption={sortOption}
+        setSortOption={setSortOption}
+      />
+      
+      {searchQuery && (
+        <div className="flex items-center gap-3 py-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <Badge variant="secondary" className="px-3 py-1.5 bg-blue-600/10 text-blue-500 border-blue-500/20 text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center gap-2 group">
+            Search: {searchQuery}
+            <button onClick={() => setSearchQuery('')} className="hover:text-blue-400">
+              <X className="w-3 h-3" />
+            </button>
+          </Badge>
+          <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Clear Results</Button>
+        </div>
+      )}
     </div>
   </div>
 
@@ -608,7 +601,7 @@ const Profile: React.FC = () => {
   <div className="max-w-7xl mx-auto px-0 md:px-4">
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-8">
       {/* Main Column (Feed/Content) */}
-      <div className="lg:col-span-8 border-x border-white/5 bg-background/50 min-h-screen">
+      <div className="lg:col-span-8 bg-background/50 min-h-screen">
         {activeTab === 'feed' && (
           <div className="animate-in fade-in duration-500">
             {/* Quick Share (X style) */}

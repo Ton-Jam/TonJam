@@ -328,23 +328,33 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Feed Filters */}
-            <div className="flex gap-2 p-3 overflow-x-auto no-scrollbar border-b border-white/[0.05] bg-white/[0.01]">
-              {['All', 'Tracks', 'NFTs', 'Trending'].map((filter) => (
-                <Button
-                  key={filter}
-                  variant={filterType === filter ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterType(filter)}
-                  className={cn(
-                    "px-6 py-2 rounded-full h-8 text-[10px] font-bold uppercase tracking-[0.2em] transition-all shrink-0",
-                    filterType === filter 
-                      ? "bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)] border-2 border-blue-400/50" 
-                      : "text-muted-foreground/60 bg-white/5 border-2 border-blue-500/30 hover:bg-white/10"
-                  )}
-                >
-                  {filter}
-                </Button>
-              ))}
+            <div className="py-3 border-b border-blue-500/20 bg-background/50 backdrop-blur-sm">
+              <Tabs value={filterType} onValueChange={setFilterType} className="w-full">
+                <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start px-4">
+                  {[
+                    { name: 'All', icon: Sparkles },
+                    { name: 'Tracks', icon: Disc },
+                    { name: 'NFTs', icon: Zap },
+                    { name: 'Trending', icon: Flame }
+                  ].map((filter) => {
+                    const Icon = filter.icon;
+                    return (
+                      <TabsTrigger
+                        key={filter.name}
+                        value={filter.name}
+                        className={cn(
+                          "px-4 py-2 rounded-[4px] h-9 text-[10px] font-black uppercase tracking-[0.15em] transition-all shrink-0 border flex items-center gap-2",
+                          "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-500/40 data-[state=active]:shadow-md",
+                          "text-muted-foreground bg-muted/20 border-border/40 hover:bg-muted/40 hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                        {filter.name}
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+              </Tabs>
             </div>
 
             {/* Main Feed */}

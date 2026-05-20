@@ -322,7 +322,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/10"
                     onClick={(e) => { e.stopPropagation(); setShowOptionsModal(true); }}
                   >
                     <MoreHorizontal className="h-4 w-4" />
@@ -435,11 +435,11 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-9 px-3 gap-2 rounded-xl hover:bg-blue-600/10 hover:text-blue-500 text-zinc-500 transition-all font-bold uppercase"
+                  className="h-9 px-3 gap-2 rounded-xl hover:bg-transparent hover:text-blue-500 text-zinc-500 transition-all font-medium uppercase"
                   onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
                 >
                   <MessageCircle className="h-4 w-4" />
-                  <span className="text-[11px]">{comments.length}</span>
+                  <span className="text-[11px] font-medium text-zinc-400">{comments.length}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="bg-zinc-800 text-[10px] font-black uppercase tracking-widest border-white/5">Connect Feedback</TooltipContent>
@@ -451,14 +451,14 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "h-9 px-3 gap-2 rounded-xl transition-all font-bold uppercase text-zinc-500",
-                    post.isReposted ? "text-emerald-500 bg-emerald-500/10" : "hover:bg-emerald-600/10 hover:text-emerald-500"
+                    "h-9 px-3 gap-2 rounded-xl transition-all font-medium uppercase text-zinc-500 bg-transparent hover:bg-transparent",
+                    post.isReposted ? "text-emerald-500" : "hover:text-emerald-500"
                   )}
                   onClick={handleRepost}
                   disabled={isReposting}
                 >
                   <Repeat2 className={cn("h-4 w-4", isReposting && "animate-spin")} />
-                  <span className="text-[11px]">{repostsCount}</span>
+                  <span className="text-[11px] font-medium text-zinc-400">{repostsCount}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="bg-zinc-800 text-[10px] font-black uppercase tracking-widest border-white/5">Amplify Signal</TooltipContent>
@@ -470,13 +470,13 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "h-9 px-3 gap-2 rounded-xl transition-all font-bold uppercase text-zinc-500",
-                    isLiked ? "text-rose-500 bg-rose-500/10" : "hover:bg-rose-600/10 hover:text-rose-500"
+                    "h-9 px-3 gap-2 rounded-xl transition-all font-medium uppercase text-zinc-500 bg-transparent hover:bg-transparent",
+                    isLiked ? "text-rose-500" : "hover:text-rose-500"
                   )}
                   onClick={handleLike}
                 >
                   <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
-                  <span className="text-[11px]">{likesCount}</span>
+                  <span className="text-[11px] font-medium text-zinc-400">{likesCount}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="bg-zinc-800 text-[10px] font-black uppercase tracking-widest border-white/5">Neural Resonance</TooltipContent>
