@@ -11,17 +11,16 @@ interface LoadingSpinnerProps {
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className, size = 48 }) => {
   return (
     <div className={cn("flex flex-col items-center justify-center gap-3", className)}>
-      <motion.div
+              <motion.div
         animate={{ 
-          rotateY: 360,
+          rotate: 360,
           scale: [1, 1.1, 1],
         }}
         transition={{ 
-          rotateY: { duration: 2, repeat: Infinity, ease: "linear" },
-          scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+          rotate: { duration: 1.5, repeat: Infinity, ease: "linear" },
+          scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
         }}
         className="relative"
-        style={{ perspective: 1000 }}
       >
         <img 
           src={TJ_COIN_ICON} 

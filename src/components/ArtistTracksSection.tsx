@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Play, Satellite, Tag, Gavel, Info } from 'lucide-react';
 import { Track, NFTItem, ArtistEvent, Collaboration, Artist } from '@/types';
 import TrackCard from '@/components/TrackCard';
 import { getPlaceholderImage } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { TON_LOGO } from '@/constants';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 interface ArtistTracksSectionProps {
   artistTracks: Track[];
@@ -28,6 +29,19 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
   artist,
 }) => {
   const navigate = useNavigate();
+  const [visibleCount, setVisibleCount] = useState(10);
+  
+  const sentinelRef = useInfiniteScroll(() => {
+    setVisibleCount(prev => prev + 10);
+  });
+
+  const filteredTracks = artistTracks.filter(t => {
+    if (trackFilter === 'All') return true;
+    if (trackFilter === 'NFTs') return t.isNFT;
+    if (trackFilter === 'Releases') return !t.isCollaboration;
+    if (trackFilter === 'Collaborations') return t.isCollaboration;
+    return true;
+  });
 
   return (
     <div className="space-y-4 animate-in fade-in duration-700">
@@ -107,13 +121,7 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          {artistTracks.filter(t => {
-            if (trackFilter === 'All') return true;
-            if (trackFilter === 'NFTs') return t.isNFT;
-            if (trackFilter === 'Releases') return !t.isCollaboration;
-            if (trackFilter === 'Collaborations') return t.isCollaboration;
-            return true;
-          }).map((t, i) => (
+          {filteredTracks.slice(0, visibleCount).map((t, i) => (
             <TrackCard 
               key={t.id}
               track={t} 
@@ -122,14 +130,9 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
               onMint={isOwnProfile ? (track) => navigate('/mint', { state: { track } }) : undefined}
             />
           ))}
+          <div ref={sentinelRef} className="h-4" />
         </div>
-        {artistTracks.filter(t => {
-          if (trackFilter === 'All') return true;
-          if (trackFilter === 'NFTs') return t.isNFT;
-          if (trackFilter === 'Releases') return !t.isCollaboration;
-          if (trackFilter === 'Collaborations') return t.isCollaboration;
-          return true;
-        }).length === 0 && (
+        {filteredTracks.length === 0 && (
           <div className="py-4 text-center bg-card rounded-[10px]">
             <p className="text-xs text-muted-foreground">No tracks broadcasted.</p>
           </div>

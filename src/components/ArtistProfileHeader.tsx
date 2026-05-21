@@ -73,6 +73,15 @@ const ArtistProfileHeader: React.FC<ArtistProfileHeaderProps> = ({ artist, onTip
       {/* Action Buttons & Social Icons - Horizontally Aligned */}
       <div className="flex flex-wrap items-center justify-end gap-3 mt-4 md:mt-0">
         
+        {isOwnProfile && (
+           <Button
+             onClick={() => navigate('/mint')}
+             className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] px-4 py-2 h-9"
+           >
+              <Hammer className="w-3.5 h-3.5 mr-2" /> Mint Artifact
+           </Button>
+        )}
+
         {artist.socials && Object.values(artist.socials).some(v => !!v) && (
           <div className="hidden sm:block w-[1px] h-4 bg-muted-foreground/30 mx-1" />
         )}

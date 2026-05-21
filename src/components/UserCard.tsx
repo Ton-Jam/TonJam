@@ -56,7 +56,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         tabIndex={0}
         aria-label={`View profile of ${user.name}`}
       >
-        <div className="relative w-10 h-10 rounded-[2px] overflow-hidden">
+        <div className="relative w-14 h-14 rounded-[2px] overflow-hidden">
           <img src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} alt={user.name} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
@@ -95,7 +95,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         aria-label={`View profile of ${user.name}`}
       >
         <div className="flex items-center gap-2">
-          <div className="relative w-12 h-12 rounded-[2px] overflow-hidden">
+          <div className="relative w-16 h-16 rounded-[2px] overflow-hidden">
             <img src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} alt={user.name} className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">
@@ -139,7 +139,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       tabIndex={0}
       aria-label={`View profile of ${user.name}`}
     >
-      <div className="relative mb-2 w-14 h-14">
+      <div className="relative mb-2 w-20 h-20">
         <div className="w-full h-full rounded-full overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300">
           <img 
             src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} 

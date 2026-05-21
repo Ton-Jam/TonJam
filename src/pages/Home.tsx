@@ -10,6 +10,7 @@ import { getPlaceholderImage } from '@/lib/utils';
 import { auth } from '@/lib/firebase';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
+import TrendingNFTCard from '@/components/TrendingNFTCard';
 import ArtistCard from '@/components/ArtistCard';
 import TaskCard from '@/components/TaskCard';
 import PlaylistCard from '@/components/PlaylistCard';
@@ -637,6 +638,19 @@ const Home: React.FC = () => {
             {/* Neural Leaderboard Section */}
             <section className="section-container mt-6 mb-6 px-2 sm:px-0">
               <Leaderboard artists={artists} limit={5} />
+            </section>
+
+            {/* Trending NFTs Section */}
+            <section className="py-8 px-2 sm:px-0">
+                <h3 className="text-xl font-black uppercase tracking-widest text-foreground/80 mb-6 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-blue-500" />
+                    Trending NFTs
+                </h3>
+                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
+                    {trendingNFTs.slice(0, 6).map(nft => (
+                        <TrendingNFTCard key={nft.id} nft={nft} />
+                    ))}
+                </div>
             </section>
 
             {/* AI Dj Krupy Section - Neural Synthesis Interface */}

@@ -120,7 +120,7 @@ const UserProfile: React.FC = () => {
   return (
     <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
       {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[160px] sm:h-[240px] md:h-[400px] overflow-hidden group bg-blue-950">
+      <div className="relative h-[140px] sm:h-[200px] md:h-[300px] overflow-hidden group bg-blue-950 border-b-4 border-muted/20">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
           style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
@@ -128,14 +128,14 @@ const UserProfile: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
         
         {/* Extreme Left Actions ON Cover Picture */}
-        <div className="absolute bottom-6 left-6 z-40 flex items-center gap-3">
+        <div className="absolute bottom-4 left-4 z-40 flex items-center gap-1.5">
           <button 
             onClick={handleFollow} 
             className={cn(
-              "px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95",
+              "cursor-pointer transition-all px-6 py-2 rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-wider transition-all",
               isFollowing 
-                ? "bg-white/20 text-white hover:bg-white/30 backdrop-blur-md" 
-                : "bg-white text-black hover:bg-white/90 shadow-white/20"
+                ? "bg-white/20 text-white border-white/40 backdrop-blur-md" 
+                : "bg-blue-500 text-white border-blue-600 shadow-white/20"
             )}
           >
             {isFollowing ? 'Following' : 'Follow'}
@@ -148,17 +148,17 @@ const UserProfile: React.FC = () => {
                   addNotification("Link copied", "success");
                 });
             }}
-            className="p-3 bg-black/40 text-white rounded-full hover:bg-black/60 transition-all border border-white/10 backdrop-blur-md shadow-lg"
+            className="p-2 bg-black/40 text-white rounded-full hover:bg-black/60 transition-all border border-white/10 backdrop-blur-md shadow-lg"
           >
-            <Share2 className="h-5 w-5" />
+            <Share2 className="h-3.5 w-3.5" />
           </button>
         </div>
         
         {/* Banner Upload Trigger */}
         {id === userProfile.uid && (
-          <div className="absolute top-6 right-6 z-40">
-            <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-blue-600 transition-all shadow-lg border border-white/10 hover:scale-110 active:scale-90" >
-              <Camera className="h-5 w-5" />
+          <div className="absolute top-4 right-4 z-40">
+            <button onClick={() => fileInputRef.current?.click()} className="p-2 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-blue-600 transition-all shadow-lg border border-white/10 hover:scale-110 active:scale-90" >
+              <Camera className="h-3.5 w-3.5" />
             </button>
             <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
           </div>
@@ -167,11 +167,11 @@ const UserProfile: React.FC = () => {
 
       {/* 2. IDENTITY & ACTIONS (Refined) */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-30">
-        <div className="flex flex-col md:flex-row items-end gap-6 sm:gap-8 -mt-16 sm:-mt-24 pb-10 border-b border-border/50">
+        <div className="flex flex-col md:flex-row items-end gap-4 sm:gap-8 -mt-12 sm:-mt-20 pb-6 border-b border-border/50">
           {/* Profile Picture (Refined Overlap) */}
           <div className="relative flex-shrink-0">
             <div 
-              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 overflow-hidden border-4 border-background shadow-2xl bg-muted rounded-full"
+              className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 overflow-hidden border-4 border-background shadow-2xl bg-muted rounded-full"
             >
               <img 
                 src={user.avatar || getPlaceholderImage(`user-${user.uid}`)} 
@@ -182,18 +182,18 @@ const UserProfile: React.FC = () => {
           </div>
           
           <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 pb-2">
-            <div className="flex flex-col gap-1 mb-6">
-              <div className="flex items-center gap-3 justify-center md:justify-start">
-                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
+            <div className="flex flex-col gap-0.5 mb-4">
+              <div className="flex items-center gap-2 justify-center md:justify-start">
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground">
                   {user.name}
                 </h1>
                 {user.isVerified && (
                   <div className="text-blue-500">
-                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6" />
+                    <CheckCircle className="h-4 w-4 md:h-6 md:w-6" />
                   </div>
                 )}
               </div>
-              <span className="text-muted-foreground font-medium text-sm md:text-base">
+              <span className="text-muted-foreground font-medium text-xs md:text-sm">
                 @{user.username || (user.name || 'user').toLowerCase().replace(/\s+/g, '')}
               </span>
             </div>
@@ -201,14 +201,14 @@ const UserProfile: React.FC = () => {
             {/* Action buttons could go here in a refined layout too */}
           </div>
 
-          <div className="flex items-center gap-6 pb-2">
+          <div className="flex items-center gap-4 pb-2">
             <Link to={`/user/${id}/follows/followers`} className="flex flex-col items-center group">
-              <span className="text-xl font-black text-foreground">{(user.followers || 0).toLocaleString()}</span>
-              <span className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">Followers</span>
+              <span className="text-lg font-black text-foreground">{(user.followers || 0).toLocaleString()}</span>
+              <span className="text-[9px] uppercase font-bold text-muted-foreground mt-0.5">Followers</span>
             </Link>
             <Link to={`/user/${id}/follows/following`} className="flex flex-col items-center group">
-              <span className="text-xl font-black text-foreground">{(user.following || 0).toLocaleString()}</span>
-              <span className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">Following</span>
+              <span className="text-lg font-black text-foreground">{(user.following || 0).toLocaleString()}</span>
+              <span className="text-[9px] uppercase font-bold text-muted-foreground mt-0.5">Following</span>
             </Link>
           </div>
         </div>

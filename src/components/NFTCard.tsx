@@ -302,12 +302,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                     onClick={handleActionClick}
                     disabled={!isOwner && isAuctionEnded}
                     className={cn(
-                      "px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.1em] transition-all active:scale-95 shadow-sm flex items-center gap-1.5",
+                      "cursor-pointer transition-all rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] px-3 py-1 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.1em]",
                       isOwner 
-                        ? 'bg-white/10 text-foreground hover:bg-white/20 border border-white/5' 
+                        ? 'bg-muted text-foreground border-border' 
                         : (isAuctionEnded 
-                            ? 'bg-white/5 text-white/20 border border-white/5 cursor-not-allowed' 
-                            : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/20 border-none')
+                            ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed' 
+                            : 'bg-blue-500 text-white border-blue-600')
                     )}
                   >
                     {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : 'BUY')}
@@ -417,12 +417,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                     onClick={handleActionClick} 
                     disabled={!isOwner && isAuctionEnded}
                     className={cn(
-                      "h-[26px] px-3 rounded-full text-[8px] font-black uppercase tracking-[0.05em] transition-all active:scale-95 shadow-sm",
+                      "cursor-pointer transition-all rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] h-[30px] px-4 text-[8px] font-black uppercase tracking-[0.1em] text-white",
                       isOwner 
-                        ? 'bg-muted/50 text-foreground hover:bg-muted/80 border border-border/10' 
+                        ? 'bg-muted text-foreground border-border' 
                         : (isAuctionEnded
-                            ? 'bg-white/5 text-white/20 border border-white/5 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/20 border-none')
+                            ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed'
+                            : 'bg-blue-500 border-blue-600')
                     )}
                   >
                     {isOwner ? (nft.listingType ? 'CONFIG' : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : 'BUY')}

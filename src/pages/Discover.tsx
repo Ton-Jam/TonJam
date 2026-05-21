@@ -27,6 +27,7 @@ import { GENRES, MOODS, MOCK_ALBUMS } from '@/constants';
 import { auth } from '@/lib/firebase';
 import { APP_LOGO } from '@/constants';
 import NFTCard from '@/components/NFTCard';
+import TrendingNFTCard from '@/components/TrendingNFTCard';
 import TrackCard from '@/components/TrackCard';
 import AlbumCard from '@/components/AlbumCard';
 import ArtistListItem from '@/components/ArtistListItem';
@@ -310,7 +311,7 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-background pb-24 relative overflow-hidden">
+    <div className="min-h-screen bg-background pb-24 relative">
       {/* Atmospheric Background Blobs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -z-10" />
       <div className="absolute top-1/4 -left-24 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px] -z-10" />
@@ -498,6 +499,19 @@ const Discover: React.FC = () => {
 
 
       <div className="max-w-5xl mx-auto px-4 pb-24 space-y-6">
+        
+        {/* Trending NFTs Section */}
+        <section className="py-8">
+            <h2 className="text-xl font-black uppercase tracking-widest text-foreground/80 mb-6 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-500" />
+                Trending NFTs
+            </h2>
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
+                {allNFTs.slice(0, 6).map(nft => (
+                    <TrendingNFTCard key={nft.id} nft={nft} />
+                ))}
+            </div>
+        </section>
         {isLoading ? (
           <div className="space-y-12">
             <div className="aspect-[2/1] w-full bg-muted rounded-[2.5rem] animate-pulse"></div>

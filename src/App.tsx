@@ -58,6 +58,7 @@ import { collection, getDocs, limit, query } from 'firebase/firestore';
 import { seedDatabase } from '@/services/seedService';
 import { resolveEndedAuctions } from '@/services/auctionService';
 
+import { WalletProvider } from '@/context/WalletContext';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 // Using a publicly accessible manifest URL hosted on GitHub pages to bypass the AI Studio authentication proxy.
@@ -240,30 +241,32 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <TonConnectUIProvider 
-      manifestUrl={manifestUrl}
-      actionsConfiguration={{
-        twaReturnUrl: 'https://ais-dev-mfbg5o2augtyymzecgehh7-9697536059.europe-west2.run.app'
-      }}
-    >
-      <ErrorBoundary>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <AuthProvider>
-            <AudioProvider>
-              <TooltipProvider>
-                <NotificationProvider>
-                  <Toaster theme="light" position="top-right" />
-                  <Router>
-                    <ScrollToTop />
-                    <AppContent />
-                  </Router>
-                </NotificationProvider>
-              </TooltipProvider>
-            </AudioProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
-    </TonConnectUIProvider>
+    <WalletProvider>
+      <TonConnectUIProvider 
+        manifestUrl={manifestUrl}
+        actionsConfiguration={{
+          twaReturnUrl: 'https://ais-dev-mfbg5o2augtyymzecgehh7-9697536059.europe-west2.run.app'
+        }}
+      >
+        <ErrorBoundary>
+          <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <AuthProvider>
+              <AudioProvider>
+                <TooltipProvider>
+                  <NotificationProvider>
+                    <Toaster theme="light" position="top-right" />
+                    <Router>
+                      <ScrollToTop />
+                      <AppContent />
+                    </Router>
+                  </NotificationProvider>
+                </TooltipProvider>
+              </AudioProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
+      </TonConnectUIProvider>
+    </WalletProvider>
   );
 };
 

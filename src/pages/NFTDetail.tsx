@@ -741,7 +741,7 @@ const NFTDetail: React.FC = () => {
               <div className="mt-4 flex flex-col sm:flex-row gap-3 relative z-10">
                 {isOwner ? (
                   <>
-                    <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all border border-blue-400/20" >
+                    <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]" >
                       {localNft.listingType ? 'Manage' : 'Sell'}
                     </button>
                     <button onClick={() => setShowSendModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10" >
@@ -768,17 +768,17 @@ const NFTDetail: React.FC = () => {
                           onClick={handleInlineBid} 
                           disabled={isPlacingBid || isAuctionEnded}
                           className={cn(
-                            "flex-1 py-3 rounded-[2px] font-bold text-[9px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-2xl border flex items-center justify-center gap-2",
-                            isAuctionEnded 
-                              ? "bg-white/5 border-white/5 text-white/20 cursor-not-allowed" 
-                              : "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/10 border-orange-400/20"
+                             "flex-1 py-2 cursor-pointer transition-all text-white rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em] border flex items-center justify-center gap-2",
+                             isAuctionEnded 
+                               ? "bg-muted border-border text-muted-foreground cursor-not-allowed" 
+                               : "bg-orange-500 border-orange-600"
                           )}
                         >
                           {isPlacingBid ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isAuctionEnded ? 'EXPIRED' : 'Place Bid'}
                         </button>
                       </div>
                     ) : (
-                      <button onClick={handleAction} className="flex-[2] py-3 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-2xl border bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-blue-600/20 border-blue-400/20" >
+                      <button onClick={handleAction} className="flex-[2] py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]" >
                         {isAuction ? 'Place Bid' : 'Acquire Asset'}
                       </button>
                     )}

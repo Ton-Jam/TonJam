@@ -96,7 +96,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
           <img 
             src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} 
             alt={artist.name} 
-            className="w-14 h-14 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform"
+            className="w-20 h-20 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform"
             onError={(e) => { e.currentTarget.src = getPlaceholderImage(`artist-${artist.uid}`); }}
           />
           {onMoreClick && (

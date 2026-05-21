@@ -360,13 +360,13 @@ const ArtistProfile: React.FC = () => {
              <button 
                 onClick={handleFollow}
                 className={cn(
-                  "p-3 rounded-full font-black text-[9px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center",
+                  "cursor-pointer transition-all px-6 py-2 rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center",
                   isFollowing 
-                    ? "bg-muted text-foreground border border-border hover:bg-muted/80" 
-                    : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg"
+                    ? "bg-muted text-foreground border-muted-foreground" 
+                    : "bg-blue-500 text-white border-blue-600"
                 )}
               >
-                  {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+                  {isFollowing ? <UserCheck className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />} {isFollowing ? 'Following' : 'Follow'}
              </button>
              <button 
                 onClick={() => setShowTipModal(true)}
@@ -418,16 +418,18 @@ const ArtistProfile: React.FC = () => {
         </div>
       </div>
       
-      {/* Name Section below cover */}
+      {/* Name Section below cover - Refined Typography */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mt-12 relative z-30">
-        <h1 id="artist-name-display" className="text-2xl sm:text-3xl md:text-5xl font-black tracking-[-0.04em] text-foreground dark:text-white uppercase leading-none drop-shadow-md">
-                {artist.name}
-        </h1>
-        {artist.username && (
-            <div className="mt-2 text-blue-500 font-black text-sm tracking-widest uppercase">
-                {artist.username}
-            </div>
-        )}
+        <div className="flex flex-col gap-1">
+            <h1 id="artist-name-display" className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight text-foreground dark:text-white leading-tight">
+                    {artist.name}
+            </h1>
+            {artist.username && (
+                <div className="text-blue-600 font-medium text-sm md:text-base tracking-normal">
+                    @{artist.username.replace('@', '')}
+                </div>
+            )}
+        </div>
       </div>
       
       {/* Biometric Identity / About Section - Adjusted margin for better overlap */}
@@ -469,16 +471,16 @@ const ArtistProfile: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <Card className="bg-blue-600 rounded-[20px] p-4 flex flex-col items-center justify-center text-center text-white border-none">
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] mb-1 opacity-80">Followers</span>
-              <div className="text-xl font-black tracking-tighter">
+            <Card className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-[20px] p-4 flex flex-col items-center justify-center text-center text-white border-none shadow-md">
+              <span className="text-[10px] font-bold uppercase tracking-wider mb-1 opacity-90">Followers</span>
+              <div className="text-2xl font-bold tracking-tight">
                 {(artist.followers || 0).toLocaleString()}
               </div>
             </Card>
             
-            <Card className="bg-muted rounded-[20px] p-4 flex flex-col items-center justify-center text-center text-foreground border-none">
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] mb-1 opacity-80">Plays</span>
-              <div className="text-xl font-black tracking-tighter">
+            <Card className="bg-background border border-border/50 rounded-[20px] p-4 flex flex-col items-center justify-center text-center text-foreground shadow-sm">
+              <span className="text-[10px] font-bold uppercase tracking-wider mb-1 opacity-90">Plays</span>
+              <div className="text-2xl font-bold tracking-tight">
                 {(artist.playCount || 0).toLocaleString()}
               </div>
             </Card>

@@ -33,6 +33,8 @@ import { Sparkles as SparklesLucide } from 'lucide-react';
 import { APP_LOGO, MOCK_USER, TJ_COIN_ICON, JAM_PRICE_USD, MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { useAudio, useUserRole } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { injected } from 'wagmi/connectors';
 import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import MiniAudioPlayer from './MiniAudioPlayer';
@@ -137,6 +139,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     headerTitle
   } = useAudio();
   const { user, signInWithGoogle, signOut } = useAuth();
+  const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
+  const { connect } = useConnect();
+  const { disconnect: disconnectEvm } = useDisconnect();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -624,17 +629,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <TooltipContent>New Playlist</TooltipContent>
                  </Tooltip>
               </div>
-            ) : userAddress ? (
+            ) : (userAddress || isEvmConnected) ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      onClick={() => tonConnectUI.disconnect()}
+                      onClick={() => {
+                        if (userAddress) tonConnectUI.disconnect();
+                        if (isEvmConnected) disconnectEvm();
+                      }}
                       className={`p-2.5 rounded-[2px] hover:bg-destructive/10 hover:text-destructive transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
                     >
                       <WalletIcon className="h-5 w-5" strokeWidth={2.5} />
                       <div className="hidden md:flex flex-col items-start leading-none gap-0.5">
                         <span className="text-[7px] font-black uppercase tracking-widest opacity-60">Wallet</span>
-                        <span className="text-[9px] font-black tracking-tighter">{userAddress.slice(0, 4)}...{userAddress.slice(-4)}</span>
+                        <span className="text-[9px] font-black tracking-tighter">
+                          {userAddress ? `${userAddress.slice(0, 4)}...${userAddress.slice(-4)}` : `${evmAddress?.slice(0, 4)}...${evmAddress?.slice(-4)}`}
+                        </span>
                       </div>
                     </button>
                   </TooltipTrigger>
@@ -644,7 +654,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      onClick={() => tonConnectUI.openModal()}
+                      onClick={() => {
+                        // Simple toggle to choose EVM
+                        connect({ connector: injected() });
+                      }}
                       className={`p-2.5 rounded-[2px] hover:bg-muted transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
                     >
                       <WalletIcon className="h-5 w-5" strokeWidth={2.5} />

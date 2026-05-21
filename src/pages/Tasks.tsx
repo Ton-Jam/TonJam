@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Flame,
   Trophy,
@@ -22,19 +22,9 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TJ_COIN_ICON } from '@/constants';
-import { toast } from 'sonner';
-
-type Task = {
-  id: string;
-  title: string;
-  description: string;
-  reward: number;
-  progress: number;
-  total: number;
-  completed?: boolean;
-  reminderSet?: boolean;
-  category: 'daily' | 'social' | 'streaming' | 'nft' | 'referral';
-};
+import TaskCard from '@/components/TaskCard';
+import { getTasks, updateTaskProgress, completeTask, claimTaskReward } from '@/services/taskService';
+import { Task } from '@/types';
 
 const TASKS: Task[] = [
   {
@@ -104,7 +94,7 @@ const FILTERS = [
   'Referral',
 ];
 
-const categoryIcons = {
+const categoryIcons: Record<string, any> = {
   daily: Clock3,
   social: Users,
   streaming: PlayCircle,
@@ -114,20 +104,40 @@ const categoryIcons = {
 
 const Tasks: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('All');
-  const [tasks, setTasks] = useState<Task[]>(TASKS);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  const toggleReminder = (taskId: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === taskId) {
-        const newState = !t.reminderSet;
-        toast.success(newState ? 'Reminder set!' : 'Reminder removed', {
-          description: newState ? `We'll notify you about "${t.title}"` : undefined,
-          icon: newState ? <Bell className="w-4 h-4 text-primary" /> : <BellOff className="w-4 h-4 text-muted-foreground" />
-        });
-        return { ...t, reminderSet: newState };
-      }
-      return t;
-    }));
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const fetchedTasks = await getTasks();
+      setTasks(fetchedTasks);
+    };
+    fetchTasks();
+  }, []);
+
+  const handleClaim = async (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // In firestore Task definition, reward is a string. Need to parse it.
+    const rewardAmount = parseInt(task.reward.replace(/[^0-9]/g, '')) || 0;
+    await claimTaskReward(taskId, rewardAmount, task.points);
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, claimed: true } : t));
+  };
+
+  const handleToggle = async (taskId: string, progress: number) => {
+    await updateTaskProgress(taskId, progress);
+    
+    const task = tasks.find(t => t.id === taskId);
+    if (task && progress >= task.total) {
+        await completeTask(taskId);
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress, completed: true } : t));
+    } else {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress } : t));
+    }
+  };
+
+  const handleClick = (task: Task) => {
+      console.log('Task clicked', task);
   };
 
   const filteredTasks = useMemo(() => {
@@ -135,7 +145,7 @@ const Tasks: React.FC = () => {
 
     return tasks.filter(
       (task) =>
-        task.category.toLowerCase() === activeFilter.toLowerCase()
+        task.type.toLowerCase() === activeFilter.toLowerCase()
     );
   }, [activeFilter, tasks]);
 
@@ -277,115 +287,16 @@ const Tasks: React.FC = () => {
         </div>
 
         {/* TASK LIST */}
-        <section className="space-y-2">
-          {filteredTasks.map((task) => {
-            const Icon = categoryIcons[task.category];
-            const percentage = (task.progress / task.total) * 100;
-
-            return (
-              <motion.div
-                key={task.id}
-                whileTap={{ scale: 0.98 }}
-                className="rounded-[16px] bg-card border border-white/5 p-3"
-              >
-                <div className="flex items-start gap-2.5">
-
-                  {/* ICON */}
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-primary" />
-                  </div>
-
-                  {/* CONTENT */}
-                  <div className="flex-1 min-w-0">
-
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex gap-2 items-start">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleReminder(task.id);
-                          }}
-                          className={`mt-0.5 p-1 rounded-md transition-all ${
-                            task.reminderSet 
-                              ? 'bg-primary/20 text-primary shadow-lg shadow-primary/10' 
-                              : 'bg-white/5 text-muted-foreground hover:bg-white/10'
-                          }`}
-                        >
-                          {task.reminderSet ? <Bell className="w-3 h-3 fill-current" /> : <BellOff className="w-3 h-3" />}
-                        </button>
-                        <div>
-                          <h3 className="font-bold text-[13px] leading-tight font-ui">
-                            {task.title}
-                          </h3>
-
-                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug font-ui">
-                            {task.description}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 py-1 pr-1">
-                        <img src={TJ_COIN_ICON} alt="TJ" className="w-6 h-6 object-contain" referrerPolicy="no-referrer" />
-
-                        <span className="text-sm font-black text-primary font-ui">
-                          +{task.reward}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* PROGRESS */}
-                    <div className="mt-2.5 space-y-1">
-                      <div className="flex justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wider font-ui">
-                        <span>
-                          {task.progress}/{task.total} completed
-                        </span>
-
-                        <span>{Math.floor(percentage)}%</span>
-                      </div>
-
-                      <Progress value={percentage} className="h-1 bg-white/5" indicatorClassName="bg-white shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
-                    </div>
-
-                    {/* ACTION */}
-                    <div className="mt-3 flex items-center justify-between">
-
-                      <div className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-muted-foreground font-ui">
-                        {task.completed ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 text-green-500" />
-                            Completed
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-3 h-3 text-primary" />
-                            Active Task
-                          </>
-                        )}
-                      </div>
-
-                      <Button
-                        disabled={task.completed}
-                        className={`rounded-full h-7 px-3 text-[9px] font-black uppercase tracking-widest font-ui ${
-                          task.completed
-                            ? 'opacity-50'
-                            : 'bg-primary hover:bg-primary/90'
-                        }`}
-                      >
-                        {task.completed ? (
-                          'Claimed'
-                        ) : (
-                          <>
-                            Go
-                            <ArrowRight className="w-3 h-3 ml-1" />
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+        <section className="space-y-2 max-h-[600px] overflow-y-auto pr-2 no-scrollbar">
+          {filteredTasks.map((task) => (
+            <TaskCard 
+              key={task.id} 
+              task={task} 
+              onClaim={handleClaim} 
+              onToggle={handleToggle} 
+              onClick={handleClick}
+            />
+          ))}
         </section>
 
         {/* LEADERBOARD */}
