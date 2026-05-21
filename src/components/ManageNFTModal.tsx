@@ -25,6 +25,8 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
   const [newEndDate, setNewEndDate] = useState(nft.auctionEndDate ? new Date(nft.auctionEndDate).toISOString().slice(0, 16) : '');
   const [duration, setDuration] = useState('7');
   const [isDelistConfirmOpen, setIsDelistConfirmOpen] = useState(false);
+  const [useGating, setUseGating] = useState(nft.tokenGating?.enabled || false);
+  const [gating, setGating] = useState<any>(nft.tokenGating || { enabled: false, tokenType: 'nft', minAmount: '1' });
 
   const handleDelist = () => {
     setIsDelistConfirmOpen(true);
@@ -43,7 +45,8 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
     const updateData: any = {
       listingType: listingType,
       isAuction: listingType === 'auction',
-      price: newPrice
+      price: newPrice,
+      tokenGating: { ...gating, enabled: useGating }
     };
 
     if (listingType === 'auction') {
@@ -153,6 +156,44 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                   />
                 </div>
               )}
+
+              <div className="border-t border-white/5 pt-4 mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-xs font-bold text-white uppercase tracking-tight">Enable Token Gating</label>
+                  <input 
+                    type="checkbox" 
+                    checked={useGating} 
+                    onChange={(e) => setUseGating(e.target.checked)}
+                    className="h-4 w-4 rounded accent-blue-600"
+                  />
+                </div>
+                {useGating && (
+                  <div className="space-y-4 animate-in slide-in-from-top-2">
+                    <select 
+                      value={gating.tokenType} 
+                      onChange={(e) => setGating({...gating, tokenType: e.target.value})}
+                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs"
+                    >
+                      <option value="nft">NFT Collection</option>
+                      <option value="jetton">Fungible Token (Jetton)</option>
+                    </select>
+                    <input 
+                      type="text" 
+                      placeholder="Token Address" 
+                      value={gating.tokenAddress || ''}
+                      onChange={(e) => setGating({...gating, tokenAddress: e.target.value})}
+                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs"
+                    />
+                    <input 
+                      type="number" 
+                      placeholder="Min Amount" 
+                      value={gating.minAmount || '1'}
+                      onChange={(e) => setGating({...gating, minAmount: e.target.value})}
+                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs"
+                    />
+                  </div>
+                )}
+              </div>
               
               <div className="flex gap-2 mt-6">
                 <button 

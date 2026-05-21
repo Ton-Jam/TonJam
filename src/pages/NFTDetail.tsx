@@ -41,6 +41,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
+import { useTokenGating } from '@/hooks/useTokenGating';
 import { NFTItem, Track, NFTOffer } from '@/types';
 import { fetchNFTMetadata } from '@/services/nftService';
 import { cancelListing, getActiveListingForNFT } from '@/services/marketplaceService';
@@ -85,7 +86,8 @@ const NFTDetail: React.FC = () => {
   }, [id, allNFTs]);
 
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers' | 'comments' | 'exclusive'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers' | 'comments' | 'exclusive' | 'collection'>('details');
+  const { hasAccess } = useTokenGating(localNft?.tokenGating || { enabled: false, tokenType: 'nft' });
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
   const [dynamicMetadata, setDynamicMetadata] = useState<NFTItem | null>(null);
@@ -865,7 +867,7 @@ const NFTDetail: React.FC = () => {
 
             {/* Information Tabs */}
             <div className="flex items-center gap-4 mb-4">
-              {['details', 'history', 'offers', 'comments', ...(isOwner && localNft.exclusiveContent?.length ? ['exclusive'] : [])].map((tab) => (
+              {['details', 'history', 'offers', 'comments', ...((isOwner || hasAccess) && localNft.exclusiveContent?.length ? ['exclusive'] : []), ...(isOwner ? ['collection'] : [])].map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab as any)} className={`pb-4 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? 'text-blue-500' : 'text-muted-foreground/50 hover:text-foreground'}`}>
                   {tab === 'exclusive' ? 'Holder Perks' : tab}
                   {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></motion.div>}
@@ -1112,7 +1114,7 @@ const NFTDetail: React.FC = () => {
                         </div>
                         <h4 className="text-base font-bold text-muted-foreground uppercase tracking-tighter mb-4">No Active Signals</h4>
                         <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em] leading-loose max-w-xs mx-auto">Zero valuation signals detected from the neural relay network.</p>
-                        <button onClick={handleAction} className="mt-4 px-4 py-4 bg-blue-600/10 border border-neutral-500/20 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 hover:bg-blue-600 hover:text-white transition-all ">Initiate Broadcast</button>
+                        <button onClick={handleAction} className="mt-4 px-3 py-2 bg-blue-600/10 border border-neutral-500/20 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 hover:bg-blue-600 hover:text-white transition-all ">Initiate Broadcast</button>
                       </div>
                     )}
                   </motion.div>
@@ -1130,55 +1132,91 @@ const NFTDetail: React.FC = () => {
                   </motion.div>
                 )}
 
-                {activeTab === 'exclusive' && isOwner && (
+                {activeTab === 'collection' && isOwner && (
                   <motion.div 
-                    key="exclusive"
+                    key="collection"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="space-y-4"
+                    className="grid grid-cols-2 md:grid-cols-4 gap-4"
                   >
-                    <div className="p-4 bg-purple-500/[0.03] border border-blue-500/30 rounded-[16px] relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-4 opacity-[0.05]"><Crown className="h-24 w-24 text-purple-500" /></div>
-                      <div className="flex items-center gap-4 mb-4 relative z-10">
-                        <div className="w-12 h-12 rounded-[12px] bg-purple-500/10 flex items-center justify-center">
-                          <Crown className="h-6 w-6 text-purple-500" />
-                        </div>
-                        <h1 className="text-sm font-bold text-foreground uppercase tracking-widest">Holder-Only Archives</h1>
-                      </div>
-                      <p className="text-sm text-muted-foreground/80 leading-relaxed mb-4 relative z-10 max-w-2xl">
-                        As the verified owner of this NFT protocol, you have unlocked access to the following exclusive sonic and visual artifacts. These are stored in your private vault.
-                      </p>
-                      <div className="grid grid-cols-1 gap-4 relative z-10">
-                        {localNft.exclusiveContent?.map((item) => (
-                          <a 
-                            key={item.id}
-                            href={item.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center justify-between p-4 bg-background/40 hover:bg-background/60 rounded-[12px] border border-border/50 hover:border-neutral-500/30 transition-all group"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-[10px] bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                                {item.type === 'video' && <Video className="h-6 w-6" />}
-                                {item.type === 'track' && <MusicIcon className="h-6 w-6" />}
-                                {item.type === 'image' && <ImageIcon className="h-6 w-6" />}
-                                {item.type === 'document' && <FileText className="h-6 w-6" />}
-                              </div>
-                              <div>
-                                <p className="text-xs font-bold text-foreground uppercase tracking-tight">{item.title}</p>
-                                <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4">{item.type} artifact</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <span className="text-[9px] font-bold text-purple-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">Access Protocol</span>
-                              <ExternalLink className="h-5 w-5 text-muted-foreground/50 group-hover:text-purple-500 transition-colors" />
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
+                    {allNFTs
+                      .filter((n) => n.owner === (userAddress || userProfile.walletAddress))
+                      .map((nft) => (
+                        <NFTCard key={nft.id} nft={nft} />
+                      ))}
                   </motion.div>
+                )}
+
+                {activeTab === 'exclusive' && (
+                  <AnimatePresence mode="wait">
+                    {(isOwner || hasAccess) ? (
+                      <motion.div 
+                        key="exclusive-content"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-4"
+                      >
+                        <div className="p-4 bg-purple-500/[0.03] border border-blue-500/30 rounded-[16px] relative overflow-hidden">
+                          <div className="absolute top-0 right-0 p-4 opacity-[0.05]"><Crown className="h-24 w-24 text-purple-500" /></div>
+                          <div className="flex items-center gap-4 mb-4 relative z-10">
+                            <div className="w-12 h-12 rounded-[12px] bg-purple-500/10 flex items-center justify-center">
+                              <Crown className="h-6 w-6 text-purple-500" />
+                            </div>
+                            <h1 className="text-sm font-bold text-foreground uppercase tracking-widest">Holder-Only Archives</h1>
+                          </div>
+                          <p className="text-sm text-muted-foreground/80 leading-relaxed mb-4 relative z-10 max-w-2xl">
+                            As the verified holder of the required protocol assets, you have unlocked access to the following exclusive sonic and visual artifacts.
+                          </p>
+                          <div className="grid grid-cols-1 gap-4 relative z-10">
+                            {localNft.exclusiveContent?.map((item) => (
+                              <a 
+                                key={item.id}
+                                href={item.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center justify-between p-4 bg-background/40 hover:bg-background/60 rounded-[12px] border border-border/50 hover:border-neutral-500/30 transition-all group"
+                              >
+                                <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-[10px] bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                                    {item.type === 'video' && <Video className="h-6 w-6" />}
+                                    {item.type === 'track' && <MusicIcon className="h-6 w-6" />}
+                                    {item.type === 'image' && <ImageIcon className="h-6 w-6" />}
+                                    {item.type === 'document' && <FileText className="h-6 w-6" />}
+                                  </div>
+                                  <div>
+                                    <p className="text-xs font-bold text-foreground uppercase tracking-tight">{item.title}</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4">{item.type} artifact</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <span className="text-[9px] font-bold text-purple-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">Access Protocol</span>
+                                  <ExternalLink className="h-5 w-5 text-muted-foreground/50 group-hover:text-purple-500 transition-colors" />
+                                </div>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div 
+                        key="exclusive-locked"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="p-8 bg-background/40 border border-border rounded-[16px] flex flex-col items-center justify-center text-center space-y-4"
+                      >
+                        <Lock className="h-12 w-12 text-muted-foreground/50" />
+                        <div>
+                          <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Access Locked</h3>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-2 max-w-xs">
+                            Holders of {localNft.tokenGating?.tokenType === 'nft' ? 'this NFT collection' : 'the required tokens'} are granted access to these artifacts.
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 )}
               </AnimatePresence>
             </div>

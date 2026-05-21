@@ -27,7 +27,7 @@ import { Track, RoyaltySplit } from '@/types';
 import { GENRES } from '@/constants';
 import RoyaltySplitManager from './RoyaltySplitManager';
 import { useAudio } from '@/context/AudioContext';
-import { Gem, Coins, Layers, Info } from 'lucide-react';
+import { Gem, Coins, Layers, Info, Lock } from 'lucide-react';
 
 const metadataSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -40,6 +40,13 @@ const metadataSchema = z.object({
     percentage: z.number().min(0).max(1),
     label: z.string().optional(),
   })),
+  tokenGating: z.object({
+    enabled: z.boolean(),
+    tokenAddress: z.string().optional(),
+    minAmount: z.string().optional(),
+    tokenSymbol: z.string().optional(),
+    tokenType: z.enum(['jetton', 'nft']),
+  }).optional(),
 });
 
 type MetadataFormData = z.infer<typeof metadataSchema>;
@@ -70,6 +77,7 @@ const TrackMonetizationModal: React.FC<TrackMonetizationModalProps> = ({ track, 
       price: track.price || '2.5',
       supply: track.editions || '100',
       royaltySplits: track.royaltySplits || [],
+      tokenGating: track.tokenGating || { enabled: false, tokenType: 'nft' },
     },
   });
 
@@ -84,6 +92,7 @@ const TrackMonetizationModal: React.FC<TrackMonetizationModalProps> = ({ track, 
         price: track.price || '2.5',
         supply: track.editions || '100',
         royaltySplits: track.royaltySplits || [],
+        tokenGating: track.tokenGating || { enabled: false, tokenType: 'nft' },
       });
     }
   }, [isOpen, track, reset]);
@@ -104,6 +113,7 @@ const TrackMonetizationModal: React.FC<TrackMonetizationModalProps> = ({ track, 
         price: data.price,
         editions: data.supply,
         royaltySplits: data.royaltySplits,
+        tokenGating: data.tokenGating,
       });
       addNotification("Metadata updated successfully", "success");
       if (onUpdate) onUpdate();
@@ -236,6 +246,52 @@ const TrackMonetizationModal: React.FC<TrackMonetizationModalProps> = ({ track, 
                   onChange={(splits) => setValue('royaltySplits', splits)}
                   collaborators={userProfile?.collaborators}
                 />
+              </div>
+
+              <Separator className="bg-white/5" />
+
+              {/* Token Gating */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lock className="w-4 h-4 text-emerald-500/50" />
+                  <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest">Exclusive Access (Gating)</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <Label className="text-[10px] font-black text-white/60 uppercase tracking-widest">Enable Gate</Label>
+                    <input type="checkbox" {...register('tokenGating.enabled')} className="form-checkbox h-5 w-5 text-cyan-500" />
+                  </div>
+                  
+                  {watch('tokenGating.enabled') && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-white/5 rounded-2xl">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-white/60 uppercase tracking-widest ml-1">Token Type</Label>
+                        <Select onValueChange={(value) => setValue('tokenGating.tokenType', value as 'jetton'|'nft')} defaultValue={track.tokenGating?.tokenType || 'nft'}>
+                          <SelectTrigger className="bg-white/5 border-none h-12 rounded-2xl font-bold">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#15191C] border-none text-white rounded-2xl">
+                            <SelectItem value="nft">NFT Collection</SelectItem>
+                            <SelectItem value="jetton">Jetton Token</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-white/60 uppercase tracking-widest ml-1">Token Address</Label>
+                        <Input {...register('tokenGating.tokenAddress')} className="bg-white/5 border-none h-12 rounded-2xl font-bold" placeholder="EQ..." />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-white/60 uppercase tracking-widest ml-1">Min Amount</Label>
+                        <Input {...register('tokenGating.minAmount')} className="bg-white/5 border-none h-12 rounded-2xl font-bold" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-white/60 uppercase tracking-widest ml-1">Token Symbol</Label>
+                        <Input {...register('tokenGating.tokenSymbol')} className="bg-white/5 border-none h-12 rounded-2xl font-bold" placeholder="JAM" />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </ScrollArea>

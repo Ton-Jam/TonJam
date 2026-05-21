@@ -101,7 +101,7 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
       )}
 
       {/* All Tracks Grid */}
-      <section className="p-5">
+      <section className="px-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-foreground">All Tracks</h3>
           <div className="flex items-center gap-2">

@@ -8,7 +8,6 @@ import { TJ_COIN_ICON } from '@/constants';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 
 interface TaskCardProps {
   task: Task;
@@ -98,7 +97,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
                   <span>Progress</span>
                   <span>{task.progress} / {task.total}</span>
                 </div>
-                <Progress value={progressPercent} className="h-2" />
+                <div className="h-1 w-full bg-secondary rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-primary"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPercent}%` }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                  />
+                </div>
               </div>
           )}
         </CardContent>
