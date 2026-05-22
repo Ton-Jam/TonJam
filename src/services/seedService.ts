@@ -200,6 +200,71 @@ export const seedDatabase = async (force = false) => {
       }
     }
 
+    // Check if validators collection is empty
+    const validatorsQuery = query(collection(db, 'validators'), limit(1));
+    const validatorsSnapshot = await getDocs(validatorsQuery);
+
+    if (validatorsSnapshot.empty || force) {
+      console.log('Seeding validators...');
+      const MOCK_VALIDATORS = [
+        { 
+          id: 'validator-a',
+          name: 'TonJam Node A', 
+          apr: 15,
+          uptime: 99.92,
+          blocksValidated: '1,424,192',
+          currentCommission: '5%',
+          commissionHistory: [
+            { date: 'Jan 26', fee: '8%' },
+            { date: 'Mar 26', fee: '6%' },
+            { date: 'May 26', fee: '5%' }
+          ],
+          selfStake: '250,000 TON',
+          status: 'Active'
+        },
+        { 
+          id: 'validator-b',
+          name: 'TonJam Node B', 
+          apr: 14,
+          uptime: 99.45,
+          blocksValidated: '984,204',
+          currentCommission: '6%',
+          commissionHistory: [
+            { date: 'Jan 26', fee: '8%' },
+            { date: 'Feb 26', fee: '7%' },
+            { date: 'Apr 26', fee: '6%' }
+          ],
+          selfStake: '180,000 TON',
+          status: 'Active'
+        },
+        { 
+          id: 'validator-c',
+          name: 'TonJam Node C', 
+          apr: 13,
+          uptime: 98.78,
+          blocksValidated: '542,110',
+          currentCommission: '8%',
+          commissionHistory: [
+            { date: 'Jan 26', fee: '9%' },
+            { date: 'Mar 26', fee: '8.5%' },
+            { date: 'May 26', fee: '8%' }
+          ],
+          selfStake: '120,000 TON',
+          status: 'Active'
+        }
+      ];
+
+      for (const validator of MOCK_VALIDATORS) {
+        try {
+          console.log(`- Seeding validator: ${validator.id} (${validator.name})`);
+          await setDoc(doc(db, 'validators', validator.id), validator);
+        } catch (err) {
+          console.error(`Failed to seed validator ${validator.id}:`, err);
+          throw err;
+        }
+      }
+    }
+
     console.log('Database seeding completed.');
   } catch (error) {
     // Determine which collection failed based on the error or context

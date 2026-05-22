@@ -133,12 +133,12 @@ const Notifications: React.FC = () => {
       <Tabs defaultValue="All" className="flex-1 flex flex-col" onValueChange={(val) => setActiveTab(val as any)}>
         <div className="px-4 border-b border-white/5">
             <div className="max-w-4xl mx-auto py-2">
-                <TabsList className="bg-transparent h-auto p-0 gap-2 flex justify-start overflow-x-auto no-scrollbar">
+                <TabsList className="bg-transparent h-auto p-0 gap-2 flex justify-start overflow-x-auto no-scrollbar -mx-4 px-4">
                     {['All', 'Social', 'Syncs', 'Rewards', 'System'].map(tab => (
                         <TabsTrigger 
                             key={tab} 
                             value={tab}
-                            className="data-[state=active]:bg-blue-500 data-[state=active]:text-black px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border border-transparent data-[state=active]:border-blue-400 bg-white/5 text-white/40"
+                            className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
                         >
                             {tab}
                         </TabsTrigger>

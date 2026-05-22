@@ -7,6 +7,7 @@ import { MOCK_PLAYLISTS, MOCK_USER, MOCK_TRACKS, MOCK_NFTS, MOCK_ARTISTS, MOCK_P
 import * as tonService from '@/services/tonService';
 import * as royaltyService from '@/services/royaltyService';
 import { audioCacheService } from '@/services/audioCacheService';
+import { indexedDbService } from '@/services/indexedDbService';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { collection, doc, onSnapshot, query, where, orderBy, limit, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, increment, serverTimestamp, writeBatch, or, arrayUnion, deleteField } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -523,6 +524,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const initialBids = MOCK_NFTS.filter(n => n.listingType === 'auction').slice(0, 2);
       setUserBids(initialBids);
     }
+
+    // Load initial track metadata from IndexedDB to ensure robust offline startup
+    indexedDbService.getTracks().then(cachedTracks => {
+      if (isMounted && cachedTracks && cachedTracks.length > 0) {
+        setFirestoreTracks(prev => prev.length === 0 ? cachedTracks : prev);
+      }
+    }).catch(err => console.warn('Could not load offline tracks from IDB on launch:', err));
     
     // Add a strict mode rapid mount/unmount delay for Firestore
     const timer = setTimeout(() => {
@@ -531,7 +539,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const tracksUnsubscribe = onSnapshot(collection(db, 'tracks'), (snapshot) => {
         const tracks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Track));
         setFirestoreTracks(tracks);
-      }, (error) => handleFirestoreError(error, OperationType.LIST, 'tracks'));
+        // Persist to IndexedDB offline cache
+        indexedDbService.saveTracks(tracks).catch(err => console.warn('Could not save tracks to IDB Cache:', err));
+      }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'tracks');
+        // Handle offline scenario explicitly by loading from cache if error
+        indexedDbService.getTracks().then(cachedTracks => {
+          if (isMounted && cachedTracks && cachedTracks.length > 0) {
+            setFirestoreTracks(cachedTracks);
+          }
+        }).catch(console.error);
+      });
 
       const nftsUnsubscribe = onSnapshot(collection(db, 'nfts'), (snapshot) => {
         const nfts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NFTItem));
@@ -1651,6 +1669,21 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (currentStaked < unstakeAmount) {
         addNotification("Insufficient staked JAM", "error");
         return;
+      }
+
+      // 24-hour cooldown after staking validation
+      const lastStake = (transactions || [])
+        .filter((tx: any) => tx.type === 'stake')
+        .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+      if (lastStake) {
+        const lastStakeTime = new Date(lastStake.timestamp).getTime();
+        const diff = Date.now() - lastStakeTime;
+        const cooldownMs = 24 * 60 * 60 * 1000;
+        if (diff < cooldownMs) {
+          const hoursLeft = Math.ceil((cooldownMs - diff) / (60 * 60 * 1000));
+          addNotification(`Unstaking locked due to 24-hour cooldown after staking. ${hoursLeft} hour(s) remaining.`, "error");
+          return;
+        }
       }
 
       // Simulate blockchain delay

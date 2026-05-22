@@ -240,6 +240,68 @@ const Wallet: React.FC = () => {
         </section>
       )}
 
+      {/* Wallet Recommendations & Guidelines */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+          <h2 className="text-[20px] font-bold uppercase tracking-tighter">Standard Security & Trading Recommendations</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-foreground/[0.02] p-4 rounded-[5px] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldCheck className="h-5 w-5 text-green-400" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-green-400">Seed Protection</h3>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Your 24-word recovery phrase is your only key. Never type it on non-custodial tools or share it. Support admins will never request your seed credentials.
+              </p>
+            </div>
+            <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Security Level: Maximum</div>
+          </div>
+
+          <div className="bg-foreground/[0.02] p-4 rounded-[5px] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="h-5 w-5 text-blue-400" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-blue-400">Gas Maintenance</h3>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Always maintain at least 0.1 TON in your active balance. The network requires small gas margins to secure, build, and broadcast smart contract transactions.
+              </p>
+            </div>
+            <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Efficiency Margin: Optimal</div>
+          </div>
+
+          <div className="bg-foreground/[0.02] p-4 rounded-[5px] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="h-5 w-5 text-amber-400" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-amber-400">Active Delegation</h3>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Unlock higher gains by staking JAM to vetted nodes. High-uptime delegation (e.g. Node A with 99.9% uptime) is recommended to mitigate slashing variables.
+              </p>
+            </div>
+            <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Yield Standard: 15% APY</div>
+          </div>
+
+          <div className="bg-foreground/[0.02] p-4 rounded-[5px] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="h-5 w-5 text-purple-400" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-purple-400">Safe Auditing</h3>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Audit and revoke unnecessary third-party contract spend limits frequently to prevent potential vulnerability exploits. Keep your digital assets secure.
+              </p>
+            </div>
+            <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Risk Level: Low-Defense</div>
+          </div>
+        </div>
+      </section>
+
       {/* Transaction History */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">

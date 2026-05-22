@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Lock, Unlock, Zap, TrendingUp, Coins, Info, ArrowUpRight, History, Sparkles, Filter, ArrowDownUp } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Lock, Unlock, Zap, TrendingUp, Coins, Info, ArrowUpRight, History, Sparkles, Filter, ArrowDownUp, Clock, AlertTriangle } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { JAM_PRICE_USD } from '@/constants';
@@ -15,6 +15,48 @@ const Staking: React.FC = () => {
   const [filterType, setFilterType] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
   const [isUnstakeModalOpen, setIsUnstakeModalOpen] = useState(false);
+
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+
+  const lastStakeTime = useMemo(() => {
+    const stakeTxs = safeTransactions.filter(tx => tx.type === 'stake');
+    if (stakeTxs.length === 0) return 0;
+    const sorted = [...stakeTxs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return new Date(sorted[0].timestamp).getTime();
+  }, [safeTransactions]);
+
+  useEffect(() => {
+    if (!lastStakeTime) {
+      setCooldownRemaining(0);
+      return;
+    }
+
+    const calculateRemaining = () => {
+      const cooldownMs = 24 * 60 * 60 * 1000; // 24 hours
+      const diff = lastStakeTime + cooldownMs - Date.now();
+      return diff > 0 ? diff : 0;
+    };
+
+    setCooldownRemaining(calculateRemaining());
+
+    const interval = setInterval(() => {
+      const remaining = calculateRemaining();
+      setCooldownRemaining(remaining);
+      if (remaining <= 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastStakeTime]);
+
+  const formatCooldown = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const staked = userProfile.stakedJam || 0;
   const pending = userProfile.pendingJamRewards || 0;
@@ -218,13 +260,15 @@ const Staking: React.FC = () => {
               <input 
                 type="number" 
                 value={unstakeAmount}
+                disabled={cooldownRemaining > 0}
                 onChange={(e) => setUnstakeAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-background/50 border border-border rounded-2xl py-4 px-4 text-[20px] font-black text-foreground outline-none focus:border-border/80 transition-all"
+                className="w-full bg-background/50 border border-border rounded-2xl py-4 px-4 text-[20px] font-black text-foreground outline-none focus:border-border/80 transition-all disabled:opacity-50"
               />
               <button 
                 onClick={() => setUnstakeAmount(staked.toString())}
-                className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground"
+                disabled={cooldownRemaining > 0}
+                className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
               >
                 Max
               </button>
@@ -235,12 +279,34 @@ const Staking: React.FC = () => {
             </div>
           </div>
 
+          {cooldownRemaining > 0 && (
+            <div className="flex flex-col gap-2 p-3 bg-amber-500/15 border border-amber-500/20 rounded-2xl animate-pulse">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">Withholding Locked</span>
+                  <p className="text-[9px] text-amber-300 font-medium font-sans mt-0.5 leading-normal">
+                    This protocol enforces a mandatory 24-hour cooldown following deposit actions. Withdrawals are temporarily frozen.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-1 flex items-center justify-between p-2 bg-neutral-900/40 rounded-xl border border-white/5">
+                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-amber-400" /> Cooldown Countdown
+                </span>
+                <span className="font-mono text-xs font-black text-amber-400 tracking-wider">
+                  {formatCooldown(cooldownRemaining)}
+                </span>
+              </div>
+            </div>
+          )}
+
           <button 
             onClick={handleUnstake}
-            disabled={isProcessing || !unstakeAmount || parseFloat(unstakeAmount) <= 0 || parseFloat(unstakeAmount) > staked}
+            disabled={isProcessing || !unstakeAmount || parseFloat(unstakeAmount) <= 0 || parseFloat(unstakeAmount) > staked || cooldownRemaining > 0}
             className="w-full py-4 bg-muted/50 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-2xl font-bold text-xs uppercase tracking-[0.3em] border border-border transition-all active:scale-95 flex items-center justify-center gap-4"
           >
-            {isProcessing ? 'Processing...' : 'Unstake JAM'}
+            {isProcessing ? 'Processing...' : cooldownRemaining > 0 ? 'Locked (Cooldown Active)' : 'Unstake JAM'}
             {!isProcessing && <Unlock className="h-4 w-4" />}
           </button>
         </div>
@@ -384,6 +450,8 @@ const Staking: React.FC = () => {
         title="Unstake JAM Tokens?"
         description={`Are you sure you want to unstake ${unstakeAmount} JAM? This will return your tokens to your available balance and they will no longer earn rewards.`}
         confirmText="Unstake Now"
+        unbondingPeriod="36 Hours"
+        penalty="Forfeit of pending rewards and future staking yield"
       />
     </div>
   );

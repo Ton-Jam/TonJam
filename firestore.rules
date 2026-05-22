@@ -109,6 +109,13 @@ service cloud.firestore {
         && data.creator is string && data.creator.size() <= 128;
     }
 
+    function isValidValidator(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 100
+        && data.apr is number
+        && data.uptime is number;
+    }
+
     function isValidJamMessage(data) {
       return data.senderId is string && data.senderId.size() <= 128
         && data.senderName is string && data.senderName.size() <= 100
@@ -399,6 +406,12 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin();
       allow update, delete: if isAdmin();
+    }
+
+    // 📡 VALIDATORS
+    match /validators/{validatorId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidValidator(incoming()) && isValidId(validatorId);
     }
 
     // 🧪 CONNECTION TEST

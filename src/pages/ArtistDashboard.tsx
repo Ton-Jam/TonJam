@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db, auth, handleFirestoreError, OperationType } from "../lib/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, onSnapshot } from "firebase/firestore";
 import { 
   Music, 
   Gem, 
@@ -25,6 +25,7 @@ import { useAudio } from "@/context/AudioContext";
 import { useAuth } from "@/context/AuthContext";
 import { getPlaceholderImage } from "@/lib/utils";
 import TrackMonetizationModal from "@/components/TrackMonetizationModal";
+import EditMetadataModal from "@/components/EditMetadataModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
 import TrackUploadModal from "@/components/TrackUploadModal";
 import SongRequestsTab from "@/components/SongRequestsTab";
@@ -32,6 +33,8 @@ import AlbumCard from "@/components/AlbumCard";
 import Autoplay from "embla-carousel-autoplay";
 import ManageNFTModal from "@/components/ManageNFTModal";
 import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
+import DailyStreamsChart from "@/components/DailyStreamsChart";
+import ListenerActivityFeed from "@/components/ListenerActivityFeed";
 import {
   Carousel,
   CarouselContent,
@@ -40,7 +43,7 @@ import {
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
-  const { getEarnings } = useAudio();
+  const { getEarnings, addNotification } = useAudio();
   const { user, isArtist, loading } = useAuth();
   const [nfts, setNFTs] = useState<any[]>([]);
   const [tracks, setTracks] = useState<any[]>([]);
@@ -49,10 +52,16 @@ export default function ArtistDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTrackForConfig, setSelectedTrackForConfig] = useState<any | null>(null);
   const [selectedNFTForManage, setSelectedNFTForManage] = useState<any | null>(null);
+  const [selectedTrackForMetadata, setSelectedTrackForMetadata] = useState<any | null>(null);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isEditMetadataOpen, setIsEditMetadataOpen] = useState(false);
+
+  // Refs to track previous track values to notify on change
+  const tracksPrevStatsRef = React.useRef<Record<string, { playCount: number; likes: number }>>({});
+  const isInitialLoadRef = React.useRef(true);
 
   useEffect(() => {
     if (!loading && (!user || !isArtist)) {
@@ -60,27 +69,58 @@ export default function ArtistDashboard() {
       return;
     }
 
-    if (user) {
-      fetchData();
-    }
-  }, [user, isArtist, loading, navigate]);
+    if (!user) return;
 
-  const fetchData = async () => {
+    // Fetch static data (NFTs, Earnings)
+    fetchStaticData();
+
+    // Set up real-time onSnapshot listener for this artist's tracks
+    const tracksQuery = query(collection(db, "tracks"), where("artistId", "==", user.uid));
+    
     setIsLoading(true);
-    try {
-      // Tracks
-      const trackSnap = await getDocs(
-        query(collection(db, "tracks"), where("artistId", "==", user?.uid))
-      );
 
-      const tracksData = trackSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+    const unsubscribeTracks = onSnapshot(tracksQuery, (snapshot) => {
+      const tracksData: any[] = [];
+      
+      snapshot.forEach((doc) => {
+        const data = { id: doc.id, ...doc.data() };
+        tracksData.push(data);
+      });
 
+      // Avoid showing notifications on the very first load
+      if (!isInitialLoadRef.current) {
+        tracksData.forEach(track => {
+          const prev = tracksPrevStatsRef.current[track.id];
+          const currentPlayCount = track.playCount || 0;
+          const currentLikes = track.likes || 0;
+
+          if (prev) {
+            // Check for new plays
+            if (currentPlayCount > prev.playCount) {
+              const diff = currentPlayCount - prev.playCount;
+              addNotification(`Your track "${track.title}" received ${diff > 1 ? `${diff} new streams` : 'a new stream'}! 🎵`, 'success');
+            }
+            // Check for new likes
+            if (currentLikes > prev.likes) {
+              const diff = currentLikes - prev.likes;
+              addNotification(`Your track "${track.title}" received ${diff > 1 ? `${diff} new likes` : 'a new like'}! ❤️`, 'success');
+            }
+          }
+        });
+      }
+
+      // Update the previous stats ref
+      tracksData.forEach(track => {
+        tracksPrevStatsRef.current[track.id] = {
+          playCount: track.playCount || 0,
+          likes: track.likes || 0
+        };
+      });
+
+      isInitialLoadRef.current = false;
       setTracks(tracksData);
-
-      // Albums (Mocking for now as per instructions)
+      
+      // Update Albums matching the new real-time track list
       setAlbums([
         {
           id: 'alb-1',
@@ -94,10 +134,25 @@ export default function ArtistDashboard() {
           description: 'The debut album defining the digital frontier.'
         }
       ]);
+      
+      setIsLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'tracks');
+      setIsLoading(false);
+    });
 
+    return () => {
+      unsubscribeTracks();
+    };
+  }, [user, isArtist, loading, navigate]);
+
+  const fetchStaticData = async () => {
+    try {
+      if (!user) return;
+      
       // NFTs
       const nftSnap = await getDocs(
-        query(collection(db, "nfts"), where("artistId", "==", user?.uid))
+        query(collection(db, "nfts"), where("artistId", "==", user.uid))
       );
       const nftData = nftSnap.docs.map(doc => ({
         id: doc.id,
@@ -107,15 +162,15 @@ export default function ArtistDashboard() {
       setNFTs(nftData);
 
       // Earnings
-      if (user?.uid) {
-        const totalEarnings = await getEarnings(user.uid);
-        setEarnings(totalEarnings);
-      }
+      const totalEarnings = await getEarnings(user.uid);
+      setEarnings(totalEarnings);
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, 'tracks/nfts');
-    } finally {
-      setIsLoading(false);
+      handleFirestoreError(error, OperationType.GET, 'artist-dashboard-static');
     }
+  };
+
+  const fetchData = async () => {
+    await fetchStaticData();
   };
 
   const mintNFT = (trackId: string) => {
@@ -128,6 +183,11 @@ export default function ArtistDashboard() {
   const openConfig = (track: any) => {
     setSelectedTrackForConfig(track);
     setIsConfigModalOpen(true);
+  };
+
+  const openEditMetadata = (track: any) => {
+    setSelectedTrackForMetadata(track);
+    setIsEditMetadataOpen(true);
   };
 
   if (!user) return null;
@@ -280,6 +340,12 @@ export default function ArtistDashboard() {
             </div>
           </div>
         </motion.div>
+
+        {/* Daily Stream Count Bar Chart */}
+        <DailyStreamsChart tracks={tracks} />
+
+        {/* Real-time Listener Activity Feed */}
+        <ListenerActivityFeed tracks={tracks} />
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -450,6 +516,16 @@ export default function ArtistDashboard() {
 
                     <div className="flex items-center gap-3">
                       <button
+                        id={`edit-metadata-btn-${track.id}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditMetadata(track);
+                        }}
+                        className="text-[9px] font-black text-cyan-400 hover:text-cyan-300 uppercase tracking-widest transition-colors"
+                      >
+                        Edit Metadata
+                      </button>
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           openConfig(track);
@@ -509,6 +585,15 @@ export default function ArtistDashboard() {
           track={selectedTrackForConfig}
           isOpen={isConfigModalOpen}
           onClose={() => setIsConfigModalOpen(false)}
+          onUpdate={fetchData}
+        />
+      )}
+
+      {selectedTrackForMetadata && (
+        <EditMetadataModal 
+          track={selectedTrackForMetadata}
+          isOpen={isEditMetadataOpen}
+          onClose={() => setIsEditMetadataOpen(false)}
           onUpdate={fetchData}
         />
       )}

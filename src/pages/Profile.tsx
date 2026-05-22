@@ -382,7 +382,7 @@ const Profile: React.FC = () => {
  return (
  <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
  {/* Banner Section */}
- <div className="relative h-[25vh] sm:h-[40vh] md:h-[50vh] w-full overflow-hidden bg-blue-950">
+ <div className="relative h-[16vh] sm:h-[30vh] md:h-[40vh] w-full overflow-hidden bg-blue-950">
  <BackButton className="absolute top-4 left-4 z-50 bg-black/50 text-white hover:bg-black/70" />
  <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.uid}`, 1200, 400)} className="w-full h-full object-cover opacity-80" alt="" />
  <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
@@ -403,13 +403,13 @@ const Profile: React.FC = () => {
   <div className="w-full max-w-7xl mx-auto px-4 relative z-30 flex flex-col items-start text-neutral-900 dark:text-white font-sans">
     <div className="flex justify-between items-end w-full mb-4">
       {/* Profile Picture */}
-      <div className="relative group -mt-12 sm:-mt-16 md:-mt-24">
+      <div className="relative group -mt-10 sm:-mt-16 md:-mt-24">
         <div 
-          className="relative overflow-hidden border-[4px] border-background bg-muted w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full"
+          className="relative overflow-hidden border-[3px] sm:border-[4px] border-background bg-muted w-20 h-20 sm:w-32 sm:h-32 md:w-38 md:h-38 rounded-full"
         >
           <Avatar className="w-full h-full rounded-full">
             <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} className="object-cover rounded-full" alt={localUser.name} />
-            <AvatarFallback className="text-3xl font-black">{(localUser.name || '?').charAt(0)}</AvatarFallback>
+            <AvatarFallback className="text-2xl sm:text-3xl font-black">{(localUser.name || '?').charAt(0)}</AvatarFallback>
           </Avatar>
           
           {isEditing && (
@@ -417,24 +417,24 @@ const Profile: React.FC = () => {
               onClick={() => avatarInputRef.current?.click()} 
               className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
             >
-              <Camera className="text-white h-8 w-8"/>
+              <Camera className="text-white h-6 w-6 sm:h-8 sm:w-8"/>
             </button>
           )}
         </div>
         {isSpotifyVerified && (
-          <div className="absolute bottom-2 right-2 z-10 bg-background rounded-full p-0.5 border-2 border-background">
-            <CheckCircle className="w-5 h-5 md:w-6 h-6 text-blue-500 fill-current"/>
+          <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 z-10 bg-background rounded-full p-0.5 border-2 border-background">
+            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-500 fill-current"/>
           </div>
         )}
         <input type="file" hidden ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
       </div>
 
       {/* Action Button (Extreme Right) */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3">
         {localUser.role !== 'artist' && !isEditing && (
           <button 
             onClick={() => handleSwitchRole('artist')}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-[11px] uppercase tracking-widest transition-all shadow-none"
+            className="px-3 py-1.5 sm:px-6 sm:py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest transition-all shadow-none"
           >
             Become Artist
           </button>
@@ -443,29 +443,29 @@ const Profile: React.FC = () => {
           <>
             <button 
               onClick={() => setIsEditing(false)} 
-              className="px-5 py-2 bg-white/5 text-white rounded-full font-black text-[11px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all"
+              className="px-3.5 py-1.5 sm:px-5 sm:py-2 bg-white/5 text-white rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all"
             >
               Cancel
             </button>
             <button 
               onClick={handleSave} 
-              className="px-5 py-2 bg-white text-black rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl"
+              className="px-3.5 py-1.5 sm:px-5 sm:py-2 bg-white text-black rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl"
             >
               Save
             </button>
           </>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button 
               onClick={() => navigate('/settings')}
-              className="p-2.5 bg-background text-foreground rounded-full border border-white/20 hover:bg-white/5 transition-all shadow-sm flex items-center justify-center cursor-pointer"
+              className="p-2 sm:p-2.5 bg-background text-foreground rounded-full border border-white/20 hover:bg-white/5 transition-all shadow-sm flex items-center justify-center cursor-pointer"
               title="Settings"
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
             <button 
               onClick={() => navigate('/edit-profile')}
-              className="px-6 py-2 bg-background text-foreground rounded-full font-black text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
+              className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-background text-foreground rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
             >
               Edit Profile
             </button>
@@ -535,9 +535,9 @@ const Profile: React.FC = () => {
   {/* Tab Navigation */}
   <div className="w-full sticky top-[0px] z-40 bg-background/95 backdrop-blur-md border-b border-border/10 mb-2">
     <div className="max-w-7xl mx-auto px-4">
-      <div className="flex items-center justify-between py-2 overflow-hidden">
+      <div className="flex items-center justify-between py-1.5 sm:py-2 overflow-hidden">
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-          <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-1 justify-start scroll-smooth">
+          <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 justify-start scroll-smooth -mx-4 px-4">
           {[
             { id: 'feed', label: 'Activity' },
             { id: 'overview', label: 'Overview' },
@@ -549,11 +549,7 @@ const Profile: React.FC = () => {
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className={cn(
-                "relative px-4 py-2 text-[11px] font-black uppercase tracking-widest transition-all rounded-full whitespace-nowrap shadow-none border border-transparent shrink-0 font-ui",
-                "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-600/30",
-                "text-muted-foreground hover:text-white"
-              )}
+              className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
             >
               {tab.label}
             </TabsTrigger>
@@ -564,7 +560,7 @@ const Profile: React.FC = () => {
         <button 
           onClick={() => setShowFilters(true)}
           className={cn(
-            "p-2.5 rounded-full transition-all border",
+            "p-2 sm:p-2.5 rounded-full transition-all border",
             showFilters ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20" : "bg-white/5 text-white/40 border-white/5 hover:border-white/20"
           )}
         >
@@ -926,6 +922,8 @@ const Profile: React.FC = () => {
  title="Unstake TJ Coins?"
  description={`Are you sure you want to unstake ${unstakeAmount} TJ Coins? This will return them to your wallet balance.`}
  confirmText="Unstake Now"
+ unbondingPeriod="28 Days"
+ penalty="Loss of active staking rewards multiplier"
  />
  </div>
  );

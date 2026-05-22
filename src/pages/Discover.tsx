@@ -481,12 +481,12 @@ const Discover: React.FC = () => {
         <div className="flex flex-col items-center filter-tabs w-full max-w-2xl mx-auto">
           <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
             <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start md:justify-center px-1 py-1">
-              <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
+              <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max -mx-4 px-4">
                 {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
                   <TabsTrigger
                     key={filter}
                     value={filter}
-                    className="px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-muted/20 border border-border/40 data-[state=active]:border-blue-500 hover:data-[state=inactive]:bg-muted/40 shrink-0 font-ui cursor-pointer"
+                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
                   >
                     {filter}
                   </TabsTrigger>

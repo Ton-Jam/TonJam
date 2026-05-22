@@ -488,15 +488,15 @@ const Home: React.FC = () => {
         </div>
 
         <TabsContent value="overview" className="focus-visible:ring-0 p-0 outline-none">
-          <div className="flex overflow-x-auto no-scrollbar space-x-2 py-2 -mx-2 px-2">
+          <div className="flex overflow-x-auto no-scrollbar gap-2 py-2 -mx-4 px-4">
             <button
               onClick={() => setSelectedGenre(null)}
-              className="flex-shrink-0 group relative"
+              className="flex-shrink-0 group relative cursor-pointer"
             >
-              <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${
+              <div className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border-none ${
                 selectedGenre === null 
-                  ? 'bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20' 
-                  : 'bg-secondary border-border text-foreground/40 hover:border-foreground/30 hover:text-foreground'
+                  ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)]' 
+                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'
               }`}>
                 ALL_FREQUENCIES
               </div>
@@ -507,14 +507,14 @@ const Home: React.FC = () => {
                 <button
                   key={genre.id}
                   onClick={() => setSelectedGenre(genre.name)}
-                  className="flex-shrink-0 group relative"
+                  className="flex-shrink-0 group relative cursor-pointer"
                 >
-                  <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all border flex items-center gap-2 ${
+                  <div className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border-none flex items-center gap-1.5 ${
                     isSelected 
-                      ? 'bg-foreground text-background border-foreground shadow-lg' 
-                      : 'bg-secondary border-border text-foreground/40 hover:border-foreground/30 hover:text-foreground'
+                      ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)]' 
+                      : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'
                   }`}>
-                    <genre.icon className="h-3 w-3" />
+                    <genre.icon className="h-3.5 w-3.5" />
                     {genre.name.replace(' ', '_')}
                   </div>
                 </button>
@@ -636,7 +636,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* Neural Leaderboard Section */}
-            <section className="section-container mt-6 mb-6 px-2 sm:px-0">
+            <section className="w-full mt-6 mb-6">
               <Leaderboard artists={artists} limit={5} />
             </section>
 
@@ -860,10 +860,10 @@ const Home: React.FC = () => {
                     <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tighter text-foreground leading-none">Trending_Pulse</h2>
                   </div>
                   
-                  <TabsList className="bg-transparent h-auto p-0 gap-3 flex flex-nowrap min-w-max">
-                    <TabsTrigger value="tracks" className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto">Tracks</TabsTrigger>
-                    <TabsTrigger value="artists" className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto">Artists</TabsTrigger>
-                    <TabsTrigger value="nfts" className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto">NFTs</TabsTrigger>
+                  <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max -mx-4 px-4">
+                    <TabsTrigger value="tracks" className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto">Tracks</TabsTrigger>
+                    <TabsTrigger value="artists" className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto">Artists</TabsTrigger>
+                    <TabsTrigger value="nfts" className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto">NFTs</TabsTrigger>
                   </TabsList>
                 </div>
 

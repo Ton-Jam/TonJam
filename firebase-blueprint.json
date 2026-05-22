@@ -311,9 +311,30 @@
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "nftId", "sellerId", "price", "status"]
+    },
+    "Validator": {
+      "title": "Validator",
+      "description": "Network Validator node",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "apr": { "type": "number" },
+        "uptime": { "type": "number" },
+        "blocksValidated": { "type": "string" },
+        "currentCommission": { "type": "string" },
+        "commissionHistory": { "type": "array" },
+        "selfStake": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "name", "apr", "uptime"]
     }
   },
   "firestore": {
+    "/validators/{validatorId}": {
+      "schema": "Validator",
+      "description": "Staking network validators"
+    },
     "/listings/{listingId}": {
       "schema": "Listing",
       "description": "Marketplace listings"

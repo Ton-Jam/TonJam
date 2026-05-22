@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Timer, AlertTriangle } from "lucide-react";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ interface ConfirmationModalProps {
   confirmText?: string;
   cancelText?: string;
   variant?: 'default' | 'destructive';
+  unbondingPeriod?: string;
+  penalty?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -31,7 +34,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   description,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  variant = 'default'
+  variant = 'default',
+  unbondingPeriod,
+  penalty
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -44,6 +49,30 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        {(unbondingPeriod || penalty) && (
+          <div className="mt-4 p-3 bg-white/[0.03] rounded-xl space-y-2.5">
+            {unbondingPeriod && (
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Timer className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Unbonding Period</span>
+                </div>
+                <span className="font-bold text-orange-400">{unbondingPeriod}</span>
+              </div>
+            )}
+            {penalty && (
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Potential Penalty</span>
+                </div>
+                <span className="font-bold text-rose-400">{penalty}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <AlertDialogFooter className="mt-6 gap-3 sm:gap-0">
           <AlertDialogCancel 
             onClick={onClose}

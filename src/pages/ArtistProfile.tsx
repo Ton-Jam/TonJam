@@ -584,12 +584,12 @@ const ArtistProfile: React.FC = () => {
         <Tabs defaultValue="discography" value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
           <div className="sticky top-0 z-30 mb-6 sm:mb-12">
             <div className="bg-background/80 backdrop-blur-2xl py-4 border-b border-border/40">
-              <TabsList className="h-auto p-0 bg-transparent rounded-full w-fit mx-auto lg:mx-0 overflow-x-auto no-scrollbar shadow-none flex items-center gap-3">
+              <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth -mx-4 px-4">
                 {(['discography', 'music_nfts', 'collection', 'signals', 'fan_club', 'events', 'about', 'comments'] as TabType[]).map((tab) => (
                   <TabsTrigger
                     key={tab}
                     value={tab}
-                    className="px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] data-[state=inactive]:text-muted-foreground/60 data-[state=inactive]:bg-white/5 border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 hover:data-[state=inactive]:bg-white/10 shrink-0 h-auto"
+                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
                   >
                     {tab.replace('_', ' ').replace('music nfts', 'NFTs')}
                   </TabsTrigger>

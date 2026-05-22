@@ -66,18 +66,21 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
   };
 
   return (
-    <Card className={cn("bg-card border-none shadow-2xl overflow-hidden rounded-3xl", className)}>
-      <CardHeader className="pb-4 pt-6 px-6 sm:px-8">
+    <Card className={cn("bg-neutral-50/70 dark:bg-[#07090C]/40 border-none shadow-none overflow-hidden rounded-none w-auto -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 px-4 sm:px-8 md:px-12 lg:px-16 py-8", className)}>
+      <CardHeader className="pb-4 pt-2 px-0">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center gap-3">
               <div className="text-primary p-2 bg-primary/10 rounded-2xl">
-                <Crown className="w-5 h-5" />
+                <Crown className="w-5 h-5 animate-pulse" />
               </div>
               <div>
-                <CardTitle className="text-lg font-black uppercase tracking-tighter text-foreground font-display">
+                <CardTitle className="text-xl font-black uppercase tracking-tighter text-foreground font-display">
                   {title}
                 </CardTitle>
+                <CardDescription className="text-[10px] font-medium tracking-tight text-neutral-500 uppercase">
+                  Consensus Network Standing
+                </CardDescription>
               </div>
             </div>
           </div>
@@ -88,7 +91,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                   <Info className="w-5 h-5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent className="bg-zinc-950 border-white/5 text-[10px] font-bold uppercase tracking-widest p-4 max-w-[240px] rounded-2xl shadow-3xl">
+              <TooltipContent className="bg-zinc-950 border-none text-[10px] font-bold uppercase tracking-widest p-4 max-w-[240px] rounded-2xl shadow-3xl text-zinc-300">
                 Earnings are synthesized from NFT primary logic, streaming micro-royalties, and license fees via TON blockchain consensus.
               </TooltipContent>
             </Tooltip>
@@ -98,13 +101,13 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
 
       <CardContent className="p-0">
         <Tabs defaultValue="all-time" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="px-6 sm:px-8 pb-6">
-            <TabsList className="grid w-full grid-cols-3 bg-muted/40 h-10 p-1 rounded-full border border-border/20 backdrop-blur-md">
+          <div className="px-0 pb-6">
+            <TabsList className="grid w-full grid-cols-3 bg-neutral-100 dark:bg-neutral-900/40 h-10 p-1 rounded-full border-none backdrop-blur-md">
               {['24h', '7d', 'all-time'].map((time) => (
                 <TabsTrigger 
                   key={time} 
                   value={time}
-                  className="text-[9px] font-black uppercase tracking-[0.2em] data-[state=active]:bg-foreground data-[state=active]:text-background rounded-full transition-all duration-300"
+                  className="text-[9px] font-black uppercase tracking-[0.2em] data-[state=active]:bg-foreground data-[state=active]:text-background rounded-full transition-all duration-300 cursor-pointer"
                 >
                   {time}
                 </TabsTrigger>
@@ -113,7 +116,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
           </div>
 
           <TabsContent value={activeTab} className="mt-0">
-            <div className="divide-y divide-border/10 px-4 sm:px-6 pb-6">
+            <div className="space-y-1.5 px-0 pb-6">
               <AnimatePresence mode="popLayout">
                 {rankedArtists.map((artist, index) => {
                   const rank = index + 1;
@@ -126,55 +129,57 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
-                      className="group flex items-center gap-2 py-2 px-1 hover:bg-primary/5 transition-all rounded-xl cursor-pointer"
+                      className="group flex items-center gap-3 py-3.5 px-3 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 transition-all rounded-2xl cursor-pointer"
                     >
                       {/* Rank Indicator */}
                       <div className="w-8 flex-shrink-0 flex items-center justify-center">
                         {rank === 1 ? (
                           <div className="relative">
-                            <div className="w-6 h-6 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                              <Award className="w-4 h-4 text-yellow-500" />
+                            <div className="w-7 h-7 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                              <Award className="w-4.5 h-4.5 text-yellow-500 animate-bounce" style={{ animationDuration: '3s' }} />
                             </div>
                             <motion.div 
-                              animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.4, 1] }}
+                              animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.3, 1] }}
                               transition={{ duration: 3, repeat: Infinity }}
-                              className="absolute inset-0 bg-yellow-500/20 blur-xl -z-10 rounded-full"
+                              className="absolute inset-0 bg-yellow-500/10 blur-lg -z-10 rounded-full"
                             />
                           </div>
                         ) : rank <= 3 ? (
                           <div className={cn(
-                            "w-6 h-6 flex items-center justify-center rounded-full font-black text-[9px] border border-border/50",
-                            rank === 2 ? "bg-slate-100 dark:bg-slate-800 text-slate-400" : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-500"
+                            "w-7 h-7 flex items-center justify-center rounded-full font-black text-[10px] border-none",
+                            rank === 2 
+                              ? "bg-slate-200/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-300" 
+                              : "bg-amber-100/50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-500"
                           )}>
                             {rank}
                           </div>
                         ) : (
-                          <span className="text-[9px] font-black tracking-tighter text-muted-foreground/30 group-hover:text-muted-foreground/50 transition-colors">
+                          <span className="text-[10px] font-black tracking-tighter text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors">
                             #{rank.toString().padStart(2, '0')}
                           </span>
                         )}
                       </div>
 
                       {/* Identity */}
-                      <Link to={`/artist/${artist.uid}`} className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                      <Link to={`/artist/${artist.uid}`} className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="relative">
-                          <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-border/50 group-hover:border-primary/50 transition-all duration-500 shadow-lg">
+                          <Avatar className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border-none shadow-md group-hover:scale-105 transition-all duration-300">
                             <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} referrerPolicy="no-referrer" />
-                            <AvatarFallback className="bg-muted text-primary font-black text-[9px]">
+                            <AvatarFallback className="bg-muted text-primary font-black text-[10px]">
                               {artist.name.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                         </div>
-                        <div className="min-w-0 space-y-0">
-                          <h4 className="text-[8px] font-bold uppercase tracking-tight text-foreground truncate group-hover:text-primary transition-colors leading-tight font-display">
+                        <div className="min-w-0 space-y-0.5">
+                          <h4 className="text-[10px] sm:text-xs font-bold uppercase tracking-tight text-foreground truncate group-hover:text-primary transition-colors leading-tight font-display">
                             {artist.name.replace('//', '')}
                           </h4>
-                          <div className="hidden sm:flex items-center gap-1.5">
-                             <span className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-widest">
+                          <div className="hidden sm:flex items-center gap-1.5 opacity-60">
+                             <span className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest">
                                LVL.{(artist.uid.length % 50) + 1}
                              </span>
-                             <div className="w-1 h-1 rounded-full bg-primary opacity-20" />
-                             <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                             <div className="w-1 h-1 rounded-full bg-primary/40" />
+                             <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
                                VLD_ID: {artist.uid.slice(0, 4).toUpperCase()}
                              </span>
                           </div>
@@ -183,13 +188,13 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
 
                       {/* Trends (Desktop) */}
                       <div className="hidden sm:flex flex-col items-end gap-0 min-w-[70px]">
-                        <div className={cn("flex items-center gap-0.5 text-[9px] font-black uppercase tracking-widest", trend.color)}>
+                        <div className={cn("flex items-center gap-0.5 text-[10px] font-black uppercase tracking-widest", trend.color)}>
                           {trend.type !== 'stable' ? (
                             <>
                               {trend.type === 'up' ? '+' : '-'}{trend.percentage}%
-                              {trend.type === 'up' ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
+                              {trend.type === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                             </>
-                          ) : <Minus className="h-2.5 w-2.5 opacity-20" />}
+                          ) : <Minus className="h-3 w-3 opacity-20" />}
                         </div>
                         <p className="text-[7.5px] font-bold text-muted-foreground/30 uppercase tracking-widest">Velocity</p>
                       </div>
@@ -197,12 +202,12 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                       {/* Earnings */}
                       <div className="text-right min-w-[60px] sm:min-w-[70px]">
                         <div className="flex items-center justify-end gap-0.5 flex-nowrap">
-                          <span className="text-[10px] sm:text-[11px] font-black tracking-tighter text-foreground group-hover:text-primary transition-colors">
+                          <span className="text-11px sm:text-xs font-black tracking-tighter text-foreground group-hover:text-primary transition-colors">
                             {artist.earnings?.total.toLocaleString(undefined, { minimumFractionDigits: 1 }) || '0.0'}
                           </span>
-                          <img src={TON_LOGO} alt="TON" className="w-2 h-2 opacity-80 dark:invert-0 light:invert" />
+                          <img src={TON_LOGO} alt="TON" className="w-2.5 h-2.5 opacity-85 dark:invert-0 light:invert" />
                         </div>
-                        <p className="text-[6px] sm:text-[7px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-0">Credits</p>
+                        <p className="text-[6.5px] sm:text-[7.5px] font-bold uppercase tracking-widest text-muted-foreground/45 mt-0.5">Credits</p>
                       </div>
                     </motion.div>
                   );
@@ -212,10 +217,10 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
           </TabsContent>
         </Tabs>
 
-        <div className="px-6 py-6 sm:px-8 border-t border-border/5 bg-secondary/10">
+        <div className="px-0 py-6 bg-transparent">
           <Button 
             variant="ghost" 
-            className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground hover:text-foreground hover:bg-muted/50 h-12 transition-all gap-3 rounded-2xl group/btn"
+            className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-900/30 h-12 transition-all gap-3 rounded-2xl group/btn cursor-pointer"
           >
             <span>View More</span>
             <div className="w-1.5 h-1.5 rounded-full bg-primary group-hover:shadow-[0_0_10px_var(--primary)] transition-shadow" />

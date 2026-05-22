@@ -290,12 +290,12 @@ const Marketplace: React.FC = () => {
         <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full px-4 mb-6 border-b border-border/10">
           <div className="max-w-[1600px] mx-auto overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth">
+              <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth -mx-4 px-4">
                 {TABS.map(tab => (
                   <TabsTrigger 
                     key={tab} 
                     value={tab} 
-                    className="px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border bg-card border-white/5 text-muted-foreground data-[state=active]:bg-primary data-[state=active]:border-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 shrink-0 font-ui cursor-pointer"
+                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
                   >
                     {tab}
                   </TabsTrigger>
@@ -400,7 +400,7 @@ const Marketplace: React.FC = () => {
             </section>
 
             {/* Network Top Earners Leaderboard */}
-            <section className="bg-card/30 rounded-3xl border border-border/60 p-6 md:p-10 my-8 shadow-sm">
+            <section className="w-full my-8">
               <Leaderboard artists={MOCK_ARTISTS} limit={5} title="Market Top Earners" />
             </section>
 
