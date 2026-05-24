@@ -19,6 +19,7 @@ export interface NotificationPreferences {
   socialSignals: boolean;
   bidAlerts: boolean;
   saleEvents: boolean;
+  revenueThreshold?: number;
 }
 
 export interface TokenGating {

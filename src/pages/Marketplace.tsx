@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap, Filter, Bell, Rocket, Box } from 'lucide-react';
-import { MOCK_NFTS, TON_LOGO, MOCK_USER, MOCK_ARTISTS, MOCK_TRACKS } from '@/constants';
+import { TON_LOGO } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
 import NFTCard from '@/components/NFTCard';
 import ArtistCard from '@/components/ArtistCard';
@@ -38,7 +38,7 @@ const SORT_OPTIONS = ['Newest', 'Price: Low', 'Price: High', 'Rarity'];
 const Marketplace: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Trending');
-  const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery, marketplaceFilters, setMarketplaceFilters, isLoading } = useAudio();
+  const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery, marketplaceFilters, setMarketplaceFilters, isLoading, allTracks, artists } = useAudio();
   const { genre: genreFilter, artist: artistFilter, rarity: rarityFilter, priceRange, sortBy } = marketplaceFilters;
 
   const setGenreFilter = (genre: string) => setMarketplaceFilters(prev => ({ ...prev, genre }));
@@ -93,7 +93,7 @@ const Marketplace: React.FC = () => {
         if (!nft.listingType) return false;
       }
       const matchesSearch = nft.title.toLowerCase().includes(searchQuery.toLowerCase()) || nft.creator.toLowerCase().includes(searchQuery.toLowerCase());
-      const track = MOCK_TRACKS.find(t => t.id === nft.trackId);
+      const track = allTracks.find(t => t.id === nft.trackId);
       const genre = track?.genre || 'Unknown';
       const matchesGenre = genreFilter === 'All' || genre === genreFilter;
       const matchesArtist = artistFilter === 'All' || nft.creator === artistFilter;
@@ -181,8 +181,8 @@ const Marketplace: React.FC = () => {
   const featuredArtists = useMemo(() => {
     // Artists who have at least one NFT listed
     const artistNamesWithNFTs = new Set(allNFTs.map(nft => nft.creator));
-    return MOCK_ARTISTS.filter(artist => artistNamesWithNFTs.has(artist.name)).slice(0, 6);
-  }, [allNFTs]);
+    return artists.filter(artist => artistNamesWithNFTs.has(artist.name)).slice(0, 6);
+  }, [allNFTs, artists]);
 
   return (
     <div className="relative min-h-screen w-full bg-background text-foreground overflow-hidden">
@@ -401,7 +401,7 @@ const Marketplace: React.FC = () => {
 
             {/* Network Top Earners Leaderboard */}
             <section className="w-full my-8">
-              <Leaderboard artists={MOCK_ARTISTS} limit={5} title="Market Top Earners" />
+              <Leaderboard artists={artists} limit={5} title="Market Top Earners" />
             </section>
 
             {/* 6. MAIN MARKET GRID */}

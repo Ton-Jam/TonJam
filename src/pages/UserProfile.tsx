@@ -120,7 +120,7 @@ const UserProfile: React.FC = () => {
   return (
     <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
       {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[140px] sm:h-[200px] md:h-[300px] overflow-hidden group bg-blue-950 border-b-4 border-muted/20">
+      <div className="relative h-[140px] sm:h-[200px] md:h-[300px] overflow-hidden group bg-blue-950 border-b-[2px] border-blue-500/50">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
           style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
@@ -196,6 +196,12 @@ const UserProfile: React.FC = () => {
               <span className="text-muted-foreground font-medium text-xs md:text-sm">
                 @{user.username || (user.name || 'user').toLowerCase().replace(/\s+/g, '')}
               </span>
+            </div>
+            
+            {/* Activity Statistics */}
+            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">
+              <span className="flex items-center gap-1.5"><Disc className="h-3 w-3" /> {uploadedTracks.length} Tracks Created</span>
+              <span className="flex items-center gap-1.5"><Layers className="h-3 w-3" /> {ownedNfts.length} NFTs Collected</span>
             </div>
             
             {/* Action buttons could go here in a refined layout too */}

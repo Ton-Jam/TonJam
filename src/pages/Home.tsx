@@ -366,7 +366,7 @@ const Home: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="page-container w-full pt-[30px] sm:pt-[46px] bg-white text-neutral-950 min-h-screen"
+      className="page-container w-full pt-[30px] sm:pt-[46px] bg-background text-foreground min-h-screen"
     >
       <div className="absolute top-0 left-0 right-0 h-10 bg-zinc-100 border-b border-zinc-200 flex items-center overflow-hidden pointer-events-none z-50">
         <motion.div 

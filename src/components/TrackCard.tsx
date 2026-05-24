@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, TrendingUp, TrendingDown } from 'lucide-react';
+import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, TrendingUp, TrendingDown, Download, CheckCircle2 } from 'lucide-react';
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_ARTISTS, TJ_COIN_ICON } from '@/constants';
@@ -53,7 +53,33 @@ const TrackCard: React.FC<TrackCardProps> = ({
   isLoading = false 
 }) => {
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, jamTrack, artists, addToQueue, setTrackToAddToPlaylist, likedTrackIds, toggleLikeTrack, isLoading: isAudioLoading } = useAudio();
+  const { 
+    playTrack, currentTrack, isPlaying, setOptionsTrack, addNotification, 
+    jamTrack, artists, addToQueue, setTrackToAddToPlaylist, likedTrackIds, 
+    toggleLikeTrack, isLoading: isAudioLoading, userProfile, 
+    downloadTrackForOffline, isTrackCached, deleteCachedTrack 
+  } = useAudio();
+  const [isCached, setIsCached] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkCache = async () => {
+      const cached = await isTrackCached(track.id);
+      setIsCached(cached);
+    };
+    checkCache();
+  }, [track.id, isTrackCached]);
+
+  const handleDownload = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    await downloadTrackForOffline(track);
+    setIsCached(true);
+  };
+    
+  const handleDeleteCached = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    await deleteCachedTrack(track.id);
+    setIsCached(false);
+  };
   const [tonConnectUI] = useTonConnectUI();
   const { hasAccess } = useTokenGating(track.tokenGating);
   
@@ -171,6 +197,13 @@ const TrackCard: React.FC<TrackCardProps> = ({
         <Share2 className="h-4 w-4" />
         <span className="text-[10px] font-bold uppercase tracking-widest">Share Signal</span>
       </DropdownMenuItem>
+      
+      {userProfile.ownedTrackIds?.includes(track.id) && (
+        <DropdownMenuItem onClick={isCached ? handleDeleteCached : handleDownload} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
+          <Download className="h-4 w-4" />
+          <span className="text-[10px] font-bold uppercase tracking-widest">{isCached ? 'Remove Offline' : 'Download for Offline'}</span>
+        </DropdownMenuItem>
+      )}
       
       {onRemove && (
         <>
@@ -337,6 +370,13 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
               >
                 <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
+                
+                {isCached && (
+                    <div className="absolute top-1 left-1 bg-emerald-600/90 p-0.5 rounded-full">
+                        <CheckCircle2 className="w-2 h-2 text-white" />
+                    </div>
+                )}
+                
                 <div className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100'}`}>
                   {track.tokenGating?.enabled && !hasAccess ? (
                       <Lock className="h-4 w-4 text-white" />
@@ -504,6 +544,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
               {track.tokenGating?.enabled && (
                 <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
                   <Key className="w-2.5 h-2.5" /> GATED
+                </div>
+              )}
+              {isCached && (
+                <div className="bg-emerald-600/80 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-emerald-400/30 flex items-center gap-1">
+                  <CheckCircle2 className="w-2.5 h-2.5" /> CACHED
                 </div>
               )}
             </div>

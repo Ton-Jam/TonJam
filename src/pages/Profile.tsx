@@ -54,6 +54,7 @@ import NFTVaultSection from '@/components/NFTVaultSection';
 import PlaylistCard from '@/components/PlaylistCard';
 import SocialFeed from '@/components/SocialFeed';
 import UserCard from '@/components/UserCard';
+import { ArtistDashboardTab } from '@/components/ArtistDashboardTab';
 import SellNFTModal from '@/components/SellNFTModal';
 import ManageNFTModal from '@/components/ManageNFTModal';
 import UserArtistVerificationModal from '@/components/UserArtistVerificationModal';
@@ -97,7 +98,7 @@ const Profile: React.FC = () => {
  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
  const [localUser, setLocalUser] = useState<UserProfile>(userProfile);
  const [isUploading, setIsUploading] = useState(false);
- const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'releases' | 'sequences' | 'activity' | 'network' | 'staking' | 'feed'>('overview');
+ const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'releases' | 'sequences' | 'activity' | 'network' | 'staking' | 'feed' | 'artist-dashboard'>('overview');
  const [selectedNftForListing, setSelectedNftForListing] = useState<NFTItem | null>(null);
  const [selectedNftForManaging, setSelectedNftForManaging] = useState<NFTItem | null>(null);
  const [newPostContent, setNewPostContent] = useState('');
@@ -421,7 +422,7 @@ const Profile: React.FC = () => {
             </button>
           )}
         </div>
-        {isSpotifyVerified && (
+        {localUser.isVerifiedArtist && (
           <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 z-10 bg-background rounded-full p-0.5 border-2 border-background">
             <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-500 fill-current"/>
           </div>
@@ -431,12 +432,12 @@ const Profile: React.FC = () => {
 
       {/* Action Button (Extreme Right) */}
       <div className="flex items-center gap-1.5 sm:gap-3">
-        {localUser.role !== 'artist' && !isEditing && (
+        {!localUser.isVerifiedArtist && !isEditing && (
           <button 
-            onClick={() => handleSwitchRole('artist')}
-            className="px-3 py-1.5 sm:px-6 sm:py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest transition-all shadow-none"
+            onClick={() => setIsVerificationModalOpen(true)}
+            className="px-3 py-1.5 sm:px-6 sm:py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest transition-all shadow-none"
           >
-            Become Artist
+            Get Verified
           </button>
         )}
         {isEditing ? (
@@ -456,6 +457,12 @@ const Profile: React.FC = () => {
           </>
         ) : (
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <button 
+              onClick={() => navigate('/artist-dashboard')}
+              className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-background text-foreground rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
+            >
+              Dashboard
+            </button>
             <button 
               onClick={() => navigate('/settings')}
               className="p-2 sm:p-2.5 bg-background text-foreground rounded-full border border-white/20 hover:bg-white/5 transition-all shadow-sm flex items-center justify-center cursor-pointer"
@@ -511,7 +518,7 @@ const Profile: React.FC = () => {
           )}
           <div className="flex items-center gap-1.5 grayscale opacity-60">
             <Plus className="w-4 h-4 rotate-45" />
-            Joined May 2026
+            Joined TonJam 2026
           </div>
         </div>
 
@@ -544,7 +551,8 @@ const Profile: React.FC = () => {
             { id: 'inventory', label: 'Inventory' },
             { id: 'releases', label: 'Releases', hidden: !userProfile.isVerifiedArtist },
             { id: 'sequences', label: 'Playlists' },
-            { id: 'staking', label: 'Staking' }
+            { id: 'staking', label: 'Staking' },
+            { id: 'artist-dashboard', label: 'Artist Dashboard', hidden: !userProfile.isVerifiedArtist }
           ].filter(t => !t.hidden).map(tab => (
             <TabsTrigger
               key={tab.id}
@@ -816,6 +824,10 @@ const Profile: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'artist-dashboard' && (
+          <ArtistDashboardTab totalEarnings={localUser.earnings || 0} />
         )}
       </div>
 

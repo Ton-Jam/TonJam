@@ -146,6 +146,9 @@ interface AudioContextType {
   activeJamRoom: { id: string, name: string, listeners: number, currentTrack: Track | null } | null;
   isOffline: boolean;
   toggleOfflineMode: () => void;
+  downloadTrackForOffline: (track: Track) => Promise<void>;
+  isTrackCached: (trackId: string) => Promise<boolean>;
+  deleteCachedTrack: (trackId: string) => Promise<void>;
   joinJamRoom: (roomId: string) => void;
   leaveJamRoom: () => void;
   allPlaylists: Playlist[];
@@ -254,6 +257,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addNotification(!prev ? "Offline mode enabled" : "Offline mode disabled", "info");
       return !prev;
     });
+  }, []);
+
+  const downloadTrackForOffline = useCallback(async (track: Track) => {
+    try {
+      addNotification(`Downloading ${track.title} for offline...`, "info");
+      await audioCacheService.cacheTrack(track.id, track.audioUrl);
+      addNotification(`${track.title} is ready for offline listening!`, "success");
+    } catch (err) {
+      console.error(err);
+      addNotification("Failed to download track", "error");
+    }
+  }, []);
+
+  const isTrackCached = useCallback(async (trackId: string) => {
+    return await audioCacheService.isTrackCached(trackId);
+  }, []);
+
+  const deleteCachedTrack = useCallback(async (trackId: string) => {
+    await audioCacheService.removeCachedTrack(trackId);
+    addNotification("Track removed from offline cache", "info");
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -3101,6 +3124,9 @@ Return a JSON object with the following structure:
       rejectSponsorship,
       isOffline,
       toggleOfflineMode,
+      downloadTrackForOffline,
+      isTrackCached,
+      deleteCachedTrack,
       getEarnings,
       purchaseTrack,
       userAddress: tonAddress,

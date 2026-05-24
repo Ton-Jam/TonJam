@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Upload, Loader2, Link2, Twitter, Instagram, Globe, MessageSquare, ChevronLeft } from 'lucide-react';
+import { Camera, Upload, Loader2, Link2, Twitter, Instagram, Globe, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useAudio } from '@/context/AudioContext';
 import { uploadFile } from '@/services/storageService';
@@ -80,13 +80,6 @@ const EditProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-          <h1 className="text-2xl font-black uppercase tracking-[0.2em]">Edit Profile</h1>
-        </div>
-
         <form onSubmit={handleSave} className="space-y-8 bg-card p-6 rounded-3xl border border-border">
           <div className="flex flex-col items-center gap-6">
             <div className="relative w-32 h-32 rounded-full overflow-hidden group bg-muted border-4 border-background shadow-lg">

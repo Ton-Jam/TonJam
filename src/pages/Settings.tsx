@@ -15,12 +15,18 @@ import {
   Eye,
   Key,
   ShieldAlert,
-  Plus
+  Database,
+  Trash2,
+  Plus,
+  WifiOff
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
+import { useAudio } from '@/context/AudioContext';
 import { useNotification } from '@/context/NotificationContext';
 import { useTheme } from '@/components/theme-provider';
+import { useCacheManagement } from '@/hooks/useCacheManagement';
+import StorageManagementModal from '@/components/StorageManagementModal';
 import { cn } from '@/lib/utils';
 import { NotificationPreferences } from '@/types';
 import VerificationTracker from '@/components/VerificationTracker';
@@ -44,10 +50,13 @@ import { motion } from 'motion/react';
 const Settings: React.FC = () => {
   const navigate = useNavigate();
   const { user, userProfile, signOut } = useAuth();
+  const { isOffline, toggleOfflineMode } = useAudio();
   const { theme, setTheme } = useTheme();
+  const { totalSizeMB, cachedCount, clearAllCache, isPurging } = useCacheManagement();
   
   const { preferences, updatePreferences } = useNotification();
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
 
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'general');
@@ -232,6 +241,24 @@ const Settings: React.FC = () => {
               >
                 <Switch checked={preferences.dropsAndReleases} onCheckedChange={(val) => handlePreferenceToggle('dropsAndReleases', val)} className="scale-75 data-[state=checked]:bg-blue-600" />
               </SettingRow>
+              <Separator className="bg-white/5" />
+              <div className="flex items-center justify-between py-3 px-1">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/5 flex items-center justify-center text-blue-500/80">
+                        <Wallet className="h-4 w-4" />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-[11px] font-black text-foreground uppercase tracking-tight">Revenue Alert Threshold (TON)</span>
+                        <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mt-0.5">Alert when monthly revenue exceeds</span>
+                    </div>
+                </div>
+                <input 
+                  type="number" 
+                  value={preferences.revenueThreshold || 100}
+                  onChange={(e) => updatePreferences({...preferences, revenueThreshold: Number(e.target.value)})}
+                  className="w-20 bg-background rounded-full border border-border p-2 text-center text-[10px] font-black"
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -260,6 +287,14 @@ const Settings: React.FC = () => {
                 </SettingRow>
                 <Separator className="bg-white/5" />
                 <SettingRow 
+                    icon={WifiOff} 
+                    title="Offline Listening" 
+                    description="Enable local playback"
+                >
+                  <Switch checked={isOffline} onCheckedChange={toggleOfflineMode} className="scale-75 data-[state=checked]:bg-blue-600" />
+                </SettingRow>                
+                <Separator className="bg-white/5" />
+                <SettingRow 
                     icon={Globe} 
                     title="Relay Region" 
                     description="Optimize data latency"
@@ -277,8 +312,49 @@ const Settings: React.FC = () => {
                 </SettingRow>
             </CardContent>
           </Card>
+          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Storage Matrix</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              <SettingRow 
+                icon={Database} 
+                title="Cache Volume" 
+                description={`${cachedCount} tracks cached`}
+              >
+                <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mr-4">
+                  {totalSizeMB} MB
+                </div>
+              </SettingRow>
+              <Separator className="bg-white/5" />
+              <div className="p-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsStorageModalOpen(true)}
+                  className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-blue-500/5 text-blue-500 hover:bg-blue-500/10 hover:text-blue-600 rounded-full border border-blue-500/10 mb-2"
+                >
+                  Manage Individual Tracks
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={clearAllCache}
+                  disabled={isPurging || cachedCount === 0}
+                  className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-red-500/5 text-red-500 hover:bg-red-500/10 hover:text-red-600 rounded-full border border-red-500/10"
+                >
+                  {isPurging ? 'Purging...' : 'Purge All Cache'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
+
+      {isStorageModalOpen && (
+        <StorageManagementModal 
+            isOpen={isStorageModalOpen} 
+            onClose={() => setIsStorageModalOpen(false)} 
+        />
+      )}
 
       <div className="pt-12 text-center">
         <Button 

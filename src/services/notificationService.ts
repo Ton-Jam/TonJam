@@ -23,6 +23,7 @@ export const notificationService = {
       socialSignals: true,
       bidAlerts: true,
       saleEvents: true,
+      revenueThreshold: 100,
     };
   },
 

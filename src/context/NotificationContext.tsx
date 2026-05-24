@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Notification, NotificationPreferences } from '@/types';
 import { notificationService } from '@/services/notificationService';
-import { useAuth } from '@/context/AuthContext'; // Assuming AuthContext exists
+import { useAuth } from '@/context/AuthContext';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -10,9 +10,16 @@ interface NotificationContextType {
   markAsRead: (id: string) => void;
   updatePreferences: (prefs: NotificationPreferences) => void;
   refreshNotifications: () => void;
+  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'timestamp'>) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+
+export const useNotification = () => {
+  const context = useContext(NotificationContext);
+  if (!context) throw new Error('useNotification must be used within NotificationProvider');
+  return context;
+};
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
@@ -25,6 +32,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     socialSignals: true,
     bidAlerts: true,
     saleEvents: true,
+    revenueThreshold: 100,
   });
 
   const refreshNotifications = () => {
@@ -32,6 +40,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications(notificationService.getNotifications(user.uid));
       setPreferences(notificationService.getPreferences(user.uid));
     }
+  };
+
+  const addNotification = (n: Omit<Notification, 'id' | 'read' | 'timestamp'>) => {
+    if (!user) return;
+    notificationService.addNotification(user.uid, n);
+    refreshNotifications();
   };
 
   useEffect(() => {
@@ -54,14 +68,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <NotificationContext.Provider value={{ notifications, preferences, unreadCount, markAsRead, updatePreferences, refreshNotifications }}>
+    <NotificationContext.Provider value={{ notifications, preferences, unreadCount, markAsRead, updatePreferences, refreshNotifications, addNotification }}>
       {children}
     </NotificationContext.Provider>
   );
-};
-
-export const useNotification = () => {
-  const context = useContext(NotificationContext);
-  if (!context) throw new Error('useNotification must be used within NotificationProvider');
-  return context;
 };

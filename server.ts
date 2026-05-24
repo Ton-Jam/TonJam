@@ -9,9 +9,19 @@ import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
 import FormData from 'form-data';
+import { GoogleGenAI, Type } from "@google/genai";
 import { verifyFirebaseToken, AuthRequest } from './src/middleware/authMiddleware';
 
 dotenv.config();
+
+const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY!,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
+    }
+  });
 
 const PORT = 3000;
 
@@ -80,6 +90,38 @@ async function startServer() {
         });
     });
 
+    app.post('/api/royalty-advice', async (req, res) => {
+        const { trackPerformance } = req.body;
+        const prompt = `Based on this performance data: ${JSON.stringify(trackPerformance)}, suggest optimal royalty split adjustments to maximize engagement and retention. Provide 3 specific, actionable suggestions. Return JSON format { recommendations: string[] }. KEEP IT CONCISE.`;
+        try {
+            const response = await ai.models.generateContent({
+                model: "gemini-1.5-flash",
+                contents: [{ parts: [{ text: prompt }] }],
+                config: { responseMimeType: "application/json" }
+            });
+            res.json(JSON.parse(response.text!));
+        } catch (error) {
+            console.error('Royalty Advice Error:', error);
+            res.status(500).json({ error: 'Failed to generate royalty advice' });
+        }
+    });
+
+    app.post('/api/royalty-audit', async (req, res) => {
+        const { auditData } = req.body;
+        const prompt = `Analyze this royalty audit log data for any anomalous patterns, irregularities, or suspected missing payout events: ${JSON.stringify(auditData)}. Provide a concise summary of your findings as a list of points. If all looks normal, say "No anomalies detected". Return JSON format { findings: string[] }.`;
+        try {
+            const response = await ai.models.generateContent({
+                model: "gemini-1.5-flash",
+                contents: [{ parts: [{ text: prompt }] }],
+                config: { responseMimeType: "application/json" }
+            });
+            res.json(JSON.parse(response.text!));
+        } catch (error) {
+            console.error('Royalty Audit Analysis Error:', error);
+            res.status(500).json({ error: 'Failed to analyze royalty audit data' });
+        }
+    });
+
     // Serve static files from public/uploads
     app.use('/uploads', express.static(uploadsDir));
 
@@ -134,10 +176,111 @@ async function startServer() {
         const audioUrl = `/uploads/${files.audio[0].filename}`;
         const coverUrl = files.cover ? `/uploads/${files.cover[0].filename}` : null;
 
-        res.json({ audioUrl, coverUrl });
+        res.json({ audioUrl, coverUrl, audioFilename: files.audio[0].filename });
     });
 
-    // Pinata IPFS Upload
+    app.post('/api/analyze-audio-file', upload.single('audio'), async (req, res) => {
+        if (!req.file) return res.status(400).json({ error: 'Audio file is required' });
+        
+        const filePath = req.file.path;
+        
+        try {
+            const audioData = fs.readFileSync(filePath);
+            
+            const response = await ai.models.generateContent({
+                model: "gemini-3.5-flash",
+                contents: [{
+                    parts: [
+                        {
+                            inlineData: {
+                                mimeType: "audio/mpeg", 
+                                data: audioData.toString("base64")
+                            }
+                        },
+                        {
+                            text: "Analyze this audio track and provide genre and mood tags (e.g., Happy, Melancholic, Energetic). Return as JSON: { genre: string, moods: string[] }"
+                        }
+                    ]
+                }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            genre: { type: Type.STRING },
+                            moods: { type: Type.ARRAY, items: { type: Type.STRING } }
+                        }
+                    }
+                }
+            });
+
+            // Clean up: Delete the temporary file
+            fs.unlinkSync(filePath);
+
+            res.json(JSON.parse(response.text!));
+        } catch (error) {
+            console.error('Audio Analysis Error:', error);
+            // Clean up on error
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            res.status(500).json({ error: 'Failed to analyze audio' });
+        }
+    });
+
+    // OAuth Routes
+    app.get('/api/auth/:provider/url', (req, res) => {
+        const { provider } = req.params;
+        const clientId = process.env[`${provider.toUpperCase()}_CLIENT_ID`];
+        const redirectUri = process.env[`${provider.toUpperCase()}_REDIRECT_URI`];
+        
+        let authUrl = '';
+        let scope = '';
+
+        switch (provider) {
+            case 'spotify':
+                authUrl = 'https://accounts.spotify.com/authorize';
+                scope = 'user-read-email';
+                break;
+            case 'twitter':
+                authUrl = 'https://twitter.com/i/oauth2/authorize';
+                scope = 'tweet.read users.read';
+                break;
+            case 'instagram':
+                authUrl = 'https://api.instagram.com/oauth/authorize';
+                scope = 'user_profile,user_media';
+                break;
+            default:
+                return res.status(400).json({ error: 'Unsupported provider' });
+        }
+
+        const params = new URLSearchParams({
+            client_id: clientId!,
+            redirect_uri: redirectUri!,
+            response_type: 'code',
+            scope: scope,
+            state: Math.random().toString(36).substring(7) // Security
+        });
+
+        res.json({ url: `${authUrl}?${params}` });
+    });
+
+    app.get('/api/auth/:provider/callback', async (req, res) => {
+        // Send success message to parent window and close popup
+        res.send(`
+            <html>
+            <body>
+                <script>
+                if (window.opener) {
+                    window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS', provider: '${req.params.provider}' }, '*');
+                    window.close();
+                } else {
+                    window.location.href = '/';
+                }
+                </script>
+                <p>Authentication successful. This window should close automatically.</p>
+            </body>
+            </html>
+        `);
+    });
     app.post('/api/pinata/upload', upload.single('file'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });

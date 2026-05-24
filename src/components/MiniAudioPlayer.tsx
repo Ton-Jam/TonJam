@@ -217,6 +217,22 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               <h4 className="text-[9.5px] font-black truncate text-foreground uppercase tracking-tighter leading-none">
                 {currentTrack.title}
               </h4>
+              {/* Lightweight Waveform Visualizer */}
+              <div className="w-12 h-3 flex items-end gap-[1px] translate-y-0.5">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex-1 bg-blue-500 rounded-sm"
+                      animate={{ height: isPlaying ? [4, 10, 4] : 4 }}
+                      transition={{
+                        duration: 0.8,
+                        repeat: Infinity,
+                        delay: i * 0.1,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  ))}
+              </div>
               {isHighFidelity && (
                 <span className="bg-blue-600 text-white text-[5.5px] font-black px-1 py-0.5 rounded-[1px] tracking-[0.2em] uppercase flex-shrink-0">
                   Hi-Fi

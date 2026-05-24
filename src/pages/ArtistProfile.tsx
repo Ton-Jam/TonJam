@@ -403,7 +403,7 @@ const ArtistProfile: React.FC = () => {
         </div>
 
         {/* Subtle blue boundary line */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-blue-500/30 z-10" />
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500/50 z-10" />
         
         {/* Followers / Following Stats below boundary */}
         <div className="absolute bottom-[-30px] left-6 flex items-center gap-4 text-white text-[8px] font-black uppercase tracking-widest z-20">

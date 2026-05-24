@@ -746,6 +746,9 @@ const NFTDetail: React.FC = () => {
                     <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]" >
                       {localNft.listingType ? 'Manage' : 'Sell'}
                     </button>
+                    <button onClick={() => setShowManageModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-zinc-800 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
+                      Settings
+                    </button>
                     <button onClick={() => setShowSendModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10" >
                       <Send className="h-3.5 w-3.5" /> Send
                     </button>
@@ -1039,82 +1042,37 @@ const NFTDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="space-y-4"
+                    className="space-y-2 no-scrollbar overflow-y-auto max-h-[400px]"
                   >
                     {localNft.offers && localNft.offers.length > 0 ? (
                       localNft.offers.map((o) => {
                         const isTopBid = parseFloat(o.price) === highestOfferPrice;
                         return (
-                          <div key={o.id} className={`group p-4 bg-white/[0.02] border transition-all rounded-[16px] flex flex-col md:flex-row items-center justify-between gap-4 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? 'border-amber-500/50 bg-amber-500/[0.05]' : 'border-blue-500/50 bg-blue-500/[0.05]') : 'border-white/5 opacity-80 hover:opacity-100'}`} >
-                            <div className="flex items-center gap-6 w-full md:w-auto">
+                          <div key={o.id} className={`group p-2 bg-white/[0.02] border transition-all rounded-[12px] flex flex-row items-center justify-between gap-2 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? 'border-amber-500/50 bg-amber-500/[0.05]' : 'border-blue-500/50 bg-blue-500/[0.05]') : 'border-white/5 opacity-80 hover:opacity-100'}`} >
+                            <div className="flex items-center gap-3 w-full">
                               <div className="relative">
-                                <div className={`w-20 h-20 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shadow-2xl`}>
+                                <div className={`w-12 h-12 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden`}>
                                   <img src={`https://picsum.photos/100/100?seed=${o.offerer}`} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
                                 </div>
-                                {isTopBid && (
-                                  <div className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center border-2 border-black ${isAuction ? 'bg-amber-500' : 'bg-blue-500'} shadow-[0_0_15px_rgba(59,130,246,0.5)]`}>
-                                    <Crown className="h-4 w-4 text-white" />
-                                  </div>
-                                )}
                               </div>
-                              <div className="flex flex-col gap-2 min-w-0">
-                                <div className="flex items-center gap-4">
-                                  <span className="text-base font-black text-foreground uppercase tracking-tight truncate max-w-[200px]">
-                                    @{(o.offerer || '').slice(0, 8)}...
+                              <div className="flex flex-col gap-0.5 min-w-0">
+                                  <span className="text-xs font-black text-foreground uppercase truncate">
+                                    @{(o.offerer || '').slice(0, 6)}...
                                   </span>
                                   {isTopBid && (
-                                    <span className={`text-[8px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${isAuction ? 'bg-amber-500 text-black' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)]'}`}>Top Signal</span>
+                                    <span className={`text-[7px] w-fit px-1.5 py-0.5 rounded-full font-black uppercase tracking-widest ${isAuction ? 'bg-amber-500 text-black' : 'bg-blue-500 text-white'}`}>Top</span>
                                   )}
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5">
-                                    <Clock className="h-3 w-3 text-muted-foreground/50" />
-                                    <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{o.timestamp}</span>
-                                  </div>
-                                  <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest">Exp: {o.duration}</span>
-                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
-                              <div className="text-right">
-                                <div className="flex items-center gap-4">
-                                  <span className={`text-[32px] font-black tracking-tighter ${isTopBid ? (isAuction ? 'text-amber-500' : 'text-blue-500') : 'text-muted-foreground/80'}`}>
-                                    {o.price}
-                                  </span>
-                                  <div className="flex flex-col items-center">
-                                    <img src={TON_LOGO} className={`w-8 h-8 ${isTopBid ? 'opacity-100 shadow-[0_0_15px_rgba(0,122,255,0.4)]' : 'opacity-20 grayscale'}`} alt="" />
-                                    <span className="text-[8px] font-black text-muted-foreground/30 uppercase mt-1">TON</span>
-                                  </div>
-                                </div>
+                              <div className="ml-auto text-right">
+                                  <span className="text-xs font-black text-foreground">{o.price} TON</span>
                               </div>
-                              {isOwner ? (
-                                <div className="flex gap-2">
-                                  {o.offerer !== localNft.owner && (
-                                    <button onClick={() => handleAcceptOffer(o)} className={`h-14 px-6 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-3 ${isAuction ? 'bg-amber-600 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-500/20'}`} >
-                                      <Check className="h-4 w-4" /> ACCEPT
-                                    </button>
-                                  )}
-                                  <button onClick={() => handleDeclineOffer(o.offerer)} className="w-14 h-14 bg-white/5 text-muted-foreground rounded-xl flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 transition-all border border-white/5" >
-                                    <X className="h-5 w-5" />
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${isTopBid ? (isAuction ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-[0_0_15px_rgba(0,122,255,0.2)]') : 'bg-white/5 text-muted-foreground/20 border-white/5'}`}>
-                                  {isTopBid ? <Zap className="h-6 w-6" /> : <Activity className="h-6 w-6" />}
-                                </div>
-                              )}
                             </div>
                           </div>
-                        );
+                      );
                       })
                     ) : (
-                      <div className="py-4 flex flex-col items-center justify-center bg-card border border-border rounded-[16px] text-center px-4">
-                        <div className="w-24 h-24 rounded-full bg-foreground/[0.02] border border-blue-500/30 flex items-center justify-center mb-4">
-                          <Satellite className="h-10 w-10 text-muted-foreground/30 animate-pulse" />
-                        </div>
-                        <h4 className="text-base font-bold text-muted-foreground uppercase tracking-tighter mb-4">No Active Signals</h4>
-                        <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em] leading-loose max-w-xs mx-auto">Zero valuation signals detected from the neural relay network.</p>
-                        <button onClick={handleAction} className="mt-4 px-3 py-2 bg-blue-600/10 border border-neutral-500/20 rounded-[10px] text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 hover:bg-blue-600 hover:text-white transition-all ">Initiate Broadcast</button>
+                      <div className="text-center py-12 text-muted-foreground/50 text-[10px] font-bold uppercase tracking-widest">
+                        No offers yet
                       </div>
                     )}
                   </motion.div>

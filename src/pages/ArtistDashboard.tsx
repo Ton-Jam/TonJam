@@ -27,7 +27,7 @@ import { getPlaceholderImage } from "@/lib/utils";
 import TrackMonetizationModal from "@/components/TrackMonetizationModal";
 import EditMetadataModal from "@/components/EditMetadataModal";
 import SponsorshipSubmissionModal from "@/components/SponsorshipSubmissionModal";
-import TrackUploadModal from "@/components/TrackUploadModal";
+
 import SongRequestsTab from "@/components/SongRequestsTab";
 import AlbumCard from "@/components/AlbumCard";
 import Autoplay from "embla-carousel-autoplay";
@@ -56,7 +56,7 @@ export default function ArtistDashboard() {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
   const [isEditMetadataOpen, setIsEditMetadataOpen] = useState(false);
 
   // Refs to track previous track values to notify on change
@@ -200,21 +200,6 @@ export default function ArtistDashboard() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 rounded-full translate-y-1/2 -translate-x-1/2" />
       </div>
 
-      {/* Header */}
-        <div className="relative z-10 p-4 flex items-center justify-between border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0">
-        <BackButton className="p-2 text-white/70 hover:text-white transition-colors" />
-        <h1 className="text-sm font-black uppercase tracking-[0.3em] flex items-center gap-2">
-          <LayoutDashboard className="w-4 h-4 text-cyan-500" />
-          Artist Dashboard
-        </h1>
-        <button 
-          onClick={() => navigate('/artist-analytics')}
-          className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors flex items-center gap-2 text-cyan-500 border border-white/10 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-        >
-          <Activity className="w-4 h-4" />
-          <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">Analytics</span>
-        </button>
-      </div>
 
       <div className="relative z-10 max-w-4xl mx-auto p-6 space-y-8">
         
@@ -350,7 +335,7 @@ export default function ArtistDashboard() {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <button
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={() => navigate('/upload')}
             className="flex flex-col items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-cyan-500 hover:text-black transition-all group active:scale-95 shadow-lg"
           >
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center group-hover:bg-black/10">
@@ -614,13 +599,6 @@ export default function ArtistDashboard() {
         onClose={() => setIsSponsorshipModalOpen(false)}
       />
 
-      <TrackUploadModal 
-        isOpen={isUploadModalOpen}
-        onClose={() => {
-          setIsUploadModalOpen(false);
-          fetchData();
-        }}
-      />
     </div>
   );
 }

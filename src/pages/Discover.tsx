@@ -337,7 +337,7 @@ const Discover: React.FC = () => {
       />
 
       {/* Search Header - Sticky & Atmospheric */}
-      <div className="sticky -top-3 z-30 bg-background/95 backdrop-blur-md pt-0 pb-2 px-4 w-full">
+      <div className="sticky -top-4 z-30 bg-background/95 backdrop-blur-md pt-0 pb-2 px-4 w-full">
         <div className="max-w-2xl mx-auto w-full flex items-center gap-3">
           <form 
             onSubmit={handleSearchSubmit} 

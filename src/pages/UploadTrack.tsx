@@ -45,6 +45,30 @@ export default function UploadTrackScreen() {
   const [bpm, setBpm] = useState("120");
   const [key, setKey] = useState("C Min");
   const [isExplicit, setIsExplicit] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleAnalyze = async () => {
+    if (!audioFile) return;
+    setIsAnalyzing(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioFile);
+      const res = await fetch('/api/analyze-audio-file', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Analysis failed');
+      const data = await res.json();
+      setGenre(data.genre);
+      setDescription(prev => prev + (prev ? '\n\n' : '') + "Moods: " + data.moods.join(', '));
+      addNotification("Audio analyzed successfully", "success");
+    } catch (e) {
+      console.error(e);
+      addNotification("Analysis failed", "error");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   // Batch Mode State
   const [batchTracks, setBatchTracks] = useState<Array<{
@@ -393,23 +417,23 @@ export default function UploadTrackScreen() {
           </button>
         </div>
 
-        {/* Global Cover Upload (Used for Single or as Default for Batch) */}
-        <div className="space-y-3">
+        {/* Global Cover Upload */}
+        <div className="space-y-4">
           <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-            <ImageIcon className="w-3 h-3" /> {mode === 'single' ? 'Cover Image' : 'Default Cover (for all tracks)'}
+             {mode === 'single' ? 'Cover Art' : 'Default Cover Art'}
           </label>
           <div 
             onClick={() => coverInputRef.current?.click()}
-            className="aspect-video sm:aspect-[21/9] rounded-3xl bg-white/5 border-2 border-dashed border-white/10 hover:border-cyan-500/50 transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center group relative"
+            className={`aspect-square sm:aspect-[21/9] w-48 mx-auto sm:w-full rounded-2xl bg-white/5 border-2 border-dashed ${coverPreview ? 'border-transparent' : 'border-white/10 hover:border-cyan-500/50'} transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center group relative`}
           >
             {coverPreview ? (
               <img src={coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
             ) : (
               <>
-                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Upload className="w-6 h-6 text-white/20" />
+                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ImageIcon className="w-6 h-6 text-white/20 group-hover:text-cyan-500" />
                 </div>
-                <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Artwork</p>
+                <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest px-4 text-center">Click to Upload</p>
               </>
             )}
             <input 
@@ -423,31 +447,38 @@ export default function UploadTrackScreen() {
         </div>
 
         {mode === 'single' ? (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Audio Upload */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                <Music className="w-3 h-3" /> Audio Artifact
-              </label>
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <Music className="w-3 h-3" /> Audio File *
+                </label>
+                {audioFile && (
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={isAnalyzing}
+                    className="text-[9px] bg-white/5 px-3 py-1 rounded-full flex items-center gap-1.5 hover:bg-cyan-500/20 text-white/60 font-bold uppercase tracking-widest transition-all"
+                  >
+                    {isAnalyzing ? <Loader2 className="animate-spin w-3 h-3"/> : <Sparkles className="w-3 h-3 text-cyan-500"/>}
+                    {isAnalyzing ? 'Analyzing...' : 'Auto-Metadata'}
+                  </button>
+                )}
+              </div>
               <div 
                 onClick={() => audioInputRef.current?.click()}
-                className="w-full rounded-3xl bg-white/5 border-2 border-dashed border-white/10 hover:border-purple-500/50 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative"
+                className={`w-full rounded-2xl ${audioFile ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5'} border-2 border-dashed ${!audioFile && 'border-white/10 hover:border-purple-500/50'} transition-all cursor-pointer flex flex-col items-center justify-center p-6 group relative`}
               >
                 {audioFile ? (
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
-                      <Music className="w-8 h-8 text-purple-400" />
-                    </div>
+                    <Music className="w-6 h-6 text-purple-400 mx-auto mb-2" />
                     <p className="text-[11px] font-bold text-white truncate max-w-[250px]">{audioFile.name}</p>
                     <p className="text-[9px] text-white/40 mt-1 uppercase font-black">{(audioFile.size / (1024 * 1024)).toFixed(2)} MB</p>
                   </div>
                 ) : (
                   <>
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Upload className="w-6 h-6 text-white/20" />
-                    </div>
-                    <p className="mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Audio</p>
-                    <p className="mt-2 text-[8px] text-white/20 uppercase tracking-[0.2em] text-center">MP3, WAV, FLAC, OGG, AAC, M4A up to 50MB</p>
+                    <Upload className="w-5 h-5 text-white/20 mb-2 group-hover:text-purple-500" />
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Select Audio</p>
                   </>
                 )}
                 <input 
@@ -460,35 +491,37 @@ export default function UploadTrackScreen() {
               </div>
             </div>
 
-            {/* Form Fields */}
+            {/* Form Fields - Grouping metadata */}
             <div className="space-y-6">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                  <Type className="w-3 h-3" /> Track Title
-                </label>
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold placeholder:text-white/10"
-                  placeholder="Enter track title..."
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    Title *
+                  </label>
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-500/50 transition-all text-xs font-bold"
+                    placeholder="Enter track title..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    Genre *
+                  </label>
+                  <select
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-500/50 transition-all text-xs font-bold text-white"
+                  >
+                    <option value="" disabled>Select genre</option>
+                    {['Electronic', 'Hip-hop', 'Ambient', 'Synthwave', 'Pop', 'Techno'].map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                  <Sparkles className="w-3 h-3" /> Genre
-                </label>
-                <select
-                  value={genre}
-                  onChange={(e) => setGenre(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-cyan-500/50 transition-all text-sm font-bold text-white"
-                >
-                  <option value="" disabled>Select a genre</option>
-                  {['Electronic', 'Hip-hop', 'Ambient', 'Synthwave', 'Pop', 'Techno'].map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-              </div>
 
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
