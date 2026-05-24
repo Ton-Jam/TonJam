@@ -333,15 +333,17 @@ service cloud.firestore {
     }
 
     // 💸 TRANSACTIONS (Pillar 7: Atomicity / Persistence)
+    // 💡 INDEX RECOMMENDATION: To speed up query performance for artists viewing their payout history,
+    // 💡 it is highly recommended to create a partial single/composite index on: (userId, type)
     match /transactions/{txId} {
-      // Transaction history is private to participants or admins
+      // Artists/users can only view their own payout/royalty records, keeping platform data accessible only to admins
       allow read: if isSignedIn() && (
-        isOwner(resource.data.userId) || 
-        (request.auth.uid in resource.data.participants) ||
+        (isOwner(resource.data.userId) && (resource.data.type == 'payout' || resource.data.type == 'royalty' || !resource.data.keys().contains('platformData'))) || 
+        (resource.data.keys().contains('artistId') && isOwner(resource.data.artistId)) ||
         isAdmin()
       );
       // Transactions are typically created by the system/user and then are IMMUTABLE
-      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidId(txId);
+      allow create: if isSignedIn() && (isOwner(incoming().userId) || (incoming().keys().contains('artistId') && isOwner(incoming().artistId))) && isValidId(txId);
       allow update, delete: if false; // Pillar 7: Transactions must be immutable
     }
 

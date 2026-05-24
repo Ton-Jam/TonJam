@@ -26,7 +26,12 @@ import { RoyaltySplit } from "@/types";
 
 export default function UploadTrackScreen() {
   const navigate = useNavigate();
-  const { addNotification, addUserTrack, userProfile } = useAudio();
+  const { addNotification, addUserTrack, userProfile, setHeaderTitle } = useAudio();
+
+  React.useEffect(() => {
+    setHeaderTitle('Forge Protocol');
+    return () => setHeaderTitle('');
+  }, [setHeaderTitle]);
 
   const [mode, setMode] = useState<'single' | 'batch'>('single');
   
@@ -385,18 +390,11 @@ export default function UploadTrackScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-white pb-24 relative overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white pb-48 relative overflow-y-auto overflow-x-hidden scroll-smooth transition-all duration-300">
       {/* Background Glow */}
       <div className="fixed inset-0 opacity-10 blur-[120px] pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 rounded-full translate-y-1/2 -translate-x-1/2" />
-      </div>
-
-      {/* Header */}
-      <div className="relative z-10 p-4 flex items-center justify-between border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0">
-        <BackButton className="p-2 text-white/70 hover:text-white transition-colors" />
-        <h1 className="text-sm font-black uppercase tracking-[0.3em]">Forge Protocol</h1>
-        <div className="w-10" />
       </div>
 
       <div className="relative z-10 max-w-2xl mx-auto p-6 space-y-8">

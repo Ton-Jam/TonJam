@@ -542,7 +542,7 @@ export default function ArtistDashboard() {
                 <h3 className="text-sm font-black uppercase tracking-tight text-white/40">No artifacts found</h3>
                 <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-2">Start by uploading your first track</p>
                 <button 
-                  onClick={() => setIsUploadModalOpen(true)}
+                  onClick={() => navigate('/upload')}
                   className="mt-6 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
                 >
                   Upload Now

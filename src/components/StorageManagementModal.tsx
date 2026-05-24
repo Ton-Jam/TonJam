@@ -5,7 +5,16 @@ import { indexedDbService } from '@/services/indexedDbService';
 import { audioCacheService } from '@/services/audioCacheService';
 import { Trash2, HardDrive, Music } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import * as RechartsPrimitive from 'recharts';
+
+const { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } = RechartsPrimitive as any;
+
+const ResponsiveContainerRC = ResponsiveContainer as any;
+const PieChartRC = PieChart as any;
+const PieRC = Pie as any;
+const CellRC = Cell as any;
+const LegendRC = Legend as any;
+const TooltipRC = Tooltip as any;
 
 interface StorageManagementModalProps {
   isOpen: boolean;
@@ -73,9 +82,9 @@ const StorageManagementModal: React.FC<StorageManagementModalProps> = ({ isOpen,
         </DialogHeader>
         
         <div className="h-64 mb-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
+          <ResponsiveContainerRC width="100%" height="100%">
+            <PieChartRC>
+              <PieRC
                 data={data}
                 cx="50%"
                 cy="50%"
@@ -85,13 +94,13 @@ const StorageManagementModal: React.FC<StorageManagementModalProps> = ({ isOpen,
                 dataKey="value"
               >
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <CellRC key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+              </PieRC>
+              <TooltipRC />
+              <LegendRC />
+            </PieChartRC>
+          </ResponsiveContainerRC>
         </div>
 
         <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 text-center">
