@@ -4,12 +4,15 @@ import { useAudio } from '@/context/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { TON_LOGO, JAM_PRICE_USD, TJ_COIN_ICON } from '@/constants';
 
+const TON_PRICE_USD = 5.30;
+
 const Wallet: React.FC = () => {
   const { userProfile, purchaseJAM, subscribePremium, transactions, depositTON, withdrawTON } = useAudio();
   const safeTransactions = transactions || [];
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currencyMode, setCurrencyMode] = useState<'CRYPTO' | 'USD'>('CRYPTO');
   
   // Modal state
   const [modalType, setModalType] = useState<'deposit' | 'withdraw' | null>(null);
@@ -84,7 +87,31 @@ const Wallet: React.FC = () => {
           <h1 className="text-[32px] font-bold text-foreground tracking-tighter uppercase">My Wallet</h1>
         </div>
         
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
+          {/* Currency Toggle */}
+          <div className="bg-muted/50 p-1 rounded-xl flex items-center gap-1 border border-white/5 shadow-inner">
+            <button
+              onClick={() => setCurrencyMode('CRYPTO')}
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                currencyMode === 'CRYPTO'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              TON / JAM
+            </button>
+            <button
+              onClick={() => setCurrencyMode('USD')}
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                currencyMode === 'USD'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              USD ($)
+            </button>
+          </div>
+
           <button 
             onClick={() => tonConnectUI.openModal()}
             className="p-4 rounded-[5px] bg-muted/50 hover:bg-muted transition-all"
@@ -103,10 +130,28 @@ const Wallet: React.FC = () => {
             </div>
             <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em] mb-4">TON Balance</p>
             <div className="flex items-end gap-4">
-              <span className="text-[44px] font-black text-foreground tracking-tighter">{userProfile.tonBalance?.toFixed(2) || '0.00'}</span>
-              <span className="text-xl font-bold text-muted-foreground mb-4">TON</span>
+              {currencyMode === 'USD' ? (
+                <>
+                  <span className="text-[44px] font-black text-foreground tracking-tighter">
+                    ${((userProfile.tonBalance || 0) * TON_PRICE_USD).toFixed(2)}
+                  </span>
+                  <span className="text-xl font-bold text-muted-foreground mb-4">USD</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-[44px] font-black text-foreground tracking-tighter">
+                    {userProfile.tonBalance?.toFixed(2) || '0.00'}
+                  </span>
+                  <span className="text-xl font-bold text-muted-foreground mb-4">TON</span>
+                </>
+              )}
             </div>
-            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4 mb-4">Protocol: TON Mainnet</p>
+            <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4 mb-4">
+              {currencyMode === 'USD' 
+                ? `≈ ${(userProfile.tonBalance || 0).toFixed(2)} TON` 
+                : `≈ $${((userProfile.tonBalance || 0) * TON_PRICE_USD).toFixed(2)} USD`
+              }
+            </p>
           </div>
           <div className="flex gap-2 relative z-10 mt-auto">
             <button onClick={() => openModal('deposit', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-blue-500/10">Deposit</button>
@@ -120,13 +165,31 @@ const Wallet: React.FC = () => {
                 <img src={TJ_COIN_ICON} className="w-32 h-32" />
             </div>
             <p className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.3em] mb-4">JAM Tokens</p>
-            <div className="flex items-end justify-between">
-              <div className="flex items-end gap-4">
-                <span className="text-[44px] font-black text-foreground tracking-tighter">{userProfile.jamBalance || '0'}</span>
-                <span className="text-xl font-bold text-muted-foreground mb-4">JAM</span>
+            <div className="flex items-end justify-between text-right">
+              <div className="flex items-end gap-2 text-left">
+                {currencyMode === 'USD' ? (
+                  <>
+                    <span className="text-[34px] xl:text-[44px] font-black text-foreground tracking-tighter">
+                      ${((userProfile.jamBalance || 0) * JAM_PRICE_USD).toFixed(2)}
+                    </span>
+                    <span className="text-xl font-bold text-muted-foreground mb-4">USD</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[34px] xl:text-[44px] font-black text-foreground tracking-tighter">
+                      {userProfile.jamBalance || '0'}
+                    </span>
+                    <span className="text-xl font-bold text-muted-foreground mb-4">JAM</span>
+                  </>
+                )}
               </div>
-              <div className="text-right mb-4">
-                <span className="text-sm font-bold text-purple-400">≈ ${((userProfile.jamBalance || 0) * JAM_PRICE_USD).toFixed(2)}</span>
+              <div className="mb-4">
+                <span className="text-xs font-bold text-purple-400">
+                  {currencyMode === 'USD' 
+                    ? `≈ ${userProfile.jamBalance || 0} JAM` 
+                    : `≈ $${((userProfile.jamBalance || 0) * JAM_PRICE_USD).toFixed(3)}`
+                  }
+                </span>
               </div>
             </div>
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4 mb-4">Utility: In-App Currency</p>
@@ -348,9 +411,32 @@ const Wallet: React.FC = () => {
                       <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest truncate w-32">{tx.txHash}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="flex items-center gap-4">
-                        <img src={TON_LOGO} className="w-3 h-3" alt="" />
-                        <span className="text-[11px] font-bold text-foreground tracking-tighter">{tx.amount} TON</span>
+                      <div className="flex flex-col justify-center">
+                        <div className="flex items-center gap-1.5">
+                          {currencyMode === 'USD' ? (
+                            <>
+                              <span className="text-[11px] font-bold text-foreground tracking-tighter">
+                                ${(Number(tx.amount) * TON_PRICE_USD).toFixed(2)}
+                              </span>
+                              <span className="text-[9px] font-medium text-muted-foreground">USD</span>
+                            </>
+                          ) : (
+                            <>
+                              <img src={TON_LOGO} className="w-3 h-3" alt="" />
+                              <span className="text-[11px] font-bold text-foreground tracking-tighter">{tx.amount} TON</span>
+                            </>
+                          )}
+                        </div>
+                        <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-0.5">
+                          {currencyMode === 'USD' ? (
+                            <span className="flex items-center gap-1">
+                              <img src={TON_LOGO} className="w-2.5 h-2.5" alt="" />
+                              {tx.amount} TON
+                            </span>
+                          ) : (
+                            `≈ $${(Number(tx.amount) * TON_PRICE_USD).toFixed(2)} USD`
+                          )}
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-4">

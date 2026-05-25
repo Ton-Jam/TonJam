@@ -290,7 +290,7 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Composer */}
-            <div className="m-4 p-4 flex gap-4 bg-white border border-blue-500/30 rounded-2xl shadow-md">
+            <div className="m-4 p-4 flex gap-4 bg-black border border-white/10 rounded-2xl shadow-md">
               <Avatar className="h-10 w-10 border border-blue-500/20 ring-2 ring-blue-500/10">
                 <AvatarImage src={userProfile.avatar} />
                 <AvatarFallback>{userProfile.name?.[0]}</AvatarFallback>
@@ -298,18 +298,18 @@ const JamSpace: React.FC = () => {
               <div className="flex-1 space-y-4">
                 <Textarea 
                   placeholder="Broadcast your frequency..." 
-                  className="border-none bg-transparent text-lg text-blue-600 resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-blue-500/60 font-bold tracking-tight"
+                  className="border-none bg-transparent text-sm text-white resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-zinc-500 font-bold tracking-tight"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                 />
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     {[
-                      { icon: ImageIcon, color: 'text-blue-500 hover:bg-blue-50' },
-                      { icon: Gift, color: 'text-rose-500 hover:bg-rose-50' },
-                      { icon: List, color: 'text-amber-500 hover:bg-amber-50' },
-                      { icon: Smile, color: 'text-yellow-500 hover:bg-yellow-50' },
-                      { icon: Calendar, color: 'text-emerald-500 hover:bg-emerald-50' },
+                      { icon: ImageIcon, color: 'text-blue-400 hover:bg-white/5' },
+                      { icon: Gift, color: 'text-rose-400 hover:bg-white/5' },
+                      { icon: List, color: 'text-amber-400 hover:bg-white/5' },
+                      { icon: Smile, color: 'text-yellow-400 hover:bg-white/5' },
+                      { icon: Calendar, color: 'text-emerald-400 hover:bg-white/5' },
                     ].map((tool, i) => (
                       <Button key={i} variant="ghost" size="icon" className={cn("h-8 w-8 rounded-full", tool.color)}>
                         <tool.icon className={cn("h-4 w-4", tool.color)} />
@@ -319,7 +319,7 @@ const JamSpace: React.FC = () => {
                   <Button 
                     disabled={!postContent.trim() || isPosting}
                     onClick={handleCreatePost}
-                    className="rounded-full px-6 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest h-9 text-xs border-none shadow-lg shadow-blue-600/20"
+                    className="rounded-lg px-4 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest h-7 text-[9px] border-none shadow-lg shadow-blue-600/15 transition-all duration-200"
                   >
                     {isPosting ? 'Broadcasting...' : 'Signal'}
                   </Button>

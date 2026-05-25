@@ -388,6 +388,9 @@ const Profile: React.FC = () => {
  <img src={localUser.bannerUrl || getPlaceholderImage(`banner-${localUser.uid}`, 1200, 400)} className="w-full h-full object-cover opacity-80" alt="" />
  <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
  
+ {/* Subtle blue gradient boundary line */}
+ <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500/10 via-blue-500/60 to-blue-500/10 z-10" />
+ 
  {isEditing && (
  <button 
  onClick={() => bannerInputRef.current?.click()} 
@@ -517,7 +520,6 @@ const Profile: React.FC = () => {
             </a>
           )}
           <div className="flex items-center gap-1.5 grayscale opacity-60">
-            <Plus className="w-4 h-4 rotate-45" />
             Joined TonJam 2026
           </div>
         </div>

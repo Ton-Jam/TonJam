@@ -4,8 +4,9 @@ import CompleteProfilePrompt from '@/components/CompleteProfilePrompt';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X } from 'lucide-react';
-import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES } from '@/constants';
-import { Track } from '@/types';
+import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES, TON_LOGO } from '@/constants';
+import { Track, Task } from '@/types';
+import { getTasks, updateTaskProgress, completeTask, claimTaskReward } from '@/services/taskService';
 import { getPlaceholderImage } from '@/lib/utils';
 import { auth } from '@/lib/firebase';
 import TrackCard from '@/components/TrackCard';
@@ -161,6 +162,7 @@ const Home: React.FC = () => {
   const [visibleNFTCount, setVisibleNFTCount] = useState(4);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const handleGenerateAIPlaylist = async () => {
@@ -179,6 +181,42 @@ const Home: React.FC = () => {
     }
   };
 
+  const handleTaskClaim = async (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const rewardAmount = parseInt(task.reward.replace(/[^0-9]/g, '')) || 0;
+    try {
+      await claimTaskReward(taskId, rewardAmount, task.points);
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, claimed: true } : t));
+    } catch (e) {
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, claimed: true } : t));
+    }
+  };
+
+  const handleTaskToggle = async (taskId: string, progress: number) => {
+    try {
+      await updateTaskProgress(taskId, progress);
+      const task = tasks.find(t => t.id === taskId);
+      if (task && progress >= task.total) {
+        await completeTask(taskId);
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress, completed: true } : t));
+      } else {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress } : t));
+      }
+    } catch (e) {
+      const task = tasks.find(t => t.id === taskId);
+      if (task && progress >= task.total) {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress, completed: true } : t));
+      } else {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress } : t));
+      }
+    }
+  };
+
+  const handleTaskClick = (task: Task) => {
+    navigate('/tasks');
+  };
+
   useEffect(() => {
     generateDiscoverWeekly();
     
@@ -186,6 +224,57 @@ const Home: React.FC = () => {
     if (!hasVisited) {
       setShowWelcome(true);
     }
+
+    const fetchHomeTasks = async () => {
+      try {
+        const fetchedTasks = await getTasks();
+        if (fetchedTasks && fetchedTasks.length > 0) {
+          setTasks(fetchedTasks.slice(0, 3));
+        } else {
+          setTasks([
+            {
+              id: '1',
+              title: 'Stream 5 Tracks',
+              description: 'Listen to at least 5 songs today',
+              reward: "40",
+              points: 10,
+              progress: 3,
+              total: 5,
+              type: 'daily',
+              completed: false,
+              claimed: false,
+            },
+            {
+              id: '2',
+              title: 'Follow TonJam on X',
+              description: 'Stay updated with TonJam news',
+              reward: "25",
+              points: 5,
+              progress: 0,
+              total: 1,
+              type: 'achievement',
+              completed: false,
+              claimed: false,
+            },
+            {
+              id: '3',
+              title: 'Buy Your First NFT',
+              description: 'Own a music collectible',
+              reward: "120",
+              points: 50,
+              progress: 0,
+              total: 1,
+              type: 'onchain',
+              completed: false,
+              claimed: false,
+            }
+          ]);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchHomeTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -366,92 +455,28 @@ const Home: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="page-container w-full pt-[30px] sm:pt-[46px] bg-background text-foreground min-h-screen"
+      className="page-container w-full pt-2 bg-background text-foreground min-h-screen"
     >
-      <div className="absolute top-0 left-0 right-0 h-10 bg-zinc-100 border-b border-zinc-200 flex items-center overflow-hidden pointer-events-none z-50">
-        <motion.div 
-          animate={{ x: [0, -1000] }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="flex whitespace-nowrap gap-12 text-[10px] font-black uppercase tracking-[0.5em] text-primary/40 px-12"
-        >
-          {Array.from({ length: 10 }).map((_, i) => (
-            <span key={i}>TONJAM_PROTOCOL v2.6.4 // DECENTRALIZED_AUDIO_STREAMING // NEURAL_SYNC_ACTIVE // GLOBAL_PULSE_99.9%</span>
-          ))}
-        </motion.div>
-      </div>
-      
       <GetFreeTokensModal isOpen={isTokensModalOpen} onClose={() => setIsTokensModalOpen(false)} />
       {isBuyTJModalOpen && <BuyTJModal onClose={() => setIsBuyTJModalOpen(false)} onSuccess={() => setIsBuyTJModalOpen(false)} />}
-      <div className="max-w-4xl mx-auto w-full relative z-20 mb-4 px-3">
-        <h1 className="text-lg sm:text-2xl font-black uppercase tracking-widest bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-800 bg-clip-text text-transparent">
-          Hello Jamies!
-        </h1>
-      </div>
-      <AnimatePresence>
-        {showWelcome && (
-          <motion.div
-            initial={{ opacity: 0, y: -50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="relative z-50 mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-transparent backdrop-blur-xl p-8 lg:p-12 shadow-2xl"
-          >
-            {/* Background elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 blur-[60px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
-            
-            <button 
-              onClick={dismissWelcome}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all"
-              aria-label="Dismiss welcome message"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <div className="relative z-10 space-y-6 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-[11px] font-bold uppercase tracking-[0.2em]">
-                <Sparkles className="h-3.5 w-3.5" />
-                Welcome to the Future
-              </div>
-              
-              <h2 className="text-[40px] lg:text-[72px] font-black uppercase tracking-tighter leading-[0.85] text-foreground">
-                Welcome to <span className="text-blue-500">TonJam</span>
-              </h2>
-              
-              <p className="text-xl lg:text-2xl text-muted-foreground leading-relaxed font-medium">
-                Experience the first decentralized music protocol on TON. Stream, collect, and connect directly with your favorite artists.
-              </p>
-              
-              <div className="flex flex-wrap gap-4 pt-4">
-                <button 
-                  onClick={() => {
-                    dismissWelcome();
-                    navigate('/marketplace');
-                  }}
-                  className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 group/btn text-sm"
-                >
-                  <ShoppingBag className="h-5 w-5 text-white group-hover/btn:scale-110 transition-transform" />
-                  Explore Marketplace
-                </button>
-                <button 
-                  onClick={() => setIsTokensModalOpen(true)}
-                  className="px-8 py-4 bg-white/5 hover:bg-white/10 text-zinc-800 dark:text-foreground font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-3 text-sm"
-                >
-                  <Sparkles className="h-5 w-5 text-blue-500" />
-                  Get Free Tokens
-                </button>
-                <button 
-                  onClick={dismissWelcome}
-                  className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-full transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 group/btn text-sm"
-                >
-                  <Play className="h-5 w-5 fill-white group-hover/btn:scale-110 transition-transform" />
-                  Start Playing
-                </button>
-              </div>
+      
+      <div className="max-w-4xl mx-auto w-full relative z-20 mb-6 px-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.25em] mb-1">User Console</p>
+            <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground">
+              Hello, {userProfile?.name || 'Jamie'}!
+            </h1>
+          </div>
+          <div className="text-right">
+            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Balance</p>
+            <div className="flex items-center justify-end gap-1.5 mt-0.5">
+              <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5" />
+              <p className="text-xs font-black text-foreground">{userProfile?.tonBalance ? `${userProfile.tonBalance.toFixed(2)} TON` : '0.00 TON'}</p>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      </div>
 
       <Tabs 
         value={activeTab} 
@@ -641,16 +666,17 @@ const Home: React.FC = () => {
             </section>
 
             {/* Trending NFTs Section */}
-            <section className="py-8 px-2 sm:px-0">
-                <h3 className="text-xl font-black uppercase tracking-widest text-foreground/80 mb-6 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-blue-500" />
-                    Trending NFTs
-                </h3>
-                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
-                    {trendingNFTs.slice(0, 6).map(nft => (
-                        <TrendingNFTCard key={nft.id} nft={nft} />
-                    ))}
-                </div>
+            <section className="section-container">
+              <SectionHeader 
+                title="Trending NFTs" 
+                subtitle="High-density transaction volumes on the marketplace" 
+                viewAllLink="/marketplace" 
+              />
+              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
+                {trendingNFTs.slice(0, 6).map(nft => (
+                  <TrendingNFTCard key={nft.id} nft={nft} />
+                ))}
+              </div>
             </section>
 
             {/* AI Dj Krupy Section - Neural Synthesis Interface */}
@@ -985,10 +1011,23 @@ const Home: React.FC = () => {
 
             {/* Tasks */}
             <section className="section-container mt-10 mb-10 px-2 sm:px-0">
-               <SectionHeader title="Tasks" viewAllLink="/tasks" />
+               <SectionHeader title="Daily Missions" subtitle="Sync with key neural loops to earn direct TJ coin drops" viewAllLink="/tasks" />
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {/* Placeholder for tasks */}
-                 <p className="text-muted-foreground text-sm">No active tasks at the moment.</p>
+                 {tasks.length > 0 ? (
+                   tasks.map(task => (
+                     <TaskCard 
+                       key={task.id} 
+                       task={task} 
+                       onClaim={handleTaskClaim} 
+                       onToggle={handleTaskToggle} 
+                       onClick={handleTaskClick} 
+                     />
+                   ))
+                 ) : (
+                   <div className="bg-secondary/15 backdrop-blur-md rounded-2xl p-6 text-center border border-border/10 col-span-full">
+                     <p className="text-muted-foreground text-xs font-medium">All telemetry tasks fully completed. Check back in the next epoch.</p>
+                   </div>
+                 )}
                </div>
             </section>
 

@@ -1041,11 +1041,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         ...track,
         songId: track.songId || `song-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       };
+      
+      // Optimistic update
+      setFirestoreTracks(prev => {
+        if (prev.find(t => t.id === trackWithId.id)) return prev;
+        return [...prev, trackWithId];
+      });
+
       const cleanTrack = cleanObject(trackWithId);
       await setDoc(doc(db, 'tracks', track.id), cleanTrack);
       addNotification(`Track "${track.title}" uploaded`, "success");
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, `tracks/${track.id}`);
+      console.warn("Firestore error saving track:", error);
+      // Even if remote save fails in preview mode, keep track in local session
+      addNotification(`Track "${track.title}" uploaded locally (Preview Mode)`, "success");
     } finally {
       setIsLoading(false);
     }

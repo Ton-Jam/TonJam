@@ -66,7 +66,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
   };
 
   return (
-    <Card className={cn("bg-neutral-50/70 dark:bg-[#07090C]/40 border-none shadow-none overflow-hidden rounded-none w-auto -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 px-4 sm:px-8 md:px-12 lg:px-16 py-8", className)}>
+    <Card className={cn("bg-neutral-50/70 dark:bg-background border-none shadow-none overflow-hidden rounded-none w-auto -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 px-4 sm:px-8 md:px-12 lg:px-16 py-8", className)}>
       <CardHeader className="pb-4 pt-2 px-0">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
@@ -102,7 +102,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
       <CardContent className="p-0">
         <Tabs defaultValue="all-time" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="px-0 pb-6">
-            <TabsList className="grid w-full grid-cols-3 bg-neutral-100 dark:bg-neutral-900/40 h-10 p-1 rounded-full border-none backdrop-blur-md">
+            <TabsList className="grid w-full grid-cols-3 bg-neutral-100 dark:bg-zinc-950 h-10 p-1 rounded-full border border-neutral-200 dark:border-white/5 backdrop-blur-md">
               {['24h', '7d', 'all-time'].map((time) => (
                 <TabsTrigger 
                   key={time} 
@@ -129,7 +129,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
-                      className="group flex items-center gap-3 py-3.5 px-3 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/40 transition-all rounded-2xl cursor-pointer"
+                      className="group flex items-center gap-3 py-3.5 px-3 hover:bg-neutral-100/70 dark:hover:bg-white/5 transition-all rounded-2xl cursor-pointer"
                     >
                       {/* Rank Indicator */}
                       <div className="w-8 flex-shrink-0 flex items-center justify-center">
@@ -146,10 +146,10 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
                           </div>
                         ) : rank <= 3 ? (
                           <div className={cn(
-                            "w-7 h-7 flex items-center justify-center rounded-full font-black text-[10px] border-none",
+                            "w-7 h-7 flex items-center justify-center rounded-full font-black text-[10px] border",
                             rank === 2 
-                              ? "bg-slate-200/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-300" 
-                              : "bg-amber-100/50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-500"
+                              ? "bg-slate-200/50 dark:bg-zinc-900 border-neutral-300 dark:border-white/5 text-slate-500 dark:text-slate-300" 
+                              : "bg-amber-100/50 dark:bg-zinc-900 border-amber-200 dark:border-white/5 text-amber-700 dark:text-amber-500"
                           )}>
                             {rank}
                           </div>
@@ -220,7 +220,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
         <div className="px-0 py-6 bg-transparent">
           <Button 
             variant="ghost" 
-            className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-900/30 h-12 transition-all gap-3 rounded-2xl group/btn cursor-pointer"
+            className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-zinc-900 h-12 transition-all gap-3 rounded-2xl group/btn cursor-pointer"
           >
             <span>View More</span>
             <div className="w-1.5 h-1.5 rounded-full bg-primary group-hover:shadow-[0_0_10px_var(--primary)] transition-shadow" />

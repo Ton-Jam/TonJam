@@ -122,6 +122,154 @@ async function startServer() {
         }
     });
 
+    // Mock data & implementation for server-side pagination of royalty audit ledger
+    let mockAuditLogEntries = Array.from({ length: 85 }, (_, i) => {
+        let amount = Math.floor(Math.abs(Math.sin(i)) * 150) + 120;
+        if (i === 4) amount = 850;   // Pre-injected historical outlier
+        if (i === 12) amount = 1150; // Pre-injected historical outlier
+
+        return {
+            id: `${i}`,
+            date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            collaborator: ['Producer Alpha', 'Manager Beta', 'Lyricist Charlie', 'Sound Tech Delta', 'Vocalist Echo', 'Co-Writer Foxtrot'][i % 6],
+            amount,
+            txHash: `0x${((i + 1726) * 31415 + 9821).toString(16).slice(0, 8)}...`
+        };
+    });
+
+    // Simulate a background process for processing new royalty receipts
+    setInterval(() => {
+        const rand = Math.random();
+        const isOutlier = rand < 0.15; // 15% chance of an outlier
+        const amount = isOutlier 
+            ? Math.floor(Math.random() * 700) + 750 // Outlier (750 - 1450 TON)
+            : Math.floor(Math.random() * 130) + 120; // Normal (120 - 250 TON)
+        
+        const newId = `bg-${Date.now()}`;
+        const newEntry = {
+            id: newId,
+            date: new Date().toISOString().split('T')[0],
+            collaborator: ['Producer Alpha', 'Manager Beta', 'Lyricist Charlie', 'Sound Tech Delta', 'Vocalist Echo', 'Co-Writer Foxtrot'][Math.floor(Math.random() * 6)],
+            amount,
+            txHash: `0x${Math.floor(Math.random() * 100000000).toString(16).padEnd(8, '0')}...`
+        };
+        // Add at the beginning of logs
+        mockAuditLogEntries.unshift(newEntry);
+    }, 20000); // simulation runs every 20 seconds, adding new transactions dynamically
+
+    // Scan for transaction outliers using Z-score calculation
+    app.get('/api/royalty-audit/scan-outliers', (req, res) => {
+        if (mockAuditLogEntries.length < 3) {
+            return res.json({ outliers: [], stats: { mean: 0, stdDev: 0, totalTransactions: 0 } });
+        }
+
+        const amounts = mockAuditLogEntries.map(e => e.amount);
+        const sum = amounts.reduce((acc, val) => acc + val, 0);
+        const mean = sum / amounts.length;
+
+        const sumSqDiff = amounts.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0);
+        const variance = sumSqDiff / amounts.length;
+        const stdDev = Math.sqrt(variance);
+
+        // Flag any transaction with Z-score > 2.0 as a significant deviation
+        const zThreshold = 2.0;
+        const outliers = mockAuditLogEntries
+            .map(e => {
+                const zScore = stdDev > 0 ? (e.amount - mean) / stdDev : 0;
+                const deviationPercent = mean > 0 ? ((e.amount - mean) / mean) * 100 : 0;
+                return {
+                    id: e.id,
+                    entry: e,
+                    zScore: Math.round(zScore * 100) / 100,
+                    deviationPercent: Math.round(deviationPercent * 10),
+                    isSignificant: zScore > zThreshold
+                };
+            })
+            .filter(o => o.isSignificant);
+
+        res.json({
+            outliers,
+            stats: {
+                mean: Math.round(mean * 100) / 100,
+                stdDev: Math.round(stdDev * 100) / 100,
+                totalTransactions: mockAuditLogEntries.length
+            }
+        });
+    });
+
+    app.get('/api/royalty-audit/list', (req, res) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 5;
+        const { startDate, endDate } = req.query;
+
+        let filtered = [...mockAuditLogEntries];
+        if (startDate) {
+            filtered = filtered.filter(entry => entry.date >= (startDate as string));
+        }
+        if (endDate) {
+            filtered = filtered.filter(entry => entry.date <= (endDate as string));
+        }
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        const results = filtered.slice(startIndex, endIndex);
+        res.json({
+            data: results,
+            total: filtered.length,
+            page,
+            limit
+        });
+    });
+
+    app.get('/api/royalty-audit/export', (req, res) => {
+        const { startDate, endDate } = req.query;
+        let filtered = [...mockAuditLogEntries];
+        if (startDate) {
+            filtered = filtered.filter(entry => entry.date >= (startDate as string));
+        }
+        if (endDate) {
+            filtered = filtered.filter(entry => entry.date <= (endDate as string));
+        }
+        res.json({
+            data: filtered
+        });
+    });
+
+    app.get('/api/royalty-audit/trend', (req, res) => {
+        const { startDate, endDate } = req.query;
+        let filtered = [...mockAuditLogEntries];
+        if (startDate) {
+            filtered = filtered.filter(entry => entry.date >= (startDate as string));
+        }
+        if (endDate) {
+            filtered = filtered.filter(entry => entry.date <= (endDate as string));
+        }
+
+        // Group by Year-Month
+        const groups: Record<string, number> = {};
+        filtered.forEach(entry => {
+            const yrMo = entry.date.substring(0, 7); // "YYYY-MM"
+            groups[yrMo] = (groups[yrMo] || 0) + entry.amount;
+        });
+
+        // Convert to list sorted ascending by month
+        const trend = Object.keys(groups)
+            .sort()
+            .map(yrMo => {
+                // Formatting "2026-05" -> "May 2026" or similar
+                const [year, month] = yrMo.split('-');
+                const monthName = new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleString('en-US', { month: 'short' });
+                return {
+                    month: `${monthName} ${year}`,
+                    amount: groups[yrMo],
+                    rawMonth: yrMo
+                };
+            });
+
+        res.json({ trend });
+    });
+
     // Serve static files from public/uploads
     app.use('/uploads', express.static(uploadsDir));
 
