@@ -986,53 +986,58 @@ const NFTDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="space-y-3"
+                    className="overflow-x-auto bg-white/[0.02] border border-border rounded-[24px]"
                   >
-                    {[...(localNft.history || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((h, i) => (
-                      <div key={`history-${i}`} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-[16px] hover:bg-white/[0.04] transition-all group overflow-hidden relative">
-                        {/* Hardware scanline effect */}
-                        <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
-                        
-                        <div className="flex items-center gap-3 relative z-10">
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-lg",
-                            h.event === 'Minted' ? "bg-blue-500/10 text-blue-500" : "bg-emerald-500/10 text-emerald-500"
-                          )}>
-                            {h.event === 'Minted' ? <Wand2 className="h-4 w-4" /> : <Handshake className="h-4 w-4" />}
-                          </div>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[10px] font-black text-foreground uppercase tracking-tight flex items-center gap-2">
-                              {h.event}
-                              <div className={cn("w-1 h-1 rounded-full", h.event === 'Minted' ? "bg-blue-500" : "bg-emerald-500")}></div>
-                            </span>
-                            <div className="flex items-center gap-2 text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                              <span>Layer: {h.event === 'Minted' ? 'MINT' : 'TRANSFER'}</span>
-                              <div className="h-px w-2 bg-white/10"></div>
-                              <span>{h.date}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-6 relative z-10">
-                          <div className="text-right hidden md:block">
-                            <p className="text-[7px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-0.5">Origin</p>
-                            <span className="text-[9px] font-mono text-primary font-black uppercase tracking-widest">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-border bg-white/[0.01]">
+                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">Event</th>
+                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">Timestamp</th>
+                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">From</th>
+                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">To</th>
+                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap text-right">Price</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {[...(localNft.history || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((h, i) => (
+                          <motion.tr 
+                            key={`history-${i}`} 
+                            className="group hover:bg-white/[0.02] transition-colors"
+                          >
+                            <td className="py-4 px-6 whitespace-nowrap">
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "w-8 h-8 rounded-[10px] flex items-center justify-center transition-all",
+                                  h.event === 'Minted' ? "bg-blue-500/10 text-blue-500" : "bg-emerald-500/10 text-emerald-500"
+                                )}>
+                                  {h.event === 'Minted' ? <Wand2 className="h-3.5 w-3.5" /> : <Handshake className="h-3.5 w-3.5" />}
+                                </div>
+                                <span className="text-[11px] font-black text-foreground uppercase tracking-wider">{h.event}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                              {h.date}
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap font-mono text-[10px] font-black text-primary uppercase tracking-widest">
                                {h.from === 'Vault' ? 'GENESIS' : `@${(h.from || '').slice(0, 6)}`}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                             <p className="text-[7px] font-bold text-muted-foreground/30 uppercase tracking-widest mb-0.5">Recipient</p>
-                             <span className="text-[9px] font-mono text-primary font-black uppercase tracking-widest">@{(h.to || '').slice(0, 6)}</span>
-                             {h.price && (
-                               <div className="flex items-center justify-end gap-1 mt-0.5">
-                                  <span className="text-[10px] font-black text-foreground tracking-tighter">{h.price}</span>
-                                  <span className="text-[7px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
-                               </div>
-                             )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap font-mono text-[10px] font-black text-primary uppercase tracking-widest">
+                              @{(h.to || '').slice(0, 6)}
+                            </td>
+                            <td className="py-4 px-6 whitespace-nowrap text-right text-[11px] font-black text-foreground tracking-tighter">
+                               {h.price ? (
+                                 <span className="flex items-center justify-end gap-1.5 text-foreground"><img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5" /> {h.price} TON</span>
+                               ) : <span className="text-muted-foreground">-</span>}
+                            </td>
+                          </motion.tr>
+                        ))}
+                        {(!localNft.history || localNft.history.length === 0) && (
+                          <tr>
+                            <td colSpan={5} className="py-12 text-center text-xs font-bold text-muted-foreground uppercase tracking-widest">No transaction history</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </motion.div>
                 )}
   

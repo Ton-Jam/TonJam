@@ -57,7 +57,6 @@ import { Card } from "@/components/ui/card";
 import { Playlist, PlaylistFolder } from '@/types';
 
 type LibraryFilter = 'all' | 'playlists' | 'artists' | 'nfts';
-type SortOption = 'recents' | 'recently-added' | 'alphabetical';
 
 const Library: React.FC = () => {
   const navigate = useNavigate();
@@ -81,7 +80,6 @@ const Library: React.FC = () => {
 
   const [filter, setFilter] = useState<LibraryFilter>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState<SortOption>('recents');
   const [isLoading, setIsLoading] = useState(true);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [selectedFolderForEdit, setSelectedFolderForEdit] = useState<any>(null);
@@ -137,16 +135,9 @@ const Library: React.FC = () => {
         if (!aTitle.startsWith(query) && bTitle.startsWith(query)) return 1;
         return aTitle.localeCompare(bTitle);
       });
-    } else {
-      if (sortBy === 'alphabetical') {
-        items.sort((a, b) => (a.title || a.name || '').localeCompare(b.title || b.name || ''));
-      } else if (sortBy === 'recently-added') {
-        items.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      }
     }
-
     return items;
-  }, [filter, playlists, artists, followedUserIds, allNFTs, userProfile, userNFTs, sortBy, searchQuery]);
+  }, [filter, playlists, artists, followedUserIds, allNFTs, userProfile, userNFTs, searchQuery]);
 
   const renderLibraryItem = (item: any) => {
     const isArtist = item.type === 'artist';
@@ -267,48 +258,6 @@ const Library: React.FC = () => {
               ))}
             </TabsList>
           </Tabs>
-
-          {/* Sorters and List/Grid switches */}
-          <div className="flex items-center gap-3 justify-end shrink-0 pr-4 sm:pr-6">
-            {/* View Switching buttons */}
-            <div className="flex items-center bg-muted/20 border border-border/40 p-1 rounded-[4px] gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewMode('grid')}
-                className={cn("h-7 w-7 p-0 rounded-[2px]", viewMode === 'grid' ? "bg-blue-600 text-white hover:bg-blue-500" : "text-muted-foreground hover:text-foreground")}
-                title="Grid representation"
-              >
-                <LayoutGrid className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewMode('list')}
-                className={cn("h-7 w-7 p-0 rounded-[2px]", viewMode === 'list' ? "bg-blue-600 text-white hover:bg-blue-500" : "text-muted-foreground hover:text-foreground")}
-                title="List representation"
-              >
-                <List className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-
-            {/* Nice Sorting dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 border border-border/40 bg-muted/20 rounded-[4px] text-[10px] font-black uppercase tracking-widest gap-2">
-                  <ArrowUpDown className="h-3.5 w-3.5 text-blue-500" />
-                  Sort: {sortBy === 'recents' ? 'Recents' : sortBy === 'recently-added' ? 'Newest' : 'A-Z'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border border-border/40 rounded-[2px] text-[10px] font-black uppercase tracking-wider">
-                <DropdownMenuRadioGroup value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
-                  <DropdownMenuRadioItem value="recents" className="cursor-pointer">Recents</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="recently-added" className="cursor-pointer">Recently Added</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="alphabetical" className="cursor-pointer">Alphabetical</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
 
         {/* Folders Section - List Layout */}
