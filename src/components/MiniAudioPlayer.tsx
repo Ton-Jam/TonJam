@@ -23,7 +23,6 @@ import {
   Gem
 } from "lucide-react";
 import { getPlaceholderImage, cn, shareContent } from "@/lib/utils";
-import DynamicVisualizer from "./DynamicVisualizer";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
@@ -178,16 +177,6 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
         />
       </div>
 
-      {/* Subtle Background Visualizer */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
-        <DynamicVisualizer 
-          variant="bars" 
-          color="#3b82f6" 
-          className="w-full h-full"
-          interactive={false}
-        />
-      </div>
-
       <div className="flex items-center justify-between h-full pt-1 relative z-10">
         {/* Track Info */}
         <div 
@@ -201,15 +190,6 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               alt=""
               referrerPolicy="no-referrer"
             />
-            {isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center bg-blue-600/20 backdrop-blur-[1px]">
-                <div className="flex gap-1 items-end h-3">
-                  <div className="w-0.75 bg-white animate-[bounce_0.6s_infinite_0.1s] rounded-full"></div>
-                  <div className="w-0.75 bg-white animate-[bounce_0.6s_infinite_0.3s] rounded-full"></div>
-                  <div className="w-0.75 bg-white animate-[bounce_0.6s_infinite_0.2s] rounded-full"></div>
-                </div>
-              </div>
-            )}
           </div>
           
           <div className="min-w-0 flex flex-col gap-0.5">
@@ -217,22 +197,6 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               <h4 className="text-[9.5px] font-black truncate text-foreground uppercase tracking-tighter leading-none">
                 {currentTrack.title}
               </h4>
-              {/* Lightweight Waveform Visualizer */}
-              <div className="w-12 h-3 flex items-end gap-[1px] translate-y-0.5">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="flex-1 bg-blue-500 rounded-sm"
-                      animate={{ height: isPlaying ? [4, 10, 4] : 4 }}
-                      transition={{
-                        duration: 0.8,
-                        repeat: Infinity,
-                        delay: i * 0.1,
-                        ease: "easeInOut"
-                      }}
-                    />
-                  ))}
-              </div>
               {isHighFidelity && (
                 <span className="bg-blue-600 text-white text-[5.5px] font-black px-1 py-0.5 rounded-[1px] tracking-[0.2em] uppercase flex-shrink-0">
                   Hi-Fi
