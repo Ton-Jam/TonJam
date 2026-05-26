@@ -670,7 +670,7 @@ const Profile: React.FC = () => {
           <div className="space-y-0 animate-in fade-in slide-in-from-bottom-4 duration-500 last:border-b-0">
             {/* Anthem Highlight */}
             {anthemNft && (
-              <div className="bg-background p-6 border-b border-white/5 relative group">
+              <div className="p-6 border-b border-white/5 relative group animate-subtle-glow rounded-3xl overflow-hidden my-4 mx-4">
                 <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                   <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 border border-white/10">
                     <img src={anthemNft.imageUrl || getPlaceholderImage(`nft-${anthemNft.id}`)} className="w-full h-full object-cover" alt={anthemNft.title} />

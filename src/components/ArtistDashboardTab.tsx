@@ -162,8 +162,26 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   const itemsPerPage = 5;
 
   const [filterType, setFilterType] = React.useState<string>('all');
+  const [ledgerViewMode, setLedgerViewMode] = React.useState<'chronological' | 'grouped'>('grouped');
   const [customStartDate, setCustomStartDate] = React.useState<string>('');
   const [customEndDate, setCustomEndDate] = React.useState<string>('');
+
+  const groupedEntries = React.useMemo(() => {
+    const groups: Record<string, { total: number; entries: AuditEntry[] }> = {};
+    auditData.forEach(entry => {
+      const col = entry.collaborator || 'Unknown';
+      if (!groups[col]) {
+        groups[col] = { total: 0, entries: [] };
+      }
+      groups[col].entries.push(entry);
+      groups[col].total += entry.amount;
+    });
+    return Object.entries(groups).map(([collaborator, data]) => ({
+      collaborator,
+      total: data.total,
+      entries: data.entries
+    }));
+  }, [auditData]);
 
   const [trendData, setTrendData] = React.useState<any[]>([]);
   const [trendLoading, setTrendLoading] = React.useState(false);
@@ -1141,10 +1159,30 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                               <h3 className="text-sm font-bold uppercase tracking-widest">Royalty Ledger</h3>
                               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-1">Processed Payments and Blockchain Transaction Hashes</p>
                             </div>
-                            <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex items-center gap-2 border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest text-[#999] hover:text-white transition-all self-end sm:self-auto">
-                              <Download className="w-3.5 h-3.5" />
-                              Download CSV
-                            </Button>
+                            <div className="flex flex-wrap items-center gap-3 self-end sm:self-auto">
+                              <div className="flex items-center bg-white/5 p-1 rounded-xl">
+                                <button
+                                  onClick={() => setLedgerViewMode('chronological')}
+                                  className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all ${
+                                    ledgerViewMode === 'chronological' ? "bg-white/10 text-white" : "text-white/40 hover:text-white"
+                                  }`}
+                                >
+                                  List
+                                </button>
+                                <button
+                                  onClick={() => setLedgerViewMode('grouped')}
+                                  className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all ${
+                                    ledgerViewMode === 'grouped' ? "bg-white/10 text-white" : "text-white/40 hover:text-white"
+                                  }`}
+                                >
+                                  Grouped
+                                </button>
+                              </div>
+                              <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex items-center gap-2 border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest text-[#999] hover:text-white transition-all">
+                                <Download className="w-3.5 h-3.5" />
+                                Download CSV
+                              </Button>
+                            </div>
                           </div>
 
                           <div className="overflow-x-auto relative min-h-[220px]">
@@ -1153,6 +1191,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                     <tr className="border-b border-border text-muted-foreground">
                                         <th className="p-3">Date</th>
                                         <th className="p-3">Collaborator</th>
+                                        <th className="p-3">Type</th>
                                         <th className="p-3">Amount</th>
                                         <th className="p-3">TX Hash</th>
                                         <th className="p-3 text-right">Notes</th>
@@ -1172,6 +1211,9 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                     <div className="h-4 w-16 bg-white/5 rounded-md animate-pulse" />
                                                 </td>
                                                 <td className="p-3">
+                                                    <div className="h-4 w-16 bg-white/5 rounded-md animate-pulse" />
+                                                </td>
+                                                <td className="p-3">
                                                     <div className="h-4 w-24 bg-white/5 rounded-md animate-pulse" />
                                                 </td>
                                                 <td className="p-3">
@@ -1181,10 +1223,104 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                         ))
                                     ) : auditData.length === 0 ? (
                                         <tr>
-                                            <td colSpan={5} className="p-8 text-center text-xs text-muted-foreground uppercase tracking-wider">
+                                            <td colSpan={6} className="p-8 text-center text-xs text-muted-foreground uppercase tracking-wider">
                                                 No records found for the selected period
                                             </td>
                                         </tr>
+                                    ) : ledgerViewMode === 'grouped' ? (
+                                        groupedEntries.map(group => (
+                                            <React.Fragment key={group.collaborator}>
+                                                <tr className="bg-white/[0.02] border-b border-border/40">
+                                                    <td colSpan={6} className="p-3 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-white flex items-center gap-2">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                                                {group.collaborator} ({group.entries.length} {group.entries.length === 1 ? 'payment' : 'payments'})
+                                                            </span>
+                                                            <span className="text-emerald-400 font-mono text-[11px] font-black bg-emerald-500/10 px-2.5 py-1 rounded-lg">
+                                                                Total: {group.total.toLocaleString()} TON
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {group.entries.map(entry => {
+                                                    const hasNote = !!auditNotes[entry.txHash];
+                                                    const isExpanded = expandedNoteTxHash === entry.txHash;
+                                                    return (
+                                                        <React.Fragment key={entry.id}>
+                                                            <motion.tr 
+                                                                initial={{ opacity: 0, y: 10 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                className="border-b border-border/30 hover:bg-white/[0.01] transition-all cursor-pointer"
+                                                                onClick={() => setExpandedNoteTxHash(isExpanded ? null : entry.txHash)}
+                                                            >
+                                                                <td className="p-3 text-muted-foreground">{entry.date}</td>
+                                                                <td className="p-3 pl-6 font-semibold text-white/80">{entry.collaborator}</td>
+                                                                <td className="p-3">
+                                                                    <span className="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/15 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">
+                                                                        Royalty Split
+                                                                    </span>
+                                                                </td>
+                                                                <td className="p-3 font-mono text-emerald-400 font-bold">{entry.amount} TON</td>
+                                                                <td className="p-3 font-mono text-muted-foreground truncate max-w-[120px]" title={entry.txHash}>{entry.txHash}</td>
+                                                                <td className="p-3 text-right">
+                                                                    <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                                        {hasNote && (
+                                                                            <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 px-2 py-0.5 rounded-full max-w-[100px] truncate" title={auditNotes[entry.txHash]}>
+                                                                                {auditNotes[entry.txHash]}
+                                                                            </span>
+                                                                        )}
+                                                                        <Button 
+                                                                            variant="ghost" 
+                                                                            size="sm" 
+                                                                            onClick={() => setExpandedNoteTxHash(isExpanded ? null : entry.txHash)}
+                                                                            className={`p-1 h-7 w-7 rounded-lg transition-colors ${isExpanded ? 'bg-zinc-800 text-white' : 'text-muted-foreground hover:text-white'}`}
+                                                                        >
+                                                                            <MessageSquare className={`w-3.5 h-3.5 ${hasNote ? 'text-emerald-400' : ''}`} />
+                                                                        </Button>
+                                                                    </div>
+                                                                </td>
+                                                            </motion.tr>
+                                                            {isExpanded && (
+                                                                <tr className="bg-white/[0.01]">
+                                                                    <td colSpan={6} className="p-3 bg-zinc-950/20">
+                                                                        <motion.div 
+                                                                            initial={{ opacity: 0, height: 0 }}
+                                                                            animate={{ opacity: 1, height: 'auto' }}
+                                                                            className="flex flex-col gap-2 p-1"
+                                                                        >
+                                                                            <div className="flex items-center justify-between">
+                                                                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                                                                                    <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> Notes for transaction
+                                                                                </span>
+                                                                                {hasNote && (
+                                                                                    <button 
+                                                                                        onClick={() => handleSaveNote(entry.txHash, '')}
+                                                                                        className="text-[9px] font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest"
+                                                                                    >
+                                                                                        Clear Note
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
+                                                                            <textarea
+                                                                                placeholder="Write custom audit note or comment for this record..."
+                                                                                value={auditNotes[entry.txHash] || ''}
+                                                                                onChange={(e) => handleSaveNote(entry.txHash, e.target.value)}
+                                                                                className="bg-zinc-900 border-none text-[11px] font-semibold text-white rounded-xl p-3 outline-none resize-none placeholder-white/20 h-16 w-full"
+                                                                                onClick={(e) => e.stopPropagation()}
+                                                                            />
+                                                                            <div className="text-[8px] text-muted-foreground uppercase tracking-wider text-right">
+                                                                                Auto-saves on typing
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </React.Fragment>
+                                        ))
                                     ) : (
                                         auditData.map(entry => {
                                             const hasNote = !!auditNotes[entry.txHash];
@@ -1198,8 +1334,13 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                         onClick={() => setExpandedNoteTxHash(isExpanded ? null : entry.txHash)}
                                                     >
                                                         <td className="p-3">{entry.date}</td>
-                                                        <td className="p-3">{entry.collaborator}</td>
-                                                        <td className="p-3 font-mono">{entry.amount} TON</td>
+                                                        <td className="p-3 font-semibold text-white">{entry.collaborator}</td>
+                                                        <td className="p-3">
+                                                            <span className="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/15 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">
+                                                                Royalty Split
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-3 font-mono text-emerald-400 font-bold">{entry.amount} TON</td>
                                                         <td className="p-3 font-mono text-muted-foreground truncate max-w-[120px]" title={entry.txHash}>{entry.txHash}</td>
                                                         <td className="p-3 text-right">
                                                             <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
@@ -1221,7 +1362,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                     </motion.tr>
                                                     {isExpanded && (
                                                         <tr className="bg-white/[0.01]">
-                                                            <td colSpan={5} className="p-3 bg-zinc-950/20">
+                                                            <td colSpan={6} className="p-3 bg-zinc-950/20">
                                                                 <motion.div 
                                                                     initial={{ opacity: 0, height: 0 }}
                                                                     animate={{ opacity: 1, height: 'auto' }}
@@ -1229,7 +1370,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                                 >
                                                                     <div className="flex items-center justify-between">
                                                                         <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                                                                            <MessageSquare className="w-3 h-3 text-emerald-400" /> Notes for transaction
+                                                                            <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> Notes for transaction
                                                                         </span>
                                                                         {hasNote && (
                                                                             <button 

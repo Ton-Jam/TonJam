@@ -1,26 +1,26 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { BackButton } from '@/components/BackButton';
-import { Button } from '@/components/ui/button';
-import { 
-  ArrowLeft, 
-  Pause, 
-  Play, 
-  CheckCircle2, 
-  User, 
-  ExternalLink, 
-  Zap, 
-  ScrollText, 
-  Loader2, 
-  Sparkles, 
-  Wand2, 
-  Handshake, 
-  Crown, 
-  Clock, 
-  Check, 
-  X, 
-  LogIn, 
-  Satellite, 
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { BackButton } from "@/components/BackButton";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
+  Pause,
+  Play,
+  CheckCircle2,
+  User,
+  ExternalLink,
+  Zap,
+  ScrollText,
+  Loader2,
+  Sparkles,
+  Wand2,
+  Handshake,
+  Crown,
+  Clock,
+  Check,
+  X,
+  LogIn,
+  Satellite,
   ChevronRight,
   Video,
   Music as MusicIcon,
@@ -34,60 +34,93 @@ import {
   Activity,
   Award,
   ArrowUpDown,
-  Users
-} from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+  Users,
+  History,
+  ArrowRight,
+  ArrowRightLeft,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { MOCK_NFTS, MOCK_USER, MOCK_TRACKS, TON_LOGO, MOCK_ARTISTS, APP_LOGO, TJ_COIN_ICON } from '@/constants';
-import { useAudio } from '@/context/AudioContext';
-import { useTokenGating } from '@/hooks/useTokenGating';
-import { NFTItem, Track, NFTOffer } from '@/types';
-import { fetchNFTMetadata } from '@/services/nftService';
-import { cancelListing, getActiveListingForNFT } from '@/services/marketplaceService';
-import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { motion, AnimatePresence } from 'motion/react';
-import * as RechartsPrimitive from 'recharts';
-const { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import {
+  MOCK_NFTS,
+  MOCK_USER,
+  MOCK_TRACKS,
+  TON_LOGO,
+  MOCK_ARTISTS,
+  APP_LOGO,
+  TJ_COIN_ICON,
+} from "@/constants";
+import { useAudio } from "@/context/AudioContext";
+import { useTokenGating } from "@/hooks/useTokenGating";
+import { NFTItem, Track, NFTOffer } from "@/types";
+import { fetchNFTMetadata } from "@/services/nftService";
+import {
+  cancelListing,
+  getActiveListingForNFT,
+} from "@/services/marketplaceService";
+import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Virtuoso } from 'react-virtuoso';
+import * as RechartsPrimitive from "recharts";
+const {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } = RechartsPrimitive as any;
-import BuyNFTModal from '@/components/BuyNFTModal';
-import SellNFTModal from '@/components/SellNFTModal';
-import BidModal from '@/components/BidModal';
-import PlaceOfferModal from '@/components/PlaceOfferModal';
-import BidAcceptanceModal from '@/components/BidAcceptanceModal';
-import ManageNFTModal from '@/components/ManageNFTModal';
-import NFTCard from '@/components/NFTCard';
-import SendNFTModal from '@/components/SendNFTModal';
-import ConfirmationModal from '@/components/ConfirmationModal';
-import CommentsSection from '@/components/CommentsSection';
-import ReactionsSection from '@/components/ReactionsSection';
-import confetti from 'canvas-confetti';
-import { getPlaceholderImage, cn } from '@/lib/utils';
+import BuyNFTModal from "@/components/BuyNFTModal";
+import SellNFTModal from "@/components/SellNFTModal";
+import BidModal from "@/components/BidModal";
+import PlaceOfferModal from "@/components/PlaceOfferModal";
+import BidAcceptanceModal from "@/components/BidAcceptanceModal";
+import ManageNFTModal from "@/components/ManageNFTModal";
+import NFTCard from "@/components/NFTCard";
+import SendNFTModal from "@/components/SendNFTModal";
+import ConfirmationModal from "@/components/ConfirmationModal";
+import CommentsSection from "@/components/CommentsSection";
+import ReactionsSection from "@/components/ReactionsSection";
+import confetti from "canvas-confetti";
+import { getPlaceholderImage, cn } from "@/lib/utils";
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addNotification, currentTrack, isPlaying, playTrack, allNFTs, updateNFT, setFullPlayerOpen, userProfile } = useAudio();
+  const {
+    addNotification,
+    currentTrack,
+    isPlaying,
+    playTrack,
+    allNFTs,
+    updateNFT,
+    setFullPlayerOpen,
+    userProfile,
+  } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isTipping, setIsTipping] = useState(false);
-  const [inlineBidAmount, setInlineBidAmount] = useState<string>('');
+  const [inlineBidAmount, setInlineBidAmount] = useState<string>("");
   const [isPlacingBid, setIsPlacingBid] = useState(false);
-  
+
   const localNft = useMemo(() => {
-    return allNFTs.find(n => n.id === id) || null;
+    return allNFTs.find((n) => n.id === id) || null;
   }, [id, allNFTs]);
 
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'history' | 'offers' | 'comments' | 'exclusive' | 'collection'>('details');
-  const { hasAccess } = useTokenGating(localNft?.tokenGating || { enabled: false, tokenType: 'nft' });
+  const [activeTab, setActiveTab] = useState<
+    "details" | "history" | "offers" | "comments" | "exclusive" | "collection"
+  >("details");
+  const { hasAccess } = useTokenGating(
+    localNft?.tokenGating || { enabled: false, tokenType: "nft" },
+  );
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
   const [dynamicMetadata, setDynamicMetadata] = useState<NFTItem | null>(null);
@@ -107,7 +140,11 @@ const NFTDetail: React.FC = () => {
   }, [localNft, userAddress, userProfile.walletAddress]);
 
   useEffect(() => {
-    if (searchParams.get('action') === 'sell' && isOwner && !localNft?.listingType) {
+    if (
+      searchParams.get("action") === "sell" &&
+      isOwner &&
+      !localNft?.listingType
+    ) {
       setShowListModal(true);
       // Clean up the URL
       setSearchParams({});
@@ -115,8 +152,9 @@ const NFTDetail: React.FC = () => {
   }, [searchParams, isOwner, localNft, setSearchParams]);
   const [showManageModal, setShowManageModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<NFTOffer | null>(null);
-  const [relatedSort, setRelatedSort] = useState<'default' | 'bids'>('default');
-  const [isCancelListingConfirmOpen, setIsCancelListingConfirmOpen] = useState(false);
+  const [relatedSort, setRelatedSort] = useState<"default" | "bids">("default");
+  const [isCancelListingConfirmOpen, setIsCancelListingConfirmOpen] =
+    useState(false);
   const [offerToDecline, setOfferToDecline] = useState<string | null>(null);
   const [offerToAccept, setOfferToAccept] = useState<NFTOffer | null>(null);
   const [isCancelBidConfirmOpen, setIsCancelBidConfirmOpen] = useState(false);
@@ -126,11 +164,11 @@ const NFTDetail: React.FC = () => {
       setIsFetchingMetadata(true);
       setMetadataError(null);
       fetchNFTMetadata(localNft.contractAddress)
-        .then(metadata => {
+        .then((metadata) => {
           if (!metadata) return;
           setDynamicMetadata(metadata);
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Failed to fetch metadata", err);
           setMetadataError("Failed to sync on-chain data.");
           addNotification("Failed to fetch on-chain metadata.", "error");
@@ -141,16 +179,21 @@ const NFTDetail: React.FC = () => {
 
   useEffect(() => {
     if (localNft) {
-      setAssociatedTrack(MOCK_TRACKS.find(t => t.id === localNft.trackId) || null);
+      setAssociatedTrack(
+        MOCK_TRACKS.find((t) => t.id === localNft.trackId) || null,
+      );
       /* Fetch dynamic metadata */
       loadMetadata();
     }
   }, [id, localNft?.id]);
 
-  const isActive = useMemo(() => currentTrack?.id === localNft?.trackId, [currentTrack, localNft]);
+  const isActive = useMemo(
+    () => currentTrack?.id === localNft?.trackId,
+    [currentTrack, localNft],
+  );
 
   const isAuction = useMemo(() => {
-    return localNft?.listingType === 'auction';
+    return localNft?.listingType === "auction";
   }, [localNft]);
 
   const isAuctionEnded = useMemo(() => {
@@ -158,23 +201,25 @@ const NFTDetail: React.FC = () => {
     return new Date(localNft.auctionEndTime).getTime() <= Date.now();
   }, [isAuction, localNft?.auctionEndTime]);
 
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
-  
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+
   useEffect(() => {
     if (!isAuction || !localNft?.auctionEndTime) return;
-    
+
     const calculateTimeRemaining = () => {
       const end = new Date(localNft.auctionEndTime!).getTime();
       const now = new Date().getTime();
       const distance = end - now;
 
       if (distance < 0) {
-        setTimeRemaining('Auction Ended');
+        setTimeRemaining("Auction Ended");
         return;
       }
 
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const hours = Math.floor(
+        (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
@@ -188,53 +233,65 @@ const NFTDetail: React.FC = () => {
   }, [isAuction, localNft?.auctionEndTime]);
 
   const minNextBid = useMemo(() => {
-    if (!localNft?.price) return '0';
+    if (!localNft?.price) return "0";
     return (parseFloat(localNft.price) * 1.05).toFixed(2);
   }, [localNft]);
 
   const userOffer = useMemo(() => {
     if (!localNft || !userAddress) return null;
-    return localNft.offers?.find(o => o.offerer === userAddress) || null;
+    return localNft.offers?.find((o) => o.offerer === userAddress) || null;
   }, [localNft, userAddress]);
 
   const highestOfferPrice = useMemo(() => {
     if (!localNft?.offers || localNft.offers.length === 0) return 0;
-    return localNft.offers.reduce((max, o) => Math.max(max, parseFloat(o.price)), 0);
+    return localNft.offers.reduce(
+      (max, o) => Math.max(max, parseFloat(o.price)),
+      0,
+    );
   }, [localNft]);
 
   const handleTip = (amount: number) => {
     setIsTipping(false);
-    
+
     // Simulate transaction
-    addNotification(`Sending ${amount} TON to ${localNft?.creator}...`, 'info');
+    addNotification(`Sending ${amount} TON to ${localNft?.creator}...`, "info");
 
     setTimeout(() => {
       confetti({
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#3b82f6', '#ffffff', '#60a5fa']
+        colors: ["#3b82f6", "#ffffff", "#60a5fa"],
       });
 
-      addNotification(`You sent ${amount} TON to ${localNft?.creator}. Thank you for supporting the artist!`, 'success');
+      addNotification(
+        `You sent ${amount} TON to ${localNft?.creator}. Thank you for supporting the artist!`,
+        "success",
+      );
     }, 1500);
   };
 
   const moreFromCreator = useMemo(() => {
     if (!localNft) return [];
-    return allNFTs.filter(n => n.creator === localNft.creator && n.id !== localNft.id).slice(0, 4);
+    return allNFTs
+      .filter((n) => n.creator === localNft.creator && n.id !== localNft.id)
+      .slice(0, 4);
   }, [localNft, allNFTs]);
 
   const relatedNfts = useMemo(() => {
     if (!localNft || !associatedTrack) return [];
-    const relatedTrackIds = MOCK_TRACKS
-      .filter(t => t.genre === associatedTrack.genre)
-      .map(t => t.id);
-    
-    let filtered = allNFTs.filter(n => relatedTrackIds.includes(n.trackId) && n.id !== localNft.id);
+    const relatedTrackIds = MOCK_TRACKS.filter(
+      (t) => t.genre === associatedTrack.genre,
+    ).map((t) => t.id);
 
-    if (relatedSort === 'bids') {
-      filtered = [...filtered].sort((a, b) => (b.offers?.length || 0) - (a.offers?.length || 0));
+    let filtered = allNFTs.filter(
+      (n) => relatedTrackIds.includes(n.trackId) && n.id !== localNft.id,
+    );
+
+    if (relatedSort === "bids") {
+      filtered = [...filtered].sort(
+        (a, b) => (b.offers?.length || 0) - (a.offers?.length || 0),
+      );
     }
 
     return filtered.slice(0, 4);
@@ -244,22 +301,29 @@ const NFTDetail: React.FC = () => {
     if (!localNft) return [];
     const basePrice = parseFloat(localNft.price) || 0.5;
     return [
-      { name: 'Jan', price: basePrice * 0.4 },
-      { name: 'Feb', price: basePrice * 0.6 },
-      { name: 'Mar', price: basePrice * 0.5 },
-      { name: 'Apr', price: basePrice * 0.9 },
-      { name: 'May', price: basePrice * 0.8 },
-      { name: 'Jun', price: basePrice },
+      { name: "Jan", price: basePrice * 0.4 },
+      { name: "Feb", price: basePrice * 0.6 },
+      { name: "Mar", price: basePrice * 0.5 },
+      { name: "Apr", price: basePrice * 0.9 },
+      { name: "May", price: basePrice * 0.8 },
+      { name: "Jun", price: basePrice },
     ];
   }, [localNft?.price]);
 
-  if (allNFTs.length === 0) return <div className="min-h-screen flex items-center justify-center text-foreground">Loading assets...</div>;
+  if (allNFTs.length === 0)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-foreground">
+        Loading assets...
+      </div>
+    );
   if (!localNft) {
     return (
       <div className="min-h-screen flex items-center justify-center text-foreground">
         <div className="text-center">
           <h2 className="text-[20px] font-bold mb-4">Asset Not Found</h2>
-          <p className="text-muted-foreground/80">The requested NFT could not be located.</p>
+          <p className="text-muted-foreground/80">
+            The requested NFT could not be located.
+          </p>
         </div>
       </div>
     );
@@ -285,10 +349,10 @@ const NFTDetail: React.FC = () => {
       tonConnectUI.openModal();
       return;
     }
-    
+
     const bidValue = parseFloat(inlineBidAmount);
     const minBidValue = parseFloat(minNextBid);
-    
+
     if (isAuctionEnded) {
       addNotification("Auction session expired. Signal rejection.", "error");
       return;
@@ -301,26 +365,26 @@ const NFTDetail: React.FC = () => {
 
     setIsPlacingBid(true);
     addNotification("Broadcasting bid to neural relay...", "info");
-    
+
     try {
       // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const newOffer = {
         id: `offer-${Date.now()}`,
         offerer: userAddress,
         price: bidValue.toString(),
-        timestamp: 'Just now',
-        duration: '24h'
+        timestamp: "Just now",
+        duration: "24h",
       };
-      
-      updateNFT(localNft.id, { 
-        price: bidValue.toString(), 
-        offers: [newOffer, ...(localNft.offers || [])] 
+
+      updateNFT(localNft.id, {
+        price: bidValue.toString(),
+        offers: [newOffer, ...(localNft.offers || [])],
       });
-      
+
       addNotification(`Bid of ${bidValue} TON placed!`, "success");
-      setInlineBidAmount('');
+      setInlineBidAmount("");
     } catch (e) {
       console.error(e);
       addNotification("Bid broadcast failed.", "error");
@@ -349,23 +413,23 @@ const NFTDetail: React.FC = () => {
 
   const confirmAcceptOffer = async () => {
     if (!offerToAccept || !localNft) return;
-    
+
     addNotification(`Accepting offer from ${offerToAccept.offerer}...`, "info");
-    
+
     // Simulate blockchain delay
     setTimeout(() => {
       // Update NFT owner and clear listing
-      updateNFT(localNft.id, { 
+      updateNFT(localNft.id, {
         owner: offerToAccept.offerer,
         listingType: undefined,
         price: offerToAccept.price,
-        offers: [] // Clear offers after sale
+        offers: [], // Clear offers after sale
       });
-      
+
       addNotification("Asset ownership transfer protocol complete.", "success");
       setOfferToAccept(null);
       setTimeout(() => {
-        navigate('/profile');
+        navigate("/profile");
       }, 1000);
     }, 1500);
   };
@@ -377,7 +441,8 @@ const NFTDetail: React.FC = () => {
   const confirmDeclineOffer = () => {
     if (!localNft || !offerToDecline) return;
     /* Remove the offer */
-    const newOffers = localNft.offers?.filter(o => o.offerer !== offerToDecline) || [];
+    const newOffers =
+      localNft.offers?.filter((o) => o.offerer !== offerToDecline) || [];
     updateNFT(localNft.id, { offers: newOffers });
     addNotification(`Offer from ${offerToDecline} rejected.`, "info");
     setOfferToDecline(null);
@@ -389,9 +454,9 @@ const NFTDetail: React.FC = () => {
 
   const confirmCancelListing = async () => {
     if (!localNft) return;
-    
+
     addNotification("Initiating listing cancellation protocol...", "info");
-    
+
     try {
       const listing = await getActiveListingForNFT(localNft.id);
       if (!listing) {
@@ -402,7 +467,7 @@ const NFTDetail: React.FC = () => {
       }
 
       await cancelListing(tonConnectUI, listing, localNft);
-      
+
       updateNFT(localNft.id, { listingType: undefined });
       addNotification("Listing cancelled. Asset returned to vault.", "success");
     } catch (e) {
@@ -419,11 +484,12 @@ const NFTDetail: React.FC = () => {
 
   const confirmCancelBid = () => {
     if (!localNft || !userAddress) return;
-    
+
     addNotification("Initiating bid withdrawal protocol...", "info");
-    
+
     setTimeout(() => {
-      const newOffers = localNft.offers?.filter(o => o.offerer !== userAddress) || [];
+      const newOffers =
+        localNft.offers?.filter((o) => o.offerer !== userAddress) || [];
       updateNFT(localNft.id, { offers: newOffers });
       addNotification("Bid signal withdrawn from the relay.", "success");
       setIsCancelBidConfirmOpen(false);
@@ -439,22 +505,27 @@ const NFTDetail: React.FC = () => {
     };
 
     try {
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare(shareData)
+      ) {
         await navigator.share(shareData);
-        addNotification('Shared successfully!', 'success');
+        addNotification("Shared successfully!", "success");
       } else {
         await navigator.clipboard.writeText(shareUrl);
-        addNotification('Link copied to clipboard!', 'success');
+        addNotification("Link copied to clipboard!", "success");
       }
     } catch (err: any) {
       // Don't log or show an error if the user just cancelled the share dialog
-      const isCancel = err.name === 'AbortError' || 
-                      err.message?.toLowerCase().includes('canceled') ||
-                      err.message?.toLowerCase().includes('aborted');
-      
+      const isCancel =
+        err.name === "AbortError" ||
+        err.message?.toLowerCase().includes("canceled") ||
+        err.message?.toLowerCase().includes("aborted");
+
       if (!isCancel) {
-        console.error('Error sharing:', err);
-        addNotification('Failed to share.', 'error');
+        console.error("Error sharing:", err);
+        addNotification("Failed to share.", "error");
       }
     }
   };
@@ -468,7 +539,9 @@ const NFTDetail: React.FC = () => {
       {isFetchingMetadata && (
         <div className="fixed inset-0 z-50 bg-background/60 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-300">
           <LoadingSpinner size={64} />
-          <p className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em] animate-pulse mt-8">Syncing Neural Relay...</p>
+          <p className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em] animate-pulse mt-8">
+            Syncing Neural Relay...
+          </p>
         </div>
       )}
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-4 pt-4">
@@ -476,9 +549,15 @@ const NFTDetail: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-4 px-4 py-4 bg-white/5 backdrop-blur-md rounded-full border border-white/10">
               <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-              <span className="text-[9px] font-bold text-foreground/80 uppercase tracking-widest">On-Chain Verified</span>
+              <span className="text-[9px] font-bold text-foreground/80 uppercase tracking-widest">
+                On-Chain Verified
+              </span>
             </div>
-            <button onClick={handleShare} className="w-10 h-10 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-muted-foreground hover:text-blue-400 hover:border-blue-400/50 transition-all" title="Share Protocol">
+            <button
+              onClick={handleShare}
+              className="w-10 h-10 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-muted-foreground hover:text-blue-400 hover:border-blue-400/50 transition-all"
+              title="Share Protocol"
+            >
               <Share2 className="h-4 w-4" />
             </button>
           </div>
@@ -489,11 +568,20 @@ const NFTDetail: React.FC = () => {
           <div className="lg:col-span-5 space-y-4">
             <div className="relative group" onClick={handlePlayClick}>
               <div className="relative aspect-square rounded-[2px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] bg-black/40 border border-white/10">
-                <img src={localNft.imageUrl || getPlaceholderImage(`nft-${localNft.id}`)} className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" alt={localNft.title} />
-                
+                <img
+                  src={
+                    localNft.imageUrl ||
+                    getPlaceholderImage(`nft-${localNft.id}`)
+                  }
+                  className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110"
+                  alt={localNft.title}
+                />
+
                 {/* Play Overlay */}
-                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[4px] transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                  <motion.div 
+                <div
+                  className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[4px] transition-opacity duration-500 ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                >
+                  <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     className="w-24 h-24 rounded-full bg-blue-600/90 backdrop-blur-md flex items-center justify-center shadow-[0_0_40px_rgba(37,99,235,0.6)] border border-white/20"
@@ -509,13 +597,22 @@ const NFTDetail: React.FC = () => {
                 {/* Edition Badge */}
                 <div className="absolute top-4 left-4 flex flex-col gap-1.5 sm:top-6 sm:left-6">
                   <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {localNft.edition} <span className="text-muted-foreground ml-2 sm:ml-4">Edition</span>
+                    {localNft.edition}{" "}
+                    <span className="text-muted-foreground ml-2 sm:ml-4">
+                      Edition
+                    </span>
                   </div>
                   <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {localNft.minted || 0} <span className="text-muted-foreground ml-1.5 sm:ml-2">Minted / {localNft.supply || 0} Total</span>
+                    {localNft.minted || 0}{" "}
+                    <span className="text-muted-foreground ml-1.5 sm:ml-2">
+                      Minted / {localNft.supply || 0} Total
+                    </span>
                   </div>
                   <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                    {(localNft.supply || 0) - (localNft.minted || 0)} <span className="text-muted-foreground ml-1.5 sm:ml-2">Remaining</span>
+                    {(localNft.supply || 0) - (localNft.minted || 0)}{" "}
+                    <span className="text-muted-foreground ml-1.5 sm:ml-2">
+                      Remaining
+                    </span>
                   </div>
                 </div>
 
@@ -525,11 +622,17 @@ const NFTDetail: React.FC = () => {
                     <div className="bg-background/60 backdrop-blur-2xl border border-border px-3 py-2 sm:px-4 sm:py-4 rounded-[12px] flex items-center justify-between shadow-2xl flex-wrap gap-2 sm:gap-4">
                       <div className="flex items-center gap-2 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-4 bg-orange-500 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)]">
                         <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
-                        <span className="text-[8px] sm:text-[10px] font-bold text-white uppercase tracking-[0.2em]">Live Auction Active</span>
+                        <span className="text-[8px] sm:text-[10px] font-bold text-white uppercase tracking-[0.2em]">
+                          Live Auction Active
+                        </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5 sm:mb-1">Time Remaining</span>
-                        <span className="text-[10px] sm:text-[12px] font-black text-amber-500 uppercase tracking-widest">{timeRemaining || 'Loading...'}</span>
+                        <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5 sm:mb-1">
+                          Time Remaining
+                        </span>
+                        <span className="text-[10px] sm:text-[12px] font-black text-amber-500 uppercase tracking-widest">
+                          {timeRemaining || "Loading..."}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -540,18 +643,47 @@ const NFTDetail: React.FC = () => {
             {/* Hardware-style Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'BPM', val: associatedTrack?.bpm || '128', icon: Activity, color: 'text-blue-500' },
-                { label: 'KEY', val: associatedTrack?.key || 'C#m', icon: MusicIcon, color: 'text-purple-500' },
-                { label: 'BIT', val: associatedTrack?.bitrate || 'FLAC', icon: Zap, color: 'text-emerald-500' },
-                { label: 'RANK', val: '#12', icon: Award, color: 'text-amber-500' }
+                {
+                  label: "BPM",
+                  val: associatedTrack?.bpm || "128",
+                  icon: Activity,
+                  color: "text-blue-500",
+                },
+                {
+                  label: "KEY",
+                  val: associatedTrack?.key || "C#m",
+                  icon: MusicIcon,
+                  color: "text-purple-500",
+                },
+                {
+                  label: "BIT",
+                  val: associatedTrack?.bitrate || "FLAC",
+                  icon: Zap,
+                  color: "text-emerald-500",
+                },
+                {
+                  label: "RANK",
+                  val: "#12",
+                  icon: Award,
+                  color: "text-amber-500",
+                },
               ].map((stat) => (
-                <div key={stat.label} className="bg-white/5 backdrop-blur-md p-4 rounded-[2px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10">
-                  <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-40`}></div>
+                <div
+                  key={stat.label}
+                  className="bg-white/5 backdrop-blur-md p-4 rounded-[2px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
+                >
+                  <div
+                    className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace("text", "bg")} opacity-40`}
+                  ></div>
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.3em]">{stat.label}</p>
+                    <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.3em]">
+                      {stat.label}
+                    </p>
                     <stat.icon className={`h-3 w-3 ${stat.color} opacity-40`} />
                   </div>
-                  <p className="text-base font-bold text-foreground tracking-tighter font-mono">{stat.val}</p>
+                  <p className="text-base font-bold text-foreground tracking-tighter font-mono">
+                    {stat.val}
+                  </p>
                 </div>
               ))}
             </div>
@@ -561,7 +693,9 @@ const NFTDetail: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <TrendingUp className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">Protocol Value Analysis</h3>
+                  <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">
+                    Protocol Value Analysis
+                  </h3>
                 </div>
                 <div className="flex items-center gap-4 text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
                   <span className="flex items-center gap-2">
@@ -575,27 +709,41 @@ const NFTDetail: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={priceHistoryData}>
                     <defs>
-                      <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      <linearGradient
+                        id="colorPrice"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#3b82f6"
+                          stopOpacity={0.3}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#3b82f6"
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#0a0a0a', 
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '12px',
-                        fontSize: '10px',
-                        fontFamily: 'Poppins, sans-serif'
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#0a0a0a",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "12px",
+                        fontSize: "10px",
+                        fontFamily: "Poppins, sans-serif",
                       }}
-                      itemStyle={{ color: '#3b82f6' }}
+                      itemStyle={{ color: "#3b82f6" }}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="price" 
-                      stroke="#3b82f6" 
-                      fillOpacity={1} 
-                      fill="url(#colorPrice)" 
+                    <Area
+                      type="monotone"
+                      dataKey="price"
+                      stroke="#3b82f6"
+                      fillOpacity={1}
+                      fill="url(#colorPrice)"
                       strokeWidth={3}
                     />
                   </AreaChart>
@@ -604,12 +752,20 @@ const NFTDetail: React.FC = () => {
 
               <div className="flex justify-between items-center pt-2">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">All Time High</p>
-                  <p className="text-sm font-bold text-foreground font-mono">{(parseFloat(localNft.price) * 2.4).toFixed(2)} TON</p>
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                    All Time High
+                  </p>
+                  <p className="text-sm font-bold text-foreground font-mono">
+                    {(parseFloat(localNft.price) * 2.4).toFixed(2)} TON
+                  </p>
                 </div>
                 <div className="text-right space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Protocol Velocity</p>
-                  <p className="text-sm font-bold text-emerald-500 font-mono">+12.4%</p>
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                    Protocol Velocity
+                  </p>
+                  <p className="text-sm font-bold text-emerald-500 font-mono">
+                    +12.4%
+                  </p>
                 </div>
               </div>
             </div>
@@ -619,122 +775,222 @@ const NFTDetail: React.FC = () => {
           <div className="lg:col-span-7 flex flex-col">
             <header className="mb-4">
               <div className="flex flex-wrap items-center gap-4 mb-4">
-                <div className="flex items-center gap-4 cursor-pointer group/creator" onClick={() => {
-                  const artist = MOCK_ARTISTS.find(a => a.name === localNft.creator);
-                  if (artist) navigate(`/artist/${artist.uid}`);
-                }} >
+                <div
+                  className="flex items-center gap-4 cursor-pointer group/creator"
+                  onClick={() => {
+                    const artist = MOCK_ARTISTS.find(
+                      (a) => a.name === localNft.creator,
+                    );
+                    if (artist) navigate(`/artist/${artist.uid}`);
+                  }}
+                >
                   <div className="relative w-10 h-10">
-                    <img src={MOCK_ARTISTS.find(a => a.name === localNft.creator)?.avatarUrl || getPlaceholderImage(`artist-${localNft.creator}`)} className="w-full h-full rounded-full object-cover" alt="" />
-                    {MOCK_ARTISTS.find(a => a.name === localNft.creator)?.verified && (
+                    <img
+                      src={
+                        MOCK_ARTISTS.find((a) => a.name === localNft.creator)
+                          ?.avatarUrl ||
+                        getPlaceholderImage(`artist-${localNft.creator}`)
+                      }
+                      className="w-full h-full rounded-full object-cover"
+                      alt=""
+                    />
+                    {MOCK_ARTISTS.find((a) => a.name === localNft.creator)
+                      ?.verified && (
                       <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-background flex items-center justify-center">
                         <Check className="h-2 w-2 text-white" />
                       </div>
                     )}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Creator</span>
-                    <span className="text-xs font-bold text-foreground uppercase tracking-tight group-hover:text-blue-500 transition-colors">{localNft.creator}</span>
+                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                      Creator
+                    </span>
+                    <span className="text-xs font-bold text-foreground uppercase tracking-tight group-hover:text-blue-500 transition-colors">
+                      {localNft.creator}
+                    </span>
                   </div>
                 </div>
 
                 <div className="w-px h-8 bg-muted"></div>
 
-                <div className="flex items-center gap-4 cursor-pointer group/owner" onClick={() => {
-                  if (localNft.owner === userProfile.walletAddress) {
-                    navigate('/profile');
-                  } else {
-                    const artist = MOCK_ARTISTS.find(a => a.walletAddress === localNft.owner || a.name === localNft.owner);
-                    if (artist) navigate(`/artist/${artist.uid}`);
-                  }
-                }} >
+                <div
+                  className="flex items-center gap-4 cursor-pointer group/owner"
+                  onClick={() => {
+                    if (localNft.owner === userProfile.walletAddress) {
+                      navigate("/profile");
+                    } else {
+                      const artist = MOCK_ARTISTS.find(
+                        (a) =>
+                          a.walletAddress === localNft.owner ||
+                          a.name === localNft.owner,
+                      );
+                      if (artist) navigate(`/artist/${artist.uid}`);
+                    }
+                  }}
+                >
                   <div className="relative w-10 h-10">
                     <div className="w-full h-full rounded-full bg-muted/50 flex items-center justify-center transition-all group-hover/owner:bg-muted">
-                      {MOCK_ARTISTS.find(a => a.walletAddress === localNft.owner || a.name === localNft.owner) ? (
-                        <img 
-                          src={MOCK_ARTISTS.find(a => a.walletAddress === localNft.owner || a.name === localNft.owner)?.avatarUrl} 
-                          className="w-full h-full rounded-full object-cover" 
-                          alt="" 
+                      {MOCK_ARTISTS.find(
+                        (a) =>
+                          a.walletAddress === localNft.owner ||
+                          a.name === localNft.owner,
+                      ) ? (
+                        <img
+                          src={
+                            MOCK_ARTISTS.find(
+                              (a) =>
+                                a.walletAddress === localNft.owner ||
+                                a.name === localNft.owner,
+                            )?.avatarUrl
+                          }
+                          className="w-full h-full rounded-full object-cover"
+                          alt=""
                         />
                       ) : (
                         <User className="h-5 w-5 text-muted-foreground group-hover/owner:text-foreground" />
                       )}
                     </div>
-                    {(MOCK_ARTISTS.find(a => a.walletAddress === localNft.owner || a.name === localNft.owner)?.verified || (localNft.owner === userProfile.walletAddress && userProfile.isVerified)) && (
+                    {(MOCK_ARTISTS.find(
+                      (a) =>
+                        a.walletAddress === localNft.owner ||
+                        a.name === localNft.owner,
+                    )?.verified ||
+                      (localNft.owner === userProfile.walletAddress &&
+                        userProfile.isVerified)) && (
                       <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-background flex items-center justify-center">
                         <Check className="h-2 w-2 text-white" />
                       </div>
                     )}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Current Owner</span>
+                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                      Current Owner
+                    </span>
                     <span className="text-xs font-bold text-muted-foreground/80 uppercase tracking-tight group-hover:text-foreground transition-colors">
-                      {isOwner ? 'You (Vault)' : localNft.owner ? `${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}` : 'Unknown'}
+                      {isOwner
+                        ? "You (Vault)"
+                        : localNft.owner
+                          ? `${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}`
+                          : "Unknown"}
                     </span>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-6 text-[8px] uppercase tracking-widest">Holders</Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[8px] uppercase tracking-widest"
+                      >
+                        Holders
+                      </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      {["Wallet 1", "Wallet 2", "Wallet 3"].map(h => <DropdownMenuItem key={h} className="text-[8px] uppercase">{h}</DropdownMenuItem>)}
+                      {["Wallet 1", "Wallet 2", "Wallet 3"].map((h) => (
+                        <DropdownMenuItem
+                          key={h}
+                          className="text-[8px] uppercase"
+                        >
+                          {h}
+                        </DropdownMenuItem>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </div>
 
-              <h1 className="text-[18px] sm:text-[24px] md:text-[36px] font-bold tracking-tighter uppercase text-foreground leading-[1] mb-2">{localNft.title}</h1>
-              
+              <h1 className="text-[18px] sm:text-[24px] md:text-[36px] font-bold tracking-tighter uppercase text-foreground leading-[1] mb-2">
+                {localNft.title}
+              </h1>
+
               <ReactionsSection targetId={localNft.id} targetType="nft" />
 
               <div className="flex items-center justify-between py-2 sm:py-4 mt-1 sm:mt-2">
                 <div className="flex items-center gap-4">
-                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">Protocol ID</span>
-                  <span className="text-[9px] sm:text-[10px] font-mono text-blue-500/60 uppercase tracking-widest">{localNft.id.toUpperCase()}</span>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">
+                    Protocol ID
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-mono text-blue-500/60 uppercase tracking-widest">
+                    {localNft.id.toUpperCase()}
+                  </span>
                 </div>
-                {localNft.contractAddress && (
-                  <a href={`https://tonviewer.com/${localNft.contractAddress}`} target="_blank" rel="noreferrer" className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-blue-400 transition-colors" >
-                    Explorer <ExternalLink className="h-3 w-3" />
-                  </a>
-                )}
+                <div className="flex items-center gap-4">
+                  {localNft.contractAddress && (
+                    <a
+                      href={`https://tonviewer.com/${localNft.contractAddress}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-blue-400 transition-colors"
+                    >
+                      Explorer <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-widest hover:text-blue-400 transition-colors cursor-pointer"
+                  >
+                    Share <Share2 className="h-3.5 w-3.5 text-blue-400" />
+                  </button>
+                </div>
               </div>
             </header>
 
             {/* Pricing Section - Hardware Style */}
             <div className="bg-white/5 backdrop-blur-xl rounded-[2px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000"><Zap className="h-64 w-64 text-blue-500" /></div>
-              
+              <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000">
+                <Zap className="h-64 w-64 text-blue-500" />
+              </div>
+
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 relative z-10">
                 <div className="space-y-2 sm:space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isAuction ? 'bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`}></div>
+                    <div
+                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isAuction ? "bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]" : "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"}`}
+                    ></div>
                     <span className="text-[8px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
-                      {isAuction ? 'Current Highest Bid' : 'Valuation Protocol'}
+                      {isAuction ? "Current Highest Bid" : "Valuation Protocol"}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2 sm:gap-3">
                     <span className="text-[32px] sm:text-[48px] md:text-[64px] font-black text-foreground tracking-tighter leading-none">
-                      {isAuction ? (highestOfferPrice > 0 ? highestOfferPrice : (localNft.startingBid || localNft.price)) : localNft.price}
+                      {isAuction
+                        ? highestOfferPrice > 0
+                          ? highestOfferPrice
+                          : localNft.startingBid || localNft.price
+                        : localNft.price}
                     </span>
-                    <span className="text-[14px] sm:text-[18px] font-black text-blue-500 uppercase tracking-tighter">TON</span>
+                    <span className="text-[14px] sm:text-[18px] font-black text-blue-500 uppercase tracking-tighter">
+                      TON
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 sm:gap-3">
                     <p className="text-[8px] sm:text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest px-2.5 py-1 sm:px-3 sm:py-1.5 bg-white/5 rounded-full border border-white/5">
-                      ≈ ${(parseFloat(localNft.price) * 5.2).toLocaleString()} USD
+                      ≈ ${(parseFloat(localNft.price) * 5.2).toLocaleString()}{" "}
+                      USD
                     </p>
                     <div className="h-px w-6 sm:w-8 bg-white/10"></div>
-                    <p className="text-[8px] sm:text-[9px] font-bold text-emerald-500 uppercase tracking-widest">+12.4% Vol</p>
+                    <p className="text-[8px] sm:text-[9px] font-bold text-emerald-500 uppercase tracking-widest">
+                      +12.4% Vol
+                    </p>
                   </div>
                 </div>
 
                 {isAuction && (
                   <div className="bg-white/5 backdrop-blur-md p-2 rounded-[2px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
                     <div className="flex flex-col items-start">
-                        <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60">Highest Bid</span>
-                        <span className="text-[10px] font-black tracking-tighter text-foreground">{highestOfferPrice} TON</span>
+                      <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                        Highest Bid
+                      </span>
+                      <span className="text-[10px] font-black tracking-tighter text-foreground">
+                        {highestOfferPrice} TON
+                      </span>
                     </div>
                     <div className="flex flex-col items-end">
-                        <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-0.5"><Clock className="h-2 w-2" /> Time</span>
-                        <span className="text-[10px] font-black tracking-tighter text-amber-500 tabular-nums">{timeRemaining || '00:00:00'}</span>
+                      <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-0.5">
+                        <Clock className="h-2 w-2" /> Time
+                      </span>
+                      <span className="text-[10px] font-black tracking-tighter text-amber-500 tabular-nums">
+                        {timeRemaining || "00:00:00"}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -743,20 +999,42 @@ const NFTDetail: React.FC = () => {
               <div className="mt-4 flex flex-col sm:flex-row gap-3 relative z-10">
                 {isOwner ? (
                   <>
-                    <button onClick={() => localNft.listingType ? setShowManageModal(true) : setShowListModal(true)} className="flex-1 py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]" >
-                      {localNft.listingType ? 'Manage' : 'Sell'}
+                    <button
+                      onClick={() =>
+                        localNft.listingType
+                          ? setShowManageModal(true)
+                          : setShowListModal(true)
+                      }
+                      className="flex-1 py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]"
+                    >
+                      {localNft.listingType ? "Manage" : "Sell"}
                     </button>
-                    <button onClick={() => setShowManageModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-zinc-800 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
+                    <button
+                      onClick={() => setShowManageModal(true)}
+                      className="flex-1 py-3 bg-white/5 hover:bg-zinc-800 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10"
+                    >
                       Settings
                     </button>
-                    <button onClick={() => setShowSendModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10" >
+                    <button
+                      onClick={() => setShowSendModal(true)}
+                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                    >
                       <Send className="h-3.5 w-3.5" /> Send
                     </button>
                     {localNft.listingType && (
-                      <button onClick={handleCancelListing} className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 hover:border-red-500/20" >
+                      <button
+                        onClick={handleCancelListing}
+                        className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 hover:border-red-500/20"
+                      >
                         Cancel
                       </button>
                     )}
+                    <button
+                      onClick={handleShare}
+                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                    >
+                      <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
+                    </button>
                   </>
                 ) : (
                   <>
@@ -769,39 +1047,60 @@ const NFTDetail: React.FC = () => {
                           placeholder={`${minNextBid}+`}
                           className="w-1/4 bg-white/5 border border-white/10 rounded-[2px] px-3 text-white font-bold outline-none focus-visible:ring-1 focus-visible:ring-amber-500 transition-all text-xs"
                         />
-                        <button 
-                          onClick={handleInlineBid} 
+                        <button
+                          onClick={handleInlineBid}
                           disabled={isPlacingBid || isAuctionEnded}
                           className={cn(
-                             "flex-1 py-2 cursor-pointer transition-all text-white rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em] border flex items-center justify-center gap-2",
-                             isAuctionEnded 
-                               ? "bg-muted border-border text-muted-foreground cursor-not-allowed" 
-                               : "bg-orange-500 border-orange-600"
+                            "flex-1 py-2 cursor-pointer transition-all text-white rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em] border flex items-center justify-center gap-2",
+                            isAuctionEnded
+                              ? "bg-muted border-border text-muted-foreground cursor-not-allowed"
+                              : "bg-orange-500 border-orange-600",
                           )}
                         >
-                          {isPlacingBid ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isAuctionEnded ? 'EXPIRED' : 'Place Bid'}
+                          {isPlacingBid ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : isAuctionEnded ? (
+                            "EXPIRED"
+                          ) : (
+                            "Place Bid"
+                          )}
                         </button>
                       </div>
                     ) : (
-                      <button onClick={handleAction} className="flex-[2] py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]" >
-                        {isAuction ? 'Place Bid' : 'Acquire Asset'}
+                      <button
+                        onClick={handleAction}
+                        className="flex-[2] py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]"
+                      >
+                        {isAuction ? "Place Bid" : "Acquire Asset"}
                       </button>
                     )}
                     {!isAuction && (
-                      <button onClick={() => setShowOfferModal(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10" >
+                      <button
+                        onClick={() => setShowOfferModal(true)}
+                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10"
+                      >
                         Offer
                       </button>
                     )}
                     {userOffer && (
-                      <button onClick={handleCancelBid} className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-red-500/20" >
+                      <button
+                        onClick={handleCancelBid}
+                        className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-red-500/20"
+                      >
                         Retract
                       </button>
                     )}
-                    <button 
+                    <button
                       onClick={() => setIsTipping(true)}
                       className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
                     >
                       <Coins className="h-3.5 w-3.5 text-blue-400" /> Support
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                    >
+                      <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
                     </button>
                   </>
                 )}
@@ -811,14 +1110,14 @@ const NFTDetail: React.FC = () => {
               <AnimatePresence>
                 {isTipping && (
                   <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => setIsTipping(false)}
                       className="absolute inset-0 bg-background/80 backdrop-blur-sm"
                     />
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, scale: 0.9, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -826,15 +1125,19 @@ const NFTDetail: React.FC = () => {
                     >
                       {/* Hardware style scanline */}
                       <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
-                      
+
                       <div className="relative z-10">
                         <div className="flex items-center gap-4 mb-4">
                           <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
                             <Coins className="h-5 w-5 text-blue-500" />
                           </div>
                           <div>
-                            <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Tip Creator</h3>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Support {localNft.creator}</p>
+                            <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">
+                              Tip Creator
+                            </h3>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                              Support {localNft.creator}
+                            </p>
                           </div>
                         </div>
 
@@ -846,14 +1149,18 @@ const NFTDetail: React.FC = () => {
                               className="group relative py-4 bg-muted/50 hover:bg-muted rounded-[12px] transition-all active:scale-95"
                             >
                               <div className="flex flex-col items-center">
-                                <span className="text-xl font-bold text-foreground group-hover:text-blue-400 transition-colors">{amount}</span>
-                                <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">TON</span>
+                                <span className="text-xl font-bold text-foreground group-hover:text-blue-400 transition-colors">
+                                  {amount}
+                                </span>
+                                <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                                  TON
+                                </span>
                               </div>
                             </button>
                           ))}
                         </div>
 
-                        <button 
+                        <button
                           onClick={() => setIsTipping(false)}
                           className="w-full py-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors"
                         >
@@ -870,23 +1177,41 @@ const NFTDetail: React.FC = () => {
 
             {/* Information Tabs */}
             <div className="flex items-center gap-4 mb-4">
-              {['details', 'history', 'offers', 'comments', ...((isOwner || hasAccess) && localNft.exclusiveContent?.length ? ['exclusive'] : []), ...(isOwner ? ['collection'] : [])].map((tab) => (
-                <button key={tab} onClick={() => setActiveTab(tab as any)} className={`pb-4 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? 'text-blue-500' : 'text-muted-foreground/50 hover:text-foreground'}`}>
-                  {tab === 'exclusive' ? 'Holder Perks' : tab}
-                  {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></motion.div>}
+              {[
+                "details",
+                "history",
+                "offers",
+                "comments",
+                ...((isOwner || hasAccess) && localNft.exclusiveContent?.length
+                  ? ["exclusive"]
+                  : []),
+                ...(isOwner ? ["collection"] : []),
+              ].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab as any)}
+                  className={`pb-4 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? "text-blue-500" : "text-muted-foreground/50 hover:text-foreground"}`}
+                >
+                  {tab === "exclusive" ? "Holder Perks" : tab}
+                  {activeTab === tab && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                    ></motion.div>
+                  )}
                 </button>
               ))}
             </div>
             <div className="min-h-[400px]">
               <AnimatePresence mode="wait">
-                {activeTab === 'details' && (
-                  <motion.div 
+                {activeTab === "details" && (
+                  <motion.div
                     key="details"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                   >
+                  >
                     {metadataError && (
                       <div className="col-span-full p-4 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-[16px] flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -894,37 +1219,56 @@ const NFTDetail: React.FC = () => {
                             <X className="h-5 w-5 text-red-500" />
                           </div>
                           <div>
-                            <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-4">Sync Error Detected</p>
-                            <p className="text-xs text-red-400/80 font-medium">{metadataError}</p>
+                            <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-4">
+                              Sync Error Detected
+                            </p>
+                            <p className="text-xs text-red-400/80 font-medium">
+                              {metadataError}
+                            </p>
                           </div>
                         </div>
-                        <button onClick={loadMetadata} className="px-4 py-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95">
+                        <button
+                          onClick={loadMetadata}
+                          className="px-4 py-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                        >
                           Retry Sync
                         </button>
                       </div>
                     )}
-                    
-                    {(localNft.traits || (dynamicMetadata && dynamicMetadata.traits)) && (
+
+                    {(localNft.traits ||
+                      (dynamicMetadata && dynamicMetadata.traits)) && (
                       <div className="col-span-full space-y-4">
                         <div className="flex items-center gap-4">
                           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-blue-500/20"></div>
-                          <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">On-Chain DNA Attributes</h4>
+                          <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
+                            On-Chain DNA Attributes
+                          </h4>
                           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-blue-500/20"></div>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {(localNft.traits || dynamicMetadata!.traits!).map((trait) => (
-                            <div key={trait.trait_type} className="bg-white/[0.03] border border-white/5 p-6 rounded-[20px] hover:border-blue-500/30 transition-all group">
-                              <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] block mb-4">{trait.trait_type}</span>
-                              <span className="text-sm font-black text-foreground tracking-tight uppercase">{trait.value}</span>
-                              <div className="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500 w-2/3 group-hover:w-full transition-all duration-1000"></div>
+                          {(localNft.traits || dynamicMetadata!.traits!).map(
+                            (trait) => (
+                              <div
+                                key={trait.trait_type}
+                                className="bg-white/[0.03] border border-white/5 p-6 rounded-[20px] hover:border-blue-500/30 transition-all group"
+                              >
+                                <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] block mb-4">
+                                  {trait.trait_type}
+                                </span>
+                                <span className="text-sm font-black text-foreground tracking-tight uppercase">
+                                  {trait.value}
+                                </span>
+                                <div className="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                  <div className="h-full bg-blue-500 w-2/3 group-hover:w-full transition-all duration-1000"></div>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ),
+                          )}
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="col-span-full md:col-span-2 space-y-4">
                       <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px]">
                         <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
@@ -932,117 +1276,278 @@ const NFTDetail: React.FC = () => {
                           Protocol Distribution
                         </h4>
                         <div className="space-y-6">
-                          {localNft.royaltySplits && localNft.royaltySplits.length > 0 ? (
+                          {localNft.royaltySplits &&
+                          localNft.royaltySplits.length > 0 ? (
                             localNft.royaltySplits.map((split, i) => (
                               <div key={i} className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                  <span className="text-xs font-black text-foreground uppercase tracking-widest">{split.label || 'Collaborator'}</span>
-                                  <span className="text-sm font-black text-emerald-500">{(split.percentage * 100).toFixed(0)}%</span>
+                                  <span className="text-xs font-black text-foreground uppercase tracking-widest">
+                                    {split.label || "Collaborator"}
+                                  </span>
+                                  <span className="text-sm font-black text-emerald-500">
+                                    {(split.percentage * 100).toFixed(0)}%
+                                  </span>
                                 </div>
                                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                  <motion.div 
+                                  <motion.div
                                     initial={{ width: 0 }}
-                                    animate={{ width: `${split.percentage * 100}%` }}
+                                    animate={{
+                                      width: `${split.percentage * 100}%`,
+                                    }}
                                     className="h-full bg-emerald-500"
                                   />
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">Standard 100% Creator Share Protocol Active</div>
+                            <div className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                              Standard 100% Creator Share Protocol Active
+                            </div>
                           )}
                         </div>
                       </div>
                     </div>
 
                     <div className="col-span-full md:col-span-1 space-y-4">
-                       <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px] h-full flex flex-col justify-center">
-                          <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
-                            <div className="w-1.5 h-4 bg-purple-500 rounded-full" />
-                            Provenance
-                          </h4>
-                          <div className="space-y-6">
-                             <div className="flex flex-col gap-2">
-                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Minted Date</span>
-                               <span className="text-sm font-black text-foreground uppercase tracking-tight">OCT 14, 2023</span>
-                             </div>
-                             <div className="flex flex-col gap-2">
-                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Standard</span>
-                               <span className="text-sm font-black text-purple-500 uppercase tracking-tight">TON NFT-v2</span>
-                             </div>
-                             <div className="flex flex-col gap-2">
-                               <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Relay Layer</span>
-                               <span className="text-sm font-black text-foreground uppercase tracking-tight">Global Consensus</span>
-                             </div>
+                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px] h-full flex flex-col justify-center">
+                        <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
+                          <div className="w-1.5 h-4 bg-purple-500 rounded-full" />
+                          Provenance
+                        </h4>
+                        <div className="space-y-6">
+                          <div className="flex flex-col gap-2">
+                            <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                              Minted Date
+                            </span>
+                            <span className="text-sm font-black text-foreground uppercase tracking-tight">
+                              OCT 14, 2023
+                            </span>
                           </div>
-                       </div>
+                          <div className="flex flex-col gap-2">
+                            <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                              Standard
+                            </span>
+                            <span className="text-sm font-black text-purple-500 uppercase tracking-tight">
+                              TON NFT-v2
+                            </span>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                              Relay Layer
+                            </span>
+                            <span className="text-sm font-black text-foreground uppercase tracking-tight">
+                              Global Consensus
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                    {isAuction && (
+                      <div className="col-span-full space-y-4">
+                        <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px]">
+                          <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
+                            <div className="w-1.5 h-4 bg-orange-500 rounded-full" />
+                            Active Bids
+                          </h4>
+                          <div className="space-y-4">
+                            {localNft.offers && localNft.offers.length > 0 ? (
+                              [...localNft.offers]
+                                .sort(
+                                  (a, b) =>
+                                    parseFloat(b.price) - parseFloat(a.price),
+                                )
+                                .map((offer, i) => {
+                                  const isTopBid =
+                                    parseFloat(offer.price) ===
+                                    highestOfferPrice;
+                                  return (
+                                    <div
+                                      key={offer.id || i}
+                                      className={cn(
+                                        "flex items-center justify-between p-4 rounded-[16px] border transition-all hover:bg-white/[0.04]",
+                                        isTopBid
+                                          ? "bg-amber-500/10 border-amber-500/30"
+                                          : "bg-white/[0.02] border-white/5",
+                                      )}
+                                    >
+                                      <div className="flex items-center gap-4">
+                                        <div className="relative">
+                                          <div className="w-10 h-10 rounded-xl bg-muted overflow-hidden flex-shrink-0 border border-white/10">
+                                            <img
+                                              src={`https://picsum.photos/100/100?seed=${offer.offerer}`}
+                                              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                                              alt=""
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="flex flex-col">
+                                          <span className="text-sm font-black text-foreground uppercase tracking-widest">
+                                            @{(offer.offerer || "").slice(0, 8)}
+                                            ...
+                                          </span>
+                                          <div className="flex flex-col gap-0.5 mt-0.5">
+                                            {isTopBid && (
+                                              <span className="text-[9px] text-amber-500 font-bold uppercase tracking-widest">
+                                                Highest Bidder
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <span className="text-base font-black text-foreground">
+                                          {offer.price} TON
+                                        </span>
+                                        <span className="block text-[8px] text-muted-foreground uppercase tracking-widest mt-1">
+                                          {new Date(
+                                            offer.timestamp || Date.now(),
+                                          ).toLocaleDateString()}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                            ) : (
+                              <div className="text-center py-12 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+                                No bids placed yet
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 )}
-  
-                {activeTab === 'history' && (
-                  <motion.div 
+
+                {activeTab === "history" && (
+                  <motion.div
                     key="history"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="overflow-x-auto bg-white/[0.02] border border-border rounded-[24px]"
+                    className="bg-white/[0.02] border border-border rounded-[24px] p-6 lg:p-8"
                   >
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-border bg-white/[0.01]">
-                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">Event</th>
-                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">Timestamp</th>
-                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">From</th>
-                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">To</th>
-                          <th className="py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap text-right">Price</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {[...(localNft.history || [])].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((h, i) => (
-                          <motion.tr 
-                            key={`history-${i}`} 
-                            className="group hover:bg-white/[0.02] transition-colors"
-                          >
-                            <td className="py-4 px-6 whitespace-nowrap">
-                              <div className="flex items-center gap-3">
-                                <div className={cn(
-                                  "w-8 h-8 rounded-[10px] flex items-center justify-center transition-all",
-                                  h.event === 'Minted' ? "bg-blue-500/10 text-blue-500" : "bg-emerald-500/10 text-emerald-500"
-                                )}>
-                                  {h.event === 'Minted' ? <Wand2 className="h-3.5 w-3.5" /> : <Handshake className="h-3.5 w-3.5" />}
-                                </div>
-                                <span className="text-[11px] font-black text-foreground uppercase tracking-wider">{h.event}</span>
+                    <div className="relative pl-6 sm:pl-0">
+                      {/* Vertical line - hidden on small screens if we wanted it to be centered, but let's make it left-aligned */}
+                      <div className="absolute left-[31px] sm:left-[35px] top-0 bottom-0 w-px bg-white/10" />
+
+                      <div className="nft-history-list h-[500px]">
+                        {localNft.history && localNft.history.length > 0 ? (
+                          <Virtuoso
+                            style={{ height: '100%', width: '100%' }}
+                            data={[...(localNft.history || [])].sort(
+                              (a, b) =>
+                                new Date(b.date).getTime() -
+                                new Date(a.date).getTime()
+                            )}
+                            itemContent={(i, h) => (
+                              <div className="pb-8">
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: i < 10 ? i * 0.1 : 0 }}
+                                  className="relative flex items-start gap-6 sm:gap-8 group"
+                                >
+                                  <div className="relative z-10 flex-shrink-0 mt-1">
+                                    <div
+                                      className={cn(
+                                        "w-10 h-10 rounded-full flex items-center justify-center border-4 border-background transition-all shadow-xl",
+                                        h.event === "Minted"
+                                          ? "bg-blue-500 shadow-blue-500/20"
+                                          : h.event === "Transfer"
+                                            ? "bg-purple-500 shadow-purple-500/20"
+                                            : h.event === "Sold"
+                                              ? "bg-emerald-500 shadow-emerald-500/20"
+                                              : "bg-zinc-500 shadow-zinc-500/20",
+                                      )}
+                                    >
+                                      {h.event === "Minted" ? (
+                                        <Wand2 className="h-4 w-4 text-white" />
+                                      ) : h.event === "Transfer" ? (
+                                        <ArrowRightLeft className="h-4 w-4 text-white" />
+                                      ) : (
+                                        <Handshake className="h-4 w-4 text-white" />
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex-1 bg-white/[0.03] border border-white/5 rounded-2xl p-5 hover:bg-white/[0.05] transition-colors relative overflow-hidden group-hover:border-white/10">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 scale-150 pointer-events-none transition-transform group-hover:scale-110">
+                                      {h.event === "Minted" ? (
+                                        <Wand2 className="w-24 h-24" />
+                                      ) : (
+                                        <Handshake className="w-24 h-24" />
+                                      )}
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                                      <div className="space-y-1">
+                                        <div className="flex items-center gap-3">
+                                          <h4 className="text-sm font-black text-foreground uppercase tracking-widest">
+                                            {h.event}
+                                          </h4>
+                                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-white/5 px-2 py-1 rounded-md">
+                                            {h.date}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 pt-2">
+                                          <div className="flex items-center gap-2 px-3 py-1.5 bg-background shadow-inner border border-white/5 rounded-xl">
+                                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                              From
+                                            </span>
+                                            <span className="font-mono text-[11px] font-black text-primary uppercase tracking-widest">
+                                              {h.from === "Vault"
+                                                ? "GENESIS"
+                                                : `@${(h.from || "").slice(0, 6)}`}
+                                            </span>
+                                          </div>
+                                          <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                                          <div className="flex items-center gap-2 px-3 py-1.5 bg-background shadow-inner border border-white/5 rounded-xl">
+                                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                              To
+                                            </span>
+                                            <span className="font-mono text-[11px] font-black text-primary uppercase tracking-widest">
+                                              @{(h.to || "").slice(0, 6)}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      {h.price && (
+                                        <div className="flex flex-col sm:items-end justify-center self-start sm:self-auto bg-white/5 sm:bg-transparent rounded-xl p-3 sm:p-0">
+                                          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1 hidden sm:block">
+                                            Amount
+                                          </span>
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-lg font-black text-foreground tracking-tighter tabular-nums">
+                                              {h.price}
+                                            </span>
+                                            <span className="text-sm font-black text-blue-500 uppercase tracking-tighter">
+                                              TON
+                                            </span>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </motion.div>
                               </div>
-                            </td>
-                            <td className="py-4 px-6 whitespace-nowrap text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                              {h.date}
-                            </td>
-                            <td className="py-4 px-6 whitespace-nowrap font-mono text-[10px] font-black text-primary uppercase tracking-widest">
-                               {h.from === 'Vault' ? 'GENESIS' : `@${(h.from || '').slice(0, 6)}`}
-                            </td>
-                            <td className="py-4 px-6 whitespace-nowrap font-mono text-[10px] font-black text-primary uppercase tracking-widest">
-                              @{(h.to || '').slice(0, 6)}
-                            </td>
-                            <td className="py-4 px-6 whitespace-nowrap text-right text-[11px] font-black text-foreground tracking-tighter">
-                               {h.price ? (
-                                 <span className="flex items-center justify-end gap-1.5 text-foreground"><img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5" /> {h.price} TON</span>
-                               ) : <span className="text-muted-foreground">-</span>}
-                            </td>
-                          </motion.tr>
-                        ))}
-                        {(!localNft.history || localNft.history.length === 0) && (
-                          <tr>
-                            <td colSpan={5} className="py-12 text-center text-xs font-bold text-muted-foreground uppercase tracking-widest">No transaction history</td>
-                          </tr>
+                            )}
+                          />
+                        ) : (
+                          <div className="py-12 flex flex-col items-center justify-center text-center bg-white/[0.02] border border-white/5 rounded-2xl ml-16 sm:ml-[4.5rem]">
+                            <History className="w-8 h-8 text-muted-foreground/30 mb-3" />
+                            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                              No transaction history
+                            </span>
+                          </div>
                         )}
-                      </tbody>
-                    </table>
+                      </div>
+                    </div>
                   </motion.div>
                 )}
-  
-                {activeTab === 'offers' && (
-                  <motion.div 
+
+                {activeTab === "offers" && (
+                  <motion.div
                     key="offers"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1051,29 +1556,45 @@ const NFTDetail: React.FC = () => {
                   >
                     {localNft.offers && localNft.offers.length > 0 ? (
                       localNft.offers.map((o) => {
-                        const isTopBid = parseFloat(o.price) === highestOfferPrice;
+                        const isTopBid =
+                          parseFloat(o.price) === highestOfferPrice;
                         return (
-                          <div key={o.id} className={`group p-2 bg-white/[0.02] border transition-all rounded-[12px] flex flex-row items-center justify-between gap-2 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? 'border-amber-500/50 bg-amber-500/[0.05]' : 'border-blue-500/50 bg-blue-500/[0.05]') : 'border-white/5 opacity-80 hover:opacity-100'}`} >
+                          <div
+                            key={o.id}
+                            className={`group p-2 bg-white/[0.02] border transition-all rounded-[12px] flex flex-row items-center justify-between gap-2 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? "border-amber-500/50 bg-amber-500/[0.05]" : "border-blue-500/50 bg-blue-500/[0.05]") : "border-white/5 opacity-80 hover:opacity-100"}`}
+                          >
                             <div className="flex items-center gap-3 w-full">
                               <div className="relative">
-                                <div className={`w-12 h-12 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden`}>
-                                  <img src={`https://picsum.photos/100/100?seed=${o.offerer}`} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
+                                <div
+                                  className={`w-12 h-12 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden`}
+                                >
+                                  <img
+                                    src={`https://picsum.photos/100/100?seed=${o.offerer}`}
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                    alt=""
+                                  />
                                 </div>
                               </div>
                               <div className="flex flex-col gap-0.5 min-w-0">
-                                  <span className="text-xs font-black text-foreground uppercase truncate">
-                                    @{(o.offerer || '').slice(0, 6)}...
+                                <span className="text-xs font-black text-foreground uppercase truncate">
+                                  @{(o.offerer || "").slice(0, 6)}...
+                                </span>
+                                {isTopBid && (
+                                  <span
+                                    className={`text-[7px] w-fit px-1.5 py-0.5 rounded-full font-black uppercase tracking-widest ${isAuction ? "bg-amber-500 text-black" : "bg-blue-500 text-white"}`}
+                                  >
+                                    Top
                                   </span>
-                                  {isTopBid && (
-                                    <span className={`text-[7px] w-fit px-1.5 py-0.5 rounded-full font-black uppercase tracking-widest ${isAuction ? 'bg-amber-500 text-black' : 'bg-blue-500 text-white'}`}>Top</span>
-                                  )}
+                                )}
                               </div>
                               <div className="ml-auto text-right">
-                                  <span className="text-xs font-black text-foreground">{o.price} TON</span>
+                                <span className="text-xs font-black text-foreground">
+                                  {o.price} TON
+                                </span>
                               </div>
                             </div>
                           </div>
-                      );
+                        );
                       })
                     ) : (
                       <div className="text-center py-12 text-muted-foreground/50 text-[10px] font-bold uppercase tracking-widest">
@@ -1082,9 +1603,9 @@ const NFTDetail: React.FC = () => {
                     )}
                   </motion.div>
                 )}
-  
-                {activeTab === 'comments' && (
-                  <motion.div 
+
+                {activeTab === "comments" && (
+                  <motion.div
                     key="comments"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1095,8 +1616,8 @@ const NFTDetail: React.FC = () => {
                   </motion.div>
                 )}
 
-                {activeTab === 'collection' && isOwner && (
-                  <motion.div 
+                {activeTab === "collection" && isOwner && (
+                  <motion.div
                     key="collection"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1104,17 +1625,21 @@ const NFTDetail: React.FC = () => {
                     className="grid grid-cols-2 md:grid-cols-4 gap-4"
                   >
                     {allNFTs
-                      .filter((n) => n.owner === (userAddress || userProfile.walletAddress))
+                      .filter(
+                        (n) =>
+                          n.owner ===
+                          (userAddress || userProfile.walletAddress),
+                      )
                       .map((nft) => (
                         <NFTCard key={nft.id} nft={nft} />
                       ))}
                   </motion.div>
                 )}
 
-                {activeTab === 'exclusive' && (
+                {activeTab === "exclusive" && (
                   <AnimatePresence mode="wait">
-                    {(isOwner || hasAccess) ? (
-                      <motion.div 
+                    {isOwner || hasAccess ? (
+                      <motion.div
                         key="exclusive-content"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -1122,19 +1647,25 @@ const NFTDetail: React.FC = () => {
                         className="space-y-4"
                       >
                         <div className="p-4 bg-purple-500/[0.03] border border-blue-500/30 rounded-[16px] relative overflow-hidden">
-                          <div className="absolute top-0 right-0 p-4 opacity-[0.05]"><Crown className="h-24 w-24 text-purple-500" /></div>
+                          <div className="absolute top-0 right-0 p-4 opacity-[0.05]">
+                            <Crown className="h-24 w-24 text-purple-500" />
+                          </div>
                           <div className="flex items-center gap-4 mb-4 relative z-10">
                             <div className="w-12 h-12 rounded-[12px] bg-purple-500/10 flex items-center justify-center">
                               <Crown className="h-6 w-6 text-purple-500" />
                             </div>
-                            <h1 className="text-sm font-bold text-foreground uppercase tracking-widest">Holder-Only Archives</h1>
+                            <h1 className="text-sm font-bold text-foreground uppercase tracking-widest">
+                              Holder-Only Archives
+                            </h1>
                           </div>
                           <p className="text-sm text-muted-foreground/80 leading-relaxed mb-4 relative z-10 max-w-2xl">
-                            As the verified holder of the required protocol assets, you have unlocked access to the following exclusive sonic and visual artifacts.
+                            As the verified holder of the required protocol
+                            assets, you have unlocked access to the following
+                            exclusive sonic and visual artifacts.
                           </p>
                           <div className="grid grid-cols-1 gap-4 relative z-10">
                             {localNft.exclusiveContent?.map((item) => (
-                              <a 
+                              <a
                                 key={item.id}
                                 href={item.url}
                                 target="_blank"
@@ -1143,18 +1674,32 @@ const NFTDetail: React.FC = () => {
                               >
                                 <div className="flex items-center gap-4">
                                   <div className="w-12 h-12 rounded-[10px] bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                                    {item.type === 'video' && <Video className="h-6 w-6" />}
-                                    {item.type === 'track' && <MusicIcon className="h-6 w-6" />}
-                                    {item.type === 'image' && <ImageIcon className="h-6 w-6" />}
-                                    {item.type === 'document' && <FileText className="h-6 w-6" />}
+                                    {item.type === "video" && (
+                                      <Video className="h-6 w-6" />
+                                    )}
+                                    {item.type === "track" && (
+                                      <MusicIcon className="h-6 w-6" />
+                                    )}
+                                    {item.type === "image" && (
+                                      <ImageIcon className="h-6 w-6" />
+                                    )}
+                                    {item.type === "document" && (
+                                      <FileText className="h-6 w-6" />
+                                    )}
                                   </div>
                                   <div>
-                                    <p className="text-xs font-bold text-foreground uppercase tracking-tight">{item.title}</p>
-                                    <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4">{item.type} artifact</p>
+                                    <p className="text-xs font-bold text-foreground uppercase tracking-tight">
+                                      {item.title}
+                                    </p>
+                                    <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4">
+                                      {item.type} artifact
+                                    </p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                  <span className="text-[9px] font-bold text-purple-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">Access Protocol</span>
+                                  <span className="text-[9px] font-bold text-purple-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                                    Access Protocol
+                                  </span>
                                   <ExternalLink className="h-5 w-5 text-muted-foreground/50 group-hover:text-purple-500 transition-colors" />
                                 </div>
                               </a>
@@ -1163,7 +1708,7 @@ const NFTDetail: React.FC = () => {
                         </div>
                       </motion.div>
                     ) : (
-                      <motion.div 
+                      <motion.div
                         key="exclusive-locked"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -1172,9 +1717,15 @@ const NFTDetail: React.FC = () => {
                       >
                         <Lock className="h-12 w-12 text-muted-foreground/50" />
                         <div>
-                          <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Access Locked</h3>
+                          <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">
+                            Access Locked
+                          </h3>
                           <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-2 max-w-xs">
-                            Holders of {localNft.tokenGating?.tokenType === 'nft' ? 'this NFT collection' : 'the required tokens'} are granted access to these artifacts.
+                            Holders of{" "}
+                            {localNft.tokenGating?.tokenType === "nft"
+                              ? "this NFT collection"
+                              : "the required tokens"}{" "}
+                            are granted access to these artifacts.
                           </p>
                         </div>
                       </motion.div>
@@ -1185,7 +1736,7 @@ const NFTDetail: React.FC = () => {
             </div>
           </div>
         </div>
-  
+
         {/* More from Creator Section */}
         {moreFromCreator.length > 0 && (
           <div className="mt-4 animate-in fade-in slide-in-from-bottom duration-1000">
@@ -1193,12 +1744,20 @@ const NFTDetail: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="w-2 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.6)]"></div>
                 <div>
-                  <h2 className="text-base font-bold tracking-tighter uppercase text-foreground">More from {localNft.creator}</h2>
-                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">Extended Discography</p>
+                  <h2 className="text-base font-bold tracking-tighter uppercase text-foreground">
+                    More from {localNft.creator}
+                  </h2>
+                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">
+                    Extended Discography
+                  </p>
                 </div>
               </div>
-              <button onClick={() => navigate(`/artist/${localNft.creator}`)} className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group" >
-                VIEW ALL <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+              <button
+                onClick={() => navigate(`/artist/${localNft.creator}`)}
+                className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group"
+              >
+                VIEW ALL{" "}
+                <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1208,7 +1767,7 @@ const NFTDetail: React.FC = () => {
             </div>
           </div>
         )}
-  
+
         {/* Related NFTs Section */}
         {relatedNfts.length > 0 && (
           <div className="mt-4 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
@@ -1216,37 +1775,45 @@ const NFTDetail: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="w-2 h-8 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)]"></div>
                 <div>
-                  <h2 className="text-base font-bold tracking-tighter uppercase text-foreground">Related {associatedTrack?.genre} Vibes</h2>
-                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">Sonic Affinities</p>
+                  <h2 className="text-base font-bold tracking-tighter uppercase text-foreground">
+                    Related {associatedTrack?.genre} Vibes
+                  </h2>
+                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">
+                    Sonic Affinities
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex bg-white/5 rounded-full p-1 border border-white/10 gap-2">
-                  <button 
-                    onClick={() => setRelatedSort('default')}
+                  <button
+                    onClick={() => setRelatedSort("default")}
                     className={cn(
                       "px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border-2",
-                      relatedSort === 'default' 
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 border-blue-400/50" 
-                        : "text-muted-foreground hover:text-foreground bg-white/5 border-blue-500/30 hover:bg-white/10"
+                      relatedSort === "default"
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 border-blue-400/50"
+                        : "text-muted-foreground hover:text-foreground bg-white/5 border-blue-500/30 hover:bg-white/10",
                     )}
                   >
                     Default
                   </button>
-                  <button 
-                    onClick={() => setRelatedSort('bids')}
+                  <button
+                    onClick={() => setRelatedSort("bids")}
                     className={cn(
                       "px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 border-2",
-                      relatedSort === 'bids' 
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 border-blue-400/50" 
-                        : "text-muted-foreground hover:text-foreground bg-white/5 border-blue-500/30 hover:bg-white/10"
+                      relatedSort === "bids"
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 border-blue-400/50"
+                        : "text-muted-foreground hover:text-foreground bg-white/5 border-blue-500/30 hover:bg-white/10",
                     )}
                   >
                     <ArrowUpDown className="h-3 w-3" /> Most Bids
                   </button>
                 </div>
-                <button onClick={() => navigate('/explore/nfts?title=Related Vibes')} className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group" >
-                  EXPLORE GENRE <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                <button
+                  onClick={() => navigate("/explore/nfts?title=Related Vibes")}
+                  className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group"
+                >
+                  EXPLORE GENRE{" "}
+                  <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
@@ -1260,14 +1827,42 @@ const NFTDetail: React.FC = () => {
       </div>
 
       {/* Conditional Modals */}
-      {showBuyModal && <BuyNFTModal nft={localNft} onClose={() => setShowBuyModal(false)} />}
-      {showOfferModal && <PlaceOfferModal nft={localNft} onClose={() => setShowOfferModal(false)} />}
-      {showListModal && <SellNFTModal nft={localNft} onClose={() => setShowListModal(false)} />}
-      {showBidModal && <BidModal nft={localNft} onClose={() => setShowBidModal(false)} />}
-      {showSendModal && <SendNFTModal nft={localNft} isOpen={showSendModal} onClose={() => setShowSendModal(false)} />}
-      {showManageModal && <ManageNFTModal nft={localNft} isOpen={showManageModal} onClose={() => setShowManageModal(false)} />}
+      {showBuyModal && (
+        <BuyNFTModal nft={localNft} onClose={() => setShowBuyModal(false)} />
+      )}
+      {showOfferModal && (
+        <PlaceOfferModal
+          nft={localNft}
+          onClose={() => setShowOfferModal(false)}
+        />
+      )}
+      {showListModal && (
+        <SellNFTModal nft={localNft} onClose={() => setShowListModal(false)} />
+      )}
+      {showBidModal && (
+        <BidModal nft={localNft} onClose={() => setShowBidModal(false)} />
+      )}
+      {showSendModal && (
+        <SendNFTModal
+          nft={localNft}
+          isOpen={showSendModal}
+          onClose={() => setShowSendModal(false)}
+        />
+      )}
+      {showManageModal && (
+        <ManageNFTModal
+          nft={localNft}
+          isOpen={showManageModal}
+          onClose={() => setShowManageModal(false)}
+        />
+      )}
       {selectedOffer && (
-        <BidAcceptanceModal nft={localNft} offer={selectedOffer} onClose={() => setSelectedOffer(null)} onAccept={onConfirmAcceptance} />
+        <BidAcceptanceModal
+          nft={localNft}
+          offer={selectedOffer}
+          onClose={() => setSelectedOffer(null)}
+          onAccept={onConfirmAcceptance}
+        />
       )}
 
       {/* Confirmation Modals */}

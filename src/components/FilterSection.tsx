@@ -221,6 +221,31 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               </>
             )}
 
+            {filters?.status !== undefined && filters.setStatus && (
+              <>
+                <Separator className="bg-white/5" />
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Listing Status</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['All', 'Active Auctions'].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => filters.setStatus!(status)}
+                        className={cn(
+                          "py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                          filters.status === status 
+                            ? "bg-purple-500/10 border-purple-500/30 text-purple-500 shadow-lg shadow-purple-500/5" 
+                            : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                        )}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
             {filters?.selectedGenres && filters.setSelectedGenres && (
               <>
                 <Separator className="bg-white/5" />

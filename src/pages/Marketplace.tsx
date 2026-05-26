@@ -39,7 +39,7 @@ const Marketplace: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Trending');
   const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery, marketplaceFilters, setMarketplaceFilters, isLoading, allTracks, artists } = useAudio();
-  const { genre: genreFilter, artist: artistFilter, rarity: rarityFilter, priceRange, sortBy } = marketplaceFilters;
+  const { genre: genreFilter, artist: artistFilter, rarity: rarityFilter, priceRange, sortBy, status: statusFilter } = marketplaceFilters;
 
   const setGenreFilter = (genre: string) => setMarketplaceFilters(prev => ({ ...prev, genre }));
   const setArtistFilter = (artist: string) => setMarketplaceFilters(prev => ({ ...prev, artist }));
@@ -98,17 +98,18 @@ const Marketplace: React.FC = () => {
       const matchesGenre = genreFilter === 'All' || genre === genreFilter;
       const matchesArtist = artistFilter === 'All' || nft.creator === artistFilter;
       const matchesRarity = rarityFilter === 'All' || nft.edition === rarityFilter;
+      const matchesStatus = statusFilter === 'All' || (statusFilter === 'Active Auctions' && nft.listingType === 'auction');
       const price = parseFloat(nft.price);
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
 
-      if (activeTab === 'Trending') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
-      if (activeTab === 'New Signal') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
-      if (activeTab === 'Genesis') return matchesSearch && nft.edition === 'Unique' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
-      if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
-      if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction' && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
-      if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === userProfile.walletAddress) && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
-      if (activeTab === 'My NFTs') return matchesSearch && isMyNft && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
-      return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity;
+      if (activeTab === 'Trending') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
+      if (activeTab === 'New Signal') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
+      if (activeTab === 'Genesis') return matchesSearch && nft.edition === 'Unique' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
+      if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
+      if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
+      if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === userProfile.walletAddress) && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
+      if (activeTab === 'My NFTs') return matchesSearch && isMyNft && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
+      return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
     });
 
     if (activeTab === 'New Signal') {
@@ -123,7 +124,7 @@ const Marketplace: React.FC = () => {
       list.sort((a, b) => (rarityMap[b.edition] || 0) - (rarityMap[a.edition] || 0));
     }
     return list;
-  }, [activeTab, searchQuery, sortBy, allNFTs, userProfile.walletAddress, genreFilter, artistFilter, rarityFilter, priceRange]);
+  }, [activeTab, searchQuery, sortBy, allNFTs, userProfile.walletAddress, genreFilter, artistFilter, rarityFilter, priceRange, statusFilter]);
 
   const displayedNfts = useMemo(() => {
     return filteredNfts.slice(0, displayCount);

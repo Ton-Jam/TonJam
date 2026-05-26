@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
   Flame,
   Trophy,
@@ -15,97 +15,28 @@ import {
   ShieldCheck,
   TrendingUp,
   Bell,
-  BellOff
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
+  BellOff,
+} from "lucide-react";
+import { motion } from "motion/react";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TJ_COIN_ICON } from '@/constants';
-import TaskCard from '@/components/TaskCard';
-import { getTasks, updateTaskProgress, completeTask, claimTaskReward } from '@/services/taskService';
-import { Task } from '@/types';
-
-const TASKS: Task[] = [
-  {
-    id: '1',
-    title: 'Stream 5 Tracks',
-    description: 'Listen to at least 5 songs today',
-    reward: "40",
-    points: 10,
-    progress: 3,
-    total: 5,
-    type: 'daily',
-    completed: false,
-    claimed: false,
-  },
-  {
-    id: '2',
-    title: 'Follow TonJam on X',
-    description: 'Stay updated with TonJam news',
-    reward: "25",
-    points: 5,
-    progress: 0,
-    total: 1,
-    type: 'achievement',
-    completed: false,
-    claimed: false,
-  },
-  {
-    id: '3',
-    title: 'Buy Your First NFT',
-    description: 'Own a music collectible',
-    reward: "120",
-    points: 50,
-    progress: 0,
-    total: 1,
-    type: 'onchain',
-    completed: false,
-    claimed: false,
-  },
-  {
-    id: '4',
-    title: 'Invite 3 Friends',
-    description: 'Grow the TonJam community',
-    reward: "80",
-    points: 20,
-    progress: 1,
-    total: 3,
-    type: 'referral',
-    completed: false,
-    claimed: false,
-  },
-  {
-    id: '5',
-    title: 'Daily Login',
-    description: 'Open TonJam today',
-    reward: "15",
-    points: 2,
-    progress: 1,
-    total: 1,
-    completed: true,
-    claimed: false,
-    type: 'daily',
-  },
-];
+import { TJ_COIN_ICON } from "@/constants";
+import TaskCard from "@/components/TaskCard";
+import { useAudio } from "@/context/AudioContext";
+import { Task } from "@/types";
 
 const STREAK_DAYS = [
-  { day: 'Mon', active: true },
-  { day: 'Tue', active: true },
-  { day: 'Wed', active: true },
-  { day: 'Thu', active: false },
-  { day: 'Fri', active: false },
-  { day: 'Sat', active: false },
-  { day: 'Sun', active: false },
+  { day: "Mon", active: true },
+  { day: "Tue", active: true },
+  { day: "Wed", active: true },
+  { day: "Thu", active: false },
+  { day: "Fri", active: false },
+  { day: "Sat", active: false },
+  { day: "Sun", active: false },
 ];
 
-const FILTERS = [
-  'All',
-  'Daily',
-  'Achievement',
-  'Onchain',
-  'Referral',
-];
+const FILTERS = ["All", "Daily", "Achievement", "Onchain", "Referral"];
 
 const categoryIcons: Record<string, any> = {
   daily: Clock3,
@@ -116,61 +47,75 @@ const categoryIcons: Record<string, any> = {
 };
 
 const Tasks: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState('All');
-  const [tasks, setTasks] = useState<Task[]>([]);
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const fetchedTasks = await getTasks();
-      setTasks(fetchedTasks);
-    };
-    fetchTasks();
-  }, []);
+  const {
+    tasks,
+    claimTaskReward,
+    updateTaskProgress,
+    completeTask,
+    userProfile,
+    transactions,
+    firestoreUsers,
+  } = useAudio();
+  const [activeFilter, setActiveFilter] = useState("All");
 
   const handleClaim = async (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-    
-    // In firestore Task definition, reward is a string. Need to parse it.
-    const rewardAmount = parseInt(task.reward.replace(/[^0-9]/g, '')) || 0;
-    await claimTaskReward(taskId, rewardAmount, task.points);
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, claimed: true } : t));
+    await claimTaskReward(taskId);
   };
 
   const handleToggle = async (taskId: string, progress: number) => {
     await updateTaskProgress(taskId, progress);
-    
-    const task = tasks.find(t => t.id === taskId);
-    if (task && progress >= task.total) {
-        await completeTask(taskId);
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress, completed: true } : t));
-    } else {
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress } : t));
+
+    const task = tasks.find((t) => t.id === taskId);
+    if (task && progress >= task.total && !task.completed) {
+      await completeTask(taskId);
     }
   };
 
   const handleClick = (task: Task) => {
-      console.log('Task clicked', task);
+    console.log("Task clicked", task);
   };
 
   const filteredTasks = useMemo(() => {
-    if (activeFilter === 'All') return tasks;
+    if (activeFilter === "All") return tasks;
 
     return tasks.filter(
       (task) =>
-        task.type.toLowerCase() === activeFilter.toLowerCase()
+        task.type && task.type.toLowerCase() === activeFilter.toLowerCase(),
     );
   }, [activeFilter, tasks]);
 
-  const totalTJ = 1420;
-  const todayEarned = 145;
-  const level = 12;
-  const xp = 72;
+  const totalTJ = userProfile?.tjBalance || 0;
+  const todayEarned = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return transactions
+      .filter(
+        (tx) =>
+          tx.type === "claim_rewards" &&
+          new Date(tx.timestamp || Date.now()) >= today,
+      )
+      .reduce((sum, tx) => sum + (tx.amount || 0), 0);
+  }, [transactions]);
+  const level = Math.floor((totalTJ || 0) / 1000) + 1;
+  const xp = Math.floor(((totalTJ || 0) % 1000) / 10); // Simple percentage out of 1000 threshold
+
+  const topEarners = useMemo(() => {
+    if (!firestoreUsers || firestoreUsers.length === 0) {
+      return [
+        { name: "DJ Nova", tj: 12450 },
+        { name: "Krupy Vibez", tj: 11200 },
+        { name: "TON Wave", tj: 10230 },
+      ];
+    }
+    return [...firestoreUsers]
+      .sort((a, b) => (b.tjBalance || 0) - (a.tjBalance || 0))
+      .slice(0, 3)
+      .map((u) => ({ name: u.name, tj: u.tjBalance || 0 }));
+  }, [firestoreUsers]);
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-[140px]">
       <div className="px-4 py-3 space-y-4">
-
         {/* HEADER */}
         <div className="flex items-center justify-between pb-1">
           <div>
@@ -184,13 +129,13 @@ const Tasks: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-center">
-            <motion.img 
+            <motion.img
               animate={{ rotate: 360 }}
               transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-              src={TJ_COIN_ICON} 
-              alt="TJ Coin" 
-              className="w-5 h-5 object-contain" 
-              referrerPolicy="no-referrer" 
+              src={TJ_COIN_ICON}
+              alt="TJ Coin"
+              className="w-5 h-5 object-contain"
+              referrerPolicy="no-referrer"
             />
           </div>
         </div>
@@ -214,7 +159,12 @@ const Tasks: React.FC = () => {
                   <h2 className="text-2xl font-black tracking-tight text-white leading-none font-display">
                     {totalTJ}
                   </h2>
-                  <img src={TJ_COIN_ICON} alt="TJ" className="w-4.5 h-4.5 object-contain" referrerPolicy="no-referrer" />
+                  <img
+                    src={TJ_COIN_ICON}
+                    alt="TJ"
+                    className="w-4.5 h-4.5 object-contain"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
 
                 <div className="flex items-center gap-1.5 mt-1">
@@ -232,7 +182,7 @@ const Tasks: React.FC = () => {
                   </p>
                   <p className="text-[9px] font-bold text-white">{xp}% XP</p>
                 </div>
-                
+
                 <Button className="bg-white text-blue-700 hover:bg-white/90 rounded-full font-black text-[9px] h-8 px-3.5 uppercase tracking-wider">
                   Claim
                 </Button>
@@ -240,7 +190,11 @@ const Tasks: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <Progress value={xp} className="h-1 bg-white/10 indicator-white" indicatorClassName="bg-white" />
+              <Progress
+                value={xp}
+                className="h-1 bg-white/10 indicator-white"
+                indicatorClassName="bg-white"
+              />
             </div>
           </div>
         </motion.div>
@@ -265,14 +219,16 @@ const Tasks: React.FC = () => {
                 key={idx}
                 className={`flex-1 rounded-xl py-1.5 flex flex-col items-center justify-center min-w-[36px] transition-all duration-300 ${
                   item.active
-                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/10'
-                    : 'bg-foreground/[0.03] text-muted-foreground/40'
+                    ? "bg-orange-500 text-white shadow-md shadow-orange-500/10"
+                    : "bg-foreground/[0.03] text-muted-foreground/40"
                 }`}
               >
                 <span className="text-[8px] font-black uppercase tracking-wider">
                   {item.day}
                 </span>
-                <Flame className={`w-3.5 h-3.5 mt-0.5 ${item.active ? 'fill-white text-white' : 'text-muted-foreground/20'}`} />
+                <Flame
+                  className={`w-3.5 h-3.5 mt-0.5 ${item.active ? "fill-white text-white" : "text-muted-foreground/20"}`}
+                />
               </div>
             ))}
           </div>
@@ -280,7 +236,11 @@ const Tasks: React.FC = () => {
 
         {/* FILTERS - FRAMELESS HIGH-CONTRAST PILLES */}
         <div className="py-0.5">
-          <Tabs value={activeFilter} onValueChange={setActiveFilter} className="w-full">
+          <Tabs
+            value={activeFilter}
+            onValueChange={setActiveFilter}
+            className="w-full"
+          >
             <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start -mx-4 px-4">
               {FILTERS.map((filter) => (
                 <TabsTrigger
@@ -298,11 +258,11 @@ const Tasks: React.FC = () => {
         {/* TASK LIST - COMPLETED WITH OUR SLICK ROW TASK CARDS */}
         <section className="space-y-1.5 max-h-[480px] overflow-y-auto pr-1 no-scrollbar">
           {filteredTasks.map((task) => (
-            <TaskCard 
-              key={task.id} 
-              task={task} 
-              onClaim={handleClaim} 
-              onToggle={handleToggle} 
+            <TaskCard
+              key={task.id}
+              task={task}
+              onClaim={handleClaim}
+              onToggle={handleToggle}
               onClick={handleClick}
             />
           ))}
@@ -318,11 +278,7 @@ const Tasks: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            {[
-              { name: 'DJ Nova', tj: 12450 },
-              { name: 'Krupy Vibez', tj: 11200 },
-              { name: 'TON Wave', tj: 10230 },
-            ].map((user, idx) => (
+            {topEarners.map((user, idx) => (
               <div
                 key={idx}
                 className="flex items-center justify-between rounded-xl bg-foreground/[0.02] p-2.5"
@@ -337,7 +293,9 @@ const Tasks: React.FC = () => {
                   </div>
 
                   <div>
-                    <h5 className="font-bold text-xs tracking-tight">{user.name}</h5>
+                    <h5 className="font-bold text-xs tracking-tight">
+                      {user.name}
+                    </h5>
                     <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest leading-none mt-0.5">
                       Rank #{idx + 1}
                     </p>
@@ -345,7 +303,12 @@ const Tasks: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <img src={TJ_COIN_ICON} alt="TJ" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
+                  <img
+                    src={TJ_COIN_ICON}
+                    alt="TJ"
+                    className="w-5 h-5 object-contain"
+                    referrerPolicy="no-referrer"
+                  />
                   <span className="font-black text-primary text-sm">
                     {user.tj.toLocaleString()}
                   </span>

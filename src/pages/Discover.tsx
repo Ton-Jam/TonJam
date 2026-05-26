@@ -753,7 +753,7 @@ const Discover: React.FC = () => {
                         {filteredResults.users.map((u) => (
                           <div 
                             key={u.uid}
-                            onClick={() => navigate(`/user/${u.uid}`)}
+                            onClick={() => navigate((u.isVerifiedArtist || u.verified) ? `/artist/${u.uid}` : `/user/${u.uid}`)}
                             className="group flex items-center gap-4 p-3 rounded-[2px] bg-muted/10 hover:bg-muted/50 cursor-pointer transition-all"
                           >
                             <Avatar className="h-12 w-12 rounded-[2px] shadow-sm grayscale group-hover:grayscale-0 transition-all duration-300">

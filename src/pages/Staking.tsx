@@ -6,7 +6,7 @@ import { JAM_PRICE_USD } from '@/constants';
 import ConfirmationModal from '@/components/ConfirmationModal';
 
 const Staking: React.FC = () => {
-  const { userProfile, stakeJam, unstakeJam, claimJamRewards, transactions } = useAudio();
+  const { userProfile, stakeJam, unstakeJam, claimJamRewards, toggleAutoCompound, transactions } = useAudio();
   const safeTransactions = transactions || [];
   const userAddress = useTonAddress();
   const [stakeAmount, setStakeAmount] = useState('');
@@ -168,14 +168,40 @@ const Staking: React.FC = () => {
               </div>
               <button 
                 onClick={handleClaim}
-                disabled={isProcessing || pending <= 0}
-                className="px-4 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
+                disabled={isProcessing || pending <= 0 || userProfile.autoCompound}
+                className="px-4 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 disabled:opacity-35 disabled:cursor-not-allowed text-white rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 cursor-pointer"
               >
-                Claim
+                {userProfile.autoCompound ? 'Auto' : 'Claim'}
               </button>
             </div>
             <div className="text-left">
               <span className="text-sm font-bold text-blue-400">≈ ${(pending * JAM_PRICE_USD).toFixed(4)}</span>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 mt-1 bg-white/[0.03] p-2.5 rounded-xl">
+              <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Auto-Compound</span>
+              
+              <button 
+                onClick={async () => {
+                  setIsProcessing(true);
+                  try {
+                    await toggleAutoCompound();
+                  } finally {
+                    setIsProcessing(false);
+                  }
+                }}
+                disabled={isProcessing}
+                className={`relative flex items-center justify-between px-2.5 py-1.5 rounded-full font-bold text-[9px] uppercase tracking-widest transition-all cursor-pointer ${
+                  userProfile.autoCompound 
+                    ? 'bg-blue-600/20 text-blue-400' 
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${userProfile.autoCompound ? 'bg-blue-400 animate-pulse' : 'bg-transparent'}`}></span>
+                  <span>{userProfile.autoCompound ? 'Active' : 'Disabled'}</span>
+                </div>
+              </button>
             </div>
           </div>
         </div>

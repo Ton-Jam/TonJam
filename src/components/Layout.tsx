@@ -799,6 +799,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           setPriceRange: isMarketplace ? ((range) => setMarketplaceFilters(prev => ({ ...prev, priceRange: range }))) : undefined,
           rarity: isMarketplace ? marketplaceFilters.rarity : undefined,
           setRarity: isMarketplace ? ((rarity) => setMarketplaceFilters(prev => ({ ...prev, rarity }))) : undefined,
+          status: isMarketplace ? marketplaceFilters.status : undefined,
+          setStatus: isMarketplace ? ((status) => setMarketplaceFilters(prev => ({ ...prev, status }))) : undefined,
           selectedGenres: isMarketplace ? [marketplaceFilters.genre] : undefined,
           setSelectedGenres: isMarketplace ? ((genres) => setMarketplaceFilters(prev => ({ ...prev, genre: genres[0] || 'All' }))) : undefined,
         }}

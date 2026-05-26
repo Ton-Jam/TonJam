@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Play, Pause, MoreVertical, Headphones, Clock, Share2, Globe, Zap, Coins, ListMusic, Plus, Lock, ChevronDown, ChevronUp, Activity, Key, User, Info, Gem, Trash2, ArrowUp, ArrowDown, TrendingUp, TrendingDown, Download, CheckCircle2 } from 'lucide-react';
 import { Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
-import { MOCK_ARTISTS, TJ_COIN_ICON } from '@/constants';
+import { MOCK_ARTISTS, TJ_COIN_ICON, MOCK_NFTS } from '@/constants';
 import { cn, getPlaceholderImage, shareContent, formatNumber } from '@/lib/utils';
 import confetti from 'canvas-confetti';
 import { useTonConnectUI } from '@tonconnect/ui-react';
@@ -89,6 +89,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
   const isActive = currentTrack?.id === track.id;
   const isLiked = likedTrackIds.includes(track.id);
   const artist = artists.find(a => a.uid === track.artistId);
+
+  const associatedNft = React.useMemo(() => {
+    return MOCK_NFTS.find(n => n.trackId === track.id);
+  }, [track.id]);
 
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -541,6 +545,11 @@ const TrackCard: React.FC<TrackCardProps> = ({
                   NFT_ASSET
                 </div>
               )}
+              {associatedNft && !track.isNFT && (
+                <div className="bg-purple-600/90 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest">
+                  NFT AVAILABLE
+                </div>
+              )}
               {track.tokenGating?.enabled && (
                 <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
                   <Key className="w-2.5 h-2.5" /> GATED
@@ -611,14 +620,24 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 )}
               </div>
 
-              {onMint && !track.isNFT && (
+              {associatedNft ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/nft/${associatedNft.id}`);
+                  }}
+                  className="text-[9px] font-black text-white hover:text-white transition-all px-3 py-1 bg-purple-600 hover:bg-purple-550 rounded-full uppercase tracking-[0.2em] shadow-md shadow-purple-600/10 border-none flex items-center gap-1 cursor-pointer"
+                >
+                  <Gem className="w-3 h-3 text-white" /> NFT
+                </button>
+              ) : onMint && !track.isNFT ? (
                 <button
                   onClick={handleMint}
-                  className="text-[9px] font-black text-white hover:text-white transition-all px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-full uppercase tracking-[0.2em] shadow-md shadow-blue-600/10 border-none"
+                  className="text-[9px] font-black text-white hover:text-white transition-all px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-full uppercase tracking-[0.2em] shadow-md shadow-blue-600/10 border-none cursor-pointer"
                 >
                   MINT
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
         </motion.div>

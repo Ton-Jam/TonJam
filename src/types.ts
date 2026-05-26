@@ -370,6 +370,7 @@ export interface UserProfile {
   stakedJam?: number;
   pendingJamRewards?: number;
   lastStakingUpdate?: string;
+  autoCompound?: boolean;
   streamingEarnings?: number;
   nftEarnings?: number;
   followedArtists?: string[];
@@ -491,7 +492,7 @@ export interface Task {
   points: number;
   completed: boolean;
   claimed: boolean;
-  type: 'daily' | 'achievement' | 'milestone' | 'seasonal' | 'one-time' | 'referral' | 'boost' | 'onchain';
+  type: 'daily' | 'achievement' | 'milestone' | 'seasonal' | 'one-time' | 'referral' | 'boost' | 'onchain' | 'social';
   progress: number;
   total: number;
   color?: string;

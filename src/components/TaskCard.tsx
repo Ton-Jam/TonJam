@@ -48,6 +48,17 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
     onToggle(task.id, newProgress);
   };
 
+  const handleCardClick = () => {
+    onClick(task);
+    if ((task.type === 'social' || task.type === 'achievement' || task.type === 'referral') && task.link) {
+      window.open(task.link, '_blank');
+      // Optimistically complete social/referral link tasks when clicked
+      if (!task.completed) {
+        onToggle(task.id, task.total);
+      }
+    }
+  };
+
   const progressPercent = Math.min(100, (task.progress / task.total) * 100);
 
   // Determine dynamic category icons based on task type or title content
@@ -58,11 +69,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
       case 'daily':
         return <Clock3 className="w-4 h-4 text-amber-500" />;
       case 'referral':
-        return <Gift className="w-4 h-4 text-pink-500" />;
-      case 'onchain':
+      case 'social':
         return <Globe className="w-4 h-4 text-blue-400" />;
-      default:
+      case 'onchain':
+      case 'milestone':
+      case 'achievement':
         return <Award className="w-4 h-4 text-purple-400" />;
+      default:
+        return <Sparkles className="w-4 h-4 text-pink-400" />;
     }
   };
 
@@ -70,6 +84,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
   const getRarityBadge = () => {
     if (!task.rarity) return null;
     const colors: Record<string, string> = {
+      common: 'bg-neutral-500/10 text-neutral-400',
       rare: 'bg-blue-500/10 text-blue-400',
       epic: 'bg-purple-500/10 text-purple-400',
       legendary: 'bg-orange-500/10 text-orange-400',
@@ -84,8 +99,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
   return (
     <motion.div
       layout
-      onClick={() => onClick(task)}
-      className={`relative w-full rounded-xl transition-all duration-200 select-none overflow-hidden ${
+      onClick={handleCardClick}
+      className={`relative w-full rounded-xl transition-all duration-200 select-none overflow-hidden cursor-pointer ${
         task.claimed 
           ? 'bg-foreground/[0.01] opacity-65' 
           : task.completed

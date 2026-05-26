@@ -55,7 +55,8 @@ const PostDetail: React.FC = () => {
     addCommentToPost,
     toggleLikePost,
     updatePost,
-    userProfile
+    userProfile,
+    artists
   } = useAudio();
   
   const [post, setPost] = useState<Post | null>(null);
@@ -239,7 +240,7 @@ const PostDetail: React.FC = () => {
               <div className="flex items-center gap-4">
                 <Avatar 
                   className="h-12 w-12 border border-white/5 cursor-pointer ring-offset-background hover:ring-2 ring-blue-500/20 transition-all"
-                  onClick={() => navigate(isMe ? '/profile' : `/user/${post.userId}`)}
+                  onClick={() => navigate(isMe ? '/profile' : (post.isVerified || MOCK_ARTISTS.some(a => a.uid === post.userId) ? `/artist/${post.userId}` : `/user/${post.userId}`))}
                 >
                   <AvatarImage src={post.userAvatar || getPlaceholderImage(`user-${post.userId}`)} className="object-cover" />
                   <AvatarFallback className="bg-zinc-800 font-bold text-lg">{post.userName[0]}</AvatarFallback>
@@ -248,7 +249,7 @@ const PostDetail: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <h3 
                       className="text-sm font-black uppercase tracking-tighter text-foreground hover:text-blue-500 transition-colors cursor-pointer"
-                      onClick={() => navigate(isMe ? '/profile' : `/user/${post.userId}`)}
+                      onClick={() => navigate(isMe ? '/profile' : (post.isVerified || MOCK_ARTISTS.some(a => a.uid === post.userId) ? `/artist/${post.userId}` : `/user/${post.userId}`))}
                     >
                       {post.userName}
                     </h3>
@@ -496,6 +497,7 @@ const PostDetail: React.FC = () => {
                       onProfileClick={(e, uid) => {
                         e.stopPropagation();
                         if (uid === userProfile.uid) navigate('/profile');
+                        else if (artists.some(a => a.uid === uid) || MOCK_ARTISTS.some(a => a.uid === uid)) navigate(`/artist/${uid}`);
                         else navigate(`/user/${uid}`);
                       }}
                       activeReactionId={activeReactionCommentId}

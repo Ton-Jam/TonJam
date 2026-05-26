@@ -25,7 +25,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
     
     if (isOwnProfile) {
       navigate('/profile');
-    } else if (MOCK_ARTISTS.some(a => a.uid === user.uid)) {
+    } else if (verified || MOCK_ARTISTS.some(a => a.uid === user.uid)) {
       navigate(`/artist/${user.uid}`);
     } else {
       navigate(`/user/${user.uid}`);

@@ -487,6 +487,7 @@ export const MOCK_USER: UserProfile = {
   stakedJam: 5000,
   pendingJamRewards: 45.2,
   lastStakingUpdate: new Date().toISOString(),
+  autoCompound: false,
   streamingEarnings: 45.2,
   nftEarnings: 79.3,
   followedArtists: ['a1', 'a2', 'a4', 'dj-krupy'],

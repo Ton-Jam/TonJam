@@ -66,7 +66,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
   };
 
   return (
-    <Card className={cn("bg-neutral-50/70 dark:bg-background border-none shadow-none overflow-hidden rounded-none w-auto -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 px-4 sm:px-8 md:px-12 lg:px-16 py-8", className)}>
+    <Card className={cn("bg-neutral-50/70 dark:bg-black border-none shadow-none overflow-hidden rounded-none w-auto -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 px-4 sm:px-8 md:px-12 lg:px-16 py-8", className)}>
       <CardHeader className="pb-4 pt-2 px-0">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">

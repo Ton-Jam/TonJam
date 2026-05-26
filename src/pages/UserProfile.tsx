@@ -44,8 +44,18 @@ const UserProfile: React.FC = () => {
       return;
     }
 
+    // Check if the ID matches an artist
+    if (MOCK_ARTISTS.some(a => a.uid === id)) {
+      navigate(`/artist/${id}`, { replace: true });
+      return;
+    }
+
     const foundUser = MOCK_USERS.find(u => u.uid === id);
     if (foundUser) {
+      if (foundUser.isVerifiedArtist || foundUser.isVerified) {
+        navigate(`/artist/${id}`, { replace: true });
+        return;
+      }
       setUser(foundUser);
     } else {
       // Handle not found

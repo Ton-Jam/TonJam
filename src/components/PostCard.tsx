@@ -66,7 +66,8 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     allNFTs, 
     updatePost, 
     addCommentToPost, 
-    toggleLikePost 
+    toggleLikePost,
+    artists 
   } = useAudio();
   
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
@@ -219,7 +220,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
     e.stopPropagation();
     if (post.userId === userProfile.uid) {
       navigate('/profile');
-    } else if (MOCK_ARTISTS.some(a => a.uid === post.userId)) {
+    } else if (post.isVerified || MOCK_ARTISTS.some(a => a.uid === post.userId)) {
       navigate(`/artist/${post.userId}`);
     } else {
       navigate(`/user/${post.userId}`);
@@ -545,6 +546,7 @@ const PostCard: React.FC<{ post: Post; onDelete?: (id: string) => void }> = ({ p
                     onProfileClick={(e, uid) => {
                       e.stopPropagation();
                       if (uid === userProfile.uid) navigate('/profile');
+                      else if (artists.some(a => a.uid === uid) || MOCK_ARTISTS.some(a => a.uid === uid)) navigate(`/artist/${uid}`);
                       else navigate(`/user/${uid}`);
                     }}
                     activeReactionId={activeReactionCommentId}
