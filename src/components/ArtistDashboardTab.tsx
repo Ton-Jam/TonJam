@@ -1389,7 +1389,9 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                                 <td className="py-4 px-4 font-mono text-[#10b981] font-black text-[12px] drop-shadow-[0_0_10px_rgba(16,185,129,0.1)]">{entry.amount} TON</td>
                                                                 <td className="py-4 px-4 font-mono text-zinc-500 hover:text-white transition-colors text-[10px] select-all max-w-[120px] truncate" title={entry.txHash}>{entry.txHash}</td>
                                                                 <td className="py-4 px-4">
-                                                                    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8.5px] font-extrabold uppercase tracking-widest ${
+                                                                    <div 
+                                                                        title={`Hash: ${entry.txHash}\nConfirmed on: ${entry.date}`}
+                                                                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8.5px] font-extrabold uppercase tracking-widest ${
                                                                         (entry.confirmationStatus || (Number(entry.id) % 8 !== 0 ? 'confirmed' : 'pending')) === 'confirmed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
                                                                     }`}>
                                                                         { (entry.confirmationStatus || (Number(entry.id) % 8 !== 0 ? 'confirmed' : 'pending')) === 'confirmed' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" /> }

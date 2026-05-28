@@ -1168,7 +1168,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (firestorePosts.length > 0) {
-      setPosts(firestorePosts);
+      setPosts((prevPosts) => {
+        const mergedPosts = [...firestorePosts];
+        prevPosts.forEach((post) => {
+          // Keep posts that were added locally but are not yet in firestorePosts
+          if (!mergedPosts.find((p) => p.id === post.id)) {
+            mergedPosts.unshift(post);
+          }
+        });
+        return mergedPosts.sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+      });
     }
   }, [firestorePosts]);
 

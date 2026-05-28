@@ -669,7 +669,6 @@ const Home: React.FC = () => {
             <section className="section-container">
               <SectionHeader 
                 title="Trending NFTs" 
-                subtitle="High-density transaction volumes on the marketplace" 
                 viewAllLink="/marketplace" 
               />
               <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
@@ -807,7 +806,6 @@ const Home: React.FC = () => {
             <section>
               <SectionHeader 
                 title="Featured_Streams" 
-                subtitle="Hand-picked frequency clusters based on network trajectory"
                 viewAllLink={`/playlist/${featuredPlaylist.id}`} 
               />
               
@@ -915,7 +913,7 @@ const Home: React.FC = () => {
 
             {/* Tasks */}
             <section className="section-container">
-               <SectionHeader title="Daily Missions" subtitle="Sync with key neural loops to earn direct TJ coin drops" viewAllLink="/tasks" />
+               <SectionHeader title="Daily Missions" viewAllLink="/tasks" />
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                  {tasks.length > 0 ? (
                    tasks.map(task => (
@@ -995,7 +993,7 @@ const Home: React.FC = () => {
             {/* Top Charts - Tactical Grid Layout */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
-                <SectionHeader title="Global_Data_Stream" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
+                <SectionHeader title="Global_Streaming" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
                 <div className="-mx-4 sm:mx-0">
                   <div className="flex flex-col">
                     {trendingTracks.slice(0, 10).map((track, idx) => (
