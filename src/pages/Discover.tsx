@@ -239,9 +239,9 @@ const Discover: React.FC = () => {
 
     const tracks = allTracks.filter((t: any) => {
       const matchesQuery = (query === '' || 
-        t.title.toLowerCase().includes(query) || 
-        t.artist.toLowerCase().includes(query) ||
-        t.genre.toLowerCase().includes(query));
+        (t.title || '').toLowerCase().includes(query) || 
+        (t.artist || '').toLowerCase().includes(query) ||
+        (t.genre || '').toLowerCase().includes(query));
       
       if (!matchesQuery) return false;
       if (t.bpm && (t.bpm < bpmRange[0] || t.bpm > bpmRange[1])) return false;
@@ -267,7 +267,7 @@ const Discover: React.FC = () => {
     }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, n => n.artistId));
     
     const filteredArtists = artists.filter((a: any) => {
-      const matchesQuery = (query === '' || a.name.toLowerCase().includes(query) || 
+      const matchesQuery = (query === '' || (a.name || '').toLowerCase().includes(query) || 
         (a.genre && a.genre.toLowerCase().includes(query)));
       
       if (!matchesQuery) return false;
@@ -276,8 +276,8 @@ const Discover: React.FC = () => {
     }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, art => art.uid));
 
     const users = firestoreUsers.filter((u: any) => {
-      const matchesQuery = (query === '' || u.name.toLowerCase().includes(query) || 
-        u.username.toLowerCase().includes(query));
+      const matchesQuery = (query === '' || (u.name || '').toLowerCase().includes(query) || 
+        (u.username || '').toLowerCase().includes(query));
       
       if (!matchesQuery) return false;
       if (onlyVerified && !u.isVerifiedArtist) return false;
@@ -336,164 +336,164 @@ const Discover: React.FC = () => {
         continuous
       />
 
-      {/* Search Header - Sticky & Atmospheric */}
-      <div className="sticky -top-4 z-30 bg-background/95 backdrop-blur-md pt-0 pb-2 px-4 w-full">
-        <div className="max-w-2xl mx-auto w-full flex items-center gap-3">
-          <form 
-            onSubmit={handleSearchSubmit} 
-            className="relative flex-1 group"
-          >
-            {/* Shiny Gradient Border Effect */}
-            <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
-            
-            <div className={`relative flex items-center h-11 bg-background border transition-all rounded-full overflow-hidden ${isFocused ? 'border-blue-500' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
-              <div className="absolute left-4 z-10 pointer-events-none">
-                <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
-              </div>
+      {/* Search Header & Filter Tabs - Sticky & Atmospheric with standard top padding */}
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-5 pb-3 w-full border-b border-blue-500/20">
+        <div className="flex flex-col gap-4 w-full">
+          {/* Search Input Row */}
+          <div className="max-w-2xl mx-auto w-full flex items-center gap-3 px-4">
+            <form 
+              onSubmit={handleSearchSubmit} 
+              className="relative flex-1 group"
+            >
+              {/* Shiny Gradient Border Effect */}
+              <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
               
-              <Input
-                type="text"
-                placeholder="Search artists, tracks, NFTs..."
-                value={searchQuery}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
-              />
+              <div className={`relative flex items-center h-11 bg-background border transition-all rounded-full overflow-hidden ${isFocused ? 'border-blue-500' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+                <div className="absolute left-4 z-10 pointer-events-none">
+                  <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
+                </div>
+                
+                <Input
+                  type="text"
+                  placeholder="Search artists, tracks, NFTs..."
+                  value={searchQuery}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
+                />
 
-              <div className="absolute right-3 flex items-center gap-1.5 z-20">
-                <AnimatePresence>
-                  {searchQuery && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        onClick={() => setSearchQuery('')}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
+                <div className="absolute right-3 flex items-center gap-1.5 z-20">
+                  <AnimatePresence>
+                    {searchQuery && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <Separator orientation="vertical" className="h-4 bg-white/10" />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  type="button"
-                  onClick={handleVoiceSearch}
-                  className={`h-8 w-8 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <Separator orientation="vertical" className="h-4 bg-white/10" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    type="button"
+                    onClick={handleVoiceSearch}
+                    className={`h-8 w-8 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            {/* Suggestions Command Palette */}
-            <AnimatePresence>
-              {isFocused && !searchQuery && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 4, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-background border border-border/40 shadow-none rounded-[4px] overflow-hidden z-50 p-2"
-                >
-                  <Command className="bg-transparent border-none">
-                    <CommandList className="max-h-[300px]">
-                      <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
-                      
-                      {searchHistory.length > 0 && (
-                        <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
-                          {searchHistory.map((item, index) => (
-                            <CommandItem 
-                              key={`hist-${index}`}
-                              onSelect={() => {
-                                setSearchQuery(item);
-                                setIsFocused(false);
-                              }}
-                              className="rounded-[2px] flex items-center justify-between group cursor-pointer"
-                            >
-                              <div className="flex items-center gap-3">
-                                <Search className="h-3.5 w-3.5 text-zinc-500" />
-                                <span className="text-sm font-medium">{item}</span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 opacity-0 group-hover:opacity-100"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSearchHistory(prev => prev.filter(t => t !== item));
+              {/* Suggestions Command Palette */}
+              <AnimatePresence>
+                {isFocused && !searchQuery && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 4, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-background border border-border/40 shadow-none rounded-[4px] overflow-hidden z-50 p-2"
+                  >
+                    <Command className="bg-transparent border-none">
+                      <CommandList className="max-h-[300px]">
+                        <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
+                        
+                        {searchHistory.length > 0 && (
+                          <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
+                            {searchHistory.map((item, index) => (
+                              <CommandItem 
+                                key={`hist-${index}`}
+                                onSelect={() => {
+                                  setSearchQuery(item);
+                                  setIsFocused(false);
                                 }}
+                                className="rounded-[2px] flex items-center justify-between group cursor-pointer"
                               >
-                                <X className="h-3 w-3" />
-                              </Button>
+                                <div className="flex items-center gap-3">
+                                  <Search className="h-3.5 w-3.5 text-zinc-500" />
+                                  <span className="text-sm font-medium">{item}</span>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSearchHistory(prev => prev.filter(t => t !== item));
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        )}
+                        
+                        <CommandSeparator className="bg-white/5" />
+                        
+                        <CommandGroup heading={<span className="flex items-center gap-2"><TrendingUp className="h-3 w-3" /> Trending</span>}>
+                          {trendingTopics.map((topic, index) => (
+                            <CommandItem 
+                              key={`trend-${index}`}
+                              onSelect={() => {
+                                  setSearchQuery(topic);
+                                  setIsFocused(false);
+                              }}
+                              className="rounded-[2px] flex items-center gap-3 cursor-pointer"
+                            >
+                              <Zap className="h-3.5 w-3.5 text-blue-500" />
+                              <span className="text-sm font-medium">{topic}</span>
+                              <CommandShortcut className="text-blue-500/50">#hot</CommandShortcut>
                             </CommandItem>
                           ))}
                         </CommandGroup>
-                      )}
-                      
-                      <CommandSeparator className="bg-white/5" />
-                      
-                      <CommandGroup heading={<span className="flex items-center gap-2"><TrendingUp className="h-3 w-3" /> Trending</span>}>
-                        {trendingTopics.map((topic, index) => (
-                          <CommandItem 
-                            key={`trend-${index}`}
-                            onSelect={() => {
-                              setSearchQuery(topic);
-                              setIsFocused(false);
-                            }}
-                            className="rounded-[2px] flex items-center gap-3 cursor-pointer"
-                          >
-                            <Zap className="h-3.5 w-3.5 text-blue-500" />
-                            <span className="text-sm font-medium">{topic}</span>
-                            <CommandShortcut className="text-blue-500/50">#hot</CommandShortcut>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </form>
+                      </CommandList>
+                    </Command>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </form>
 
-          {/* Advanced Filters Sheet */}
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => setIsDiscoverFiltersOpen(true)}
-            className="h-11 w-11 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
-          >
-            <ListFilter className="h-4 w-4 text-foreground" />
-          </Button>
+            {/* Advanced Filters Sheet */}
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => setIsDiscoverFiltersOpen(true)}
+              className="h-11 w-11 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
+            >
+              <ListFilter className="h-4 w-4 text-foreground" />
+            </Button>
+          </div>
 
-        </div>
-      </div>
-
-      {/* Filter Tabs - Sticky & Atmospheric */}
-      <div className="sticky top-[3.5rem] z-20 bg-background/95 backdrop-blur-md pb-4 px-4 border-b border-blue-500/20 w-full">
-        <div className="flex flex-col items-center filter-tabs w-full max-w-2xl mx-auto">
-          <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
-            <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start md:justify-center px-1 py-1">
-              <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max -mx-4 px-4">
-                {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
-                  <TabsTrigger
-                    key={filter}
-                    value={filter}
-                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
-                  >
-                    {filter}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-          </Tabs>
+          {/* Filter Tabs Inside same sticky block */}
+          <div className="w-full filter-tabs">
+            <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
+              <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12 flex justify-start md:justify-center py-1">
+                <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
+                  {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
+                    <TabsTrigger
+                      key={filter}
+                      value={filter}
+                      className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
+                    >
+                      {filter}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+            </Tabs>
+          </div>
         </div>
       </div>
 

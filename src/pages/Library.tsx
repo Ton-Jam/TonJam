@@ -238,25 +238,27 @@ const Library: React.FC = () => {
       <div className="px-4 py-3 sm:px-6 max-w-7xl mx-auto space-y-6">
         
         {/* Global Filter Pills & Grid Toggle controls block */}
-        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full px-4 mb-6 border-b border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4 -mx-4 sm:-mx-6">
-          <Tabs value={filter} onValueChange={(v: any) => setFilter(v)} className="w-full md:w-auto px-4 sm:px-6">
-            <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth -mx-4 px-4">
-              {[
-                { id: 'all', label: 'All Symbols', icon: Layers },
-                { id: 'playlists', label: 'Playlists', icon: ListMusic },
-                { id: 'artists', label: 'Artists', icon: Users },
-                { id: 'nfts', label: 'NFTs', icon: ShoppingBag }
-              ].map((tab) => (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto flex items-center gap-1.5"
-                >
-                  <tab.icon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-6 border-b border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <Tabs value={filter} onValueChange={(v: any) => setFilter(v)} className="w-full">
+            <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+              <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
+                {[
+                  { id: 'all', label: 'All Symbols', icon: Layers },
+                  { id: 'playlists', label: 'Playlists', icon: ListMusic },
+                  { id: 'artists', label: 'Artists', icon: Users },
+                  { id: 'nfts', label: 'NFTs', icon: ShoppingBag }
+                ].map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto flex items-center gap-1.5"
+                  >
+                    <tab.icon className="w-3.5 h-3.5" />
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </Tabs>
         </div>
 

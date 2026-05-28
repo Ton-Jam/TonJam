@@ -173,8 +173,8 @@ const JamSpace: React.FC = () => {
 
     if (search) {
       basePosts = basePosts.filter(p => 
-        p.content.toLowerCase().includes(search.toLowerCase()) || 
-        p.userName.toLowerCase().includes(search.toLowerCase())
+        (p.content || '').toLowerCase().includes(search.toLowerCase()) || 
+        (p.userName || '').toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -328,28 +328,30 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Feed Filters - Sticky & Atmospheric matching Marketplace */}
-            <div className="sticky top-14 z-[37] bg-background/80 backdrop-blur-md py-4 px-4 border-b border-white/[0.05] mb-4">
+            <div className="sticky top-14 z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-4 border-b border-white/[0.05]">
               <Tabs value={filterType} onValueChange={setFilterType} className="w-full">
-                <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth -mx-4 px-4">
-                  {[
-                    { name: 'All', icon: Sparkles },
-                    { name: 'Tracks', icon: Disc },
-                    { name: 'NFTs', icon: Zap },
-                    { name: 'Trending', icon: Flame }
-                  ].map((filter) => {
-                    const Icon = filter.icon;
-                    return (
-                      <TabsTrigger
-                        key={filter.name}
-                        value={filter.name}
-                        className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto flex items-center gap-1.5"
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                        {filter.name}
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
+                <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+                  <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
+                    {[
+                      { name: 'All', icon: Sparkles },
+                      { name: 'Tracks', icon: Disc },
+                      { name: 'NFTs', icon: Zap },
+                      { name: 'Trending', icon: Flame }
+                    ].map((filter) => {
+                      const Icon = filter.icon;
+                      return (
+                        <TabsTrigger
+                          key={filter.name}
+                          value={filter.name}
+                          className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto flex items-center gap-1.5"
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          {filter.name}
+                        </TabsTrigger>
+                      );
+                    })}
+                  </TabsList>
+                </div>
               </Tabs>
             </div>
 

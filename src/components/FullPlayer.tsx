@@ -23,7 +23,7 @@ import {
   Hash,
   Clock,
   ExternalLink,
-  CheckCircle2,
+  Verified,
   Mic2,
   Zap,
   ShoppingBag,
@@ -678,7 +678,7 @@ const FullPlayer: React.FC = () => {
                        
                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                           {recommendations.tracks.map((trackTitle, idx) => {
-                            const track = allTracks.find(t => t.title.toLowerCase() === trackTitle.toLowerCase());
+                            const track = allTracks.find(t => (t.title || '').toLowerCase() === (trackTitle || '').toLowerCase());
                             return (
                               <button 
                                 key={idx}
@@ -694,7 +694,7 @@ const FullPlayer: React.FC = () => {
                             <button 
                               key={idx}
                               onClick={() => {
-                                const artist = MOCK_ARTISTS.find(a => a.name.toLowerCase() === artistName.toLowerCase());
+                                const artist = MOCK_ARTISTS.find(a => (a.name || '').toLowerCase() === (artistName || '').toLowerCase());
                                 if (artist) {
                                   setFullPlayerOpen(false);
                                   navigate(`/artist/${artist.uid}`);
@@ -867,7 +867,7 @@ const FullPlayer: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h4 className="text-lg font-black uppercase tracking-tight text-white truncate">{artistData.name}</h4>
-                        {artistData.verified && <CheckCircle2 className="h-4 w-4 text-blue-500 flex-shrink-0" />}
+                        {artistData.verified && <Verified className="h-4 w-4 text-blue-500 flex-shrink-0" />}
                       </div>
                       <p className="text-[8px] font-black uppercase text-white/20 tracking-widest">{artistData.followers?.toLocaleString()} Listeners</p>
                     </div>

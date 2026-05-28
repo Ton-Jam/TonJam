@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, Disc, Layers, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, ExternalLink, Disc, Layers, Loader2, Verified } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NFTItem } from '@/types';
 import { MOCK_ARTISTS, MOCK_USER } from '@/constants';
@@ -116,7 +116,7 @@ const NFTQuickViewModal: React.FC<NFTQuickViewModalProps> = ({ nft, isOpen, onCl
                       {nft.creator}
                     </span>
                     {MOCK_ARTISTS.find(a => a.name === nft.creator)?.verified && (
-                      <CheckCircle2 className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                      <Verified className="h-3 w-3 text-blue-500 flex-shrink-0" />
                     )}
                   </span>
                 </div>

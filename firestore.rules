@@ -334,7 +334,7 @@ service cloud.firestore {
 
     // 💸 TRANSACTIONS (Pillar 7: Atomicity / Persistence)
     // 💡 INDEX RECOMMENDATION: To speed up query performance for artists viewing their payout history,
-    // 💡 it is highly recommended to create a partial single/composite index on: (userId, type)
+    // 💡 it is highly recommended to create a composite index on: (userId, type, timestamp)
     match /transactions/{txId} {
       // Artists/users can only view their own payout/royalty records, keeping platform data accessible only to admins
       allow read: if isSignedIn() && (

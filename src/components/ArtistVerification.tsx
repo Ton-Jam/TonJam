@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Artist } from '@/types';
-import { CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
+import { Verified, Loader2, ShieldCheck } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { useAuth } from '@/context/AuthContext';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
@@ -30,7 +30,7 @@ const ArtistVerification: React.FC<ArtistVerificationProps> = ({ artist }) => {
   if (status === 'verified') {
     return (
       <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded-full font-black text-[10px] uppercase tracking-widest" title="Verified Artist">
-        <CheckCircle2 className="h-3 w-3 fill-current" />
+        <Verified className="h-3 w-3 fill-current" />
         <span>Verified</span>
       </div>
     );

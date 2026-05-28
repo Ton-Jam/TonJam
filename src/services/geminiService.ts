@@ -80,9 +80,9 @@ export const semanticSearchTracks = async (query: string, allTracks: Track[]) =>
   } catch (error) {
     console.warn("Using fallback for semantic search due to:", error instanceof Error ? error.message : "Unknown error");
     return allTracks.filter(t => 
-      t.title.toLowerCase().includes(query.toLowerCase()) || 
-      t.genre.toLowerCase().includes(query.toLowerCase()) ||
-      t.artist.toLowerCase().includes(query.toLowerCase())
+      (t.title || '').toLowerCase().includes((query || '').toLowerCase()) || 
+      (t.genre || '').toLowerCase().includes((query || '').toLowerCase()) ||
+      (t.artist || '').toLowerCase().includes((query || '').toLowerCase())
     );
   }
 };
@@ -151,10 +151,10 @@ export const globalAISearch = async (
     const results: any[] = [];
     const q = query.toLowerCase();
     
-    context.tracks.filter(t => t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q)).forEach(t => 
+    context.tracks.filter(t => (t.title || '').toLowerCase().includes(q) || (t.artist || '').toLowerCase().includes(q)).forEach(t => 
       results.push({ type: 'track', id: t.id, name: t.title, sub: t.artist, relevance: 0.9 })
     );
-    context.artists.filter(a => a.name.toLowerCase().includes(q)).forEach(a => 
+    context.artists.filter(a => (a.name || '').toLowerCase().includes(q)).forEach(a => 
       results.push({ type: 'artist', id: a.uid, name: a.name, sub: a.genre || '', relevance: 0.8 })
     );
     

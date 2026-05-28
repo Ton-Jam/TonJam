@@ -566,8 +566,8 @@ const NFTDetail: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4 items-start">
           {/* Left Column: Artwork & Technical Specs */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="relative group" onClick={handlePlayClick}>
-              <div className="relative aspect-square rounded-[2px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] bg-black/40 border border-white/10">
+            <div className="relative group max-w-[280px] mx-auto sm:max-w-none" onClick={handlePlayClick}>
+              <div className="relative aspect-square max-h-[280px] sm:max-h-none mx-auto w-full rounded-[2px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] bg-black/40 border border-white/10">
                 <img
                   src={
                     localNft.imageUrl ||
@@ -670,7 +670,7 @@ const NFTDetail: React.FC = () => {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-white/5 backdrop-blur-md p-4 rounded-[2px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
+                  className="bg-white/5 backdrop-blur-md p-2.5 sm:p-4 rounded-[2px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
                 >
                   <div
                     className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace("text", "bg")} opacity-40`}
@@ -689,7 +689,7 @@ const NFTDetail: React.FC = () => {
             </div>
 
             {/* Price Analysis Section */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-[2px] p-6 border border-white/5 space-y-6">
+            <div className="bg-white/5 backdrop-blur-xl rounded-[2px] p-4 sm:p-6 border border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <TrendingUp className="h-4 w-4 text-blue-500" />
@@ -705,7 +705,7 @@ const NFTDetail: React.FC = () => {
                 </div>
               </div>
 
-              <div className="h-[180px] w-full">
+              <div className="h-[120px] sm:h-[180px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={priceHistoryData}>
                     <defs>

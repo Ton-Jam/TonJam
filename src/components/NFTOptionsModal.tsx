@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, CheckCircle2, ChevronRight, Trash } from 'lucide-react';
+import { Info, Share2, Send, Tag, Coins, Star, User, ExternalLink, Copy, Verified, ChevronRight, Trash } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -144,7 +144,7 @@ const NFTOptionsModal: React.FC<NFTOptionsModalProps> = ({ nft, onClose, onSend,
                 <DrawerDescription className="text-sm font-medium text-muted-foreground mt-1 flex items-center gap-1 truncate">
                   {nft.creator}
                   {isVerified && (
-                    <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <Verified className="w-4 h-4 text-blue-500 flex-shrink-0" />
                   )}
                 </DrawerDescription>
                 <div className="flex flex-wrap items-center gap-2 mt-2">

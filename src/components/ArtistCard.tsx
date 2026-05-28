@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, UserPlus, UserCheck, MoreHorizontal } from 'lucide-react';
+import { Verified, UserPlus, UserCheck, MoreHorizontal } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { cn, getPlaceholderImage } from '@/lib/utils';
@@ -111,7 +111,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
       <div className="space-y-0.5 max-w-full overflow-hidden min-w-0">
         <div className="flex items-center justify-center gap-1 max-w-full">
             <h3 className="font-bold text-[10px] tracking-tight uppercase truncate">{artist.name}</h3>
-            {artist.verified && <CheckCircle2 className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
+            {artist.verified && <Verified className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
         </div>
         <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest">{artist.followers.toLocaleString()} Followers</p>
       </div>

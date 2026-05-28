@@ -92,7 +92,7 @@ const Marketplace: React.FC = () => {
       } else {
         if (!nft.listingType) return false;
       }
-      const matchesSearch = nft.title.toLowerCase().includes(searchQuery.toLowerCase()) || nft.creator.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = (nft.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || (nft.creator || '').toLowerCase().includes(searchQuery.toLowerCase());
       const track = allTracks.find(t => t.id === nft.trackId);
       const genre = track?.genre || 'Unknown';
       const matchesGenre = genreFilter === 'All' || genre === genreFilter;
@@ -288,20 +288,22 @@ const Marketplace: React.FC = () => {
         </section>
 
         {/* 3. REFINED CONTROLS - Clean Tab Filters */}
-        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full px-4 mb-6 border-b border-border/10">
-          <div className="max-w-[1600px] mx-auto overflow-hidden">
+        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-6 border-b border-border/10">
+          <div className="w-full overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start scroll-smooth -mx-4 px-4">
-                {TABS.map(tab => (
-                  <TabsTrigger 
-                    key={tab} 
-                    value={tab} 
-                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
-                  >
-                    {tab}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+              <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+                <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
+                  {TABS.map(tab => (
+                    <TabsTrigger 
+                      key={tab} 
+                      value={tab} 
+                      className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
+                    >
+                      {tab}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
             </Tabs>
           </div>
         </div>

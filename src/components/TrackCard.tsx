@@ -254,10 +254,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
   const MoreOptionsButton = () => (
     <button 
       onClick={handleOptions}
-      className="p-1.5 rounded-xl transition-all hover:bg-white/5 text-muted-foreground/30 hover:text-blue-400 flex-shrink-0 active:scale-90"
+      className="p-2 rounded-xl transition-all hover:bg-white/10 text-foreground hover:text-blue-400 flex-shrink-0 active:scale-90"
       aria-label="Track options"
     >
-      <MoreVertical className="h-4 w-4" />
+      <MoreVertical className="h-6 w-6" strokeWidth={3} />
     </button>
   );
 

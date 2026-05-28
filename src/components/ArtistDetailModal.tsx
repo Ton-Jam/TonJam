@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { X, CheckCircle2, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause, TrendingUp, Zap, ChevronDown, ChevronUp, Clock, Activity, Key, Twitter, Instagram, Globe, Send } from 'lucide-react';
+import { X, Verified, UserPlus, UserCheck, Music, Disc, ExternalLink, Play, Pause, TrendingUp, Zap, ChevronDown, ChevronUp, Clock, Activity, Key, Twitter, Instagram, Globe, Send } from 'lucide-react';
 import { Artist, Track } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { useNavigate } from 'react-router-dom';
@@ -97,7 +97,7 @@ const ArtistDetailModal: React.FC<ArtistDetailModalProps> = ({ artist, onClose }
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl sm:text-4xl font-black text-black tracking-tighter">{artist.name}</h2>
-                  {artist.verified && <CheckCircle2 className="w-6 h-6 text-blue-500 fill-blue-500/20" />}
+                  {artist.verified && <Verified className="w-6 h-6 text-blue-500" />}
                 </div>
                 
                 {/* Social Icons near name */}

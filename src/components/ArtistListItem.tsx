@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, UserPlus, UserCheck, ChevronRight, Play, Activity } from 'lucide-react';
+import { Verified, UserPlus, UserCheck, ChevronRight, Play, Activity } from 'lucide-react';
 import { Artist } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
@@ -46,7 +46,7 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
             <h4 className="text-[14px] font-black uppercase tracking-tight truncate text-foreground group-hover:text-blue-400 transition-colors">
               {artist.name}
             </h4>
-            {artist.verified && <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />}
+            {artist.verified && <Verified className="h-3.5 w-3.5 text-blue-500" />}
           </div>
           <div className="flex items-center gap-3">
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest truncate">

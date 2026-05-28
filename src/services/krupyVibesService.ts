@@ -47,9 +47,9 @@ export const krupyVibesSearch = async (
     console.warn("Krupy Vibes engine unavailable, falling back to basic search:", error);
     // Simple fallback
     return allTracks.filter(t => 
-      t.title.toLowerCase().includes(moodQuery.toLowerCase()) || 
-      t.genre.toLowerCase().includes(moodQuery.toLowerCase()) ||
-      t.artist.toLowerCase().includes(moodQuery.toLowerCase())
+      (t.title || '').toLowerCase().includes((moodQuery || '').toLowerCase()) || 
+      (t.genre || '').toLowerCase().includes((moodQuery || '').toLowerCase()) ||
+      (t.artist || '').toLowerCase().includes((moodQuery || '').toLowerCase())
     );
   }
 };

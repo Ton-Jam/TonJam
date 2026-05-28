@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
-  CheckCircle, 
+  Verified, 
   Users, 
   Layers, 
   Disc, 
@@ -199,7 +199,7 @@ const UserProfile: React.FC = () => {
                 </h1>
                 {user.isVerified && (
                   <div className="text-blue-500">
-                    <CheckCircle className="h-4 w-4 md:h-6 md:w-6" />
+                    <Verified className="h-4 w-4 md:h-6 md:w-6 fill-white" />
                   </div>
                 )}
               </div>

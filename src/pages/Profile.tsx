@@ -5,7 +5,7 @@ import {
  Camera, 
  Check, 
  Pencil, 
- CheckCircle, 
+ Verified, 
  BarChart3, 
  Star, 
  Settings, 
@@ -426,8 +426,8 @@ const Profile: React.FC = () => {
           )}
         </div>
         {localUser.isVerifiedArtist && (
-          <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 z-10 bg-background rounded-full p-0.5 border-2 border-background">
-            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-500 fill-current"/>
+          <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 z-10 bg-background rounded-full p-0.5 border border-background">
+            <Verified className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-500 fill-white"/>
           </div>
         )}
         <input type="file" hidden ref={avatarInputRef} onChange={(e) => handleFileChange(e, 'avatar')} accept={ALLOWED_IMAGE_TYPES.join(',')} />
@@ -857,7 +857,7 @@ const Profile: React.FC = () => {
             <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-6">Identity Protocols</h4>
             {localUser.isVerifiedArtist ? (
               <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                <Verified className="w-5 h-5 text-emerald-500" />
                 <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Verified Architect</span>
               </div>
             ) : localUser.verificationStatus && localUser.verificationStatus !== 'unverified' ? (

@@ -66,21 +66,21 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
   };
 
   return (
-    <Card className={cn("bg-neutral-50/70 dark:bg-black border-none shadow-none overflow-hidden rounded-none w-auto -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 px-4 sm:px-8 md:px-12 lg:px-16 py-8", className)}>
-      <CardHeader className="pb-4 pt-2 px-0">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
+    <div className={cn("w-full py-2", className)}>
+      <div className="pb-4 pt-2">
+        <div className="flex items-center justify-between animate-in fade-in">
+          <div className="space-y-1">
             <div className="flex items-center gap-3">
               <div className="text-primary p-2 bg-primary/10 rounded-2xl">
-                <Crown className="w-5 h-5 animate-pulse" />
+                <Crown className="w-5 h-5" />
               </div>
               <div>
-                <CardTitle className="text-xl font-black uppercase tracking-tighter text-foreground font-display">
+                <h2 className="text-xl font-black uppercase tracking-tight text-foreground font-display">
                   {title}
-                </CardTitle>
-                <CardDescription className="text-[10px] font-medium tracking-tight text-neutral-500 uppercase">
+                </h2>
+                <p className="text-[10px] font-bold tracking-tight text-neutral-500 uppercase">
                   Consensus Network Standing
-                </CardDescription>
+                </p>
               </div>
             </div>
           </div>
@@ -97,12 +97,12 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
             </Tooltip>
           </TooltipProvider>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="p-0">
+      <div className="p-0">
         <Tabs defaultValue="all-time" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="px-0 pb-6">
-            <TabsList className="grid w-full grid-cols-3 bg-neutral-100 dark:bg-zinc-950 h-10 p-1 rounded-full border border-neutral-200 dark:border-white/5 backdrop-blur-md">
+            <TabsList className="grid w-full grid-cols-3 bg-neutral-100 dark:bg-zinc-900 h-10 p-1 rounded-full border border-neutral-200 dark:border-none">
               {['24h', '7d', 'all-time'].map((time) => (
                 <TabsTrigger 
                   key={time} 
@@ -227,8 +227,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
             <ChevronRight className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

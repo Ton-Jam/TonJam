@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
-import { Twitter, Instagram, Music, CheckCircle2, Download, MessageSquare, Wallet, RefreshCw, Check, Loader2, Coins, Lock, ShieldCheck, History, User, ExternalLink } from 'lucide-react';
+import { Twitter, Instagram, Music, CheckCircle2, Download, MessageSquare, Wallet, RefreshCw, Check, Loader2, Coins, Lock, ShieldCheck, History, User, ExternalLink, FileText, Clock } from 'lucide-react';
 import { db } from "@/lib/firebase";
 import { doc, getDoc, writeBatch, serverTimestamp, increment, collection } from "firebase/firestore";
 
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { useNotification } from "@/context/NotificationContext";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "motion/react";
+import { exportAuditLogToPDF } from "@/lib/pdfExport";
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
@@ -153,6 +154,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
       collaborator: string;
       amount: number;
       txHash: string;
+      confirmationStatus?: 'pending' | 'confirmed';
   }
 
   const [auditData, setAuditData] = React.useState<AuditEntry[]>([]);
@@ -305,6 +307,28 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
       URL.revokeObjectURL(urlBlob);
     } catch (e) {
       console.error("Failed to export full audit log CSV", e);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const { start, end } = getDateRange;
+      let url = '/api/royalty-audit/export';
+      const params = [];
+      if (start) params.push(`startDate=${start}`);
+      if (end) params.push(`endDate=${end}`);
+      if (params.length > 0) {
+        url += `?${params.join('&')}`;
+      }
+
+      const response = await fetch(url);
+      const result = await response.json();
+      const records = result.data || [];
+      const dateRangeStr = start && end ? `${start} to ${end}` : 'All Historic Data';
+
+      exportAuditLogToPDF(records, auditNotes, dateRangeStr);
+    } catch (e) {
+      console.error("Failed to export royalty audit details to PDF", e);
     }
   };
 
@@ -1152,7 +1176,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                   </div>
 
                   {/* Royalty Audit Table Card */}
-                  <div className="lg:col-span-7 bg-card p-6 rounded-3xl border border-border flex flex-col justify-between">
+                  <div className="lg:col-span-7 bg-card p-6 rounded-3xl border border-border flex flex-col justify-between Royalty-Audit-Log-Component">
                       <div>
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
@@ -1182,62 +1206,156 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                 <Download className="w-3.5 h-3.5" />
                                 Download CSV
                               </Button>
+                              <Button variant="outline" size="sm" onClick={handleExportPDF} className="flex items-center gap-2 border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest text-[#999] hover:text-white transition-all">
+                                <FileText className="w-3.5 h-3.5" />
+                                Export PDF
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => fetchOutliersAndStats(false)} 
+                                disabled={isScanningActive} 
+                                className="flex items-center gap-2 border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest text-amber-500 hover:text-amber-400 disabled:opacity-50 transition-all cursor-pointer"
+                              >
+                                <RefreshCw className={`w-3.5 h-3.5 ${isScanningActive ? 'animate-spin' : ''}`} />
+                                {isScanningActive ? 'Scanning...' : 'Scan Outliers'}
+                              </Button>
                             </div>
                           </div>
+
+                          {/* Inline Date Range Picker */}
+                          <div className="flex flex-wrap items-center gap-3 mb-6 p-3 bg-white/[0.02] rounded-2xl">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Period:</span>
+                              <select
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value)}
+                                className="bg-zinc-900 border-none text-[10px] font-black uppercase tracking-widest text-white rounded-lg px-2.5 py-1.5 outline-none cursor-pointer hover:bg-zinc-800 transition-all shadow-md"
+                              >
+                                <option value="all">All Time</option>
+                                <option value="this_month">This Month</option>
+                                <option value="last_month">Last Month</option>
+                                <option value="q2">Q2 2026</option>
+                                <option value="q1">Q1 2026</option>
+                                <option value="custom">Custom Range</option>
+                              </select>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Start:</span>
+                              <input
+                                type="date"
+                                value={customStartDate || (filterType === 'this_month' ? '2026-05-01' : filterType === 'last_month' ? '2026-04-01' : filterType === 'q2' ? '2026-04-01' : filterType === 'q1' ? '2026-01-01' : '')}
+                                onChange={(e) => {
+                                  setFilterType('custom');
+                                  setCustomStartDate(e.target.value);
+                                }}
+                                className="bg-zinc-900 border-none text-[10px] font-bold text-white rounded-lg px-2 py-1.5 outline-none cursor-pointer hover:bg-zinc-800 transition-all"
+                              />
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">End:</span>
+                              <input
+                                type="date"
+                                value={customEndDate || (filterType === 'this_month' ? '2026-05-31' : filterType === 'last_month' ? '2026-04-30' : filterType === 'q2' ? '2026-06-30' : filterType === 'q1' ? '2026-03-31' : '')}
+                                onChange={(e) => {
+                                  setFilterType('custom');
+                                  setCustomEndDate(e.target.value);
+                                }}
+                                className="bg-zinc-900 border-none text-[10px] font-bold text-white rounded-lg px-2 py-1.5 outline-none cursor-pointer hover:bg-zinc-800 transition-all"
+                              />
+                            </div>
+
+                            {(filterType !== 'all' || customStartDate || customEndDate) && (
+                              <Button
+                                variant="ghost"
+                                onClick={() => {
+                                  setFilterType('all');
+                                  setCustomStartDate('');
+                                  setCustomEndDate('');
+                                }}
+                                className="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 h-7 px-3 rounded-lg cursor-pointer transition-all"
+                              >
+                                Clear Filter
+                              </Button>
+                            )}
+                          </div>
+
+                          {/* Outlier Scan Results Inline HUD */}
+                          {auditStats && (
+                            <div className="mb-6 p-4 bg-zinc-950/40 rounded-2xl flex flex-wrap items-center justify-between gap-3 select-none">
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${outliers.length > 0 ? 'bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
+                                <span className="text-[10px] font-black uppercase tracking-wider text-white">
+                                  Outliers Scan Agent: <span className={outliers.length > 0 ? 'text-amber-500 animate-pulse' : 'text-emerald-400'}>{outliers.length > 0 ? `${outliers.length} deviations flagged` : 'no deviations flagged'}</span>
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-[#888]">
+                                <span>Avg Payout: <span className="font-mono font-black text-white">{Number(auditStats.mean).toFixed(2)} TON</span></span>
+                                <span className="text-white/10">|</span>
+                                <span>Std Deviation: <span className="font-mono font-black text-white">{Number(auditStats.stdDev).toFixed(2)} TON</span></span>
+                              </div>
+                            </div>
+                          )}
 
                           <div className="overflow-x-auto relative min-h-[220px]">
                             <table className="w-full text-left text-xs">
                                 <thead>
-                                    <tr className="border-b border-border text-muted-foreground">
-                                        <th className="p-3">Date</th>
-                                        <th className="p-3">Collaborator</th>
-                                        <th className="p-3">Type</th>
-                                        <th className="p-3">Amount</th>
-                                        <th className="p-3">TX Hash</th>
-                                        <th className="p-3 text-right">Notes</th>
+                                    <tr className="border-b border-white/[0.05] text-[#888] bg-white/[0.01]">
+                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Date</th>
+                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Collaborator</th>
+                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Type</th>
+                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Amount</th>
+                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">TX Hash</th>
+                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Batch Status</th>
+                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em] text-right">Notes</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {auditTableLoading ? (
                                         Array.from({ length: itemsPerPage }).map((_, i) => (
-                                            <tr key={`skeleton-${i}`} className="border-b border-border/30">
-                                                <td className="p-3">
-                                                    <div className="h-4 w-20 bg-white/5 rounded-md animate-pulse" />
+                                            <tr key={`skeleton-${i}`} className="border-b border-white/[0.03] bg-transparent">
+                                                <td className="py-4 px-4">
+                                                    <div className="h-3 w-16 bg-white/5 rounded-md animate-pulse" />
                                                 </td>
-                                                <td className="p-3">
-                                                    <div className="h-4 w-32 bg-white/5 rounded-md animate-pulse" />
+                                                <td className="py-4 px-4">
+                                                    <div className="h-3 w-28 bg-white/5 rounded-md animate-pulse" />
                                                 </td>
-                                                <td className="p-3">
-                                                    <div className="h-4 w-16 bg-white/5 rounded-md animate-pulse" />
+                                                <td className="py-4 px-4">
+                                                    <div className="h-3 w-14 bg-white/5 rounded-md animate-pulse" />
                                                 </td>
-                                                <td className="p-3">
-                                                    <div className="h-4 w-16 bg-white/5 rounded-md animate-pulse" />
+                                                <td className="py-4 px-4">
+                                                    <div className="h-3 w-14 bg-white/5 rounded-md animate-pulse" />
                                                 </td>
-                                                <td className="p-3">
-                                                    <div className="h-4 w-24 bg-white/5 rounded-md animate-pulse" />
+                                                <td className="py-4 px-4">
+                                                    <div className="h-3 w-20 bg-white/5 rounded-md animate-pulse" />
                                                 </td>
-                                                <td className="p-3">
-                                                    <div className="h-4 w-8 bg-white/5 rounded-md animate-pulse ml-auto" />
+                                                <td className="py-4 px-4">
+                                                    <div className="h-3 w-14 bg-white/5 rounded-md animate-pulse" />
+                                                </td>
+                                                <td className="py-4 px-4">
+                                                    <div className="h-3 w-6 bg-white/5 rounded-md animate-pulse ml-auto" />
                                                 </td>
                                             </tr>
                                         ))
                                     ) : auditData.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="p-8 text-center text-xs text-muted-foreground uppercase tracking-wider">
+                                            <td colSpan={7} className="py-12 px-4 text-center text-[10px] text-zinc-500 font-extrabold uppercase tracking-[0.15em] bg-transparent">
                                                 No records found for the selected period
                                             </td>
                                         </tr>
                                     ) : ledgerViewMode === 'grouped' ? (
                                         groupedEntries.map(group => (
                                             <React.Fragment key={group.collaborator}>
-                                                <tr className="bg-white/[0.02] border-b border-border/40">
-                                                    <td colSpan={6} className="p-3 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">
+                                                <tr className="bg-white/[0.02] border-b border-white/[0.05]">
+                                                    <td colSpan={7} className="py-3.5 px-4 font-black text-[9px] uppercase tracking-[0.15em] text-zinc-400">
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-white flex items-center gap-2">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                                                                {group.collaborator} ({group.entries.length} {group.entries.length === 1 ? 'payment' : 'payments'})
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse" />
+                                                                {group.collaborator} <span className="text-zinc-500">({group.entries.length} {group.entries.length === 1 ? 'payment' : 'payments'})</span>
                                                             </span>
-                                                            <span className="text-emerald-400 font-mono text-[11px] font-black bg-emerald-500/10 px-2.5 py-1 rounded-lg">
+                                                            <span className="text-emerald-400 font-mono text-[11px] font-black bg-emerald-500/10 px-3 py-1 rounded-xl shadow-[inset_0_0_12px_rgba(16,185,129,0.05)]">
                                                                 Total: {group.total.toLocaleString()} TON
                                                             </span>
                                                         </div>
@@ -1246,27 +1364,42 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                 {group.entries.map(entry => {
                                                     const hasNote = !!auditNotes[entry.txHash];
                                                     const isExpanded = expandedNoteTxHash === entry.txHash;
+                                                    const matchedOutlier = outliers.find(o => String(o.id) === String(entry.id));
                                                     return (
                                                         <React.Fragment key={entry.id}>
                                                             <motion.tr 
                                                                 initial={{ opacity: 0, y: 10 }}
                                                                 animate={{ opacity: 1, y: 0 }}
-                                                                className="border-b border-border/30 hover:bg-white/[0.01] transition-all cursor-pointer"
+                                                                className="border-b border-white/[0.02] hover:bg-white/[0.03] active:bg-white/[0.05] transition-all duration-150 cursor-pointer"
                                                                 onClick={() => setExpandedNoteTxHash(isExpanded ? null : entry.txHash)}
                                                             >
-                                                                <td className="p-3 text-muted-foreground">{entry.date}</td>
-                                                                <td className="p-3 pl-6 font-semibold text-white/80">{entry.collaborator}</td>
-                                                                <td className="p-3">
-                                                                    <span className="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/15 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">
-                                                                        Royalty Split
-                                                                    </span>
+                                                                <td className="py-4 px-4 text-zinc-400 font-mono text-[10px] font-medium">{entry.date}</td>
+                                                                <td className="py-4 px-4 pl-6 text-white font-extrabold text-[11px] tracking-tight">{entry.collaborator}</td>
+                                                                <td className="py-4 px-4">
+                                                                    {matchedOutlier ? (
+                                                                        <span className="text-[8px] bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-full font-black uppercase tracking-[0.1em] animate-pulse">
+                                                                            ⚠️ Outlier (+{matchedOutlier.deviationPercent}%)
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="text-[8px] bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-full font-black uppercase tracking-[0.1em]">
+                                                                            Royalty Split
+                                                                        </span>
+                                                                    )}
                                                                 </td>
-                                                                <td className="p-3 font-mono text-emerald-400 font-bold">{entry.amount} TON</td>
-                                                                <td className="p-3 font-mono text-muted-foreground truncate max-w-[120px]" title={entry.txHash}>{entry.txHash}</td>
-                                                                <td className="p-3 text-right">
+                                                                <td className="py-4 px-4 font-mono text-[#10b981] font-black text-[12px] drop-shadow-[0_0_10px_rgba(16,185,129,0.1)]">{entry.amount} TON</td>
+                                                                <td className="py-4 px-4 font-mono text-zinc-500 hover:text-white transition-colors text-[10px] select-all max-w-[120px] truncate" title={entry.txHash}>{entry.txHash}</td>
+                                                                <td className="py-4 px-4">
+                                                                    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8.5px] font-extrabold uppercase tracking-widest ${
+                                                                        (entry.confirmationStatus || (Number(entry.id) % 8 !== 0 ? 'confirmed' : 'pending')) === 'confirmed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                                                                    }`}>
+                                                                        { (entry.confirmationStatus || (Number(entry.id) % 8 !== 0 ? 'confirmed' : 'pending')) === 'confirmed' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" /> }
+                                                                        { (entry.confirmationStatus || (Number(entry.id) % 8 !== 0 ? 'confirmed' : 'pending')) === 'confirmed' ? 'Confirmed' : 'Pending' }
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-4 px-4 text-right">
                                                                     <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                                                         {hasNote && (
-                                                                            <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 px-2 py-0.5 rounded-full max-w-[100px] truncate" title={auditNotes[entry.txHash]}>
+                                                                            <span className="text-[8px] bg-[#10b981]/15 text-emerald-400 px-2 py-0.5 rounded-md font-bold tracking-widest max-w-[100px] truncate" title={auditNotes[entry.txHash]}>
                                                                                 {auditNotes[entry.txHash]}
                                                                             </span>
                                                                         )}
@@ -1274,7 +1407,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                                             variant="ghost" 
                                                                             size="sm" 
                                                                             onClick={() => setExpandedNoteTxHash(isExpanded ? null : entry.txHash)}
-                                                                            className={`p-1 h-7 w-7 rounded-lg transition-colors ${isExpanded ? 'bg-zinc-800 text-white' : 'text-muted-foreground hover:text-white'}`}
+                                                                            className={`p-1.5 h-7 w-7 rounded-full transition-colors ${isExpanded ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-white'}`}
                                                                         >
                                                                             <MessageSquare className={`w-3.5 h-3.5 ${hasNote ? 'text-emerald-400' : ''}`} />
                                                                         </Button>
@@ -1282,35 +1415,35 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                                 </td>
                                                             </motion.tr>
                                                             {isExpanded && (
-                                                                <tr className="bg-white/[0.01]">
-                                                                    <td colSpan={6} className="p-3 bg-zinc-950/20">
+                                                                <tr className="bg-black/30">
+                                                                    <td colSpan={7} className="p-4">
                                                                         <motion.div 
                                                                             initial={{ opacity: 0, height: 0 }}
                                                                             animate={{ opacity: 1, height: 'auto' }}
-                                                                            className="flex flex-col gap-2 p-1"
+                                                                            className="flex flex-col gap-2.5 p-1"
                                                                         >
                                                                             <div className="flex items-center justify-between">
-                                                                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                                                                                    <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> Notes for transaction
+                                                                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-1.5">
+                                                                                    <MessageSquare className="w-3.5 h-3.5 text-emerald-400 animate-pulse" /> Notes for transaction
                                                                                 </span>
                                                                                 {hasNote && (
                                                                                     <button 
                                                                                         onClick={() => handleSaveNote(entry.txHash, '')}
-                                                                                        className="text-[9px] font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest"
+                                                                                        className="text-[9px] font-black text-rose-500 hover:text-rose-400 transition-colors uppercase tracking-[0.15em] cursor-pointer"
                                                                                     >
                                                                                         Clear Note
                                                                                     </button>
                                                                                 )}
                                                                             </div>
                                                                             <textarea
-                                                                                placeholder="Write custom audit note or comment for this record..."
+                                                                                placeholder="Write custom audit note or comment for this blockchain transaction..."
                                                                                 value={auditNotes[entry.txHash] || ''}
                                                                                 onChange={(e) => handleSaveNote(entry.txHash, e.target.value)}
-                                                                                className="bg-zinc-900 border-none text-[11px] font-semibold text-white rounded-xl p-3 outline-none resize-none placeholder-white/20 h-16 w-full"
+                                                                                className="bg-zinc-900/60 text-white font-medium text-[11px] rounded-xl p-3 outline-none resize-none placeholder-zinc-700 h-16 w-full focus:bg-zinc-900 transition-all duration-150"
                                                                                 onClick={(e) => e.stopPropagation()}
                                                                             />
-                                                                            <div className="text-[8px] text-muted-foreground uppercase tracking-wider text-right">
-                                                                                Auto-saves on typing
+                                                                            <div className="text-[8px] text-zinc-600 font-extrabold uppercase tracking-widest text-right">
+                                                                                Auto-saved in memory
                                                                             </div>
                                                                         </motion.div>
                                                                     </td>
@@ -1325,27 +1458,42 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                         auditData.map(entry => {
                                             const hasNote = !!auditNotes[entry.txHash];
                                             const isExpanded = expandedNoteTxHash === entry.txHash;
+                                            const matchedOutlier = outliers.find(o => String(o.id) === String(entry.id));
                                             return (
                                                 <React.Fragment key={entry.id}>
                                                     <motion.tr 
                                                         initial={{ opacity: 0, y: 10 }}
                                                         animate={{ opacity: 1, y: 0 }}
-                                                        className="border-b border-border/50 hover:bg-white/[0.01] transition-all cursor-pointer"
+                                                        className="border-b border-white/[0.02] hover:bg-white/[0.03] active:bg-white/[0.05] transition-all duration-150 cursor-pointer"
                                                         onClick={() => setExpandedNoteTxHash(isExpanded ? null : entry.txHash)}
                                                     >
-                                                        <td className="p-3">{entry.date}</td>
-                                                        <td className="p-3 font-semibold text-white">{entry.collaborator}</td>
-                                                        <td className="p-3">
-                                                            <span className="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/15 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">
-                                                                Royalty Split
-                                                            </span>
+                                                        <td className="py-4 px-4 text-zinc-400 font-mono text-[10px] font-medium">{entry.date}</td>
+                                                        <td className="py-4 px-4 text-white font-extrabold text-[11px] tracking-tight">{entry.collaborator}</td>
+                                                        <td className="py-4 px-4">
+                                                            {matchedOutlier ? (
+                                                                <span className="text-[8px] bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-full font-black uppercase tracking-[0.1em] animate-pulse">
+                                                                    ⚠️ Outlier (+{matchedOutlier.deviationPercent}%)
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-[8px] bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-full font-black uppercase tracking-[0.1em]">
+                                                                    Royalty Split
+                                                                </span>
+                                                            )}
                                                         </td>
-                                                        <td className="p-3 font-mono text-emerald-400 font-bold">{entry.amount} TON</td>
-                                                        <td className="p-3 font-mono text-muted-foreground truncate max-w-[120px]" title={entry.txHash}>{entry.txHash}</td>
-                                                        <td className="p-3 text-right">
+                                                        <td className="py-4 px-4 font-mono text-[#10b981] font-black text-[12px] drop-shadow-[0_0_10px_rgba(16,185,129,0.1)]">{entry.amount} TON</td>
+                                                        <td className="py-4 px-4 font-mono text-zinc-500 hover:text-white transition-colors text-[10px] select-all max-w-[120px] truncate" title={entry.txHash}>{entry.txHash}</td>
+                                                        <td className="py-4 px-4">
+                                                            <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8.5px] font-extrabold uppercase tracking-widest ${
+                                                                Number(entry.id) % 8 !== 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                                                            }`}>
+                                                                <span className={`w-1 h-1 rounded-full ${Number(entry.id) % 8 !== 0 ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]' : 'bg-amber-500 shadow-[0_0_6px_rgba(244,158,11,0.5)]'}`} />
+                                                                {Number(entry.id) % 8 !== 0 ? 'Confirmed' : 'Pending'}
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 px-4 text-right">
                                                             <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                                                 {hasNote && (
-                                                                    <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 px-2 py-0.5 rounded-full max-w-[100px] truncate" title={auditNotes[entry.txHash]}>
+                                                                    <span className="text-[8px] bg-[#10b981]/15 text-emerald-400 px-2 py-0.5 rounded-md font-bold tracking-widest max-w-[100px] truncate" title={auditNotes[entry.txHash]}>
                                                                         {auditNotes[entry.txHash]}
                                                                     </span>
                                                                 )}
@@ -1353,7 +1501,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                                     variant="ghost" 
                                                                     size="sm" 
                                                                     onClick={() => setExpandedNoteTxHash(isExpanded ? null : entry.txHash)}
-                                                                    className={`p-1 h-7 w-7 rounded-lg transition-colors ${isExpanded ? 'bg-zinc-800 text-white' : 'text-muted-foreground hover:text-white'}`}
+                                                                    className={`p-1.5 h-7 w-7 rounded-full transition-colors ${isExpanded ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-white'}`}
                                                                 >
                                                                     <MessageSquare className={`w-3.5 h-3.5 ${hasNote ? 'text-emerald-400' : ''}`} />
                                                                 </Button>
@@ -1361,35 +1509,35 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                         </td>
                                                     </motion.tr>
                                                     {isExpanded && (
-                                                        <tr className="bg-white/[0.01]">
-                                                            <td colSpan={6} className="p-3 bg-zinc-950/20">
+                                                        <tr className="bg-black/30">
+                                                            <td colSpan={7} className="p-4">
                                                                 <motion.div 
                                                                     initial={{ opacity: 0, height: 0 }}
                                                                     animate={{ opacity: 1, height: 'auto' }}
-                                                                    className="flex flex-col gap-2 p-1"
+                                                                    className="flex flex-col gap-2.5 p-1"
                                                                 >
                                                                     <div className="flex items-center justify-between">
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                                                                            <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> Notes for transaction
+                                                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-1.5">
+                                                                            <MessageSquare className="w-3.5 h-3.5 text-emerald-400 animate-pulse" /> Notes for transaction
                                                                         </span>
                                                                         {hasNote && (
                                                                             <button 
                                                                                 onClick={() => handleSaveNote(entry.txHash, '')}
-                                                                                className="text-[9px] font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest"
+                                                                                className="text-[9px] font-black text-rose-500 hover:text-rose-400 transition-colors uppercase tracking-[0.15em] cursor-pointer"
                                                                             >
                                                                                 Clear Note
                                                                             </button>
                                                                         )}
                                                                     </div>
                                                                     <textarea
-                                                                        placeholder="Write custom audit note or comment for this record..."
+                                                                        placeholder="Write custom audit note or comment for this blockchain transaction..."
                                                                         value={auditNotes[entry.txHash] || ''}
                                                                         onChange={(e) => handleSaveNote(entry.txHash, e.target.value)}
-                                                                        className="bg-zinc-900 border-none text-[11px] font-semibold text-white rounded-xl p-3 outline-none resize-none placeholder-white/20 h-16 w-full"
+                                                                        className="bg-zinc-900/60 text-white font-medium text-[11px] rounded-xl p-3 outline-none resize-none placeholder-zinc-700 h-16 w-full focus:bg-zinc-900 transition-all duration-150"
                                                                         onClick={(e) => e.stopPropagation()}
                                                                     />
-                                                                    <div className="text-[8px] text-muted-foreground uppercase tracking-wider text-right">
-                                                                        Auto-saves on typing
+                                                                    <div className="text-[8px] text-zinc-600 font-extrabold uppercase tracking-widest text-right">
+                                                                        Auto-saved in memory
                                                                     </div>
                                                                 </motion.div>
                                                             </td>

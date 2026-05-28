@@ -287,8 +287,8 @@ const Governance: React.FC = () => {
 
   const filteredProposals = proposals.filter(p => {
     const matchesTab = activeTab === 'all' || p.status === activeTab;
-    const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (p.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (p.description || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 

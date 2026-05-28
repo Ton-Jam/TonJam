@@ -560,7 +560,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="space-y-4 pb-20"
+            className="max-w-4xl mx-auto w-full space-y-12 sm:space-y-16 pb-24 px-4 sm:px-0"
           >
             {/* Welcome Banner */}
             <CompleteProfilePrompt />
@@ -571,7 +571,7 @@ const Home: React.FC = () => {
             </AnimatePresence>
 
             {/* Featured Sponsored Posts Carousel */}
-            <div className="mt-4">
+            <div>
               <SectionHeader title="Featured" viewAllLink="/explore" />
               <TrendingBannerCarousel 
                 banners={carouselItems.map(item => ({
@@ -661,7 +661,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* Neural Leaderboard Section */}
-            <section className="w-full mt-6 mb-6">
+            <section className="w-full">
               <Leaderboard artists={artists} limit={5} />
             </section>
 
@@ -680,7 +680,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* AI Dj Krupy Section - Neural Synthesis Interface */}
-            <section className="mb-12 relative px-2 sm:px-0">
+            <section className="relative">
               {aiResult ? (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
@@ -804,7 +804,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* Featured Tracks Dynamic Playlist */}
-            <section className="mb-8">
+            <section>
               <SectionHeader 
                 title="Featured_Streams" 
                 subtitle="Hand-picked frequency clusters based on network trajectory"
@@ -874,105 +874,9 @@ const Home: React.FC = () => {
               </Card>
             </section>
 
-            {/* Trending Now Section - Global Pulse */}
-            <section className="section-container mt-10 mb-10 px-2 sm:px-0">
-              <Tabs defaultValue="tracks" className="w-full">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 px-2">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-foreground/40">Global.Pulse</span>
-                    </div>
-                    <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tighter text-foreground leading-none">Trending_Pulse</h2>
-                  </div>
-                  
-                  <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max -mx-4 px-4">
-                    <TabsTrigger value="tracks" className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto">Tracks</TabsTrigger>
-                    <TabsTrigger value="artists" className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto">Artists</TabsTrigger>
-                    <TabsTrigger value="nfts" className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto">NFTs</TabsTrigger>
-                  </TabsList>
-                </div>
-
-                <TabsContent value="tracks" className="focus-visible:ring-0 mt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-zinc-50 dark:bg-white/[0.02] rounded-3xl p-2 sm:p-4 shadow-none border-none">
-                       <div className="flex flex-col">
-                        {trendingTracks.slice(0, 5).map((track, idx) => (
-                          <TrackCard key={`trend-track-${track.id}`} track={track} variant="row" index={idx} />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="hidden lg:block space-y-6">
-                       <div className="bg-primary/5 rounded-3xl p-8 flex flex-col justify-center items-center text-center gap-4">
-                          <Activity className="h-10 w-10 text-primary opacity-40" />
-                          <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary">Neural_Trajectory</h4>
-                          <p className="text-[11px] font-medium text-primary/60 leading-relaxed">Streaming velocity in this segment has increased by 18.4% in the last 2 nodes.</p>
-                       </div>
-                       <Card className="bg-zinc-950 rounded-3xl p-6 overflow-hidden relative border-none">
-                         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/10 blur-2xl" />
-                         <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest mb-4">Node_Status: Optimal</p>
-                         <h5 className="text-white font-black uppercase tracking-tight mb-2">Network Hub</h5>
-                         <p className="text-zinc-500 text-[10px] leading-relaxed">Participate in global frequencies and earn JAM rewards for every neural sync.</p>
-                       </Card>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="artists" className="focus-visible:ring-0 mt-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {trendingArtists.map((artist) => (
-                      <Card 
-                        key={`trend-artist-${artist.uid}`} 
-                        className="group cursor-pointer bg-zinc-50 dark:bg-white/[0.02] hover:bg-zinc-100 dark:hover:bg-white/[0.05] transition-all active:scale-[0.98] rounded-3xl shadow-none border-none" 
-                        onClick={() => navigate(`/artist/${artist.uid}`)}
-                      >
-                        <CardContent className="p-6 flex flex-col items-center text-center gap-4">
-                          <div className="relative group-hover:scale-105 transition-transform duration-500">
-                            <img src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-zinc-900 shadow-xl" alt={artist.name} />
-                            <div className="absolute -bottom-1 right-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-4 border-white dark:border-zinc-900 shadow-lg">
-                              <UserCheck className="h-4 w-4 text-white" />
-                            </div>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-lg font-black text-foreground uppercase tracking-tight">{artist.name}</p>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{artist.genre}</p>
-                          </div>
-                          <button className="mt-2 w-full py-2 bg-foreground text-background text-[9px] font-black uppercase tracking-widest rounded-full opacity-0 group-hover:opacity-100 transition-all">
-                             View Node
-                          </button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="nfts" className="focus-visible:ring-0 mt-0">
-                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {trendingNFTs.slice(0, 4).map((nft) => (
-                      <div 
-                        key={`trend-nft-${nft.id}`} 
-                        className="flex flex-col gap-4 group cursor-pointer" 
-                        onClick={() => navigate(`/nft/${nft.id}`)}
-                      >
-                        <div className="relative aspect-square overflow-hidden rounded-3xl shadow-xl">
-                          <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={nft.title} />
-                          <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[9px] font-black text-emerald-400 border border-emerald-500/30">
-                            {nft.price} TON
-                          </div>
-                        </div>
-                        <div className="px-2 space-y-1">
-                          <p className="text-sm font-black truncate text-foreground uppercase tracking-tight leading-tight">{nft.title}</p>
-                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate">{nft.artist}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </section>
 
             {/* Protocol Mechanics Accordion */}
-            <section className="section-container mt-12 mb-12">
+            <section className="section-container">
               <div className="max-w-3xl mx-auto space-y-8">
                 <div className="text-center space-y-2">
                   <Badge variant="outline" className="px-4 py-1 bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-white/40 text-[9px] font-black uppercase tracking-[0.3em] rounded-full">
@@ -1010,7 +914,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* Tasks */}
-            <section className="section-container mt-10 mb-10 px-2 sm:px-0">
+            <section className="section-container">
                <SectionHeader title="Daily Missions" subtitle="Sync with key neural loops to earn direct TJ coin drops" viewAllLink="/tasks" />
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                  {tasks.length > 0 ? (
@@ -1089,13 +993,13 @@ const Home: React.FC = () => {
             )}
 
             {/* Top Charts - Tactical Grid Layout */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6 mb-10">
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
                 <SectionHeader title="Global_Data_Stream" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
-                <div className="bg-secondary/30 border border-border rounded-3xl overflow-hidden p-1 shadow-xl backdrop-blur-md">
+                <div className="-mx-4 sm:mx-0">
                   <div className="flex flex-col">
                     {trendingTracks.slice(0, 10).map((track, idx) => (
-                      <TrackCard key={`chart-${track.id}`} track={track} variant="row" index={idx} />
+                      <TrackCard key={`chart-${track.id}`} track={track} variant="row" index={idx} className="!mx-0 rounded-none border-none" />
                     ))}
                   </div>
                 </div>
@@ -1103,7 +1007,7 @@ const Home: React.FC = () => {
 
               <div className="space-y-6">
                 <SectionHeader title="Latest_Releases" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
-                <div className="bg-secondary/30 border border-border rounded-3xl overflow-hidden p-1 shadow-xl backdrop-blur-md">
+                <div className="-mx-4 sm:mx-0">
                   <div className="flex flex-col">
                     {newReleases.map((track, index) => (
                       <TrackCard 
@@ -1111,6 +1015,7 @@ const Home: React.FC = () => {
                         track={track} 
                         variant="row"
                         index={index}
+                        className="!mx-0 rounded-none border-none"
                       />
                     ))}
                   </div>
@@ -1231,7 +1136,7 @@ const Home: React.FC = () => {
             )}
 
             {/* Community & Artist CTA Section */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-10 px-4 sm:px-0">
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <motion.div 
                 whileHover={{ y: -5 }}
                 className="relative overflow-hidden rounded-2xl bg-secondary/50 dark:bg-black/30 border border-border p-6 sm:p-8 shadow-xl group cursor-pointer"

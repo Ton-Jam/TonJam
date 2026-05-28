@@ -235,23 +235,25 @@ const Tasks: React.FC = () => {
         </section>
 
         {/* FILTERS - FRAMELESS HIGH-CONTRAST PILLES */}
-        <div className="py-0.5">
+        <div className="py-0.5 -mx-4 md:-mx-8 lg:-mx-12">
           <Tabs
             value={activeFilter}
             onValueChange={setActiveFilter}
             className="w-full"
           >
-            <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start -mx-4 px-4">
-              {FILTERS.map((filter) => (
-                <TabsTrigger
-                  key={filter}
-                  value={filter}
-                  className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
-                >
-                  {filter}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+              <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
+                {FILTERS.map((filter) => (
+                  <TabsTrigger
+                    key={filter}
+                    value={filter}
+                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
+                  >
+                    {filter}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </Tabs>
         </div>
 

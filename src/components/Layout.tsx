@@ -736,8 +736,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <img src={APP_LOGO} alt="" className="w-8 h-8 object-contain" />
                   <span className="font-bold text-lg tracking-tight text-foreground uppercase">JamSpace</span>
                 </Link>
-                <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 rounded-full hover:bg-muted">
-                  <ArrowLeftIcon className="h-5 w-5 text-zinc-700" />
+                <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 rounded-full hover:bg-white/10 text-foreground active:scale-95">
+                  <ArrowLeftIcon className="h-6 w-6 text-foreground" strokeWidth={3.5} />
                 </button>
               </div>
               <SidebarContent user={user} userProfile={userProfile} signOut={signOut} onNavigate={() => setIsMobileSidebarOpen(false)} />
@@ -747,7 +747,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy || isArtistProfile || isProfile || isUserProfile ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
+      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy || isArtistProfile || isProfile || isUserProfile || isSearch ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
         <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>

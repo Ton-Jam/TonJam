@@ -1,4 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAudio } from '@/context/AudioContext';
+import { MOCK_TRACKS } from '@/constants';
 import { NFTItem } from '@/types';
 import { ShoppingCart } from 'lucide-react';
 
@@ -8,10 +11,39 @@ interface TrendingNFTCardProps {
 }
 
 const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
+  const navigate = useNavigate();
+  const { allTracks, playTrack } = useAudio();
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick();
+      return;
+    }
+
+    const track = allTracks.find(t => t.id === nft.trackId) || MOCK_TRACKS.find(t => t.id === nft.trackId);
+    if (track) {
+      playTrack(track);
+    } else {
+      const fallbackTrack = {
+        id: nft.trackId || nft.id,
+        title: nft.title,
+        artist: nft.artist || nft.creator,
+        coverUrl: nft.imageUrl,
+        audioUrl: nft.audioUrl || (MOCK_TRACKS[0]?.audioUrl ?? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
+      };
+      playTrack(fallbackTrack as any);
+    }
+  };
+
+  const handleBuyClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/nft/${nft.id}`);
+  };
+
   return (
     <div 
-      onClick={onClick}
-      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5"
+      onClick={handleCardClick}
+      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
     >
       {/* Premium Badge */}
       <div className="absolute top-[-8px] left-[-8px] w-[100px] h-[100px] overflow-hidden flex items-center justify-center pointer-events-none">
@@ -33,7 +65,10 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
         <p className="text-blue-400 font-bold text-[11px] tracking-tight">{nft.price} TON</p>
       </div>
 
-      <button className="cursor-pointer transition-all bg-blue-500 text-white px-4 py-1 rounded-[4px] border-blue-600 border-b-[2px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[3px] active:border-b-[1px] active:brightness-90 active:translate-y-[1px] text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 mt-1 w-full justify-center">
+      <button 
+        onClick={handleBuyClick}
+        className="cursor-pointer transition-all bg-blue-500 text-white px-4 py-1 rounded-[4px] border-blue-600 border-b-[2px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[3px] active:border-b-[1px] active:brightness-90 active:translate-y-[1px] text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 mt-1 w-full justify-center"
+      >
         <ShoppingCart className="w-3 h-3" /> Buy
       </button>
 

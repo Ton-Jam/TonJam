@@ -69,6 +69,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (data.createdAt && typeof data.createdAt !== 'string') {
           data.createdAt = (data.createdAt as any).toDate().toISOString();
         }
+        
+        // Ensure currently logged in user has a short artist bio if missing
+        if (!data.bio || data.bio.trim() === '') {
+          const shortBio = "Creating the future of sound. Electronic producer and synth enthusiast.";
+          try {
+            await setDoc(docRef, { bio: shortBio }, { merge: true });
+            data.bio = shortBio;
+          } catch (writeErr) {
+            console.error("Failed to automatically update user profile bio in Firestore:", writeErr);
+          }
+        }
+        
         setUserProfile(data);
       } else {
         // Create a default profile if it doesn't exist
@@ -81,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           following: 0,
           earnings: 0,
           role: 'collector',
+          bio: "Creating the future of sound. Electronic producer and synth enthusiast.",
           createdAt: new Date().toISOString()
         };
         

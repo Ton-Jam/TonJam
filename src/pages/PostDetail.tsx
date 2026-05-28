@@ -260,7 +260,7 @@ const PostDetail: React.FC = () => {
                     )}
                   </div>
                   <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest opacity-40">
-                    @{post.username || post.userName.toLowerCase().replace(/\s+/g, '')}
+                    @{post.username || (post.userName || 'user').toLowerCase().replace(/\s+/g, '')}
                   </span>
                 </div>
               </div>

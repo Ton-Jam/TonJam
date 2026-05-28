@@ -4,6 +4,7 @@ import { RoyaltySplit, Collaborator } from '@/types';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { motion } from 'motion/react';
 
 interface RoyaltySplitManagerProps {
   splits: RoyaltySplit[];
@@ -14,6 +15,19 @@ interface RoyaltySplitManagerProps {
 const RoyaltySplitManager: React.FC<RoyaltySplitManagerProps> = ({ splits, onChange, collaborators }) => {
   const [localSplits, setLocalSplits] = useState<RoyaltySplit[]>(splits && splits.length > 0 ? splits : []);
   const [totalPercentage, setTotalPercentage] = useState(0);
+
+  const colors = [
+    'bg-cyan-500', 
+    'bg-purple-500', 
+    'bg-pink-500', 
+    'bg-amber-500', 
+    'bg-emerald-500', 
+    'bg-indigo-500', 
+    'bg-rose-500', 
+    'bg-blue-500'
+  ];
+
+  const maxCap = Math.max(100, totalPercentage);
 
   useEffect(() => {
     if (splits && JSON.stringify(splits) !== JSON.stringify(localSplits)) {
@@ -73,11 +87,69 @@ const RoyaltySplitManager: React.FC<RoyaltySplitManagerProps> = ({ splits, onCha
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Royalty Splits</Label>
-        <div className={`text-[10px] font-bold uppercase tracking-widest ${totalPercentage > 100 ? 'text-red-500' : 'text-cyan-500'}`}>
-          Total: {totalPercentage.toFixed(1)}%
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-[10px] font-black text-white/45 uppercase tracking-[0.2em]">Royalty Splits</Label>
+          <div className={`text-[10px] font-black uppercase tracking-widest ${totalPercentage > 100 ? 'text-red-500' : 'text-cyan-500'}`}>
+            Total: {totalPercentage.toFixed(1)}%
+          </div>
         </div>
+
+        {/* Dynamic Percentage Distribution Bar */}
+        {localSplits.length > 0 && (
+          <div className="space-y-2 p-3 bg-white/[0.02] rounded-2xl">
+            <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden flex gap-[2px]">
+              {localSplits.map((split, index) => {
+                const pct = split.percentage * 100;
+                if (pct <= 0) return null;
+                const widthPercentage = (pct / maxCap) * 100;
+                const colorClass = colors[index % colors.length];
+
+                return (
+                  <motion.div
+                    key={`segment-${index}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${widthPercentage}%` }}
+                    transition={{ type: 'spring', stiffness: 120, damping: 15 }}
+                    className={`h-full ${colorClass} first:rounded-l-full last:rounded-r-full flex items-center justify-center text-[8px] font-black text-black select-none overflow-hidden`}
+                    title={`${split.label || `Recipient ${index + 1}`}: ${pct.toFixed(1)}%`}
+                  >
+                    {widthPercentage >= 8 && (
+                      <span className="truncate px-1 opacity-90 font-black">
+                        {Math.round(pct)}%
+                      </span>
+                    )}
+                  </motion.div>
+                );
+              })}
+              {totalPercentage < 100 && (
+                <motion.div
+                  key="unallocated-segment"
+                  initial={{ width: '100%' }}
+                  animate={{ width: `${((100 - totalPercentage) / maxCap) * 100}%` }}
+                  transition={{ type: 'spring', stiffness: 120, damping: 15 }}
+                  className="h-full bg-white/5 first:rounded-l-full last:rounded-r-full"
+                  title={`Unallocated: ${(100 - totalPercentage).toFixed(1)}%`}
+                />
+              )}
+            </div>
+
+            {/* Dynamic Legend */}
+            <div className="flex flex-wrap gap-x-3 gap-y-1 pl-1">
+              {localSplits.map((split, index) => {
+                const pct = split.percentage * 100;
+                const bulletColor = colors[index % colors.length];
+                return (
+                  <div key={`legend-${index}`} className="flex items-center gap-1 text-[8.5px] font-bold text-white/50">
+                    <span className={`w-1.5 h-1.5 rounded-full ${bulletColor}`} />
+                    <span className="truncate max-w-[80px]">{split.label || `Recipient ${index + 1}`}</span>
+                    <span className="text-white/30 font-mono">({pct.toFixed(0)}%)</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {collaborators && collaborators.length > 0 && (

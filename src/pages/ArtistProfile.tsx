@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Play, Heart, UserCheck, 
   Edit2, MoreVertical, LayoutGrid, Zap, 
-  MapPin, Ticket, Calendar, ArrowLeft, CheckCircle2, ChevronRight, Activity, Award, UserPlus, Gem
+  MapPin, Ticket, Calendar, ArrowLeft, Verified, ChevronRight, Activity, Award, UserPlus, Gem
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import TrackCard from '@/components/TrackCard';
@@ -296,7 +296,7 @@ const ArtistProfile: React.FC = () => {
                       {artist.name}
               </h1>
               {artist.verified && (
-                <CheckCircle2 className="w-6 h-6 text-blue-500 mt-1" />
+                <Verified className="w-6 h-6 text-blue-500 mt-1 fill-white" />
               )}
             </div>
             {artist.username && (

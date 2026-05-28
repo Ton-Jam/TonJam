@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, ChevronUp } from 'lucide-react';
+import { Verified, ChevronUp } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_ARTISTS, MOCK_USER } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
@@ -55,7 +55,7 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
             {nft.creator}
           </p>
           {artist?.verified && (
-            <CheckCircle2 className="h-2.5 w-2.5 text-blue-500 flex-shrink-0" />
+            <Verified className="h-2.5 w-2.5 text-blue-500 flex-shrink-0" />
           )}
         </div>
       </div>

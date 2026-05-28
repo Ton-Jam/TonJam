@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Users, UserPlus, UserCheck } from 'lucide-react';
+import { Verified, Users, UserPlus, UserCheck } from 'lucide-react';
 import { Artist, UserProfile } from '@/types';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage } from '@/lib/utils';
@@ -62,7 +62,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-[10px] font-bold text-blue-600 dark:text-foreground truncate uppercase tracking-tight group-hover:text-blue-500 transition-colors">{user.name}</p>
-            {verified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
+            {verified && <Verified className="h-3 w-3 text-blue-500" />}
           </div>
           <p className="text-[8px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest">{user.followers?.toLocaleString() || 0} Collectors</p>
         </div>
@@ -101,7 +101,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
           <div className="min-w-0">
             <div className="flex items-center gap-3">
               <p className="text-[12px] font-bold text-blue-600 dark:text-foreground uppercase tracking-tight group-hover:text-blue-500 transition-colors truncate">{user.name}</p>
-              {verified && <CheckCircle2 className="h-3 w-3 text-blue-500" />}
+              {verified && <Verified className="h-3 w-3 text-blue-500" />}
             </div>
             <p className="text-[10px] font-bold text-blue-500/50 dark:text-muted-foreground/50 uppercase tracking-widest">{genre || 'Artist'}</p>
           </div>
@@ -154,7 +154,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
           <h3 className="text-[10px] font-bold text-foreground tracking-tight uppercase truncate">
             {user.name}
           </h3>
-          {verified && <CheckCircle2 className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
+          {verified && <Verified className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
         </div>
         
         <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">

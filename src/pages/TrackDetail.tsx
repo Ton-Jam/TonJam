@@ -4,7 +4,7 @@ import {
   Play, 
   Pause, 
   Zap, 
-  CheckCircle2, 
+  Verified, 
   Share2, 
   Heart, 
   MoreHorizontal, 
@@ -164,8 +164,8 @@ const TrackDetail: React.FC = () => {
             <div className="relative">
               <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 100, 100)} className="w-10 h-10 rounded-full object-cover" alt="" />
               {track.artistVerified && (
-                <div className="absolute -bottom-0.5 -right-0.5 bg-blue-600 rounded-full p-0.5 border-2 border-background">
-                  <CheckCircle2 className="h-2.5 w-2.5 text-white fill-white" />
+                <div className="absolute -bottom-0.5 -right-0.5 bg-background rounded-full p-0.5 border border-background">
+                  <Verified className="h-4 w-4 text-blue-500 fill-white" />
                 </div>
               )}
             </div>
@@ -604,8 +604,8 @@ const TrackDetail: React.FC = () => {
                   <div className="relative group/artist" onClick={() => navigate(`/artist/${track.artistId}`)}>
                     <img src={artist?.avatarUrl || getPlaceholderImage(`artist-${track.artistId}`, 200, 200)} className="w-16 h-16 rounded-full object-cover cursor-pointer transition-transform group-hover/artist:scale-105" alt="" />
                     {track.artistVerified && (
-                      <div className="absolute -bottom-0.5 -right-0.5 bg-blue-600 rounded-full p-0.5 border-2 border-background shadow-lg">
-                        <CheckCircle2 className="h-3 w-3 text-white fill-white" />
+                      <div className="absolute -bottom-0.5 -right-0.5 bg-background rounded-full p-0.5 border border-background shadow-lg">
+                        <Verified className="h-4.5 w-4.5 text-blue-500 fill-white" />
                       </div>
                     )}
                   </div>

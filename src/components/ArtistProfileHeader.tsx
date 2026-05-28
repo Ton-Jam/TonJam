@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import LikeButton from './LikeButton';
-import { Twitter, Instagram, Globe, Send, Disc, CheckCircle2, LayoutDashboard, Settings, Hammer, Edit2, Zap, UserPlus, UserCheck } from 'lucide-react';
+import { Twitter, Instagram, Globe, Send, Disc, LayoutDashboard, Settings, Hammer, Edit2, Zap, UserPlus, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAudio } from '@/context/AudioContext';
 import { toast } from 'sonner';
