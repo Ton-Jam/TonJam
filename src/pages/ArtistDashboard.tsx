@@ -470,7 +470,7 @@ export default function ArtistDashboard() {
                 : "text-zinc-500 hover:text-white hover:bg-white/[0.02]"
             }`}
           >
-            <Music className="w-3.5 h-3.5" /> Sonic Vault
+            <Music className="w-3.5 h-3.5" /> Sonic Library
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
@@ -834,7 +834,7 @@ export default function ArtistDashboard() {
                 {/* Vault Grid */}
                 <div className="space-y-4">
                   <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.25em] px-2 flex items-center gap-1.5">
-                    <Gem className="w-3.5 h-3.5 text-purple-400" /> Digital Collection Vault
+                    <Gem className="w-3.5 h-3.5 text-purple-400" /> Digital Collection Library
                   </h3>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

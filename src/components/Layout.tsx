@@ -822,12 +822,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
         <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-600/20 via-blue-500/50 to-blue-600/20 z-10" />
-          <nav className="h-full w-full bg-background/95 backdrop-blur-xl border-t border-white/5 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.4)]" aria-label="Mobile Navigation">
+          <nav className="h-full w-full bg-white/5 backdrop-blur-xl border-t border-white/10 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.2)]" aria-label="Mobile Navigation">
             <MobileNavItem to="/" icon={HomeIcon} label="Home" />
             <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
-            <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jam" />
-            <MobileNavItem to="/library" icon={RectangleStackIcon} label="Vault" />
-            <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Asset" />
+            <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" />
+            <MobileNavItem to="/library" icon={RectangleStackIcon} label="Library" />
+            <MobileNavItem to="/marketplace" icon={ShoppingBagIcon} label="Market" />
           </nav>
         </div>
       )}
@@ -1005,12 +1005,12 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label
         aria-label={label}
         className={({ isActive }) => `
           flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[2px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
-          ${isActive ? 'text-blue-500' : 'text-muted-foreground hover:text-foreground hover:bg-muted/5'}
+          ${isActive ? 'text-blue-500' : 'text-white hover:text-white hover:bg-white/5'}
         `}
       >
           {({ isActive }) => (
             <>
-              <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'text-muted-foreground opacity-60'}`} strokeWidth={isActive ? 3 : 2.5} />
+              <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500' : 'text-white'}`} strokeWidth={isActive ? 3 : 2.5} />
               <span className={`text-[8px] font-bold uppercase tracking-widest transition-all ${isActive ? 'opacity-100' : 'opacity-0 scale-75'}`}>{label}</span>
             </>
           )}

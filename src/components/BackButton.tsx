@@ -9,15 +9,15 @@ interface BackButtonProps {
   children?: React.ReactNode;
 }
 
-export const BackButton: React.FC<BackButtonProps> = ({ className, ariaLabel = "Go back", iconClassName = "h-6 w-6 text-foreground", children }) => {
+export const BackButton: React.FC<BackButtonProps> = ({ className, ariaLabel = "Go back", iconClassName = "h-5 w-5 text-foreground", children }) => {
   const navigate = useNavigate();
   return (
     <button 
       onClick={() => navigate(-1)} 
-      className={`p-2.5 rounded-full hover:bg-white/10 text-foreground transition-all active:scale-95 flex items-center justify-center ${className}`}
+      className={`p-2 rounded-full hover:bg-white/10 text-foreground transition-all active:scale-95 flex items-center justify-center ${className}`}
       aria-label={ariaLabel}
     >
-      <ArrowLeftIcon className={`${iconClassName}`} strokeWidth={3.5} />
+      <ArrowLeftIcon className={`${iconClassName}`} strokeWidth={2.5} />
       {children}
     </button>
   );

@@ -531,7 +531,16 @@ const NFTDetail: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen pb-4 animate-in fade-in duration-500 bg-gradient-to-br from-background via-background to-blue-900/10">
+    <div className="relative min-h-screen pb-4 animate-in fade-in duration-500 bg-background">
+      {/* Blurred Cover Background */}
+      <div className="absolute top-0 left-0 w-full h-[60vh] z-0 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center blur-3xl opacity-20"
+          style={{ backgroundImage: `url(${localNft.imageUrl || getPlaceholderImage(`nft-${localNft.id}`)})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
+      </div>
+
       {/* Immersive background glow */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
@@ -641,7 +650,7 @@ const NFTDetail: React.FC = () => {
             </div>
 
             {/* Hardware-style Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[
                 {
                   label: "BPM",
@@ -670,18 +679,15 @@ const NFTDetail: React.FC = () => {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-white/5 backdrop-blur-md p-2.5 sm:p-4 rounded-[2px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
+                  className="bg-white/5 backdrop-blur-md p-3 rounded-[2px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
                 >
-                  <div
-                    className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace("text", "bg")} opacity-40`}
-                  ></div>
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.3em]">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
                       {stat.label}
                     </p>
                     <stat.icon className={`h-3 w-3 ${stat.color} opacity-40`} />
                   </div>
-                  <p className="text-base font-bold text-foreground tracking-tighter font-mono">
+                  <p className="text-sm font-bold text-foreground tracking-tighter font-mono">
                     {stat.val}
                   </p>
                 </div>
@@ -996,7 +1002,7 @@ const NFTDetail: React.FC = () => {
                 )}
               </div>
 
-              <div className="mt-4 flex flex-col sm:flex-row gap-3 relative z-10">
+              <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-row gap-2 relative z-10">
                 {isOwner ? (
                   <>
                     <button
@@ -1005,35 +1011,35 @@ const NFTDetail: React.FC = () => {
                           ? setShowManageModal(true)
                           : setShowListModal(true)
                       }
-                      className="flex-1 py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]"
+                      className="py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-[2px] font-black text-[10px] uppercase tracking-[0.2em]"
                     >
                       {localNft.listingType ? "Manage" : "Sell"}
                     </button>
                     <button
                       onClick={() => setShowManageModal(true)}
-                      className="flex-1 py-3 bg-white/5 hover:bg-zinc-800 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10"
+                      className="py-2 bg-white/5 hover:bg-zinc-800 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10"
                     >
                       Settings
                     </button>
                     <button
                       onClick={() => setShowSendModal(true)}
-                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                      className="py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 border border-white/10"
                     >
-                      <Send className="h-3.5 w-3.5" /> Send
+                      <Send className="h-3 w-3" /> Send
                     </button>
                     {localNft.listingType && (
                       <button
                         onClick={handleCancelListing}
-                        className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 hover:border-red-500/20"
+                        className="py-2 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10 hover:border-red-500/20"
                       >
                         Cancel
                       </button>
                     )}
                     <button
                       onClick={handleShare}
-                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                      className="py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 border border-white/10"
                     >
-                      <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
+                      <Share2 className="h-3 w-3 text-blue-400" /> Share
                     </button>
                   </>
                 ) : (

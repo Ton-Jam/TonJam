@@ -229,7 +229,7 @@ const Marketplace: React.FC = () => {
               { label: 'Floor Price', val: Math.min(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2), unit: 'TON', color: 'text-emerald-500', icon: TrendingUp, desc: 'Lowest Entry' },
               { label: 'Highest Sale', val: Math.max(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2), unit: 'TON', color: 'text-amber-500', icon: Rocket, desc: 'Premium Value' },
               { label: 'Market Volume', val: allNFTs.reduce((sum, nft) => sum + parseFloat(nft.price), 0).toLocaleString(undefined, { maximumFractionDigits: 0 }), unit: 'TON', color: 'text-purple-500', icon: Zap, desc: 'Total Liquidity' },
-              { label: 'Active Auctions', val: allNFTs.filter(nft => nft.listingType === 'auction').length, unit: 'Assets', color: 'text-blue-500', icon: Bell, desc: 'Live Bidding' },
+              { label: 'Active Auctions', val: allNFTs.filter(nft => nft.listingType === 'auction').length, unit: 'Market', color: 'text-blue-500', icon: Bell, desc: 'Live Bidding' },
             ].map((card, i) => (
               <Card key={i} className="bg-card border border-border/60 shadow-none overflow-hidden transition-all hover:border-primary/40">
                 <CardContent className="p-4">
