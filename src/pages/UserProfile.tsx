@@ -164,11 +164,15 @@ const UserProfile: React.FC = () => {
           </button>
         </div>
         
-        {/* Banner Upload Trigger */}
+        {/* Banner Upload Trigger / Cover Upload */}
         {id === userProfile.uid && (
-          <div className="absolute top-4 right-4 z-40">
-            <button onClick={() => fileInputRef.current?.click()} className="p-2 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-blue-600 transition-all shadow-lg border border-white/10 hover:scale-110 active:scale-90" >
+          <div className="absolute inset-0 z-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-background/40 backdrop-blur-sm">
+            <button 
+              onClick={() => fileInputRef.current?.click()} 
+              className="flex items-center gap-2 px-6 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-xl"
+            >
               <Camera className="h-3.5 w-3.5" />
+              Upload Cover
             </button>
             <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
           </div>
@@ -230,24 +234,24 @@ const UserProfile: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. TABS NAVIGATION */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 mb-4 sm:mb-8 overflow-hidden">
+      {/* 3. TABS NAVIGATION (Refined) */}
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 mb-4 sm:mb-8 overflow-hidden group">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center gap-4 sm:gap-10 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar [--scrollbar-width:none]">
             {['overview', 'inventory', 'activity', 'network'].map(tab => (
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab as any)} 
                 className={cn(
-                  "py-3 sm:py-5 text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] transition-all relative whitespace-nowrap",
-                  activeTab === tab ? "text-blue-500" : "text-muted-foreground hover:text-foreground"
+                  "py-4 sm:py-6 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] transition-all relative whitespace-nowrap flex items-center gap-2",
+                  activeTab === tab ? "text-blue-500" : "text-muted-foreground hover:text-foreground/80"
                 )} 
               >
                 {tab === 'inventory' ? 'Collection' : tab}
                 {activeTab === tab && (
                   <motion.div 
                     layoutId="activeTabUser"
-                    className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-t-full shadow-[0_-2px_10px_rgba(59,130,246,0.5)]" 
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
                   />
                 )}
               </button>

@@ -1308,7 +1308,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                         <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Type</th>
                                         <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Amount</th>
                                         <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">TX Hash</th>
-                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Batch Status</th>
+                                        <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em]">Payment Status</th>
                                         <th className="py-3 px-4 text-[9px] font-black uppercase tracking-[0.25em] text-right">Notes</th>
                                     </tr>
                                 </thead>

@@ -361,254 +361,101 @@ const FullPlayer: React.FC = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="space-y-6"
+              className="flex flex-col h-full justify-between py-2"
             >
-              {/* Cover Art & Dynamic Visualizer */}
-              <div className="relative group">
-                <div className="absolute inset-0 bg-blue-500/10 rounded-[2px] blur-3xl -z-10 animate-pulse"></div>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      className="relative w-[280px] h-[280px] mx-auto overflow-hidden rounded-[8px] shadow-2xl border border-white/5 cursor-pointer"
-                      onClick={() => {
-                        const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
-                        const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
-                        setVisualizerVariant(variants[nextIndex]);
-                        addNotification(`Visualizer morphed to ${variants[nextIndex]}`, 'info', 1000);
-                      }}
-                    >
-                      <img
-                        src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
-                        className={cn(
-                          "w-full h-full object-cover transition-opacity duration-700",
-                          visualizerVariant === 'circle' ? "opacity-30 blur-sm scale-110" : 
-                          visualizerVariant === 'particles' ? "opacity-20 blur-md" : 
-                          visualizerVariant === 'waves' ? "opacity-40 blur-[2px]" : "opacity-100"
-                        )}
-                        alt={currentTrack.title}
-                      />
-                      
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <DynamicVisualizer 
-                          variant={visualizerVariant as any} 
-                          className="w-full h-full"
-                          color={visualizerColor}
-                          interactive={false}
-                        />
-                      </div>
-                      
-                      {/* Floating UI over visualizer */}
-                      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity">
-                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[6px] font-black uppercase tracking-[0.2em] text-blue-400">Morph Active</span>
-                            <span className="text-[8px] font-black uppercase tracking-widest text-white/40">{visualizerVariant.toUpperCase()} DATA</span>
-                         </div>
-                         <div className="p-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
-                            <Maximize2 className="w-3 h-3 text-white/50" />
-                         </div>
-                      </div>
-                    </motion.div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-[8px] font-black uppercase tracking-widest bg-blue-600 border-none">Tap to change visualization protocol</TooltipContent>
-                </Tooltip>
-              </div>
-
-              {/* Technical Overlay Badges */}
-              <div className="flex gap-2 justify-center px-2">
-                <Badge variant="secondary" className="bg-white/5 border-none text-[7px] font-bold uppercase tracking-widest text-white/40 hover:bg-white/10">
-                  FRQ: {currentTrack.bpm || Math.floor(Math.random() * 40 + 80)}HZ
-                </Badge>
-                <Badge variant="secondary" className="bg-white/5 border-none text-[7px] font-bold uppercase tracking-widest text-white/40 hover:bg-white/10">
-                  BIT: {currentTrack.bitrate || 'FLAC 24'}
-                </Badge>
-                <Badge variant="secondary" className="bg-white/5 border-none text-[7px] font-bold uppercase tracking-widest text-white/40 hover:bg-white/10">
-                  ENC: OGG/TJ
-                </Badge>
-              </div>
-
-              {/* Info & Like */}
-              <div className="flex justify-between items-center px-2">
-                <div className="flex-1 min-w-0 pr-4">
-                  <h1 className="text-lg font-black uppercase tracking-tight truncate mb-0.5">
-                    {currentTrack.title}
-                  </h1>
-                  <p className="text-[11px] font-bold text-white uppercase tracking-widest cursor-pointer hover:text-blue-400 transition-colors" onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }}>
-                    {currentTrack.artist}
-                  </p>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => toggleLikeTrack(currentTrack.id)}
-                  className={cn(
-                    "rounded-[4px] bg-white/5 backdrop-blur-md transition-all active:scale-90 gap-2 px-3",
-                    isLiked ? 'text-blue-500 hover:text-blue-400' : 'text-white/20 hover:text-white'
-                  )}
+              {/* Cover Art Area */}
+              <div className="relative flex-1 flex items-center justify-center">
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  className="relative w-[320px] h-[320px] overflow-hidden rounded-[16px] shadow-2xl border border-white/5 cursor-pointer"
+                  onClick={() => {
+                    const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
+                    const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
+                    setVisualizerVariant(variants[nextIndex]);
+                  }}
                 >
-                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">{(currentTrack.likes || 0).toLocaleString()}</span>
-                </Button>
+                  <img
+                    src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
+                    className="w-full h-full object-cover"
+                    alt={currentTrack.title}
+                  />
+                  
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                      <Sparkles className="w-8 h-8 text-white/50" />
+                  </div>
+                </motion.div>
               </div>
 
-              {/* Waveform Progress Profile */}
-              <div>
-                <div 
-                  className="h-10 flex items-end gap-[1px] cursor-pointer relative px-2"
-                  onClick={handleWaveformClick}
-                >
-                  <DynamicVisualizer 
-                    variant="bars" 
-                    color={visualizerColor} 
-                    className="absolute inset-0 opacity-20 pointer-events-none"
-                    interactive={false}
-                  />
-                  {/* Floating Playhead Glow */}
-                  <motion.div 
-                    className="absolute bottom-0 h-full w-[2px] bg-blue-400 z-10 shadow-[0_0_10px_#60a5fa] pointer-events-none"
-                    style={{ left: `${progress}%` }}
-                    animate={{ opacity: isPlaying ? [0.4, 0.8, 0.4] : 0.6 }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                  />
-                  {waveformHeights.map((height, i) => {
-                    const barProgress = (i / waveformHeights.length) * 100;
-                    const isActive = barProgress <= progress;
-                    return (
-                      <div 
-                        key={i}
-                        className={cn(
-                          "flex-1 rounded-t-sm transition-all duration-300",
-                          isActive ? "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]" : "bg-white/10"
-                        )}
-                        style={{ 
-                          height: `${height * 0.8}%`,
-                        }}
-                      >
-                         {isActive && isPlaying && (
-                           <motion.div 
-                             animate={{ height: ['40%', '100%', '40%'] }}
-                             transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.02 }}
-                             className="w-full bg-blue-300/30 rounded-t-sm"
-                           />
-                         )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-white/40 mt-3 px-2">
-                  <span className="text-white">{formatTime(currentTime)}</span>
-                  <span className="text-blue-500/60 font-mono tracking-normal">LINK active</span>
-                  <span className="text-white">{formatTime(duration)}</span>
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center justify-between px-4">
+              {/* Info Area */}
+              <div className="space-y-6 pt-8">
+                <div className="flex justify-between items-start px-2">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <h1 className="text-2xl font-black uppercase tracking-tight truncate">
+                      {currentTrack.title}
+                    </h1>
+                    <p className="text-sm font-bold text-white/60 uppercase tracking-widest cursor-pointer hover:text-blue-400 transition-colors mt-1" onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }}>
+                      {currentTrack.artist}
+                    </p>
+                  </div>
                   <Button 
                     variant="ghost" 
-                    size="icon"
-                    onClick={toggleShuffle}
-                    className={cn("transition-all", isShuffle ? 'text-blue-500 hover:text-blue-400' : 'text-white/10 hover:text-white hover:bg-white/5')}
+                    size="sm"
+                    onClick={() => toggleLikeTrack(currentTrack.id)}
+                    className={cn(
+                      "rounded-full p-2 transition-all",
+                      isLiked ? 'text-blue-500' : 'text-white/20 hover:text-white'
+                    )}
                   >
-                    <ShuffleIcon className="w-4 h-4" />
+                    <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
+                  </Button>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="space-y-1">
+                  <Slider 
+                    value={[progress]}
+                    min={0}
+                    max={100}
+                    step={0.1}
+                    onValueChange={(val) => seek(val[0])}
+                    className="cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                    <span className="text-white">{formatTime(currentTime)}</span>
+                    <span className="text-white">{formatTime(duration)}</span>
+                  </div>
+                </div>
+
+                {/* Controls */}
+                <div className="flex items-center justify-between px-2 pt-2">
+                  <Button variant="ghost" size="icon" onClick={toggleShuffle} className={isShuffle ? 'text-blue-500' : 'text-white/40 hover:text-white'}>
+                    <ShuffleIcon className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={prevTrack} className="text-white hover:text-blue-500 transition-colors">
+                    <SkipBack className="w-8 h-8 fill-current" />
                   </Button>
                   
-                  <div className="flex items-center gap-6">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={prevTrack} 
-                      className="text-white/60 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <SkipBack className="w-6 h-6 fill-current" />
-                    </Button>
-                    
-                    <Button
-                      onClick={togglePlay}
-                      className="w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(37,99,235,0.3)] border-none"
-                    >
-                      {isPlaying ? (
-                        <Pause className="w-6 h-6 text-white fill-white" />
-                      ) : (
-                        <Play className="w-6 h-6 text-white fill-white ml-1" />
-                      )}
-                    </Button>
-
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={nextTrack} 
-                      className="text-white/60 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <SkipForward className="w-6 h-6 fill-current" />
-                    </Button>
-                  </div>
-
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={toggleRepeat}
-                    className={cn("relative transition-all", repeatMode !== 'off' ? 'text-blue-500 hover:text-blue-400' : 'text-white/10 hover:text-white hover:bg-white/5')}
+                  <Button
+                    onClick={togglePlay}
+                    className="w-16 h-16 rounded-full bg-white text-black hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex items-center justify-center"
                   >
-                    <RepeatIcon className="w-4 h-4" />
-                    {repeatMode === 'one' && <span className="absolute -top-0.5 -right-0.5 text-[7px] font-black bg-blue-500 text-white rounded-full w-3 h-3 flex items-center justify-center">1</span>}
+                    {isPlaying ? <Pause className="w-7 h-7 fill-black" /> : <Play className="w-7 h-7 fill-black ml-1" />}
+                  </Button>
+
+                  <Button variant="ghost" size="icon" onClick={nextTrack} className="text-white hover:text-blue-500 transition-colors">
+                    <SkipForward className="w-8 h-8 fill-current" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={toggleRepeat} className={repeatMode !== 'off' ? 'text-blue-500' : 'text-white/40 hover:text-white'}>
+                    <RepeatIcon className="w-5 h-5" />
                   </Button>
                 </div>
+              </div>
 
-                {/* Bottom Tools */}
-                <div className="flex items-center gap-3 bg-white/5 p-3 rounded-[4px] border-none mx-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setShowVolumeHUD(!showVolumeHUD)} 
-                    className="h-8 w-8 text-white/50 hover:text-white"
-                  >
-                    <Volume2 className="h-4 w-4" />
-                  </Button>
-                  <Slider 
-                    min={0} 
-                    max={100} 
-                    step={1}
-                    value={[volume * 100]}
-                    onValueChange={(vals) => setVolume(vals[0] / 100)}
-                    className="flex-1"
-                  />
-                  <Separator orientation="vertical" className="h-4 bg-white/10" />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" onClick={toggleOfflineMode} className={cn("h-8 w-8 transition-colors", isOffline ? "text-red-500 hover:bg-red-500/10" : "text-white/20 hover:text-white hover:bg-white/10")}>
-                        <Zap className={cn("w-3.5 h-3.5", isOffline && "fill-current")} />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Offline Mode</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" onClick={() => setActiveView('krupy')} className="h-8 w-8 text-blue-500/50 hover:text-blue-500 hover:bg-blue-500/10">
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>AI Insights</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" onClick={() => setShowQueue(true)} className="h-8 w-8 text-white/20 hover:text-white hover:bg-white/10">
-                        <List className="w-3.5 h-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Queue</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" onClick={handleShare} className="h-8 w-8 text-white/20 hover:text-white hover:bg-white/10">
-                        <Share2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Share</TooltipContent>
-                  </Tooltip>
-                </div>
+              {/* Bottom secondary tools */}
+              <div className="flex items-center justify-center pt-8 pb-4 gap-6 text-white/30">
+                 <Volume2 className="w-4 h-4 cursor-pointer hover:text-white" onClick={() => setShowVolumeHUD(!showVolumeHUD)} />
+                 <Share2 className="w-4 h-4 cursor-pointer hover:text-white" onClick={handleShare} />
+                 <ListMusic className="w-4 h-4 cursor-pointer hover:text-white" onClick={() => setShowQueue(true)} />
               </div>
             </motion.div>
           </TabsContent>

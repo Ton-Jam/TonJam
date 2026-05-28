@@ -102,7 +102,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
       <div className="p-0">
         <Tabs defaultValue="all-time" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="px-0 pb-6">
-            <TabsList className="grid w-full grid-cols-3 bg-neutral-100 dark:bg-zinc-900 h-10 p-1 rounded-full border border-neutral-200 dark:border-none">
+            <TabsList className="grid w-full grid-cols-3 bg-muted h-10 p-1 rounded-full border border-border/50">
               {['24h', '7d', 'all-time'].map((time) => (
                 <TabsTrigger 
                   key={time} 
