@@ -428,26 +428,34 @@ export default function ArtistDashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#07090E] text-white pb-24 relative overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white pb-24 relative overflow-x-hidden">
       {/* Dynamic Ambient Blur Backgrounds */}
       <div className="fixed inset-0 opacity-10 blur-[130px] pointer-events-none z-0">
         <div className="absolute top-10 right-10 w-80 h-80 bg-cyan-500 rounded-full" />
         <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600 rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+      <div className="relative z-10 max-w-5xl mx-auto p-2 sm:p-4 space-y-4">
         
         {/* Banner Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/[0.02] backdrop-blur-md p-6 rounded-[32px] shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
-              Artist Hub <Sparkles className="w-5 h-5 text-cyan-400 animate-pulse" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/[0.02] backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">
+          <div className="space-y-0.5">
+            <h1 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
+              Artist Hub <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
             </h1>
-            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-              Manage tracks, monitor sales, stream analytic feeds & connect with digital collectors
+            <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">
+              Manage tracks, sales & fans
             </p>
           </div>
-          <BackButton />
+          <div className="flex items-center gap-2">
+            <button
+               onClick={() => setActiveTab("sonic")}
+               className="h-9 px-4 bg-cyan-500 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-cyan-400 transition-colors flex items-center gap-2"
+            >
+                <Upload className="w-3.5 h-3.5" /> Upload Track
+            </button>
+            <BackButton />
+          </div>
         </div>
 
         {/* Workspace Subtab Selection Grid (Porosity Glass Aesthetic) */}
@@ -512,75 +520,67 @@ export default function ArtistDashboard() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             {/* OVERVIEW TAB */}
             {activeTab === "overview" && (
               <>
                 {/* Statistics Bento Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-3xl relative overflow-hidden group shadow-lg">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <Music className="w-14 h-14" />
-                    </div>
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Total Tracks</p>
-                    <div className="flex items-end gap-2">
-                      <h3 className="text-3xl font-black text-cyan-400">{tracks.length}</h3>
-                      <Activity className="w-4 h-4 text-cyan-500/30 mb-2 animate-bounce" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="bg-white/[0.02] backdrop-blur-md p-3 rounded-lg relative overflow-hidden group shadow">
+                    <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Total Tracks</p>
+                    <div className="flex items-end gap-1">
+                      <h3 className="text-xl font-black text-cyan-400">{tracks.length}</h3>
                     </div>
                   </div>
 
-                  <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-3xl relative overflow-hidden group shadow-lg">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <Gem className="w-14 h-14" />
-                    </div>
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Minted Collectibles</p>
-                    <div className="flex items-end gap-2">
-                      <h3 className="text-3xl font-black text-purple-400">{nfts.length}</h3>
-                      <ArrowUpRight className="w-4 h-4 text-purple-500/30 mb-2" />
+                  <div className="bg-white/[0.02] backdrop-blur-md p-3 rounded-lg relative overflow-hidden group shadow">
+                    <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Minted</p>
+                    <div className="flex items-end gap-1">
+                      <h3 className="text-xl font-black text-purple-400">{nfts.length}</h3>
                     </div>
                   </div>
 
-                  <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-3xl relative overflow-hidden group shadow-lg">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <Coins className="w-14 h-14" />
-                    </div>
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Total Royalty Pool</p>
-                    <div className="flex items-end gap-2">
-                      <h3 className="text-3xl font-black text-amber-500">{earnings.toFixed(2)}</h3>
-                      <span className="text-[9px] font-black text-amber-500/70 mb-2 uppercase tracking-widest">TON</span>
+                  <div className="bg-white/[0.02] backdrop-blur-md p-3 rounded-lg relative overflow-hidden group shadow">
+                    <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Royalty (TON)</p>
+                    <div className="flex items-end gap-1">
+                      <h3 className="text-xl font-black text-amber-500">{earnings.toFixed(2)}</h3>
                     </div>
                   </div>
                 </div>
 
                 {/* Audiences Area Chart Card */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[32px] shadow-lg">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] flex items-center gap-2 mb-1">
-                        <BarChart3 className="w-3.5 h-3.5 text-cyan-400" /> Recent performance
+                      <h2 className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-1 mb-0.5">
+                        <BarChart3 className="w-3 h-3 text-cyan-400" /> Recent performance
                       </h2>
-                      <h3 className="text-sm font-black uppercase tracking-tight">Stream Playback Growth</h3>
+                      <h3 className="text-xs font-black uppercase tracking-tight">Stream Playback Growth</h3>
                     </div>
                   </div>
-                  <div className="h-48 -mx-4">
+                  <div className="h-40 -mx-4">
                     <ChartAreaInteractive />
                   </div>
                 </div>
 
                 {/* Live Streams Bar Chart */}
-                <DailyStreamsChart tracks={tracks} />
+                <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
+                  <DailyStreamsChart tracks={tracks} />
+                </div>
 
                 {/* Simulated Feed of Listeners Activity */}
-                <ListenerActivityFeed tracks={tracks} />
+                <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
+                  <ListenerActivityFeed tracks={tracks} />
+                </div>
 
                 {/* Audience Request Sub-module */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 px-2">
-                    <div className="w-1 h-5 bg-cyan-500 rounded-full animate-pulse" />
-                    <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.25em]">Audience Requests</h2>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <div className="w-0.5 h-4 bg-cyan-500 rounded-full animate-pulse" />
+                    <h2 className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em]">Audience Requests</h2>
                   </div>
-                  <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[28px] shadow-lg">
+                  <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
                     <SongRequestsTab artistId={user.uid} isOwnProfile={true} />
                   </div>
                 </div>

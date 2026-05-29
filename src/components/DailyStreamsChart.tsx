@@ -106,88 +106,52 @@ export default function DailyStreamsChart({ tracks }: DailyStreamsChartProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="backdrop-blur-3xl bg-white/5 border border-white/10 rounded-[32px] p-5 space-y-5 relative overflow-hidden"
+      className="backdrop-blur-3xl bg-white/5 border border-white/10 rounded-2xl p-3 space-y-3 relative overflow-hidden"
     >
       {/* Visual background accents */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
 
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-2">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="p-1 px-1.5 bg-cyan-500/10 rounded-md text-cyan-400">
-              <BarChart3 className="w-3.5 h-3.5" />
-            </div>
-            <h2 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">
-              Sonic Analytics
-            </h2>
-          </div>
-          <h3 className="text-sm font-black uppercase tracking-tight text-white">
-            Daily Stream Distribution
+          <h3 className="text-xs font-black uppercase tracking-tight text-white">
+            Streams
           </h3>
+          <p className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em]">
+            Daily Distribution
+          </p>
         </div>
 
         {/* Calendar context badge */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/5 rounded-full self-start">
-          <Calendar className="w-3 h-3 text-cyan-500" />
-          <span className="text-[8px] font-black tracking-wider uppercase text-white/60">
-            Last 7 Days (UTC)
+        <div className="flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/5 rounded-full shrink-0">
+          <Calendar className="w-2.5 h-2.5 text-cyan-500" />
+          <span className="text-[7px] font-black tracking-wider uppercase text-white/60">
+            7 Days
           </span>
         </div>
       </div>
 
-      {/* Horizontal Track Selector ScrollRail */}
-      {tracks.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2">
-          <button
-            onClick={() => setSelectedTrackId('all')}
-            className={`px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest transition-all shrink-0 cursor-pointer ${
-              selectedTrackId === 'all'
-                ? 'bg-cyan-500 text-black font-extrabold shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-                : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            All Tracks
-          </button>
-          {tracks.map((track) => (
-            <button
-              key={track.id}
-              onClick={() => setSelectedTrackId(track.id)}
-              className={`px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-1.5 cursor-pointer max-w-[150px] ${
-                selectedTrackId === track.id
-                  ? 'bg-purple-600 text-white font-extrabold shadow-[0_0_15px_rgba(147,51,234,0.3)]'
-                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <Music className="w-2.5 h-2.5 shrink-0" />
-              <span className="truncate">{track.title}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Key Metric Snapshot Grid */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="bg-black/20 rounded-2xl p-3 border border-white/5 decoration-none">
-          <span className="text-[7px] text-white/30 uppercase tracking-widest block font-bold mb-0.5">Total Plays</span>
-          <p className="text-sm font-black text-cyan-400 font-mono tracking-tight">{stats.total.toLocaleString()}</p>
+      <div className="grid grid-cols-3 gap-1.5">
+        <div className="bg-black/20 rounded-lg p-2 border border-white/5">
+          <span className="text-[6px] text-white/30 uppercase tracking-widest block font-bold mb-0.5">Total</span>
+          <p className="text-xs font-black text-cyan-400 font-mono tracking-tight">{stats.total.toLocaleString()}</p>
         </div>
-        <div className="bg-black/20 rounded-2xl p-3 border border-white/5">
-          <span className="text-[7px] text-white/30 uppercase tracking-widest block font-bold mb-0.5">Avg / Day</span>
-          <p className="text-sm font-black text-white font-mono tracking-tight">{stats.average.toLocaleString()}</p>
+        <div className="bg-black/20 rounded-lg p-2 border border-white/5">
+          <span className="text-[6px] text-white/30 uppercase tracking-widest block font-bold mb-0.5">Avg</span>
+          <p className="text-xs font-black text-white font-mono tracking-tight">{stats.average.toLocaleString()}</p>
         </div>
-        <div className="bg-black/20 rounded-2xl p-3 border border-white/5">
-          <span className="text-[7px] text-white/30 uppercase tracking-widest block font-bold mb-0.5">Peak Day</span>
-          <p className="text-sm font-black text-purple-400 flex items-center gap-1">
-            <Flame className="w-3.5 h-3.5 text-amber-500 inline shrink-0" />
-            <span className="text-xs uppercase font-extrabold">{stats.peakLabel}</span>
+        <div className="bg-black/20 rounded-lg p-2 border border-white/5">
+          <span className="text-[6px] text-white/30 uppercase tracking-widest block font-bold mb-0.5">Peak</span>
+          <p className="text-xs font-black text-purple-400 font-mono tracking-tight">
+             {stats.peakLabel}
           </p>
         </div>
       </div>
 
       {/* Recharts Bar Chart Container */}
-      <div className="bg-black/30 rounded-2xl p-3">
-        <div className="h-[140px] w-full">
+      <div className="bg-black/30 rounded-lg p-2">
+        <div className="h-[120px] w-full">
           <ResponsiveContainerRC width="100%" height="100%">
             <BarChartRC data={chartData} margin={{ top: 5, right: 0, left: -25, bottom: 0 }}>
               <defs>
@@ -203,13 +167,13 @@ export default function DailyStreamsChart({ tracks }: DailyStreamsChartProps) {
               <XAxisRC
                 dataKey="day"
                 stroke="rgba(255,255,255,0.15)"
-                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 8, fontWeight: 'bold' }}
+                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 7, fontWeight: 'bold' }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxisRC
                 stroke="rgba(255,255,255,0.15)"
-                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 8, fontWeight: 'bold' }}
+                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 7, fontWeight: 'bold' }}
                 axisLine={false}
                 tickLine={false}
                 domain={[0, 'auto']}
@@ -218,22 +182,22 @@ export default function DailyStreamsChart({ tracks }: DailyStreamsChartProps) {
                 contentStyle={{
                   backgroundColor: '#0f172a',
                   border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '12px',
-                  fontSize: '9px',
+                  borderRadius: '8px',
+                  fontSize: '8px',
                   color: '#fff',
                   fontWeight: '900',
-                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.5)',
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.5)',
                   backdropFilter: 'blur(8px)',
                 }}
                 itemStyle={{ color: '#22d3ee' }}
                 labelStyle={{ color: '#94a3b8', textTransform: 'uppercase' }}
-                cursor={{ fill: 'rgba(255, 255, 255, 0.04)', radius: 8 }}
+                cursor={{ fill: 'rgba(255, 255, 255, 0.04)', radius: 4 }}
               />
               <BarRC
                 dataKey="streams"
                 fill="url(#cyanPurpleGrad)"
-                radius={[6, 6, 0, 0]}
-                maxBarSize={32}
+                radius={[4, 4, 0, 0]}
+                maxBarSize={24}
               >
                 {chartData.map((entry: any, index: number) => (
                   <CellRC 
@@ -246,6 +210,36 @@ export default function DailyStreamsChart({ tracks }: DailyStreamsChartProps) {
           </ResponsiveContainerRC>
         </div>
       </div>
+      
+      {/* Horizontal Track Selector ScrollRail */}
+      {tracks.length > 0 && (
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-0.5 -mx-1 px-1">
+          <button
+            onClick={() => setSelectedTrackId('all')}
+            className={`px-2 py-1 rounded-md text-[7px] font-black uppercase tracking-widest transition-all shrink-0 cursor-pointer ${
+              selectedTrackId === 'all'
+                ? 'bg-cyan-500 text-black font-extrabold'
+                : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            All
+          </button>
+          {tracks.map((track) => (
+            <button
+              key={track.id}
+              onClick={() => setSelectedTrackId(track.id)}
+              className={`px-2 py-1 rounded-md text-[7px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-1 cursor-pointer max-w-[100px] ${
+                selectedTrackId === track.id
+                  ? 'bg-purple-600 text-white font-extrabold'
+                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Music className="w-2 h-2 shrink-0" />
+              <span className="truncate">{track.title}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }

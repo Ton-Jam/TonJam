@@ -335,7 +335,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           >
             <Card
               onClick={handleCardClick}
-              className={`group relative cursor-pointer transition-all duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] overflow-hidden bg-muted/10 border border-border/60 hover:border-blue-500/40 w-full shadow-none ${className}`}
+              className={`group relative cursor-pointer transition-all duration-500 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[3px] overflow-hidden bg-transparent border border-transparent w-full shadow-none ${className}`}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
@@ -347,7 +347,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               aria-label={`View NFT ${nft.title}`}
             >
             {/* Image Container - 1:1 Aspect Ratio with NFT Gradient Border */}
-            <div className="relative aspect-square overflow-hidden bg-neutral-900 transition-all">
+            <div className="relative aspect-square overflow-hidden bg-neutral-900 transition-all rounded-[3px]">
               <img
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
                 loading="lazy"
@@ -360,18 +360,18 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${getRarityColor(rarity)}`} />
               
               {/* Top Overlays */}
-              <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10 pointer-events-none">
+              <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10 pointer-events-none">
                  <div className="flex flex-col gap-1">
-                    <span className="px-2 py-1 bg-black/50 backdrop-blur-md rounded-[2px] text-[8px] font-bold uppercase tracking-[0.1em] text-white border border-white/10 shadow-lg">
+                    <span className="px-1.5 py-0.5 bg-black/50 backdrop-blur-md rounded-[3px] text-[8px] font-bold uppercase tracking-[0.1em] text-white border border-white/10 shadow-lg">
                       {nft.edition}
                     </span>
                     {nft.listingType === 'auction' && (
-                      <span className="px-2 py-1 bg-amber-500 rounded-[2px] text-[8px] font-bold uppercase tracking-[0.1em] text-black shadow-lg border border-white/10">
+                      <span className="px-1.5 py-0.5 bg-amber-500 rounded-[3px] text-[8px] font-bold uppercase tracking-[0.1em] text-black shadow-lg border border-white/10">
                         AUCTION
                       </span>
                     )}
                     {rarity && (
-                      <span className={`px-2 py-1 bg-gradient-to-r ${getRarityColor(rarity)} rounded-[2px] text-[8px] font-bold uppercase tracking-[0.1em] text-white shadow-lg border border-white/10`}>
+                      <span className={`px-1.5 py-0.5 bg-gradient-to-r ${getRarityColor(rarity)} rounded-[3px] text-[8px] font-bold uppercase tracking-[0.1em] text-white shadow-lg border border-white/10`}>
                         {rarity}
                       </span>
                     )}
@@ -394,22 +394,22 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             </div>
       
             {/* Artifact Data Footer */}
-            <CardContent className="p-2 flex flex-col gap-2">
+            <CardContent className="p-1 mt-1 flex flex-col gap-1">
                <div className="space-y-0.5">
-                  <h3 className={`text-[7.5px] font-medium uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
+                  <h3 className={`text-xs font-black uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
                     {nft.title}
                   </h3>
-                  <div className="flex items-center gap-2">
-                     <p className="text-[7.5px] font-medium text-foreground/80 uppercase tracking-[0.1em]">{nft.creator}</p>
+                  <div className="flex items-center gap-1">
+                     <p className="text-[10px] font-medium text-foreground/80 uppercase tracking-[0.1em]">{nft.creator}</p>
                   </div>
                </div>
 
                <div className="flex items-end justify-between mt-1">
                   <div className="space-y-0.5">
-                     <p className="text-[6px] font-medium text-muted-foreground/20 uppercase tracking-[0.1em]">Val_Artifact</p>
-                     <div className="flex items-center gap-1 bg-muted/30 py-0.5 px-2 rounded-[2px] border border-border/10">
-                        <img src={TON_LOGO} className="w-2.5 h-2.5" alt="TON" />
-                        <span className="text-[11px] font-medium text-foreground tracking-tighter">{nft.price}</span>
+                     <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Val_Artifact</p>
+                     <div className="flex items-center gap-1 bg-muted/40 py-0.5 px-2 rounded-[3px] border border-border/10">
+                        <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
+                        <span className="text-sm font-black text-foreground tracking-tighter">{nft.price}</span>
                      </div>
                   </div>
                   
@@ -417,19 +417,19 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                     onClick={handleActionClick} 
                     disabled={!isOwner && isAuctionEnded}
                     className={cn(
-                      "cursor-pointer transition-all rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] h-[30px] px-4 text-[8px] font-black uppercase tracking-[0.1em] text-white",
+                      "cursor-pointer transition-all rounded-[3px] border-b-[2px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[4px] active:border-b-[1px] active:brightness-90 active:translate-y-[1px] h-8 px-3 text-[9px] font-black uppercase tracking-[0.1em] text-white",
                       isOwner 
                         ? 'bg-muted text-foreground border-border' 
                         : (isAuctionEnded
                             ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed'
-                            : 'bg-blue-500 border-blue-600')
+                            : 'bg-blue-600 border-blue-700')
                     )}
                   >
-                    {isOwner ? (nft.listingType ? 'CONFIG' : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : 'BUY')}
+                    {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : 'BUY')}
                   </button>
                </div>
             </CardContent>
-          </Card>
+            </Card>
         </motion.div>
       </ContextMenuTrigger>
         <ContextMenuContentRefined />

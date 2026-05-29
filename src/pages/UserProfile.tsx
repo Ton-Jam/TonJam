@@ -130,15 +130,32 @@ const UserProfile: React.FC = () => {
   return (
     <div className={`animate-in fade-in duration-1000 pb-24 min-h-screen font-sans ${themeClass} bg-background text-foreground`}>
       {/* 1. CINEMATIC BANNER (Audiomack Style) */}
-      <div className="relative h-[140px] sm:h-[200px] md:h-[300px] overflow-hidden group bg-blue-950 border-b-[2px] border-blue-500/50">
+      <div className="relative h-[120px] sm:h-[160px] md:h-[200px] overflow-hidden group bg-blue-950 border-b-[2px] border-blue-500/50">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105 opacity-80"
           style={{ backgroundImage: `url(${user.bannerUrl || getPlaceholderImage(`user-banner-${user.uid}`, 1200, 400)})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-background/60 to-background"></div>
         
-        {/* Extreme Left Actions ON Cover Picture */}
-        <div className="absolute bottom-4 left-4 z-40 flex items-center gap-1.5">
+        {/* Banner Upload Trigger / Cover Upload */}
+        {id === userProfile.uid && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-background/40 backdrop-blur-sm">
+            <button 
+              onClick={() => fileInputRef.current?.click()} 
+              className="flex items-center gap-2 px-6 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-xl"
+            >
+              <Camera className="h-3.5 w-3.5" />
+              Upload Cover
+            </button>
+            <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
+          </div>
+        )}
+      </div>
+
+      {/* 2. IDENTITY & ACTIONS (Refined) */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-30">
+        {/* Extreme Left Actions Below Cover */}
+        <div className="flex items-center gap-2 mb-4 pt-4">
           <button 
             onClick={handleFollow} 
             className={cn(
@@ -158,30 +175,13 @@ const UserProfile: React.FC = () => {
                   addNotification("Link copied", "success");
                 });
             }}
-            className="p-2 bg-black/40 text-white rounded-full hover:bg-black/60 transition-all border border-white/10 backdrop-blur-md shadow-lg"
+            className="p-2 bg-black/40 text-white rounded-lg hover:bg-black/60 transition-all border border-white/10 backdrop-blur-md shadow-lg"
           >
-            <Share2 className="h-3.5 w-3.5" />
+            <Share2 className="h-4 w-4" />
           </button>
         </div>
         
-        {/* Banner Upload Trigger / Cover Upload */}
-        {id === userProfile.uid && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-background/40 backdrop-blur-sm">
-            <button 
-              onClick={() => fileInputRef.current?.click()} 
-              className="flex items-center gap-2 px-6 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-xl"
-            >
-              <Camera className="h-3.5 w-3.5" />
-              Upload Cover
-            </button>
-            <input type="file" ref={fileInputRef} onChange={handleBannerUpload} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
-          </div>
-        )}
-      </div>
-
-      {/* 2. IDENTITY & ACTIONS (Refined) */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-30">
-        <div className="flex flex-col md:flex-row items-end gap-4 sm:gap-8 -mt-12 sm:-mt-20 pb-6 border-b border-border/50">
+        <div className="flex flex-col md:flex-row items-end gap-4 sm:gap-8 -mt-6 sm:-mt-8 pb-6 border-b border-border/50">
           {/* Profile Picture (Refined Overlap) */}
           <div className="relative flex-shrink-0">
             <div 

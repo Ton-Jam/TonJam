@@ -337,7 +337,7 @@ const Discover: React.FC = () => {
       />
 
       {/* Search Header & Filter Tabs - Sticky & Atmospheric with standard top padding */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-5 pb-3 w-full border-b border-blue-500/20">
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md pt-5 pb-3 w-full border-b border-blue-500/20">
         <div className="flex flex-col gap-4 w-full">
           {/* Search Input Row */}
           <div className="max-w-2xl mx-auto w-full flex items-center gap-3 px-4">
@@ -348,7 +348,7 @@ const Discover: React.FC = () => {
               {/* Shiny Gradient Border Effect */}
               <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
               
-              <div className={`relative flex items-center h-11 bg-background border transition-all rounded-full overflow-hidden ${isFocused ? 'border-blue-500' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+              <div className={`relative flex items-center h-11 bg-background border transition-all duration-300 ease-in-out rounded-full overflow-hidden focus-within:scale-[1.02] ${isFocused ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
                 <div className="absolute left-4 z-10 pointer-events-none">
                   <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
                 </div>
@@ -398,7 +398,7 @@ const Discover: React.FC = () => {
 
               {/* Suggestions Command Palette */}
               <AnimatePresence>
-                {isFocused && !searchQuery && (
+                {isFocused && (
                   <motion.div 
                     initial={{ opacity: 0, y: 4, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -409,55 +409,94 @@ const Discover: React.FC = () => {
                       <CommandList className="max-h-[300px]">
                         <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
                         
-                        {searchHistory.length > 0 && (
-                          <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
-                            {searchHistory.map((item, index) => (
-                              <CommandItem 
-                                key={`hist-${index}`}
-                                onSelect={() => {
-                                  setSearchQuery(item);
-                                  setIsFocused(false);
-                                }}
-                                className="rounded-[2px] flex items-center justify-between group cursor-pointer"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <Search className="h-3.5 w-3.5 text-zinc-500" />
-                                  <span className="text-sm font-medium">{item}</span>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7 opacity-0 group-hover:opacity-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSearchHistory(prev => prev.filter(t => t !== item));
-                                  }}
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              </CommandItem>
-                            ))}
+                        {searchQuery ? (
+                          <CommandGroup heading="Suggestions">
+                             {filteredResults.tracks.slice(0, 3).map((track) => (
+                               <CommandItem 
+                                 key={`track-${track.id}`}
+                                 onSelect={() => {
+                                   setSearchQuery(track.title);
+                                   setIsFocused(false);
+                                   navigate(`/track/${track.id}`);
+                                 }}
+                                 className="rounded-[2px] flex items-center justify-between group cursor-pointer"
+                               >
+                                 <div className="flex items-center gap-3">
+                                   <Music className="h-3.5 w-3.5 text-zinc-500" />
+                                   <span className="text-sm font-medium">{track.title}</span>
+                                 </div>
+                               </CommandItem>
+                             ))}
+                             {filteredResults.artists.slice(0, 3).map((artist) => (
+                               <CommandItem 
+                                 key={`artist-${artist.uid}`}
+                                 onSelect={() => {
+                                   setSearchQuery(artist.name);
+                                   setIsFocused(false);
+                                   navigate(`/artist/${artist.uid}`);
+                                 }}
+                                 className="rounded-[2px] flex items-center justify-between group cursor-pointer"
+                               >
+                                 <div className="flex items-center gap-3">
+                                   <User className="h-3.5 w-3.5 text-zinc-500" />
+                                   <span className="text-sm font-medium">{artist.name}</span>
+                                 </div>
+                               </CommandItem>
+                             ))}
                           </CommandGroup>
+                        ) : (
+                          <>
+                            {searchHistory.length > 0 && (
+                              <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
+                                {searchHistory.map((item, index) => (
+                                  <CommandItem 
+                                    key={`hist-${index}`}
+                                    onSelect={() => {
+                                      setSearchQuery(item);
+                                      setIsFocused(false);
+                                    }}
+                                    className="rounded-[2px] flex items-center justify-between group cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <Search className="h-3.5 w-3.5 text-zinc-500" />
+                                      <span className="text-sm font-medium">{item}</span>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSearchHistory(prev => prev.filter(t => t !== item));
+                                      }}
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
+                            
+                            <CommandSeparator className="bg-white/5" />
+                            
+                            <CommandGroup heading={<span className="flex items-center gap-2"><TrendingUp className="h-3 w-3" /> Trending</span>}>
+                              {trendingTopics.map((topic, index) => (
+                                <CommandItem 
+                                  key={`trend-${index}`}
+                                  onSelect={() => {
+                                      setSearchQuery(topic);
+                                      setIsFocused(false);
+                                  }}
+                                  className="rounded-[2px] flex items-center gap-3 cursor-pointer"
+                                >
+                                  <Zap className="h-3.5 w-3.5 text-blue-500" />
+                                  <span className="text-sm font-medium">{topic}</span>
+                                  <CommandShortcut className="text-blue-500/50">#hot</CommandShortcut>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </>
                         )}
-                        
-                        <CommandSeparator className="bg-white/5" />
-                        
-                        <CommandGroup heading={<span className="flex items-center gap-2"><TrendingUp className="h-3 w-3" /> Trending</span>}>
-                          {trendingTopics.map((topic, index) => (
-                            <CommandItem 
-                              key={`trend-${index}`}
-                              onSelect={() => {
-                                  setSearchQuery(topic);
-                                  setIsFocused(false);
-                              }}
-                              className="rounded-[2px] flex items-center gap-3 cursor-pointer"
-                            >
-                              <Zap className="h-3.5 w-3.5 text-blue-500" />
-                              <span className="text-sm font-medium">{topic}</span>
-                              <CommandShortcut className="text-blue-500/50">#hot</CommandShortcut>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
                       </CommandList>
                     </Command>
                   </motion.div>
@@ -500,18 +539,7 @@ const Discover: React.FC = () => {
 
       <div className="max-w-5xl mx-auto px-4 pb-24 space-y-6">
         
-        {/* Trending NFTs Section */}
-        <section className="py-8">
-            <h2 className="text-xl font-black uppercase tracking-widest text-foreground/80 mb-6 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-500" />
-                Trending NFTs
-            </h2>
-            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
-                {allNFTs.slice(0, 6).map(nft => (
-                    <TrendingNFTCard key={nft.id} nft={nft} />
-                ))}
-            </div>
-        </section>
+
         {isLoading ? (
           <div className="space-y-12">
             <div className="aspect-[2/1] w-full bg-muted rounded-[2.5rem] animate-pulse"></div>

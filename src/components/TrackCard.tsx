@@ -504,7 +504,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ y: -8, scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className={`group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[2px] p-3 bg-muted/10 hover:border-blue-500/20 hover:bg-white/[0.03] border border-transparent w-full ${className}`}
+          className={`group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[3px] p-2 bg-transparent hover:border-blue-500/20 hover:bg-white/[0.03] border border-transparent w-full ${className}`}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"
@@ -512,7 +512,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           aria-label={`View track: ${track.title} by ${track.artist}`}
         >
           {/* Image Container - 1:1 Aspect Ratio */}
-          <div className="relative aspect-square rounded-[2px] overflow-hidden bg-neutral-900 mb-4 transition-all border border-white/5">
+          <div className="relative aspect-square rounded-[3px] overflow-hidden bg-neutral-900 mb-2 transition-all border border-white/5">
             <img 
               src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
               alt="" 
@@ -527,7 +527,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
               >
                 {track.tokenGating?.enabled && !hasAccess ? (
-                  <Lock className="h-3 w-3" />
+                  <Lock className="h-4 w-4" />
                 ) : (isActive && isAudioLoading) ? (
                   <img src={TJ_COIN_ICON} className="h-4 w-4 animate-spin" alt="Loading" />
                 ) : isActive && isPlaying ? (
@@ -539,24 +539,24 @@ const TrackCard: React.FC<TrackCardProps> = ({
             </div>
             
             {/* Status indicators */}
-            <div className="absolute top-3 left-3 flex flex-col gap-1">
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
               {track.isNFT && (
-                <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-purple-400/30">
+                <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest border border-purple-400/30">
                   NFT_ASSET
                 </div>
               )}
               {associatedNft && !track.isNFT && (
-                <div className="bg-purple-600/90 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest">
+                <div className="bg-purple-600/90 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest">
                   NFT AVAILABLE
                 </div>
               )}
               {track.tokenGating?.enabled && (
-                <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
+                <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
                   <Key className="w-2.5 h-2.5" /> GATED
                 </div>
               )}
               {isCached && (
-                <div className="bg-emerald-600/80 backdrop-blur-md text-[8px] font-bold text-white px-2 py-1 rounded-sm uppercase tracking-widest border border-emerald-400/30 flex items-center gap-1">
+                <div className="bg-emerald-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest border border-emerald-400/30 flex items-center gap-1">
                   <CheckCircle2 className="w-2.5 h-2.5" /> CACHED
                 </div>
               )}
@@ -564,19 +564,19 @@ const TrackCard: React.FC<TrackCardProps> = ({
           </div>
 
           {/* Content Below Card */}
-          <div className="px-1 flex flex-col">
-            <div className="flex justify-between items-start gap-2">
-              <h3 className={`text-[10px] font-black leading-tight line-clamp-2 whitespace-normal break-words uppercase tracking-tighter ${isActive ? 'text-primary' : 'text-foreground'}`}>
+          <div className="px-0.5 flex flex-col">
+            <div className="flex justify-between items-start gap-1">
+              <h3 className={`text-xs font-black leading-tight line-clamp-2 whitespace-normal break-words uppercase tracking-tighter ${isActive ? 'text-primary' : 'text-foreground'}`}>
                 {track.title}
               </h3>
               <MoreOptionsButton />
             </div>
             
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-1 mt-1">
               <HoverCard>
                 <HoverCardTrigger asChild>
                   <p 
-                    className="text-[9px] font-black text-foreground/80 uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
+                    className="text-[10px] font-black text-foreground/80 uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
                     onClick={handleArtistClick}
                   >
                     {track.artist}
@@ -593,7 +593,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
                       <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
                         {artist?.followers?.toLocaleString() || '0'} Followers
                       </p>
-                      <button className="w-full mt-2 py-1.5 bg-blue-600 rounded-sm text-[8px] font-black text-white uppercase tracking-widest hover:bg-blue-500 transition-colors">
+                      <button className="w-full mt-2 py-1.5 bg-blue-600 rounded-[3px] text-[8px] font-black text-white uppercase tracking-widest hover:bg-blue-500 transition-colors">
                         View Dossier
                       </button>
                     </div>
@@ -602,19 +602,15 @@ const TrackCard: React.FC<TrackCardProps> = ({
               </HoverCard>
             </div>
 
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 text-[8px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
-                    <Headphones className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-[9px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
+                    <Headphones className="w-3 h-3" />
                     {formatNumber(track.playCount || 0)}
                 </div>
-                <div className="flex items-center gap-1.5 text-[8px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
-                    <Clock className="w-3.5 h-3.5" />
-                    {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}
-                </div>
                 {!track.isNFT && track.price && (
-                    <div className="flex items-center gap-1.5 text-[10px] font-medium text-amber-500 uppercase tracking-[0.2em]">
-                        <Coins className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-1 text-[9px] font-medium text-amber-500 uppercase tracking-[0.2em]">
+                        <Coins className="w-3 h-3" />
                         {track.price} TON
                     </div>
                 )}
@@ -626,14 +622,14 @@ const TrackCard: React.FC<TrackCardProps> = ({
                     e.stopPropagation();
                     navigate(`/nft/${associatedNft.id}`);
                   }}
-                  className="text-[9px] font-black text-white hover:text-white transition-all px-3 py-1 bg-purple-600 hover:bg-purple-550 rounded-full uppercase tracking-[0.2em] shadow-md shadow-purple-600/10 border-none flex items-center gap-1 cursor-pointer"
+                  className="text-[8px] font-black text-white hover:text-white transition-all px-2 py-1 bg-purple-600 hover:bg-purple-550 rounded-[3px] uppercase tracking-[0.2em] shadow-md shadow-purple-600/10 border-none flex items-center gap-1 cursor-pointer"
                 >
-                  <Gem className="w-3 h-3 text-white" /> NFT
+                  <Gem className="w-2.5 h-2.5 text-white" /> NFT
                 </button>
               ) : onMint && !track.isNFT ? (
                 <button
                   onClick={handleMint}
-                  className="text-[9px] font-black text-white hover:text-white transition-all px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-full uppercase tracking-[0.2em] shadow-md shadow-blue-600/10 border-none cursor-pointer"
+                  className="text-[8px] font-black text-white hover:text-white transition-all px-2 py-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-[3px] uppercase tracking-[0.2em] shadow-md shadow-blue-600/10 border-none cursor-pointer"
                 >
                   MINT
                 </button>

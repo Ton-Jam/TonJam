@@ -16,6 +16,17 @@ const ErrorBoundary: React.FC<Props> = ({ children }) => {
 
     const rejectionHandler = (event: PromiseRejectionEvent) => {
       const reason = event.reason;
+      
+      // Telemetry: Log Firebase connectivity errors
+      const errorMessage = reason?.message || (typeof reason === 'string' ? reason : '');
+      if (errorMessage && (errorMessage.includes('unavailable') || errorMessage.includes('network-request-failed') || errorMessage.includes('failed to fetch'))) {
+        console.warn('[Telemetry] Firebase connectivity error detected:', {
+          timestamp: new Date().toISOString(),
+          message: errorMessage,
+          type: 'FIREBASE_CONNECTION_FALLBACK'
+        });
+      }
+
       const isIgnoredError = reason && (
         (typeof reason === 'string' && (reason.includes('TON_CONNECT_SDK') || reason.includes('tonconnect'))) ||
         (reason.message && (reason.message.includes('TON_CONNECT_SDK') || reason.message.includes('tonconnect') || reason.message.includes('Failed to fetch'))) ||

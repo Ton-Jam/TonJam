@@ -222,7 +222,7 @@ const ArtistProfile: React.FC = () => {
   return (
     <div className="w-full bg-background min-h-screen text-foreground pb-24">
       {/* Cover Image */}
-      <div className="relative h-[250px] md:h-[300px] w-full bg-muted">
+      <div className="relative h-[200px] md:h-[240px] w-full bg-muted">
         <button 
           onClick={() => navigate(-1)} 
           className="absolute top-4 left-4 z-30 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all cursor-pointer"
@@ -254,32 +254,6 @@ const ArtistProfile: React.FC = () => {
           </button>
         )}
 
-        {/* Action Buttons Overlay */}
-        <div className="absolute top-4 right-16 z-30 flex items-center gap-2">
-           {!isOwnProfile && (
-             <>
-               <button 
-                  onClick={handleFollow}
-                  className={cn(
-                    "px-4 py-1.5 rounded-full font-semibold text-xs transition-colors backdrop-blur-md flex items-center gap-1",
-                    isFollowing 
-                      ? "bg-white/10 text-white hover:bg-white/20 border border-white/20" 
-                      : "bg-white text-black hover:bg-white/90"
-                  )}
-                >
-                    {isFollowing ? <UserCheck className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
-                    {isFollowing ? 'Following' : 'Follow'}
-               </button>
-               <button 
-                  onClick={() => setShowTipModal(true)}
-                  className="px-4 py-1.5 rounded-full font-semibold text-xs border border-white/20 bg-black/40 backdrop-blur-md hover:bg-white text-white hover:text-black transition-colors"
-                >
-                  Tip
-               </button>
-             </>
-           )}
-        </div>
-
         <div className="absolute left-4 md:left-12 -bottom-16 z-20 flex items-end gap-6">
           <Avatar className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-background bg-muted">
             <AvatarImage src={artist.avatarUrl || getPlaceholderImage(`artist-${artist.uid}`)} alt={artist.name} className="object-cover" />
@@ -289,6 +263,30 @@ const ArtistProfile: React.FC = () => {
       </div>
       
       <div className="max-w-6xl mx-auto px-4 md:px-12 mt-20 md:mt-24">
+        {/* Action Buttons Below Cover */}
+        {!isOwnProfile && (
+            <div className="flex items-center gap-2 mb-6">
+                <button 
+                   onClick={handleFollow}
+                   className={cn(
+                     "px-6 py-2 rounded-full font-semibold text-xs transition-colors flex items-center gap-1.5",
+                     isFollowing 
+                       ? "bg-white/10 text-white hover:bg-white/20 border border-white/20" 
+                       : "bg-white text-black hover:bg-white/90"
+                   )}
+                 >
+                     {isFollowing ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                     {isFollowing ? 'Following' : 'Follow'}
+                </button>
+                <button 
+                   onClick={() => setShowTipModal(true)}
+                   className="px-6 py-2 rounded-full font-semibold text-xs border border-white/20 hover:bg-white text-white hover:text-black transition-colors"
+                 >
+                   Tip
+                </button>
+            </div>
+        )}
+
         {/* Name & Basic Info */}
         <div className="flex flex-col gap-2 mb-8">
             <div className="flex items-center gap-3">

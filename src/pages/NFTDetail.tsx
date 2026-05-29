@@ -1478,59 +1478,46 @@ const NFTDetail: React.FC = () => {
                                     </div>
                                   </div>
 
-                                  <div className="flex-1 bg-white/[0.03] border border-white/5 rounded-2xl p-5 hover:bg-white/[0.05] transition-colors relative overflow-hidden group-hover:border-white/10">
-                                    <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 scale-150 pointer-events-none transition-transform group-hover:scale-110">
+                                  <div className="flex-1 bg-white/[0.03] border border-white/5 rounded-[12px] p-3 hover:bg-white/[0.05] transition-colors relative overflow-hidden group-hover:border-white/10">
+                                    <div className="absolute top-0 right-0 p-2 opacity-5 rotate-12 scale-150 pointer-events-none transition-transform group-hover:scale-110">
                                       {h.event === "Minted" ? (
-                                        <Wand2 className="w-24 h-24" />
+                                        <Wand2 className="w-16 h-16" />
                                       ) : (
-                                        <Handshake className="w-24 h-24" />
+                                        <Handshake className="w-16 h-16" />
                                       )}
                                     </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-                                      <div className="space-y-1">
-                                        <div className="flex items-center gap-3">
-                                          <h4 className="text-sm font-black text-foreground uppercase tracking-widest">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 relative z-10">
+                                      <div className="space-y-0.5">
+                                        <div className="flex items-center gap-2">
+                                          <h4 className="text-xs font-black text-foreground uppercase tracking-widest">
                                             {h.event}
                                           </h4>
-                                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-white/5 px-2 py-1 rounded-md">
+                                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider bg-white/5 px-1.5 py-0.5 rounded-[4px]">
                                             {h.date}
                                           </span>
                                         </div>
-                                        <div className="flex items-center gap-2 pt-2">
-                                          <div className="flex items-center gap-2 px-3 py-1.5 bg-background shadow-inner border border-white/5 rounded-xl">
-                                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                              From
-                                            </span>
-                                            <span className="font-mono text-[11px] font-black text-primary uppercase tracking-widest">
-                                              {h.from === "Vault"
-                                                ? "GENESIS"
-                                                : `@${(h.from || "").slice(0, 6)}`}
-                                            </span>
-                                          </div>
-                                          <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                                          <div className="flex items-center gap-2 px-3 py-1.5 bg-background shadow-inner border border-white/5 rounded-xl">
-                                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                              To
-                                            </span>
-                                            <span className="font-mono text-[11px] font-black text-primary uppercase tracking-widest">
-                                              @{(h.to || "").slice(0, 6)}
-                                            </span>
-                                          </div>
+                                        <div className="flex items-center gap-1 pt-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                                          From
+                                          <span className="font-mono text-primary">
+                                            {h.from === "Vault"
+                                              ? "GENESIS"
+                                              : `@${(h.from || "").slice(0, 6)}`}
+                                          </span>
+                                          <ArrowRight className="w-2.5 h-2.5" />
+                                          To
+                                          <span className="font-mono text-primary">
+                                            @{(h.to || "").slice(0, 6)}
+                                          </span>
                                         </div>
                                       </div>
                                       {h.price && (
-                                        <div className="flex flex-col sm:items-end justify-center self-start sm:self-auto bg-white/5 sm:bg-transparent rounded-xl p-3 sm:p-0">
-                                          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1 hidden sm:block">
-                                            Amount
+                                        <div className="flex items-center gap-1.5 bg-background/50 rounded-[4px] px-2 py-1">
+                                          <span className="text-xs font-black text-foreground tracking-tighter tabular-nums">
+                                            {h.price}
                                           </span>
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-lg font-black text-foreground tracking-tighter tabular-nums">
-                                              {h.price}
-                                            </span>
-                                            <span className="text-sm font-black text-blue-500 uppercase tracking-tighter">
-                                              TON
-                                            </span>
-                                          </div>
+                                          <span className="text-[9px] font-black text-blue-500 uppercase tracking-tighter">
+                                            TON
+                                          </span>
                                         </div>
                                       )}
                                     </div>

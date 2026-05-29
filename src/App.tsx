@@ -49,6 +49,7 @@ import { NotificationProvider } from '@/context/NotificationContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ArtistOnboarding from '@/pages/ArtistOnboarding';
 import ArtistAnalytics from '@/pages/ArtistAnalytics';
+import { useProactivePreloader } from '@/hooks/useProactivePreloader';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -89,6 +90,9 @@ const AppContent: React.FC = () => {
   const location = useLocation();
 
   const { user, userProfile } = useAuth();
+  
+  // Initialize proactive data pre-fetching
+  useProactivePreloader();
 
   useEffect(() => {
     // Test Firebase connection
