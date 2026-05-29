@@ -73,12 +73,23 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     setTrackToAddToPlaylist,
     likedTrackIds,
     toggleLikeTrack,
-    addNotification
+    addNotification,
+    seek
   } = useAudio();
 
   if (!currentTrack) return null;
 
   const isLiked = likedTrackIds.includes(currentTrack.id);
+
+  const duration = currentTrack.duration || 0;
+  const currentTime = (progress / 100) * duration;
+
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
   const handleArtistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -165,74 +176,101 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       className={cn(
-        "fixed left-0 right-0 z-[48] bg-background/80 backdrop-blur-xl border-t border-blue-500/20 px-4 py-2 flex flex-col items-stretch shadow-[0_-10px_40px_rgba(0,0,0,0.3)] h-18 lg:left-64 transition-all duration-300",
+        "fixed left-0 right-0 z-[48] bg-background/85 backdrop-blur-xl border-t border-blue-500/10 px-6 py-3 flex flex-col items-stretch shadow-[0_-12px_45px_rgba(0,0,0,0.4)] h-[76px] md:h-24 lg:left-64 transition-all duration-300",
         isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0"
       )}
     >
       {/* Blurred Cover Background */}
-      <div className="absolute inset-0 z-0 overflow-hidden opacity-30">
+      <div className="absolute inset-0 z-0 overflow-hidden opacity-25">
         <div
-          className="absolute inset-0 bg-cover bg-center blur-2xl"
+          className="absolute inset-0 bg-cover bg-center blur-3xl scale-110"
           style={{ backgroundImage: `url(${currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)})` }}
         />
-        <div className="absolute inset-0 bg-background/60" />
+        <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* Top Progress Bar */}
-      <div className="absolute top-0 left-0 right-0 px-0 z-10">
+      {/* Top Progress Bar for Mobile Screen only (Compact indicator, interactive slider is on desktop center column) */}
+      <div className="absolute top-0 left-0 right-0 px-0 z-10 sm:hidden">
         <Progress 
           value={progress} 
-          className="h-[2px] w-full rounded-none bg-muted/20" 
+          className="h-[2.5px] w-full rounded-none bg-muted/10" 
         />
       </div>
 
-      <div className="flex items-center justify-between h-full pt-1 relative z-10">
-        {/* Track Info */}
-        <div 
-          className="flex items-center gap-3 w-[45%] sm:w-[50%] cursor-pointer group"
-          onClick={() => setFullPlayerOpen(true)}
-        >
-          <div className="relative w-11 h-11 rounded-[4px] overflow-hidden flex-shrink-0 bg-muted shadow-lg ring-1 ring-white/5">
-            <img
-              src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              alt=""
-              referrerPolicy="no-referrer"
-            />
-          </div>
-          
-          <div className="min-w-0 flex flex-col gap-0.5">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <h4 className="text-[9.5px] font-black truncate text-foreground uppercase tracking-tighter leading-none">
-                {currentTrack.title}
-              </h4>
-              {isHighFidelity && (
-                <span className="bg-blue-600 text-white text-[5.5px] font-black px-1 py-0.5 rounded-[4px] tracking-[0.2em] uppercase flex-shrink-0">
-                  Hi-Fi
-                </span>
-              )}
+      <div className="flex items-center justify-between h-full relative z-10">
+        {/* ================= COLUMN 1: TRACK & HEART ================= */}
+        <div className="flex items-center gap-3.5 w-auto max-w-[45%] sm:max-w-[30%] min-w-0">
+          <div 
+            className="flex items-center gap-3 min-w-0 cursor-pointer group"
+            onClick={() => setFullPlayerOpen(true)}
+          >
+            <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-[4px] overflow-hidden flex-shrink-0 bg-zinc-900 shadow-md ring-1 ring-white/10">
+              <img
+                src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                alt=""
+                referrerPolicy="no-referrer"
+              />
             </div>
-            <button
-              onClick={handleArtistClick}
-              className="text-[7.5px] text-muted-foreground/60 truncate uppercase font-black tracking-widest hover:text-blue-500 transition-colors text-left leading-none w-fit"
-            >
-              {currentTrack.artist}
-            </button>
+            
+            <div className="min-w-0 flex flex-col gap-1">
+              <div className="flex items-center gap-2 overflow-hidden">
+                <h4 className="text-[11px] md:text-sm font-black truncate text-white uppercase tracking-tighter leading-tight">
+                  {currentTrack.title}
+                </h4>
+                {isHighFidelity && (
+                  <span className="bg-blue-600 text-white text-[6px] md:text-[8px] font-black px-1.5 py-0.5 rounded-[2px] tracking-[0.2em] uppercase flex-shrink-0">
+                    Hi-Fi
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={handleArtistClick}
+                className="text-[8.5px] md:text-[10px] text-zinc-400 hover:text-blue-400 transition-colors text-left leading-none w-fit font-bold uppercase tracking-widest truncate"
+              >
+                {currentTrack.artist}
+              </button>
+            </div>
           </div>
+
+          {/* Symmetrical Heart button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleToggleLike}
+                className={cn(
+                  "h-8 w-8 rounded-[4px] text-zinc-400 hover:text-white transition-all ml-1 flex-shrink-0 hover:bg-white/5",
+                  isLiked && "text-blue-500 hover:text-blue-400"
+                )}
+              >
+                <Heart className={cn("h-4 w-4 transition-transform active:scale-90", isLiked && "fill-current")} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{isLiked ? "Remove from Library" : "Save to Library"}</TooltipContent>
+          </Tooltip>
         </div>
 
-        {/* Controls Block (Grouped on the right) */}
-        <div className="flex items-center gap-2 sm:gap-4 relative z-10">
-          <div className="hidden sm:flex items-center gap-1">
+        {/* ================= COLUMN 2: CENTER PLAYBACK & SEEK BAR ================= */}
+        <div className="hidden sm:flex flex-col items-center justify-center gap-2 w-[40%] px-2">
+          {/* Controls Row */}
+          <div className="flex items-center gap-4">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className={cn("h-8 w-8 rounded-[4px]", isShuffle ? "text-blue-500 bg-blue-500/5" : "text-muted-foreground/40")}
+                  className={cn(
+                    "h-8 w-8 rounded-[4px] transition-all relative hover:bg-white/5", 
+                    isShuffle ? "text-blue-500 bg-blue-500/5 hover:bg-blue-500/10" : "text-zinc-400 hover:text-white"
+                  )}
                   onClick={toggleShuffle}
                 >
-                  <Shuffle className="h-3.5 w-3.5" />
+                  <Shuffle className="h-4 w-4" />
+                  {isShuffle && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-500 rounded-full" />
+                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Shuffle</TooltipContent>
@@ -241,33 +279,31 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 rounded-[4px] text-foreground/80"
+              className="h-8 w-8 rounded-[4px] text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
               onClick={prevTrack}
             >
-              <SkipBack className="h-4 w-4" />
+              <SkipBack className="h-[18px] w-[18px] fill-current" />
             </Button>
-          </div>
 
-          <Button
-            size="icon"
-            className="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all hover:scale-105 active:scale-95 mx-1"
-            onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-          >
-            {isPlaying ? (
-              <Pause className="h-5 w-5 fill-current" />
-            ) : (
-              <Play className="h-5 w-5 fill-current ml-0.5" />
-            )}
-          </Button>
+            <Button
+              size="icon"
+              className="w-10 h-10 rounded-full bg-white hover:bg-neutral-100 text-black shadow-lg transition-transform hover:scale-105 active:scale-95"
+              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+            >
+              {isPlaying ? (
+                <Pause className="h-4 w-4 fill-current text-black" />
+              ) : (
+                <Play className="h-4 w-4 fill-current text-black ml-0.5" />
+              )}
+            </Button>
 
-          <div className="hidden sm:flex items-center gap-1">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 rounded-[4px] text-foreground/80"
+              className="h-8 w-8 rounded-[4px] text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
               onClick={nextTrack}
             >
-              <SkipForward className="h-4 w-4" />
+              <SkipForward className="h-[18px] w-[18px] fill-current" />
             </Button>
 
             <Tooltip>
@@ -275,12 +311,15 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className={cn("h-8 w-8 rounded-[4px] relative", repeatMode !== 'off' ? "text-blue-500 bg-blue-500/5" : "text-muted-foreground/40")}
+                  className={cn(
+                    "h-8 w-8 rounded-[4px] transition-all relative hover:bg-white/5", 
+                    repeatMode !== 'off' ? "text-blue-500 bg-blue-500/5 hover:bg-blue-500/10" : "text-zinc-400 hover:text-white"
+                  )}
                   onClick={toggleRepeat}
                 >
-                  <Repeat className="h-3.5 w-3.5" />
-                  {repeatMode === 'one' && (
-                    <span className="absolute top-1 right-1 text-[6px] font-black bg-blue-500 text-white rounded-full w-2.5 h-2.5 flex items-center justify-center">1</span>
+                  <Repeat className="h-4 w-4" />
+                  {repeatMode !== 'off' && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-500 rounded-full" />
                   )}
                 </Button>
               </TooltipTrigger>
@@ -288,47 +327,116 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             </Tooltip>
           </div>
 
-          <div className="hidden md:flex items-center gap-3 ml-2 mr-2">
+          {/* Live Progress Bar with Time Labels */}
+          <div className="flex items-center gap-3 w-full max-w-sm md:max-w-md">
+            <span className="text-[10px] font-bold text-zinc-500 w-8 text-right font-mono select-none">
+              {formatTime(currentTime)}
+            </span>
+            <Slider
+              value={[progress]}
+              min={0}
+              max={100}
+              step={0.1}
+              onValueChange={(val) => seek(val[0])}
+              className="w-full cursor-pointer h-1"
+            />
+            <span className="text-[10px] font-bold text-zinc-500 w-8 text-left font-mono select-none">
+              {formatTime(duration)}
+            </span>
+          </div>
+        </div>
+
+        {/* ================= COLUMN 3: AUXILIARY & VOLUME ================= */}
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 w-auto max-w-[45%] sm:max-w-[30%]">
+          {/* Mobile-only Play Button */}
+          <Button
+            size="icon"
+            className="sm:hidden w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all hover:scale-105 active:scale-95"
+            onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+          >
+            {isPlaying ? (
+              <Pause className="h-4 w-4 fill-current" />
+            ) : (
+              <Play className="h-4 w-4 fill-current ml-0.5" />
+            )}
+          </Button>
+
+          {/* Queue Trigger */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-[4px] text-zinc-400 hover:text-white hover:bg-white/5 transition-all hidden sm:flex"
+                onClick={handleAddToQueue}
+              >
+                <ListMusic className="h-4.5 w-4.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Queue</TooltipContent>
+          </Tooltip>
+
+          {/* Interactive Volume control hover styled */}
+          <div className="hidden md:flex items-center gap-2 group/volume ml-1 mr-1">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-[4px] text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+              onClick={toggleMute}
+            >
+              {isMuted || volume === 0 ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+            </Button>
             <Slider
               value={[isMuted ? 0 : volume * 100]}
               max={100}
               step={1}
-              className="w-20"
+              className="w-[72px] lg:w-20 cursor-pointer h-1"
               onValueChange={(vals) => setVolume(vals[0] / 100)}
             />
           </div>
 
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 rounded-[4px] text-muted-foreground/40 hover:text-foreground hidden sm:flex"
-                  onClick={() => setFullPlayerOpen(true)}
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Open Full Player</TooltipContent>
-            </Tooltip>
+          {/* Maximize screen */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-[4px] text-zinc-400 hover:text-white hover:bg-white/5 transition-all hidden sm:flex"
+                onClick={() => setFullPlayerOpen(true)}
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Open Full Player</TooltipContent>
+          </Tooltip>
 
-            <button 
-              onClick={handleOptionsClick}
-              className="h-8 w-8 flex items-center justify-center rounded-[4px] text-muted-foreground/40 hover:text-foreground outline-none"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </button>
+          {/* Dropdown Options */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button 
+                className="h-8 w-8 flex items-center justify-center rounded-[4px] text-zinc-400 hover:text-white hover:bg-white/5 outline-none transition-colors"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-zinc-950/95 border border-white/10 backdrop-blur-md rounded-[4px]">
+              <PlayerMenuContent />
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 rounded-[4px] text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 hidden sm:flex"
-              onClick={(e) => { e.stopPropagation(); closePlayer(); }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          {/* Discard Player Toggle */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-[4px] text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors hidden sm:flex"
+            onClick={(e) => { e.stopPropagation(); closePlayer(); }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </motion.div>

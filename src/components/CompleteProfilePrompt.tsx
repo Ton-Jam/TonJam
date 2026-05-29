@@ -27,7 +27,7 @@ const CompleteProfilePrompt = () => {
       </button>
       
       <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
-        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-blue-950/40 backdrop-blur-md border border-blue-500/10 flex items-center justify-center flex-shrink-0">
           <User className="h-6 w-6 md:h-8 md:w-8 text-white" />
         </div>
         
