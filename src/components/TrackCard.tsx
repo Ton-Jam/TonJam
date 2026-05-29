@@ -351,9 +351,9 @@ const TrackCard: React.FC<TrackCardProps> = ({
     return (
       <ContextMenu>
         <ContextMenuTrigger>
-        <motion.div 
+          <motion.div 
           whileHover={{ opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.05)" }}
-          className={`flex flex-col w-full group/row last:border-0 transition-colors rounded-[2px] mx-2 ${className}`}
+          className={`flex flex-col w-full group/row border-b border-zinc-700 last:border-0 transition-colors rounded-[2px] mx-2 ${className}`}
         >
             <div 
               className="flex items-center gap-4 p-2 sm:p-3 cursor-pointer w-full outline-none focus-visible:bg-white/5"
@@ -399,7 +399,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
               </div>
 
               <div className="flex-1 min-w-0">
-                <h4 className={`text-[9px] font-bold uppercase tracking-tight line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>
+                <h4 className={`text-xs font-bold uppercase tracking-tight line-clamp-2 whitespace-normal break-words ${isActive ? 'text-primary' : 'text-foreground'}`}>
                   {track.title}
                 </h4>
                 <div className="flex items-center gap-2 mt-0.5">
