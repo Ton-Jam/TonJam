@@ -5,7 +5,7 @@ import { TON_LOGO } from '@/constants';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-black/40 backdrop-blur-3xl border-t border-white/5 pt-16 pb-8 px-6 mt-20 relative overflow-hidden">
+    <footer className="bg-black/60 backdrop-blur-3xl border-t border-white/5 pt-16 pb-8 px-6 mt-20 relative overflow-hidden">
       {/* Decorative Blur */}
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
       

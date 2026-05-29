@@ -100,21 +100,17 @@ const Notifications: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-background">
       {/* Header */}
-      <div className="px-4 py-6 border-b border-white/5">
+      <div className="px-4 py-4 border-b border-white/5">
         <div className="flex items-center justify-between gap-4 max-w-4xl mx-auto">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Protocol Logs</span>
-            </div>
-            <h1 className="text-2xl font-black tracking-tighter uppercase text-foreground">Signals</h1>
+            <h1 className="text-lg font-black tracking-tighter uppercase text-foreground">Signals</h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={markAllRead}
-                className="h-8 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-500/5 hover:bg-blue-500/10 text-blue-500 border border-blue-500/20"
+                className="h-7 rounded-lg text-[8px] font-black uppercase tracking-widest bg-blue-500/5 hover:bg-blue-500/10 text-blue-500 border border-blue-500/20 px-3"
             >
                 Read All
             </Button>
@@ -122,7 +118,7 @@ const Notifications: React.FC = () => {
                 variant="ghost" 
                 size="sm" 
                 onClick={clearAll}
-                className="h-8 rounded-full text-[9px] font-black uppercase tracking-widest bg-red-500/5 hover:bg-red-500/10 text-red-500 border border-red-500/20"
+                className="h-7 rounded-lg text-[8px] font-black uppercase tracking-widest bg-red-500/5 hover:bg-red-500/10 text-red-500 border border-red-500/20 px-3"
             >
                 Purge
             </Button>
@@ -163,10 +159,10 @@ const Notifications: React.FC = () => {
                                 )}
                                 onClick={() => handleNotificationClick(item)}
                             >
-                                <div className="flex items-start gap-3">
+                                <div className="flex items-center gap-2">
                                     {/* Small Icon container */}
                                     <div className={cn(
-                                        "w-10 h-10 rounded-xl flex items-center justify-center border transition-colors",
+                                        "w-8 h-8 rounded-lg flex items-center justify-center border transition-colors",
                                         item.isRead ? "bg-muted/30 border-white/5" : "bg-blue-500/10 border-blue-500/20"
                                     )}>
                                         {renderIcon(item)}
@@ -175,17 +171,17 @@ const Notifications: React.FC = () => {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-0.5">
                                             <span className={cn(
-                                                "text-[9px] font-black uppercase tracking-[0.2em]",
+                                                "text-[8px] font-black uppercase tracking-[0.2em]",
                                                 item.isRead ? "text-muted-foreground/40" : "text-blue-500/60"
                                             )}>{item.type}</span>
-                                            <span className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-widest">{item.time}</span>
+                                            <span className="text-[7px] font-bold text-muted-foreground/30 uppercase tracking-widest">{item.time}</span>
                                         </div>
                                         <h4 className={cn(
-                                            "text-xs md:text-sm font-black tracking-tight uppercase truncate",
+                                            "text-[10px] font-black tracking-tight uppercase truncate",
                                             item.isRead ? "text-foreground/60" : "text-foreground"
                                         )}>{item.title}</h4>
                                         <p className={cn(
-                                            "text-[11px] md:text-xs font-bold tracking-tight leading-snug line-clamp-2 mt-0.5",
+                                            "text-[9px] font-bold tracking-tight leading-snug line-clamp-1 mt-0",
                                             item.isRead ? "text-muted-foreground/50" : "text-muted-foreground"
                                         )}>
                                             {item.message}

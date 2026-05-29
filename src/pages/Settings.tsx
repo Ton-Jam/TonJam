@@ -79,8 +79,8 @@ const Settings: React.FC = () => {
   const SettingRow = ({ icon: Icon, title, description, children, onClick }: any) => (
     <div 
       className={cn(
-        "flex items-center justify-between py-3 px-1 transition-all duration-200",
-        onClick && "cursor-pointer group hover:opacity-70"
+        "flex items-center justify-between py-2 px-3 transition-all duration-200 rounded-xl",
+        onClick && "cursor-pointer group hover:bg-white/[0.03]"
       )}
       onClick={onClick}
     >
@@ -89,11 +89,11 @@ const Settings: React.FC = () => {
           <Icon className="h-4 w-4" />
         </div>
         <div className="flex flex-col">
-          <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{title}</span>
-          <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mt-0.5">{description}</span>
+          <span className="text-[10px] font-black text-foreground uppercase tracking-tight">{title}</span>
+          <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mt-0.5">{description}</span>
         </div>
       </div>
-      <div onClick={(e) => onClick && e.stopPropagation()} className="flex items-center">
+      <div onClick={(e) => onClick && e.stopPropagation()} className="flex items-center gap-2">
         {children || <ChevronRight className="h-3 w-3 text-muted-foreground/30 group-hover:translate-x-0.5 transition-transform" />}
       </div>
     </div>
@@ -101,44 +101,40 @@ const Settings: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24 pt-4 animate-in fade-in duration-700">
-      <div className="mb-6 text-center lg:text-left flex items-center justify-between opacity-40">
+      <div className="mb-6 text-center lg:text-left flex items-center justify-between opacity-50">
         <div className="flex items-center gap-2">
            <ShieldCheck className="h-3 w-3 text-blue-500" />
-           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Neural Interface Parameters</span>
+           <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">System Parameters</span>
         </div>
-        <span className="text-[8px] font-mono">v2.4.0-STABLE</span>
+        <span className="text-[8px] font-mono text-muted-foreground">v2.4.0</span>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-transparent p-0 mb-8 flex border-none h-auto gap-3">
-          <TabsTrigger value="general" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
-            Identity
-          </TabsTrigger>
-          <TabsTrigger value="verification" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
-            Verification
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
-            Signals
-          </TabsTrigger>
-          <TabsTrigger value="interface" className="flex-1 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white border-2 border-blue-500/30 data-[state=active]:border-blue-400/50 data-[state=inactive]:bg-white/5 transition-all">
-            System
-          </TabsTrigger>
+        <TabsList className="bg-transparent p-0 mb-6 flex border-none h-auto gap-2">
+          {['general', 'verification', 'notifications', 'interface'].map((tab) => (
+            <TabsTrigger 
+              key={tab}
+              value={tab} 
+              className="flex-1 rounded-lg px-2 py-1.5 text-[8px] font-black uppercase tracking-widest data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:bg-muted/10 transition-all border border-white/5"
+            >
+              {tab}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        <TabsContent value="general" className="space-y-6">
-          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Identity Core</CardTitle>
-              <CardDescription className="text-[9px] font-bold uppercase tracking-widest opacity-40">Manage your network presence</CardDescription>
+        <TabsContent value="general" className="space-y-4">
+          <Card className="bg-muted/5 border-white/5 rounded-2xl overflow-hidden">
+            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-[9px] font-black text-blue-500 uppercase tracking-[0.3em]">Identity Core</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
+            <CardContent className="p-2 space-y-0.5">
                 <SettingRow 
                     icon={UserCircle} 
                     title="Profile Sync" 
                     description="Edit bio, links and visuals"
                     onClick={() => navigate('/profile-settings')}
                 />
-                <Separator className="bg-white/5" />
+                <Separator className="bg-white/5 mx-3 w-[calc(100%-1.5rem)]" />
                 <SettingRow 
                     icon={Wallet} 
                     title="Vault Bridge" 
@@ -147,13 +143,14 @@ const Settings: React.FC = () => {
                 >
                     <div className={cn(
                     "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter border",
-                    user?.uid ? "bg-emerald-500/5 text-emerald-500 border-emerald-500/20" : "bg-red-500/5 text-red-500 border-red-500/20"
+                    user?.uid ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
                     )}>
                     {user?.uid ? "Online" : "Offline"}
                     </div>
                 </SettingRow>
             </CardContent>
           </Card>
+
 
           <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
             <CardHeader className="pb-4">

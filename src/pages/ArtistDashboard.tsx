@@ -549,20 +549,6 @@ export default function ArtistDashboard() {
                   </div>
                 </div>
 
-                {/* Audiences Area Chart Card */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h2 className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-1 mb-0.5">
-                        <BarChart3 className="w-3 h-3 text-cyan-400" /> Recent performance
-                      </h2>
-                      <h3 className="text-xs font-black uppercase tracking-tight">Stream Playback Growth</h3>
-                    </div>
-                  </div>
-                  <div className="h-40 -mx-4">
-                    <ChartAreaInteractive />
-                  </div>
-                </div>
 
                 {/* Live Streams Bar Chart */}
                 <div className="bg-white/[0.02] backdrop-blur-md p-4 rounded-xl shadow-lg">

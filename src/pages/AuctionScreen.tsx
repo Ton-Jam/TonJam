@@ -171,9 +171,9 @@ const AuctionScreen: React.FC = () => {
               </Button>
               <Button 
                 variant="outline" 
-                size="lg" 
+                size="sm" 
                 onClick={() => navigate('/marketplace')}
-                className="rounded-full px-8 border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 font-bold h-12"
+                className="rounded-full px-5 border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 font-bold h-9 text-xs"
               >
                 Explore Market
               </Button>

@@ -822,7 +822,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {!isPostDetail && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && (
         <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 h-16 transition-all duration-300 ${isMobileNavHidden ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-600/20 via-blue-500/50 to-blue-600/20 z-10" />
-          <nav className="h-full w-full bg-white/5 backdrop-blur-xl border-t border-white/10 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.2)]" aria-label="Mobile Navigation">
+          <nav className="h-full w-full bg-black/60 backdrop-blur-xl border-t border-white/10 px-2 flex justify-around items-center shadow-[0_-8px_32px_rgba(0,0,0,0.5)]" aria-label="Mobile Navigation">
             <MobileNavItem to="/" icon={HomeIcon} label="Home" />
             <MobileNavItem to="/discover" icon={MagnifyingGlassIcon} label="Search" />
             <MobileNavItem to="/jamspace" icon={PaperAirplaneIcon} label="Jamspace" />
