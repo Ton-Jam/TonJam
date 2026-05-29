@@ -111,8 +111,8 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               ></textarea>
 
               {selectedTrack && (
-                <div className="relative rounded-[10px] bg-muted/50 border border-border p-2 flex items-center gap-2 group/track hover:bg-muted transition-colors">
-                  <img src={selectedTrack.coverUrl || getPlaceholderImage(`track-${selectedTrack.id}`)} className="w-10 h-10 rounded-[6px] object-cover shadow-lg" alt="" aria-hidden="true" />
+                <div className="relative rounded-[4px] bg-muted/50 border border-border p-2 flex items-center gap-2 group/track hover:bg-muted transition-colors">
+                  <img src={selectedTrack.coverUrl || getPlaceholderImage(`track-${selectedTrack.id}`)} className="w-10 h-10 rounded-[4px] object-cover shadow-lg" alt="" aria-hidden="true" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-bold text-foreground uppercase truncate tracking-wide">{selectedTrack.title}</p>
                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate mt-3">{selectedTrack.artist}</p>
@@ -128,7 +128,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               )}
 
               {mediaUrl && (
-                <div className="relative rounded-[10px] overflow-hidden group/media border border-border">
+                <div className="relative rounded-[4px] overflow-hidden group/media border border-border">
                   {mediaUrl.startsWith("data:video") ? (
                     <video
                       src={mediaUrl}
@@ -177,7 +177,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
                 <button 
                   key={track.id} 
                   onClick={() => { setSelectedTrackId(track.id); setShowTrackPicker(false); }}
-                  className={`w-full flex items-center gap-3 p-2 rounded-[8px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-neutral-500/30' : 'bg-muted/50 border border-transparent hover:bg-muted'}`}
+                  className={`w-full flex items-center gap-3 p-2 rounded-[4px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selectedTrackId === track.id ? 'bg-blue-600/20 border border-neutral-500/30' : 'bg-muted/50 border border-transparent hover:bg-muted'}`}
                   aria-label={`Select ${track.title} by ${track.artist}`}
                   aria-pressed={selectedTrackId === track.id}
                 >
@@ -205,14 +205,14 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-8 h-8 rounded-[8px] flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="w-8 h-8 rounded-[4px] flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Upload Media"
             >
               <Image className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
             </button>
             <button
               onClick={() => setShowTrackPicker(!showTrackPicker)}
-              className={`w-8 h-8 rounded-[8px] flex items-center justify-center transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${showTrackPicker ? 'text-blue-400 bg-blue-500/10' : 'text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10'}`}
+              className={`w-8 h-8 rounded-[4px] flex items-center justify-center transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${showTrackPicker ? 'text-blue-400 bg-blue-500/10' : 'text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10'}`}
               aria-label="Attach Track"
               aria-expanded={showTrackPicker}
             >
@@ -220,13 +220,13 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
             </button>
             <button
               onClick={handleSocialShare}
-              className="w-8 h-8 rounded-[8px] flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="w-8 h-8 rounded-[4px] flex items-center justify-center text-muted-foreground/50 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Share externally"
             >
               <Share2 className="h-3.5 w-3.5 group-hover/btn:scale-110 transition-transform" />
             </button>
             <button 
-              className="px-2 h-8 rounded-[8px] flex items-center gap-3 text-blue-500/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="px-2 h-8 rounded-[4px] flex items-center gap-3 text-blue-500/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Forge AI"
             >
               <Sparkles className="h-3 w-3" />
@@ -254,7 +254,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onSubmit }) => {
               disabled={
                 (!content.trim() && !mediaUrl && !selectedTrackId) || content.length > maxLength || isUploading
               }
-              className="bg-blue-600 hover:bg-blue-500 disabled:bg-muted/50 disabled:text-muted-foreground/30 w-10 h-10 rounded-[8px] flex items-center justify-center text-foreground transition-all shadow-lg shadow-blue-600/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="bg-blue-600 hover:bg-blue-500 disabled:bg-muted/50 disabled:text-muted-foreground/30 w-10 h-10 rounded-[4px] flex items-center justify-center text-foreground transition-all shadow-lg shadow-blue-600/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Post Signal"
             >
               {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

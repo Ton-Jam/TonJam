@@ -73,7 +73,7 @@ const StorageManagementModal: React.FC<StorageManagementModalProps> = ({ isOpen,
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-zinc-950 border-white/10 rounded-[32px] p-8">
+      <DialogContent className="max-w-2xl bg-zinc-950 border-white/10 rounded-[4px] p-8">
         <DialogHeader>
           <DialogTitle className="text-xl font-black uppercase tracking-tighter text-white flex items-center gap-2">
             <HardDrive className="h-5 w-5 text-blue-500" />

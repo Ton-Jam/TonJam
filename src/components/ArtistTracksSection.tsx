@@ -49,11 +49,11 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
       {featuredNFT && (
         <div className="mb-4 relative group cursor-pointer" onClick={() => navigate(`/nft/${featuredNFT.id}`)}>
           <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-purple-500/20 blur-2xl opacity-50 group-hover:opacity-100 transition-opacity" />
-          <div className="relative glass border border-amber-500/30 bg-foreground/[0.01] p-5 rounded-[16px] flex flex-col md:flex-row items-center gap-4 overflow-hidden">
+          <div className="relative glass border border-amber-500/30 bg-foreground/[0.01] p-5 rounded-[4px] flex flex-col md:flex-row items-center gap-4 overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5">
               <Satellite className="h-32 w-32 text-amber-500" />
             </div>
-            <div className="relative w-full md:w-32 aspect-square rounded-[12px] overflow-hidden shadow-2xl">
+            <div className="relative w-full md:w-32 aspect-square rounded-[4px] overflow-hidden shadow-2xl">
               <img src={featuredNFT.imageUrl || getPlaceholderImage(`nft-${featuredNFT.id}`)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
               <div className="absolute inset-0 bg-black/20" />
             </div>
@@ -73,7 +73,7 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
                   <img src={TON_LOGO} className="w-4 h-4" alt="" />
                   <span className="text-xl font-bold text-foreground tracking-tighter">{featuredNFT.price} TON</span>
                 </div>
-                <button className="px-4 py-4 bg-amber-500 hover:bg-amber-400 text-background rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-amber-500/20">
+                <button className="px-4 py-4 bg-amber-500 hover:bg-amber-400 text-background rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-amber-500/20">
                   {featuredNFT.listingType === 'auction' ? 'Place Bid' : 'Acquire Protocol'}
                 </button>
               </div>
@@ -84,7 +84,7 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
 
       {/* Top Tracks Section */}
       {topTracks.length > 0 && (
-        <section className="bg-card rounded-[10px] p-5">
+        <section className="bg-card rounded-[4px] p-5">
           <h3 className="text-lg font-bold text-foreground mb-4">Popular</h3>
           <div className="space-y-2">
             {topTracks.slice(0, 3).map((track, idx) => (
@@ -133,7 +133,7 @@ const ArtistTracksSection: React.FC<ArtistTracksSectionProps> = ({
           <div ref={sentinelRef} className="h-4" />
         </div>
         {filteredTracks.length === 0 && (
-          <div className="py-4 text-center bg-card rounded-[10px]">
+          <div className="py-4 text-center bg-card rounded-[4px]">
             <p className="text-xs text-muted-foreground">No tracks broadcasted.</p>
           </div>
         )}

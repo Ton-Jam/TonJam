@@ -84,7 +84,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
     <div className="space-y-4 animate-in fade-in duration-700">
       {/* Earnings Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <div className="glass border border-neutral-500/10 p-2 rounded-[10px] bg-foreground/[0.02] relative overflow-hidden group">
+        <div className="glass border border-neutral-500/10 p-2 rounded-[4px] bg-foreground/[0.02] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
             <ChartLine className="h-10 w-10 text-blue-500" />
           </div>
@@ -96,7 +96,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
           <p className="text-[8px] text-blue-400/70 uppercase tracking-widest mt-2">Based on {(streamingPercentage * 100).toFixed(1)}% share</p>
         </div>
 
-        <div className="glass border border-neutral-500/10 p-2 rounded-[10px] bg-foreground/[0.02] relative overflow-hidden group">
+        <div className="glass border border-neutral-500/10 p-2 rounded-[4px] bg-foreground/[0.02] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
             <Gem className="h-10 w-10 text-amber-500" />
           </div>
@@ -108,7 +108,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
           <p className="text-[8px] text-blue-400/70 uppercase tracking-widest mt-2">Based on {(nftSaleShare * 100).toFixed(1)}% share</p>
         </div>
 
-        <div className="glass border border-neutral-500/10 p-2 rounded-[10px] bg-blue-600/5 relative overflow-hidden group">
+        <div className="glass border border-neutral-500/10 p-2 rounded-[4px] bg-blue-600/5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-2 opacity-10">
             <Wallet className="h-10 w-10 text-blue-400" />
           </div>
@@ -117,12 +117,12 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
             <span className="text-[26px] font-bold text-blue-400 tracking-tighter">{earnings.total}</span>
             <span className="text-[10px] font-bold text-blue-400 uppercase">TON</span>
           </div>
-          <button className="w-full mt-2 py-2 bg-blue-600 text-foreground rounded-[10px] text-[8px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">Withdraw to Wallet</button>
+          <button className="w-full mt-2 py-2 bg-blue-600 text-foreground rounded-[4px] text-[8px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">Withdraw to Wallet</button>
         </div>
       </div>
 
       {/* Monthly Royalty Trends Chart (No border lines) */}
-      <div className="glass p-5 rounded-[10px] bg-[#18181b]/30 space-y-4">
+      <div className="glass p-5 rounded-[4px] bg-[#18181b]/30 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em]">Royalty Payout Trends</h3>
@@ -200,9 +200,9 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
       </div>
 
       {/* Royalty Configuration */}
-      <div className="glass border border-neutral-500/10 p-2 rounded-[10px] bg-foreground/[0.01]">
+      <div className="glass border border-neutral-500/10 p-2 rounded-[4px] bg-foreground/[0.01]">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-10 h-10 bg-blue-600/20 rounded-[10px] flex items-center justify-center">
+          <div className="w-10 h-10 bg-blue-600/20 rounded-[4px] flex items-center justify-center">
             <Settings className="h-4 w-4 text-blue-400" />
           </div>
           <div>
@@ -236,7 +236,7 @@ const RoyaltyDashboard: React.FC<RoyaltyDashboardProps> = ({ artist }) => {
             </div>
           </div>
 
-          <div className="bg-blue-600/5 p-2 rounded-[10px]">
+          <div className="bg-blue-600/5 p-2 rounded-[4px]">
             <h4 className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] mb-2">Contract Status</h4>
             <div className="space-y-2">
               <div className="flex items-center gap-2">

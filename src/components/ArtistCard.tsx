@@ -90,7 +90,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, variant = 'default', cl
     >
       <Card 
         onClick={handleCardClick}
-        className={cn("group flex flex-col items-center text-center p-3 space-y-2 cursor-pointer transition-all bg-muted/20 border-none shadow-none rounded-[2px]", className)}
+        className={cn("group flex flex-col items-center text-center p-3 space-y-2 cursor-pointer transition-all bg-muted/20 border-none shadow-none rounded-[4px]", className)}
       >
       <div className="relative">
           <img 

@@ -64,7 +64,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
   return (
     <div className="space-y-2 animate-in fade-in duration-700">
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-10 h-10 bg-purple-600/20 rounded-[10px] flex items-center justify-center">
+        <div className="w-10 h-10 bg-purple-600/20 rounded-[4px] flex items-center justify-center">
           <Disc className="h-4 w-4 text-purple-400" />
         </div>
         <div>
@@ -90,14 +90,14 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
             <motion.div 
               key={track.id}
               layout
-              className={`glass border transition-all duration-300 rounded-[12px] overflow-hidden ${
+              className={`glass border transition-all duration-300 rounded-[4px] overflow-hidden ${
                 isEditing ? 'border-neutral-500/30 bg-purple-500/5' : 'border-border/50 bg-foreground/[0.01] hover:bg-foreground/[0.03]'
               }`}
             >
               <div className="p-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-12 h-12 rounded-[8px] object-cover shadow-lg" alt="" />
+                    <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="w-12 h-12 rounded-[4px] object-cover shadow-lg" alt="" />
                     <div className="min-w-0">
                       <h4 className="text-sm font-bold text-foreground truncate uppercase tracking-tight">{track.title}</h4>
                       <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest">{track.genre} • {track.isNFT ? 'NFT Protocol Active' : 'Standard Stream'}</p>
@@ -108,7 +108,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                     {!isEditing ? (
                       <button 
                         onClick={() => handleEdit(track)}
-                        className="px-2 py-2 bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
+                        className="px-2 py-2 bg-muted/50 hover:bg-muted text-muted-foreground/80 hover:text-foreground rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all"
                       >
                         Configure Metadata
                       </button>
@@ -116,14 +116,14 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                       <div className="flex items-center gap-2">
                         <button 
                           onClick={() => setEditingTrackId(null)}
-                          className="px-2 py-2 bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all"
+                          className="px-2 py-2 bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all"
                         >
                           Cancel
                         </button>
                         <button 
                           onClick={() => handleSave(track.id)}
                           disabled={isSaving === track.id}
-                          className="px-2 py-2 bg-purple-600 hover:bg-purple-500 text-foreground rounded-[8px] text-[8px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 flex items-center gap-2"
+                          className="px-2 py-2 bg-purple-600 hover:bg-purple-500 text-foreground rounded-[4px] text-[8px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 flex items-center gap-2"
                         >
                           {isSaving === track.id ? (
                             <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
@@ -155,7 +155,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                               type="text"
                               value={currentMetadata.title}
                               onChange={(e) => handleChange(track.id, 'title', e.target.value)}
-                              className="w-full bg-background/40 border border-border rounded-[8px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                              className="w-full bg-background/40 border border-border rounded-[4px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
                             />
                           </div>
 
@@ -166,7 +166,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                             <select 
                               value={currentMetadata.genre}
                               onChange={(e) => handleChange(track.id, 'genre', e.target.value)}
-                              className="w-full bg-background/40 border border-border rounded-[8px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all appearance-none"
+                              className="w-full bg-background/40 border border-border rounded-[4px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all appearance-none"
                             >
                               {['Techno', 'House', 'Ambient', 'Phonk', 'Cyberpunk', 'Lo-Fi'].map(g => (
                                 <option key={g} value={g}>{g}</option>
@@ -183,7 +183,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                               step="0.1"
                               value={currentMetadata.price}
                               onChange={(e) => handleChange(track.id, 'price', e.target.value)}
-                              className="w-full bg-background/40 border border-border rounded-[8px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                              className="w-full bg-background/40 border border-border rounded-[4px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
                             />
                           </div>
 
@@ -197,7 +197,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                                 step="1"
                                 value={currentMetadata.bpm}
                                 onChange={(e) => handleChange(track.id, 'bpm', e.target.value)}
-                                className="w-full bg-background/40 border border-border rounded-[8px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                className="w-full bg-background/40 border border-border rounded-[4px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                 placeholder="e.g. 128"
                               />
                             </div>
@@ -209,7 +209,7 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                                 type="text"
                                 value={currentMetadata.key}
                                 onChange={(e) => handleChange(track.id, 'key', e.target.value)}
-                                className="w-full bg-background/40 border border-border rounded-[8px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
+                                className="w-full bg-background/40 border border-border rounded-[4px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all"
                                 placeholder="e.g. Am"
                               />
                             </div>
@@ -224,12 +224,12 @@ const NFTMetadataManager: React.FC<NFTMetadataManagerProps> = ({ artistTracks, o
                             <textarea 
                               value={currentMetadata.description}
                               onChange={(e) => handleChange(track.id, 'description', e.target.value)}
-                              className="w-full bg-background/40 border border-border rounded-[8px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all min-h-[100px] resize-none"
+                              className="w-full bg-background/40 border border-border rounded-[4px] p-2 text-xs text-foreground outline-none focus:border-neutral-500/50 transition-all min-h-[100px] resize-none"
                               placeholder="Describe the unique qualities of this NFT asset..."
                             />
                           </div>
 
-                          <div className="p-2 bg-purple-600/5 border border-neutral-500/20 rounded-[10px] flex items-center justify-between">
+                          <div className="p-2 bg-purple-600/5 border border-neutral-500/20 rounded-[4px] flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
                                 <Sparkles className="w-4 h-4 text-purple-400" />

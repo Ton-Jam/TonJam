@@ -297,52 +297,52 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <header className="mb-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-[12px]">
+            <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-[4px]">
               <button 
                 onClick={() => setActiveTab('overview')}
-                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'overview' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'overview' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Overview
               </button>
               <button 
                 onClick={() => setActiveTab('withdrawals')}
-                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'withdrawals' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'withdrawals' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Withdrawals
               </button>
               <button 
                 onClick={() => setActiveTab('sponsorships')}
-                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'sponsorships' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'sponsorships' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Sponsorships
               </button>
               <button 
                 onClick={() => setActiveTab('tasks')}
-                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tasks' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'tasks' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Tasks
               </button>
               <button 
                 onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'users' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Users
               </button>
               <button 
                 onClick={() => setActiveTab('verifications')}
-                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'verifications' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'verifications' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Verifications
               </button>
               <button 
                 onClick={() => setActiveTab('treasury')}
-                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'treasury' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'treasury' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Treasury
               </button>
               <button 
                 onClick={() => setActiveTab('mockmaker')}
-                className={`px-4 py-2 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'mockmaker' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`px-4 py-2 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'mockmaker' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Mock Maker
               </button>
@@ -361,7 +361,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-4">
-              <div className="glass px-4 py-4 rounded-[10px] flex items-center gap-4">
+              <div className="glass px-4 py-4 rounded-[4px] flex items-center gap-4">
                 <div className="text-right">
                   <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">Platform Balance</p>
                   <p className="text-lg font-bold text-foreground tracking-tighter">{platformStats.totalFees} TON</p>
@@ -374,7 +374,7 @@ const AdminDashboard: React.FC = () => {
 
         {activeTab === 'mockmaker' && (
           <div className="space-y-4 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-8 text-center max-w-2xl mx-auto">
+            <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-8 text-center max-w-2xl mx-auto">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
                 <Database className="w-8 h-8 text-primary" />
               </div>
@@ -443,8 +443,8 @@ const AdminDashboard: React.FC = () => {
             { label: 'Total Streams', value: platformStats.streamCount.toLocaleString(), icon: <Activity className="h-4 w-4" />, color: 'purple' },
             { label: 'NFT Transactions', value: platformStats.saleCount.toLocaleString(), icon: <Shield className="h-4 w-4" />, color: 'amber' },
           ].map((stat, i) => (
-            <div key={i} className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
-              <div className={`w-8 h-8 rounded-[8px] flex items-center justify-center mb-4 bg-${stat.color}-500/10 text-${stat.color}-500`}>
+            <div key={i} className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4">
+              <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center mb-4 bg-${stat.color}-500/10 text-${stat.color}-500`}>
                 {stat.icon}
               </div>
               <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">{stat.label}</p>
@@ -458,7 +458,7 @@ const AdminDashboard: React.FC = () => {
         {/* Contract Management */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">NFT Collection Contract</h3>
@@ -468,7 +468,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             
             <div className="space-y-4">
-              <div className="bg-muted/30 p-4 rounded-[8px] border border-border/30">
+              <div className="bg-muted/30 p-4 rounded-[4px] border border-border/30">
                 <p className="text-[7px] font-bold text-muted-foreground/50 uppercase mb-2">Deployed Address</p>
                 <p className="text-[10px] font-mono text-foreground break-all">
                   {deployedCollection.startsWith('EQB_') ? (
@@ -486,14 +486,14 @@ const AdminDashboard: React.FC = () => {
               <Button 
                 onClick={handleDeployCollection}
                 disabled={isDeployingCollection}
-                className="w-full py-6 bg-foreground text-background hover:bg-foreground/90 rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all"
+                className="w-full py-6 bg-foreground text-background hover:bg-foreground/90 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all"
               >
                 {isDeployingCollection ? "Deploying..." : "Deploy Collection Contract"}
               </Button>
             </div>
           </div>
 
-          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">Marketplace Contract</h3>
@@ -503,7 +503,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             
             <div className="space-y-4">
-              <div className="bg-muted/30 p-4 rounded-[8px] border border-border/30">
+              <div className="bg-muted/30 p-4 rounded-[4px] border border-border/30">
                 <p className="text-[7px] font-bold text-muted-foreground/50 uppercase mb-2">Deployed Address</p>
                 <p className="text-[10px] font-mono text-foreground break-all">
                   {deployedMarketplace.startsWith('EQB_') ? (
@@ -521,7 +521,7 @@ const AdminDashboard: React.FC = () => {
               <Button 
                 onClick={handleDeployMarketplace}
                 disabled={isDeployingMarketplace}
-                className="w-full py-6 bg-foreground text-background hover:bg-foreground/90 rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all"
+                className="w-full py-6 bg-foreground text-background hover:bg-foreground/90 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all"
               >
                 {isDeployingMarketplace ? "Deploying..." : "Deploy Marketplace Contract"}
               </Button>
@@ -531,7 +531,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {activeTab === 'withdrawals' && (
-          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6">
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-6">
             <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">Platform Withdrawals</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
@@ -547,7 +547,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {activeTab === 'sponsorships' && (
-          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6">
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-sm font-bold text-foreground uppercase tracking-widest">Sponsored Content Management</h2>
@@ -623,7 +623,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {activeTab === 'tasks' && (
-          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6">
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-6">
             <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">Task Management</h2>
             <div className="space-y-4">
               <div className="p-4 bg-muted/30 rounded-lg">
@@ -637,7 +637,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {activeTab === 'users' && (
-          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6 mb-4">
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-6 mb-4">
             <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">User Role Management</h2>
             <div className="flex gap-4 mb-4">
               <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="bg-muted p-2 rounded text-[10px] uppercase font-bold text-muted-foreground outline-none border border-border/20">
@@ -724,7 +724,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {activeTab === 'verifications' && (
-          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6 mb-4">
+          <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-6 mb-4">
             <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">Artist Verification Requests</h2>
             <div className="space-y-4">
               {verificationRequests.length > 0 ? (
@@ -793,21 +793,21 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'treasury' && (
           <div className="space-y-4 mb-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4">
                 <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Treasury Balance</p>
                 <h3 className="text-xl font-bold text-foreground tracking-tighter">{treasuryStats?.balance?.toFixed(2) || '0.00'} TON</h3>
               </div>
-              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4">
                 <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Fees Collected</p>
                 <h3 className="text-xl font-bold text-green-500 tracking-tighter">+{treasuryStats?.totalFeesCollected?.toFixed(2) || '0.00'} TON</h3>
               </div>
-              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+              <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4">
                 <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Grants Allocated</p>
                 <h3 className="text-xl font-bold text-amber-500 tracking-tighter">{treasuryStats?.totalGrantsAllocated?.toFixed(2) || '0.00'} TON</h3>
               </div>
             </div>
 
-            <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-6">
+            <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-6">
               <h2 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6">Treasury Governance Proposals</h2>
               <div className="space-y-4">
                 {allProposals.filter(p => p.category === 'Treasury' || p.category === 'Artist Spotlight').length > 0 ? (
@@ -860,7 +860,7 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {/* Transaction Master Ledger */}
-        <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[10px] p-4">
+        <div className="glass border border-border/50 bg-foreground/[0.02] rounded-[4px] p-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
             <div>
               <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">Global Transaction Ledger</h3>
@@ -875,7 +875,7 @@ const AdminDashboard: React.FC = () => {
                   inputClassName="bg-muted/50 border-border py-4 text-[10px] outline-none text-foreground placeholder:text-muted-foreground/50 dark:placeholder:text-neutral-500"
                 />
               </div>
-              <Button variant="outline" className="p-4 bg-muted/50 rounded-[5px] text-muted-foreground hover:text-foreground transition-all">
+              <Button variant="outline" className="p-4 bg-muted/50 rounded-[4px] text-muted-foreground hover:text-foreground transition-all">
                 <Filter className="h-3.5 w-3.5" />
               </Button>
             </div>

@@ -378,7 +378,7 @@ const JamSpace: React.FC = () => {
                 </div>
 
                 {/* AI Curator - Neural Discovery */}
-                <Card className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border-blue-500/20 rounded-[24px] overflow-hidden group/ai relative">
+                <Card className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border-blue-500/20 rounded-[4px] overflow-hidden group/ai relative">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl -z-10 group-hover/ai:scale-150 transition-all duration-700" />
                   <CardHeader className="p-5 pb-4">
                     <div className="flex items-center gap-3">
@@ -429,7 +429,7 @@ const JamSpace: React.FC = () => {
                 </Card>
 
                 {/* Trending */}
-                <Card className="bg-zinc-900/40 border-white/[0.05] rounded-[24px] overflow-hidden">
+                <Card className="bg-zinc-900/40 border-white/[0.05] rounded-[4px] overflow-hidden">
                   <CardHeader className="p-5 pb-2">
                     <CardTitle className="text-xl font-black uppercase tracking-tighter">Hyper-Trending</CardTitle>
                   </CardHeader>
@@ -453,7 +453,7 @@ const JamSpace: React.FC = () => {
                 </Card>
 
                 {/* Recommendations */}
-                <Card className="bg-zinc-900/40 border-white/[0.05] rounded-[24px] overflow-hidden">
+                <Card className="bg-zinc-900/40 border-white/[0.05] rounded-[4px] overflow-hidden">
                   <CardHeader className="p-5 pb-2">
                     <CardTitle className="text-xl font-black uppercase tracking-tighter">Echo Recs</CardTitle>
                   </CardHeader>

@@ -276,7 +276,7 @@ export default function ListenerActivityFeed({ tracks }: ListenerActivityFeedPro
   };
 
   return (
-    <div className="backdrop-blur-3xl bg-white/5 border border-white/10 rounded-[32px] p-5 space-y-4">
+    <div className="backdrop-blur-3xl bg-white/5 border border-white/10 rounded-[4px] p-5 space-y-4">
       {/* Top Header */}
       <div className="flex items-center justify-between">
         <div>

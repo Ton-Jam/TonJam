@@ -31,7 +31,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ title, subtitle, viewAllL
         {viewAllLink && (
           <Link 
             to={viewAllLink} 
-            className="group flex items-center gap-2 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-full text-[7.5px] sm:text-[8.5px] font-black text-muted-foreground uppercase tracking-[0.2em] hover:text-foreground hover:border-primary/50 transition-all active:scale-95 shadow-sm"
+            className="group flex items-center gap-2 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-blue-600 hover:bg-blue-500 border border-transparent rounded-full text-[7.5px] sm:text-[8.5px] font-black text-white uppercase tracking-[0.2em] transition-all active:scale-95 shadow-sm"
           >
             View More
             <ChevronRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-1" />

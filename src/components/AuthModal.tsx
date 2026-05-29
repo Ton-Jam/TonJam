@@ -12,7 +12,9 @@ import { APP_LOGO } from '../constants';
 const authSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  username: z.string().min(3, 'Username must be at least 3 characters').optional(),
+  username: z.string().optional().refine((val) => !val || val.length >= 3, {
+    message: 'Username must be at least 3 characters',
+  }),
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -199,7 +201,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       {...register('username')}
                       type="text"
                       placeholder="Username"
-                      className="w-full bg-muted/30 border border-border rounded-[12px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
+                      className="w-full bg-muted/30 border border-border rounded-[4px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
                     />
                   </div>
                   {errors.username && <p className="text-[11px] text-red-500 font-medium ml-1">{errors.username.message}</p>}
@@ -214,7 +216,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   {...register('email')}
                   type="email"
                   placeholder="Email Address"
-                  className="w-full bg-muted/30 border border-border rounded-[12px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
+                  className="w-full bg-muted/30 border border-border rounded-[4px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
                 />
               </div>
               {errors.email && <p className="text-[11px] text-red-500 font-medium ml-1">{errors.email.message}</p>}
@@ -227,7 +229,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   {...register('password')}
                   type="password"
                   placeholder="Password"
-                  className="w-full bg-muted/30 border border-border rounded-[12px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
+                  className="w-full bg-muted/30 border border-border rounded-[4px] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-background transition-all font-medium"
                 />
                 {isLogin && (
                   <button 
@@ -245,7 +247,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-[12px] font-black text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 group active:scale-[0.98] mt-2"
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-[4px] font-black text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 group active:scale-[0.98] mt-2"
             >
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -270,18 +272,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
             <div className="flex flex-col gap-3">
               <div className="flex justify-center w-full">
-                <TonConnectButton className="w-full h-14 [&>button]:w-full [&>button]:h-full [&>button]:rounded-[12px] [&>button]:bg-muted/50 [&>button]:text-foreground [&>button]:hover:bg-muted [&>button]:transition-all [&>button]:font-black [&>button]:text-xs [&>button]:uppercase [&>button]:tracking-widest [&>button]:border [&>button]:border-border" />
+                <TonConnectButton className="w-full h-14 [&>button]:w-full [&>button]:h-full [&>button]:rounded-[4px] [&>button]:bg-muted/50 [&>button]:text-foreground [&>button]:hover:bg-muted [&>button]:transition-all [&>button]:font-black [&>button]:text-xs [&>button]:uppercase [&>button]:tracking-widest [&>button]:border [&>button]:border-border" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => signInWithGoogle()}
-                  className="flex items-center justify-center gap-3 py-3.5 bg-muted/50 border border-border rounded-[12px] hover:bg-muted transition-all group"
+                  className="flex items-center justify-center gap-3 py-3.5 bg-muted/50 border border-border rounded-[4px] hover:bg-muted transition-all group"
                 >
                   <Chrome className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   <span className="text-[10px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">Google</span>
                 </button>
                 <button
-                  className="flex items-center justify-center gap-3 py-3.5 bg-muted/50 border border-border rounded-[12px] hover:bg-muted transition-all group"
+                  className="flex items-center justify-center gap-3 py-3.5 bg-muted/50 border border-border rounded-[4px] hover:bg-muted transition-all group"
                 >
                   <Github className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   <span className="text-[10px] font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-widest">GitHub</span>

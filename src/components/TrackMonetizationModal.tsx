@@ -126,7 +126,7 @@ const TrackMonetizationModal: React.FC<TrackMonetizationModalProps> = ({ track, 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-[#0B0F14] border-none text-white p-0 overflow-hidden rounded-[32px] gap-0">
+      <DialogContent className="max-w-2xl bg-[#0B0F14] border-none text-white p-0 overflow-hidden rounded-[4px] gap-0">
         <DialogHeader className="p-8 pb-4">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center">

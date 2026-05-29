@@ -684,7 +684,7 @@ const Home: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-blue-600/20 via-slate-900 to-black rounded-[2.5rem] p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden border border-blue-500/20 shadow-2xl"
+                  className="bg-gradient-to-br from-blue-600/20 via-slate-900 to-black rounded-[4px] p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden border border-blue-500/20 shadow-2xl"
                 >
                   {/* Digital particles effect */}
                   <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -1080,7 +1080,7 @@ const Home: React.FC = () => {
               <HomeSection title="Rising Stars" icon={UserCheck}>
                 {[1, 2, 3, 4].map(i => (
                   <div key={`artists-loading-${i}`} className="flex-shrink-0 w-[140px] sm:w-[160px] snap-start">
-                    <div className="animate-pulse bg-muted/20 p-6 rounded-[10px] space-y-4">
+                    <div className="animate-pulse bg-muted/20 p-6 rounded-[4px] space-y-4">
                       <div className="w-24 h-24 rounded-full bg-muted mx-auto"></div>
                       <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
                       <div className="h-3 bg-muted rounded w-1/2 mx-auto"></div>

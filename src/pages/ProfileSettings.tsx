@@ -448,7 +448,7 @@ Return ONLY the bio text, nothing else.`;
             </div>
 
             {userProfile?.isVerifiedArtist ? (
-              <div className="p-12 bg-emerald-500/5 border border-emerald-500/20 rounded-[32px] text-center space-y-6">
+              <div className="p-12 bg-emerald-500/5 border border-emerald-500/20 rounded-[4px] text-center space-y-6">
                 <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20">
                   <CheckCircle className="w-10 h-10 text-emerald-500" />
                 </div>
@@ -461,7 +461,7 @@ Return ONLY the bio text, nothing else.`;
               </div>
             ) : userProfile?.verificationStatus === 'pending' ? (
               <div className="space-y-10">
-                <div className="p-6 bg-blue-500/5 border border-blue-500/20 rounded-[24px] flex items-center gap-4">
+                <div className="p-6 bg-blue-500/5 border border-blue-500/20 rounded-[4px] flex items-center gap-4">
                   <Clock className="w-6 h-6 text-blue-500 animate-pulse" />
                   <div>
                     <h4 className="text-xs font-black text-white uppercase tracking-tight">Identity Analysis in Progress</h4>

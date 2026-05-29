@@ -32,7 +32,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={onClose}></div>
       
-      <div className="relative w-full max-w-sm glass border border-border bg-background rounded-[12px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-sm glass border border-border bg-background rounded-[4px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         <div className="p-3 border-b border-border/50 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -69,9 +69,9 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
               <button 
                 key={playlist.id} 
                 onClick={() => handleAdd(playlist.id, playlist.title)}
-                className="w-full flex items-center gap-3 p-3 rounded-[10px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="w-full flex items-center gap-3 p-3 rounded-[4px] hover:bg-muted/50 transition-all text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
-                <div className="w-10 h-10 rounded-[6px] bg-muted/50 flex items-center justify-center overflow-hidden border border-border/50">
+                <div className="w-10 h-10 rounded-[4px] bg-muted/50 flex items-center justify-center overflow-hidden border border-border/50">
                   <img src={playlist.coverUrl || getPlaceholderImage(`playlist-${playlist.id}`)} className="w-full h-full object-cover" alt="" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -89,7 +89,7 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ track, onClose 
               onClose();
               setIsCreatePlaylistModalOpen(true);
             }}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-[8px] bg-blue-600/10 border border-neutral-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-[4px] bg-blue-600/10 border border-neutral-500/30 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <Plus className="h-3 w-3" /> Create New Playlist
           </button>

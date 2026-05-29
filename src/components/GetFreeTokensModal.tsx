@@ -37,7 +37,7 @@ const GetFreeTokensModal: React.FC<GetFreeTokensModalProps> = ({ isOpen, onClose
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[92vw] max-w-[380px] p-0 overflow-hidden bg-[#0a0a0a] shadow-2xl shadow-blue-500/10 rounded-[28px] border-none">
+      <DialogContent className="w-[92vw] max-w-[380px] p-0 overflow-hidden bg-[#0a0a0a] shadow-2xl shadow-blue-500/10 rounded-[4px] border-none">
         <div className="relative">
           {/* Header Background Decoration */}
           <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-blue-600/20 to-transparent" />

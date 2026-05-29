@@ -284,13 +284,13 @@ const TrackCard: React.FC<TrackCardProps> = ({
         <motion.div 
           whileHover={{ y: -4, scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className={`group flex items-center gap-5 p-3 rounded-[2px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 ${className}`}
+          className={`group flex items-center gap-5 p-3 rounded-[4px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 ${className}`}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"
           tabIndex={0}
         >
-            <div className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0 shadow-sm border border-white/5 group-hover:border-blue-500/30 transition-colors">
+            <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 shadow-sm border border-white/5 group-hover:border-blue-500/30 transition-colors">
               <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
               <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
                 <button onClick={handlePlay} className="text-white">
@@ -353,7 +353,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
         <ContextMenuTrigger>
           <motion.div 
           whileHover={{ opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.05)" }}
-          className={`flex flex-col w-full group/row border-b border-zinc-700 last:border-0 transition-colors rounded-[2px] mx-2 ${className}`}
+          className={`flex flex-col w-full group/row border-b border-zinc-700 last:border-0 transition-colors rounded-[4px] mx-2 ${className}`}
         >
             <div 
               className="flex items-center gap-4 p-2 sm:p-3 cursor-pointer w-full outline-none focus-visible:bg-white/5"
@@ -370,7 +370,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
               )}
 
               <div 
-                className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0 cursor-pointer shadow-sm group/thumb border border-white/5 group-hover/row:border-blue-500/20 transition-colors" 
+                className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 cursor-pointer shadow-sm group/thumb border border-white/5 group-hover/row:border-blue-500/20 transition-colors" 
                 onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
               >
                 <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
@@ -469,7 +469,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 animate={{ height: 'auto', opacity: 1 }}
                 className="px-5 pb-5 pt-2 overflow-hidden"
               >
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-[2px] bg-white/[0.02] border border-white/5 backdrop-blur-md shadow-inner">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-[4px] bg-white/[0.02] border border-white/5 backdrop-blur-md shadow-inner">
                     <div className="space-y-1">
                       <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">Pulse_BPM</p>
                       <p className="text-xs font-bold text-blue-500 uppercase tracking-widest">{track.bpm || '128'}</p>
@@ -504,7 +504,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ y: -8, scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className={`group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[3px] p-2 bg-transparent hover:border-blue-500/20 hover:bg-white/[0.03] border border-transparent w-full ${className}`}
+          className={`group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent hover:border-blue-500/20 hover:bg-white/[0.03] border border-transparent w-full ${className}`}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"
@@ -512,7 +512,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
           aria-label={`View track: ${track.title} by ${track.artist}`}
         >
           {/* Image Container - 1:1 Aspect Ratio */}
-          <div className="relative aspect-square rounded-[3px] overflow-hidden bg-neutral-900 mb-2 transition-all border border-white/5">
+          <div className="relative aspect-square rounded-[4px] overflow-hidden bg-neutral-900 mb-2 transition-all border border-white/5">
             <img 
               src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
               alt="" 
@@ -541,22 +541,22 @@ const TrackCard: React.FC<TrackCardProps> = ({
             {/* Status indicators */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
               {track.isNFT && (
-                <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest border border-purple-400/30">
+                <div className="bg-purple-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest border border-purple-400/30">
                   NFT_ASSET
                 </div>
               )}
               {associatedNft && !track.isNFT && (
-                <div className="bg-purple-600/90 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest">
+                <div className="bg-purple-600/90 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest">
                   NFT AVAILABLE
                 </div>
               )}
               {track.tokenGating?.enabled && (
-                <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
+                <div className="bg-amber-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest border border-amber-400/30 flex items-center gap-1">
                   <Key className="w-2.5 h-2.5" /> GATED
                 </div>
               )}
               {isCached && (
-                <div className="bg-emerald-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest border border-emerald-400/30 flex items-center gap-1">
+                <div className="bg-emerald-600/80 backdrop-blur-md text-[8px] font-bold text-white px-1.5 py-0.5 rounded-[4px] uppercase tracking-widest border border-emerald-400/30 flex items-center gap-1">
                   <CheckCircle2 className="w-2.5 h-2.5" /> CACHED
                 </div>
               )}
@@ -593,7 +593,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
                       <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
                         {artist?.followers?.toLocaleString() || '0'} Followers
                       </p>
-                      <button className="w-full mt-2 py-1.5 bg-blue-600 rounded-[3px] text-[8px] font-black text-white uppercase tracking-widest hover:bg-blue-500 transition-colors">
+                      <button className="w-full mt-2 py-1.5 bg-blue-600 rounded-[4px] text-[8px] font-black text-white uppercase tracking-widest hover:bg-blue-500 transition-colors">
                         View Dossier
                       </button>
                     </div>
@@ -622,14 +622,14 @@ const TrackCard: React.FC<TrackCardProps> = ({
                     e.stopPropagation();
                     navigate(`/nft/${associatedNft.id}`);
                   }}
-                  className="text-[8px] font-black text-white hover:text-white transition-all px-2 py-1 bg-purple-600 hover:bg-purple-550 rounded-[3px] uppercase tracking-[0.2em] shadow-md shadow-purple-600/10 border-none flex items-center gap-1 cursor-pointer"
+                  className="text-[8px] font-black text-white hover:text-white transition-all px-2 py-1 bg-purple-600 hover:bg-purple-550 rounded-[4px] uppercase tracking-[0.2em] shadow-md shadow-purple-600/10 border-none flex items-center gap-1 cursor-pointer"
                 >
                   <Gem className="w-2.5 h-2.5 text-white" /> NFT
                 </button>
               ) : onMint && !track.isNFT ? (
                 <button
                   onClick={handleMint}
-                  className="text-[8px] font-black text-white hover:text-white transition-all px-2 py-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-[3px] uppercase tracking-[0.2em] shadow-md shadow-blue-600/10 border-none cursor-pointer"
+                  className="text-[8px] font-black text-white hover:text-white transition-all px-2 py-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-[4px] uppercase tracking-[0.2em] shadow-md shadow-blue-600/10 border-none cursor-pointer"
                 >
                   MINT
                 </button>

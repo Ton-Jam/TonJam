@@ -41,7 +41,7 @@ const RequestSongModal: React.FC<RequestSongModalProps> = ({ artistId, artistNam
 
   return (
     <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-      <div className="glass border border-border w-full max-w-md rounded-[20px] p-6 shadow-2xl">
+      <div className="glass border border-border w-full max-w-md rounded-[4px] p-6 shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-foreground">Request a Song from {artistName}</h2>
           <button onClick={onClose}><XCircle className="h-6 w-6 text-muted-foreground"/></button>

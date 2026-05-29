@@ -60,7 +60,7 @@ const FolderModal: React.FC<FolderModalProps> = ({ isOpen, onClose, folder }) =>
     <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-2 sm:p-4 animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={resetAndClose}></div>
       
-      <div className="relative w-full max-w-sm glass border-t sm:border border-white/10 bg-black rounded-t-[20px] sm:rounded-[10px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-500 flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+      <div className="relative w-full max-w-sm glass border-t sm:border border-white/10 bg-black rounded-t-[20px] sm:rounded-[4px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-500 flex flex-col max-h-[95vh] sm:max-h-[90vh]">
         {/* Handle for mobile */}
         <div className="w-12 h-1 mx-auto my-2 rounded-full bg-white/10 sm:hidden" />
 

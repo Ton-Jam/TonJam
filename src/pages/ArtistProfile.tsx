@@ -368,7 +368,7 @@ const ArtistProfile: React.FC = () => {
                         toast("Wallet address copied to clipboard!");
                         addNotification("Artist wallet address copied!", "success");
                       }}
-                      className="px-2 py-1 bg-white/5 hover:bg-white/10 text-white rounded-[2px] font-bold text-[8px] uppercase tracking-widest transition-all cursor-pointer border-none"
+                      className="px-2 py-1 bg-white/5 hover:bg-white/10 text-white rounded-[4px] font-bold text-[8px] uppercase tracking-widest transition-all cursor-pointer border-none"
                     >
                       Copy
                     </button>
@@ -442,7 +442,7 @@ const ArtistProfile: React.FC = () => {
                                       e.stopPropagation();
                                       navigate(`/nft/${associatedNft.id}`);
                                     }}
-                                    className="flex items-center gap-1 text-[8px] font-black text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 px-1.5 py-0.5 rounded-[2px] transition-colors uppercase tracking-widest cursor-pointer whitespace-nowrap"
+                                    className="flex items-center gap-1 text-[8px] font-black text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 px-1.5 py-0.5 rounded-[4px] transition-colors uppercase tracking-widest cursor-pointer whitespace-nowrap"
                                   >
                                     <Gem className="w-2.5 h-2.5 text-purple-400" /> Linked NFT
                                   </span>

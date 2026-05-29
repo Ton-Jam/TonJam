@@ -114,7 +114,7 @@ const Wallet: React.FC = () => {
 
           <button 
             onClick={() => tonConnectUI.openModal()}
-            className="p-4 rounded-[5px] bg-muted/50 hover:bg-muted transition-all"
+            className="p-4 rounded-[4px] bg-muted/50 hover:bg-muted transition-all"
           >
             <WalletIcon className="h-6 w-6 text-blue-500" />
           </button>
@@ -123,7 +123,7 @@ const Wallet: React.FC = () => {
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-600/20 to-black p-4 rounded-[5px] relative overflow-hidden group flex flex-col justify-between">
+        <div className="bg-gradient-to-br from-blue-600/20 to-black p-4 rounded-[4px] relative overflow-hidden group flex flex-col justify-between">
           <div>
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <img src={TON_LOGO} className="w-32 h-32" alt="" />
@@ -154,12 +154,12 @@ const Wallet: React.FC = () => {
             </p>
           </div>
           <div className="flex gap-2 relative z-10 mt-auto">
-            <button onClick={() => openModal('deposit', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-blue-500/10">Deposit</button>
-            <button onClick={() => openModal('withdraw', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-blue-500/10">Withdraw</button>
+            <button onClick={() => openModal('deposit', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-blue-500/10">Deposit</button>
+            <button onClick={() => openModal('withdraw', 'TON')} className="flex-1 py-3 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-blue-500/10">Withdraw</button>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-600/20 to-black p-4 rounded-[5px] relative overflow-hidden group flex flex-col justify-between">
+        <div className="bg-gradient-to-br from-purple-600/20 to-black p-4 rounded-[4px] relative overflow-hidden group flex flex-col justify-between">
           <div>
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <img src={TJ_COIN_ICON} className="w-32 h-32" />
@@ -195,12 +195,12 @@ const Wallet: React.FC = () => {
             <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-4 mb-4">Utility: In-App Currency</p>
           </div>
           <div className="flex gap-2 relative z-10 mt-auto">
-            <button onClick={() => openModal('deposit', 'JAM')} className="flex-1 py-3 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all border border-purple-500/20">Deposit</button>
-            <button onClick={() => openModal('withdraw', 'JAM')} className="flex-1 py-3 bg-white/5 text-foreground hover:bg-white/10 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all border border-white/10">Withdraw</button>
+            <button onClick={() => openModal('deposit', 'JAM')} className="flex-1 py-3 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all border border-purple-500/20">Deposit</button>
+            <button onClick={() => openModal('withdraw', 'JAM')} className="flex-1 py-3 bg-white/5 text-foreground hover:bg-white/10 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all border border-white/10">Withdraw</button>
           </div>
         </div>
 
-        <div className={`p-4 rounded-[5px] relative overflow-hidden group transition-all flex flex-col justify-between ${userProfile.isPremium ? 'bg-gradient-to-br from-amber-600/20 to-black' : 'bg-muted/50'}`}>
+        <div className={`p-4 rounded-[4px] relative overflow-hidden group transition-all flex flex-col justify-between ${userProfile.isPremium ? 'bg-gradient-to-br from-amber-600/20 to-black' : 'bg-muted/50'}`}>
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <ShieldCheck className={`w-32 h-32 ${userProfile.isPremium ? 'text-amber-500' : 'text-foreground'}`} />
           </div>
@@ -226,7 +226,7 @@ const Wallet: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {jamPackages.map(pkg => (
-            <div key={pkg.id} className={`relative p-4 rounded-[5px] transition-all hover:scale-[1.02] cursor-pointer group ${pkg.popular ? 'bg-blue-600/5' : 'bg-muted/50'}`}>
+            <div key={pkg.id} className={`relative p-4 rounded-[4px] transition-all hover:scale-[1.02] cursor-pointer group ${pkg.popular ? 'bg-blue-600/5' : 'bg-muted/50'}`}>
               {pkg.popular && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 py-1 bg-blue-600 text-[6px] font-bold uppercase tracking-widest rounded-full">Most Popular</div>
               )}
@@ -246,7 +246,7 @@ const Wallet: React.FC = () => {
               <button 
                 onClick={() => handlePurchaseJAM(pkg.price, pkg.amount)}
                 disabled={isProcessing}
-                className={`w-full py-4 rounded-[5px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 shadow-xl shadow-blue-500/20 disabled:opacity-50`}
+                className={`w-full py-4 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] text-white hover:opacity-90 shadow-xl shadow-blue-500/20 disabled:opacity-50`}
               >
                 {isProcessing ? 'Processing...' : `Buy for ${pkg.price} TON`}
                 {!isProcessing && <ArrowRight className="h-4 w-4" />}
@@ -258,7 +258,7 @@ const Wallet: React.FC = () => {
 
       {/* Premium Upgrade Section */}
       {!userProfile.isPremium && (
-        <section className="relative rounded-[5px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black p-4 lg:p-4">
+        <section className="relative rounded-[4px] overflow-hidden bg-gradient-to-br from-amber-600/20 to-black p-4 lg:p-4">
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
             <Zap className="w-full h-full text-amber-500" />
           </div>
@@ -292,7 +292,7 @@ const Wallet: React.FC = () => {
               <button 
                 onClick={handleSubscribePremium}
                 disabled={isProcessing}
-                className="px-4 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white font-bold uppercase tracking-widest rounded-[5px] transition-all shadow-xl shadow-blue-600/20 flex items-center gap-4"
+                className="px-4 py-4 bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white font-bold uppercase tracking-widest rounded-[4px] transition-all shadow-xl shadow-blue-600/20 flex items-center gap-4"
               >
                 {isProcessing ? 'Processing...' : 'Upgrade Now for 5 TON'}
                 {!isProcessing && <Zap className="h-5 w-5 fill-white" />}
@@ -311,7 +311,7 @@ const Wallet: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-foreground/[0.02] p-4 rounded-[5px] flex flex-col justify-between">
+          <div className="bg-foreground/[0.02] p-4 rounded-[4px] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <ShieldCheck className="h-5 w-5 text-green-400" />
@@ -324,7 +324,7 @@ const Wallet: React.FC = () => {
             <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Security Level: Maximum</div>
           </div>
 
-          <div className="bg-foreground/[0.02] p-4 rounded-[5px] flex flex-col justify-between">
+          <div className="bg-foreground/[0.02] p-4 rounded-[4px] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="h-5 w-5 text-blue-400" />
@@ -337,7 +337,7 @@ const Wallet: React.FC = () => {
             <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Efficiency Margin: Optimal</div>
           </div>
 
-          <div className="bg-foreground/[0.02] p-4 rounded-[5px] flex flex-col justify-between">
+          <div className="bg-foreground/[0.02] p-4 rounded-[4px] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="h-5 w-5 text-amber-400" />
@@ -350,7 +350,7 @@ const Wallet: React.FC = () => {
             <div className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-4">Yield Standard: 15% APY</div>
           </div>
 
-          <div className="bg-foreground/[0.02] p-4 rounded-[5px] flex flex-col justify-between">
+          <div className="bg-foreground/[0.02] p-4 rounded-[4px] flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-purple-400" />
@@ -375,7 +375,7 @@ const Wallet: React.FC = () => {
           <button className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest hover:text-foreground transition-colors">Export CSV</button>
         </div>
         
-        <div className="glass rounded-[5px] overflow-hidden">
+        <div className="glass rounded-[4px] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -471,7 +471,7 @@ const Wallet: React.FC = () => {
             className="absolute inset-0 bg-background/90 backdrop-blur-xl"
             onClick={() => setModalType(null)}
           ></div>
-          <div className="relative w-full max-w-md glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[10px] p-6 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-md glass border border-neutral-500/20 bg-foreground/[0.02] rounded-[4px] p-6 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-[20px] font-bold text-foreground tracking-tighter uppercase">
                 {modalType === 'deposit' ? 'Deposit' : 'Withdraw'} {modalCurrency}
@@ -482,7 +482,7 @@ const Wallet: React.FC = () => {
             </div>
             
             {modalCurrency === 'JAM' && (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-[5px] p-4 mb-6 flex items-start gap-3">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-[4px] p-4 mb-6 flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Feature Disabled</p>
@@ -504,7 +504,7 @@ const Wallet: React.FC = () => {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className={`w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all ${modalCurrency === 'JAM' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full bg-foreground/[0.03] border border-border/50 rounded-[4px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all ${modalCurrency === 'JAM' ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={modalCurrency === 'JAM' || isProcessing}
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -523,7 +523,7 @@ const Wallet: React.FC = () => {
                     value={walletAddress}
                     onChange={(e) => setWalletAddress(e.target.value)}
                     placeholder={`Enter ${modalCurrency} address`}
-                    className={`w-full bg-foreground/[0.03] border border-border/50 rounded-[5px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all ${modalCurrency === 'JAM' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full bg-foreground/[0.03] border border-border/50 rounded-[4px] p-4 text-sm text-foreground outline-none focus:border-blue-500/50 transition-all ${modalCurrency === 'JAM' ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={modalCurrency === 'JAM' || isProcessing}
                   />
                 </div>
@@ -532,7 +532,7 @@ const Wallet: React.FC = () => {
               <button
                 onClick={handleModalSubmit}
                 disabled={modalCurrency === 'JAM' || isProcessing || !amount || Number(amount) <= 0 || (modalType === 'withdraw' && !walletAddress)}
-                className={`w-full py-4 rounded-[5px] font-bold text-[10px] uppercase tracking-widest transition-all mt-4 ${
+                className={`w-full py-4 rounded-[4px] font-bold text-[10px] uppercase tracking-widest transition-all mt-4 ${
                   modalCurrency === 'JAM' || isProcessing || !amount || Number(amount) <= 0 || (modalType === 'withdraw' && !walletAddress)
                     ? 'bg-muted/50 text-muted-foreground opacity-50 cursor-not-allowed'
                     : 'bg-[linear-gradient(90deg,#007AFF_0%,#00C6FF_100%)] hover:opacity-90 text-white shadow-lg shadow-blue-600/20'

@@ -28,14 +28,14 @@ const GenreCard: React.FC<GenreCardProps> = ({ genre, onClick, isSelected }) => 
   return (
     <div className="relative group">
       {/* Blue gradient boundary/glow */}
-      <div className={`absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-[12px] blur transition-opacity duration-300 ${isSelected ? 'opacity-100 shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'opacity-20 group-hover:opacity-100'}`}></div>
+      <div className={`absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-[4px] blur transition-opacity duration-300 ${isSelected ? 'opacity-100 shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'opacity-20 group-hover:opacity-100'}`}></div>
       
       {/* Additional sharp boundary layer */}
-      <div className={`absolute -inset-[2px] bg-gradient-to-r from-blue-600 to-cyan-400 rounded-[12px] transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}></div>
+      <div className={`absolute -inset-[2px] bg-gradient-to-r from-blue-600 to-cyan-400 rounded-[4px] transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}></div>
       
       <button 
         onClick={handleClick}
-        className={`relative w-full h-24 rounded-[10px] overflow-hidden transition-all hover:scale-[1.02] active:scale-95 ${isSelected ? 'ring-1 ring-white/50' : ''}`}
+        className={`relative w-full h-24 rounded-[4px] overflow-hidden transition-all hover:scale-[1.02] active:scale-95 ${isSelected ? 'ring-1 ring-white/50' : ''}`}
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-70 group-hover:opacity-100 transition-opacity`}></div>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">

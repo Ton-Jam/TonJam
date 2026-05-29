@@ -22,7 +22,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const authSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  username: z.string().min(3, 'Username must be at least 3 characters').optional(),
+  username: z.string().optional().refine((val) => !val || val.length >= 3, {
+    message: 'Username must be at least 3 characters',
+  }),
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -122,11 +124,24 @@ const Login: React.FC = () => {
   }, [avatarStyle, avatarSeed, customFilePreview]);
 
   const {
-    register,
-    handleSubmit,
-    getValues,
-    formState: { errors },
-    reset,
+    register: loginRegister,
+    handleSubmit: handleLoginSubmit,
+    getValues: getLoginValues,
+    formState: { errors: loginErrors },
+    reset: resetLoginForm,
+  } = useForm<AuthFormData>({
+    resolver: zodResolver(authSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    }
+  });
+
+  const {
+    register: registerRegister,
+    handleSubmit: handleRegisterSubmit,
+    formState: { errors: registerErrors },
+    reset: resetRegisterForm,
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
     defaultValues: {
@@ -148,7 +163,7 @@ const Login: React.FC = () => {
   };
 
   const handleForgotPassword = async () => {
-    const email = getValues('email');
+    const email = getLoginValues('email');
     if (!email) {
       toast.error('Email Required', {
         description: 'Please enter your email address to reset your password.',
@@ -166,20 +181,29 @@ const Login: React.FC = () => {
     }
   };
 
-  const onSubmit = async (data: AuthFormData) => {
+  const onLoginSubmit = async (data: AuthFormData) => {
     setIsLoading(true);
     try {
-      if (tabMode === 'login') {
-        const { error } = await signInWithEmail(data.email, data.password);
-        if (error) throw error;
-        toast.success('Welcome Back');
-        navigate(from, { replace: true });
-      } else {
-        const { error } = await signUpWithEmail(data.email, data.password, { username: data.username });
-        if (error) throw error;
-        toast.success('Account Created');
-        navigate(from, { replace: true });
-      }
+      const { error } = await signInWithEmail(data.email, data.password);
+      if (error) throw error;
+      toast.success('Welcome Back');
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      toast.error('Authentication Failed', {
+        description: getErrorMessage(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onRegisterSubmit = async (data: AuthFormData) => {
+    setIsLoading(true);
+    try {
+      const { error } = await signUpWithEmail(data.email, data.password, { username: data.username });
+      if (error) throw error;
+      toast.success('Account Created');
+      navigate(from, { replace: true });
     } catch (error: any) {
       toast.error('Authentication Failed', {
         description: getErrorMessage(error),
@@ -293,18 +317,18 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-y-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#060B1E] via-[#091535] to-[#040817] text-white flex flex-col items-center justify-center p-4 relative overflow-y-auto">
       {/* Background Glow */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-500/5 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-500/5 rounded-full blur-[150px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-500/10 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-500/10 rounded-full blur-[150px]" />
       </div>
 
       <Button
         variant="ghost"
         size="icon"
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 text-muted-foreground hover:text-foreground z-20 group rounded-[2px]"
+        className="absolute top-6 left-6 text-white/75 hover:text-white hover:bg-white/10 z-20 group rounded-[4px]"
       >
         <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
       </Button>
@@ -322,91 +346,98 @@ const Login: React.FC = () => {
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             className="mb-4 relative"
           >
-            <img src={APP_LOGO} className="w-12 h-12 relative z-10" alt="Logo" />
+            <div className="absolute inset-1 bg-blue-500/5 blur-xl rounded-full pointer-events-none" />
+            <motion.img 
+              src={APP_LOGO} 
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+              className="w-24 h-24 relative z-10 filter drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]" 
+              alt="Logo" 
+            />
           </motion.div>
-          <h1 className="text-lg font-bold text-foreground tracking-tighter uppercase leading-none mb-2">
+          <h1 className="text-xl font-black text-white tracking-widest uppercase leading-none mb-2">
             TON JAM
           </h1>
-          <p className="text-[9px] font-semibold text-muted-foreground/60 tracking-[0.4em] uppercase">
+          <p className="text-[10px] font-black text-blue-400/80 tracking-[0.4em] uppercase">
             Audio Protocol
           </p>
         </div>
 
         <Tabs 
           value={tabMode} 
-          onValueChange={(val) => { reset(); setTabMode(val as any); }}
+          onValueChange={(val) => { resetLoginForm(); resetRegisterForm(); setTabMode(val as any); }}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50 border border-border/50 mb-6 h-11 rounded-[2px] p-1">
-            <TabsTrigger value="login" className="text-[10px] font-semibold uppercase tracking-widest rounded-[2px] cursor-pointer">
+          <TabsList className="grid w-full grid-cols-3 bg-[#0d1636]/80 border border-white/5 mb-6 h-11 rounded-[4px] p-1">
+            <TabsTrigger value="login" className="text-[10px] font-semibold uppercase tracking-widest rounded-[4px] cursor-pointer text-white/60 data-[state=active]:bg-[#1e2d5a] data-[state=active]:text-blue-400">
               Log In
             </TabsTrigger>
-            <TabsTrigger value="register" className="text-[10px] font-semibold uppercase tracking-widest rounded-[2px] cursor-pointer">
+            <TabsTrigger value="register" className="text-[10px] font-semibold uppercase tracking-widest rounded-[4px] cursor-pointer text-white/60 data-[state=active]:bg-[#1e2d5a] data-[state=active]:text-blue-400">
               New User
             </TabsTrigger>
-            <TabsTrigger value="wallet" className="text-[10px] font-semibold uppercase tracking-widest rounded-[2px] cursor-pointer">
+            <TabsTrigger value="wallet" className="text-[10px] font-semibold uppercase tracking-widest rounded-[4px] cursor-pointer text-white/60 data-[state=active]:bg-[#1e2d5a] data-[state=active]:text-blue-400">
               Web3 Web
             </TabsTrigger>
           </TabsList>
 
-          <Card className="bg-white border-border/50 shadow-xl shadow-black/[0.03] relative overflow-hidden rounded-[2px]">
+          <Card className="bg-[#0b132e]/85 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(59,130,246,0.15)] relative overflow-hidden rounded-[4px] text-white">
             {/* EMAIL LOGIN VIEW */}
             {tabMode === 'login' && (
               <>
                 <CardHeader className="text-center pb-2 relative z-10">
-                  <CardTitle className="text-base font-bold tracking-tight text-foreground">
+                  <CardTitle className="text-base font-bold tracking-tight text-white uppercase">
                     WELCOME BACK
                   </CardTitle>
-                  <CardDescription className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                  <CardDescription className="text-[9px] font-semibold uppercase tracking-widest text-blue-400/80">
                     Login to access your jam
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-5 pt-4 relative z-10">
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <form onSubmit={handleLoginSubmit(onLoginSubmit)} className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="email" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-muted-foreground/70">Email</Label>
+                      <Label htmlFor="email" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/40" />
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-white/40" />
                         <Input
                           id="email"
                           type="email"
-                          {...register('email')}
+                          {...loginRegister('email')}
                           placeholder="email@example.com"
-                          className="pl-10 h-10 bg-muted/30 border-border/50 focus-visible:ring-primary/20 text-foreground placeholder:text-muted-foreground/40 font-semibold"
+                          className="pl-10 h-10 bg-[#070c22]/80 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
-                      {errors.email && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{errors.email.message}</p>}
+                      {loginErrors.email && <p className="text-[9px] text-red-400 font-medium tracking-tight ml-1">{loginErrors.email.message}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center px-1">
-                        <Label htmlFor="password" className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">Password</Label>
+                        <Label htmlFor="password" className="text-[9px] font-bold uppercase tracking-widest text-white/70">Password</Label>
                         <button 
                           type="button" 
                           onClick={handleForgotPassword}
-                          className="text-[9px] font-bold text-primary hover:text-primary/80 uppercase tracking-widest transition-colors"
+                          className="text-[9px] font-bold text-blue-400 hover:text-blue-300 uppercase tracking-widest transition-colors"
                         >
                           Reset?
                         </button>
                       </div>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/40" />
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-white/40" />
                         <Input
                           id="password"
                           type="password"
-                          {...register('password')}
+                          {...loginRegister('password')}
                           placeholder="••••••••"
-                          className="pl-10 h-10 bg-muted/30 border-border/50 focus-visible:ring-primary/20 text-foreground placeholder:text-muted-foreground/40 font-semibold"
+                          className="pl-10 h-10 bg-[#070c22]/80 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
-                      {errors.password && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{errors.password.message}</p>}
+                      {loginErrors.password && <p className="text-[9px] text-red-400 font-medium tracking-tight ml-1">{loginErrors.password.message}</p>}
                     </div>
 
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden group rounded-[2px]"
+                      className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white font-bold text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden group rounded-[4px]"
                     >
                       <span className="relative z-10 flex items-center justify-center gap-2">
                         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
@@ -421,10 +452,10 @@ const Login: React.FC = () => {
 
                   <div className="relative py-1">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-border/50"></div>
+                      <div className="w-full border-t border-white/10"></div>
                     </div>
                     <div className="relative flex justify-center">
-                      <span className="bg-white px-3 text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.3em]">OR</span>
+                      <span className="bg-[#0b132e] px-3 text-[8px] font-bold text-white/40 uppercase tracking-[0.3em]">OR</span>
                     </div>
                   </div>
 
@@ -441,9 +472,9 @@ const Login: React.FC = () => {
                           setIsLoading(false);
                         }
                       }}
-                      className="w-full h-11 border-border/50 hover:bg-muted/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-2 rounded-[2px]"
+                      className="w-full h-11 border border-white/10 hover:bg-white/5 text-white font-bold text-[10px] uppercase tracking-[0.2em] gap-2 rounded-[4px]"
                     >
-                      <Chrome className="h-4 w-4 text-blue-500" />
+                      <Chrome className="h-4 w-4 text-blue-400" />
                       Continue with Google
                     </Button>
                   </div>
@@ -455,64 +486,64 @@ const Login: React.FC = () => {
             {tabMode === 'register' && (
               <>
                 <CardHeader className="text-center pb-2 relative z-10">
-                  <CardTitle className="text-base font-bold tracking-tight text-foreground">
+                  <CardTitle className="text-base font-bold tracking-tight text-white uppercase">
                     JOIN THE REVOLUTION
                   </CardTitle>
-                  <CardDescription className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                  <CardDescription className="text-[9px] font-semibold uppercase tracking-widest text-blue-400/80">
                     Create your sonic node
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-5 pt-4 relative z-10">
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <form onSubmit={handleRegisterSubmit(onRegisterSubmit)} className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="username_reg" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-muted-foreground/70">Username</Label>
+                      <Label htmlFor="username_reg" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">Username</Label>
                       <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/40" />
+                        <User className="absolute left-3 top-3 h-4 w-4 text-white/40" />
                         <Input
                           id="username_reg"
-                          {...register('username')}
+                          {...registerRegister('username')}
                           placeholder="Select username"
-                          className="pl-10 h-10 bg-muted/30 border-border/50 focus-visible:ring-primary/20 text-foreground placeholder:text-muted-foreground/40 font-semibold"
+                          className="pl-10 h-10 bg-[#070c22]/80 border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
-                      {errors.username && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{errors.username.message}</p>}
+                      {registerErrors.username && <p className="text-[9px] text-red-400 font-medium tracking-tight ml-1">{registerErrors.username.message}</p>}
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="email_reg" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-muted-foreground/70">Email Address</Label>
+                      <Label htmlFor="email_reg" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">Email Address</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/40" />
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-white/40" />
                         <Input
                           id="email_reg"
                           type="email"
-                          {...register('email')}
+                          {...registerRegister('email')}
                           placeholder="email@example.com"
-                          className="pl-10 h-10 bg-muted/30 border-border/50 focus-visible:ring-primary/20 text-foreground placeholder:text-muted-foreground/40 font-semibold"
+                          className="pl-10 h-10 bg-[#070c22]/80 border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
-                      {errors.email && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{errors.email.message}</p>}
+                      {registerErrors.email && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{registerErrors.email.message}</p>}
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="password_reg" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-muted-foreground/70">Password</Label>
+                      <Label htmlFor="password_reg" className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">Password</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/40" />
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-white/40" />
                         <Input
                           id="password_reg"
                           type="password"
-                          {...register('password')}
+                          {...registerRegister('password')}
                           placeholder="••••••••"
-                          className="pl-10 h-10 bg-muted/30 border-border/50 focus-visible:ring-primary/20 text-foreground placeholder:text-muted-foreground/40 font-semibold"
+                          className="pl-10 h-10 bg-[#070c22]/80 border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
-                      {errors.password && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{errors.password.message}</p>}
+                      {registerErrors.password && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{registerErrors.password.message}</p>}
                     </div>
 
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden group rounded-[2px]"
+                      className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white font-bold text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden group rounded-[4px]"
                     >
                       <span className="relative z-10 flex items-center justify-center gap-2">
                         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
@@ -532,10 +563,10 @@ const Login: React.FC = () => {
             {tabMode === 'wallet' && (
               <>
                 <CardHeader className="text-center pb-2 relative z-10">
-                  <CardTitle className="text-base font-bold tracking-tight text-foreground uppercase">
+                  <CardTitle className="text-base font-bold tracking-tight text-white uppercase">
                     {onboardingActive ? 'IDENTITY PROTOCOL' : 'SECURE SEC REVOLUTION'}
                   </CardTitle>
-                  <CardDescription className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                  <CardDescription className="text-[9px] font-semibold uppercase tracking-widest text-blue-400/80">
                     {onboardingActive ? 'Customize your on-chain sonic presence' : 'Authenticate using Web3 connection features'}
                   </CardDescription>
                 </CardHeader>
@@ -544,9 +575,9 @@ const Login: React.FC = () => {
                   {!onboardingActive ? (
                     <div className="space-y-4">
                       {/* Connection Warning / Info */}
-                      <div className="bg-blue-500/5 p-4 rounded-xl text-center space-y-2">
-                        <p className="text-[10px] font-black tracking-widest text-blue-500 uppercase">Decentralized Authorization</p>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      <div className="bg-blue-500/10 p-4 rounded-[4px] text-center space-y-2 border border-blue-500/20">
+                        <p className="text-[10px] font-black tracking-widest text-blue-400 uppercase">Decentralized Authorization</p>
+                        <p className="text-[10px] text-white/70 leading-relaxed">
                           Secure wallet connections eliminate passwords completely. Link on-chain identity nodes directly.
                         </p>
                       </div>
@@ -554,10 +585,10 @@ const Login: React.FC = () => {
                       <div className="space-y-3">
                         {/* TON CONNECT DEFAULT SDK TRIGGER */}
                         <div className="flex flex-col gap-2">
-                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-muted-foreground/70">TON Ecosystem</Label>
+                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">TON Ecosystem</Label>
                           <button
                             onClick={() => tonConnectUI.openModal()}
-                            className="w-full h-11 pointer-events-auto flex items-center justify-between px-4 border border-blue-500/20 hover:bg-blue-500/5 text-blue-500 rounded-[2px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
+                            className="w-full h-11 pointer-events-auto flex items-center justify-between px-4 border border-blue-500/30 hover:bg-blue-500/10 text-blue-400 rounded-[4px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
                           >
                             <span className="flex items-center gap-2">
                               <Wallet className="h-4 w-4" />
@@ -569,30 +600,30 @@ const Login: React.FC = () => {
 
                         {/* EVM / WALLETCONNECT / WAGMI */}
                         <div className="flex flex-col gap-2 pt-2">
-                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-muted-foreground/70">Multi-Chain standard (WalletConnect / EVM)</Label>
+                          <Label className="text-[9px] font-bold uppercase tracking-widest ml-1 text-white/70">Multi-Chain standard (WalletConnect / EVM)</Label>
                           
                           {/* Inject Standard EVM connectors dynamically */}
                           {connectors.map((connector) => (
                             <button
                               key={connector.id}
                               onClick={() => connect({ connector })}
-                              className="w-full h-11 flex items-center justify-between px-4 border border-purple-500/20 hover:bg-purple-500/5 text-purple-500 rounded-[2px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
+                              className="w-full h-11 flex items-center justify-between px-4 border border-purple-500/30 hover:bg-purple-500/10 text-purple-400 rounded-[4px] transition-colors font-bold text-[10px] uppercase tracking-wider cursor-pointer"
                             >
                               <span className="flex items-center gap-2">
                                 <Sparkles className="h-4 w-4" />
                                 Connect with {connector.name}
                               </span>
-                              <span className="text-[8px] bg-purple-500/10 px-2 py-0.5 rounded-[2px] tracking-widest">Active</span>
+                              <span className="text-[8px] bg-purple-500/20 px-2 py-0.5 rounded-[4px] tracking-widest">Active</span>
                             </button>
                           ))}
 
                           {/* Interactive Standard QR Simulator Card to represent premium WalletConnect capabilities */}
-                          <div className="border border-border/40 p-3 rounded-lg flex items-center justify-between bg-muted/20 mt-1">
+                          <div className="border border-white/10 p-3 rounded-[4px] flex items-center justify-between bg-[#070d24]/60 mt-1">
                             <div className="flex items-center gap-2">
-                              <RefreshCw className="h-4 w-4 text-emerald-500 animate-spin" />
+                              <RefreshCw className="h-4 w-4 text-emerald-400 animate-spin" />
                               <div className="text-left">
-                                <p className="text-[9px] font-bold text-foreground">Standard WalletConnect Hub</p>
-                                <p className="text-[8px] text-muted-foreground">Ethers, Metamask, Safe standard support</p>
+                                <p className="text-[9px] font-bold text-white">Standard WalletConnect Hub</p>
+                                <p className="text-[8px] text-white/60">Ethers, Metamask, Safe standard support</p>
                               </div>
                             </div>
                             <Button 
@@ -608,7 +639,7 @@ const Login: React.FC = () => {
                                 setAvatarSeed(mockEthAddress);
                                 toast.success("WalletConnected Successfully");
                               }}
-                              className="text-[8px] h-7 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 uppercase font-black tracking-widest rounded-sm"
+                              className="text-[8px] h-7 bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-400 uppercase font-black tracking-widest rounded-[4px]"
                             >
                               Simulate WC
                             </Button>
@@ -620,10 +651,10 @@ const Login: React.FC = () => {
                     /* STEP 2: STUNNING INTERACTIVE WEB3 PROFILE CREATION FORM */
                     <div className="space-y-4">
                       {/* Active Connection Badge */}
-                      <div className="p-3 bg-muted/40 rounded-xl flex items-center justify-between">
+                      <div className="p-3 bg-[#070d24]/80 border border-white/10 rounded-[4px] flex items-center justify-between">
                         <div className="text-left">
-                          <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Linked Node Address</p>
-                          <p className="font-mono text-[10px] text-foreground font-black mt-0.5">
+                          <p className="text-[8px] font-black uppercase text-white/50 tracking-widest">Linked Node Address</p>
+                          <p className="font-mono text-[10px] text-white font-black mt-0.5">
                             {activeAddress.substring(0, 10)}...{activeAddress.substring(activeAddress.length - 8)}
                           </p>
                         </div>
@@ -632,7 +663,7 @@ const Login: React.FC = () => {
 
                       {/* AVATAR SYSTEM WIZARD */}
                       <div className="flex flex-col items-center gap-4 py-2">
-                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Choose Web3 Identity Picture</Label>
+                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/75">Choose Web3 Identity Picture</Label>
                         
                         <div className="relative w-24 h-24 rounded-full overflow-hidden group bg-muted/20 border-2 border-primary/20 flex items-center justify-center">
                           {customFilePreview ? (
@@ -670,10 +701,10 @@ const Login: React.FC = () => {
                                   setCustomFilePreview('');
                                   setAvatarStyle(styleName);
                                 }}
-                                className={`px-2 py-1 text-[8px] font-bold uppercase tracking-widest rounded transition-all border ${
+                                className={`px-2 py-1 text-[8px] font-bold uppercase tracking-widest rounded-[4px] transition-all border ${
                                   avatarStyle === styleName && !customFilePreview
-                                    ? 'bg-primary border-primary text-primary-foreground'
-                                    : 'border-border bg-transparent text-muted-foreground hover:bg-muted'
+                                    ? 'bg-blue-600 border-blue-600 text-white animate-pulse'
+                                    : 'border-white/10 bg-transparent text-white/60 hover:bg-white/5'
                                 }`}
                               >
                                 {styleName}
@@ -691,7 +722,7 @@ const Login: React.FC = () => {
                                 setAvatarSeed(e.target.value);
                               }}
                               placeholder="Avatar seed..."
-                              className="h-7 text-[10px] font-semibold text-center border-border"
+                              className="h-7 text-[10px] font-semibold text-center bg-[#070c22]/80 border border-white/10 text-white placeholder-white/30 rounded-[4px]"
                             />
                             <Button
                               type="button"
@@ -702,60 +733,60 @@ const Login: React.FC = () => {
                                 setCustomFilePreview('');
                                 setAvatarSeed(Math.random().toString(36).substring(7));
                               }}
-                              className="h-7 w-7 rounded-[2px]"
+                              className="h-7 w-7 rounded-[4px] border-white/10 text-white/70 hover:text-white hover:bg-white/5"
                             >
-                              <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
+                              <RefreshCw className="h-3.5 w-3.5 text-white/75" />
                             </Button>
                           </div>
                         </div>
                       </div>
 
                       {/* PROFILE DETAIL FIELDS */}
-                      <div className="space-y-3 pt-3 border-t border-border/40">
+                      <div className="space-y-3 pt-3 border-t border-white/10">
                         <div className="space-y-1">
-                          <Label htmlFor="onboard_username" className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">TONJam Profile Name</Label>
+                          <Label htmlFor="onboard_username" className="text-[9px] font-black uppercase tracking-widest text-white/70">TONJam Profile Name</Label>
                           <Input
                             id="onboard_username"
                             type="text"
                             value={onboardUsername}
                             onChange={(e) => setOnboardUsername(e.target.value)}
                             placeholder="Input profile name (e.g. SatoshiSonics)"
-                            className="h-10 bg-muted/40 font-semibold focus:border-primary border-border"
+                            className="h-10 bg-[#070c22]/80 border border-white/10 text-white placeholder-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <Label htmlFor="onboard_bio" className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">My Artist / Collector Bio</Label>
+                          <Label htmlFor="onboard_bio" className="text-[9px] font-black uppercase tracking-widest text-white/70">My Artist / Collector Bio</Label>
                           <textarea
                             id="onboard_bio"
                             value={onboardBio}
                             onChange={(e) => setOnboardBio(e.target.value)}
                             placeholder="Share your musical style and details..."
-                            className="w-full bg-muted/40 text-foreground border border-border p-3 text-xs font-semibold rounded-md resize-none focus:outline-none focus:border-primary"
+                            className="w-full bg-[#070c22]/80 border border-white/10 text-white p-3 text-xs font-semibold rounded-[4px] resize-none focus:outline-none focus:border-blue-500/50"
                             rows={3}
                           />
                         </div>
 
                         {/* Optional social links */}
                         <div className="space-y-2 pt-2">
-                          <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">On-chain Social Verification (Optional)</Label>
+                          <Label className="text-[9px] font-black uppercase tracking-widest text-white/75 block">On-chain Social Verification (Optional)</Label>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="relative">
-                              <span className="absolute left-2.5 top-2 text-[10px] text-muted-foreground/60 font-bold font-mono">X:</span>
+                              <span className="absolute left-2.5 top-2 text-[10px] text-white/40 font-bold font-mono">X:</span>
                               <Input
                                 value={socialTwitter}
                                 onChange={(e) => setSocialTwitter(e.target.value)}
                                 placeholder="username"
-                                className="pl-6 h-8 text-[10px] font-semibold"
+                                className="pl-6 h-8 text-[10px] font-semibold bg-[#070c22]/80 border-white/10 text-white rounded-[4px]"
                               />
                             </div>
                             <div className="relative">
-                              <span className="absolute left-2.5 top-2 text-[10px] text-muted-foreground/60 font-bold font-mono">TG:</span>
+                              <span className="absolute left-2.5 top-2 text-[10px] text-white/40 font-bold font-mono">TG:</span>
                               <Input
                                 value={socialTelegram}
                                 onChange={(e) => setSocialTelegram(e.target.value)}
                                 placeholder="username"
-                                className="pl-8 h-8 text-[10px] font-semibold"
+                                className="pl-8 h-8 text-[10px] font-semibold bg-[#070c22]/80 border-white/10 text-white rounded-[4px]"
                               />
                             </div>
                           </div>
@@ -763,12 +794,12 @@ const Login: React.FC = () => {
                       </div>
 
                       {/* COMPLETE SUBMIT BUTTONS */}
-                      <div className="space-y-2 pt-4 border-t border-border/40">
+                      <div className="space-y-2 pt-4 border-t border-white/10">
                         <Button
                           type="button"
                           onClick={handleLaunchWeb3Node}
                           disabled={isLoading || !onboardUsername.trim()}
-                          className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white font-bold text-[10px] uppercase tracking-[0.2em] transition-all rounded-[2px]"
+                          className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-bold text-[10px] uppercase tracking-[0.2em] transition-all rounded-[4px]"
                         >
                           {isLoading ? (
                             <span className="flex items-center gap-2">
@@ -784,7 +815,7 @@ const Login: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleDisconnectWallet}
-                          className="w-full text-center text-[9px] font-bold text-red-500/80 hover:text-red-500 uppercase tracking-widest transition-colors"
+                          className="w-full text-center text-[9px] font-bold text-rose-400 hover:text-rose-300 uppercase tracking-widest transition-colors cursor-pointer"
                         >
                           Disconnect Linked Node
                         </button>
@@ -795,9 +826,9 @@ const Login: React.FC = () => {
               </>
             )}
 
-            <CardFooter className="justify-center border-t border-border/50 bg-muted/20 p-3">
-              <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest flex items-center gap-1.5">
-                <ShieldCheck className="h-3 w-3 text-emerald-500/70" />
+            <CardFooter className="justify-center border-t border-white/10 bg-[#070d24]/30 p-3">
+              <p className="text-[8px] font-bold text-white/50 uppercase tracking-widest flex items-center gap-1.5">
+                <ShieldCheck className="h-3 w-3 text-emerald-400" />
                 Access Protocol Secured
               </p>
             </CardFooter>
@@ -805,13 +836,13 @@ const Login: React.FC = () => {
         </Tabs>
       </motion.div>
 
-      <div className="absolute bottom-6 flex justify-center gap-8 opacity-40 text-muted-foreground z-10">
+      <div className="absolute bottom-6 flex justify-center gap-8 opacity-40 text-white/60 z-10">
         <div className="flex items-center gap-1.5">
-          <Globe className="w-3 h-3" />
+          <Globe className="w-3 h-3 text-blue-500" />
           <span className="text-[8px] font-black uppercase tracking-widest">Mainnet</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Lock className="w-3 h-3" />
+          <Lock className="w-3 h-3 text-blue-500" />
           <span className="text-[8px] font-black uppercase tracking-widest">Secured</span>
         </div>
       </div>

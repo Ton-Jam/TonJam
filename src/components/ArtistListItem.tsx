@@ -86,11 +86,11 @@ const ArtistListItem: React.FC<ArtistListItemProps> = ({ artist }) => {
                 e.stopPropagation();
                 playTrack(track);
               }}
-              className="flex items-center justify-between p-2 rounded-[2px] bg-white/[0.03] hover:bg-white/[0.08] transition-colors group/track"
+              className="flex items-center justify-between p-2 rounded-[4px] bg-white/[0.03] hover:bg-white/[0.08] transition-colors group/track"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="text-[10px] font-black text-white/10 w-4">{idx + 1}</span>
-                <div className="w-8 h-8 rounded-[1px] overflow-hidden flex-shrink-0 border border-white/5 relative">
+                <div className="w-8 h-8 rounded-[4px] overflow-hidden flex-shrink-0 border border-white/5 relative">
                   <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-blue-500/40 opacity-0 group-hover/track:opacity-100 transition-opacity flex items-center justify-center">
                     <Play className="w-3 h-3 text-white fill-current" />

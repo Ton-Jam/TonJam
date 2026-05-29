@@ -44,7 +44,7 @@ const ScrollToTopButton: React.FC<ScrollToTopButtonProps> = ({ isMobileNavHidden
     <button
       type="button"
       onClick={scrollToTop}
-      className={`fixed ${bottomOffset} right-6 lg:right-8 z-50 p-3 rounded-[2px] bg-blue-600 text-white shadow-lg transition-all duration-300 hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+      className={`fixed ${bottomOffset} right-6 lg:right-8 z-50 p-3 rounded-[4px] bg-blue-600 text-white shadow-lg transition-all duration-300 hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
       }`}
       aria-label="Scroll to top"

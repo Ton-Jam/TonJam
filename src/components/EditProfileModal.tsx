@@ -80,7 +80,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ user, onClose, onUp
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="w-full max-w-lg rounded-[32px] p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-300 bg-background">
+      <div className="w-full max-w-lg rounded-[4px] p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-300 bg-background">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-sm font-black uppercase tracking-[0.2em]">Edit Profile</h2>
           <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">

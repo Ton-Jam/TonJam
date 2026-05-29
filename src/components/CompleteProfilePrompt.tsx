@@ -18,7 +18,7 @@ const CompleteProfilePrompt = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-[16px] bg-gradient-to-r from-purple-600 to-blue-600 p-4 md:p-6 text-white shadow-2xl mb-8">
+    <div className="relative overflow-hidden rounded-[4px] bg-gradient-to-r from-purple-600 to-blue-600 p-4 md:p-6 text-white shadow-2xl mb-8">
       <button 
         onClick={() => setIsVisible(false)}
         className="absolute top-2 right-2 p-1 rounded-full hover:bg-white/10 transition-colors"

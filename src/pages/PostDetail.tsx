@@ -508,7 +508,7 @@ const PostDetail: React.FC = () => {
                 ))}
                 
                 {comments.length === 0 && (
-                  <div className="py-20 flex flex-col items-center gap-4 text-center bg-white/[0.01] rounded-[32px] border border-dashed border-white/5">
+                  <div className="py-20 flex flex-col items-center gap-4 text-center bg-white/[0.01] rounded-[4px] border border-dashed border-white/5">
                     <MessageSquareOff className="h-12 w-12 text-zinc-800" />
                     <div className="space-y-1">
                       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Zero response signals detected</p>

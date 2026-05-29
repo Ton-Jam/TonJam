@@ -371,7 +371,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <button 
                       onClick={() => setIsMobileSidebarOpen(true)}
-                      className="lg:hidden p-2 rounded-[2px] bg-muted/30 hover:bg-muted transition-all"
+                      className="lg:hidden p-2 rounded-[4px] bg-muted/30 hover:bg-muted transition-all"
                       aria-label="Open sidebar"
                     >
                       <motion.img 
@@ -401,7 +401,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className={`flex items-center ${headerTitle ? 'w-full justify-center relative' : 'gap-2'}`}>
                 {!headerTitle && (
                   <BackButton 
-                    className={`p-2 rounded-[2px] bg-transparent hover:bg-white/5 transition-all ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
+                    className={`p-2 rounded-[4px] bg-transparent hover:bg-white/5 transition-all ${isTrendingNFTs ? 'text-white' : 'text-foreground'}`}
                     ariaLabel="Go back"
                   />
                 )}
@@ -415,7 +415,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
                 {headerTitle && !isHome && (
                   <BackButton 
-                    className="absolute left-0 p-2 rounded-[2px] bg-transparent hover:bg-white/5 transition-all text-foreground"
+                    className="absolute left-0 p-2 rounded-[4px] bg-transparent hover:bg-white/5 transition-all text-foreground"
                     ariaLabel="Go back"
                   />
                 )}
@@ -574,7 +574,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <button 
                     onClick={() => setIsDiscoverFiltersOpen(true)}
                     className={cn(
-                      "p-2.5 rounded-[2px] transition-all flex items-center gap-2",
+                      "p-2.5 rounded-[4px] transition-all flex items-center gap-2",
                       isDiscoverFiltersOpen ? "text-blue-500 bg-blue-500/10" : "text-muted-foreground hover:bg-muted"
                     )}
                   >
@@ -588,7 +588,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
 
             {/* JAM Balance Badge */}
-            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] hover:bg-white/5 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
+            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-2 px-3 py-1.5 rounded-[4px] hover:bg-white/5 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
                <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[35px] h-[35px] object-contain" />
                <div className="flex flex-col items-start hidden sm:flex">
                   <span className="text-[7px] font-bold uppercase tracking-widest text-blue-500 opacity-60">Balance (Tasks)</span>
@@ -609,7 +609,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <TooltipTrigger asChild>
                       <button 
                         onClick={() => setIsHeaderSearchOpen(!isHeaderSearchOpen)}
-                        className={`p-2.5 rounded-[2px] transition-all flex items-center gap-2 ${isHeaderSearchOpen ? 'text-blue-500 bg-blue-500/10' : 'text-muted-foreground hover:bg-muted'}`}
+                        className={`p-2.5 rounded-[4px] transition-all flex items-center gap-2 ${isHeaderSearchOpen ? 'text-blue-500 bg-blue-500/10' : 'text-muted-foreground hover:bg-muted'}`}
                       >
                         <MagnifyingGlassIcon className="h-5 w-5" strokeWidth={2.5} />
                       </button>
@@ -621,7 +621,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <TooltipTrigger asChild>
                       <button 
                         onClick={() => setIsCreatePlaylistModalOpen(true)}
-                        className="p-2.5 rounded-[2px] hover:bg-muted transition-all text-muted-foreground"
+                        className="p-2.5 rounded-[4px] hover:bg-muted transition-all text-muted-foreground"
                       >
                         <PlusIcon className="h-5 w-5" strokeWidth={2.5} />
                       </button>
@@ -637,7 +637,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         if (userAddress) tonConnectUI.disconnect();
                         if (isEvmConnected) disconnectEvm();
                       }}
-                      className={`p-2.5 rounded-[2px] hover:bg-destructive/10 hover:text-destructive transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
+                      className={`p-2.5 rounded-[4px] hover:bg-destructive/10 hover:text-destructive transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
                     >
                       <WalletIcon className="h-5 w-5" strokeWidth={2.5} />
                       <div className="hidden md:flex flex-col items-start leading-none gap-0.5">
@@ -658,7 +658,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         // Simple toggle to choose EVM
                         connect({ connector: injected() });
                       }}
-                      className={`p-2.5 rounded-[2px] hover:bg-muted transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
+                      className={`p-2.5 rounded-[4px] hover:bg-muted transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
                     >
                       <WalletIcon className="h-5 w-5" strokeWidth={2.5} />
                       <span className="hidden md:inline text-[9px] font-black uppercase tracking-widest">Connect</span>
@@ -673,10 +673,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {user && !isLibrary ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link to="/profile" className={`flex items-center gap-2 p-1 rounded-[2px] hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
-                      <Avatar className="w-8 h-8 rounded-[2px]">
+                    <Link to="/profile" className={`flex items-center gap-2 p-1 rounded-[4px] hover:bg-muted transition-all ${isProfile ? 'ring-1 ring-blue-500/30' : ''}`}>
+                      <Avatar className="w-8 h-8 rounded-[4px]">
                         <AvatarImage src={userProfile?.avatar || user.photoURL || ''} alt="" className="object-cover" />
-                        <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-[2px] text-[10px] font-bold">
+                        <AvatarFallback className="bg-blue-600/10 text-blue-500 rounded-[4px] text-[10px] font-bold">
                           {user.displayName ? user.displayName.slice(0, 2).toUpperCase() : '??'}
                         </AvatarFallback>
                       </Avatar>
@@ -693,7 +693,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <TooltipTrigger asChild>
                     <button 
                       onClick={() => navigate('/login')}
-                      className="p-2.5 rounded-[2px] hover:bg-muted transition-all text-muted-foreground"
+                      className="p-2.5 rounded-[4px] hover:bg-muted transition-all text-muted-foreground"
                     >
                       <UserIcon className="h-5 w-5" strokeWidth={2.5} />
                     </button>
@@ -903,7 +903,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
               signOut();
               onNavigate?.();
             }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-all group mt-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
             aria-label="Sign Out"
           >
             <ArrowRightOnRectangleIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -917,7 +917,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <Link 
             to="/upload"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
             aria-label="Upload new track"
           >
             <ArrowUpTrayIcon className="h-4 w-4" />
@@ -927,7 +927,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <Link 
             to="/mint"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-left"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-muted/50 text-muted-foreground font-bold hover:bg-muted transition-all border-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-left"
             aria-label="Mint new NFT"
           >
             <PlusCircleIcon className="h-4 w-4" />
@@ -939,7 +939,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
           <Link 
             to="/artist-onboarding"
             onClick={onNavigate}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[2px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-bold transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-[4px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-bold transition-all shadow-lg shadow-blue-600/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
             aria-label="Become an Artist"
           >
             <StarIcon className="h-4 w-4" />
@@ -949,7 +949,7 @@ const SidebarContent = ({ user, userProfile, signOut, onNavigate }: { user: any;
       )}
 
       {/* TJ Coin Price Widget */}
-      <div className="mt-2 p-2 rounded-[5px] bg-muted/50 border-0 space-y-2" role="complementary" aria-label="Token Price Info">
+      <div className="mt-2 p-2 rounded-[4px] bg-muted/50 border-0 space-y-2" role="complementary" aria-label="Token Price Info">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src={TJ_COIN_ICON} alt="JAM Token" className="w-[26px] h-[26px] object-contain" />
@@ -983,7 +983,7 @@ const NavItem = ({ to, icon: Icon, label, onClick, className = "" }: { to: strin
     to={to} 
     onClick={onClick}
     className={({ isActive }) => `
-      flex items-center gap-3 px-4 py-2.5 rounded-[2px] transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500
+      flex items-center gap-3 px-4 py-2.5 rounded-[4px] transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500
       ${isActive ? 'bg-blue-600/10 text-blue-500 font-black' : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/50'}
       ${className}
     `}
@@ -1004,7 +1004,7 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label
         to={to} 
         aria-label={label}
         className={({ isActive }) => `
-          flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[2px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
+          flex-1 flex flex-col items-center justify-center transition-all gap-1 h-full rounded-[4px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mobile-nav-item
           ${isActive ? 'text-blue-500' : 'text-white hover:text-white hover:bg-white/5'}
         `}
       >

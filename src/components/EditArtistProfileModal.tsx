@@ -150,7 +150,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 animate-in fade-in duration-300">
       <div className="absolute inset-0 backdrop-blur-md" onClick={onClose}></div>
-      <div className="relative glass w-full max-w-2xl rounded-[10px] p-2 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+      <div className="relative glass w-full max-w-2xl rounded-[4px] p-2 shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
         <div className="flex justify-between items-center mb-2">
           <div>
             <h2 className="text-xl font-bold uppercase tracking-tighter text-foreground">Edit Profile</h2>
@@ -165,7 +165,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             {/* Banner Upload Section */}
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Profile Banner</label>
-              <div className="relative w-full h-32 rounded-[10px] overflow-hidden group bg-muted/50">
+              <div className="relative w-full h-32 rounded-[4px] overflow-hidden group bg-muted/50">
                 <img src={bannerImageUrl || bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1500, 500)} alt="Banner Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
@@ -215,19 +215,19 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Artist Name</label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground" aria-label="Artist Name" />
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-muted/50 rounded-[4px] py-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground" aria-label="Artist Name" />
               </div>
               <div className="space-y-2">
                 <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Neural Handle</label>
                 <div className="relative">
                   <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 text-xs">@</span>
-                  <input type="text" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))} className="w-full bg-muted/50 rounded-[10px] py-2 pl-6 pr-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground" placeholder="handle" aria-label="Neural Handle" />
+                  <input type="text" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))} className="w-full bg-muted/50 rounded-[4px] py-2 pl-6 pr-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground" placeholder="handle" aria-label="Neural Handle" />
                 </div>
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Origin Narrative (Bio)</label>
-              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-muted/50 rounded-[10px] py-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground resize-none" placeholder="Describe your sonic journey..." aria-label="Origin Narrative (Bio)" />
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} className="w-full bg-muted/50 rounded-[4px] py-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-all text-foreground resize-none" placeholder="Describe your sonic journey..." aria-label="Origin Narrative (Bio)" />
             </div>
             <div className="space-y-4 pt-4 border-t border-border/50">
               <div className="flex items-center gap-2 mb-2">
@@ -337,7 +337,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
               ) : (
                 <div className="space-y-4">
                   {events.map((event, index) => (
-                    <div key={event.id} className="p-4 bg-muted/30 rounded-[10px] border border-border/50 relative">
+                    <div key={event.id} className="p-4 bg-muted/30 rounded-[4px] border border-border/50 relative">
                       <button
                         type="button"
                         onClick={() => handleRemoveEvent(event.id)}
@@ -350,39 +350,39 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
                       <div className="space-y-3">
                         <div className="pr-8">
                           <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 block">Title</label>
-                          <input type="text" value={event.title} onChange={(e) => handleUpdateEvent(event.id, 'title', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. Neon Nights Residency" required />
+                          <input type="text" value={event.title} onChange={(e) => handleUpdateEvent(event.id, 'title', e.target.value)} className="w-full bg-background/50 rounded-[4px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. Neon Nights Residency" required />
                         </div>
                         
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Calendar className="h-2 w-2"/> Date</label>
-                            <input type="date" value={event.date} onChange={(e) => handleUpdateEvent(event.id, 'date', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" required />
+                            <input type="date" value={event.date} onChange={(e) => handleUpdateEvent(event.id, 'date', e.target.value)} className="w-full bg-background/50 rounded-[4px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" required />
                           </div>
                           <div>
                             <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Clock className="h-2 w-2"/> Time</label>
-                            <input type="time" value={event.time} onChange={(e) => handleUpdateEvent(event.id, 'time', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" required />
+                            <input type="time" value={event.time} onChange={(e) => handleUpdateEvent(event.id, 'time', e.target.value)} className="w-full bg-background/50 rounded-[4px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" required />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><MapPin className="h-2 w-2"/> Venue</label>
-                            <input type="text" value={event.venue} onChange={(e) => handleUpdateEvent(event.id, 'venue', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. The Matrix Club" required />
+                            <input type="text" value={event.venue} onChange={(e) => handleUpdateEvent(event.id, 'venue', e.target.value)} className="w-full bg-background/50 rounded-[4px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. The Matrix Club" required />
                           </div>
                           <div>
                             <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1">City/Location</label>
-                            <input type="text" value={event.location} onChange={(e) => handleUpdateEvent(event.id, 'location', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. Neo-Tokyo" required />
+                            <input type="text" value={event.location} onChange={(e) => handleUpdateEvent(event.id, 'location', e.target.value)} className="w-full bg-background/50 rounded-[4px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="e.g. Neo-Tokyo" required />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Ticket className="h-2 w-2"/> Ticket URL (Optional)</label>
-                            <input type="url" value={event.ticketUrl} onChange={(e) => handleUpdateEvent(event.id, 'ticketUrl', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." />
+                            <input type="url" value={event.ticketUrl} onChange={(e) => handleUpdateEvent(event.id, 'ticketUrl', e.target.value)} className="w-full bg-background/50 rounded-[4px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." />
                           </div>
                           <div>
                             <label className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 flex items-center gap-1"><ImageIcon className="h-2 w-2"/> Banner Image URL</label>
-                            <input type="url" value={event.bannerImageUrl} onChange={(e) => handleUpdateEvent(event.id, 'bannerImageUrl', e.target.value)} className="w-full bg-background/50 rounded-[8px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." />
+                            <input type="url" value={event.bannerImageUrl} onChange={(e) => handleUpdateEvent(event.id, 'bannerImageUrl', e.target.value)} className="w-full bg-background/50 rounded-[4px] py-1.5 px-3 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-all text-foreground" placeholder="https://..." />
                           </div>
                         </div>
                       </div>
@@ -394,7 +394,7 @@ const EditArtistProfileModal: React.FC<EditArtistProfileModalProps> = ({ artist,
             
           </div>
           <div className="pt-2">
-            <button type="submit" className="w-full py-2 bg-purple-600 text-foreground rounded-[10px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-purple-600/20 hover:bg-purple-500 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500" > SAVE_IDENTITY_CHANGES </button>
+            <button type="submit" className="w-full py-2 bg-purple-600 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-purple-600/20 hover:bg-purple-500 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500" > SAVE_IDENTITY_CHANGES </button>
           </div>
         </form>
       </div>

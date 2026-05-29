@@ -38,6 +38,8 @@ const SORT_OPTIONS = ['Newest', 'Price: Low', 'Price: High', 'Rarity'];
 const Marketplace: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Trending');
+  const [onlyVerified, setOnlyVerified] = useState(false);
+  const [onlyDirectBuy, setOnlyDirectBuy] = useState(false);
   const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery, marketplaceFilters, setMarketplaceFilters, isLoading, allTracks, artists } = useAudio();
   const { genre: genreFilter, artist: artistFilter, rarity: rarityFilter, priceRange, sortBy, status: statusFilter } = marketplaceFilters;
 
@@ -102,14 +104,23 @@ const Marketplace: React.FC = () => {
       const price = parseFloat(nft.price);
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
 
-      if (activeTab === 'Trending') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
-      if (activeTab === 'New Signal') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
-      if (activeTab === 'Genesis') return matchesSearch && nft.edition === 'Unique' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
-      if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
-      if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
-      if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === userProfile.walletAddress) && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
-      if (activeTab === 'My NFTs') return matchesSearch && isMyNft && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
-      return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus;
+      let isVerified = nft.artistVerified === true;
+      if (!isVerified) {
+        const artistObj = artists.find(a => a.name === nft.creator || a.name === nft.artist);
+        isVerified = artistObj?.verified === true || artistObj?.isVerifiedArtist === true || artistObj?.verificationStatus === 'verified';
+      }
+      const matchesVerified = !onlyVerified || isVerified;
+
+      const matchesDirectBuy = !onlyDirectBuy || nft.listingType === 'fixed';
+
+      if (activeTab === 'Trending') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus && matchesVerified && matchesDirectBuy;
+      if (activeTab === 'New Signal') return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus && matchesVerified && matchesDirectBuy;
+      if (activeTab === 'Genesis') return matchesSearch && nft.edition === 'Unique' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus && matchesVerified && matchesDirectBuy;
+      if (activeTab === 'Limited') return matchesSearch && nft.edition === 'Limited' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus && matchesVerified && matchesDirectBuy;
+      if (activeTab === 'Auctions') return matchesSearch && nft.listingType === 'auction' && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus && matchesVerified && matchesDirectBuy;
+      if (activeTab === 'My Bids') return matchesSearch && nft.offers?.some(o => o.offerer === userProfile.walletAddress) && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus && matchesVerified && matchesDirectBuy;
+      if (activeTab === 'My NFTs') return matchesSearch && isMyNft && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus && matchesVerified && matchesDirectBuy;
+      return matchesSearch && matchesGenre && matchesArtist && matchesPrice && matchesRarity && matchesStatus && matchesVerified && matchesDirectBuy;
     });
 
     if (activeTab === 'New Signal') {
@@ -124,7 +135,7 @@ const Marketplace: React.FC = () => {
       list.sort((a, b) => (rarityMap[b.edition] || 0) - (rarityMap[a.edition] || 0));
     }
     return list;
-  }, [activeTab, searchQuery, sortBy, allNFTs, userProfile.walletAddress, genreFilter, artistFilter, rarityFilter, priceRange, statusFilter]);
+  }, [activeTab, searchQuery, sortBy, allNFTs, userProfile.walletAddress, genreFilter, artistFilter, rarityFilter, priceRange, statusFilter, onlyVerified, onlyDirectBuy]);
 
   const displayedNfts = useMemo(() => {
     return filteredNfts.slice(0, displayCount);
@@ -155,7 +166,7 @@ const Marketplace: React.FC = () => {
   // Reset display count when filters change
   useEffect(() => {
     setDisplayCount(10);
-  }, [activeTab, searchQuery, sortBy, genreFilter, artistFilter, rarityFilter, priceRange]);
+  }, [activeTab, searchQuery, sortBy, genreFilter, artistFilter, rarityFilter, priceRange, onlyVerified, onlyDirectBuy]);
 
   /* Auto-scroll logic for Bidding Relay */
   useEffect(() => {
@@ -305,6 +316,46 @@ const Marketplace: React.FC = () => {
                 </TabsList>
               </div>
             </Tabs>
+
+            {/* Smart Filters Toggle ribbon */}
+            <div className="flex items-center gap-2 px-4 md:px-8 lg:px-12 mt-3 overflow-x-auto no-scrollbar">
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-1 shrink-0">
+                <Filter className="h-2.5 w-2.5 text-blue-500/80" /> Smart Filters:
+              </span>
+              
+              <button 
+                onClick={() => setOnlyVerified(prev => !prev)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
+                  onlyVerified 
+                    ? 'bg-blue-600/20 text-blue-400 font-extrabold shadow-[0_0_10px_rgba(37,99,235,0.15)]' 
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'
+                }`}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyVerified ? 'bg-blue-400 scale-110 shadow-[0_0_6px_#3b82f6]' : 'bg-muted-foreground/30'}`} />
+                Only Verified
+              </button>
+
+              <button 
+                onClick={() => setOnlyDirectBuy(prev => !prev)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
+                  onlyDirectBuy 
+                    ? 'bg-blue-600/20 text-blue-400 font-extrabold shadow-[0_0_10px_rgba(37,99,235,0.15)]' 
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'
+                }`}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyDirectBuy ? 'bg-blue-400 scale-110 shadow-[0_0_6px_#3b82f6]' : 'bg-muted-foreground/30'}`} />
+                Direct Buy
+              </button>
+
+              {(onlyVerified || onlyDirectBuy) && (
+                <button
+                  onClick={() => { setOnlyVerified(false); setOnlyDirectBuy(false); }}
+                  className="text-[8px] font-black text-rose-400 hover:text-rose-300 uppercase tracking-widest ml-auto shrink-0 transition-all cursor-pointer active:scale-95 px-2.5 py-1 bg-rose-500/5 hover:bg-rose-500/10 rounded-md"
+                >
+                  Clear Smart
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -469,7 +520,7 @@ const Marketplace: React.FC = () => {
 
             {/* 7. ALPHA DROP / SUBSCRIPTION */}
             <section className="pb-12">
-              <div className="bg-primary/5 rounded-[40px] p-8 md:p-12 relative overflow-hidden group border border-primary/10">
+              <div className="bg-primary/5 rounded-[4px] p-8 md:p-12 relative overflow-hidden group border border-primary/10">
                 <div className="absolute top-0 right-0 p-8 opacity-[0.05] -rotate-12 group-hover:opacity-[0.1] transition-opacity">
                   <Zap className="h-48 w-48 text-primary" />
                 </div>

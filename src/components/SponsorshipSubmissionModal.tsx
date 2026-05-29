@@ -36,7 +36,7 @@ const SponsorshipSubmissionModal: React.FC<SponsorshipSubmissionModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] bg-[#0a0a0a] border-none shadow-2xl rounded-[32px] p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[500px] bg-[#0a0a0a] border-none shadow-2xl rounded-[4px] p-0 overflow-hidden">
         <div className="relative p-6 space-y-6">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">

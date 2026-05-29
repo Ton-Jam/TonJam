@@ -101,7 +101,7 @@ const TrendingNFTs: React.FC = () => {
             { label: 'Neural Heatweight', value: '8.4/10', icon: Flame, color: 'text-blue-400' },
             { label: 'Total Minted', value: '1.2M', icon: Clock, color: 'text-purple-400' },
           ].map((stat, i) => (
-            <div key={i} className="bg-white/5 border border-white/5 rounded-[2px] p-4">
+            <div key={i} className="bg-white/5 border border-white/5 rounded-[4px] p-4">
               <div className="flex items-center gap-2 mb-1">
                 <stat.icon className={`w-3 h-3 ${stat.color}`} />
                 <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">{stat.label}</span>
@@ -120,7 +120,7 @@ const TrendingNFTs: React.FC = () => {
           <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="flex-shrink-0 w-32 sm:w-40 group cursor-pointer">
-                <div className="relative aspect-square rounded-[2px] overflow-hidden mb-2">
+                <div className="relative aspect-square rounded-[4px] overflow-hidden mb-2">
                   <img 
                     src={getPlaceholderImage(`collection-${i}`)} 
                     alt="Collection"
@@ -148,7 +148,7 @@ const TrendingNFTs: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: (idx % 15) * 0.03 }}
               >
-                <div className="group flex flex-row items-center gap-3 py-2 px-3 hover:bg-white/[0.03] transition-colors overflow-hidden relative rounded-[2px] w-full">
+                <div className="group flex flex-row items-center gap-3 py-2 px-3 hover:bg-white/[0.03] transition-colors overflow-hidden relative rounded-[4px] w-full">
                   {/* Ranking & Status */}
                   <div className="flex flex-col items-center justify-center w-6 flex-shrink-0">
                     <span className={`text-[10px] font-black tracking-tighter ${idx < 3 ? 'text-blue-500' : 'text-white/20'}`}>
@@ -169,7 +169,7 @@ const TrendingNFTs: React.FC = () => {
                     <img 
                       src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} 
                       alt={nft.title}
-                      className="w-full h-full object-cover rounded-[2px]"
+                      className="w-full h-full object-cover rounded-[4px]"
                       referrerPolicy="no-referrer"
                     />
                     {idx === 0 && (
@@ -180,7 +180,7 @@ const TrendingNFTs: React.FC = () => {
                     )}
                     <button 
                       onClick={(e) => { e.stopPropagation(); playTrack(nft.track as any); }}
-                      className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2px]"
+                      className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-[4px]"
                     >
                       <Play className="w-4 h-4 text-white fill-white" />
                     </button>

@@ -192,7 +192,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           className="flex items-center gap-3 w-[45%] sm:w-[50%] cursor-pointer group"
           onClick={() => setFullPlayerOpen(true)}
         >
-          <div className="relative w-11 h-11 rounded-[2px] overflow-hidden flex-shrink-0 bg-muted shadow-lg ring-1 ring-white/5">
+          <div className="relative w-11 h-11 rounded-[4px] overflow-hidden flex-shrink-0 bg-muted shadow-lg ring-1 ring-white/5">
             <img
               src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -207,7 +207,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 {currentTrack.title}
               </h4>
               {isHighFidelity && (
-                <span className="bg-blue-600 text-white text-[5.5px] font-black px-1 py-0.5 rounded-[1px] tracking-[0.2em] uppercase flex-shrink-0">
+                <span className="bg-blue-600 text-white text-[5.5px] font-black px-1 py-0.5 rounded-[4px] tracking-[0.2em] uppercase flex-shrink-0">
                   Hi-Fi
                 </span>
               )}
@@ -229,7 +229,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className={cn("h-8 w-8 rounded-[2px]", isShuffle ? "text-blue-500 bg-blue-500/5" : "text-muted-foreground/40")}
+                  className={cn("h-8 w-8 rounded-[4px]", isShuffle ? "text-blue-500 bg-blue-500/5" : "text-muted-foreground/40")}
                   onClick={toggleShuffle}
                 >
                   <Shuffle className="h-3.5 w-3.5" />
@@ -241,7 +241,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 rounded-[2px] text-foreground/80"
+              className="h-8 w-8 rounded-[4px] text-foreground/80"
               onClick={prevTrack}
             >
               <SkipBack className="h-4 w-4" />
@@ -264,7 +264,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 rounded-[2px] text-foreground/80"
+              className="h-8 w-8 rounded-[4px] text-foreground/80"
               onClick={nextTrack}
             >
               <SkipForward className="h-4 w-4" />
@@ -275,7 +275,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className={cn("h-8 w-8 rounded-[2px] relative", repeatMode !== 'off' ? "text-blue-500 bg-blue-500/5" : "text-muted-foreground/40")}
+                  className={cn("h-8 w-8 rounded-[4px] relative", repeatMode !== 'off' ? "text-blue-500 bg-blue-500/5" : "text-muted-foreground/40")}
                   onClick={toggleRepeat}
                 >
                   <Repeat className="h-3.5 w-3.5" />
@@ -304,7 +304,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8 rounded-[2px] text-muted-foreground/40 hover:text-foreground hidden sm:flex"
+                  className="h-8 w-8 rounded-[4px] text-muted-foreground/40 hover:text-foreground hidden sm:flex"
                   onClick={() => setFullPlayerOpen(true)}
                 >
                   <Maximize2 className="h-4 w-4" />
@@ -315,7 +315,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
 
             <button 
               onClick={handleOptionsClick}
-              className="h-8 w-8 flex items-center justify-center rounded-[2px] text-muted-foreground/40 hover:text-foreground outline-none"
+              className="h-8 w-8 flex items-center justify-center rounded-[4px] text-muted-foreground/40 hover:text-foreground outline-none"
             >
               <MoreVertical className="h-4 w-4" />
             </button>
@@ -323,7 +323,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 rounded-[2px] text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 hidden sm:flex"
+              className="h-8 w-8 rounded-[4px] text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 hidden sm:flex"
               onClick={(e) => { e.stopPropagation(); closePlayer(); }}
             >
               <X className="h-4 w-4" />

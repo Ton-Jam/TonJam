@@ -319,7 +319,7 @@ const MintNFT: React.FC = () => {
   return (
     <div className="w-full px-4 sm:px-4 lg:px-4 py-4 sm:py-4 animate-in fade-in duration-1000">
       {/* COMPACT MARKET TICKER */}
-      <div className="sticky top-[var(--header-height,64px)] z-[38] bg-background/90 backdrop-blur-xl py-4 px-4 flex items-center justify-center overflow-hidden whitespace-nowrap transition-all duration-300 mb-4 rounded-[10px] border border-neutral-500/10">
+      <div className="sticky top-[var(--header-height,64px)] z-[38] bg-background/90 backdrop-blur-xl py-4 px-4 flex items-center justify-center overflow-hidden whitespace-nowrap transition-all duration-300 mb-4 rounded-[4px] border border-neutral-500/10">
         <div className="flex gap-4 animate-[marquee_40s_linear_infinite]">
           {[
             { label: 'TON/USD', val: '$5.42', up: true },
@@ -350,11 +350,11 @@ const MintNFT: React.FC = () => {
           </BackButton>
         </div>
 
-        <div className="relative glass border-y sm:border border-neutral-500/10 w-full sm:rounded-[10px] p-4 sm:p-4 shadow-2xl flex flex-col overflow-hidden">
+        <div className="relative glass border-y sm:border border-neutral-500/10 w-full sm:rounded-[4px] p-4 sm:p-4 shadow-2xl flex flex-col overflow-hidden">
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-3xl rounded-full pointer-events-none"></div>
           
           <div className="flex items-center gap-4 mb-4 relative z-10">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-[10px] flex items-center justify-center shadow-lg shadow-blue-600/20 shrink-0">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-[4px] flex items-center justify-center shadow-lg shadow-blue-600/20 shrink-0">
               <Hammer className="h-6 w-6 sm:h-8 sm:w-8 text-foreground" />
             </div>
             <div>
@@ -370,12 +370,12 @@ const MintNFT: React.FC = () => {
                 <div className="space-y-4 sm:space-y-4">
                   <div className="space-y-4">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Artifact Title</label>
-                    <input {...register('title')} className="w-full bg-muted/50 rounded-[8px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" placeholder="Enter track title..." />
+                    <input {...register('title')} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" placeholder="Enter track title..." />
                     {errors.title && <p className="text-[10px] text-red-500 mt-4">{errors.title.message}</p>}
                   </div>
                   <div className="space-y-4">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Genre</label>
-                    <select {...register('genre')} className="w-full bg-muted/50 rounded-[8px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground">
+                    <select {...register('genre')} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground">
                       <option value="Electronic">Electronic</option>
                       <option value="Hip Hop">Hip Hop</option>
                       <option value="Pop">Pop</option>
@@ -393,7 +393,7 @@ const MintNFT: React.FC = () => {
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Sonic Data (Audio)</label>
                     <div className="relative group">
                       <input type="file" accept={ALLOWED_AUDIO_TYPES.join(',')} onChange={(e) => handleFileChange(e, 'audio')} className="hidden" id="audio-upload" />
-                      <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-28 sm:h-32 bg-muted/50 hover:bg-muted rounded-[8px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Audio">
+                      <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-28 sm:h-32 bg-muted/50 hover:bg-muted rounded-[4px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Audio">
                         {mintData.audioPreview ? (
                           <div className="text-center">
                             <FileAudio className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 mb-4 mx-auto" />
@@ -414,7 +414,7 @@ const MintNFT: React.FC = () => {
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Visual Matrix (Cover Art)</label>
                   <div className="relative group h-full">
                     <input type="file" accept={ALLOWED_IMAGE_TYPES.join(',')} onChange={(e) => handleFileChange(e, 'cover')} className="hidden" id="cover-upload" />
-                    <label htmlFor="cover-upload" className="flex flex-col items-center justify-center w-full h-full min-h-[160px] sm:min-h-[200px] bg-muted/50 hover:bg-muted rounded-[8px] transition-all cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('cover-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Cover Art">
+                    <label htmlFor="cover-upload" className="flex flex-col items-center justify-center w-full h-full min-h-[160px] sm:min-h-[200px] bg-muted/50 hover:bg-muted rounded-[4px] transition-all cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('cover-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Cover Art">
                       {mintData.coverPreview ? (
                         <img src={mintData.coverPreview} className="w-full h-full object-cover" alt="Preview" referrerPolicy="no-referrer" />
                       ) : (
@@ -427,7 +427,7 @@ const MintNFT: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <button onClick={() => setStep(2)} disabled={!mintData.title || !mintData.audioPreview || !mintData.genre} className="w-full py-4 sm:py-4 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > INITIALIZE_METADATA_SEQUENCE </button>
+              <button onClick={() => setStep(2)} disabled={!mintData.title || !mintData.audioPreview || !mintData.genre} className="w-full py-4 sm:py-4 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > INITIALIZE_METADATA_SEQUENCE </button>
             </div>
           )}
 
@@ -439,9 +439,9 @@ const MintNFT: React.FC = () => {
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">AI-Generated Artifact Lore</label>
                   </div>
                   <div className="relative">
-                    <textarea {...register('description')} rows={5} className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-muted-foreground/90 leading-relaxed resize-none" aria-label="AI-Generated Artifact Lore" />
+                    <textarea {...register('description')} rows={5} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-muted-foreground/90 leading-relaxed resize-none" aria-label="AI-Generated Artifact Lore" />
                     {loading && (
-                      <div className="absolute inset-0 bg-background/40 backdrop-blur-sm rounded-[10px] flex items-center justify-center">
+                      <div className="absolute inset-0 bg-background/40 backdrop-blur-sm rounded-[4px] flex items-center justify-center">
                         <div className="flex flex-col items-center gap-4">
                           <img src={APP_LOGO} className="w-10 h-10 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." referrerPolicy="no-referrer" />
                           <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">AI Lore Generation...</p>
@@ -460,17 +460,17 @@ const MintNFT: React.FC = () => {
                       </label>
                     </div>
                   </div>
-                  <textarea {...register('lyrics')} rows={4} className="w-full bg-muted/50 rounded-[10px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground resize-none" placeholder="Enter lyrics or upload a file..." />
+                  <textarea {...register('lyrics')} rows={4} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground resize-none" placeholder="Enter lyrics or upload a file..." />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-4">
                   <div className="space-y-4">
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Mint Price (TON)</label>
-                    <input {...register('price')} type="number" className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" aria-label="Mint Price (TON)" />
+                    <input {...register('price')} type="number" className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" aria-label="Mint Price (TON)" />
                   </div>
                   <div className="space-y-4">
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Edition Type</label>
-                    <select {...register('editionType')} className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground">
+                    <select {...register('editionType')} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground">
                       <option value="Standard">Standard</option>
                       <option value="Limited">Limited</option>
                       <option value="Unique">Unique (1/1)</option>
@@ -478,7 +478,7 @@ const MintNFT: React.FC = () => {
                   </div>
                   <div className="space-y-4">
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Rarity Label/Score</label>
-                    <input {...register('rarity')} placeholder="e.g. Legendary, 99/100" className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" />
+                    <input {...register('rarity')} placeholder="e.g. Legendary, 99/100" className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" />
                   </div>
                   <div className="space-y-4 sm:space-y-4 col-span-1 sm:col-span-3">
                     <div className="flex justify-between items-center">
@@ -494,20 +494,20 @@ const MintNFT: React.FC = () => {
                             {...register(`royaltySplits.${index}.label`)}
                             type="text" 
                             placeholder="Role (e.g. Producer)" 
-                            className="w-full sm:w-32 bg-muted/50 rounded-[10px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
+                            className="w-full sm:w-32 bg-muted/50 rounded-[4px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
                           />
                           <input 
                             {...register(`royaltySplits.${index}.address`)}
                             type="text" 
                             placeholder="Wallet Address" 
-                            className="flex-1 w-full bg-muted/50 rounded-[10px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground font-mono"
+                            className="flex-1 w-full bg-muted/50 rounded-[4px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground font-mono"
                           />
                           <div className="flex items-center gap-4 w-full sm:w-auto">
                             <input 
                               {...register(`royaltySplits.${index}.percentage`, { valueAsNumber: true })}
                               type="number" 
                               placeholder="%" 
-                              className="w-20 bg-muted/50 rounded-[10px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
+                              className="w-20 bg-muted/50 rounded-[4px] py-4 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
                             />
                             <button type="button" onClick={() => removeRoyalty(index)} className="p-4 text-muted-foreground/50 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm">
                               <Trash2 className="h-5 w-5" />
@@ -522,7 +522,7 @@ const MintNFT: React.FC = () => {
                   </div>
                   <div className="space-y-4">
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Supply</label>
-                    <input {...register('supply')} type="number" className="w-full bg-muted/50 rounded-[10px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" aria-label="Supply" />
+                    <input {...register('supply')} type="number" className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" aria-label="Supply" />
                   </div>
                   <div className="space-y-4 flex items-center gap-3 pt-2 pl-4">
                     <input {...register('listNow')} type="checkbox" id="listNow" className="w-4 h-4 bg-muted/50 rounded-[4px] accent-blue-600 cursor-pointer" />
@@ -543,13 +543,13 @@ const MintNFT: React.FC = () => {
                         <input 
                           {...register(`traits.${index}.trait_type`)}
                           placeholder="Type (e.g. Genre)" 
-                          className="flex-1 bg-muted/50 rounded-[10px] py-4 px-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
+                          className="flex-1 bg-muted/50 rounded-[4px] py-4 px-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
                           aria-label={`Trait type ${index + 1}`}
                         />
                         <input 
                           {...register(`traits.${index}.value`)}
                           placeholder="Value (e.g. Electronic)" 
-                          className="flex-1 bg-muted/50 rounded-[10px] py-4 px-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
+                          className="flex-1 bg-muted/50 rounded-[4px] py-4 px-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
                           aria-label={`Trait value ${index + 1}`}
                         />
                         <button onClick={() => removeTrait(index)} className="p-4 sm:p-4 text-muted-foreground/50 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm" aria-label={`Remove trait ${index + 1}`}>
@@ -572,18 +572,18 @@ const MintNFT: React.FC = () => {
                   </div>
                   <div className="space-y-4 sm:space-y-4 max-h-48 sm:max-h-64 overflow-y-auto pr-4 no-scrollbar">
                     {exclusiveFields.map((field, index) => (
-                      <div key={field.id} className="flex gap-4 sm:gap-4 items-center bg-muted/50 p-4 sm:p-4 rounded-[10px] border border-border/50">
+                      <div key={field.id} className="flex gap-4 sm:gap-4 items-center bg-muted/50 p-4 sm:p-4 rounded-[4px] border border-border/50">
                         <div className="flex-1 space-y-4 sm:space-y-4">
                           <input 
                             {...register(`exclusiveContent.${index}.title`)}
                             placeholder="Perk Title (e.g. BTS Video)" 
-                            className="w-full bg-background/20 rounded-[8px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
+                            className="w-full bg-background/20 rounded-[4px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
                             aria-label={`Perk title ${index + 1}`}
                           />
                           <div className="flex flex-col sm:flex-row gap-4 sm:gap-4">
                             <select 
                               {...register(`exclusiveContent.${index}.type`)}
-                              className="bg-background/20 rounded-[8px] py-4 px-4 text-xs outline-none text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-blue-500"
+                              className="bg-background/20 rounded-[4px] py-4 px-4 text-xs outline-none text-muted-foreground/80 focus-visible:ring-2 focus-visible:ring-blue-500"
                               aria-label={`Perk type ${index + 1}`}
                             >
                               <option value="video">Video</option>
@@ -594,7 +594,7 @@ const MintNFT: React.FC = () => {
                             <input 
                               {...register(`exclusiveContent.${index}.url`)}
                               placeholder="URL (IPFS or CDN)" 
-                              className="flex-1 bg-background/20 rounded-[8px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
+                              className="flex-1 bg-background/20 rounded-[4px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground"
                               aria-label={`Perk URL ${index + 1}`}
                             />
                           </div>
@@ -611,17 +611,17 @@ const MintNFT: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-4 sm:gap-4 pt-4 sm:pt-4">
-                <button onClick={() => setStep(1)} className="w-1/3 py-4 sm:py-4 bg-muted/50 text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > BACK </button>
-                <button onClick={() => setStep(3)} className="w-2/3 py-4 sm:py-4 bg-blue-600 text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > REVIEW_PROTOCOL_DEPLOYMENT </button>
+                <button onClick={() => setStep(1)} className="w-1/3 py-4 sm:py-4 bg-muted/50 text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > BACK </button>
+                <button onClick={() => setStep(3)} className="w-2/3 py-4 sm:py-4 bg-blue-600 text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > REVIEW_PROTOCOL_DEPLOYMENT </button>
               </div>
             </div>
           )}
 
           {step === 3 && (
             <div className="space-y-4 sm:space-y-4 animate-in slide-in-from-right duration-300">
-              <div className="bg-muted/50 rounded-[10px] p-4 sm:p-4 space-y-4 sm:space-y-4">
+              <div className="bg-muted/50 rounded-[4px] p-4 sm:p-4 space-y-4 sm:space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-4">
-                  <img src={mintData.coverPreview} className="w-24 h-24 sm:w-32 sm:h-32 rounded-[10px] object-cover shadow-xl shrink-0" alt="" referrerPolicy="no-referrer" />
+                  <img src={mintData.coverPreview} className="w-24 h-24 sm:w-32 sm:h-32 rounded-[4px] object-cover shadow-xl shrink-0" alt="" referrerPolicy="no-referrer" />
                   <div className="flex-1">
                     <h3 className="text-xl sm:text-[20px] font-bold text-foreground uppercase tracking-tighter mb-4">{mintData.title}</h3>
                     <p className="text-[10px] sm:text-xs font-bold text-blue-500 uppercase tracking-widest mb-4">By {userProfile.name}</p>
@@ -668,8 +668,8 @@ const MintNFT: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-4 sm:gap-4 pt-4 sm:pt-4">
-                <button onClick={() => setStep(2)} className="w-1/3 py-4 sm:py-4 bg-muted/50 text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > BACK </button>
-                <button onClick={handleSubmit(handleMint)} disabled={loading} className="w-2/3 py-4 sm:py-4 bg-green-600 text-foreground rounded-[8px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-green-600/20 hover:bg-green-500 transition-all flex items-center justify-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" >
+                <button onClick={() => setStep(2)} className="w-1/3 py-4 sm:py-4 bg-muted/50 text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > BACK </button>
+                <button onClick={handleSubmit(handleMint)} disabled={loading} className="w-2/3 py-4 sm:py-4 bg-green-600 text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-green-600/20 hover:bg-green-500 transition-all flex items-center justify-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" >
                   {loading ? (
                     <>
                       <img src={APP_LOGO} className="w-4 h-4 sm:w-5 sm:h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80 mr-4 inline-block" alt="Loading..." referrerPolicy="no-referrer" /> 
@@ -693,8 +693,8 @@ const MintNFT: React.FC = () => {
               <h2 className="text-[26px] sm:text-[32px] font-bold text-foreground uppercase tracking-tighter mb-4">Protocol Deployed</h2>
               <p className="text-muted-foreground/80 text-sm sm:text-base max-w-md mx-auto mb-4 leading-relaxed px-4"> Your sonic artifact has been successfully minted and registered on the TON blockchain. </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onClick={() => navigate('/profile')} className="w-full sm:w-auto px-4 py-4 bg-blue-600 text-foreground rounded-[10px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > VIEW_IN_COLLECTION </button>
-                <button onClick={() => { setStep(1); reset(); }} className="w-full sm:w-auto px-4 py-4 bg-muted/50 text-foreground rounded-[10px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > MINT_ANOTHER_ARTIFACT </button>
+                <button onClick={() => navigate('/profile')} className="w-full sm:w-auto px-4 py-4 bg-blue-600 text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > VIEW_IN_COLLECTION </button>
+                <button onClick={() => { setStep(1); reset(); }} className="w-full sm:w-auto px-4 py-4 bg-muted/50 text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] hover:bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > MINT_ANOTHER_ARTIFACT </button>
               </div>
             </div>
           )}

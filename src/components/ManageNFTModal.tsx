@@ -70,7 +70,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="w-full max-sm:max-w-[95vw] sm:max-w-md bg-[#0A0A0B]/95 backdrop-blur-xl border border-white/5 rounded-[2px] p-0 overflow-hidden shadow-2xl">
+        <DialogContent className="w-full max-sm:max-w-[95vw] sm:max-w-md bg-[#0A0A0B]/95 backdrop-blur-xl border border-white/5 rounded-[4px] p-0 overflow-hidden shadow-2xl">
           <div className="p-6">
             <DialogHeader className="mb-4">
               <DialogTitle className="text-sm font-bold text-white uppercase tracking-tight">Manage_Protocol</DialogTitle>
@@ -81,7 +81,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                 <button
                   type="button"
                   onClick={() => setListingType('fixed')}
-                  className={`flex-1 py-2.5 rounded-[2px] border transition-all flex flex-col items-center justify-center gap-1.5 ${listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500/30 text-blue-400' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
+                  className={`flex-1 py-2.5 rounded-[4px] border transition-all flex flex-col items-center justify-center gap-1.5 ${listingType === 'fixed' ? 'bg-blue-600/10 border-blue-500/30 text-blue-400' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
                 >
                   <Tag className="h-3.5 w-3.5" />
                   <span className="text-[8px] font-bold uppercase tracking-widest">Fixed_Sale</span>
@@ -89,7 +89,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                 <button
                   type="button"
                   onClick={() => setListingType('auction')}
-                  className={`flex-1 py-2.5 rounded-[2px] border transition-all flex flex-col items-center justify-center gap-1.5 ${listingType === 'auction' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
+                  className={`flex-1 py-2.5 rounded-[4px] border transition-all flex flex-col items-center justify-center gap-1.5 ${listingType === 'auction' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
                 >
                   <Gavel className="h-3.5 w-3.5" />
                   <span className="text-[8px] font-bold uppercase tracking-widest">Auction_Sync</span>
@@ -106,7 +106,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                       type="number" 
                       value={newPrice} 
                       onChange={(e) => setNewPrice(e.target.value)}
-                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs outline-none focus:ring-1 focus:ring-amber-500"
+                      className="w-full bg-white/5 border border-white/5 rounded-[4px] p-2 text-white text-xs outline-none focus:ring-1 focus:ring-amber-500"
                     />
                   </div>
                   <div>
@@ -118,7 +118,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                         type="datetime-local" 
                         value={newEndDate} 
                         onChange={(e) => setNewEndDate(e.target.value)}
-                        className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 pr-10 text-white text-[10px] outline-none focus:ring-1 focus:ring-amber-500"
+                        className="w-full bg-white/5 border border-white/5 rounded-[4px] p-2 pr-10 text-white text-[10px] outline-none focus:ring-1 focus:ring-amber-500"
                       />
                       <Clock className="absolute right-3 top-[10px] h-3.5 w-3.5 text-white/20 group-hover:text-amber-500 transition-colors" />
                     </div>
@@ -135,7 +135,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                             const date = new Date(Date.now() + parseInt(d) * 24 * 60 * 60 * 1000);
                             setNewEndDate(date.toISOString().slice(0, 16));
                           }}
-                          className={`flex-1 py-1.5 rounded-[2px] text-[8px] font-bold transition-all ${duration === d ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                          className={`flex-1 py-1.5 rounded-[4px] text-[8px] font-bold transition-all ${duration === d ? 'bg-amber-500 text-black' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
                           {d}D
                         </button>
@@ -152,7 +152,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                     type="number" 
                     value={newPrice} 
                     onChange={(e) => setNewPrice(e.target.value)}
-                    className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full bg-white/5 border border-white/5 rounded-[4px] p-2 text-white text-xs outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               )}
@@ -172,7 +172,7 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                     <select 
                       value={gating.tokenType} 
                       onChange={(e) => setGating({...gating, tokenType: e.target.value})}
-                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs"
+                      className="w-full bg-white/5 border border-white/5 rounded-[4px] p-2 text-white text-xs"
                     >
                       <option value="nft">NFT Collection</option>
                       <option value="jetton">Fungible Token (Jetton)</option>
@@ -182,14 +182,14 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                       placeholder="Token Address" 
                       value={gating.tokenAddress || ''}
                       onChange={(e) => setGating({...gating, tokenAddress: e.target.value})}
-                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs"
+                      className="w-full bg-white/5 border border-white/5 rounded-[4px] p-2 text-white text-xs"
                     />
                     <input 
                       type="number" 
                       placeholder="Min Amount" 
                       value={gating.minAmount || '1'}
                       onChange={(e) => setGating({...gating, minAmount: e.target.value})}
-                      className="w-full bg-white/5 border border-white/5 rounded-[2px] p-2 text-white text-xs"
+                      className="w-full bg-white/5 border border-white/5 rounded-[4px] p-2 text-white text-xs"
                     />
                   </div>
                 )}
@@ -199,14 +199,14 @@ const ManageNFTModal: React.FC<ManageNFTModalProps> = ({ nft, isOpen, onClose })
                 <button 
                   onClick={handleUpdate}
                   disabled={isUpdating}
-                  className="flex-[2] py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[2px] font-bold text-[8px] uppercase tracking-widest transition-all h-9"
+                  className="flex-[2] py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[4px] font-bold text-[8px] uppercase tracking-widest transition-all h-9"
                 >
                   {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Apply_Changes'}
                 </button>
                 <button 
                   onClick={handleDelist}
                   disabled={isUpdating}
-                  className="flex-1 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-[2px] border border-red-500/20 font-bold text-[8px] uppercase tracking-widest transition-all h-9"
+                  className="flex-1 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-[4px] border border-red-500/20 font-bold text-[8px] uppercase tracking-widest transition-all h-9"
                 >
                   {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Delist'}
                 </button>

@@ -40,10 +40,10 @@ const FavoriteTracks: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
                 key={track.id}
-                className="group flex items-center gap-3 p-3 rounded-[2px] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer border-b border-white/5 hover:border-pink-500/10"
+                className="group flex items-center gap-3 p-3 rounded-[4px] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer border-b border-white/5 hover:border-pink-500/10"
                 onClick={() => playTrack(track as any)}
               >
-                <div className="w-10 h-10 rounded-[2px] overflow-hidden flex-shrink-0 bg-muted/20">
+                <div className="w-10 h-10 rounded-[4px] overflow-hidden flex-shrink-0 bg-muted/20">
                   <img src={track.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
                 </div>
                 <div className="flex-1 min-w-0">

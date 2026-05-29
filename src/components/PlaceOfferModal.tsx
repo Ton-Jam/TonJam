@@ -67,7 +67,7 @@ const PlaceOfferModal: React.FC<PlaceOfferModalProps> = ({ nft, onClose }) => {
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-full max-w-sm rounded-[16px] bg-card border border-border shadow-2xl p-0 overflow-hidden">
+      <DialogContent className="w-full max-w-sm rounded-[4px] bg-card border border-border shadow-2xl p-0 overflow-hidden">
         <div className="p-6">
           <DialogHeader className="flex flex-row justify-between items-center mb-6">
             <DialogTitle className="text-lg font-bold text-foreground">Make an Offer</DialogTitle>
@@ -82,7 +82,7 @@ const PlaceOfferModal: React.FC<PlaceOfferModalProps> = ({ nft, onClose }) => {
                   onChange={(e) => setOfferAmount(e.target.value)}
                   step="0.1"
                   placeholder="0.0"
-                  className="w-full bg-muted/50 border border-border py-3 px-4 rounded-[12px] text-lg font-bold text-foreground outline-none focus:border-primary transition-all"
+                  className="w-full bg-muted/50 border border-border py-3 px-4 rounded-[4px] text-lg font-bold text-foreground outline-none focus:border-primary transition-all"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">TON</span>
               </div>
@@ -91,7 +91,7 @@ const PlaceOfferModal: React.FC<PlaceOfferModalProps> = ({ nft, onClose }) => {
           <button
             onClick={handlePlaceOffer}
             disabled={isProcessing}
-            className="w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-[2px] text-sm font-bold text-white shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-[4px] text-sm font-bold text-white shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Handshake className="h-4 w-4" />}
             {isProcessing ? 'PLACING OFFER...' : 'PLACE OFFER'}
           </button>

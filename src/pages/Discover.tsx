@@ -419,7 +419,7 @@ const Discover: React.FC = () => {
                                    setIsFocused(false);
                                    navigate(`/track/${track.id}`);
                                  }}
-                                 className="rounded-[2px] flex items-center justify-between group cursor-pointer"
+                                 className="rounded-[4px] flex items-center justify-between group cursor-pointer"
                                >
                                  <div className="flex items-center gap-3">
                                    <Music className="h-3.5 w-3.5 text-zinc-500" />
@@ -435,7 +435,7 @@ const Discover: React.FC = () => {
                                    setIsFocused(false);
                                    navigate(`/artist/${artist.uid}`);
                                  }}
-                                 className="rounded-[2px] flex items-center justify-between group cursor-pointer"
+                                 className="rounded-[4px] flex items-center justify-between group cursor-pointer"
                                >
                                  <div className="flex items-center gap-3">
                                    <User className="h-3.5 w-3.5 text-zinc-500" />
@@ -455,7 +455,7 @@ const Discover: React.FC = () => {
                                       setSearchQuery(item);
                                       setIsFocused(false);
                                     }}
-                                    className="rounded-[2px] flex items-center justify-between group cursor-pointer"
+                                    className="rounded-[4px] flex items-center justify-between group cursor-pointer"
                                   >
                                     <div className="flex items-center gap-3">
                                       <Search className="h-3.5 w-3.5 text-zinc-500" />
@@ -487,7 +487,7 @@ const Discover: React.FC = () => {
                                       setSearchQuery(topic);
                                       setIsFocused(false);
                                   }}
-                                  className="rounded-[2px] flex items-center gap-3 cursor-pointer"
+                                  className="rounded-[4px] flex items-center gap-3 cursor-pointer"
                                 >
                                   <Zap className="h-3.5 w-3.5 text-blue-500" />
                                   <span className="text-sm font-medium">{topic}</span>
@@ -542,7 +542,7 @@ const Discover: React.FC = () => {
 
         {isLoading ? (
           <div className="space-y-12">
-            <div className="aspect-[2/1] w-full bg-muted rounded-[2.5rem] animate-pulse"></div>
+            <div className="aspect-[2/1] w-full bg-muted rounded-[4px] animate-pulse"></div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                 <div key={`cat-loading-${i}`} className="aspect-square bg-muted rounded-2xl animate-pulse"></div>
@@ -696,7 +696,7 @@ const Discover: React.FC = () => {
                         <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-800/60 mb-6">Discovery Identification</h2>
                         <Card 
                           onClick={() => navigate(`/artist/${filteredResults.artists[0].uid}`)}
-                          className="max-w-2xl bg-white/[0.02] hover:bg-white/[0.05] border-none transition-all p-8 rounded-[2rem] group cursor-pointer"
+                          className="max-w-2xl bg-white/[0.02] hover:bg-white/[0.05] border-none transition-all p-8 rounded-[4px] group cursor-pointer"
                         >
                           <div className="flex flex-col md:flex-row items-center gap-8">
                             <Avatar className="h-40 w-40 shadow-2xl ring-8 ring-white/[0.02]">
@@ -782,9 +782,9 @@ const Discover: React.FC = () => {
                           <div 
                             key={u.uid}
                             onClick={() => navigate((u.isVerifiedArtist || u.verified) ? `/artist/${u.uid}` : `/user/${u.uid}`)}
-                            className="group flex items-center gap-4 p-3 rounded-[2px] bg-muted/10 hover:bg-muted/50 cursor-pointer transition-all"
+                            className="group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 hover:bg-muted/50 cursor-pointer transition-all"
                           >
-                            <Avatar className="h-12 w-12 rounded-[2px] shadow-sm grayscale group-hover:grayscale-0 transition-all duration-300">
+                            <Avatar className="h-12 w-12 rounded-[4px] shadow-sm grayscale group-hover:grayscale-0 transition-all duration-300">
                               <AvatarImage src={u.avatar || getPlaceholderImage(u.name)} className="object-cover" />
                               <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
                             </Avatar>

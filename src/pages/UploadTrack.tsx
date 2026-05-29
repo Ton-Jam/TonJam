@@ -702,7 +702,7 @@ export default function UploadTrackScreen() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="bg-white/5 border border-white/10 rounded-[3px] p-4 flex items-center gap-4 group"
+                      className="bg-white/5 border border-white/10 rounded-[4px] p-4 flex items-center gap-4 group"
                     >
                       <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
                         <Music className="w-5 h-5 text-purple-400" />

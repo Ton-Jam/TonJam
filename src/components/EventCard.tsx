@@ -23,14 +23,14 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className={cn(
-        "group relative bg-card/40 backdrop-blur-xl border border-white/5 rounded-[32px] overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]",
+        "group relative bg-card/40 backdrop-blur-xl border border-white/5 rounded-[4px] overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]",
         className
       )}
     >
       {/* 2px Blue Gradient Boundary (Request) */}
-      <div className="absolute inset-0 p-[2px] rounded-[32px] bg-gradient-to-br from-blue-500/50 via-transparent to-purple-500/50 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+      <div className="absolute inset-0 p-[2px] rounded-[4px] bg-gradient-to-br from-blue-500/50 via-transparent to-purple-500/50 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
       
-      <div className="relative z-10 bg-card/90 m-[2px] rounded-[30px] overflow-hidden h-full flex flex-col">
+      <div className="relative z-10 bg-card/90 m-[2px] rounded-[4px] overflow-hidden h-full flex flex-col">
         {/* Event Image */}
         <div className="relative h-48 sm:h-56 overflow-hidden">
           <img 

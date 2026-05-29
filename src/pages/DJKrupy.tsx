@@ -124,7 +124,7 @@ const DJKrupy: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-black uppercase tracking-tight text-foreground m-0">DJ Krupy AI</h2>
-                <div className="px-1.5 py-0.5 rounded-[2px] bg-blue-500/20 border border-blue-500/30">
+                <div className="px-1.5 py-0.5 rounded-[4px] bg-blue-500/20 border border-blue-500/30">
                   <span className="text-[7px] font-black uppercase tracking-[0.2em] text-blue-400">Ver. 3.4.1</span>
                 </div>
               </div>
@@ -188,7 +188,7 @@ const DJKrupy: React.FC = () => {
                 )}
               >
                 <div className={cn(
-                  "relative px-5 py-4 rounded-[12px] text-sm leading-relaxed shadow-none transition-all duration-300",
+                  "relative px-5 py-4 rounded-[4px] text-sm leading-relaxed shadow-none transition-all duration-300",
                   chat.role === 'user' 
                     ? "bg-blue-600 text-white rounded-tr-none font-medium" 
                     : chat.isError 
@@ -251,7 +251,7 @@ const DJKrupy: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 className="flex justify-start max-w-[75%]"
               >
-                <div className="bg-muted/30 backdrop-blur-sm text-muted-foreground px-6 py-4 rounded-[12px] rounded-tl-none flex items-center gap-4 border border-border/40 shadow-none group">
+                <div className="bg-muted/30 backdrop-blur-sm text-muted-foreground px-6 py-4 rounded-[4px] rounded-tl-none flex items-center gap-4 border border-border/40 shadow-none group">
                   <div className="relative">
                     <LoadingSpinner size={20} />
                     <div className="absolute inset-0 bg-blue-500 blur-md opacity-20 group-hover:opacity-40 transition-opacity"></div>

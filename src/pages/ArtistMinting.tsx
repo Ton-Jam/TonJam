@@ -229,7 +229,7 @@ const ArtistMinting: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white/5 border border-white/10 p-8 rounded-[40px] shadow-2xl backdrop-blur-md space-y-8 relative overflow-hidden group">
+        <div className="bg-white/5 border border-white/10 p-8 rounded-[4px] shadow-2xl backdrop-blur-md space-y-8 relative overflow-hidden group">
           {step === 1 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between">
@@ -290,7 +290,7 @@ const ArtistMinting: React.FC = () => {
                 <div className="space-y-8">
                   <div 
                     onClick={() => fileInputRef.current?.click()} 
-                    className="w-full aspect-square bg-white/5 border-2 border-dashed border-white/10 rounded-[32px] flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/50 transition-all overflow-hidden relative group" 
+                    className="w-full aspect-square bg-white/5 border-2 border-dashed border-white/10 rounded-[4px] flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/50 transition-all overflow-hidden relative group" 
                   >
                     <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'cover')} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
                     {trackData.coverPreview ? (
@@ -308,7 +308,7 @@ const ArtistMinting: React.FC = () => {
                   {!selectedTrack && (
                     <div 
                       onClick={() => audioInputRef.current?.click()} 
-                      className="w-full h-32 bg-white/5 border-2 border-dashed border-white/10 rounded-[32px] flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-all group" 
+                      className="w-full h-32 bg-white/5 border-2 border-dashed border-white/10 rounded-[4px] flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-all group" 
                     >
                       <input type="file" ref={audioInputRef} onChange={(e) => handleFileChange(e, 'audio')} accept={ALLOWED_AUDIO_TYPES.join(',')} className="hidden" />
                       <Music className={`h-8 w-8 transition-all ${trackData.audioFile ? 'text-purple-500 animate-pulse' : 'text-white/20 group-hover:scale-110'}`} />
@@ -317,7 +317,7 @@ const ArtistMinting: React.FC = () => {
                   )}
 
                   {selectedTrack && (
-                    <div className="p-6 bg-white/5 rounded-[32px] border border-white/10 flex items-center gap-6">
+                    <div className="p-6 bg-white/5 rounded-[4px] border border-white/10 flex items-center gap-6">
                       <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
                         <Check className="w-6 h-6 text-cyan-500" />
                       </div>

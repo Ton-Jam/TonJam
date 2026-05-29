@@ -122,7 +122,7 @@ const TreasuryDashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Growth Chart Placeholder / Distribution Info */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="p-8 rounded-[32px] bg-card border border-border shadow-sm space-y-6 relative overflow-hidden">
+          <div className="p-8 rounded-[4px] bg-card border border-border shadow-sm space-y-6 relative overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-black uppercase tracking-tighter text-foreground">Treasury Overview</h3>
@@ -193,7 +193,7 @@ const TreasuryDashboard: React.FC = () => {
             <button className="text-[10px] font-bold text-primary uppercase tracking-widest hover:underline">View All</button>
           </div>
           
-          <div className="bg-card border border-border rounded-[32px] p-2 space-y-1">
+          <div className="bg-card border border-border rounded-[4px] p-2 space-y-1">
             {allocations.length > 0 ? (
               allocations.map((allocation) => (
                 <AllocationRow key={allocation.id} allocation={allocation} />

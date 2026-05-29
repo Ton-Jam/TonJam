@@ -174,7 +174,7 @@ const RoyaltySplitManager: React.FC<RoyaltySplitManagerProps> = ({ splits, onCha
 
       <div className="space-y-3">
         {localSplits.map((split, index) => (
-          <div key={index} className="flex flex-col gap-3 p-4 bg-white/5 rounded-[3px] border border-white/5 relative group">
+          <div key={index} className="flex flex-col gap-3 p-4 bg-white/5 rounded-[4px] border border-white/5 relative group">
             <button 
               onClick={() => removeSplit(index)}
               className="absolute top-2 right-2 p-2 text-white/20 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"

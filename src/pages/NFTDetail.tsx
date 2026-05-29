@@ -576,7 +576,7 @@ const NFTDetail: React.FC = () => {
           {/* Left Column: Artwork & Technical Specs */}
           <div className="lg:col-span-5 space-y-4">
             <div className="relative group max-w-[280px] mx-auto sm:max-w-none" onClick={handlePlayClick}>
-              <div className="relative aspect-square max-h-[280px] sm:max-h-none mx-auto w-full rounded-[2px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] bg-black/40 border border-white/10">
+              <div className="relative aspect-square max-h-[280px] sm:max-h-none mx-auto w-full rounded-[4px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] bg-black/40 border border-white/10">
                 <img
                   src={
                     localNft.imageUrl ||
@@ -605,19 +605,19 @@ const NFTDetail: React.FC = () => {
 
                 {/* Edition Badge */}
                 <div className="absolute top-4 left-4 flex flex-col gap-1.5 sm:top-6 sm:left-6">
-                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[4px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
                     {localNft.edition}{" "}
                     <span className="text-muted-foreground ml-2 sm:ml-4">
                       Edition
                     </span>
                   </div>
-                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[4px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
                     {localNft.minted || 0}{" "}
                     <span className="text-muted-foreground ml-1.5 sm:ml-2">
                       Minted / {localNft.supply || 0} Total
                     </span>
                   </div>
-                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[6px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
+                  <div className="px-3 py-1.5 bg-background/60 backdrop-blur-xl border border-border rounded-[4px] text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
                     {(localNft.supply || 0) - (localNft.minted || 0)}{" "}
                     <span className="text-muted-foreground ml-1.5 sm:ml-2">
                       Remaining
@@ -628,7 +628,7 @@ const NFTDetail: React.FC = () => {
                 {/* Live Auction Badge */}
                 {isAuction && (
                   <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
-                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-3 py-2 sm:px-4 sm:py-4 rounded-[12px] flex items-center justify-between shadow-2xl flex-wrap gap-2 sm:gap-4">
+                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-3 py-2 sm:px-4 sm:py-4 rounded-[4px] flex items-center justify-between shadow-2xl flex-wrap gap-2 sm:gap-4">
                       <div className="flex items-center gap-2 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-4 bg-orange-500 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)]">
                         <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
                         <span className="text-[8px] sm:text-[10px] font-bold text-white uppercase tracking-[0.2em]">
@@ -679,7 +679,7 @@ const NFTDetail: React.FC = () => {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-white/5 backdrop-blur-md p-3 rounded-[2px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
+                  className="bg-white/5 backdrop-blur-md p-3 rounded-[4px] border border-white/5 relative overflow-hidden group transition-all hover:border-white/20 hover:bg-white/10"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
@@ -695,7 +695,7 @@ const NFTDetail: React.FC = () => {
             </div>
 
             {/* Price Analysis Section */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-[2px] p-4 sm:p-6 border border-white/5 space-y-4">
+            <div className="bg-white/5 backdrop-blur-xl rounded-[4px] p-4 sm:p-6 border border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <TrendingUp className="h-4 w-4 text-blue-500" />
@@ -941,7 +941,7 @@ const NFTDetail: React.FC = () => {
             </header>
 
             {/* Pricing Section - Hardware Style */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-[2px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group">
+            <div className="bg-white/5 backdrop-blur-xl rounded-[4px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000">
                 <Zap className="h-64 w-64 text-blue-500" />
               </div>
@@ -981,7 +981,7 @@ const NFTDetail: React.FC = () => {
                 </div>
 
                 {isAuction && (
-                  <div className="bg-white/5 backdrop-blur-md p-2 rounded-[2px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
+                  <div className="bg-white/5 backdrop-blur-md p-2 rounded-[4px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
                     <div className="flex flex-col items-start">
                       <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60">
                         Highest Bid
@@ -1011,33 +1011,33 @@ const NFTDetail: React.FC = () => {
                           ? setShowManageModal(true)
                           : setShowListModal(true)
                       }
-                      className="py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-[2px] font-black text-[10px] uppercase tracking-[0.2em]"
+                      className="py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-[4px] font-black text-[10px] uppercase tracking-[0.2em]"
                     >
                       {localNft.listingType ? "Manage" : "Sell"}
                     </button>
                     <button
                       onClick={() => setShowManageModal(true)}
-                      className="py-2 bg-white/5 hover:bg-zinc-800 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10"
+                      className="py-2 bg-white/5 hover:bg-zinc-800 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10"
                     >
                       Settings
                     </button>
                     <button
                       onClick={() => setShowSendModal(true)}
-                      className="py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 border border-white/10"
+                      className="py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 border border-white/10"
                     >
                       <Send className="h-3 w-3" /> Send
                     </button>
                     {localNft.listingType && (
                       <button
                         onClick={handleCancelListing}
-                        className="py-2 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10 hover:border-red-500/20"
+                        className="py-2 bg-white/5 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10 hover:border-red-500/20"
                       >
                         Cancel
                       </button>
                     )}
                     <button
                       onClick={handleShare}
-                      className="py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 border border-white/10"
+                      className="py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 border border-white/10"
                     >
                       <Share2 className="h-3 w-3 text-blue-400" /> Share
                     </button>
@@ -1051,7 +1051,7 @@ const NFTDetail: React.FC = () => {
                           value={inlineBidAmount}
                           onChange={(e) => setInlineBidAmount(e.target.value)}
                           placeholder={`${minNextBid}+`}
-                          className="w-1/4 bg-white/5 border border-white/10 rounded-[2px] px-3 text-white font-bold outline-none focus-visible:ring-1 focus-visible:ring-amber-500 transition-all text-xs"
+                          className="w-1/4 bg-white/5 border border-white/10 rounded-[4px] px-3 text-white font-bold outline-none focus-visible:ring-1 focus-visible:ring-amber-500 transition-all text-xs"
                         />
                         <button
                           onClick={handleInlineBid}
@@ -1083,7 +1083,7 @@ const NFTDetail: React.FC = () => {
                     {!isAuction && (
                       <button
                         onClick={() => setShowOfferModal(true)}
-                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10"
+                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10"
                       >
                         Offer
                       </button>
@@ -1091,20 +1091,20 @@ const NFTDetail: React.FC = () => {
                     {userOffer && (
                       <button
                         onClick={handleCancelBid}
-                        className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-red-500 rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-red-500/20"
+                        className="flex-1 py-3 bg-white/5 hover:bg-red-500/10 text-red-500 rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-red-500/20"
                       >
                         Retract
                       </button>
                     )}
                     <button
                       onClick={() => setIsTipping(true)}
-                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
                     >
                       <Coins className="h-3.5 w-3.5 text-blue-400" /> Support
                     </button>
                     <button
                       onClick={handleShare}
-                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[2px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
                     >
                       <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
                     </button>
@@ -1127,7 +1127,7 @@ const NFTDetail: React.FC = () => {
                       initial={{ opacity: 0, scale: 0.9, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                      className="relative w-full max-w-sm bg-card rounded-[24px] p-4 overflow-hidden"
+                      className="relative w-full max-w-sm bg-card rounded-[4px] p-4 overflow-hidden"
                     >
                       {/* Hardware style scanline */}
                       <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
@@ -1152,7 +1152,7 @@ const NFTDetail: React.FC = () => {
                             <button
                               key={amount}
                               onClick={() => handleTip(amount)}
-                              className="group relative py-4 bg-muted/50 hover:bg-muted rounded-[12px] transition-all active:scale-95"
+                              className="group relative py-4 bg-muted/50 hover:bg-muted rounded-[4px] transition-all active:scale-95"
                             >
                               <div className="flex flex-col items-center">
                                 <span className="text-xl font-bold text-foreground group-hover:text-blue-400 transition-colors">
@@ -1219,7 +1219,7 @@ const NFTDetail: React.FC = () => {
                     className="grid grid-cols-1 md:grid-cols-3 gap-6"
                   >
                     {metadataError && (
-                      <div className="col-span-full p-4 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-[16px] flex items-center justify-between">
+                      <div className="col-span-full p-4 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-[4px] flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
                             <X className="h-5 w-5 text-red-500" />
@@ -1235,7 +1235,7 @@ const NFTDetail: React.FC = () => {
                         </div>
                         <button
                           onClick={loadMetadata}
-                          className="px-4 py-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                          className="px-4 py-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-[4px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
                         >
                           Retry Sync
                         </button>
@@ -1257,7 +1257,7 @@ const NFTDetail: React.FC = () => {
                             (trait) => (
                               <div
                                 key={trait.trait_type}
-                                className="bg-white/[0.03] border border-white/5 p-6 rounded-[20px] hover:border-blue-500/30 transition-all group"
+                                className="bg-white/[0.03] border border-white/5 p-6 rounded-[4px] hover:border-blue-500/30 transition-all group"
                               >
                                 <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] block mb-4">
                                   {trait.trait_type}
@@ -1276,7 +1276,7 @@ const NFTDetail: React.FC = () => {
                     )}
 
                     <div className="col-span-full md:col-span-2 space-y-4">
-                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px]">
+                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px]">
                         <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
                           <div className="w-1.5 h-4 bg-emerald-500 rounded-full" />
                           Protocol Distribution
@@ -1315,7 +1315,7 @@ const NFTDetail: React.FC = () => {
                     </div>
 
                     <div className="col-span-full md:col-span-1 space-y-4">
-                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px] h-full flex flex-col justify-center">
+                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px] h-full flex flex-col justify-center">
                         <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
                           <div className="w-1.5 h-4 bg-purple-500 rounded-full" />
                           Provenance
@@ -1351,7 +1351,7 @@ const NFTDetail: React.FC = () => {
 
                     {isAuction && (
                       <div className="col-span-full space-y-4">
-                        <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[24px]">
+                        <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px]">
                           <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
                             <div className="w-1.5 h-4 bg-orange-500 rounded-full" />
                             Active Bids
@@ -1371,7 +1371,7 @@ const NFTDetail: React.FC = () => {
                                     <div
                                       key={offer.id || i}
                                       className={cn(
-                                        "flex items-center justify-between p-4 rounded-[16px] border transition-all hover:bg-white/[0.04]",
+                                        "flex items-center justify-between p-4 rounded-[4px] border transition-all hover:bg-white/[0.04]",
                                         isTopBid
                                           ? "bg-amber-500/10 border-amber-500/30"
                                           : "bg-white/[0.02] border-white/5",
@@ -1432,7 +1432,7 @@ const NFTDetail: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="bg-white/[0.02] border border-border rounded-[24px] p-6 lg:p-8"
+                    className="bg-white/[0.02] border border-border rounded-[4px] p-6 lg:p-8"
                   >
                     <div className="relative pl-6 sm:pl-0">
                       {/* Vertical line - hidden on small screens if we wanted it to be centered, but let's make it left-aligned */}
@@ -1478,7 +1478,7 @@ const NFTDetail: React.FC = () => {
                                     </div>
                                   </div>
 
-                                  <div className="flex-1 bg-white/[0.03] border border-white/5 rounded-[12px] p-3 hover:bg-white/[0.05] transition-colors relative overflow-hidden group-hover:border-white/10">
+                                  <div className="flex-1 bg-white/[0.03] border border-white/5 rounded-[4px] p-3 hover:bg-white/[0.05] transition-colors relative overflow-hidden group-hover:border-white/10">
                                     <div className="absolute top-0 right-0 p-2 opacity-5 rotate-12 scale-150 pointer-events-none transition-transform group-hover:scale-110">
                                       {h.event === "Minted" ? (
                                         <Wand2 className="w-16 h-16" />
@@ -1554,7 +1554,7 @@ const NFTDetail: React.FC = () => {
                         return (
                           <div
                             key={o.id}
-                            className={`group p-2 bg-white/[0.02] border transition-all rounded-[12px] flex flex-row items-center justify-between gap-2 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? "border-amber-500/50 bg-amber-500/[0.05]" : "border-blue-500/50 bg-blue-500/[0.05]") : "border-white/5 opacity-80 hover:opacity-100"}`}
+                            className={`group p-2 bg-white/[0.02] border transition-all rounded-[4px] flex flex-row items-center justify-between gap-2 hover:bg-white/[0.04] ${isTopBid ? (isAuction ? "border-amber-500/50 bg-amber-500/[0.05]" : "border-blue-500/50 bg-blue-500/[0.05]") : "border-white/5 opacity-80 hover:opacity-100"}`}
                           >
                             <div className="flex items-center gap-3 w-full">
                               <div className="relative">
@@ -1639,12 +1639,12 @@ const NFTDetail: React.FC = () => {
                         exit={{ opacity: 0, y: -10 }}
                         className="space-y-4"
                       >
-                        <div className="p-4 bg-purple-500/[0.03] border border-blue-500/30 rounded-[16px] relative overflow-hidden">
+                        <div className="p-4 bg-purple-500/[0.03] border border-blue-500/30 rounded-[4px] relative overflow-hidden">
                           <div className="absolute top-0 right-0 p-4 opacity-[0.05]">
                             <Crown className="h-24 w-24 text-purple-500" />
                           </div>
                           <div className="flex items-center gap-4 mb-4 relative z-10">
-                            <div className="w-12 h-12 rounded-[12px] bg-purple-500/10 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-[4px] bg-purple-500/10 flex items-center justify-center">
                               <Crown className="h-6 w-6 text-purple-500" />
                             </div>
                             <h1 className="text-sm font-bold text-foreground uppercase tracking-widest">
@@ -1663,10 +1663,10 @@ const NFTDetail: React.FC = () => {
                                 href={item.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center justify-between p-4 bg-background/40 hover:bg-background/60 rounded-[12px] border border-border/50 hover:border-neutral-500/30 transition-all group"
+                                className="flex items-center justify-between p-4 bg-background/40 hover:bg-background/60 rounded-[4px] border border-border/50 hover:border-neutral-500/30 transition-all group"
                               >
                                 <div className="flex items-center gap-4">
-                                  <div className="w-12 h-12 rounded-[10px] bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                                  <div className="w-12 h-12 rounded-[4px] bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                                     {item.type === "video" && (
                                       <Video className="h-6 w-6" />
                                     )}
@@ -1706,7 +1706,7 @@ const NFTDetail: React.FC = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="p-8 bg-background/40 border border-border rounded-[16px] flex flex-col items-center justify-center text-center space-y-4"
+                        className="p-8 bg-background/40 border border-border rounded-[4px] flex flex-col items-center justify-center text-center space-y-4"
                       >
                         <Lock className="h-12 w-12 text-muted-foreground/50" />
                         <div>

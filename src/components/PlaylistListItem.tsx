@@ -54,9 +54,9 @@ const PlaylistListItem: React.FC<PlaylistListItemProps> = ({ playlist, onClick }
   return (
     <div 
       onClick={onClick}
-      className="group flex items-center gap-2 p-2 rounded-[10px] bg-foreground/[0.02] border border-blue-500/30 hover:bg-muted/50 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
+      className="group flex items-center gap-2 p-2 rounded-[4px] bg-foreground/[0.02] border border-blue-500/30 hover:bg-muted/50 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full"
     >
-      <div className="relative w-14 h-14 rounded-[6px] overflow-hidden flex-shrink-0 shadow-lg">
+      <div className="relative w-14 h-14 rounded-[4px] overflow-hidden flex-shrink-0 shadow-lg">
         {renderCover()}
         <div className="absolute inset-0 bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <Play className="h-4 w-4 text-foreground fill-white" />

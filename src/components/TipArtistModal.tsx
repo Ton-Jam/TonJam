@@ -91,7 +91,7 @@ const TipArtistModal: React.FC<TipArtistModalProps> = ({ artist, onClose }) => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="bg-white border border-gray-200 rounded-[24px] w-full max-w-sm overflow-hidden shadow-2xl"
+        className="bg-white border border-gray-200 rounded-[4px] w-full max-w-sm overflow-hidden shadow-2xl"
       >
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">

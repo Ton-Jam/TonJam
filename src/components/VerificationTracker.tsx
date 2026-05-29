@@ -78,7 +78,7 @@ const VerificationTracker: React.FC = () => {
         {requests.map((request) => (
           <div 
             key={request.id}
-            className="group relative bg-white/[0.03] border border-white/5 rounded-[24px] overflow-hidden hover:bg-white/[0.05] transition-all duration-500"
+            className="group relative bg-white/[0.03] border border-white/5 rounded-[4px] overflow-hidden hover:bg-white/[0.05] transition-all duration-500"
           >
             <div className="p-5 flex items-start gap-5">
               {/* Status Icon */}
@@ -175,7 +175,7 @@ const VerificationTracker: React.FC = () => {
       </div>
 
       {/* Info Card */}
-      <div className="p-6 bg-blue-600/5 border border-blue-500/10 rounded-[28px] flex items-start gap-4">
+      <div className="p-6 bg-blue-600/5 border border-blue-500/10 rounded-[4px] flex items-start gap-4">
         <div className="w-10 h-10 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 flex-shrink-0">
           <AlertCircle className="w-5 h-5" />
         </div>

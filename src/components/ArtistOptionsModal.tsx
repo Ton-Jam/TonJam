@@ -35,15 +35,15 @@ const ArtistOptionsModal: React.FC<ArtistOptionsModalProps> = ({ artist, onClose
           </div>
 
           <div className="space-y-2">
-            <button className="flex w-full items-center gap-4 p-4 rounded-[16px] hover:bg-muted transition-all text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+            <button className="flex w-full items-center gap-4 p-4 rounded-[4px] hover:bg-muted transition-all text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
               <Share2 className="h-4 w-4" />
               Share Artist
             </button>
-            <button className="flex w-full items-center gap-4 p-4 rounded-[16px] hover:bg-muted transition-all text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+            <button className="flex w-full items-center gap-4 p-4 rounded-[4px] hover:bg-muted transition-all text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
               <UserMinus className="h-4 w-4" />
               Unfollow
             </button>
-            <button className="flex w-full items-center gap-4 p-4 rounded-[16px] hover:bg-muted transition-all text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-400">
+            <button className="flex w-full items-center gap-4 p-4 rounded-[4px] hover:bg-muted transition-all text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-400">
               <Flag className="h-4 w-4" />
               Report Artist
             </button>

@@ -138,7 +138,7 @@ export const CollaboratorManager: React.FC<CollaboratorManagerProps> = ({
       <div className="grid gap-4">
         {collaborators.length > 0 ? (
           collaborators.map((collab) => (
-            <div key={collab.id} className="flex items-center justify-between p-4 rounded-[3px] bg-muted/30 border border-border/50">
+            <div key={collab.id} className="flex items-center justify-between p-4 rounded-[4px] bg-muted/30 border border-border/50">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
                   <UserPlus className="w-5 h-5" />

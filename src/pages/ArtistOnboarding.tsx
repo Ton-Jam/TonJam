@@ -226,7 +226,7 @@ const ArtistOnboarding: React.FC = () => {
           </div>
         </header>
 
-        <div className="glass p-4 rounded-[10px] border border-white/5 shadow-2xl relative overflow-hidden">
+        <div className="glass p-4 rounded-[4px] border border-white/5 shadow-2xl relative overflow-hidden">
           {/* Background decorative elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 blur-[100px] rounded-full pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/5 blur-[100px] rounded-full pointer-events-none"></div>
@@ -237,7 +237,7 @@ const ArtistOnboarding: React.FC = () => {
               
               {/* Image Uploads */}
               <div className="space-y-6">
-                <div className="relative h-32 w-full rounded-[10px] overflow-hidden bg-muted/50 group">
+                <div className="relative h-32 w-full rounded-[4px] overflow-hidden bg-muted/50 group">
                   <img 
                     src={profileData.bannerUrl || getPlaceholderImage('banner-onboarding', 1200, 400)} 
                     className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" 
@@ -286,19 +286,19 @@ const ArtistOnboarding: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Artist Name</label>
-                  <input type="text" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="Enter your stage name" required />
+                  <input type="text" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="Enter your stage name" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Username (@)</label>
-                  <input type="text" value={profileData.username} onChange={e => setProfileData({...profileData, username: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="@username" required />
+                  <input type="text" value={profileData.username} onChange={e => setProfileData({...profileData, username: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="@username" required />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Bio</label>
-                  <textarea value={profileData.bio} onChange={e => setProfileData({...profileData, bio: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors h-32 resize-none" placeholder="Tell your story..." />
+                  <textarea value={profileData.bio} onChange={e => setProfileData({...profileData, bio: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors h-32 resize-none" placeholder="Tell your story..." />
                 </div>
               </div>
               <div className="pt-4">
-                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98]" > Confirm Identity </button>
+                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest py-4 rounded-[4px] transition-all hover:scale-[1.02] active:scale-[0.98]" > Confirm Identity </button>
               </div>
             </form>
           )}
@@ -310,11 +310,11 @@ const ArtistOnboarding: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Track Title</label>
-                    <input type="text" value={trackData.title} onChange={e => setTrackData({...trackData, title: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="e.g. Midnight Protocol" required />
+                    <input type="text" value={trackData.title} onChange={e => setTrackData({...trackData, title: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" placeholder="e.g. Midnight Protocol" required />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Genre</label>
-                    <select value={trackData.genre} onChange={e => setTrackData({...trackData, genre: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors appearance-none" required >
+                    <select value={trackData.genre} onChange={e => setTrackData({...trackData, genre: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors appearance-none" required >
                       <option value="" disabled>Select Genre</option>
                       <option value="Electronic">Electronic</option>
                       <option value="Hip Hop">Hip Hop</option>
@@ -326,7 +326,7 @@ const ArtistOnboarding: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Audio File</label>
-                    <div onClick={() => audioInputRef.current?.click()} className="w-full h-24 border-2 border-dashed border-white/10 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-muted/50 transition-all" >
+                    <div onClick={() => audioInputRef.current?.click()} className="w-full h-24 border-2 border-dashed border-white/10 rounded-[4px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-muted/50 transition-all" >
                       <input type="file" ref={audioInputRef} onChange={(e) => handleFileChange(e, 'audio')} accept={ALLOWED_AUDIO_TYPES.join(',')} className="hidden" />
                       <Music className="h-6 w-6 text-muted-foreground/50 mb-4" />
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"> {trackData.audioFile ? trackData.audioFile.name : "Click to Upload Audio"} </span>
@@ -336,7 +336,7 @@ const ArtistOnboarding: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Cover Art</label>
-                    <div onClick={() => fileInputRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-white/10 rounded-[10px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-muted/50 transition-all overflow-hidden relative" >
+                    <div onClick={() => fileInputRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-white/10 rounded-[4px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-muted/50 transition-all overflow-hidden relative" >
                       <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'cover')} accept={ALLOWED_IMAGE_TYPES.join(',')} className="hidden" />
                       {trackData.coverPreview ? (
                         <img src={trackData.coverPreview} alt="Cover" className="w-full h-full object-cover" />
@@ -351,9 +351,9 @@ const ArtistOnboarding: React.FC = () => {
                 </div>
               </div>
               <div className="pt-4 flex flex-col md:flex-row gap-4">
-                <button type="button" onClick={() => setStep(1)} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Back </button>
-                <button type="button" onClick={() => navigate('/artist-dashboard')} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Skip Upload </button>
-                <button type="submit" disabled={isLoading} className="flex-[2] bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4" >
+                <button type="button" onClick={() => setStep(1)} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[4px] transition-all" > Back </button>
+                <button type="button" onClick={() => navigate('/artist-dashboard')} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[4px] transition-all" > Skip Upload </button>
+                <button type="submit" disabled={isLoading} className="flex-[2] bg-blue-600 hover:bg-blue-500 text-foreground font-bold uppercase tracking-widest py-4 rounded-[4px] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4" >
                   {isLoading ? (
                     <img src={APP_LOGO} className="w-5 h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." />
                   ) : (
@@ -368,7 +368,7 @@ const ArtistOnboarding: React.FC = () => {
             <form onSubmit={handleMintSubmit} className="space-y-4 animate-in fade-in slide-in-from-right duration-500 relative z-10">
               <h2 className="text-xl font-bold uppercase tracking-tight mb-4">Mint Genesis Asset</h2>
               <div className="flex gap-4 mb-4">
-                <div className="w-32 h-32 rounded-[10px] overflow-hidden shadow-xl border border-white/10 flex-shrink-0">
+                <div className="w-32 h-32 rounded-[4px] overflow-hidden shadow-xl border border-white/10 flex-shrink-0">
                   <img src={trackData.coverPreview || getPlaceholderImage(trackData.title || 'onboarding-track')} alt="Cover" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
@@ -383,7 +383,7 @@ const ArtistOnboarding: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Listing Price (TON)</label>
-                  <input type="number" value={mintData.price} onChange={e => setMintData({...mintData, price: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" required />
+                  <input type="number" value={mintData.price} onChange={e => setMintData({...mintData, price: e.target.value})} className="w-full bg-muted/50 border border-white/10 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:border-blue-500 transition-colors" required />
                 </div>
               <div className="space-y-4">
                 <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Royalty Splits (%)</label>
@@ -398,7 +398,7 @@ const ArtistOnboarding: React.FC = () => {
                         newSplits[index].address = e.target.value;
                         setMintData({...mintData, royaltySplits: newSplits});
                       }}
-                      className="flex-1 bg-muted/50 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                      className="flex-1 bg-muted/50 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                     />
                     <input 
                       type="number" 
@@ -409,7 +409,7 @@ const ArtistOnboarding: React.FC = () => {
                         newSplits[index].percentage = Number(e.target.value);
                         setMintData({...mintData, royaltySplits: newSplits});
                       }}
-                      className="w-20 bg-muted/50 rounded-[10px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                      className="w-20 bg-muted/50 rounded-[4px] px-4 py-4 text-sm font-bold text-foreground outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                     />
                   </div>
                 ))}
@@ -418,7 +418,7 @@ const ArtistOnboarding: React.FC = () => {
                 </button>
               </div>
               </div>
-              <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-[10px] flex items-start gap-4">
+              <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-[4px] flex items-start gap-4">
                 <Info className="h-4 w-4 text-blue-400 mt-4" />
                 <div>
                   <h4 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">Smart Contract Deployment</h4>
@@ -426,9 +426,9 @@ const ArtistOnboarding: React.FC = () => {
                 </div>
               </div>
               <div className="pt-4 flex flex-col md:flex-row gap-4">
-                <button type="button" onClick={() => setStep(2)} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Back </button>
-                <button type="button" onClick={() => navigate('/artist-dashboard')} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all" > Skip Minting </button>
-                <button type="submit" disabled={isLoading} className="flex-[2] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-foreground font-bold uppercase tracking-widest py-4 rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4 shadow-lg shadow-blue-600/20" >
+                <button type="button" onClick={() => setStep(2)} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[4px] transition-all" > Back </button>
+                <button type="button" onClick={() => navigate('/artist-dashboard')} className="flex-1 bg-muted/50 hover:bg-muted text-foreground font-bold uppercase tracking-widest py-4 rounded-[4px] transition-all" > Skip Minting </button>
+                <button type="submit" disabled={isLoading} className="flex-[2] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-foreground font-bold uppercase tracking-widest py-4 rounded-[4px] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4 shadow-lg shadow-blue-600/20" >
                   {isLoading ? (
                     <>
                       <img src={APP_LOGO} className="w-5 h-5 object-contain animate-[spin_3s_linear_infinite] opacity-80" alt="Loading..." />

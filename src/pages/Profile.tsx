@@ -327,7 +327,7 @@ const Profile: React.FC = () => {
  };
 
  const StatBlock = ({ label, value, icon, subValue, trend }: { label: string, value: string, icon?: string, subValue?: string, trend?: string }) => (
- <div className="relative group overflow-hidden bg-background p-3 rounded-[2px] transition-all shadow-2xl">
+ <div className="relative group overflow-hidden bg-background p-3 rounded-[4px] transition-all shadow-2xl">
  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 blur-3xl rounded-full -mr-4 -mt-4 group-hover:bg-blue-600/10 transition-colors"></div>
  
  <div className="flex justify-between items-start mb-4 relative z-10">

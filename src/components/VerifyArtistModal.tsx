@@ -107,7 +107,7 @@ const VerifyArtistModal: React.FC<VerifyArtistModalProps> = ({ onClose, artistNa
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
       <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={onClose}></div>
       
-      <div className="relative w-full max-w-xl bg-black border border-white/5 rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 max-h-[90vh] flex flex-col">
+      <div className="relative w-full max-w-xl bg-black border border-white/5 rounded-[4px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-blue-600/10 to-transparent">
           <div className="flex items-center gap-4">

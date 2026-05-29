@@ -28,7 +28,11 @@ import {
   RefreshCw,
   Play,
   CheckCircle,
-  FileText
+  FileText,
+  Square,
+  CheckSquare,
+  Trash2,
+  Wand2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BackButton } from "@/components/BackButton";
@@ -60,11 +64,16 @@ import {
 
 export default function ArtistDashboard() {
   const navigate = useNavigate();
-  const { getEarnings, addNotification } = useAudio();
+  const { getEarnings, addNotification, deleteTrack, updateTrack, addUserNFT, userProfile } = useAudio();
   const { user, isArtist, loading } = useAuth();
   
   // Tabs state
   const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect">("overview");
+
+  // Bulk Selection States
+  const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([]);
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+  const [bulkProcessingMsg, setBulkProcessingMsg] = useState("");
 
   // Core Data States
   const [nfts, setNFTs] = useState<any[]>([]);
@@ -275,6 +284,82 @@ export default function ArtistDashboard() {
     const track = tracks.find(t => t.id === trackId);
     if (track) {
       navigate('/artist-minting', { state: { track } });
+    }
+  };
+
+  const handleBulkMint = async () => {
+    const tracksToMint = tracks.filter(t => selectedTrackIds.includes(t.id) && !t.isNFT);
+    if (tracksToMint.length === 0) {
+      addNotification("No eligible unminted tracks selected", "warning");
+      return;
+    }
+
+    setIsBulkProcessing(true);
+    setBulkProcessingMsg(`Preparing mass-mint of ${tracksToMint.length} track(s)...`);
+
+    try {
+      for (let i = 0; i < tracksToMint.length; i++) {
+        const track = tracksToMint[i];
+        setBulkProcessingMsg(`[${i + 1}/${tracksToMint.length}] Broadcasting "${track.title}" onto TON Ledger...`);
+        
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        const nftId = `nft-${Date.now()}-${track.id}`;
+        const newNft: any = {
+          id: nftId,
+          trackId: track.id,
+          title: track.title,
+          description: track.description || `Decentralized sound recording NFT collectible of "${track.title}"`,
+          owner: userProfile?.name || "Verified Creator",
+          creator: userProfile?.name || track.artistName || "Verified Creator",
+          artistId: user?.uid || track.artistId,
+          price: "2.5",
+          imageUrl: track.coverUrl || getPlaceholderImage(track.title),
+          coverUrl: track.coverUrl || getPlaceholderImage(track.title),
+          audioUrl: track.audioUrl || "",
+          edition: "Limited",
+          isNFT: true,
+          listingType: "fixed" as const,
+          mintedAt: new Date().toISOString(),
+          ownerAddress: userProfile?.walletAddress || "EQ_vault"
+        };
+
+        await addUserNFT(newNft, true);
+        await updateTrack(track.id, { isNFT: true });
+      }
+
+      addNotification(`Mass-minted ${tracksToMint.length} assets successfully compiled to the TON VM! 🌌💎`, "success");
+      setSelectedTrackIds([]);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, "bulk-mint");
+      addNotification("Mass-minting failed. Check smart contract parameters.", "error");
+    } finally {
+      setIsBulkProcessing(false);
+      setBulkProcessingMsg("");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedTrackIds.length === 0) {
+      addNotification("No tracks selected for deletion", "warning");
+      return;
+    }
+
+    setIsBulkProcessing(true);
+    setBulkProcessingMsg(`Purging ${selectedTrackIds.length} selective records from IPFS indexes...`);
+
+    try {
+      for (let i = 0; i < selectedTrackIds.length; i++) {
+        const trackId = selectedTrackIds[i];
+        await deleteTrack(trackId);
+      }
+      addNotification(`Batch metadata purge of ${selectedTrackIds.length} items complete!`, "success");
+      setSelectedTrackIds([]);
+    } catch (err) {
+      addNotification("Batch delete encountered an error.", "error");
+    } finally {
+      setIsBulkProcessing(false);
+      setBulkProcessingMsg("");
     }
   };
 
@@ -578,7 +663,7 @@ export default function ArtistDashboard() {
               <div className="space-y-6">
                 
                 {/* Quick Track Upload Component */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[32px] shadow-lg">
+                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[4px] shadow-lg">
                   <h3 className="text-sm font-black uppercase tracking-wider mb-4 flex items-center gap-2">
                     <UploadCloud className="w-4 h-4 text-cyan-400" /> Digital Distribution Studio
                   </h3>
@@ -657,7 +742,7 @@ export default function ArtistDashboard() {
                   <Carousel
                     opts={{ align: "start", loop: true }}
                     plugins={[Autoplay({ delay: 3000 })]}
-                    className="w-full bg-[#10141b]/20 p-4 rounded-[32px] border border-white/[0.02]"
+                    className="w-full bg-[#10141b]/20 p-4 rounded-[4px] border border-white/[0.02]"
                   >
                     <CarouselContent>
                       {albums.map((album, index) => (
@@ -675,7 +760,80 @@ export default function ArtistDashboard() {
                     <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
                       <Music className="w-3.5 h-3.5" /> Published sonic assets ({tracks.length})
                     </h3>
+                    {tracks.length > 0 && (
+                      <button 
+                        onClick={() => {
+                          if (selectedTrackIds.length === tracks.length) {
+                            setSelectedTrackIds([]);
+                          } else {
+                            setSelectedTrackIds(tracks.map(t => t.id));
+                          }
+                        }}
+                        className="text-[9px] font-black text-cyan-400 hover:text-cyan-300 uppercase tracking-widest cursor-pointer flex items-center gap-1.5 transition-all"
+                      >
+                        {selectedTrackIds.length === tracks.length ? (
+                          <>
+                            <CheckSquare className="w-3.5 h-3.5" /> Deselect All ({selectedTrackIds.length})
+                          </>
+                        ) : (
+                          <>
+                            <Square className="w-3.5 h-3.5" /> Select All ({tracks.length})
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
+
+                  {/* Bulk Actions Panel */}
+                  <AnimatePresence>
+                    {selectedTrackIds.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="p-4 bg-zinc-900/60 backdrop-blur-md rounded-3xl flex flex-wrap items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-cyan-400" />
+                          <span className="text-[10px] font-black uppercase tracking-wider text-zinc-200">
+                            {selectedTrackIds.length} track(s) selected
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleBulkMint}
+                            disabled={isBulkProcessing}
+                            className="bg-purple-600 hover:bg-purple-500 transition-all text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          >
+                            <Wand2 className="w-3 h-3" /> Mass-Mint as NFTs
+                          </button>
+                          <button
+                            onClick={handleBulkDelete}
+                            disabled={isBulkProcessing}
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          >
+                            <Trash2 className="w-3 h-3" /> Batch-Delete drafts
+                          </button>
+                          <button
+                            onClick={() => setSelectedTrackIds([])}
+                            disabled={isBulkProcessing}
+                            className="text-zinc-500 hover:text-zinc-300 text-[9px] font-black uppercase tracking-widest px-2 py-1.5 cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {isBulkProcessing && (
+                    <div className="p-4 bg-purple-900/30 text-purple-200 rounded-3xl flex items-center gap-3 animate-pulse">
+                      <RefreshCw className="w-4 h-4 animate-spin text-purple-400" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">
+                        {bulkProcessingMsg || "Processing bulk transaction..."}
+                      </span>
+                    </div>
+                  )}
 
                   {isLoading ? (
                     <div className="py-12 text-center bg-white/[0.01] rounded-3xl">
@@ -694,6 +852,25 @@ export default function ArtistDashboard() {
                           onClick={() => navigate(`/track/${track.id}`)}
                         >
                           <div className="flex items-center gap-4 min-w-0">
+                            {/* Checkbox */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedTrackIds(prev =>
+                                  prev.includes(track.id)
+                                    ? prev.filter(id => id !== track.id)
+                                    : [...prev, track.id]
+                                );
+                              }}
+                              className="text-zinc-500 hover:text-cyan-400 transition-colors cursor-pointer shrink-0"
+                            >
+                              {selectedTrackIds.includes(track.id) ? (
+                                <CheckSquare className="w-4 h-4 text-cyan-400" />
+                              ) : (
+                                <Square className="w-4 h-4" />
+                              )}
+                            </button>
+
                             <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 relative group">
                               <img src={track.coverUrl || getPlaceholderImage(track.title)} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
                               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
@@ -779,7 +956,7 @@ export default function ArtistDashboard() {
               <div className="space-y-6">
                 
                 {/* Secondary sales ledger display */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[32px] shadow-lg">
+                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[4px] shadow-lg">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
                       <Coins className="w-4 h-4 text-amber-400" /> Web3 NFT sales Ledger
@@ -853,7 +1030,7 @@ export default function ArtistDashboard() {
                         </motion.div>
                       ))
                     ) : (
-                      <div className="col-span-full py-12 text-center bg-white/[0.01] rounded-[28px] border border-dashed border-white/[0.05]">
+                      <div className="col-span-full py-12 text-center bg-white/[0.01] rounded-[4px] border border-dashed border-white/[0.05]">
                         <Gem className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
                         <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">No web3 artifact minted yet</p>
                       </div>
@@ -869,7 +1046,7 @@ export default function ArtistDashboard() {
               <div className="space-y-6">
                 
                 {/* Side-by-Side Live DMs and Chat Panel */}
-                <div className="grid grid-cols-1 md:grid-cols-3 bg-white/[0.02] backdrop-blur-md rounded-[32px] overflow-hidden shadow-xl min-h-[480px]">
+                <div className="grid grid-cols-1 md:grid-cols-3 bg-white/[0.02] backdrop-blur-md rounded-[4px] overflow-hidden shadow-xl min-h-[480px]">
                   
                   {/* Left Fan/Collector list */}
                   <div className="md:col-span-1 border-r border-white/[0.03] p-4 space-y-3">
@@ -980,7 +1157,7 @@ export default function ArtistDashboard() {
                 </div>
 
                 {/* Gated Exclusive Content Drops Form */}
-                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[32px] shadow-lg space-y-6">
+                <div className="bg-white/[0.02] backdrop-blur-md p-6 rounded-[4px] shadow-lg space-y-6">
                   <div className="space-y-1">
                     <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-1.5">
                       <Lock className="w-4 h-4 text-purple-400 animate-pulse" /> Launch Exclusive drop (Perks)

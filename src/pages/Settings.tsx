@@ -152,7 +152,7 @@ const Settings: React.FC = () => {
           </Card>
 
 
-          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Security Matrix</CardTitle>
             </CardHeader>
@@ -179,13 +179,13 @@ const Settings: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="verification" className="space-y-6">
-          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Artist verification</CardTitle>
               <CardDescription className="text-[9px] font-bold uppercase tracking-widest opacity-40">Establish your sonic identity on-chain</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-blue-600/5 border border-blue-500/10 rounded-[24px]">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-blue-600/5 border border-blue-500/10 rounded-[4px]">
                 <div className="flex items-center gap-4 text-center sm:text-left">
                   <div className="w-12 h-12 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-500 border border-blue-500/20">
                     <ShieldCheck className="w-6 h-6" />
@@ -210,7 +210,7 @@ const Settings: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">
-          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Signal Filters</CardTitle>
             </CardHeader>
@@ -261,7 +261,7 @@ const Settings: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="interface" className="space-y-6">
-          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Environment Settings</CardTitle>
             </CardHeader>
@@ -309,7 +309,7 @@ const Settings: React.FC = () => {
                 </SettingRow>
             </CardContent>
           </Card>
-          <Card className="bg-muted/10 border-white/5 rounded-[32px] overflow-hidden">
+          <Card className="bg-muted/10 border-white/5 rounded-[4px] overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Storage Matrix</CardTitle>
             </CardHeader>

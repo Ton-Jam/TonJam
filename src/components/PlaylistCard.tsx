@@ -108,9 +108,9 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
         whileHover={{ x: 4 }}
         whileTap={{ scale: 0.98 }}
         onClick={onClick} 
-        className="group flex items-center gap-2 p-2 rounded-[2px] hover:bg-muted/50 transition-all cursor-pointer w-full"
+        className="group flex items-center gap-2 p-2 rounded-[4px] hover:bg-muted/50 transition-all cursor-pointer w-full"
       >
-        <div className="relative w-12 h-12 rounded-[2px] overflow-hidden flex-shrink-0">
+        <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0">
           {renderCover()}
         </div>
         <div className="flex-1 min-w-0">
@@ -134,10 +134,10 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
       whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick} 
-      className="group relative cursor-pointer p-2 rounded-[2px] w-full"
+      className="group relative cursor-pointer p-2 rounded-[4px] w-full"
     >
       {/* Image Container - 1:1 Aspect Ratio */}
-      <div className="relative aspect-square rounded-[2px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
+      <div className="relative aspect-square rounded-[4px] overflow-hidden bg-neutral-900 shadow-lg mb-2">
         {renderCover()}
         <div className="absolute inset-0 flex items-center justify-center gap-3">
           <button 
@@ -196,7 +196,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, variant = 'defaul
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 rounded-[2px] hover:bg-black/5"
+            className="h-6 w-6 rounded-[4px] hover:bg-black/5"
             onClick={(e) => { e.stopPropagation(); setIsOptionsModalOpen(true); }}
           >
             <MoreVertical className="h-3 w-3 text-muted-foreground" />

@@ -61,7 +61,7 @@ const FavoriteArtists: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
                 key={artist.uid}
-                className="group flex items-center justify-between p-3 rounded-[2px] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer border-b border-white/5 hover:border-emerald-500/10"
+                className="group flex items-center justify-between p-3 rounded-[4px] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer border-b border-white/5 hover:border-emerald-500/10"
                 onClick={() => navigate(`/artist/${artist.uid}`)}
               >
                 <div className="flex items-center gap-4">

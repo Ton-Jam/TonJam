@@ -154,10 +154,10 @@ const Library: React.FC = () => {
           layout
           key={`${item.type}-${item.id || item.uid}`}
           onClick={() => navigate(item.type === 'artist' ? `/artist/${item.uid}` : item.type === 'playlist' ? `/playlist/${item.id}` : `/nft/${item.id}`)}
-          className="flex items-center gap-4 p-3 rounded-[2px] hover:bg-white/[0.03] transition-all cursor-pointer group border border-transparent hover:border-white/[0.05]"
+          className="flex items-center gap-4 p-3 rounded-[4px] hover:bg-white/[0.03] transition-all cursor-pointer group border border-transparent hover:border-white/[0.05]"
         >
           <div className={cn(
-            "relative w-14 h-14 flex-shrink-0 overflow-hidden shadow-lg shadow-black/50 rounded-[2px]"
+            "relative w-14 h-14 flex-shrink-0 overflow-hidden shadow-lg shadow-black/50 rounded-[4px]"
           )}>
             <img src={imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
             <div className="absolute inset-0 bg-blue-600/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -172,7 +172,7 @@ const Library: React.FC = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-9 w-9 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity" 
+              className="h-9 w-9 rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity" 
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedPlaylistForOptions(item);
@@ -181,7 +181,7 @@ const Library: React.FC = () => {
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           ) : (
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           )}
@@ -293,11 +293,11 @@ const Library: React.FC = () => {
               whileHover={{ x: 4 }}
               onClick={() => setFilter('playlists')}
               className={cn(
-                "flex items-center gap-4 p-4 rounded-[2px] transition-all cursor-pointer group border border-white/5",
+                "flex items-center gap-4 p-4 rounded-[4px] transition-all cursor-pointer group border border-white/5",
                 filter === 'playlists' ? "bg-blue-600/10 border-blue-500/40" : "bg-white/[0.02] hover:bg-white/[0.04]"
               )}
             >
-              <div className="w-12 h-12 rounded-[2px] bg-blue-600/20 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-[4px] bg-blue-600/20 flex items-center justify-center shadow-lg">
                 <Music2 className="h-5 w-5 text-blue-500" />
               </div>
               <div className="flex-1 min-w-0">
@@ -314,10 +314,10 @@ const Library: React.FC = () => {
               whileHover={{ x: 4 }}
               onClick={() => navigate('/my-nfts')}
               className={cn(
-                "flex items-center gap-4 p-4 rounded-[2px] transition-all cursor-pointer group border border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+                "flex items-center gap-4 p-4 rounded-[4px] transition-all cursor-pointer group border border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
               )}
             >
-              <div className="w-12 h-12 rounded-[2px] bg-purple-600/20 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-[4px] bg-purple-600/20 flex items-center justify-center shadow-lg">
                 <Zap className="h-5 w-5 text-purple-500" />
               </div>
               <div className="flex-1 min-w-0">
@@ -333,9 +333,9 @@ const Library: React.FC = () => {
             <motion.div
               whileHover={{ x: 4 }}
               onClick={() => navigate('/favorite-tracks')}
-              className="flex items-center gap-4 p-4 rounded-[2px] bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 transition-all cursor-pointer group"
+              className="flex items-center gap-4 p-4 rounded-[4px] bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 transition-all cursor-pointer group"
             >
-              <div className="w-12 h-12 rounded-[2px] bg-pink-600/20 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-[4px] bg-pink-600/20 flex items-center justify-center shadow-lg">
                 <Heart className="h-5 w-5 text-pink-500" />
               </div>
               <div className="flex-1 min-w-0">
@@ -351,9 +351,9 @@ const Library: React.FC = () => {
             <motion.div
               whileHover={{ x: 4 }}
               onClick={() => navigate('/favorite-artists')}
-              className="flex items-center gap-4 p-4 rounded-[2px] bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 transition-all cursor-pointer group"
+              className="flex items-center gap-4 p-4 rounded-[4px] bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 transition-all cursor-pointer group"
             >
-              <div className="w-12 h-12 rounded-[2px] bg-emerald-600/20 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-[4px] bg-emerald-600/20 flex items-center justify-center shadow-lg">
                 <Users className="h-5 w-5 text-emerald-500" />
               </div>
               <div className="flex-1 min-w-0">

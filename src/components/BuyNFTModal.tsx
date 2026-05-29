@@ -184,7 +184,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
                     
                     <Separator className="my-1.5 bg-border" />
                     
-                    <div className="flex justify-between items-center p-4 bg-muted/80 rounded-[12px] relative overflow-hidden">
+                    <div className="flex justify-between items-center p-4 bg-muted/80 rounded-[4px] relative overflow-hidden">
                       <span className="text-[9px] font-black text-foreground uppercase tracking-[0.3em] leading-none">Total</span>
                       <div className="flex items-center gap-2">
                         <img src={TON_LOGO} className="w-4 h-4" alt="TON" />
@@ -194,7 +194,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
                   </div>
 
                   {royaltySplits.length > 0 && (
-                    <div className="p-4 rounded-[12px] bg-muted/50 border border-border space-y-2">
+                    <div className="p-4 rounded-[4px] bg-muted/50 border border-border space-y-2">
                       <div className="flex items-center gap-2 mb-1">
                         <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em]">Royalties</span>

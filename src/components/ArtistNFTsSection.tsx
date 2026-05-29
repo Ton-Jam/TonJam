@@ -24,7 +24,7 @@ const ArtistNFTsSection: React.FC<ArtistNFTsSectionProps> = ({
         </div>
       ))}
       {artistNFTs.length === 0 && (
-        <div className="w-full py-4 text-center bg-card rounded-[10px]">
+        <div className="w-full py-4 text-center bg-card rounded-[4px]">
           <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">No assets detected.</p>
         </div>
       )}

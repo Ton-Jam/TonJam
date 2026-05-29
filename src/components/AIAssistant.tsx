@@ -105,7 +105,7 @@ const AIAssistant: React.FC = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="mb-4 w-[calc(100vw-48px)] sm:w-[380px] h-[60vh] sm:h-[500px] bg-background/80 backdrop-blur-2xl border border-blue-500/20 rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
+            className="mb-4 w-[calc(100vw-48px)] sm:w-[380px] h-[60vh] sm:h-[500px] bg-background/80 backdrop-blur-2xl border border-blue-500/20 rounded-[4px] shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-b border-white/5 flex items-center justify-between">

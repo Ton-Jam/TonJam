@@ -44,7 +44,7 @@ const NFTAlphaCarousel: React.FC<NFTAlphaCarouselProps> = ({ nfts }) => {
             >
               <div 
                 onClick={() => navigate(`/nft/${nft.id}`)}
-                className="relative aspect-square rounded-[20px] overflow-hidden cursor-pointer bg-neutral-900 border border-white/5 hover:border-blue-500/30 transition-all duration-500 shadow-2xl"
+                className="relative aspect-square rounded-[4px] overflow-hidden cursor-pointer bg-neutral-900 border border-white/5 hover:border-blue-500/30 transition-all duration-500 shadow-2xl"
               >
                 {/* NFT Image */}
                 <img 

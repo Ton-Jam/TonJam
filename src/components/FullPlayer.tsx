@@ -367,7 +367,7 @@ const FullPlayer: React.FC = () => {
               <div className="relative flex-1 flex items-center justify-center">
                 <motion.div
                   whileHover={{ scale: 1.01 }}
-                  className="relative w-[320px] h-[320px] overflow-hidden rounded-[16px] shadow-2xl border border-white/5 cursor-pointer"
+                  className="relative w-[320px] h-[320px] overflow-hidden rounded-[4px] shadow-2xl border border-white/5 cursor-pointer"
                   onClick={() => {
                     const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
                     const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
@@ -642,7 +642,7 @@ const FullPlayer: React.FC = () => {
                 <LyricsView lyrics={currentTrack.lyrics} />
               ) : (
                 <div className="flex flex-col items-center justify-center h-[400px] text-center space-y-4">
-                  <div className="p-6 rounded-[8px] bg-white/5">
+                  <div className="p-6 rounded-[4px] bg-white/5">
                     <Mic2 className="w-12 h-12 text-white/20" />
                   </div>
                   <p className="text-sm font-black uppercase tracking-widest text-white/30">No neural lyrics found for this frequency</p>

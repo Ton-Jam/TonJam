@@ -139,7 +139,7 @@ const JamChat: React.FC = () => {
       initial={{ y: 20, opacity: 0, scale: 0.95 }}
       animate={{ y: 0, opacity: 1, scale: 1 }}
       exit={{ y: 20, opacity: 0, scale: 0.95 }}
-      className="fixed bottom-24 right-4 sm:right-8 z-[60] w-[320px] sm:w-[380px] h-[500px] bg-background/80 backdrop-blur-2xl border border-white/10 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden"
+      className="fixed bottom-24 right-4 sm:right-8 z-[60] w-[320px] sm:w-[380px] h-[500px] bg-background/80 backdrop-blur-2xl border border-white/10 rounded-[4px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden"
     >
       {/* Digital Grid Overlay */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none" />
