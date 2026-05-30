@@ -240,8 +240,45 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     }
   };
 
+  const getSupplyIndicator = () => {
+    const supply = nft.supply || 1;
+    const editionLower = (nft.edition || "").toLowerCase();
+    
+    if (supply === 1 || editionLower === 'unique' || nft.edition === 'Unique') {
+      return {
+        label: '1/1 UNIQUE',
+        className: 'bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-extrabold uppercase border border-white/20 shadow-lg animate-pulse',
+        icon: 'Star'
+      };
+    }
+    
+    if (supply <= 10) {
+      return {
+        label: `LIMIT: ${supply} (ULTRA)`,
+        className: 'bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold uppercase border border-orange-400/20 shadow-md',
+        icon: 'Gem'
+      };
+    }
+
+    if (supply <= 100) {
+      return {
+        label: `LIMIT: ${supply}`,
+        className: 'bg-slate-900/90 text-amber-500 font-bold uppercase border border-amber-500/20 shadow-sm',
+        icon: 'Sparkles'
+      };
+    }
+
+    return {
+      label: `QTY: ${supply}`,
+      className: 'bg-black/60 text-zinc-300 font-medium uppercase border border-white/5',
+      icon: 'Layers'
+    };
+  };
+
   const rarity = nft.traits?.find(t => t.trait_type === 'Rarity')?.value as string || 
                  nft.attributes?.find(t => t.trait_type === 'Rarity')?.value as string;
+
+  const supplyIndicator = getSupplyIndicator();
 
   if (variant === 'row') {
     return (
@@ -286,6 +323,9 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                 >
                   {nft.creator}
                 </p>
+                <span className={cn("text-[6px] px-1 py-0.5 rounded font-extrabold uppercase tracking-widest shrink-0 ml-1.5", supplyIndicator.className)}>
+                  {supplyIndicator.label}
+                </span>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -362,8 +402,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
               {/* Top Overlays */}
               <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10 pointer-events-none">
                  <div className="flex flex-col gap-1">
-                    <span className="px-1.5 py-0.5 bg-black/50 backdrop-blur-md rounded-[4px] text-[8px] font-bold uppercase tracking-[0.1em] text-white border border-white/10 shadow-lg">
-                      {nft.edition}
+                    <span className={cn("px-1.5 py-0.5 bg-black/50 backdrop-blur-md rounded-[4px] text-[8px] font-bold uppercase tracking-[0.1em] text-white border border-white/10 shadow-lg flex items-center gap-1", supplyIndicator.className)}>
+                      {supplyIndicator.icon === 'Star' && <Star className="w-2 h-2 fill-current text-yellow-400 animate-spin-slow" />}
+                      {supplyIndicator.icon === 'Gem' && <Gem className="w-2 h-2" />}
+                      {supplyIndicator.label}
                     </span>
                     {nft.listingType === 'auction' && (
                       <span className="px-1.5 py-0.5 bg-amber-500 rounded-[4px] text-[8px] font-bold uppercase tracking-[0.1em] text-black shadow-lg border border-white/10">

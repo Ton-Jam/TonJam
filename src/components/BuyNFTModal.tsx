@@ -158,7 +158,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
               </div>
 
               <ScrollArea className="max-h-[220px] pr-4 -mr-4">
-                <div className="space-y-4">
+                <div className="space-y-4 list-section-silver">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center group/item">
                       <span className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">Signal_Value</span>

@@ -848,6 +848,31 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [userBids, setUserBids] = useState<NFTItem[]>([]);
 
+  // Auction warning effect
+  const alertedAuctions = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const checkAuctions = () => {
+      userBids.forEach((nft) => {
+        if (nft.listingType === 'auction' && nft.auctionEndTime) {
+          const endTime = new Date(nft.auctionEndTime).getTime();
+          const now = Date.now();
+          const diff = endTime - now;
+          
+          if (diff > 0 && diff <= 30 * 60 * 1000 && !alertedAuctions.current.has(nft.id)) {
+            toast.warning(`Auction ending soon`, {
+              description: `Auction for "${nft.title}" ends in less than 30 minutes!`,
+              duration: 10000,
+            });
+            alertedAuctions.current.add(nft.id);
+          }
+        }
+      });
+    };
+
+    const interval = setInterval(checkAuctions, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [userBids]);
+
   // Sync with Firebase
   useEffect(() => {
     let unsubs: (() => void)[] = [];
@@ -1972,6 +1997,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", (e) => {
+      console.error("[Audio] Element error:", audio.error);
+    });
 
     /* Sync volume and mute state */
     audio.volume = isMuted ? 0 : volume;
@@ -2906,6 +2934,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         audioRef.current.src = sourceUrl;
+        console.log("[Audio] Playing:", sourceUrl);
         audioRef.current.load(); // Explicitly call load()
 
         playPromiseRef.current = audioRef.current.play();

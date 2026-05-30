@@ -1,6 +1,7 @@
 import GetFreeTokensModal from '@/components/GetFreeTokensModal';
 import BuyTJModal from '@/components/BuyTJModal';
 import CompleteProfilePrompt from '@/components/CompleteProfilePrompt';
+import { CardSmall } from '@/components/CardSmall';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X } from 'lucide-react';
@@ -570,17 +571,25 @@ const Home: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Featured Sponsored Posts Carousel */}
-            <div>
-              <SectionHeader title="Featured" viewAllLink="/explore" />
-              <TrendingBannerCarousel 
-                banners={carouselItems.map(item => ({
-                  id: item.id,
-                  title: item.title,
-                  image: item.imageUrl,
-                  link: item.link
-                }))} 
-              />
+            {/* Featured Sponsored Posts Carousel & Token Forge */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+              <div className="md:col-span-2 flex flex-col justify-between">
+                <SectionHeader title="Featured" viewAllLink="/explore" />
+                <TrendingBannerCarousel 
+                  banners={carouselItems.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    image: item.imageUrl,
+                    link: item.link
+                  }))} 
+                />
+              </div>
+              <div className="flex flex-col justify-between h-full bg-transparent">
+                <SectionHeader title="Token Forge" />
+                <div className="flex-1 flex items-center justify-center pt-1 px-1">
+                  <CardSmall onClick={() => setIsBuyTJModalOpen(true)} />
+                </div>
+              </div>
             </div>
 
             {/* Hero Section - Neural Protocol Aesthetic */}

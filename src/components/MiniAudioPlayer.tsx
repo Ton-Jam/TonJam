@@ -198,7 +198,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
       </div>
 
       <div className="flex items-center justify-between h-full relative z-10">
-        {/* ================= COLUMN 1: TRACK & HEART ================= */}
+        {/* ================= COLUMN 1: TRACK INFO ================= */}
         <div className="flex items-center gap-3.5 w-auto max-w-[45%] sm:max-w-[30%] min-w-0">
           <div 
             className="flex items-center gap-3 min-w-0 cursor-pointer group"
@@ -232,24 +232,6 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               </button>
             </div>
           </div>
-
-          {/* Symmetrical Heart button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleToggleLike}
-                className={cn(
-                  "h-8 w-8 rounded-[4px] text-zinc-400 hover:text-white transition-all ml-1 flex-shrink-0 hover:bg-white/5",
-                  isLiked && "text-blue-500 hover:text-blue-400"
-                )}
-              >
-                <Heart className={cn("h-4 w-4 transition-transform active:scale-90", isLiked && "fill-current")} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{isLiked ? "Remove from Library" : "Save to Library"}</TooltipContent>
-          </Tooltip>
         </div>
 
         {/* ================= COLUMN 2: CENTER PLAYBACK & SEEK BAR ================= */}

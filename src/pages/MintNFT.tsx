@@ -96,6 +96,23 @@ const MintNFT: React.FC = () => {
   const mintData = watch();
   const totalRoyaltyPercentage = mintData.royaltySplits.reduce((sum, split) => sum + split.percentage, 0);
 
+  React.useEffect(() => {
+    if (mintData.editionType === 'Unique') {
+      setValue('supply', '1');
+      setValue('rarity', 'Mythic');
+    } else if (mintData.editionType === 'Limited') {
+      if (mintData.supply === '1') {
+        setValue('supply', '10');
+      }
+      setValue('rarity', 'Rare');
+    } else if (mintData.editionType === 'Standard') {
+      if (mintData.supply === '1' || mintData.supply === '10') {
+        setValue('supply', '100');
+      }
+      setValue('rarity', 'Common');
+    }
+  }, [mintData.editionType, setValue]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'audio' | 'cover' | 'lyrics') => {
     const file = e.target.files?.[0];
     if (file) {
@@ -478,7 +495,14 @@ const MintNFT: React.FC = () => {
                   </div>
                   <div className="space-y-4">
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Rarity Label/Score</label>
-                    <input {...register('rarity')} placeholder="e.g. Legendary, 99/100" className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" />
+                    <select {...register('rarity')} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground">
+                      <option value="Common">Common</option>
+                      <option value="Uncommon">Uncommon</option>
+                      <option value="Rare">Rare</option>
+                      <option value="Epic">Epic</option>
+                      <option value="Legendary">Legendary</option>
+                      <option value="Mythic">Mythic</option>
+                    </select>
                   </div>
                   <div className="space-y-4 sm:space-y-4 col-span-1 sm:col-span-3">
                     <div className="flex justify-between items-center">
@@ -522,7 +546,13 @@ const MintNFT: React.FC = () => {
                   </div>
                   <div className="space-y-4">
                     <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">Supply</label>
-                    <input {...register('supply')} type="number" className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" aria-label="Supply" />
+                    <input 
+                      {...register('supply')} 
+                      type="number" 
+                      disabled={mintData.editionType === 'Unique'}
+                      className="w-full bg-muted/50 rounded-[4px] py-4 px-4 sm:py-4 sm:px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground disabled:opacity-50 disabled:cursor-not-allowed" 
+                      aria-label="Supply" 
+                    />
                   </div>
                   <div className="space-y-4 flex items-center gap-3 pt-2 pl-4">
                     <input {...register('listNow')} type="checkbox" id="listNow" className="w-4 h-4 bg-muted/50 rounded-[4px] accent-blue-600 cursor-pointer" />

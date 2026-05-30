@@ -35,6 +35,7 @@ import PostDetail from '@/pages/PostDetail';
 import SocialFeedPage from '@/pages/SocialFeedPage';
 import TrackDetail from '@/pages/TrackDetail';
 import AdminDashboard from '@/pages/AdminDashboard';
+import About from '@/pages/About';
 import Wallet from '@/pages/Wallet';
 import Login from '@/pages/Login';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -233,6 +234,7 @@ const AppContent: React.FC = () => {
               <Route path="/post/:id" element={<PageWrapper><PostDetail /></PageWrapper>} />
               <Route path="/social" element={<PageWrapper><SocialFeedPage /></PageWrapper>} />
               <Route path="/admin" element={<PageWrapper><ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute></PageWrapper>} />
+              <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
               <Route path="/login" element={<Login />} />
               <Route path="/user/:id/follows/:type" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
             </Routes>

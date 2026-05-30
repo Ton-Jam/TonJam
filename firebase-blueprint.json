@@ -69,6 +69,9 @@
         "imageUrl": { "type": "string" },
         "price": { "type": "string" },
         "edition": { "type": "string" },
+        "editionType": { "type": "string" },
+        "rarity": { "type": "string" },
+        "supply": { "type": "number" },
         "listingType": { "type": "string" },
         "owner": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }

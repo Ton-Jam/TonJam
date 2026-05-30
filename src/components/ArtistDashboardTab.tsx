@@ -24,6 +24,8 @@ import { useNotification } from "@/context/NotificationContext";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "motion/react";
 import { exportAuditLogToPDF } from "@/lib/pdfExport";
+import TrackUploadModal from "@/components/TrackUploadModal";
+import { cn } from "@/lib/utils";
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
@@ -37,6 +39,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
 
   // Timeframe states for all charts
   const [revenueTimeFrame, setRevenueTimeFrame] = React.useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
+  const [isUploadModalOpen, setIsUploadModalOpen] = React.useState(false);
   const [expandedMonth, setExpandedMonth] = React.useState<string | null>(null);
   const [activityTimeFrame, setActivityTimeFrame] = React.useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
   const [performanceTimeFrame, setPerformanceTimeFrame] = React.useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
@@ -159,11 +162,15 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
 
   const [auditData, setAuditData] = React.useState<AuditEntry[]>([]);
   const [auditTotal, setAuditTotal] = React.useState(0);
+  const [newlyAddedIds, setNewlyAddedIds] = React.useState<string[]>([]);
+  const prevAuditDataRef = React.useRef<AuditEntry[]>([]);
   const [auditPage, setAuditPage] = React.useState(1);
   const [auditTableLoading, setAuditTableLoading] = React.useState(false);
   const itemsPerPage = 5;
 
   const [filterType, setFilterType] = React.useState<string>('all');
+  const [autoScrollEnabled, setAutoScrollEnabled] = React.useState(true);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [ledgerViewMode, setLedgerViewMode] = React.useState<'chronological' | 'grouped'>('grouped');
   const [customStartDate, setCustomStartDate] = React.useState<string>('');
   const [customEndDate, setCustomEndDate] = React.useState<string>('');
@@ -241,7 +248,18 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
 
         const response = await fetch(url);
         const result = await response.json();
-        setAuditData(result.data || []);
+        const newData = result.data || [];
+        
+        const newEntries = newData.filter((n: AuditEntry) => !prevAuditDataRef.current.find(a => a.id === n.id));
+        if (newEntries.length > 0) {
+            setNewlyAddedIds([newEntries[0].id]);
+        } else {
+            setNewlyAddedIds([]);
+        }
+        prevAuditDataRef.current = newData;
+        setTimeout(() => setNewlyAddedIds([]), 3000);
+        
+        setAuditData(newData);
         setAuditTotal(result.total || 0);
     } catch (e) {
         console.error("Failed to fetch paginated audit list", e);
@@ -280,6 +298,12 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
   React.useEffect(() => {
     fetchPaginatedAudit(auditPage);
   }, [auditPage]);
+
+  React.useEffect(() => {
+      if (autoScrollEnabled && scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      }
+  }, [auditData, autoScrollEnabled]);
 
   const handleExportCSV = async () => {
     try {
@@ -676,11 +700,19 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
 
   return (
     <div className="p-6 bg-background space-y-8 animate-in fade-in duration-500">
+      <TrackUploadModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-xl font-black uppercase tracking-widest text-foreground">Artist Performance Dashboard</h2>
         
         {/* Flat style Subtab Selector */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <Button
+            variant="outline"
+            onClick={() => setIsUploadModalOpen(true)}
+            className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-500 border-cyan-500/20 hover:bg-cyan-500/20"
+          >
+            Upload Track
+          </Button>
           <button
             onClick={() => setActiveSubTab('overview')}
             className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeSubTab === 'overview' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white/5 text-muted-foreground hover:text-foreground'}`}
@@ -1176,7 +1208,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                   </div>
 
                   {/* Royalty Audit Table Card */}
-                  <div className="lg:col-span-7 bg-card p-6 rounded-3xl border border-border flex flex-col justify-between Royalty-Audit-Log-Component">
+                  <div className={cn("lg:col-span-7 bg-card p-6 rounded-3xl border border-border flex flex-col justify-between Royalty-Audit-Log-Component", newlyAddedIds.length > 0 && "bid-container-glow")}>
                       <div>
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
@@ -1202,6 +1234,14 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                   Grouped
                                 </button>
                               </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
+                                className={`flex items-center gap-2 border-white/10 ${autoScrollEnabled ? 'bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30' : 'bg-white/5 text-[#999] hover:text-white'} text-[10px] font-black uppercase tracking-widest transition-all`}
+                              >
+                                {autoScrollEnabled ? 'Auto-Scroll ON' : 'Auto-Scroll OFF'}
+                              </Button>
                               <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex items-center gap-2 border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest text-[#999] hover:text-white transition-all">
                                 <Download className="w-3.5 h-3.5" />
                                 Download CSV
@@ -1299,7 +1339,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                             </div>
                           )}
 
-                          <div className="overflow-x-auto relative min-h-[220px]">
+                          <div ref={scrollContainerRef} className="overflow-x-auto overflow-y-auto max-h-[500px] relative min-h-[220px]">
                             <table className="w-full text-left text-xs">
                                 <thead>
                                     <tr className="border-b border-white/[0.05] text-[#888] bg-white/[0.01]">
@@ -1370,7 +1410,7 @@ export const ArtistDashboardTab: React.FC<{ totalEarnings: number }> = ({ totalE
                                                             <motion.tr 
                                                                 initial={{ opacity: 0, y: 10 }}
                                                                 animate={{ opacity: 1, y: 0 }}
-                                                                className="border-b border-white/[0.02] hover:bg-white/[0.03] active:bg-white/[0.05] transition-all duration-150 cursor-pointer"
+                                                                className={cn("border-b border-white/[0.02] hover:bg-white/[0.03] active:bg-white/[0.05] transition-all duration-150 cursor-pointer", newlyAddedIds.includes(entry.id) && "animate-bid-pulse")}
                                                                 onClick={() => setExpandedNoteTxHash(isExpanded ? null : entry.txHash)}
                                                             >
                                                                 <td className="py-4 px-4 text-zinc-400 font-mono text-[10px] font-medium">{entry.date}</td>

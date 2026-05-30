@@ -179,10 +179,19 @@ function DropdownMenuSeparator({
   className,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
+  const cleanedClassName = className
+    ? className
+        .replace(/bg-white\/[0-9%gp\[\]\.]+/g, "")
+        .replace(/bg-border\/[0-9%gp\[\]\.]+/g, "")
+        .replace("bg-white/5", "")
+        .replace("bg-white/[0.05]", "")
+        .replace("bg-border", "")
+    : ""
+
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1 my-1 h-px bg-border/50", className)}
+      className={cn("-mx-1 my-1 h-px bg-[#E2E8F0]/15", cleanedClassName)}
       {...props}
     />
   )
