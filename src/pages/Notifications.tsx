@@ -101,7 +101,7 @@ const Notifications: React.FC = () => {
     <div className="flex flex-col h-[calc(100vh-64px)] bg-background">
       {/* Header */}
       <div className="px-4 py-4 border-b border-white/5">
-        <div className="flex items-center justify-between gap-4 max-w-4xl mx-auto">
+        <div className="flex items-center justify-between gap-4 w-full max-w-full">
           <div>
             <h1 className="text-lg font-black tracking-tighter uppercase text-foreground">Signals</h1>
           </div>
@@ -145,7 +145,7 @@ const Notifications: React.FC = () => {
 
         <TabsContent value={activeTab} className="flex-1 m-0">
             <ScrollArea className="h-full">
-                <div className="max-w-4xl mx-auto px-4 py-6 space-y-2">
+                <div className="w-full max-w-full px-4 py-6 space-y-2">
                     {filtered.length > 0 ? (
                         filtered.map(item => (
                             <motion.div

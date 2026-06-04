@@ -747,8 +747,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy || isArtistProfile || isProfile || isUserProfile || isSearch ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 overflow-x-hidden ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
-        <div className="w-full max-w-full overflow-x-hidden">
+      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy || isArtistProfile || isProfile || isUserProfile || isSearch ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 ${isSearch ? 'overflow-visible' : 'overflow-x-clip'} ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
+        <div className={`w-full max-w-full ${isSearch ? 'overflow-visible' : 'overflow-x-clip'}`}>
           {children}
         </div>
       </main>

@@ -65,29 +65,29 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       <SheetContent className="w-full sm:max-w-md bg-background border-l border-white/10 p-0 overflow-hidden flex flex-col font-ui">
         <div className="absolute inset-0 bg-blue-500/5 pointer-events-none" />
         
-        <SheetHeader className="p-8 border-b border-white/5 relative bg-background/50 backdrop-blur-xl">
-          <SheetTitle className="text-3xl font-black uppercase tracking-tighter flex items-center gap-3">
-            <Filter className="h-6 w-6 text-blue-500" />
+        <SheetHeader className="p-4 sm:p-6 border-b border-white/5 relative bg-background/50 backdrop-blur-xl">
+          <SheetTitle className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center gap-2">
+            <Filter className="h-5 w-5 text-blue-500" />
             Signal Filters
           </SheetTitle>
-          <SheetDescription className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
+          <SheetDescription className="text-[9px] font-black text-white/40 uppercase tracking-[0.15em] mt-1">
             Refine your sensory exploration parameters
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="flex-1 p-8">
-          <div className="space-y-10">
-            {/* Search Input inside Filters (Optional but requested pattern usually) */}
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Query Identification</Label>
+        <ScrollArea className="flex-1 p-4 sm:p-6">
+          <div className="space-y-6 sm:space-y-8">
+            {/* Search Input inside Filters */}
+            <div className="space-y-2.5">
+              <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Query Identification</Label>
               <div className="relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-blue-500 transition-colors" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20 group-focus-within:text-blue-500 transition-colors" />
                 <input 
                   type="text"
                   placeholder="Filter parameters..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all font-medium"
+                  className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all font-medium"
                 />
               </div>
             </div>
@@ -95,8 +95,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             <Separator className="bg-white/5" />
 
             {/* Category Filter */}
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Dimension</Label>
+            <div className="space-y-2.5">
+              <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Dimension</Label>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: 'all', label: 'All Signals', icon: Zap },
@@ -104,19 +104,20 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   { id: 'artists', label: 'Artists', icon: Users },
                   { id: 'nfts', label: 'NFT Artifacts', icon: ShoppingBag }
                 ].map((cat) => (
-                  <button
+                  <Button
                     key={cat.id}
+                    variant="outline"
                     onClick={() => setActiveFilter(cat.id)}
                     className={cn(
-                      "py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 justify-center",
+                      "h-9 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer w-full",
                       activeFilter === cat.id 
-                        ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20" 
-                        : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                        ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
+                        : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
                     )}
                   >
                     <cat.icon className="h-3.5 w-3.5" />
                     {cat.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -124,8 +125,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             <Separator className="bg-white/5" />
 
             {/* Sorting Section */}
-            <div className="space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Sort Protocol</Label>
+            <div className="space-y-2.5">
+              <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Sort Protocol</Label>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: 'newest', label: 'Newest', icon: Clock3 },
@@ -133,19 +134,20 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   { id: 'price-low', label: 'Price Low', icon: ArrowDown },
                   { id: 'price-high', label: 'Price High', icon: ArrowUp }
                 ].map((opt) => (
-                  <button
+                  <Button
                     key={opt.id}
+                    variant="outline"
                     onClick={() => setSortOption(opt.id)}
                     className={cn(
-                      "py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 justify-center",
+                      "h-9 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer w-full",
                       sortOption === opt.id 
-                        ? "bg-white/10 border-white/20 text-white" 
-                        : "bg-transparent border-white/5 text-white/40 hover:border-white/10"
+                        ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
+                        : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
                     )}
                   >
-                    <opt.icon className="h-3 w-3" />
+                    <opt.icon className="h-3.5 w-3.5" />
                     {opt.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -153,10 +155,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             {filters?.priceRange && filters.setPriceRange && (
               <>
                 <Separator className="bg-white/5" />
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Price Range (TON)</Label>
-                    <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Price Range (TON)</Label>
+                    <span className="text-[9px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">
                       {filters.priceRange[0]} - {filters.priceRange[1]}
                     </span>
                   </div>
@@ -167,7 +169,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     step={10}
                     value={filters.priceRange}
                     onValueChange={filters.setPriceRange}
-                    className="py-4"
+                    className="py-2"
                   />
                 </div>
               </>
@@ -176,10 +178,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             {filters?.bpmRange && filters.setBpmRange && (
               <>
                 <Separator className="bg-white/5" />
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Tempo (BPM)</Label>
-                    <span className="text-[10px] font-mono text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Tempo (BPM)</Label>
+                    <span className="text-[9px] font-mono text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
                       {filters.bpmRange[0]} - {filters.bpmRange[1]}
                     </span>
                   </div>
@@ -190,7 +192,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     step={1}
                     value={filters.bpmRange}
                     onValueChange={filters.setBpmRange}
-                    className="py-4"
+                    className="py-2"
                   />
                 </div>
               </>
@@ -199,22 +201,23 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             {filters?.setRarity && (
               <>
                 <Separator className="bg-white/5" />
-                <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Artifact Rarity</Label>
+                <div className="space-y-3">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Artifact Rarity</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {['All', 'Unique', 'Rare', 'Limited', 'Common'].map((rarity) => (
-                      <button
+                      <Button
                         key={rarity}
+                        variant="outline"
                         onClick={() => filters.setRarity!(rarity)}
                         className={cn(
-                          "py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                          "h-9 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center justify-center cursor-pointer w-full",
                           filters.rarity === rarity 
-                            ? "bg-amber-500/10 border-amber-500/30 text-amber-500 shadow-lg shadow-amber-500/5" 
-                            : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                            ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
+                            : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
                         )}
                       >
                         {rarity}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -224,22 +227,23 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             {filters?.status !== undefined && filters.setStatus && (
               <>
                 <Separator className="bg-white/5" />
-                <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Listing Status</Label>
+                <div className="space-y-3">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Listing Status</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {['All', 'Active Auctions'].map((status) => (
-                      <button
+                      <Button
                         key={status}
+                        variant="outline"
                         onClick={() => filters.setStatus!(status)}
                         className={cn(
-                          "py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                          "h-9 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center justify-center cursor-pointer w-full",
                           filters.status === status 
-                            ? "bg-purple-500/10 border-purple-500/30 text-purple-500 shadow-lg shadow-purple-500/5" 
-                            : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                            ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
+                            : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
                         )}
                       >
                         {status}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -249,15 +253,15 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             {filters?.selectedGenres && filters.setSelectedGenres && (
               <>
                 <Separator className="bg-white/5" />
-                <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-foreground">Frequency Genres</Label>
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-3">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Frequency Genres</Label>
+                  <div className="flex flex-wrap gap-1.5">
                     {GENRES.map((genre) => {
                       const isSelected = filters.selectedGenres?.includes(genre.name);
                       return (
-                        <Badge 
+                        <Button 
                           key={genre.id}
-                          variant={isSelected ? "default" : "outline"}
+                          variant="outline"
                           onClick={() => {
                             if (isSelected) {
                               filters.setSelectedGenres!(filters.selectedGenres!.filter(g => g !== genre.name));
@@ -266,14 +270,49 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                             }
                           }}
                           className={cn(
-                            "px-3 py-1 cursor-pointer text-[9px] font-black uppercase tracking-widest rounded-full transition-all",
+                            "px-3 h-7 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border",
                             isSelected 
-                              ? "bg-blue-600 border-blue-500 text-white" 
-                              : "bg-transparent border-white/10 hover:border-blue-500/50 hover:bg-blue-500/5"
+                              ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
+                              : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
                           )}
                         >
                           {genre.name}
-                        </Badge>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {filters?.selectedMoods && filters.setSelectedMoods && (
+              <>
+                <Separator className="bg-white/5" />
+                <div className="space-y-3">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Mood Exploration</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {MOODS.map((mood) => {
+                      const isSelected = filters.selectedMoods?.includes(mood.name);
+                      return (
+                        <Button 
+                          key={mood.id}
+                          variant="outline"
+                          onClick={() => {
+                            if (isSelected) {
+                              filters.setSelectedMoods!(filters.selectedMoods!.filter(m => m !== mood.name));
+                            } else {
+                              filters.setSelectedMoods!([...(filters.selectedMoods || []), mood.name]);
+                            }
+                          }}
+                          className={cn(
+                            "px-3 h-7 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border",
+                            isSelected 
+                              ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
+                              : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
+                          )}
+                        >
+                          {mood.name}
+                        </Button>
                       );
                     })}
                   </div>
@@ -284,16 +323,16 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             {filters?.setOnlyVerified && (
               <>
                 <Separator className="bg-white/5" />
-                <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-foreground cursor-pointer" htmlFor="verified-filter">Verified Entities</Label>
-                    <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-wider">Only show signals from identified artists</p>
+                <div className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-xl">
+                  <div className="space-y-0.5">
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground cursor-pointer" htmlFor="verified-filter">Verified Entities</Label>
+                    <p className="text-[8px] text-muted-foreground font-semibold uppercase tracking-wider">Only show signals from identified artists</p>
                   </div>
                   <Checkbox 
                     id="verified-filter" 
                     checked={filters.onlyVerified} 
                     onCheckedChange={(v) => filters.setOnlyVerified!(!!v)}
-                    className="h-5 w-5 border-white/20 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-500 rounded-sm"
+                    className="h-4.5 w-4.5 border-white/20 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-500 rounded-sm"
                   />
                 </div>
               </>
@@ -301,10 +340,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
           </div>
         </ScrollArea>
 
-        <SheetFooter className="p-8 border-t border-white/5 bg-background relative z-10 sm:flex-row gap-3">
+        <SheetFooter className="p-4 sm:p-6 border-t border-white/5 bg-background relative z-10 sm:flex-row gap-2">
           <Button 
             variant="ghost" 
-            className="flex-1 rounded-xl text-[10px] font-black uppercase tracking-widest"
+            className="flex-1 rounded-xl text-[9px] font-black uppercase tracking-widest h-10 border-none"
             onClick={() => {
               setSortOption('newest');
               setActiveFilter('all');
@@ -320,7 +359,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             Reset
           </Button>
           <Button 
-            className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-600/20"
+            className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest h-10 shadow-lg shadow-blue-600/20"
             onClick={() => onOpenChange(false)}
           >
             Engage

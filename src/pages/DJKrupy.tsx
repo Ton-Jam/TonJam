@@ -405,7 +405,7 @@ const DJKrupy: React.FC = () => {
                     </Button>
                 </header>
                 <div className="flex-1 overflow-y-auto px-6 md:px-24 py-16 scrollbar-none">
-                    <div className="max-w-4xl mx-auto space-y-12">
+                    <div className="w-full max-w-full space-y-12">
                         {currentTrack.lyrics.split('\n').map((line, idx) => (
                             <p key={idx} className={cn(
                                 "text-2xl md:text-5xl font-black uppercase tracking-tight transition-all duration-700 leading-[1.3]",

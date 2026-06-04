@@ -32,7 +32,16 @@ const ArtistMinting: React.FC = () => {
     audioFile: null as File | null,
     coverPreview: '',
     price: '2.5',
-    editions: '100'
+    editions: '100',
+    lyrics: '',
+    hasExclusive: false,
+    exclusiveTitle: '',
+    exclusiveType: 'document' as 'video' | 'track' | 'image' | 'document',
+    exclusiveUrl: '',
+    exclusiveDescription: '',
+    listingType: 'fixed' as 'fixed' | 'auction',
+    startingBid: '1.0',
+    auctionDuration: '3'
   });
 
   const [royaltySplits, setRoyaltySplits] = useState<RoyaltySplitExtended[]>([{ address: userProfile.walletAddress || '', percentage: 100, label: 'Creator' }]);
@@ -47,7 +56,16 @@ const ArtistMinting: React.FC = () => {
         audioFile: null,
         coverPreview: selectedTrack.coverUrl,
         price: selectedTrack.price || '2.5',
-        editions: selectedTrack.editions || '100'
+        editions: selectedTrack.editions || '100',
+        lyrics: selectedTrack.lyrics || '',
+        hasExclusive: selectedTrack.isExclusive || false,
+        exclusiveTitle: '',
+        exclusiveType: 'document',
+        exclusiveUrl: '',
+        exclusiveDescription: '',
+        listingType: selectedTrack.listingType || 'fixed',
+        startingBid: (selectedTrack as any).startingBid || '1.0',
+        auctionDuration: '3'
       });
       
       const extendedSplits: RoyaltySplitExtended[] = (selectedTrack.royaltySplits || []).map(s => ({
@@ -133,7 +151,14 @@ const ArtistMinting: React.FC = () => {
         attributes: [
           { trait_type: "Genre", value: trackData.genre },
           { trait_type: "RoyaltySplits", value: JSON.stringify(royaltySplitsDecimals) },
-          { trait_type: "Editions", value: trackData.editions }
+          { trait_type: "Editions", value: trackData.editions },
+          ...(trackData.lyrics ? [{ trait_type: "Lyrics", value: trackData.lyrics }] : []),
+          ...(trackData.hasExclusive ? [
+            { trait_type: "ExclusiveTitle", value: trackData.exclusiveTitle },
+            { trait_type: "ExclusiveType", value: trackData.exclusiveType },
+            { trait_type: "ExclusiveUrl", value: trackData.exclusiveUrl },
+            { trait_type: "ExclusiveDescription", value: trackData.exclusiveDescription }
+          ] : [])
         ]
       };
       
@@ -146,6 +171,8 @@ const ArtistMinting: React.FC = () => {
 
       // Save to database
       const finalTrackId = selectedTrack?.id || `track-nft-${Date.now()}`;
+      const finalPrice = trackData.listingType === 'auction' ? trackData.startingBid : trackData.price;
+      
       const newTrack: Track = {
         ...(selectedTrack || {}),
         id: finalTrackId,
@@ -159,15 +186,26 @@ const ArtistMinting: React.FC = () => {
         genre: trackData.genre,
         isNFT: true,
         artistVerified: true,
-        price: trackData.price,
+        price: finalPrice,
         editions: trackData.editions,
         royaltySplits: royaltySplitsDecimals,
         minted: (selectedTrack?.minted || 0) + 1,
         metadataUrl: metadataRes.downloadUrl,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        lyrics: trackData.lyrics,
+        isExclusive: trackData.hasExclusive,
+        listingType: trackData.listingType,
+        auctionDuration: trackData.listingType === 'auction' ? trackData.auctionDuration : undefined
       } as Track;
 
       await addUserTrack(newTrack);
+
+      const getAuctionEndTime = (daysStr: string) => {
+        const days = parseInt(daysStr) || 3;
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + days);
+        return targetDate.toISOString();
+      };
 
       const newNFT: NFTItem = {
         id: `nft-${Date.now()}`,
@@ -177,7 +215,7 @@ const ArtistMinting: React.FC = () => {
         creator: userProfile.name || 'Unknown Artist',
         artist: userProfile.name,
         artistId: userProfile.uid,
-        price: trackData.price,
+        price: finalPrice,
         imageUrl: coverUrl,
         coverUrl: coverUrl,
         audioUrl: audioUrl,
@@ -186,9 +224,20 @@ const ArtistMinting: React.FC = () => {
         minted: 1,
         royaltySplits: royaltySplitsDecimals,
         description: trackData.description,
-        listingType: 'fixed',
+        listingType: trackData.listingType,
+        isAuction: trackData.listingType === 'auction',
+        startingBid: trackData.listingType === 'auction' ? trackData.startingBid : undefined,
+        auctionStartTime: trackData.listingType === 'auction' ? new Date().toISOString() : undefined,
+        auctionEndTime: trackData.listingType === 'auction' ? getAuctionEndTime(trackData.auctionDuration) : undefined,
+        exclusiveContent: trackData.hasExclusive ? [{
+          id: `ex-${Date.now()}`,
+          title: trackData.exclusiveTitle,
+          type: trackData.exclusiveType,
+          url: trackData.exclusiveUrl,
+          description: trackData.exclusiveDescription
+        }] : [],
         ipfsUrl: metadataRes.downloadUrl,
-        history: [{ event: 'Minted', from: 'NullAddress', to: userProfile.name || 'Unknown', date: new Date().toISOString(), price: trackData.price }]
+        history: [{ event: 'Minted', from: 'NullAddress', to: userProfile.name || 'Unknown', date: new Date().toISOString(), price: finalPrice }]
       };
       
       await addUserNFT(newNFT);
@@ -327,6 +376,70 @@ const ArtistMinting: React.FC = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Exclusive Content Integration */}
+                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-tight">Exclusive Collector's Content</h3>
+                        <p className="text-[9px] font-bold text-white/45 uppercase tracking-widest mt-1">Unlockable only by NFT owners</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={trackData.hasExclusive} 
+                        onChange={e => setTrackData({...trackData, hasExclusive: e.target.checked})}
+                        className="w-4 h-4 rounded text-cyan-500 bg-white/5 border-white/10 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                      />
+                    </div>
+                    {trackData.hasExclusive && (
+                      <div className="space-y-4 pt-2 animate-in fade-in duration-300">
+                        <div>
+                          <label className="block text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Content Title</label>
+                          <input 
+                            type="text" 
+                            value={trackData.exclusiveTitle} 
+                            onChange={e => setTrackData({...trackData, exclusiveTitle: e.target.value})}
+                            required
+                            className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-cyan-500"
+                            placeholder="VIP Access Pass / Bonus Audio" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Content Type</label>
+                          <select 
+                            value={trackData.exclusiveType} 
+                            onChange={e => setTrackData({...trackData, exclusiveType: e.target.value as any})}
+                            className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-cyan-500"
+                          >
+                            <option value="video" className="bg-[#15191C]">Video Release</option>
+                            <option value="track" className="bg-[#15191C]">Special Track/Stems</option>
+                            <option value="image" className="bg-[#15191C]">Digital Artwork/Poster</option>
+                            <option value="document" className="bg-[#15191C]">Exclusive PDF Document</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Resource URL (IPFS or secure link)</label>
+                          <input 
+                            type="text" 
+                            value={trackData.exclusiveUrl} 
+                            onChange={e => setTrackData({...trackData, exclusiveUrl: e.target.value})}
+                            required
+                            className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-cyan-500"
+                            placeholder="https://ipfs.io/ipfs/..." 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Instructions / VIP Note</label>
+                          <textarea 
+                            value={trackData.exclusiveDescription} 
+                            onChange={e => setTrackData({...trackData, exclusiveDescription: e.target.value})}
+                            className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:border-cyan-500 h-20 resize-none"
+                            placeholder="Explain what the collector receives and how to redeem it..." 
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-6">
@@ -349,6 +462,11 @@ const ArtistMinting: React.FC = () => {
                     <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-2">Artifact Lore</label>
                     <textarea value={trackData.description} onChange={e => setTrackData({...trackData, description: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-cyan-500 transition-colors h-32 resize-none" placeholder="Describe the frequency..." />
                   </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-2">Release Lyrics</label>
+                    <textarea value={trackData.lyrics} onChange={e => setTrackData({...trackData, lyrics: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-cyan-500 transition-colors h-48 resize-none" placeholder="Enter lyrics for the track (optional)..." />
+                  </div>
                 </div>
               </div>
 
@@ -362,12 +480,51 @@ const ArtistMinting: React.FC = () => {
           {step === 3 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <h2 className="text-xl font-black uppercase tracking-tighter">Economic Parameters</h2>
+
+              {/* Listing Type Selection */}
+              <div>
+                <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-2">Sale Type</label>
+                <div className="flex gap-4 p-1 bg-white/5 border border-white/10 rounded-2xl max-w-sm">
+                  <button 
+                    type="button" 
+                    onClick={() => setTrackData({...trackData, listingType: 'fixed'})}
+                    className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${trackData.listingType === 'fixed' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                  >
+                    Fixed Price
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setTrackData({...trackData, listingType: 'auction'})}
+                    className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${trackData.listingType === 'auction' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                  >
+                    Timed Auction
+                  </button>
+                </div>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-2">Market Price (TON)</label>
-                  <input type="number" value={trackData.price} onChange={e => setTrackData({...trackData, price: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xl font-black text-amber-500 outline-none focus:border-amber-500/50 transition-colors" />
-                </div>
+                {trackData.listingType === 'fixed' ? (
+                  <div>
+                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-2">Market Price (TON)</label>
+                    <input type="number" step="0.1" value={trackData.price} onChange={e => setTrackData({...trackData, price: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xl font-black text-amber-500 outline-none focus:border-amber-500/50 transition-colors" />
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-2">Starting Bid (TON)</label>
+                      <input type="number" step="0.1" value={trackData.startingBid} onChange={e => setTrackData({...trackData, startingBid: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xl font-black text-amber-500 outline-none focus:border-amber-500/50 transition-colors" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-2">Auction Duration</label>
+                      <select value={trackData.auctionDuration} onChange={e => setTrackData({...trackData, auctionDuration: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold/80 outline-none focus:border-cyan-500 transition-colors uppercase tracking-widest bg-[#15191C]">
+                        <option value="1">1 Day</option>
+                        <option value="3">3 Days</option>
+                        <option value="7">7 Days</option>
+                        <option value="14">2 Weeks</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
                 
                 <div>
                   <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-2">Max Editions</label>

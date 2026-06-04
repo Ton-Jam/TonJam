@@ -461,7 +461,7 @@ const Home: React.FC = () => {
       <GetFreeTokensModal isOpen={isTokensModalOpen} onClose={() => setIsTokensModalOpen(false)} />
       {isBuyTJModalOpen && <BuyTJModal onClose={() => setIsBuyTJModalOpen(false)} onSuccess={() => setIsBuyTJModalOpen(false)} />}
       
-      <div className="max-w-4xl mx-auto w-full relative z-20 mb-6 px-4">
+      <div className="w-full relative z-20 mb-6 px-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.25em] mb-1">User Console</p>
@@ -482,7 +482,7 @@ const Home: React.FC = () => {
       <Tabs 
         value={activeTab} 
         onValueChange={(v) => setActiveTab(v as 'overview' | 'discovery')}
-        className="max-w-4xl mx-auto w-full relative z-20 mb-[18px] sm:mb-[34px]"
+        className="w-full relative z-20 mb-[18px] sm:mb-[34px]"
       >
         <div className="flex items-center justify-between mb-4 px-2">
           <TabsList variant="line" className="bg-transparent gap-4 sm:gap-8">
@@ -561,7 +561,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="max-w-4xl mx-auto w-full space-y-12 sm:space-y-16 pb-24 px-4 sm:px-0"
+            className="w-full space-y-12 sm:space-y-16 pb-24 px-4 sm:px-0"
           >
             {/* Welcome Banner */}
             <CompleteProfilePrompt />
@@ -884,7 +884,7 @@ const Home: React.FC = () => {
 
             {/* Protocol Mechanics Accordion */}
             <section className="section-container">
-              <div className="max-w-3xl mx-auto space-y-8">
+              <div className="w-full space-y-8">
                 <div className="text-center space-y-2">
                   <Badge variant="outline" className="px-4 py-1 bg-blue-950/20 dark:bg-blue-950/20 border-zinc-700 dark:border-blue-900/30 text-zinc-400 dark:text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] rounded-full">
                     Protocol_Documentation

@@ -128,7 +128,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
   return (
     <div 
       onClick={handleClick}
-      className="flex flex-col items-center text-center h-full w-full p-3 rounded-[4px] bg-muted/20 hover:bg-muted/30 transition-all min-w-[130px] cursor-pointer group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 shadow-none"
+      className="group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent hover:bg-white/[0.03] border border-transparent w-full"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -139,43 +139,52 @@ const UserCard: React.FC<UserCardProps> = ({ user, variant = 'portrait' }) => {
       tabIndex={0}
       aria-label={`View profile of ${user.name}`}
     >
-      <div className="relative mb-2 w-20 h-20">
-        <div className="w-full h-full rounded-full overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300">
-          <img 
-            src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} 
-            alt={user.name} 
-            className="w-full h-full object-cover" 
-          />
-        </div>
+      <div className="relative aspect-square overflow-hidden bg-neutral-900 transition-all rounded-[4px] mb-2 border border-white/5">
+        <img 
+          src={avatarUrl || getPlaceholderImage(`user-${user.uid}`)} 
+          alt={user.name} 
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+          onError={(e) => { e.currentTarget.src = getPlaceholderImage(`user-${user.uid}`); }}
+        />
       </div>
       
-      <div className="flex flex-col min-w-0 w-full mb-2 items-center text-center space-y-0.5">
-        <div className="flex items-center gap-1 justify-center max-w-full">
-          <h3 className="text-[10px] font-bold text-foreground tracking-tight uppercase truncate">
-            {user.name}
-          </h3>
-          {verified && <Verified className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
+      <div className="px-0.5 flex flex-col gap-1">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1">
+            <h3 className="text-xs font-black uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight text-foreground truncate">
+              {user.name}
+            </h3>
+            {verified && <Verified className="w-2.5 h-2.5 text-primary flex-shrink-0" />}
+          </div>
+          <p className="text-[10px] font-medium text-foreground/80 uppercase tracking-[0.1em] truncate">
+            {genre || 'COLLECTOR'}
+          </p>
         </div>
-        
-        <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">
-          {user.followers?.toLocaleString() || 0} Followers
-        </p>
+
+        <div className="flex items-end justify-between mt-2">
+          <div className="space-y-0.5">
+            <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Network Fans</p>
+            <div className="flex items-center gap-1 bg-muted/40 py-0.5 px-2 rounded-[4px] border border-border/10 text-muted-foreground text-[10px] font-extrabold tracking-widest">
+              {user.followers?.toLocaleString() || 0}
+            </div>
+          </div>
+          
+          {!isOwnProfile && (
+            <button 
+              onClick={handleFollow}
+              className={`cursor-pointer transition-all rounded-[4px] border-b-[2px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[4px] active:border-b-[1px] active:brightness-90 active:translate-y-[1px] h-8 px-3 text-[9px] font-black uppercase tracking-[0.1em] text-white
+                ${isFollowing 
+                  ? 'bg-muted text-foreground border-border' 
+                  : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 border-blue-600'
+                }
+              `}
+              aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
+            >
+              {isFollowing ? 'SYNCED' : 'FOLLOW'}
+            </button>
+          )}
+        </div>
       </div>
-      
-      {!isOwnProfile && (
-        <button 
-          onClick={handleFollow}
-          className={`w-auto px-5 py-1.5 text-[9px] rounded-full mx-auto flex items-center justify-center gap-2 transition-all font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600
-            ${isFollowing 
-              ? 'bg-muted/50 text-muted-foreground/60 border border-border/50' 
-              : 'bg-gradient-to-r from-blue-700 to-blue-500 hover:opacity-90 text-white'
-            }
-          `}
-          aria-label={isFollowing ? `Unfollow ${user.name}` : `Follow ${user.name}`}
-        >
-          {isFollowing ? 'SYNCED' : 'FOLLOW'}
-        </button>
-      )}
     </div>
   );
 };

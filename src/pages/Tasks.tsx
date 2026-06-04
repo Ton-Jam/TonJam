@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TJ_COIN_ICON } from "@/constants";
 import TaskCard from "@/components/TaskCard";
+import TaskCards from "@/components/aicanvas/task-cards";
 import { useAudio } from "@/context/AudioContext";
 import { Task } from "@/types";
 
@@ -73,6 +74,12 @@ const Tasks: React.FC = () => {
 
   const handleClick = (task: Task) => {
     console.log("Task clicked", task);
+    if ((task.type === 'social' || task.type === 'achievement' || task.type === 'referral') && task.link) {
+      window.open(task.link, '_blank');
+      if (!task.completed) {
+        handleToggle(task.id, task.total);
+      }
+    }
   };
 
   const filteredTasks = useMemo(() => {
@@ -114,8 +121,8 @@ const Tasks: React.FC = () => {
   }, [firestoreUsers]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-[140px]">
-      <div className="px-4 py-3 space-y-4">
+    <div className="min-h-screen bg-background text-foreground pb-[140px] w-full">
+      <div className="w-full max-w-full px-4 md:px-8 py-4 space-y-5">
         {/* HEADER */}
         <div className="flex items-center justify-between pb-1">
           <div>
@@ -234,6 +241,25 @@ const Tasks: React.FC = () => {
           </div>
         </section>
 
+        {/* INTERACTIVE SWIPE DECK */}
+        <section className="bg-foreground/[0.02] rounded-2xl p-4 flex flex-col items-center">
+          <div className="flex items-center gap-1.5 self-start mb-2">
+            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500/10" />
+            <h2 className="font-bold text-[10px] uppercase tracking-wider text-muted-foreground font-ui">
+              Active Quest Deck
+            </h2>
+          </div>
+          <p className="text-[9px] text-muted-foreground text-center mb-1">
+            Swipe left/right to browse. Click <span className="font-black text-primary">Start</span> to begin.
+          </p>
+          <TaskCards 
+            tasks={tasks}
+            onClaim={handleClaim}
+            onToggle={handleToggle}
+            onClick={handleClick}
+          />
+        </section>
+
         {/* FILTERS - FRAMELESS HIGH-CONTRAST PILLES */}
         <div className="py-0.5 -mx-4 md:-mx-8 lg:-mx-12">
           <Tabs
@@ -258,7 +284,7 @@ const Tasks: React.FC = () => {
         </div>
 
         {/* TASK LIST - COMPLETED WITH OUR SLICK ROW TASK CARDS */}
-        <section className="space-y-1.5 max-h-[480px] overflow-y-auto pr-1 no-scrollbar">
+        <section className="space-y-2 w-full">
           {filteredTasks.map((task) => (
             <TaskCard
               key={task.id}

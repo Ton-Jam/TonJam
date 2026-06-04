@@ -656,228 +656,234 @@ export const MOCK_ARTISTS: Artist[] = [
   },
   { 
     uid: 'a1', 
-    name: 'Cosmic Echo', 
-    username: '@neon_voyager',
-    walletAddress: 'UQCc_NeonVoyager_x9y1_v8s2_m5n6_z2w3',
-    avatarUrl: 'https://image.pollinations.ai/prompt/mystical%20space%20traveler%20avatar%20synthwave%20colors?width=400&height=400&nologo=true', 
-    followers: 12400, 
-    verified: true,
-    isVerifiedArtist: true,
-    genre: 'Electronic',
-    bio: "Pioneering the sound of the digital frontier. Synthwave frequencies forged in the TON core.",
-    bannerUrl: "https://image.pollinations.ai/prompt/space%20nebula%20landscape%20synthwave%20banner?width=1200&height=400&nologo=true",
-    socials: { x: 'https://x.com/neon_voyager', spotify: 'https://spotify.com/artist/neon_voyager', instagram: 'https://instagram.com/neon_voyager', telegram: 'https://t.me/neon_voyager' },
-    royaltyConfig: { 
-      streamingSplits: [{ address: 'UQCc_NeonVoyager_x9y1_v8s2_m5n6_z2w3', percentage: 0.05, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQCc_NeonVoyager_x9y1_v8s2_m5n6_z2w3', percentage: 0.10, label: 'Main Artist' }]
-    },
-    earnings: { streaming: 12.4, nftSales: 45.2, total: 57.6 },
-    events: [
-      { id: 'e1', artistId: 'a1', title: 'Neon Nights Live', date: '2024-05-20', time: '20:00', venue: 'The Digital Dome', location: 'London, UK', ticketUrl: 'https://example.com/tickets' },
-      { id: 'e2', artistId: 'a1', title: 'Cyber Drift Tour', date: '2024-06-15', time: '21:30', venue: 'Synth City Arena', location: 'Tokyo, JP' }
-    ],
-    collaborations: [
-      { id: 'c1', artistName: 'Byte Beat', trackTitle: 'Digital Pulse', coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Digital%20Pulse?width=200&height=200&nologo=true' },
-      { id: 'c2', artistName: 'Luna Ray', trackTitle: 'Starlight Drift', coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Starlight%20Drift?width=200&height=200&nologo=true' }
-    ]
-  },
-  { 
-    uid: 'a2', 
-    name: 'Byte Beat', 
-    username: '@byte_beat',
-    walletAddress: 'UQByteBeat_n7m2_k9p4_j8h3_f5g6',
-    avatarUrl: 'https://image.pollinations.ai/prompt/digital%20humanoid%20avatar%20glitch%20art?width=400&height=400&nologo=true', 
-    followers: 8900, 
-    verified: true,
-    isVerifiedArtist: true,
-    genre: 'Synthwave',
-    bio: "Algorithmically generated beats for the decentralized generation.",
-    bannerUrl: "https://image.pollinations.ai/prompt/glitched%20digital%20cityscape%20banner?width=1200&height=400&nologo=true",
-    socials: { x: 'https://x.com/byte_beat', spotify: 'https://spotify.com/artist/byte_beat' },
-    royaltyConfig: { 
-      streamingSplits: [{ address: 'UQByteBeat_n7m2_k9p4_j8h3_f5g6', percentage: 0.04, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQByteBeat_n7m2_k9p4_j8h3_f5g6', percentage: 0.08, label: 'Main Artist' }]
-    },
-    earnings: { streaming: 5.2, nftSales: 12.8, total: 18.0 },
-    events: [
-      { id: 'e3', artistId: 'a2', title: 'Byte Beat Live Stream', date: '2024-05-25', time: '18:00', venue: 'Twitch / TonJam Live', location: 'Virtual', ticketUrl: 'https://twitch.tv/bytebeat' },
-      { id: 'e4', artistId: 'a2', title: 'Decentralized Beats Festival', date: '2024-07-10', time: '14:00', venue: 'Blockchain Park', location: 'Berlin, DE' }
-    ],
-    collaborations: [
-      { id: 'c3', artistName: 'Neon Voyager', trackTitle: 'Digital Pulse', coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Digital%20Pulse?width=200&height=200&nologo=true' },
-      { id: 'c4', artistName: 'City Ghost', trackTitle: 'Urban Echo', coverUrl: 'https://image.pollinations.ai/prompt/music%20album%20cover%20Urban%20Echo?width=200&height=200&nologo=true' }
-    ]
-  },
-  { 
-    uid: 'a3', 
-    name: 'Echo Phase', 
-    username: '@echo_phase',
-    walletAddress: 'UQEchoPhase_v8s1_m5n6_k9p4_j8h3',
-    avatarUrl: 'https://image.pollinations.ai/prompt/abstract%20wave%20pattern%20avatar%20deep%20blue?width=400&height=400&nologo=true', 
-    followers: 5600, 
-    verified: false,
-    isVerifiedArtist: false,
-    genre: 'Ambient',
-    bio: "Ambient explorations through the blockchain void.",
-    bannerUrl: "https://image.pollinations.ai/prompt/calm%20ocean%20under%20stars%20ambient%20banner?width=1200&height=400&nologo=true",
-    socials: { website: 'https://echophase.io' },
-    royaltyConfig: { 
-      streamingSplits: [{ address: 'UQEchoPhase_v8s1_m5n6_k9p4_j8h3', percentage: 0.03, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQEchoPhase_v8s1_m5n6_k9p4_j8h3', percentage: 0.05, label: 'Main Artist' }]
-    },
-    earnings: { streaming: 2.1, nftSales: 8.5, total: 10.6 }
-  },
-  { 
-    uid: 'a4', 
-    name: 'Luna Ray', 
-    username: '@lunaray',
-    walletAddress: 'UQLunaRay_p3q9_r7t8_w2x4_b1c2',
-    avatarUrl: 'https://image.pollinations.ai/prompt/dreamy%20pop%20singer%20avatar%20pastel%20colors?width=400&height=400&nologo=true', 
-    followers: 15200, 
-    verified: true,
-    isVerifiedArtist: true,
-    genre: 'Pop',
-    bio: "Ethereal pop melodies floating on top of complex electronic soundscapes.",
-    bannerUrl: "https://image.pollinations.ai/prompt/soft%20clouds%20and%20moonlight%20pop%20banner?width=1200&height=400&nologo=true",
-    socials: { x: 'https://x.com/lunaray', instagram: 'https://instagram.com/lunaray' },
-    royaltyConfig: { 
-      streamingSplits: [{ address: 'UQLunaRay_p3q9_r7t8_w2x4_b1c2', percentage: 0.06, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQLunaRay_p3q9_r7t8_w2x4_b1c2', percentage: 0.12, label: 'Main Artist' }]
-    },
-    earnings: { streaming: 18.5, nftSales: 32.1, total: 50.6 }
-  },
-  { 
-    uid: 'a5', 
-    name: 'City Ghost', 
-    username: '@city_ghost',
-    walletAddress: 'UQCityGhost_w2x4_b1c2_d5f6_g7h8',
-    avatarUrl: 'https://image.pollinations.ai/prompt/lofi%20ghost%20wearing%20headphones%20in%20city%20rain?width=400&height=400&nologo=true', 
-    followers: 4300, 
-    verified: false,
-    isVerifiedArtist: false,
-    genre: 'Electronic',
-    bio: "Lo-fi beats captured from the heart of the urban jungle.",
-    bannerUrl: "https://image.pollinations.ai/prompt/rainy%20city%20street%20lofi%20banner?width=1200&height=400&nologo=true",
-    socials: { spotify: 'https://spotify.com/artist/cityghost' },
-    royaltyConfig: { 
-      streamingSplits: [{ address: 'UQCityGhost_w2x4_b1c2_d5f6_g7h8', percentage: 0.02, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQCityGhost_w2x4_b1c2_d5f6_g7h8', percentage: 0.04, label: 'Main Artist' }]
-    },
-    earnings: { streaming: 1.2, nftSales: 4.3, total: 5.5 }
-  },
-  { 
-    uid: 'a6', 
-    name: 'Prism Core', 
-    username: '@prism_core',
-    walletAddress: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2',
-    avatarUrl: 'https://image.pollinations.ai/prompt/abstract%20digital%20prism%20avatar%20techno%20style?width=400&height=400&nologo=true', 
-    followers: 7800, 
-    verified: true,
-    isVerifiedArtist: true,
-    genre: 'Techno',
-    bio: "Shattering sonic boundaries with experimental techno and hard-hitting rhythms.",
-    bannerUrl: "https://image.pollinations.ai/prompt/abstract%20geometric%20techno%20banner%20with%20lasers?width=1200&height=400&nologo=true",
-    socials: { x: 'https://x.com/prismcore', website: 'https://prismcore.tech' },
-    royaltyConfig: { 
-      streamingSplits: [{ address: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2', percentage: 0.05, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQPrismCore_d5f6_g7h8_x9y1_v8s2', percentage: 0.10, label: 'Main Artist' }]
-    },
-    earnings: { streaming: 8.4, nftSales: 22.1, total: 30.5 }
-  },
-  { 
-    uid: 'a7', 
-    name: 'Smooth Operator', 
-    username: '@smooth_operator',
-    walletAddress: 'UQJazzMan_j1a2_z3z4_m5a6_n7n8',
-    avatarUrl: 'https://image.pollinations.ai/prompt/cool%20jazz%20saxophonist%20avatar%20silhouette%20in%20blue?width=400&height=400&nologo=true', 
-    followers: 4500, 
-    verified: true,
-    isVerifiedArtist: true,
-    genre: 'Jazz',
-    bio: "Setting the mood with classic jazz standards and original compositions.",
-    bannerUrl: "https://image.pollinations.ai/prompt/moody%20jazz%20club%20interior%20banner?width=1200&height=400&nologo=true",
-    socials: { x: 'https://x.com/smooth_jazz' },
-    royaltyConfig: { 
-      streamingSplits: [{ address: 'UQJazzMan_j1a2_z3z4_m5a6_n7n8', percentage: 0.05, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQJazzMan_j1a2_z3z4_m5a6_n7n8', percentage: 0.10, label: 'Main Artist' }]
-    },
-    earnings: { streaming: 4.1, nftSales: 15.2, total: 19.3 }
-  },
-  { 
-    uid: 'a8', 
-    name: 'Urban Flow', 
-    username: '@urbanflow',
-    walletAddress: 'UQHipHop_h1i2_p3h4_o5p6_u7r8',
-    avatarUrl: 'https://image.pollinations.ai/prompt/streetwear%20style%20hiphop%20artist%20avatar%20with%20hoodie?width=400&height=400&nologo=true', 
-    followers: 32000, 
+    name: 'Drake', 
+    username: '@drake',
+    walletAddress: 'UQDrake_x9y1_8888',
+    avatarUrl: 'https://i.postimg.cc/LhhtQkF0/drake.jpg', 
+    followers: 95000, 
     verified: true,
     isVerifiedArtist: true,
     genre: 'Hip Hop',
-    bio: "The voice of the TON streets. Real words, real beats.",
-    bannerUrl: "https://image.pollinations.ai/prompt/urban%20rooftop%20at%20night%20hiphop%20banner?width=1200&height=400&nologo=true",
-    socials: { instagram: 'https://instagram.com/urban_flow' },
+    bio: "Global icon bringing the best of hip hop to the TonJam network.",
+    bannerUrl: "https://image.pollinations.ai/prompt/cool%20hip%20hop%20banner%20drake?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/drake', instagram: 'https://instagram.com/drake' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'UQHipHop_h1i2_p3h4_o5p6_u7r8', percentage: 0.04, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQHipHop_h1i2_p3h4_o5p6_u7r8', percentage: 0.08, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQDrake_x9y1_8888', percentage: 0.10, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQDrake_x9y1_8888', percentage: 0.20, label: 'Main Artist' }]
     },
-    earnings: { streaming: 25.4, nftSales: 12.1, total: 37.5 }
+    earnings: { streaming: 500.0, nftSales: 1500.0, total: 2000.0 },
+    events: [],
+    collaborations: []
+  },
+  { 
+    uid: 'a2', 
+    name: 'Wizkid', 
+    username: '@wizkid',
+    walletAddress: 'UQualWizkid_n7m2_k9p4',
+    avatarUrl: 'https://i.postimg.cc/y3SS1PVB/wizkid.jpg', 
+    followers: 88000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Afrobeats',
+    bio: "Pioneering the afrobeats sound globally.",
+    bannerUrl: "https://image.pollinations.ai/prompt/afrobeats%20vibe%20banner%20wizkid?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/wizkid', instagram: 'https://instagram.com/wizkid' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQualWizkid_n7m2_k9p4', percentage: 0.08, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQualWizkid_n7m2_k9p4', percentage: 0.15, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 400.0, nftSales: 1200.0, total: 1600.0 },
+    events: [],
+    collaborations: []
+  },
+  { 
+    uid: 'a3', 
+    name: 'Rihanna', 
+    username: '@rihanna',
+    walletAddress: 'UQRihanna_v8s1_m5n6',
+    avatarUrl: 'https://i.postimg.cc/hh7J72qs/rihanna.jpg', 
+    followers: 120000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Pop',
+    bio: "Global icon and fashion mogul.",
+    bannerUrl: "https://image.pollinations.ai/prompt/glamorous%20pop%20star%20banner%20rihanna?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/rihanna', instagram: 'https://instagram.com/rihanna' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQRihanna_v8s1_m5n6', percentage: 0.10, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQRihanna_v8s1_m5n6', percentage: 0.20, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 600.0, nftSales: 2000.0, total: 2600.0 },
+    events: [],
+    collaborations: []
+  },
+  { 
+    uid: 'a4', 
+    name: 'Asake', 
+    username: '@asake',
+    walletAddress: 'UQAsake_p3q9_r7t8',
+    avatarUrl: 'https://i.postimg.cc/p96TmFcH/asake.jpg', 
+    followers: 70000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Afrobeats',
+    bio: "Energy, Afrobeats, vibes.",
+    bannerUrl: "https://image.pollinations.ai/prompt/asake%20vibe%20banner?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/asake', instagram: 'https://instagram.com/asake' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQAsake_p3q9_r7t8', percentage: 0.07, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQAsake_p3q9_r7t8', percentage: 0.12, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 300.0, nftSales: 900.0, total: 1200.0 },
+    events: [],
+    collaborations: []
+  },
+  { 
+    uid: 'a5', 
+    name: 'Justin Bieber', 
+    username: '@justinbieber',
+    walletAddress: 'UQJBieber_w2x4_b1c2',
+    avatarUrl: 'https://i.postimg.cc/VdWkjTZr/bieber.jpg', 
+    followers: 150000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Pop',
+    bio: "Global pop sensation.",
+    bannerUrl: "https://image.pollinations.ai/prompt/bieber%20pop%20banner?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/justinbieber', instagram: 'https://instagram.com/justinbieber' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQJBieber_w2x4_b1c2', percentage: 0.10, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQJBieber_w2x4_b1c2', percentage: 0.20, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 700.0, nftSales: 2500.0, total: 3200.0 },
+    events: [],
+    collaborations: []
+  },
+  { 
+    uid: 'a6', 
+    name: 'Beyonce', 
+    username: '@beyonce',
+    walletAddress: 'UQBeyonce_d5f6_g7h8',
+    avatarUrl: 'https://i.postimg.cc/94Kmmjzc/beyonce.jpg', 
+    followers: 160000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Pop / R&B',
+    bio: "Queen Bey. Global superstar.",
+    bannerUrl: "https://image.pollinations.ai/prompt/beyonce%20queen%20banner?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/beyonce', instagram: 'https://instagram.com/beyonce' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQBeyonce_d5f6_g7h8', percentage: 0.12, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQBeyonce_d5f6_g7h8', percentage: 0.25, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 800.0, nftSales: 3000.0, total: 3800.0 },
+    events: [],
+    collaborations: []
+  },
+  { 
+    uid: 'a7', 
+    name: 'Snoop Dogg', 
+    username: '@snoopdogg',
+    walletAddress: 'UQSnoopDogg_j1a2_z3z4',
+    avatarUrl: 'https://i.postimg.cc/Yj1rHZ7t/snoop.jpg', 
+    followers: 100000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Hip Hop',
+    bio: "West coast hip hop legend.",
+    bannerUrl: "https://image.pollinations.ai/prompt/snoop%20dogg%20banner?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/snoopdogg', instagram: 'https://instagram.com/snoopdogg' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQSnoopDogg_j1a2_z3z4', percentage: 0.08, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQSnoopDogg_j1a2_z3z4', percentage: 0.15, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 500.0, nftSales: 1500.0, total: 2000.0 },
+    events: [],
+    collaborations: []
+  },
+  { 
+    uid: 'a8', 
+    name: 'Jay-Z', 
+    username: '@jayz',
+    walletAddress: 'UQJayZ_h1i2_p3h4',
+    avatarUrl: 'https://i.postimg.cc/JsdmxWNn/jayz.jpg', 
+    followers: 110000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Hip Hop',
+    bio: "Hip hop legend and mogul.",
+    bannerUrl: "https://image.pollinations.ai/prompt/jayz%20banner?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/jayz', instagram: 'https://instagram.com/jayz' },
+    royaltyConfig: { 
+      streamingSplits: [{ address: 'UQJayZ_h1i2_p3h4', percentage: 0.10, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQJayZ_h1i2_p3h4', percentage: 0.20, label: 'Main Artist' }]
+    },
+    earnings: { streaming: 600.0, nftSales: 2000.0, total: 2600.0 },
+    events: [],
+    collaborations: []
   },
   { 
     uid: 'a9', 
-    name: 'Serenity Strings', 
-    username: '@serenity_strings',
-    walletAddress: 'UQClassical_c1l2_a3s4_s5i6_c7a8',
-    avatarUrl: 'https://image.pollinations.ai/prompt/elegant%20violin%20close%20up%20avatar%20classical%20music?width=400&height=400&nologo=true', 
-    followers: 1200, 
-    verified: false,
-    isVerifiedArtist: false,
-    genre: 'Classical',
-    bio: "Modern classical interpretations for the digital age.",
-    bannerUrl: "https://image.pollinations.ai/prompt/grand%20concert%20hall%20interior%20classical%20banner?width=1200&height=400&nologo=true",
-    socials: { website: 'https://serenitystrings.com' },
+    name: '2Pac', 
+    username: '@2pac',
+    walletAddress: 'UQ2Pac_c1l2_a3s4',
+    avatarUrl: 'https://i.postimg.cc/1VH1qxRD/2pac.jpg', 
+    followers: 150000, 
+    verified: true,
+    isVerifiedArtist: true,
+    genre: 'Hip Hop',
+    bio: "Legendary hip hop artist.",
+    bannerUrl: "https://image.pollinations.ai/prompt/2pac%20banner?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/2pac' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'UQClassical_c1l2_a3s4_s5i6_c7a8', percentage: 0.03, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQClassical_c1l2_a3s4_s5i6_c7a8', percentage: 0.05, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQ2Pac_c1l2_a3s4', percentage: 0.10, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQ2Pac_c1l2_a3s4', percentage: 0.20, label: 'Main Artist' }]
     },
-    earnings: { streaming: 1.5, nftSales: 22.0, total: 23.5 }
+    earnings: { streaming: 500.0, nftSales: 1500.0, total: 2000.0 },
+    events: [],
+    collaborations: []
   },
   { 
     uid: 'a10', 
-    name: 'Electric Storm', 
-    username: '@electric_storm',
-    walletAddress: 'UQRock_r1o2_c3k4_s5t6_o7r8',
-    avatarUrl: 'https://image.pollinations.ai/prompt/rock%20guitarist%20on%20stage%20with%20flames%20avatar?width=400&height=400&nologo=true', 
-    followers: 8500, 
+    name: '50 Cent', 
+    username: '@50cent',
+    walletAddress: 'UQ50Cent_r1o2_c3k4',
+    avatarUrl: 'https://i.postimg.cc/ftQb7Nsm/50cent.jpg', 
+    followers: 90000, 
     verified: true,
     isVerifiedArtist: true,
-    genre: 'Rock',
-    bio: "High voltage rock and roll. Amplifying the TON ecosystem.",
-    bannerUrl: "https://image.pollinations.ai/prompt/rock%20concert%20crowd%20with%20lights%20banner?width=1200&height=400&nologo=true",
-    socials: { x: 'https://x.com/electric_rock' },
+    genre: 'Hip Hop',
+    bio: "Hip hop legend and star.",
+    bannerUrl: "https://image.pollinations.ai/prompt/50cent%20banner?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/50cent', instagram: 'https://instagram.com/50cent' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'UQRock_r1o2_c3k4_s5t6_o7r8', percentage: 0.05, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQRock_r1o2_c3k4_s5t6_o7r8', percentage: 0.10, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQ50Cent_r1o2_c3k4', percentage: 0.08, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQ50Cent_r1o2_c3k4', percentage: 0.15, label: 'Main Artist' }]
     },
-    earnings: { streaming: 9.8, nftSales: 18.5, total: 28.3 }
+    earnings: { streaming: 400.0, nftSales: 1200.0, total: 1600.0 },
+    events: [],
+    collaborations: []
   },
   { 
     uid: 'a11', 
-    name: 'Chill Coffee', 
-    username: '@chillcoffee',
-    walletAddress: 'UQLoFi_l1o2_f3i4_c5o6_f7f8',
-    avatarUrl: 'https://image.pollinations.ai/prompt/relaxed%20anime%20girl%20studying%20with%20coffee%20avatar%20lofi?width=400&height=400&nologo=true', 
-    followers: 42000, 
+    name: 'Wiz Khalifa', 
+    username: '@wizkhalifa',
+    walletAddress: 'UQLoFi_l1o2_f3i4',
+    avatarUrl: 'https://i.postimg.cc/JG0RknJR/wizkhalifa.jpg', 
+    followers: 80000, 
     verified: true,
     isVerifiedArtist: true,
-    genre: 'Lo-Fi',
-    bio: "Beats to study, chill, and relax to. Your daily coffee companion.",
-    bannerUrl: "https://image.pollinations.ai/prompt/cozy%20bedroom%20at%20night%20with%20rainy%20window%20lofi%20banner?width=1200&height=400&nologo=true",
-    socials: { spotify: 'https://spotify.com/artist/chillcoffee' },
+    genre: 'Hip Hop',
+    bio: "Hip hop artist and lifestyle icon.",
+    bannerUrl: "https://image.pollinations.ai/prompt/wiz%20khalifa%20banner?width=1200&height=400&nologo=true",
+    socials: { x: 'https://x.com/wizkhalifa', instagram: 'https://instagram.com/wizkhalifa' },
     royaltyConfig: { 
-      streamingSplits: [{ address: 'UQLoFi_l1o2_f3i4_c5o6_f7f8', percentage: 0.02, label: 'Main Artist' }],
-      nftSaleSplits: [{ address: 'UQLoFi_l1o2_f3i4_c5o6_f7f8', percentage: 0.04, label: 'Main Artist' }]
+      streamingSplits: [{ address: 'UQLoFi_l1o2_f3i4', percentage: 0.07, label: 'Main Artist' }],
+      nftSaleSplits: [{ address: 'UQLoFi_l1o2_f3i4', percentage: 0.12, label: 'Main Artist' }]
     },
-    earnings: { streaming: 4.2, nftSales: 8.4, total: 12.6 }
+    earnings: { streaming: 300.0, nftSales: 900.0, total: 1200.0 },
+    events: [],
+    collaborations: []
   },
 ];
 

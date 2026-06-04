@@ -31,7 +31,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface TrackCardProps {
   track: Track;
@@ -291,18 +291,35 @@ const TrackCard: React.FC<TrackCardProps> = ({
           tabIndex={0}
         >
             <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 shadow-sm border border-white/5 group-hover:border-blue-500/30 transition-colors">
-              <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
+              <motion.img 
+                src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
+                alt="" 
+                className="w-full h-full object-cover" 
+                onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} 
+                animate={isActive && isPlaying ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+                transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+              />
               <div className={`absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
-                <button onClick={handlePlay} className="text-white">
-                  {track.tokenGating?.enabled && !hasAccess ? (
-                    <Lock className="h-4 w-4" />
-                  ) : (isActive && isAudioLoading) ? (
-                    <img src={TJ_COIN_ICON} className="h-5 w-5 animate-spin" alt="Loading" />
-                  ) : isActive && isPlaying ? (
-                    <Pause className="h-5 w-5 fill-current animate-pulse" />
-                  ) : (
-                    <Play className="h-5 w-5 fill-current" />
-                  )}
+                <button onClick={handlePlay} className="text-white flex items-center justify-center">
+                  <AnimatePresence mode="wait">
+                    {track.tokenGating?.enabled && !hasAccess ? (
+                      <motion.div key="lock" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
+                        <Lock className="h-4 w-4" />
+                      </motion.div>
+                    ) : (isActive && isAudioLoading) ? (
+                      <motion.div key="loading" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
+                        <img src={TJ_COIN_ICON} className="h-5 w-5 animate-spin" alt="Loading" />
+                      </motion.div>
+                    ) : isActive && isPlaying ? (
+                      <motion.div key="pause" initial={{ scale: 0.7, opacity: 0, rotate: -90 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.7, opacity: 0, rotate: 90 }} transition={{ duration: 0.18 }}>
+                        <Pause className="h-5 w-5 fill-current animate-pulse" />
+                      </motion.div>
+                    ) : (
+                      <motion.div key="play" initial={{ scale: 0.7, opacity: 0, rotate: 90 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.7, opacity: 0, rotate: -90 }} transition={{ duration: 0.18 }}>
+                        <Play className="h-5 w-5 fill-current" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </button>
               </div>
             </div>
@@ -373,28 +390,43 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 cursor-pointer shadow-sm group/thumb border border-white/5 group-hover/row:border-blue-500/20 transition-colors" 
                 onClick={(e) => { e.stopPropagation(); handlePlay(e); }}
               >
-                <img src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-700" onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} />
+                <motion.img 
+                  src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
+                  alt="" 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }} 
+                  animate={isActive && isPlaying ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+                  transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                />
                 
                 {isCached && (
-                    <div className="absolute top-1 left-1 bg-emerald-600/90 p-0.5 rounded-full">
+                    <div className="absolute top-1 left-1 bg-emerald-600/90 p-0.5 rounded-full z-10">
                         <CheckCircle2 className="w-2 h-2 text-white" />
                     </div>
                 )}
                 
                 <div className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100'}`}>
-                  {track.tokenGating?.enabled && !hasAccess ? (
-                      <Lock className="h-4 w-4 text-white" />
-                  ) : (isActive && isAudioLoading) ? (
-                      <img src={TJ_COIN_ICON} className="h-6 w-6 animate-spin" alt="Loading" />
-                  ) : isActive && isPlaying ? (
-                      <div className="flex items-end justify-center gap-1 h-4" aria-hidden="true">
+                  <AnimatePresence mode="wait">
+                    {track.tokenGating?.enabled && !hasAccess ? (
+                      <motion.div key="lock" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
+                        <Lock className="h-4 w-4 text-white" />
+                      </motion.div>
+                    ) : (isActive && isAudioLoading) ? (
+                      <motion.div key="loading" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
+                        <img src={TJ_COIN_ICON} className="h-6 w-6 animate-spin" alt="Loading" />
+                      </motion.div>
+                    ) : isActive && isPlaying ? (
+                      <motion.div key="playing-bars" initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.7, opacity: 0 }} transition={{ duration: 0.18 }} className="flex items-end justify-center gap-1 h-4" aria-hidden="true">
                         <div className="w-0.5 bg-blue-400 h-2 animate-[bounce_1s_infinite_0ms]"></div>
                         <div className="w-0.5 bg-blue-400 h-4 animate-[bounce_1s_infinite_200ms]"></div>
                         <div className="w-0.5 bg-blue-400 h-3 animate-[bounce_1s_infinite_400ms]"></div>
-                      </div>
-                  ) : (
-                      <Play className="h-6 w-6 text-white fill-current animate-in zoom-in-50 duration-300" aria-hidden="true" />
-                  )}
+                      </motion.div>
+                    ) : (
+                      <motion.div key="play" initial={{ scale: 0.7, opacity: 0, rotate: 90 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.7, opacity: 0, rotate: -90 }} transition={{ duration: 0.18 }}>
+                        <Play className="h-6 w-6 text-white fill-current" aria-hidden="true" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -513,28 +545,40 @@ const TrackCard: React.FC<TrackCardProps> = ({
         >
           {/* Image Container - 1:1 Aspect Ratio */}
           <div className="relative aspect-square rounded-[4px] overflow-hidden bg-neutral-900 mb-2 transition-all border border-white/5">
-            <img 
+            <motion.img 
               src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} 
               alt="" 
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+              className="w-full h-full object-cover"
               onError={(e) => { e.currentTarget.src = getPlaceholderImage(`track-${track.id}`); }}
+              animate={isActive && isPlaying ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+              transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
             />
             
             <div className={`absolute inset-0 bg-black/40 transition-all duration-300 opacity-0 group-hover:opacity-100 ${isActive ? 'opacity-100' : ''}`}>
               <button 
-                className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl shadow-blue-600/30 border border-white/20"
+                className="absolute bottom-2 left-2 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl shadow-blue-600/30 border border-white/20 overflow-hidden"
                 onClick={handlePlay}
                 aria-label={isActive && isPlaying ? "Pause track" : "Play track"}
               >
-                {track.tokenGating?.enabled && !hasAccess ? (
-                  <Lock className="h-4 w-4" />
-                ) : (isActive && isAudioLoading) ? (
-                  <img src={TJ_COIN_ICON} className="h-4 w-4 animate-spin" alt="Loading" />
-                ) : isActive && isPlaying ? (
-                  <Pause className="h-4 w-4 fill-current animate-pulse" />
-                ) : (
-                  <Play className="h-4 w-4 fill-current ml-0.5" />
-                )}
+                <AnimatePresence mode="wait">
+                  {track.tokenGating?.enabled && !hasAccess ? (
+                    <motion.div key="lock" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
+                      <Lock className="h-4 w-4 text-white" />
+                    </motion.div>
+                  ) : (isActive && isAudioLoading) ? (
+                    <motion.div key="loading" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
+                      <img src={TJ_COIN_ICON} className="h-4 w-4 animate-spin" alt="Loading" />
+                    </motion.div>
+                  ) : isActive && isPlaying ? (
+                    <motion.div key="pause" initial={{ scale: 0.7, opacity: 0, rotate: -90 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.7, opacity: 0, rotate: 90 }} transition={{ duration: 0.18 }}>
+                      <Pause className="h-4 w-4 fill-current animate-pulse" />
+                    </motion.div>
+                  ) : (
+                    <motion.div key="play" initial={{ scale: 0.7, opacity: 0, rotate: 90 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.7, opacity: 0, rotate: -90 }} transition={{ duration: 0.18 }} className="flex items-center justify-center w-full h-full">
+                      <Play className="h-4 w-4 fill-current ml-0.5" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </button>
             </div>
             

@@ -20,7 +20,8 @@ import {
   Plus,
   User,
   Info,
-  Gem
+  Gem,
+  DownloadCloud
 } from "lucide-react";
 import { getPlaceholderImage, cn, shareContent } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -74,8 +75,27 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     likedTrackIds,
     toggleLikeTrack,
     addNotification,
-    seek
+    seek,
+    isTrackCached
   } = useAudio();
+
+  const [isCached, setIsCached] = React.useState(false);
+
+  React.useEffect(() => {
+    let active = true;
+    const checkCache = async () => {
+      if (currentTrack) {
+        const cached = await isTrackCached(currentTrack.id);
+        if (active) {
+          setIsCached(cached);
+        }
+      }
+    };
+    checkCache();
+    return () => {
+      active = false;
+    };
+  }, [currentTrack?.id, isTrackCached]);
 
   if (!currentTrack) return null;
 
@@ -221,6 +241,11 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 {isHighFidelity && (
                   <span className="bg-blue-600 text-white text-[6px] md:text-[8px] font-black px-1.5 py-0.5 rounded-[2px] tracking-[0.2em] uppercase flex-shrink-0">
                     Hi-Fi
+                  </span>
+                )}
+                {isCached && (
+                  <span className="text-blue-400 flex items-center flex-shrink-0" title="Cached for offline listening">
+                    <DownloadCloud className="w-3.5 h-3.5 fill-blue-500/10" />
                   </span>
                 )}
               </div>

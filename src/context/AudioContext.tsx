@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { toast } from "sonner";
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
+import { useAccount } from "wagmi";
 import { GoogleGenAI, Type } from "@google/genai";
 import {
   Track,
@@ -329,6 +330,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [tonConnectUI] = useTonConnectUI();
   const tonAddress = useTonAddress();
+  const { address: evmAddress } = useAccount();
 
   // Zustand State Integration
   const {
@@ -458,6 +460,24 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
+
+  // Cross-fade fader references for smooth track transition
+  const activeFadersRef = useRef<{ fadeOutAudio?: HTMLAudioElement; intervalId?: NodeJS.Timeout }[]>([]);
+
+  const stopAllActiveFades = useCallback(() => {
+    activeFadersRef.current.forEach((fader) => {
+      try {
+        if (fader.intervalId) clearInterval(fader.intervalId);
+        if (fader.fadeOutAudio) {
+          fader.fadeOutAudio.pause();
+          fader.fadeOutAudio.src = "";
+        }
+      } catch (err) {
+        console.warn("Error stopping active fader:", err);
+      }
+    });
+    activeFadersRef.current = [];
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [headerTitle, setHeaderTitle] = useState("");
@@ -2002,7 +2022,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     /* Sync volume and mute state */
-    audio.volume = isMuted ? 0 : volume;
+    if (activeFadersRef.current.length === 0) {
+      audio.volume = isMuted ? 0 : volume;
+    }
 
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
@@ -2023,24 +2045,30 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const syncWallet = async () => {
+      const activeAddr = tonAddress || evmAddress;
       if (
-        tonAddress &&
+        activeAddr &&
         auth.currentUser &&
-        userProfile.walletAddress !== tonAddress
+        userProfile.walletAddress !== activeAddr
       ) {
         try {
           await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            walletAddress: tonAddress,
+            walletAddress: activeAddr,
+            walletType: tonAddress ? "TON" : "MetaMask",
           });
-          setUserProfile((prev) => ({ ...prev, walletAddress: tonAddress }));
-          addNotification("Wallet address synced with profile", "success");
+          setUserProfile((prev) => ({ 
+            ...prev, 
+            walletAddress: activeAddr,
+            walletType: tonAddress ? "TON" : "MetaMask"
+          }));
+          addNotification(`Wallet address (${tonAddress ? "TON" : "MetaMask"}) synced with profile`, "success");
         } catch (error) {
           console.error("Error syncing wallet address:", error);
         }
       }
     };
     syncWallet();
-  }, [tonAddress, userProfile.walletAddress]);
+  }, [tonAddress, evmAddress, userProfile.walletAddress]);
 
   const recordTransaction = async (
     txData: Omit<Transaction, "id" | "timestamp" | "status">,
@@ -2862,6 +2890,35 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         await playPromiseRef.current.catch(() => {});
       }
 
+      // Cross-fade setup: capture the old playing track's current source/time
+      const oldTime = audioRef.current.currentTime;
+      const oldSrc = audioRef.current.src;
+      const wasPlaying = isPlaying;
+
+      stopAllActiveFades();
+
+      let fadeOutAudio: HTMLAudioElement | undefined = undefined;
+      const initialVolume = useAudioStore.getState().volume;
+      const initialMuted = useAudioStore.getState().isMuted;
+      const initialTargetVolume = initialMuted ? 0 : initialVolume;
+
+      if (wasPlaying && oldSrc && !audioRef.current.paused) {
+        try {
+          fadeOutAudio = new Audio();
+          fadeOutAudio.src = oldSrc;
+          fadeOutAudio.currentTime = oldTime;
+          fadeOutAudio.volume = initialTargetVolume;
+          if (oldSrc.startsWith("http")) {
+            fadeOutAudio.crossOrigin = "anonymous";
+          }
+          fadeOutAudio.play().catch((err) => {
+            console.warn("Cross-fade fadeOutAudio play failed:", err);
+          });
+        } catch (err) {
+          console.warn("Failed to set up fadeOutAudio:", err);
+        }
+      }
+
       setCurrentTrack(track);
 
       // Increment streams
@@ -2937,7 +2994,53 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("[Audio] Playing:", sourceUrl);
         audioRef.current.load(); // Explicitly call load()
 
+        // Set initial volume to 0 for the smooth fade-in
+        audioRef.current.volume = 0;
+
         playPromiseRef.current = audioRef.current.play();
+
+        // 2-second cross-fade / fade-in interval (40 steps of 50ms)
+        const steps = 40;
+        const stepDuration = 50;
+        let currentStep = 0;
+
+        const intervalId = setInterval(() => {
+          currentStep++;
+          const freshVolume = useAudioStore.getState().volume;
+          const freshMuted = useAudioStore.getState().isMuted;
+          const targetVolume = freshMuted ? 0 : freshVolume;
+
+          if (currentStep > steps) {
+            clearInterval(intervalId);
+            if (fadeOutAudio) {
+              try {
+                fadeOutAudio.pause();
+                fadeOutAudio.src = "";
+              } catch (e) {}
+            }
+            if (audioRef.current) {
+              audioRef.current.volume = targetVolume;
+            }
+            activeFadersRef.current = activeFadersRef.current.filter((f) => f.intervalId !== intervalId);
+            return;
+          }
+
+          const ratio = currentStep / steps;
+
+          if (fadeOutAudio) {
+            try {
+              fadeOutAudio.volume = Math.max(0, targetVolume * (1 - ratio));
+            } catch (e) {}
+          }
+
+          if (audioRef.current) {
+            try {
+              audioRef.current.volume = Math.min(targetVolume, targetVolume * ratio);
+            } catch (e) {}
+          }
+        }, stepDuration);
+
+        activeFadersRef.current.push({ fadeOutAudio, intervalId });
         if (playPromiseRef.current !== undefined) {
           playPromiseRef.current.catch((error) => {
             // Check for common playback errors
@@ -4224,7 +4327,7 @@ Return a JSON object with the following structure:
         deleteCachedTrack,
         getEarnings,
         purchaseTrack,
-        userAddress: tonAddress,
+        userAddress: tonAddress || evmAddress || null,
         headerTitle,
         setHeaderTitle,
       }}

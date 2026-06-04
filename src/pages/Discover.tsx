@@ -12,6 +12,7 @@ import {
   TrendingUp, 
   Clock, 
   ChevronRight,
+  ChevronDown,
   MoreVertical,
   User,
   Music,
@@ -75,6 +76,14 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const BROWSE_CATEGORIES = [
   { id: 'music', title: 'Music', color: 'bg-pink-600', image: 'https://picsum.photos/seed/music/200/200' },
@@ -147,6 +156,7 @@ const Discover: React.FC = () => {
   const [isVoiceSearchActive, setIsVoiceSearchActive] = useState(false);
   const [isVibeSearch, setIsVibeSearch] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'tracks' | 'nfts' | 'artists' | 'playlists' | 'users'>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('trending');
   const [aiVibeResults, setAiVibeResults] = useState<any[] | null>(null);
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -252,7 +262,32 @@ const Discover: React.FC = () => {
       if (selectedMoods.length > 0 && t.mood && !selectedMoods.includes(t.mood)) return false;
       if (onlyVerified && !t.artistVerified) return false;
       return true;
-    }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, t => t.artistId));
+    }).sort((a: any, b: any) => {
+      const followedRes = sortPrioritizeFollowed(a, b, t => t.artistId);
+      if (followedRes !== 0) return followedRes;
+
+      if (sortBy === 'newest') {
+        const getTimestamp = (x: any) => {
+          if (x.releaseDate) {
+            const parsed = Date.parse(x.releaseDate);
+            if (!isNaN(parsed)) return parsed;
+          }
+          if (x.createdAt) {
+            const parsed = Date.parse(x.createdAt.toString());
+            if (!isNaN(parsed)) return parsed;
+          }
+          return 0;
+        };
+        return getTimestamp(b) - getTimestamp(a);
+      } else if (sortBy === 'popular') {
+        return (b.playCount || b.streams || 0) - (a.playCount || a.streams || 0);
+      } else if (sortBy === 'trending') {
+        const aScore = a.jamScore || ((a.likes || 0) * 10 + (a.playCount || 0));
+        const bScore = b.jamScore || ((b.likes || 0) * 10 + (b.playCount || 0));
+        return bScore - aScore;
+      }
+      return 0;
+    });
     
     const nfts = allNFTs.filter((n: any) => {
       const q = query;
@@ -264,7 +299,21 @@ const Discover: React.FC = () => {
       if (!matchesQuery) return false;
       if (onlyVerified && !n.artistVerified) return false;
       return true;
-    }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, n => n.artistId));
+    }).sort((a: any, b: any) => {
+      const followedRes = sortPrioritizeFollowed(a, b, n => n.artistId);
+      if (followedRes !== 0) return followedRes;
+
+      if (sortBy === 'newest') {
+        const aTime = a.createdAt ? Date.parse(a.createdAt.toString()) : 0;
+        const bTime = b.createdAt ? Date.parse(b.createdAt.toString()) : 0;
+        return bTime - aTime;
+      } else if (sortBy === 'popular') {
+        return (b.views || b.likes || 0) - (a.views || a.likes || 0);
+      } else if (sortBy === 'trending') {
+        return (b.likes || 0) - (a.likes || 0);
+      }
+      return 0;
+    });
     
     const filteredArtists = artists.filter((a: any) => {
       const matchesQuery = (query === '' || (a.name || '').toLowerCase().includes(query) || 
@@ -285,7 +334,37 @@ const Discover: React.FC = () => {
     }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, usr => usr.uid));
 
     return { tracks, nfts, artists: filteredArtists, users };
-  }, [searchQuery, allTracks, artists, allNFTs, firestoreUsers, bpmRange, selectedKeys, selectedMoods, onlyVerified, followedUserIds, aiVibeResults]);
+  }, [searchQuery, allTracks, artists, allNFTs, firestoreUsers, bpmRange, selectedKeys, selectedMoods, onlyVerified, followedUserIds, aiVibeResults, sortBy]);
+
+  // Sorted tracks for content discovery when there is no search query
+  const sortedDiscoveryTracks = useMemo(() => {
+    let result = [...allTracks];
+    
+    const getTimestamp = (t: any) => {
+      if (t.releaseDate) {
+        const parsed = Date.parse(t.releaseDate);
+        if (!isNaN(parsed)) return parsed;
+      }
+      if (t.createdAt) {
+        const parsed = Date.parse(t.createdAt.toString());
+        if (!isNaN(parsed)) return parsed;
+      }
+      return 0;
+    };
+
+    if (sortBy === 'newest') {
+      result.sort((a, b) => getTimestamp(b) - getTimestamp(a));
+    } else if (sortBy === 'popular') {
+      result.sort((a, b) => (b.playCount || b.streams || 0) - (a.playCount || a.streams || 0));
+    } else if (sortBy === 'trending') {
+      result.sort((a, b) => {
+        const aScore = a.jamScore || ((a.likes || 0) * 10 + (a.playCount || 0));
+        const bScore = b.jamScore || ((b.likes || 0) * 10 + (b.playCount || 0));
+        return bScore - aScore;
+      });
+    }
+    return result;
+  }, [allTracks, sortBy]);
 
   const hasResults = filteredResults.tracks.length > 0 || 
                      filteredResults.nfts.length > 0 || 
@@ -336,189 +415,190 @@ const Discover: React.FC = () => {
         continuous
       />
 
-      {/* Search Header & Filter Tabs - Sticky & Atmospheric with standard top padding */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md pt-5 pb-3 w-full border-b border-blue-500/20">
-        <div className="flex flex-col gap-4 w-full">
-          {/* Search Input Row */}
-          <div className="max-w-2xl mx-auto w-full flex items-center gap-3 px-4">
-            <form 
-              onSubmit={handleSearchSubmit} 
-              className="relative flex-1 group"
-            >
-              {/* Shiny Gradient Border Effect */}
-              <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
-              
-              <div className={`relative flex items-center h-11 bg-background border transition-all duration-300 ease-in-out rounded-full overflow-hidden focus-within:scale-[1.02] ${isFocused ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
-                <div className="absolute left-4 z-10 pointer-events-none">
-                  <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
-                </div>
-                
-                <Input
-                  type="text"
-                  placeholder="Search artists, tracks, NFTs..."
-                  value={searchQuery}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
-                />
-
-                <div className="absolute right-3 flex items-center gap-1.5 z-20">
-                  <AnimatePresence>
-                    {searchQuery && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          type="button"
-                          onClick={() => setSearchQuery('')}
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <Separator orientation="vertical" className="h-4 bg-white/10" />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    type="button"
-                    onClick={handleVoiceSearch}
-                    className={`h-8 w-8 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
-                  >
-                    {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                  </Button>
-                </div>
+      {/* Search Header - Sticky & Atmospheric with standard top padding */}
+      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md pt-5 pb-3 w-full border-b border-blue-500/10 transition-colors duration-300">
+        <div className="max-w-2xl mx-auto w-full flex items-center gap-3 px-4">
+          <form 
+            onSubmit={handleSearchSubmit} 
+            className="relative flex-1 group"
+          >
+            {/* Shiny Gradient Border Effect */}
+            <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
+            
+            <div className={`relative flex items-center h-11 bg-background border transition-all duration-300 ease-in-out rounded-full overflow-hidden focus-within:scale-[1.02] ${isFocused ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+              <div className="absolute left-4 z-10 pointer-events-none">
+                <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
               </div>
+              
+              <Input
+                type="text"
+                placeholder="Search artists, tracks, NFTs..."
+                value={searchQuery}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
+              />
 
-              {/* Suggestions Command Palette */}
-              <AnimatePresence>
-                {isFocused && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 4, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-background border border-border/40 shadow-none rounded-[4px] overflow-hidden z-50 p-2"
-                  >
-                    <Command className="bg-transparent border-none">
-                      <CommandList className="max-h-[300px]">
-                        <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
-                        
-                        {searchQuery ? (
-                          <CommandGroup heading="Suggestions">
-                             {filteredResults.tracks.slice(0, 3).map((track) => (
-                               <CommandItem 
-                                 key={`track-${track.id}`}
-                                 onSelect={() => {
-                                   setSearchQuery(track.title);
-                                   setIsFocused(false);
-                                   navigate(`/track/${track.id}`);
-                                 }}
-                                 className="rounded-[4px] flex items-center justify-between group cursor-pointer"
-                               >
-                                 <div className="flex items-center gap-3">
-                                   <Music className="h-3.5 w-3.5 text-zinc-500" />
-                                   <span className="text-sm font-medium">{track.title}</span>
-                                 </div>
-                               </CommandItem>
-                             ))}
-                             {filteredResults.artists.slice(0, 3).map((artist) => (
-                               <CommandItem 
-                                 key={`artist-${artist.uid}`}
-                                 onSelect={() => {
-                                   setSearchQuery(artist.name);
-                                   setIsFocused(false);
-                                   navigate(`/artist/${artist.uid}`);
-                                 }}
-                                 className="rounded-[4px] flex items-center justify-between group cursor-pointer"
-                               >
-                                 <div className="flex items-center gap-3">
-                                   <User className="h-3.5 w-3.5 text-zinc-500" />
-                                   <span className="text-sm font-medium">{artist.name}</span>
-                                 </div>
-                               </CommandItem>
-                             ))}
-                          </CommandGroup>
-                        ) : (
-                          <>
-                            {searchHistory.length > 0 && (
-                              <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
-                                {searchHistory.map((item, index) => (
-                                  <CommandItem 
-                                    key={`hist-${index}`}
-                                    onSelect={() => {
-                                      setSearchQuery(item);
-                                      setIsFocused(false);
-                                    }}
-                                    className="rounded-[4px] flex items-center justify-between group cursor-pointer"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <Search className="h-3.5 w-3.5 text-zinc-500" />
-                                      <span className="text-sm font-medium">{item}</span>
-                                    </div>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 opacity-0 group-hover:opacity-100"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSearchHistory(prev => prev.filter(t => t !== item));
-                                      }}
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </Button>
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            )}
-                            
-                            <CommandSeparator className="bg-white/5" />
-                            
-                            <CommandGroup heading={<span className="flex items-center gap-2"><TrendingUp className="h-3 w-3" /> Trending</span>}>
-                              {trendingTopics.map((topic, index) => (
+              <div className="absolute right-3 flex items-center gap-1.5 z-20">
+                <AnimatePresence>
+                  {searchQuery && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        onClick={() => setSearchQuery('')}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <Separator orientation="vertical" className="h-4 bg-white/10" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  onClick={handleVoiceSearch}
+                  className={`h-8 w-8 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            {/* Suggestions Command Palette */}
+            <AnimatePresence>
+              {isFocused && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 4, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-background border border-border/40 shadow-none rounded-[4px] overflow-hidden z-50 p-2"
+                >
+                  <Command className="bg-transparent border-none">
+                    <CommandList className="max-h-[300px]">
+                      <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
+                      
+                      {searchQuery ? (
+                        <CommandGroup heading="Suggestions">
+                           {filteredResults.tracks.slice(0, 3).map((track) => (
+                             <CommandItem 
+                               key={`track-${track.id}`}
+                               onSelect={() => {
+                                 setSearchQuery(track.title);
+                                 setIsFocused(false);
+                                 navigate(`/track/${track.id}`);
+                               }}
+                               className="rounded-[4px] flex items-center justify-between group cursor-pointer"
+                             >
+                               <div className="flex items-center gap-3">
+                                 <Music className="h-3.5 w-3.5 text-zinc-500" />
+                                 <span className="text-sm font-medium">{track.title}</span>
+                               </div>
+                             </CommandItem>
+                           ))}
+                           {filteredResults.artists.slice(0, 3).map((artist) => (
+                             <CommandItem 
+                               key={`artist-${artist.uid}`}
+                               onSelect={() => {
+                                 setSearchQuery(artist.name);
+                                 setIsFocused(false);
+                                 navigate(`/artist/${artist.uid}`);
+                               }}
+                               className="rounded-[4px] flex items-center justify-between group cursor-pointer"
+                             >
+                               <div className="flex items-center gap-3">
+                                 <User className="h-3.5 w-3.5 text-zinc-500" />
+                                 <span className="text-sm font-medium">{artist.name}</span>
+                               </div>
+                             </CommandItem>
+                           ))}
+                        </CommandGroup>
+                      ) : (
+                        <>
+                          {searchHistory.length > 0 && (
+                            <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
+                              {searchHistory.map((item, index) => (
                                 <CommandItem 
-                                  key={`trend-${index}`}
+                                  key={`hist-${index}`}
                                   onSelect={() => {
-                                      setSearchQuery(topic);
-                                      setIsFocused(false);
+                                    setSearchQuery(item);
+                                    setIsFocused(false);
                                   }}
-                                  className="rounded-[4px] flex items-center gap-3 cursor-pointer"
+                                  className="rounded-[4px] flex items-center justify-between group cursor-pointer"
                                 >
-                                  <Zap className="h-3.5 w-3.5 text-blue-500" />
-                                  <span className="text-sm font-medium">{topic}</span>
-                                  <CommandShortcut className="text-blue-500/50">#hot</CommandShortcut>
+                                  <div className="flex items-center gap-3">
+                                    <Search className="h-3.5 w-3.5 text-zinc-500" />
+                                    <span className="text-sm font-medium">{item}</span>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSearchHistory(prev => prev.filter(t => t !== item));
+                                    }}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
                                 </CommandItem>
                               ))}
                             </CommandGroup>
-                          </>
-                        )}
-                      </CommandList>
-                    </Command>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </form>
+                          )}
+                          
+                          <CommandSeparator className="bg-white/5" />
+                          
+                          <CommandGroup heading={<span className="flex items-center gap-2"><TrendingUp className="h-3 w-3" /> Trending</span>}>
+                            {trendingTopics.map((topic, index) => (
+                              <CommandItem 
+                                key={`trend-${index}`}
+                                onSelect={() => {
+                                    setSearchQuery(topic);
+                                    setIsFocused(false);
+                                }}
+                                className="rounded-[4px] flex items-center gap-3 cursor-pointer"
+                              >
+                                <Zap className="h-3.5 w-3.5 text-blue-500" />
+                                <span className="text-sm font-medium">{topic}</span>
+                                <CommandShortcut className="text-blue-500/50">#hot</CommandShortcut>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </>
+                      )}
+                    </CommandList>
+                  </Command>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </form>
 
-            {/* Advanced Filters Sheet */}
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => setIsDiscoverFiltersOpen(true)}
-              className="h-11 w-11 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
-            >
-              <ListFilter className="h-4 w-4 text-foreground" />
-            </Button>
-          </div>
+          {/* Advanced Filters Sheet */}
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => setIsDiscoverFiltersOpen(true)}
+            className="h-11 w-11 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
+          >
+            <ListFilter className="h-4 w-4 text-foreground" />
+          </Button>
+        </div>
+      </div>
 
-          {/* Filter Tabs Inside same sticky block */}
-          <div className="w-full filter-tabs">
+      {/* Filter Tabs Section - Sticky directly below Header */}
+      <div className="sticky top-[76px] z-40 bg-background/80 backdrop-blur-md py-3 w-full border-b border-blue-500/10 transition-colors duration-300">
+        <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="filter-tabs flex-1 overflow-x-auto no-scrollbar">
             <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
-              <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12 flex justify-start md:justify-center py-1">
+              <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start py-1">
                 <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
                   {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
                     <TabsTrigger
@@ -533,11 +613,56 @@ const Discover: React.FC = () => {
               </div>
             </Tabs>
           </div>
+
+          {/* Sorting Dropdown */}
+          <div className="flex items-center gap-2 self-end md:self-auto shrink-0 py-1">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60 select-none">Sort:</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  aria-label="Sort content discovery options"
+                  variant="ghost" 
+                  size="sm" 
+                  className="rounded-full px-4 h-8 text-[10px] font-black uppercase tracking-widest bg-blue-500/10 hover:bg-blue-500/15 text-blue-500 hover:text-blue-400 border-none flex items-center gap-1 cursor-pointer select-none"
+                >
+                  {sortBy === 'newest' && 'Newest Arrivals'}
+                  {sortBy === 'popular' && 'Most Popular'}
+                  {sortBy === 'trending' && 'Trending'}
+                  <ChevronDown className="h-3.5 w-3.5 ml-0.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background border border-blue-500/10 rounded-[8px] p-1 w-44">
+                <DropdownMenuLabel className="text-[8px] font-black uppercase tracking-widest text-muted-foreground p-2">Select View</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/5" />
+                <DropdownMenuItem 
+                  onClick={() => setSortBy('newest')}
+                  className={`flex items-center justify-between text-[10px] font-bold uppercase tracking-widest p-2 rounded-[4px] cursor-pointer ${sortBy === 'newest' ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-foreground'}`}
+                >
+                  Newest Arrivals
+                  {sortBy === 'newest' && <Check className="h-3.5 w-3.5" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortBy('popular')}
+                  className={`flex items-center justify-between text-[10px] font-bold uppercase tracking-widest p-2 rounded-[4px] cursor-pointer ${sortBy === 'popular' ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-foreground'}`}
+                >
+                  Most Popular
+                  {sortBy === 'popular' && <Check className="h-3.5 w-3.5" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortBy('trending')}
+                  className={`flex items-center justify-between text-[10px] font-bold uppercase tracking-widest p-2 rounded-[4px] cursor-pointer ${sortBy === 'trending' ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-foreground'}`}
+                >
+                  Trending
+                  {sortBy === 'trending' && <Check className="h-3.5 w-3.5" />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
 
-      <div className="max-w-5xl mx-auto px-4 pb-24 space-y-6">
+      <div className="w-full max-w-full px-4 pb-24 space-y-6">
         
 
         {isLoading ? (
@@ -678,6 +803,27 @@ const Discover: React.FC = () => {
                 </CarouselContent>
               </Carousel>
             </section>
+
+            {/* Curated Content Discovery Feed */}
+            {sortedDiscoveryTracks.length > 0 && (
+              <section className="space-y-6 pt-4">
+                <div>
+                  <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800 font-ui flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-blue-500 fill-blue-500/15 animate-pulse" />
+                    Discover: {sortBy === 'newest' && 'Newest Arrivals'}{sortBy === 'popular' && 'Most Popular'}{sortBy === 'trending' && 'Trending'}
+                  </h2>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">
+                    Frequencies sorted by active filter selections
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {sortedDiscoveryTracks.slice(0, 8).map((track, idx) => (
+                    <TrackCard key={`discovery-feed-${track.id}-${idx}`} track={track} variant="default" />
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* AI Dj Krupy Section removed to avoid duplication on Home screen context */}
           </>

@@ -4,7 +4,7 @@ import { ShieldCheck, Users, Zap, Music2 } from 'lucide-react';
 
 const About: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 md:p-4 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background text-foreground p-4 md:p-8 w-full max-w-full">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

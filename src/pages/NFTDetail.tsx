@@ -60,6 +60,8 @@ import { useAudio } from "@/context/AudioContext";
 import { useTokenGating } from "@/hooks/useTokenGating";
 import { NFTItem, Track, NFTOffer } from "@/types";
 import { fetchNFTMetadata } from "@/services/nftService";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 import {
   cancelListing,
   getActiveListingForNFT,
@@ -186,6 +188,23 @@ const NFTDetail: React.FC = () => {
       loadMetadata();
     }
   }, [id, localNft?.id]);
+
+  // Sync specific NFT history from Firestore
+  useEffect(() => {
+    if (activeTab !== "history" || !localNft) return;
+    
+    // Subscribe to this specific NFT to pull latest history
+    const unsub = onSnapshot(doc(db, "nfts", localNft.id), (doc) => {
+      if (doc.exists()) {
+        const nftData = doc.data() as NFTItem;
+        if (JSON.stringify(nftData.history) !== JSON.stringify(localNft.history)) {
+          // If the history field updated, sync it
+           updateNFT(localNft.id, { history: nftData.history }, true);
+        }
+      }
+    });
+    return () => unsub();
+  }, [activeTab, localNft?.id, localNft?.history]);
 
   const isActive = useMemo(
     () => currentTrack?.id === localNft?.trackId,
@@ -1733,21 +1752,21 @@ const NFTDetail: React.FC = () => {
         {/* More from Creator Section */}
         {moreFromCreator.length > 0 && (
           <div className="mt-4 animate-in fade-in slide-in-from-bottom duration-1000">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-4">
                 <div className="w-2 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.6)]"></div>
                 <div>
                   <h2 className="text-base font-bold tracking-tighter uppercase text-foreground">
                     More from {localNft.creator}
                   </h2>
-                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">
+                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-0.5">
                     Extended Discography
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => navigate(`/artist/${localNft.creator}`)}
-                className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center h-10 group"
               >
                 VIEW ALL{" "}
                 <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />
@@ -1764,27 +1783,27 @@ const NFTDetail: React.FC = () => {
         {/* Related NFTs Section */}
         {relatedNfts.length > 0 && (
           <div className="mt-4 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-4">
                 <div className="w-2 h-8 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)]"></div>
                 <div>
                   <h2 className="text-base font-bold tracking-tighter uppercase text-foreground">
                     Related {associatedTrack?.genre} Vibes
                   </h2>
-                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-4">
+                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.4em] mt-0.5">
                     Sonic Affinities
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex bg-white/5 rounded-full p-1 border border-white/10 gap-2">
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                <div className="flex bg-white/5 rounded-full p-1 border border-white/10 items-center justify-center h-10 gap-1.5">
                   <button
                     onClick={() => setRelatedSort("default")}
                     className={cn(
-                      "px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all border-2",
+                      "px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer h-8 flex items-center justify-center",
                       relatedSort === "default"
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 border-blue-400/50"
-                        : "text-muted-foreground hover:text-foreground bg-white/5 border-blue-500/30 hover:bg-white/10",
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
+                        : "text-muted-foreground hover:text-white"
                     )}
                   >
                     Default
@@ -1792,10 +1811,10 @@ const NFTDetail: React.FC = () => {
                   <button
                     onClick={() => setRelatedSort("bids")}
                     className={cn(
-                      "px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 border-2",
+                      "px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer h-8 flex items-center justify-center gap-1.5",
                       relatedSort === "bids"
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 border-blue-400/50"
-                        : "text-muted-foreground hover:text-foreground bg-white/5 border-blue-500/30 hover:bg-white/10",
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
+                        : "text-muted-foreground hover:text-white"
                     )}
                   >
                     <ArrowUpDown className="h-3 w-3" /> Most Bids
@@ -1803,7 +1822,7 @@ const NFTDetail: React.FC = () => {
                 </div>
                 <button
                   onClick={() => navigate("/explore/nfts?title=Related Vibes")}
-                  className="px-4 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center group"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-foreground uppercase tracking-[0.3em] transition-all flex items-center h-10 group"
                 >
                   EXPLORE GENRE{" "}
                   <ChevronRight className="ml-4 h-3 w-3 group-hover:translate-x-1 transition-transform" />

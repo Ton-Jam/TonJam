@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import LoadingOverlay from './LoadingOverlay';
+import ConfirmationModal from './ConfirmationModal';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface BuyNFTModalProps {
@@ -43,6 +44,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const price = parseFloat(nft.price) || 0;
   const platformFeeFromBuyer = price * 0.05;
   const platformFeeFromSeller = price * 0.05;
@@ -54,11 +56,16 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
   const royaltyTotal = royaltySplits.reduce((sum, split) => sum + (split.percentage * price), 0);
   const artistShare = (price - platformFeeFromSeller - royaltyTotal).toFixed(2);
 
-  const handlePurchase = async () => {
+  const handlePurchase = () => {
     if (!userAddress) {
       addNotification("Connect wallet to initialize sync.", "warning");
       return;
     }
+    setIsConfirmOpen(true);
+  };
+
+  const executePurchase = async () => {
+    setIsConfirmOpen(false);
     setIsProcessing(true);
     addNotification("Requesting wallet signature...", "info");
     try {
@@ -310,6 +317,15 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
           )}
         </AnimatePresence>
       </DialogContent>
+
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={executePurchase}
+        title="Confirm Purchase"
+        description={`Are you sure you want to purchase "${nft.title}" for ${total} TON? This action will initiate a blockchain transaction.`}
+        confirmText="Purchase NFT"
+      />
     </Dialog>
   );
 };

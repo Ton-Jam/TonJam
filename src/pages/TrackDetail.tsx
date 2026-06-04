@@ -18,7 +18,9 @@ import {
   Coins,
   PlusCircle,
   Sparkles,
-  Lock
+  Lock,
+  DownloadCloud,
+  Loader2
 } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, TJ_COIN_ICON } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -35,7 +37,12 @@ import ReactionsSection from '@/components/ReactionsSection';
 const TrackDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, jamTrack, purchaseTrack, mintNFT, allTracks, likedTrackIds, toggleLikeTrack, addNotification, setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile } = useAudio();
+  const { 
+    playTrack, currentTrack, isPlaying, jamTrack, purchaseTrack, mintNFT, 
+    allTracks, likedTrackIds, toggleLikeTrack, addNotification, 
+    setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile,
+    isTrackCached, downloadTrackForOffline, deleteCachedTrack
+  } = useAudio();
   const [isTipping, setIsTipping] = useState(false);
   const [isProcessingPurchase, setIsProcessingPurchase] = useState(false);
   const [tonConnectUI] = useTonConnectUI();
@@ -43,6 +50,51 @@ const TrackDetail: React.FC = () => {
   const track = useMemo(() => allTracks.find(t => t.id === id), [id, allTracks]);
   const artist = useMemo(() => MOCK_ARTISTS.find(a => a.uid === track?.artistId), [track]);
   const associatedNFTs = useMemo(() => MOCK_NFTS.filter(n => n.trackId === id), [id]);
+  
+  const [isCached, setIsCached] = useState(false);
+  const [isCaching, setIsCaching] = useState(false);
+
+  React.useEffect(() => {
+    let active = true;
+    const checkCache = async () => {
+      if (track) {
+        const cached = await isTrackCached(track.id);
+        if (active) {
+          setIsCached(cached);
+        }
+      }
+    };
+    checkCache();
+    return () => {
+      active = false;
+    };
+  }, [track?.id, isTrackCached]);
+
+  const handleToggleCache = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!track) return;
+    
+    if (isCached) {
+      try {
+        await deleteCachedTrack(track.id);
+        setIsCached(false);
+        addNotification("Removed track from offline cache", "info");
+      } catch (err) {
+        addNotification("Failed to remove track from offline cache", "error");
+      }
+    } else {
+      setIsCaching(true);
+      try {
+        await downloadTrackForOffline(track);
+        setIsCached(true);
+        addNotification("Track successfully cached for offline", "success");
+      } catch (err) {
+        addNotification("Failed to download track for offline", "error");
+      } finally {
+        setIsCaching(false);
+      }
+    }
+  };
   
   const isActive = currentTrack?.id === track?.id;
   const isLiked = track ? likedTrackIds.includes(track.id) : false;
@@ -270,6 +322,20 @@ const TrackDetail: React.FC = () => {
               >
                 <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
               </button>
+              
+              <button 
+                onClick={handleToggleCache}
+                disabled={isCaching}
+                className={`p-4 rounded-xl transition-all active:scale-95 flex items-center justify-center ${isCached ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}
+                title={isCached ? "Remove from Offline Cache" : "Download for Offline Listening"}
+              >
+                {isCaching ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                ) : (
+                  <DownloadCloud className={`h-5 w-5 ${isCached ? 'fill-blue-500/20 text-blue-400' : ''}`} />
+                )}
+              </button>
+
               <button 
                 onClick={() => setTrackToAddToPlaylist(track)}
                 className="p-4 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground transition-all active:scale-95"
@@ -410,6 +476,12 @@ const TrackDetail: React.FC = () => {
                 {track.isExplicit && (
                   <span className="inline-block bg-red-500/15 text-red-500 border border-red-500/30 px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-[0.2em] select-none shadow-lg shadow-red-500/5">
                     EXPLICIT
+                  </span>
+                )}
+                {isCached && (
+                  <span className="inline-flex bg-blue-500/15 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-[0.2em] select-none items-center gap-1.5 shadow-lg shadow-blue-500/5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    OFFLINE READY
                   </span>
                 )}
               </div>

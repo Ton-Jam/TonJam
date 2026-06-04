@@ -371,23 +371,23 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -8, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full"
+            className={cn(
+              "group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent hover:bg-white/[0.03] border border-transparent w-full",
+              className
+            )}
+            onClick={handleCardClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigate(`/nft/${nft.id}`);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label={`View NFT ${nft.title}`}
           >
-            <Card
-              onClick={handleCardClick}
-              className={`group relative cursor-pointer transition-all duration-500 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] overflow-hidden bg-transparent border border-transparent w-full shadow-none ${className}`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  navigate(`/nft/${nft.id}`);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label={`View NFT ${nft.title}`}
-            >
             {/* Image Container - 1:1 Aspect Ratio with NFT Gradient Border */}
-            <div className="relative aspect-square overflow-hidden bg-neutral-900 transition-all rounded-[4px]">
+            <div className="relative aspect-square overflow-hidden bg-neutral-900 transition-all rounded-[4px] mb-2 border border-white/5">
               <img
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
                 loading="lazy"
@@ -421,7 +421,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                  
                  <div className="flex gap-2 pointer-events-auto">
                     <MoreOptionsButton />
-                 </div>
+                  </div>
               </div>
 
               {/* Action Overlay */}
@@ -436,7 +436,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
             </div>
       
             {/* Artifact Data Footer */}
-            <CardContent className="p-1 mt-1 flex flex-col gap-1">
+            <div className="px-0.5 flex flex-col gap-1">
                <div className="space-y-0.5">
                   <h3 className={`text-xs font-black uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
                     {nft.title}
@@ -470,10 +470,9 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                     {isOwner ? (nft.listingType ? <Settings className="w-3 h-3" /> : 'SELL') : (nft.listingType === 'auction' ? (isAuctionEnded ? 'ENDED' : 'BID') : 'BUY')}
                   </button>
                </div>
-            </CardContent>
-            </Card>
-        </motion.div>
-      </ContextMenuTrigger>
+            </div>
+          </motion.div>
+        </ContextMenuTrigger>
         <ContextMenuContentRefined />
       </ContextMenu>
 

@@ -33,7 +33,8 @@ import {
   Volume1,
   Sparkles,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  DownloadCloud
 } from "lucide-react";
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_ARTISTS, MOCK_TRACKS, DJ_KRUPY_AVATAR } from '@/constants';
@@ -120,8 +121,56 @@ const FullPlayer: React.FC = () => {
     updateTrack,
     setOptionsTrack,
     isOffline,
-    toggleOfflineMode
+    toggleOfflineMode,
+    isTrackCached,
+    downloadTrackForOffline,
+    deleteCachedTrack
   } = useAudio();
+
+  const [isCached, setIsCached] = useState(false);
+  const [isCaching, setIsCaching] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const checkCache = async () => {
+      if (currentTrack) {
+        const cached = await isTrackCached(currentTrack.id);
+        if (active) {
+          setIsCached(cached);
+        }
+      }
+    };
+    checkCache();
+    return () => {
+      active = false;
+    };
+  }, [currentTrack?.id, isTrackCached]);
+
+  const handleToggleCache = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!currentTrack) return;
+    
+    if (isCached) {
+      try {
+        await deleteCachedTrack(currentTrack.id);
+        setIsCached(false);
+        addNotification("Track removed from offline storage", "info");
+      } catch (err) {
+        addNotification("Failed to remove track from offline cache", "error");
+      }
+    } else {
+      setIsCaching(true);
+      try {
+        await downloadTrackForOffline(currentTrack);
+        setIsCached(true);
+        addNotification("Track cached successfully for offline listening", "success");
+      } catch (err) {
+        addNotification("Failed to download track for offline", "error");
+      } finally {
+        setIsCaching(false);
+      }
+    }
+  };
 
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy'>('player');
   const [visualizerVariant, setVisualizerVariant] = useState<'bars' | 'circle' | 'particles' | 'waves'>('bars');
@@ -336,9 +385,9 @@ const FullPlayer: React.FC = () => {
             variant="ghost" 
             size="icon"
             onClick={() => setFullPlayerOpen(false)}
-            className="text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-all"
+            className="text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-all h-12 w-12 flex items-center justify-center"
           >
-            <ChevronDown className="w-5 h-5 animate-bounce-slow" />
+            <ChevronDown className="w-8 h-8 animate-bounce-slow" />
           </Button>
           <div className="text-center">
             <p className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-white/30">Now Playing</p>
@@ -349,9 +398,9 @@ const FullPlayer: React.FC = () => {
               e.stopPropagation();
               setOptionsTrack(currentTrack);
             }}
-            className="p-2.5 rounded-full text-white/50 hover:text-white hover:bg-white/5 outline-none transition-all"
+            className="p-2 rounded-full text-white/50 hover:text-white hover:bg-white/5 outline-none transition-all h-12 w-12 flex items-center justify-center"
           >
-            <MoreVertical className="w-4 h-4" />
+            <MoreVertical className="w-7 h-7" />
           </button>
         </div>
 
@@ -401,6 +450,12 @@ const FullPlayer: React.FC = () => {
                           OFFLINE
                         </span>
                       )}
+                      {isCached && (
+                        <span className="bg-blue-500/20 text-blue-400 text-[8px] font-black px-2 py-0.5 rounded-full tracking-widest uppercase flex items-center gap-1 border border-blue-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                          OFFLINE READY
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <p 
@@ -413,17 +468,38 @@ const FullPlayer: React.FC = () => {
                     </div>
                   </div>
                   
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => toggleLikeTrack(currentTrack.id)}
-                    className={cn(
-                      "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90",
-                      isLiked && "text-blue-500 hover:text-blue-400 bg-blue-500/5 hover:bg-blue-500/15"
-                    )}
-                  >
-                    <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
-                  </Button>
+                  <div className="flex items-center gap-2.5 flex-shrink-0">
+                    {/* Offline Cache Download Action */}
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleToggleCache}
+                      disabled={isCaching}
+                      className={cn(
+                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 h-[60px] w-[60px] flex items-center justify-center",
+                        isCached && "text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10"
+                      )}
+                      title={isCached ? "Remove from offline cache" : "Download for offline listening"}
+                    >
+                      {isCaching ? (
+                        <Loader2 className="w-[32px] h-[32px] animate-spin text-blue-500" />
+                      ) : (
+                        <DownloadCloud className={cn("w-[32px] h-[32px]", isCached && "fill-blue-500/20")} />
+                      )}
+                    </Button>
+
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => toggleLikeTrack(currentTrack.id)}
+                      className={cn(
+                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 h-[60px] w-[60px] flex items-center justify-center",
+                        isLiked && "text-blue-500 hover:text-blue-400 bg-blue-500/5 hover:bg-blue-500/15"
+                      )}
+                    >
+                      <Heart className={`w-[32px] h-[32px] ${isLiked ? 'fill-current' : ''}`} />
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Ambient Lyrics Snapshot Widget (On Desktop for premium feel) */}
@@ -468,35 +544,35 @@ const FullPlayer: React.FC = () => {
                 )}
 
                 {/* Timeline Slider with smooth interaction */}
-                <div className="space-y-2 px-1">
+                <div className="space-y-3 px-1 group/slider-deck">
                   <Slider 
                     value={[progress]}
                     min={0}
                     max={100}
                     step={0.1}
                     onValueChange={(val) => seek(val[0])}
-                    className="cursor-pointer h-1"
+                    className="cursor-pointer py-2 [&_[data-slot=slider-track]]:!h-[6px] [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-range]]:!bg-neutral-200 group-hover/slider-deck:[&_[data-slot=slider-range]]:!bg-blue-500 [&_[data-slot=slider-thumb]]:!size-3.5 [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/slider-deck:[&_[data-slot=slider-thumb]]:opacity-100 transition-all [&_[data-slot=slider-thumb]]:transition-opacity"
                   />
-                  <div className="flex justify-between text-[10px] md:text-xs font-bold text-neutral-400 uppercase tracking-widest font-mono">
+                  <div className="flex justify-between text-[11px] md:text-xs font-bold text-neutral-400 uppercase tracking-widest font-mono">
                     <span>{formatTime(currentTime)}</span>
                     <span>{formatTime(duration)}</span>
                   </div>
                 </div>
 
                 {/* Core Playback Controls Row */}
-                <div className="flex items-center justify-between px-2 pt-1 md:pt-4">
+                <div className="flex items-center justify-center gap-6 sm:gap-10 md:gap-14 px-2 pt-2 md:pt-6">
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={toggleShuffle} 
                     className={cn(
-                      "relative h-11 w-11 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5",
-                      isShuffle && 'text-blue-500 bg-blue-500/5 hover:bg-blue-500/10'
+                      "relative h-16 w-16 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5 flex items-center justify-center shrink-0",
+                      isShuffle && 'text-blue-500 bg-blue-500/5 hover:bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
                     )}
                   >
-                    <ShuffleIcon className="w-5 h-5" />
+                    <ShuffleIcon className="w-8 h-8" />
                     {isShuffle && (
-                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_#3b82f6]" />
                     )}
                   </Button>
 
@@ -504,25 +580,29 @@ const FullPlayer: React.FC = () => {
                     variant="ghost" 
                     size="icon" 
                     onClick={prevTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-95 transition-all h-12 w-12 rounded-full flex items-center justify-center"
+                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-90 transition-all h-20 w-20 md:h-24 md:w-24 rounded-full flex items-center justify-center shrink-0"
                   >
-                    <SkipBack className="w-8 h-8 fill-current" />
+                    <SkipBack className="w-14 h-14 md:w-16 md:h-16 fill-current" />
                   </Button>
                   
                   <Button
                     onClick={togglePlay}
-                    className="w-16 h-16 rounded-full bg-white text-black hover:scale-105 active:scale-95 transition-all shadow-[0_0_35px_rgba(255,255,255,0.35)] flex items-center justify-center p-0 hover:bg-neutral-100"
+                    className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white text-black hover:scale-108 active:scale-95 transition-all shadow-[0_8px_40px_rgba(255,255,255,0.4)] flex items-center justify-center p-0 hover:bg-neutral-100 shrink-0"
                   >
-                    {isPlaying ? <Pause className="w-8 h-8 fill-black text-black" /> : <Play className="w-8 h-8 fill-black text-black ml-1.5" />}
+                    {isPlaying ? (
+                      <Pause className="w-12 h-12 md:w-14 md:h-14 fill-black text-black" />
+                    ) : (
+                      <Play className="w-12 h-12 md:w-14 md:h-14 fill-black text-black ml-1.5" />
+                    )}
                   </Button>
 
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={nextTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-95 transition-all h-12 w-12 rounded-full flex items-center justify-center"
+                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-90 transition-all h-20 w-20 md:h-24 md:w-24 rounded-full flex items-center justify-center shrink-0"
                   >
-                    <SkipForward className="w-8 h-8 fill-current" />
+                    <SkipForward className="w-14 h-14 md:w-16 md:h-16 fill-current" />
                   </Button>
 
                   <Button 
@@ -530,36 +610,36 @@ const FullPlayer: React.FC = () => {
                     size="icon" 
                     onClick={toggleRepeat} 
                     className={cn(
-                      "relative h-11 w-11 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5",
-                      repeatMode !== 'off' ? 'text-blue-500 bg-blue-500/5 hover:bg-blue-500/10' : 'text-neutral-450 hover:text-white'
+                      "relative h-16 w-16 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5 flex items-center justify-center shrink-0",
+                      repeatMode !== 'off' ? 'text-blue-500 bg-blue-500/5 hover:bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'text-neutral-450 hover:text-white'
                     )}
                   >
-                    <RepeatIcon className="w-5 h-5" />
+                    <RepeatIcon className="w-8 h-8" />
                     {repeatMode !== 'off' && (
-                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_#3b82f6]" />
                     )}
                     {repeatMode === 'one' && (
-                      <span className="absolute top-[2px] right-[2px] text-[8px] font-black bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center border border-zinc-950 scale-90 text-[7px]">1</span>
+                      <span className="absolute top-[3px] right-[3px] text-[8px] font-black bg-blue-500 text-white rounded-full w-4.5 h-4.5 flex items-center justify-center border border-zinc-950">1</span>
                     )}
                   </Button>
                 </div>
 
                 {/* Bottom accessory tools row */}
-                <div className="flex items-center justify-between pt-6 pb-2 px-2 text-neutral-450">
-                  <div className="flex items-center gap-2.5 w-1/3">
+                <div className="flex items-center justify-between pt-8 pb-3 px-2 text-neutral-400 border-t border-white/5 mt-4">
+                  <div className="flex items-center gap-4 w-1/3 group/volume">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                      className="h-12 w-12 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
                       onClick={toggleMute}
                     >
-                      {volume === 0 || isMuted ? <VolumeX className="w-4 h-4 text-rose-500" /> : <Volume2 className="w-4 h-4" />}
+                      {volume === 0 || isMuted ? <VolumeX className="w-7 h-7 text-rose-500" /> : <Volume2 className="w-7 h-7" />}
                     </Button>
                     <Slider
                       value={[isMuted ? 0 : volume * 100]}
                       max={100}
                       step={1}
-                      className="w-20 hidden sm:flex cursor-pointer h-1"
+                      className="w-28 hidden sm:flex cursor-pointer py-1 [&_[data-slot=slider-track]]:!h-[4px] [&_[data-slot=slider-track]]:bg-neutral-800 [&_[data-slot=slider-range]]:!bg-neutral-450 group-hover/volume:[&_[data-slot=slider-range]]:!bg-blue-500 [&_[data-slot=slider-thumb]]:!size-[11px] [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/volume:[&_[data-slot=slider-thumb]]:opacity-100 [&_[data-slot=slider-thumb]]:transition-opacity"
                       onValueChange={(vals) => setVolume(vals[0] / 100)}
                     />
                   </div>
@@ -569,17 +649,17 @@ const FullPlayer: React.FC = () => {
                       variant="ghost"
                       size="icon"
                       onClick={handleShare}
-                      className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                      className="h-12 w-12 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors flex items-center justify-center"
                     >
-                      <Share2 className="w-4.5 h-4.5" />
+                      <Share2 className="w-7 h-7" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowQueue(true)}
-                      className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                      className="h-12 w-12 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors flex items-center justify-center"
                     >
-                      <ListMusic className="w-4.5 h-4.5" />
+                      <ListMusic className="w-7 h-7" />
                     </Button>
                   </div>
                 </div>
@@ -589,33 +669,33 @@ const FullPlayer: React.FC = () => {
           </TabsContent>
 
           <TabsList className={cn(
-            "grid w-full max-w-md mx-auto bg-white/5 border-none h-11 p-1 mb-6 relative z-10",
+            "grid w-full max-w-md mx-auto bg-white/5 border-none h-12 p-1 mb-6 relative z-10 rounded-xl",
             currentTrack.isNFT ? "grid-cols-6" : "grid-cols-5"
           )}>
-            <TabsTrigger value="player" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 font-bold">
-              <Music className="w-4 h-4" />
+            <TabsTrigger value="player" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 font-bold py-2 rounded-lg">
+              <Music className="w-5 h-5" />
             </TabsTrigger>
-            <TabsTrigger value="lyrics" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 font-bold">
-              <Mic2 className="w-4 h-4" />
+            <TabsTrigger value="lyrics" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 font-bold py-2 rounded-lg">
+              <Mic2 className="w-5 h-5" />
             </TabsTrigger>
-            <TabsTrigger value="krupy" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 relative font-bold">
+            <TabsTrigger value="krupy" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 relative font-bold py-2 rounded-lg">
 
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-5 h-5" />
               <motion.div 
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 2, repeat: Infinity }}
                 className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"
               />
             </TabsTrigger>
-            <TabsTrigger value="comments" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40">
-              <MessageSquare className="w-4 h-4" />
+            <TabsTrigger value="comments" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 py-2 rounded-lg">
+              <MessageSquare className="w-5 h-5" />
             </TabsTrigger>
-            <TabsTrigger value="artist" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40">
-              <Hash className="w-4 h-4" />
+            <TabsTrigger value="artist" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 py-2 rounded-lg">
+              <Hash className="w-5 h-5" />
             </TabsTrigger>
             {currentTrack.isNFT && (
-              <TabsTrigger value="nft" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40">
-                <Zap className="w-4 h-4" />
+              <TabsTrigger value="nft" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 py-2 rounded-lg">
+                <Zap className="w-5 h-5" />
               </TabsTrigger>
             )}
           </TabsList>

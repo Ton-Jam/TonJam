@@ -435,37 +435,38 @@ const Profile: React.FC = () => {
 
       {/* Action Button (Extreme Right) */}
       <div className="flex items-center gap-1.5 sm:gap-3">
-        {!localUser.isVerifiedArtist && !isEditing && (
-          <button 
-            onClick={() => setIsVerificationModalOpen(true)}
-            className="px-3 py-1.5 sm:px-6 sm:py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest transition-all shadow-none"
-          >
-            Get Verified
-          </button>
-        )}
         {isEditing ? (
           <>
             <button 
               onClick={() => setIsEditing(false)} 
-              className="px-3.5 py-1.5 sm:px-5 sm:py-2 bg-white/5 text-white rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all"
+              className="px-3.5 py-1.5 sm:px-5 sm:py-2 bg-white/5 text-white rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button 
               onClick={handleSave} 
-              className="px-3.5 py-1.5 sm:px-5 sm:py-2 bg-white text-black rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl"
+              className="px-3.5 py-1.5 sm:px-5 sm:py-2 bg-white text-black rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest hover:bg-white/90 transition-all shadow-xl cursor-pointer"
             >
               Save
             </button>
           </>
         ) : (
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <button 
-              onClick={() => navigate('/artist-dashboard')}
-              className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-background text-foreground rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
-            >
-              Dashboard
-            </button>
+            {localUser.isVerifiedArtist ? (
+              <button 
+                onClick={() => navigate('/artist-dashboard')}
+                className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-background text-foreground rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm cursor-pointer"
+              >
+                Dashboard
+              </button>
+            ) : (
+              <button 
+                onClick={() => navigate('/artist-onboarding')}
+                className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest transition-all shadow-none cursor-pointer"
+              >
+                Become an Artist
+              </button>
+            )}
             <button 
               onClick={() => navigate('/settings')}
               className="p-2 sm:p-2.5 bg-background text-foreground rounded-full border border-white/20 hover:bg-white/5 transition-all shadow-sm flex items-center justify-center cursor-pointer"
@@ -475,7 +476,7 @@ const Profile: React.FC = () => {
             </button>
             <button 
               onClick={() => navigate('/edit-profile')}
-              className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-background text-foreground rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm"
+              className="px-3.5 py-1.5 sm:px-6 sm:py-2 bg-background text-foreground rounded-full font-black text-[9px] sm:text-[11px] uppercase tracking-widest border border-white/20 hover:bg-white/5 transition-all shadow-sm cursor-pointer"
             >
               Edit Profile
             </button>
