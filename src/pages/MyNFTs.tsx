@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAudio } from '@/context/AudioContext';
 import NFTCard from '@/components/NFTCard';
+import EmptyNFTState from '@/components/EmptyNFTState';
 import ManageNFTModal from '@/components/ManageNFTModal';
 import { Sparkles, Gavel, LayoutGrid, List } from 'lucide-react';
 import { NFTItem } from '@/types';
@@ -9,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 const MyNFTs: React.FC = () => {
+  const navigate = useNavigate();
   const { userNFTs, userBids } = useAudio();
   const [selectedNFT, setSelectedNFT] = useState<NFTItem | null>(null);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
@@ -20,18 +23,17 @@ const MyNFTs: React.FC = () => {
   };
 
   const renderEmptyState = (type: 'owned' | 'bids') => (
-    <div className="col-span-full flex flex-col items-center justify-center py-12 text-center glass border border-border/20 rounded-2xl bg-white/[0.02]">
-      <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-6">
-        {type === 'owned' ? <Sparkles className="h-8 w-8 text-muted-foreground/50" /> : <Gavel className="h-8 w-8 text-muted-foreground/50" />}
-      </div>
-      <h3 className="text-xl font-bold text-foreground uppercase tracking-tighter">
-        {type === 'owned' ? 'No NFTs Found' : 'No Active Bids'}
-      </h3>
-      <p className="text-muted-foreground/80 text-sm mt-2 max-w-sm">
-        {type === 'owned' 
-          ? "You haven't acquired any NFT artifacts yet. Explore the marketplace to find unique tracks."
-          : "You haven't placed any bids on active auctions yet."}
-      </p>
+    <div className="col-span-full py-4">
+      <EmptyNFTState
+        title={type === 'owned' ? 'No NFTs Found' : 'No Active Bids'}
+        description={
+          type === 'owned' 
+            ? "You haven't acquired any NFT artifacts yet. Explore the marketplace to find unique tracks."
+            : "You haven't placed any bids on active auctions yet."
+        }
+        onReset={() => navigate('/marketplace')}
+        actionLabel={type === 'owned' ? 'Browse Marketplace' : 'View Live Auctions'}
+      />
     </div>
   );
 

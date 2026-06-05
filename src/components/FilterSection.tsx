@@ -104,20 +104,19 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   { id: 'artists', label: 'Artists', icon: Users },
                   { id: 'nfts', label: 'NFT Artifacts', icon: ShoppingBag }
                 ].map((cat) => (
-                  <Button
+                  <button
                     key={cat.id}
-                    variant="outline"
                     onClick={() => setActiveFilter(cat.id)}
                     className={cn(
-                      "h-9 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer w-full",
+                      "py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer",
                       activeFilter === cat.id 
-                        ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
-                        : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
+                        ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20" 
+                        : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
                     )}
                   >
-                    <cat.icon className="h-3.5 w-3.5" />
+                    <cat.icon className="h-3 w-3" />
                     {cat.label}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
@@ -134,20 +133,19 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   { id: 'price-low', label: 'Price Low', icon: ArrowDown },
                   { id: 'price-high', label: 'Price High', icon: ArrowUp }
                 ].map((opt) => (
-                  <Button
+                  <button
                     key={opt.id}
-                    variant="outline"
                     onClick={() => setSortOption(opt.id)}
                     className={cn(
-                      "h-9 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer w-full",
+                      "py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer",
                       sortOption === opt.id 
-                        ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
-                        : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
+                        ? "bg-white/10 border-white/25 text-white" 
+                        : "bg-transparent border-white/5 text-white/40 hover:border-white/10"
                     )}
                   >
-                    <opt.icon className="h-3.5 w-3.5" />
+                    <opt.icon className="h-2.5 w-2.5" />
                     {opt.label}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
@@ -205,19 +203,18 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Artifact Rarity</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {['All', 'Unique', 'Rare', 'Limited', 'Common'].map((rarity) => (
-                      <Button
+                      <button
                         key={rarity}
-                        variant="outline"
                         onClick={() => filters.setRarity!(rarity)}
                         className={cn(
-                          "h-9 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center justify-center cursor-pointer w-full",
+                          "py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border cursor-pointer",
                           filters.rarity === rarity 
-                            ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
-                            : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
+                            ? "bg-amber-500/10 border-amber-500/30 text-amber-500 shadow-lg shadow-amber-500/5" 
+                            : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
                         )}
                       >
                         {rarity}
-                      </Button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -231,19 +228,18 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Listing Status</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {['All', 'Active Auctions'].map((status) => (
-                      <Button
+                      <button
                         key={status}
-                        variant="outline"
                         onClick={() => filters.setStatus!(status)}
                         className={cn(
-                          "h-9 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center justify-center cursor-pointer w-full",
+                          "py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border cursor-pointer",
                           filters.status === status 
-                            ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
-                            : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
+                            ? "bg-purple-500/10 border-purple-500/30 text-purple-500 shadow-lg shadow-purple-500/5" 
+                            : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
                         )}
                       >
                         {status}
-                      </Button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -259,9 +255,9 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     {GENRES.map((genre) => {
                       const isSelected = filters.selectedGenres?.includes(genre.name);
                       return (
-                        <Button 
+                        <Badge 
                           key={genre.id}
-                          variant="outline"
+                          variant={isSelected ? "default" : "outline"}
                           onClick={() => {
                             if (isSelected) {
                               filters.setSelectedGenres!(filters.selectedGenres!.filter(g => g !== genre.name));
@@ -270,14 +266,14 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                             }
                           }}
                           className={cn(
-                            "px-3 h-7 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border",
+                            "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
                             isSelected 
-                              ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
-                              : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
+                              ? "bg-blue-600 text-white" 
+                              : "bg-white/5 text-white/50 hover:bg-white/10"
                           )}
                         >
                           {genre.name}
-                        </Button>
+                        </Badge>
                       );
                     })}
                   </div>
@@ -294,9 +290,9 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     {MOODS.map((mood) => {
                       const isSelected = filters.selectedMoods?.includes(mood.name);
                       return (
-                        <Button 
+                        <Badge 
                           key={mood.id}
-                          variant="outline"
+                          variant={isSelected ? "default" : "outline"}
                           onClick={() => {
                             if (isSelected) {
                               filters.setSelectedMoods!(filters.selectedMoods!.filter(m => m !== mood.name));
@@ -305,14 +301,14 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                             }
                           }}
                           className={cn(
-                            "px-3 h-7 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border",
+                            "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
                             isSelected 
-                              ? "bg-blue-600 border-blue-500 text-white hover:bg-blue-500 hover:text-white shadow-lg shadow-blue-600/30" 
-                              : "bg-transparent border-blue-500/30 hover:border-blue-400 text-muted-foreground hover:bg-blue-500/10 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.05)]"
+                              ? "bg-purple-600 text-white" 
+                              : "bg-white/5 text-white/50 hover:bg-white/10"
                           )}
                         >
                           {mood.name}
-                        </Button>
+                        </Badge>
                       );
                     })}
                   </div>

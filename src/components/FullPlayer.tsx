@@ -385,9 +385,9 @@ const FullPlayer: React.FC = () => {
             variant="ghost" 
             size="icon"
             onClick={() => setFullPlayerOpen(false)}
-            className="text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-all h-12 w-12 flex items-center justify-center"
+            className="text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-all h-[42px] w-[42px]"
           >
-            <ChevronDown className="w-8 h-8 animate-bounce-slow" />
+            <ChevronDown className="w-[26px] h-[26px] animate-bounce-slow" />
           </Button>
           <div className="text-center">
             <p className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-white/30">Now Playing</p>
@@ -398,9 +398,9 @@ const FullPlayer: React.FC = () => {
               e.stopPropagation();
               setOptionsTrack(currentTrack);
             }}
-            className="p-2 rounded-full text-white/50 hover:text-white hover:bg-white/5 outline-none transition-all h-12 w-12 flex items-center justify-center"
+            className="p-2 rounded-full text-white/50 hover:text-white hover:bg-white/5 outline-none transition-all h-[42px] w-[42px] flex items-center justify-center"
           >
-            <MoreVertical className="w-7 h-7" />
+            <MoreVertical className="w-[24px] h-[24px]" />
           </button>
         </div>
 
@@ -412,27 +412,90 @@ const FullPlayer: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col h-full justify-between py-2 md:grid md:grid-cols-12 md:gap-16 md:items-center md:py-6"
             >
-              {/* Cover Art Area (Left Column on Desktop, Top on Mobile) */}
-              <div className="relative flex-1 flex flex-col items-center justify-center md:col-span-5">
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="relative w-[280px] h-[280px] sm:w-[330px] sm:h-[330px] lg:w-[420px] lg:h-[420px] overflow-hidden rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.85)] group cursor-pointer transition-all duration-500"
-                  onClick={() => {
-                    const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
-                    const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
-                    setVisualizerVariant(variants[nextIndex]);
-                  }}
-                >
-                  <img
-                    src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                    alt={currentTrack.title}
-                  />
-                  
-                  <div className="absolute inset-0 bg-black/35 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Sparkles className="w-8 h-8 text-white/70 animate-pulse" />
-                  </div>
-                </motion.div>
+              {/* Cover Art Area (Exquisite glass spinning vinyl disk based on @aicanvas/glass-music-player design) */}
+              <div className="relative flex-1 flex flex-col items-center justify-center md:col-span-5 py-4 select-none">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentTrack.id}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.85 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 26 }}
+                    className="relative"
+                  >
+                    {/* Ambient glow behind the disc - matching track mood color */}
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background: visualizerColor,
+                        opacity: 0.22,
+                        filter: 'blur(35px)',
+                        transform: 'scale(1.2)',
+                      }}
+                    />
+                    
+                    {/* Disc shell - premium dual borders, 3D shadows */}
+                    <div
+                      className="relative flex h-60 w-60 sm:h-72 sm:w-72 items-center justify-center rounded-full transition-all duration-300 cursor-pointer"
+                      onClick={() => {
+                        const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
+                        const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
+                        setVisualizerVariant(variants[nextIndex]);
+                      }}
+                      style={{
+                        background: `radial-gradient(circle at 38% 35%, ${visualizerColor}20, ${visualizerColor}04 60%, transparent)`,
+                        outline: `1px solid ${visualizerColor}18`,
+                        boxShadow: `0 0 0 8px rgba(255,255,255,0.02), 0 20px 60px rgba(0,0,0,0.85)`,
+                      }}
+                    >
+                      {/* Spinning artwork & groove records */}
+                      <motion.div
+                        animate={{ rotate: isPlaying ? 360 : 0 }}
+                        transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+                        className="relative h-44 w-44 sm:h-52 sm:w-52 rounded-full overflow-hidden flex items-center justify-center"
+                        style={{
+                          boxShadow: `inset 0 0 15px rgba(0,0,0,0.9)`,
+                        }}
+                      >
+                        {/* Album art cover */}
+                        <img
+                          src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
+                          alt={currentTrack.title}
+                          className="absolute inset-0 w-full h-full object-cover rounded-full select-none"
+                          referrerPolicy="no-referrer"
+                        />
+                        
+                        {/* Continuous Concentric Grooves overlay for authentic vinyl aesthetic */}
+                        {[0.88, 0.76, 0.64, 0.52].map((s, i) => (
+                          <div
+                            key={i}
+                            className="absolute inset-0 rounded-full pointer-events-none"
+                            style={{
+                              transform: `scale(${s})`,
+                              border: `1px solid rgba(255,255,255, ${0.06 - (i * 0.01)})`,
+                            }}
+                          />
+                        ))}
+
+                        {/* Center spindle cap and label with color highlights */}
+                        <div
+                          className="absolute left-1/2 top-1/2 h-[44px] w-[44px] sm:h-[50px] sm:w-[50px] -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center"
+                          style={{
+                            background: `radial-gradient(circle at 40% 40%, ${visualizerColor}e0, ${visualizerColor}90)`,
+                            boxShadow: `0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)`,
+                          }}
+                        >
+                          <div className="w-[10px] h-[10px] rounded-full bg-neutral-950/95" />
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    {/* Small Floating Sparkle indicator of Active Mood Transmission */}
+                    <div className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 shadow-lg select-none">
+                      <Sparkles className="w-3.5 h-3.5" style={{ color: visualizerColor }} />
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
               {/* Controls and Metadata (Right Column on Desktop, Bottom on Mobile) */}
@@ -468,7 +531,7 @@ const FullPlayer: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2.5 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {/* Offline Cache Download Action */}
                     <Button 
                       variant="ghost" 
@@ -476,15 +539,15 @@ const FullPlayer: React.FC = () => {
                       onClick={handleToggleCache}
                       disabled={isCaching}
                       className={cn(
-                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 h-[60px] w-[60px] flex items-center justify-center",
+                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 h-[52px] w-[52px] flex items-center justify-center",
                         isCached && "text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10"
                       )}
                       title={isCached ? "Remove from offline cache" : "Download for offline listening"}
                     >
                       {isCaching ? (
-                        <Loader2 className="w-[32px] h-[32px] animate-spin text-blue-500" />
+                        <Loader2 className="w-[28px] h-[28px] animate-spin text-blue-500" />
                       ) : (
-                        <DownloadCloud className={cn("w-[32px] h-[32px]", isCached && "fill-blue-500/20")} />
+                        <DownloadCloud className={cn("w-[28px] h-[28px]", isCached && "fill-blue-500/20")} />
                       )}
                     </Button>
 
@@ -493,11 +556,11 @@ const FullPlayer: React.FC = () => {
                       size="sm"
                       onClick={() => toggleLikeTrack(currentTrack.id)}
                       className={cn(
-                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 h-[60px] w-[60px] flex items-center justify-center",
+                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 h-[52px] w-[52px] flex items-center justify-center",
                         isLiked && "text-blue-500 hover:text-blue-400 bg-blue-500/5 hover:bg-blue-500/15"
                       )}
                     >
-                      <Heart className={`w-[32px] h-[32px] ${isLiked ? 'fill-current' : ''}`} />
+                      <Heart className={`w-[28px] h-[28px] ${isLiked ? 'fill-current' : ''}`} />
                     </Button>
                   </div>
                 </div>
@@ -552,10 +615,13 @@ const FullPlayer: React.FC = () => {
                     step={0.1}
                     onValueChange={(val) => seek(val[0])}
                     className="cursor-pointer py-2 [&_[data-slot=slider-track]]:!h-[6px] [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-range]]:!bg-neutral-200 group-hover/slider-deck:[&_[data-slot=slider-range]]:!bg-blue-500 [&_[data-slot=slider-thumb]]:!size-3.5 [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/slider-deck:[&_[data-slot=slider-thumb]]:opacity-100 transition-all [&_[data-slot=slider-thumb]]:transition-opacity"
+                    style={{
+                      contentVisibility: 'auto'
+                    }}
                   />
                   <div className="flex justify-between text-[11px] md:text-xs font-bold text-neutral-400 uppercase tracking-widest font-mono">
                     <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
+                    <span style={{ color: `${visualizerColor}aa` }}>{formatTime(duration)}</span>
                   </div>
                 </div>
 
@@ -566,13 +632,16 @@ const FullPlayer: React.FC = () => {
                     size="icon" 
                     onClick={toggleShuffle} 
                     className={cn(
-                      "relative h-16 w-16 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5 flex items-center justify-center shrink-0",
-                      isShuffle && 'text-blue-500 bg-blue-500/5 hover:bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
+                      "relative h-14 w-14 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5 flex items-center justify-center shrink-0"
                     )}
+                    style={{
+                      color: isShuffle ? visualizerColor : undefined,
+                      backgroundColor: isShuffle ? `${visualizerColor}0c` : undefined
+                    }}
                   >
-                    <ShuffleIcon className="w-8 h-8" />
+                    <ShuffleIcon className="w-7 h-7" />
                     {isShuffle && (
-                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_#3b82f6]" />
+                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: visualizerColor }} />
                     )}
                   </Button>
 
@@ -580,19 +649,23 @@ const FullPlayer: React.FC = () => {
                     variant="ghost" 
                     size="icon" 
                     onClick={prevTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-90 transition-all h-20 w-20 md:h-24 md:w-24 rounded-full flex items-center justify-center shrink-0"
+                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-90 transition-all h-16 w-16 md:h-20 md:w-20 rounded-full flex items-center justify-center shrink-0"
                   >
-                    <SkipBack className="w-14 h-14 md:w-16 md:h-16 fill-current" />
+                    <SkipBack className="w-12 h-12 md:w-14 md:h-14 fill-current" />
                   </Button>
                   
                   <Button
                     onClick={togglePlay}
-                    className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white text-black hover:scale-108 active:scale-95 transition-all shadow-[0_8px_40px_rgba(255,255,255,0.4)] flex items-center justify-center p-0 hover:bg-neutral-100 shrink-0"
+                    className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center p-0 shrink-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-white hover:bg-white"
+                    style={{
+                      background: `radial-gradient(circle at 38% 35%, ${visualizerColor}ee, ${visualizerColor}99)`,
+                      boxShadow: `0 12px 30px ${visualizerColor}40, inset 0 1px 0 rgba(255,255,255,0.25)`
+                    }}
                   >
                     {isPlaying ? (
-                      <Pause className="w-12 h-12 md:w-14 md:h-14 fill-black text-black" />
+                      <Pause className="w-8 h-8 md:w-10 md:h-10 text-white fill-white" />
                     ) : (
-                      <Play className="w-12 h-12 md:w-14 md:h-14 fill-black text-black ml-1.5" />
+                      <Play className="w-8 h-8 md:w-10 md:h-10 text-white fill-white ml-1" />
                     )}
                   </Button>
 
@@ -600,9 +673,9 @@ const FullPlayer: React.FC = () => {
                     variant="ghost" 
                     size="icon" 
                     onClick={nextTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-90 transition-all h-20 w-20 md:h-24 md:w-24 rounded-full flex items-center justify-center shrink-0"
+                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-90 transition-all h-16 w-16 md:h-20 md:w-20 rounded-full flex items-center justify-center shrink-0"
                   >
-                    <SkipForward className="w-14 h-14 md:w-16 md:h-16 fill-current" />
+                    <SkipForward className="w-12 h-12 md:w-14 md:h-14 fill-current" />
                   </Button>
 
                   <Button 
@@ -610,36 +683,39 @@ const FullPlayer: React.FC = () => {
                     size="icon" 
                     onClick={toggleRepeat} 
                     className={cn(
-                      "relative h-16 w-16 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5 flex items-center justify-center shrink-0",
-                      repeatMode !== 'off' ? 'text-blue-500 bg-blue-500/5 hover:bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'text-neutral-450 hover:text-white'
+                      "relative h-14 w-14 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5 flex items-center justify-center shrink-0"
                     )}
+                    style={{
+                      color: repeatMode !== 'off' ? visualizerColor : undefined,
+                      backgroundColor: repeatMode !== 'off' ? `${visualizerColor}0c` : undefined
+                    }}
                   >
-                    <RepeatIcon className="w-8 h-8" />
+                    <RepeatIcon className="w-7 h-7" />
                     {repeatMode !== 'off' && (
-                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_#3b82f6]" />
+                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: visualizerColor }} />
                     )}
                     {repeatMode === 'one' && (
-                      <span className="absolute top-[3px] right-[3px] text-[8px] font-black bg-blue-500 text-white rounded-full w-4.5 h-4.5 flex items-center justify-center border border-zinc-950">1</span>
+                      <span className="absolute top-[3px] right-[3px] text-[8px] font-black text-white rounded-full w-4.5 h-4.5 flex items-center justify-center border border-zinc-950 scale-90" style={{ backgroundColor: visualizerColor }}>1</span>
                     )}
                   </Button>
                 </div>
 
                 {/* Bottom accessory tools row */}
-                <div className="flex items-center justify-between pt-8 pb-3 px-2 text-neutral-400 border-t border-white/5 mt-4">
-                  <div className="flex items-center gap-4 w-1/3 group/volume">
+                <div className="flex items-center justify-between pt-8 pb-3 px-2 text-neutral-450 border-t border-white/5 mt-4">
+                  <div className="flex items-center gap-3 w-1/3 group/volume">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-12 w-12 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                      className="h-11 w-11 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
                       onClick={toggleMute}
                     >
-                      {volume === 0 || isMuted ? <VolumeX className="w-7 h-7 text-rose-500" /> : <Volume2 className="w-7 h-7" />}
+                      {volume === 0 || isMuted ? <VolumeX className="w-5.5 h-5.5 text-rose-500" /> : <Volume2 className="w-5.5 h-5.5" />}
                     </Button>
                     <Slider
                       value={[isMuted ? 0 : volume * 100]}
                       max={100}
                       step={1}
-                      className="w-28 hidden sm:flex cursor-pointer py-1 [&_[data-slot=slider-track]]:!h-[4px] [&_[data-slot=slider-track]]:bg-neutral-800 [&_[data-slot=slider-range]]:!bg-neutral-450 group-hover/volume:[&_[data-slot=slider-range]]:!bg-blue-500 [&_[data-slot=slider-thumb]]:!size-[11px] [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/volume:[&_[data-slot=slider-thumb]]:opacity-100 [&_[data-slot=slider-thumb]]:transition-opacity"
+                      className="w-24 hidden sm:flex cursor-pointer py-1 [&_[data-slot=slider-track]]:!h-[4px] [&_[data-slot=slider-track]]:bg-neutral-800 [&_[data-slot=slider-range]]:!bg-neutral-450 group-hover/volume:[&_[data-slot=slider-range]]:!bg-blue-500 [&_[data-slot=slider-thumb]]:!size-[11px] [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/volume:[&_[data-slot=slider-thumb]]:opacity-100 [&_[data-slot=slider-thumb]]:transition-opacity"
                       onValueChange={(vals) => setVolume(vals[0] / 100)}
                     />
                   </div>
@@ -649,17 +725,17 @@ const FullPlayer: React.FC = () => {
                       variant="ghost"
                       size="icon"
                       onClick={handleShare}
-                      className="h-12 w-12 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors flex items-center justify-center"
+                      className="h-11 w-11 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors flex items-center justify-center"
                     >
-                      <Share2 className="w-7 h-7" />
+                      <Share2 className="w-[24px] h-[24px]" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowQueue(true)}
-                      className="h-12 w-12 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors flex items-center justify-center"
+                      className="h-11 w-11 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors flex items-center justify-center"
                     >
-                      <ListMusic className="w-7 h-7" />
+                      <ListMusic className="w-[24px] h-[24px]" />
                     </Button>
                   </div>
                 </div>

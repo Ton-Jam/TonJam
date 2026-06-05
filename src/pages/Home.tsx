@@ -1,12 +1,14 @@
 import GetFreeTokensModal from '@/components/GetFreeTokensModal';
 import BuyTJModal from '@/components/BuyTJModal';
+import BuyNFTModal from '@/components/BuyNFTModal';
 import CompleteProfilePrompt from '@/components/CompleteProfilePrompt';
 import { CardSmall } from '@/components/CardSmall';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X } from 'lucide-react';
-import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES, TON_LOGO } from '@/constants';
-import { Track, Task } from '@/types';
+import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X, ArrowRight } from 'lucide-react';
+import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES, TON_LOGO, TJ_COIN_ICON } from '@/constants';
+import TiltedCoverflow, { CoverflowItem } from '@/components/aicanvas/tilted-coverflow';
+import { Track, Task, NFTItem } from '@/types';
 import { getTasks, updateTaskProgress, completeTask, claimTaskReward } from '@/services/taskService';
 import { getPlaceholderImage } from '@/lib/utils';
 import { auth } from '@/lib/firebase';
@@ -136,7 +138,9 @@ const Home: React.FC = () => {
     generateDiscoverWeekly, 
     getRecommendations, 
     allNFTs,
-    sponsoredPosts
+    sponsoredPosts,
+    tasks: globalTasks,
+    claimTaskReward: globalClaimTaskReward
   } = useAudio();
   
   const carouselItems = useMemo(() => {
@@ -160,6 +164,8 @@ const Home: React.FC = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [isTokensModalOpen, setIsTokensModalOpen] = useState(false);
   const [isBuyTJModalOpen, setIsBuyTJModalOpen] = useState(false);
+  const [selectedCoverflowNFT, setSelectedCoverflowNFT] = useState<NFTItem | null>(null);
+  const [showBuyModalForCoverflow, setShowBuyModalForCoverflow] = useState(false);
   const [visibleNFTCount, setVisibleNFTCount] = useState(4);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
@@ -449,6 +455,26 @@ const Home: React.FC = () => {
     return nfts.slice(2, 7);
   }, [allNFTs, selectedGenre]);
 
+  const trackCoverflowItems = useMemo<CoverflowItem[]>(() => {
+    return trendingTracks.slice(0, 7).map(track => ({
+      id: track.id,
+      title: track.title,
+      subtitle: track.artist,
+      imageUrl: track.coverUrl,
+      onClick: () => playTrack(track)
+    }));
+  }, [trendingTracks, playTrack]);
+
+  const nftCoverflowItems = useMemo<CoverflowItem[]>(() => {
+    return trendingNFTs.slice(0, 7).map(nft => ({
+      id: nft.id,
+      title: nft.title,
+      subtitle: `${nft.artist} • ${nft.price} TON`,
+      imageUrl: nft.imageUrl,
+      onClick: () => setSelectedCoverflowNFT(nft)
+    }));
+  }, [trendingNFTs]);
+
   /* Removed local discoverWeekly memo as it is now in useAudio() */
 
   return (
@@ -460,6 +486,139 @@ const Home: React.FC = () => {
     >
       <GetFreeTokensModal isOpen={isTokensModalOpen} onClose={() => setIsTokensModalOpen(false)} />
       {isBuyTJModalOpen && <BuyTJModal onClose={() => setIsBuyTJModalOpen(false)} onSuccess={() => setIsBuyTJModalOpen(false)} />}
+      
+      {/* Coverflow NFT Custom Interactive Modal Overlay */}
+      <AnimatePresence>
+        {selectedCoverflowNFT && (
+          <div key="coverflow-nft-overlay" className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl">
+            {/* Click backdrop to close */}
+            <div 
+              className="absolute inset-0 cursor-pointer" 
+              onClick={() => setSelectedCoverflowNFT(null)} 
+            />
+            
+            {/* Modal Body Container */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              className="relative w-full max-w-xl md:max-w-3xl rounded-3xl bg-slate-950 p-6 md:p-8 overflow-hidden shadow-2xl flex flex-col md:flex-row gap-6 md:gap-8 items-stretch max-h-[90vh]"
+            >
+              {/* Absolutes for Glows (no borders!) */}
+              <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-500/10 blur-[120px] pointer-events-none rounded-full" />
+              <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/10 blur-[120px] pointer-events-none rounded-full" />
+
+              {/* Close Button */}
+              <button 
+                onClick={() => setSelectedCoverflowNFT(null)}
+                className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Left Column: Enlarged Artwork */}
+              <div className="relative flex-1 flex flex-col justify-center min-w-0">
+                <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl bg-black/40">
+                  <img 
+                    src={selectedCoverflowNFT.imageUrl || getPlaceholderImage(`nft-${selectedCoverflowNFT.id}`)} 
+                    alt={selectedCoverflowNFT.title}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                  
+                  {/* Floating Edition Tag */}
+                  {selectedCoverflowNFT.edition && (
+                    <div className="absolute bottom-4 left-4 z-10 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[9px] font-black tracking-widest uppercase text-blue-400 shadow-lg">
+                      {selectedCoverflowNFT.edition} EDITION
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Details & Pricing Block */}
+              <div className="flex-1 flex flex-col justify-between space-y-5 min-w-0 z-10 text-left">
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-[9px] font-black uppercase tracking-[0.25em] text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full inline-block leading-none">
+                      Sonic Artifact
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight leading-tight mt-2.5">
+                      {selectedCoverflowNFT.title}
+                    </h2>
+                    <p className="text-xs font-bold text-zinc-400 mt-1">
+                      by <span className="text-blue-400">{selectedCoverflowNFT.artist || selectedCoverflowNFT.creator}</span>
+                    </p>
+                  </div>
+
+                  {selectedCoverflowNFT.description && (
+                    <p className="text-[11px] sm:text-xs text-zinc-400 leading-relaxed font-medium">
+                      {selectedCoverflowNFT.description}
+                    </p>
+                  )}
+
+                  {/* Pricing Breakdown Card (No border lines, only shadow & background contrasts) */}
+                  <div className="bg-white/5 rounded-2xl p-4 space-y-3">
+                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block leading-none">
+                      Financial Protocol
+                    </span>
+                    <div className="flex items-center justify-between text-xs font-bold text-zinc-400">
+                      <span>Listing Price</span>
+                      <div className="flex items-center gap-1.5 text-white">
+                        <img src={TON_LOGO} alt="TON" className="w-4 h-4 object-contain" />
+                        <span>{parseFloat(selectedCoverflowNFT.price).toFixed(2)} TON</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-bold text-zinc-400">
+                      <span>Sync Fee (5%)</span>
+                      <div className="flex items-center gap-1.5 text-white">
+                        <img src={TON_LOGO} alt="TON" className="w-4 h-4 object-contain" />
+                        <span>{(parseFloat(selectedCoverflowNFT.price) * 0.05).toFixed(2)} TON</span>
+                      </div>
+                    </div>
+                    <div className="h-px bg-white/5 my-1" />
+                    <div className="flex items-center justify-between text-sm font-black text-white">
+                      <span>TOTAL DEPOSIT</span>
+                      <div className="flex items-center gap-1.5 text-blue-400">
+                        <img src={TON_LOGO} alt="TON" className="w-4.5 h-4.5 object-contain" />
+                        <span>{(parseFloat(selectedCoverflowNFT.price) * 1.05).toFixed(2)} TON</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions Row */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button
+                    onClick={() => setShowBuyModalForCoverflow(true)}
+                    className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest rounded-2xl text-[10px] active:scale-95 transition-all shadow-lg hover:shadow-blue-500/20 cursor-pointer"
+                  >
+                    Buy Now
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedCoverflowNFT(null);
+                      navigate(`/nft/${selectedCoverflowNFT.id}`);
+                    }}
+                    className="flex-1 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl text-[10px] active:scale-95 transition-all cursor-pointer"
+                  >
+                    More Details
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {showBuyModalForCoverflow && selectedCoverflowNFT && (
+        <BuyNFTModal 
+          nft={selectedCoverflowNFT} 
+          onClose={() => setShowBuyModalForCoverflow(false)} 
+        />
+      )}
       
       <div className="w-full relative z-20 mb-6 px-4">
         <div className="flex items-center justify-between">
@@ -571,26 +730,83 @@ const Home: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Featured Sponsored Posts Carousel & Token Forge */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-              <div className="md:col-span-2 flex flex-col justify-between">
-                <SectionHeader title="Featured" viewAllLink="/explore" />
-                <TrendingBannerCarousel 
-                  banners={carouselItems.map(item => ({
-                    id: item.id,
-                    title: item.title,
-                    image: item.imageUrl,
-                    link: item.link
-                  }))} 
-                />
-              </div>
-              <div className="flex flex-col justify-between h-full bg-transparent">
-                <SectionHeader title="Token Forge" />
-                <div className="flex-1 flex items-center justify-center pt-1 px-1">
-                  <CardSmall onClick={() => setIsBuyTJModalOpen(true)} />
+            {/* Featured Sponsored Posts Carousel */}
+            <div className="space-y-4">
+              <SectionHeader title="Featured" viewAllLink="/explore" />
+              <TrendingBannerCarousel 
+                banners={carouselItems.map(item => ({
+                  id: item.id,
+                  title: item.title,
+                  image: item.imageUrl,
+                  link: item.link
+                }))} 
+              />
+            </div>
+
+            {/* Edge-to-Edge Token Forge Section */}
+            <section className="relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-gradient-to-r from-blue-950/20 via-slate-900/50 to-purple-950/20 p-6 sm:p-8 hover:bg-slate-900/30 transition-all shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-6">
+              {/* Background Glow */}
+              <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-500/10 blur-[100px] pointer-events-none rounded-full" />
+              <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/10 blur-[100px] pointer-events-none rounded-full" />
+
+              <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-center lg:items-start gap-4 text-center lg:text-left">
+                <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Zap className="h-8 w-8 text-blue-400 animate-pulse" />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-center lg:justify-start gap-2">
+                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">Token Forge</h2>
+                    <Badge variant="outline" className="bg-blue-500/15 text-blue-400 border-none px-2 py-0.5 text-[8px] tracking-[0.2em] font-black rounded-full uppercase">TJ_GEN_V2</Badge>
+                  </div>
+                  <p className="text-zinc-400 font-medium text-xs sm:text-sm max-w-xl leading-relaxed">
+                    Instantly forge TON into JAM tokens. Participate in decentralized staking, access premium creator contracts, and acquire exclusive limited audio NFTs.
+                  </p>
                 </div>
               </div>
-            </div>
+
+              {/* Balances and Rate Block */}
+              <div className="relative z-10 flex flex-col sm:flex-row items-stretch gap-4 w-full xl:w-auto">
+                {/* Rate conversion display */}
+                <div className="bg-black/40 px-4 py-3 rounded-2xl flex items-center justify-between gap-6 min-w-full sm:min-w-[180px]">
+                  <div className="flex items-center gap-2">
+                    <img src={TON_LOGO} alt="TON" className="w-5 h-5 object-contain" />
+                    <div>
+                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Rate</p>
+                      <p className="text-xs font-black text-white">1 TON</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-blue-500/40" />
+                  <div className="flex items-center gap-2">
+                    <img src={TJ_COIN_ICON} alt="JAM" className="w-5 h-5 object-contain" />
+                    <div>
+                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Yield</p>
+                      <p className="text-xs font-black text-blue-400">100 JAM</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Balances */}
+                <div className="bg-black/40 px-5 py-3 rounded-2xl flex items-center justify-around gap-6 min-w-full sm:min-w-[200px]">
+                  <div className="text-center sm:text-left">
+                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">TON Balance</span>
+                    <span className="text-sm font-black text-white">{userProfile.tonBalance?.toFixed(2) || '0.00'} TON</span>
+                  </div>
+                  <div className="h-8 w-px bg-white/5" />
+                  <div className="text-center sm:text-left">
+                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">JAM Balance</span>
+                    <span className="text-sm font-black text-blue-400">{userProfile.jamBalance || '0'} JAM</span>
+                  </div>
+                </div>
+
+                {/* Forge Button */}
+                <button
+                  onClick={() => setIsBuyTJModalOpen(true)}
+                  className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest rounded-2xl text-xs active:scale-95 transition-all shadow-lg hover:shadow-blue-500/20 min-w-full sm:min-w-[150px] cursor-pointer"
+                >
+                  Forge JAM Now
+                </button>
+              </div>
+            </section>
 
             {/* Hero Section - Neural Protocol Aesthetic */}
             <section className="relative rounded-3xl overflow-hidden bg-slate-950 shadow-2xl shadow-blue-900/40">
@@ -680,10 +896,8 @@ const Home: React.FC = () => {
                 title="Trending NFTs" 
                 viewAllLink="/marketplace" 
               />
-              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
-                {trendingNFTs.slice(0, 6).map(nft => (
-                  <TrendingNFTCard key={nft.id} nft={nft} />
-                ))}
+              <div className="w-full">
+                <TiltedCoverflow items={nftCoverflowItems} />
               </div>
             </section>
 
@@ -923,22 +1137,115 @@ const Home: React.FC = () => {
             {/* Tasks */}
             <section className="section-container">
                <SectionHeader title="Daily Missions" viewAllLink="/tasks" />
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {tasks.length > 0 ? (
-                   tasks.map(task => (
-                     <TaskCard 
-                       key={task.id} 
-                       task={task} 
-                       onClaim={handleTaskClaim} 
-                       onToggle={handleTaskToggle} 
-                       onClick={handleTaskClick} 
-                     />
-                   ))
-                 ) : (
-                   <div className="bg-secondary/15 backdrop-blur-md rounded-2xl p-6 text-center border border-border/10 col-span-full">
-                     <p className="text-muted-foreground text-xs font-medium">All telemetry tasks fully completed. Check back in the next epoch.</p>
-                   </div>
-                 )}
+               <div className="space-y-4">
+                 {/* Premium AI Task Block inside task section */}
+                 {(() => {
+                   const aiTask = globalTasks.find(t => t.id === "11");
+                   if (!aiTask) return null;
+                   return (
+                     <div
+                       onClick={() => {
+                         if (!aiTask.completed && !aiTask.claimed) {
+                            navigate("/dj-krupy");
+                         }
+                       }}
+                       className={`relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/35 to-slate-900 p-4 space-y-3.5 cursor-pointer select-none border-none ${
+                         aiTask.claimed ? "opacity-60" : "hover:bg-indigo-950/[0.2] transition-colors"
+                       }`}
+                     >
+                       {/* Soft visual glow */}
+                       <div className="absolute -left-12 -top-12 w-48 h-48 bg-blue-500/10 blur-[80px] pointer-events-none rounded-full" />
+                       <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-purple-500/10 blur-[80px] pointer-events-none rounded-full" />
+
+                       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                         <div className="flex gap-3 items-start">
+                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+                             <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                           </div>
+                           <div>
+                             <div className="flex items-center gap-2">
+                               <span className="text-[8px] font-black uppercase tracking-[0.2em] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full inline-block leading-none">
+                                 Neural Protocol
+                               </span>
+                               <span className="text-[8px] font-black text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                 Featured AI
+                               </span>
+                             </div>
+                             <h3 className="text-xs font-black text-white uppercase tracking-tight mt-1.5">
+                               {aiTask.title}
+                             </h3>
+                             <p className="text-[10px] text-zinc-400 font-medium leading-normal mt-0.5 max-w-xl">
+                               {aiTask.description}
+                             </p>
+                           </div>
+                         </div>
+
+                         <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
+                           <div className="text-left sm:text-right">
+                             <div className="flex items-center gap-1">
+                               <span className="text-xs font-black text-white">{aiTask.reward}</span>
+                               <img
+                                 src={TJ_COIN_ICON}
+                                 alt="TJ"
+                                 className="w-3.5 h-3.5 object-contain"
+                                 referrerPolicy="no-referrer"
+                               />
+                             </div>
+                             <span className="text-[8px] text-zinc-500 font-bold uppercase mt-0.5 block leading-none">
+                               +{aiTask.points} companion XP
+                             </span>
+                           </div>
+
+                           <div>
+                             {aiTask.claimed ? (
+                               <span className="text-[8px] font-black uppercase tracking-widest bg-zinc-500/10 text-zinc-400 px-3 py-1.5 rounded-full inline-block leading-none">
+                                 Aligned
+                               </span>
+                             ) : aiTask.completed ? (
+                               <button
+                                 onClick={async (e) => {
+                                   e.stopPropagation();
+                                   await globalClaimTaskReward(aiTask.id);
+                                 }}
+                                 className="h-7 text-[8px] font-black uppercase tracking-widest px-3.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-emerald-500/15 font-black"
+                               >
+                                 Claim
+                               </button>
+                             ) : (
+                               <button
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   navigate("/dj-krupy");
+                                 }}
+                                 className="h-7 text-[8px] font-black uppercase tracking-widest px-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/10 font-black"
+                               >
+                                 Align Vibe
+                               </button>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   );
+                 })()}
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                   {tasks.length > 0 ? (
+                     tasks.map(task => (
+                       <TaskCard 
+                         key={task.id} 
+                         task={task} 
+                         onClaim={handleTaskClaim} 
+                         onToggle={handleTaskToggle} 
+                         onClick={handleTaskClick} 
+                       />
+                     ))
+                   ) : (
+                     <div className="bg-secondary/15 backdrop-blur-md rounded-2xl p-6 text-center border border-border/10 col-span-full">
+                       <p className="text-muted-foreground text-xs font-medium">All telemetry tasks fully completed. Check back in the next epoch.</p>
+                     </div>
+                   )}
+                 </div>
                </div>
             </section>
 
@@ -981,23 +1288,25 @@ const Home: React.FC = () => {
             )}
 
             {/* Trending Tracks */}
-            {isLoading ? (
-              <HomeSection title="Trending Signals" icon={Flame}>
-                {[1, 2, 3, 4].map(i => (
-                  <div key={`trend-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                    <SkeletonCard />
-                  </div>
-                ))}
-              </HomeSection>
-            ) : (
-              <HomeSection title="Trending Signals" icon={Flame} link="/explore/tracks?title=Trending Signals&filter=trending">
-                {trendingTracks.map(track => (
-                  <div key={`trend-${track.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                    <TrackCard track={track} />
-                  </div>
-                ))}
-              </HomeSection>
-            )}
+            <section className="section-container">
+              <SectionHeader 
+                title="Trending Signals" 
+                viewAllLink="/explore/tracks?title=Trending Signals&filter=trending" 
+              />
+              {isLoading ? (
+                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={`trend-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px]">
+                      <SkeletonCard />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full">
+                  <TiltedCoverflow items={trackCoverflowItems} />
+                </div>
+              )}
+            </section>
 
             {/* Top Charts - Tactical Grid Layout */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">

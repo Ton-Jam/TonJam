@@ -12,7 +12,6 @@ import {
   TrendingUp, 
   Clock, 
   ChevronRight,
-  ChevronDown,
   MoreVertical,
   User,
   Music,
@@ -28,6 +27,7 @@ import { GENRES, MOODS, MOCK_ALBUMS } from '@/constants';
 import { auth } from '@/lib/firebase';
 import { APP_LOGO } from '@/constants';
 import NFTCard from '@/components/NFTCard';
+import EmptyNFTState from '@/components/EmptyNFTState';
 import TrendingNFTCard from '@/components/TrendingNFTCard';
 import TrackCard from '@/components/TrackCard';
 import AlbumCard from '@/components/AlbumCard';
@@ -76,14 +76,6 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 
 const BROWSE_CATEGORIES = [
   { id: 'music', title: 'Music', color: 'bg-pink-600', image: 'https://picsum.photos/seed/music/200/200' },
@@ -156,7 +148,6 @@ const Discover: React.FC = () => {
   const [isVoiceSearchActive, setIsVoiceSearchActive] = useState(false);
   const [isVibeSearch, setIsVibeSearch] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'tracks' | 'nfts' | 'artists' | 'playlists' | 'users'>('all');
-  const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('trending');
   const [aiVibeResults, setAiVibeResults] = useState<any[] | null>(null);
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -262,32 +253,7 @@ const Discover: React.FC = () => {
       if (selectedMoods.length > 0 && t.mood && !selectedMoods.includes(t.mood)) return false;
       if (onlyVerified && !t.artistVerified) return false;
       return true;
-    }).sort((a: any, b: any) => {
-      const followedRes = sortPrioritizeFollowed(a, b, t => t.artistId);
-      if (followedRes !== 0) return followedRes;
-
-      if (sortBy === 'newest') {
-        const getTimestamp = (x: any) => {
-          if (x.releaseDate) {
-            const parsed = Date.parse(x.releaseDate);
-            if (!isNaN(parsed)) return parsed;
-          }
-          if (x.createdAt) {
-            const parsed = Date.parse(x.createdAt.toString());
-            if (!isNaN(parsed)) return parsed;
-          }
-          return 0;
-        };
-        return getTimestamp(b) - getTimestamp(a);
-      } else if (sortBy === 'popular') {
-        return (b.playCount || b.streams || 0) - (a.playCount || a.streams || 0);
-      } else if (sortBy === 'trending') {
-        const aScore = a.jamScore || ((a.likes || 0) * 10 + (a.playCount || 0));
-        const bScore = b.jamScore || ((b.likes || 0) * 10 + (b.playCount || 0));
-        return bScore - aScore;
-      }
-      return 0;
-    });
+    }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, t => t.artistId));
     
     const nfts = allNFTs.filter((n: any) => {
       const q = query;
@@ -299,21 +265,7 @@ const Discover: React.FC = () => {
       if (!matchesQuery) return false;
       if (onlyVerified && !n.artistVerified) return false;
       return true;
-    }).sort((a: any, b: any) => {
-      const followedRes = sortPrioritizeFollowed(a, b, n => n.artistId);
-      if (followedRes !== 0) return followedRes;
-
-      if (sortBy === 'newest') {
-        const aTime = a.createdAt ? Date.parse(a.createdAt.toString()) : 0;
-        const bTime = b.createdAt ? Date.parse(b.createdAt.toString()) : 0;
-        return bTime - aTime;
-      } else if (sortBy === 'popular') {
-        return (b.views || b.likes || 0) - (a.views || a.likes || 0);
-      } else if (sortBy === 'trending') {
-        return (b.likes || 0) - (a.likes || 0);
-      }
-      return 0;
-    });
+    }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, n => n.artistId));
     
     const filteredArtists = artists.filter((a: any) => {
       const matchesQuery = (query === '' || (a.name || '').toLowerCase().includes(query) || 
@@ -334,37 +286,7 @@ const Discover: React.FC = () => {
     }).sort((a: any, b: any) => sortPrioritizeFollowed(a, b, usr => usr.uid));
 
     return { tracks, nfts, artists: filteredArtists, users };
-  }, [searchQuery, allTracks, artists, allNFTs, firestoreUsers, bpmRange, selectedKeys, selectedMoods, onlyVerified, followedUserIds, aiVibeResults, sortBy]);
-
-  // Sorted tracks for content discovery when there is no search query
-  const sortedDiscoveryTracks = useMemo(() => {
-    let result = [...allTracks];
-    
-    const getTimestamp = (t: any) => {
-      if (t.releaseDate) {
-        const parsed = Date.parse(t.releaseDate);
-        if (!isNaN(parsed)) return parsed;
-      }
-      if (t.createdAt) {
-        const parsed = Date.parse(t.createdAt.toString());
-        if (!isNaN(parsed)) return parsed;
-      }
-      return 0;
-    };
-
-    if (sortBy === 'newest') {
-      result.sort((a, b) => getTimestamp(b) - getTimestamp(a));
-    } else if (sortBy === 'popular') {
-      result.sort((a, b) => (b.playCount || b.streams || 0) - (a.playCount || a.streams || 0));
-    } else if (sortBy === 'trending') {
-      result.sort((a, b) => {
-        const aScore = a.jamScore || ((a.likes || 0) * 10 + (a.playCount || 0));
-        const bScore = b.jamScore || ((b.likes || 0) * 10 + (b.playCount || 0));
-        return bScore - aScore;
-      });
-    }
-    return result;
-  }, [allTracks, sortBy]);
+  }, [searchQuery, allTracks, artists, allNFTs, firestoreUsers, bpmRange, selectedKeys, selectedMoods, onlyVerified, followedUserIds, aiVibeResults]);
 
   const hasResults = filteredResults.tracks.length > 0 || 
                      filteredResults.nfts.length > 0 || 
@@ -594,70 +516,23 @@ const Discover: React.FC = () => {
       </div>
 
       {/* Filter Tabs Section - Sticky directly below Header */}
-      <div className="sticky top-[76px] z-40 bg-background/80 backdrop-blur-md py-3 w-full border-b border-blue-500/10 transition-colors duration-300">
-        <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="filter-tabs flex-1 overflow-x-auto no-scrollbar">
-            <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
-              <div className="overflow-x-auto no-scrollbar scroll-smooth flex justify-start py-1">
-                <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
-                  {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
-                    <TabsTrigger
-                      key={filter}
-                      value={filter}
-                      className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
-                    >
-                      {filter}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-            </Tabs>
-          </div>
-
-          {/* Sorting Dropdown */}
-          <div className="flex items-center gap-2 self-end md:self-auto shrink-0 py-1">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60 select-none">Sort:</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  aria-label="Sort content discovery options"
-                  variant="ghost" 
-                  size="sm" 
-                  className="rounded-full px-4 h-8 text-[10px] font-black uppercase tracking-widest bg-blue-500/10 hover:bg-blue-500/15 text-blue-500 hover:text-blue-400 border-none flex items-center gap-1 cursor-pointer select-none"
-                >
-                  {sortBy === 'newest' && 'Newest Arrivals'}
-                  {sortBy === 'popular' && 'Most Popular'}
-                  {sortBy === 'trending' && 'Trending'}
-                  <ChevronDown className="h-3.5 w-3.5 ml-0.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border border-blue-500/10 rounded-[8px] p-1 w-44">
-                <DropdownMenuLabel className="text-[8px] font-black uppercase tracking-widest text-muted-foreground p-2">Select View</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-white/5" />
-                <DropdownMenuItem 
-                  onClick={() => setSortBy('newest')}
-                  className={`flex items-center justify-between text-[10px] font-bold uppercase tracking-widest p-2 rounded-[4px] cursor-pointer ${sortBy === 'newest' ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-foreground'}`}
-                >
-                  Newest Arrivals
-                  {sortBy === 'newest' && <Check className="h-3.5 w-3.5" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setSortBy('popular')}
-                  className={`flex items-center justify-between text-[10px] font-bold uppercase tracking-widest p-2 rounded-[4px] cursor-pointer ${sortBy === 'popular' ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-foreground'}`}
-                >
-                  Most Popular
-                  {sortBy === 'popular' && <Check className="h-3.5 w-3.5" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setSortBy('trending')}
-                  className={`flex items-center justify-between text-[10px] font-bold uppercase tracking-widest p-2 rounded-[4px] cursor-pointer ${sortBy === 'trending' ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-foreground'}`}
-                >
-                  Trending
-                  {sortBy === 'trending' && <Check className="h-3.5 w-3.5" />}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+      <div className="sticky top-[76px] z-40 bg-background/70 backdrop-blur-md py-3 w-full border-b border-blue-500/10 transition-colors duration-300">
+        <div className="w-full filter-tabs">
+          <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
+            <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12 flex justify-start md:justify-center py-1">
+              <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
+                {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
+                  <TabsTrigger
+                    key={filter}
+                    value={filter}
+                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
+                  >
+                    {filter}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </Tabs>
         </div>
       </div>
 
@@ -804,27 +679,6 @@ const Discover: React.FC = () => {
               </Carousel>
             </section>
 
-            {/* Curated Content Discovery Feed */}
-            {sortedDiscoveryTracks.length > 0 && (
-              <section className="space-y-6 pt-4">
-                <div>
-                  <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800 font-ui flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-blue-500 fill-blue-500/15 animate-pulse" />
-                    Discover: {sortBy === 'newest' && 'Newest Arrivals'}{sortBy === 'popular' && 'Most Popular'}{sortBy === 'trending' && 'Trending'}
-                  </h2>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">
-                    Frequencies sorted by active filter selections
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {sortedDiscoveryTracks.slice(0, 8).map((track, idx) => (
-                    <TrackCard key={`discovery-feed-${track.id}-${idx}`} track={track} variant="default" />
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* AI Dj Krupy Section removed to avoid duplication on Home screen context */}
           </>
         ) : (
@@ -945,15 +799,27 @@ const Discover: React.FC = () => {
                   )}
 
                   {/* NFTs */}
-                  {(activeFilter === 'all' || activeFilter === 'nfts') && filteredResults.nfts.length > 0 && (
-                    <section className="space-y-8">
-                      <h2 className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-800/60">Digital Collectibles</h2>
-                      <div className="flex flex-col gap-2">
-                        {filteredResults.nfts.map((nft) => (
-                          <NFTCard key={nft.id} nft={nft} variant="row" />
-                        ))}
-                      </div>
-                    </section>
+                  {(activeFilter === 'all' || activeFilter === 'nfts') && (
+                    filteredResults.nfts.length > 0 ? (
+                      <section className="space-y-8">
+                        <h2 className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-800/60">Digital Collectibles</h2>
+                        <div className="flex flex-col gap-2">
+                          {filteredResults.nfts.map((nft) => (
+                            <NFTCard key={nft.id} nft={nft} variant="row" />
+                          ))}
+                        </div>
+                      </section>
+                    ) : activeFilter === 'nfts' ? (
+                      <EmptyNFTState
+                        title="No NFTs Found"
+                        description="Our scanners mapped zero audio NFTs corresponding to your query. Modify your search syntax or explore other categories."
+                        onReset={() => {
+                          setSearchQuery('');
+                          setActiveFilter('all');
+                        }}
+                        actionLabel="Clear Search Filter"
+                      />
+                    ) : null
                   )}
                 </div>
               </>

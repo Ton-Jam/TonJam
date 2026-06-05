@@ -4,6 +4,7 @@ import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap, Fil
 import { TON_LOGO } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
 import NFTCard from '@/components/NFTCard';
+import EmptyNFTState from '@/components/EmptyNFTState';
 import ArtistCard from '@/components/ArtistCard';
 import TopChartNFTs from '@/components/TopChartNFTs';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -507,14 +508,23 @@ const Marketplace: React.FC = () => {
                     ))}
                   </div>
               ) : (
-                <div className="py-20 flex flex-col items-center justify-center rounded-3xl text-center bg-muted/20 border border-border/10">
-                  <div className="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center mb-4">
-                    <Satellite className="h-10 w-10 text-primary/40" />
-                  </div>
-                  <h3 className="page-title !text-xl">No Results Detected</h3>
-                  <p className="micro-label mt-4 max-w-xs mx-auto">Try adjusting your scanner or search criteria.</p>
-                  <Button variant="outline" onClick={() => { setActiveTab('Trending'); setSearchQuery(''); }} className="mt-8 rounded-xl btn-primary" > Reset Market Scanner </Button>
-                </div>
+                <EmptyNFTState 
+                  title="No Artifacts Detected"
+                  description="Our neural subgrid scanned the blockchain catalog but found no matches in this scope. Try adjusting your search query or filters."
+                  onReset={() => {
+                    setActiveTab('Trending');
+                    setSearchQuery('');
+                    setMarketplaceFilters({
+                      genre: "All",
+                      artist: "All",
+                      rarity: "All",
+                      priceRange: [0, 1000],
+                      sortBy: "Newest",
+                      status: "All",
+                    });
+                  }}
+                  actionLabel="Reset Market Scanner"
+                />
               )}
             </section>
 

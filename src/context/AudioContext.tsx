@@ -461,24 +461,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
-  // Cross-fade fader references for smooth track transition
-  const activeFadersRef = useRef<{ fadeOutAudio?: HTMLAudioElement; intervalId?: NodeJS.Timeout }[]>([]);
-
-  const stopAllActiveFades = useCallback(() => {
-    activeFadersRef.current.forEach((fader) => {
-      try {
-        if (fader.intervalId) clearInterval(fader.intervalId);
-        if (fader.fadeOutAudio) {
-          fader.fadeOutAudio.pause();
-          fader.fadeOutAudio.src = "";
-        }
-      } catch (err) {
-        console.warn("Error stopping active fader:", err);
-      }
-    });
-    activeFadersRef.current = [];
-  }, []);
-
   const [isLoading, setIsLoading] = useState(false);
   const [headerTitle, setHeaderTitle] = useState("");
   const [isHighFidelity, setIsHighFidelity] = useState(false);
@@ -514,9 +496,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem("tonjam_tasks");
-    return saved
-      ? JSON.parse(saved)
-      : [
+    const defaultTasks: Task[] = [
           {
             id: "1",
             title: "Daily Sync",
@@ -659,7 +639,37 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
             rarity: "common",
             priority: "medium",
           },
-        ];
+          {
+            id: "11",
+            title: "AI Vibe Alignment",
+            description: "Consult DJ Krupy AI to analyze your sonic profile and claim legendary rewards",
+            reward: "150 TJ",
+            points: 1500,
+            completed: false,
+            claimed: false,
+            type: "social",
+            progress: 0,
+            total: 1,
+            rarity: "legendary",
+            priority: "high",
+            link: "/dj-krupy",
+          },
+    ];
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Task[];
+        if (Array.isArray(parsed) && !parsed.some(t => t.id === "11")) {
+          parsed.push(defaultTasks.find(t => t.id === "11")!);
+          localStorage.setItem("tonjam_tasks", JSON.stringify(parsed));
+          return parsed;
+        }
+        return parsed;
+      } catch (e) {
+        return defaultTasks;
+      }
+    }
+    return defaultTasks;
   });
 
   const addTask = async (
@@ -2022,9 +2032,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     /* Sync volume and mute state */
-    if (activeFadersRef.current.length === 0) {
-      audio.volume = isMuted ? 0 : volume;
-    }
+    audio.volume = isMuted ? 0 : volume;
 
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
@@ -2890,35 +2898,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         await playPromiseRef.current.catch(() => {});
       }
 
-      // Cross-fade setup: capture the old playing track's current source/time
-      const oldTime = audioRef.current.currentTime;
-      const oldSrc = audioRef.current.src;
-      const wasPlaying = isPlaying;
-
-      stopAllActiveFades();
-
-      let fadeOutAudio: HTMLAudioElement | undefined = undefined;
-      const initialVolume = useAudioStore.getState().volume;
-      const initialMuted = useAudioStore.getState().isMuted;
-      const initialTargetVolume = initialMuted ? 0 : initialVolume;
-
-      if (wasPlaying && oldSrc && !audioRef.current.paused) {
-        try {
-          fadeOutAudio = new Audio();
-          fadeOutAudio.src = oldSrc;
-          fadeOutAudio.currentTime = oldTime;
-          fadeOutAudio.volume = initialTargetVolume;
-          if (oldSrc.startsWith("http")) {
-            fadeOutAudio.crossOrigin = "anonymous";
-          }
-          fadeOutAudio.play().catch((err) => {
-            console.warn("Cross-fade fadeOutAudio play failed:", err);
-          });
-        } catch (err) {
-          console.warn("Failed to set up fadeOutAudio:", err);
-        }
-      }
-
       setCurrentTrack(track);
 
       // Increment streams
@@ -2994,53 +2973,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("[Audio] Playing:", sourceUrl);
         audioRef.current.load(); // Explicitly call load()
 
-        // Set initial volume to 0 for the smooth fade-in
-        audioRef.current.volume = 0;
-
         playPromiseRef.current = audioRef.current.play();
-
-        // 2-second cross-fade / fade-in interval (40 steps of 50ms)
-        const steps = 40;
-        const stepDuration = 50;
-        let currentStep = 0;
-
-        const intervalId = setInterval(() => {
-          currentStep++;
-          const freshVolume = useAudioStore.getState().volume;
-          const freshMuted = useAudioStore.getState().isMuted;
-          const targetVolume = freshMuted ? 0 : freshVolume;
-
-          if (currentStep > steps) {
-            clearInterval(intervalId);
-            if (fadeOutAudio) {
-              try {
-                fadeOutAudio.pause();
-                fadeOutAudio.src = "";
-              } catch (e) {}
-            }
-            if (audioRef.current) {
-              audioRef.current.volume = targetVolume;
-            }
-            activeFadersRef.current = activeFadersRef.current.filter((f) => f.intervalId !== intervalId);
-            return;
-          }
-
-          const ratio = currentStep / steps;
-
-          if (fadeOutAudio) {
-            try {
-              fadeOutAudio.volume = Math.max(0, targetVolume * (1 - ratio));
-            } catch (e) {}
-          }
-
-          if (audioRef.current) {
-            try {
-              audioRef.current.volume = Math.min(targetVolume, targetVolume * ratio);
-            } catch (e) {}
-          }
-        }, stepDuration);
-
-        activeFadersRef.current.push({ fadeOutAudio, intervalId });
         if (playPromiseRef.current !== undefined) {
           playPromiseRef.current.catch((error) => {
             // Check for common playback errors
