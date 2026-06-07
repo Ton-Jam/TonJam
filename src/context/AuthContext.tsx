@@ -15,6 +15,7 @@ import {
 import { doc, getDoc, setDoc, serverTimestamp, getDocFromServer } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { UserProfile } from '@/types';
+import { clearDriveToken } from '@/services/googleDriveService';
 
 interface AuthContextType {
   user: User | null;
@@ -288,6 +289,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
+      clearDriveToken();
       await firebaseSignOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);

@@ -60,6 +60,7 @@ import { getPlaceholderImage, cn } from '@/lib/utils';
 import { Track } from '@/types';
 import { generateAIPlaylist, GenerateAIPlaylistResult } from '@/services/aiPlaylistService';
 import { Loader2 } from 'lucide-react';
+import GlassAiCompose from '@/components/aicanvas/glass-ai-compose';
 
 const JamSpace: React.FC = () => {
   const navigate = useNavigate();
@@ -88,6 +89,22 @@ const JamSpace: React.FC = () => {
   const [filterType, setFilterType] = useState('All');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
+  const [isAiComposeOpen, setIsAiComposeOpen] = useState(false);
+
+  const handleAiSubmit = (content: string, model: string, images: string[], webSearch: boolean) => {
+    createPost({
+      content: content,
+      userId: userProfile.uid,
+      userName: userProfile.name,
+      userAvatar: userProfile.avatar,
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      reposts: 0,
+      comments: 0,
+      isVerified: true
+    });
+    addNotification(`Broadcast synthesized from neural node using ${model}`, 'success');
+  };
 
   const handleAIPlaylist = async () => {
     setIsGeneratingAI(true);
@@ -223,7 +240,10 @@ const JamSpace: React.FC = () => {
                   </Button>
                 ))}
                 
-                <Button className="mt-6 w-full rounded-full py-7 text-lg font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all">
+                <Button 
+                  onClick={() => setIsAiComposeOpen(true)}
+                  className="mt-6 w-full rounded-full py-7 text-lg font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all cursor-pointer"
+                >
                   Post Signal
                 </Button>
               </div>
@@ -316,13 +336,23 @@ const JamSpace: React.FC = () => {
                       </Button>
                     ))}
                   </div>
-                  <Button 
-                    disabled={!postContent.trim() || isPosting}
-                    onClick={handleCreatePost}
-                    className="rounded-lg px-4 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest h-7 text-[9px] border-none shadow-lg shadow-blue-600/15 transition-all duration-200"
-                  >
-                    {isPosting ? 'Broadcasting...' : 'Signal'}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => setIsAiComposeOpen(true)}
+                      variant="outline"
+                      className="rounded-lg px-3 bg-zinc-900 hover:bg-purple-600/10 text-purple-400 hover:text-purple-300 font-black uppercase tracking-widest h-7 text-[9px] border border-purple-500/20 transition-all duration-200 flex items-center gap-1 cursor-pointer"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Neural AI
+                    </Button>
+                    <Button 
+                      disabled={!postContent.trim() || isPosting}
+                      onClick={handleCreatePost}
+                      className="rounded-lg px-4 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest h-7 text-[9px] border-none shadow-lg shadow-blue-600/15 transition-all duration-200 cursor-pointer"
+                    >
+                      {isPosting ? 'Broadcasting...' : 'Signal'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -490,6 +520,17 @@ const JamSpace: React.FC = () => {
        <AnimatePresence>
          {activeJamRoom && <JamChat />}
        </AnimatePresence>
+
+      {/* Glass AI Compose Modal Overlay */}
+      <AnimatePresence>
+        {isAiComposeOpen && (
+          <GlassAiCompose 
+            isOpen={isAiComposeOpen}
+            onClose={() => setIsAiComposeOpen(false)}
+            onSubmit={handleAiSubmit}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

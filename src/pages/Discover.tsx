@@ -338,7 +338,7 @@ const Discover: React.FC = () => {
       />
 
       {/* Search Header - Sticky & Atmospheric with standard top padding */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md pt-5 pb-3 w-full border-b border-blue-500/10 transition-colors duration-300">
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg pt-5 pb-3 w-full border-b border-blue-500/10 transition-colors duration-300">
         <div className="max-w-2xl mx-auto w-full flex items-center gap-3 px-4">
           <form 
             onSubmit={handleSearchSubmit} 
@@ -516,7 +516,7 @@ const Discover: React.FC = () => {
       </div>
 
       {/* Filter Tabs Section - Sticky directly below Header */}
-      <div className="sticky top-[76px] z-40 bg-background/70 backdrop-blur-md py-3 w-full border-b border-blue-500/10 transition-colors duration-300">
+      <div className="sticky top-[76px] z-40 bg-background/95 backdrop-blur-lg py-3 w-full border-b border-blue-500/10 transition-colors duration-300">
         <div className="w-full filter-tabs">
           <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
             <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12 flex justify-start md:justify-center py-1">

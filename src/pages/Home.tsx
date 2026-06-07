@@ -69,38 +69,38 @@ const WelcomeBanner = ({ onDismiss, onGetTokens }: { onDismiss: () => void, onGe
       animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
     >
-      <Card className="relative overflow-hidden border-none bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-2xl shadow-blue-500/20">
+      <Card className="relative overflow-hidden border-none -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black text-foreground">
         <button 
           onClick={onDismiss}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors z-20"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors z-20 text-muted-foreground"
         >
           <X className="h-5 w-5" />
         </button>
         
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
-            <div className="w-20 h-20 rounded-2xl bg-blue-950/40 backdrop-blur-md border border-blue-500/10 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="h-10 w-10 text-white" />
+            <div className="w-20 h-20 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="h-10 w-10 text-primary" />
             </div>
             
             <div className="space-y-3 text-center md:text-left">
               <div className="flex flex-col md:flex-row md:items-center gap-2">
                 <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Welcome to TonJam</h2>
-                <Badge variant="outline" className="w-fit mx-auto md:mx-0 bg-white/10 border-white/20 text-white uppercase text-[8px] tracking-[0.2em]">v2.1_CORE</Badge>
+                <Badge variant="outline" className="w-fit mx-auto md:mx-0 bg-secondary border-border text-foreground uppercase text-[8px] tracking-[0.2em]">v2.1_CORE</Badge>
               </div>
-              <p className="text-white/80 font-medium max-w-xl text-sm leading-relaxed">
+              <p className="text-muted-foreground font-medium max-w-xl text-sm leading-relaxed">
                 You've just entered the future of music. Discover decentralized sounds, collect rare NFTs, and connect with your favorite artists on the TON blockchain.
               </p>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
                 <button 
                   onClick={onDismiss}
-                  className="px-6 py-2 bg-white text-blue-600 font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-neutral-100 transition-all shadow-lg active:scale-95"
+                  className="px-6 py-2 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-primary/90 transition-all shadow-lg active:scale-95 cursor-pointer"
                 >
                   Start Exploring
                 </button>
                 <button 
                   onClick={onGetTokens}
-                  className="px-6 py-2 bg-white/20 text-white font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-white/30 transition-all shadow-lg active:scale-95"
+                  className="px-6 py-2 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-secondary/80 transition-all shadow-lg active:scale-95 cursor-pointer"
                 >
                   Get Free Tokens
                 </button>
@@ -109,8 +109,8 @@ const WelcomeBanner = ({ onDismiss, onGetTokens }: { onDismiss: () => void, onGe
           </div>
           
           {/* Decorative elements */}
-          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 blur-3xl rounded-full"></div>
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/5 blur-3xl rounded-full"></div>
+          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/5 blur-3xl rounded-full"></div>
+          <div className="absolute -top-10 -left-10 w-40 h-40 bg-purple-500/5 blur-3xl rounded-full"></div>
         </CardContent>
       </Card>
     </motion.div>
@@ -620,7 +620,7 @@ const Home: React.FC = () => {
         />
       )}
       
-      <div className="w-full relative z-20 mb-6 px-4">
+      <div className="w-full relative z-20 mb-6 px-0">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.25em] mb-1">User Console</p>
@@ -643,7 +643,7 @@ const Home: React.FC = () => {
         onValueChange={(v) => setActiveTab(v as 'overview' | 'discovery')}
         className="w-full relative z-20 mb-[18px] sm:mb-[34px]"
       >
-        <div className="flex items-center justify-between mb-4 px-2">
+        <div className="flex items-center justify-between mb-4 px-0">
           <TabsList variant="line" className="bg-transparent gap-4 sm:gap-8">
             <TabsTrigger 
               value="overview"
@@ -720,7 +720,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="w-full space-y-12 sm:space-y-16 pb-24 px-4 sm:px-0"
+            className="w-full space-y-12 sm:space-y-16 pb-24 px-0"
           >
             {/* Welcome Banner */}
             <CompleteProfilePrompt />
@@ -733,18 +733,20 @@ const Home: React.FC = () => {
             {/* Featured Sponsored Posts Carousel */}
             <div className="space-y-4">
               <SectionHeader title="Featured" viewAllLink="/explore" />
-              <TrendingBannerCarousel 
-                banners={carouselItems.map(item => ({
-                  id: item.id,
-                  title: item.title,
-                  image: item.imageUrl,
-                  link: item.link
-                }))} 
-              />
+              <div className="-mx-4 sm:mx-0">
+                <TrendingBannerCarousel 
+                  banners={carouselItems.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    image: item.imageUrl,
+                    link: item.link
+                  }))} 
+                />
+              </div>
             </div>
 
             {/* Edge-to-Edge Token Forge Section */}
-            <section className="relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-gradient-to-r from-blue-950/20 via-slate-900/50 to-purple-950/20 p-6 sm:p-8 hover:bg-slate-900/30 transition-all shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-6">
+            <section className="relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black p-6 sm:p-8 hover:bg-zinc-50 dark:hover:bg-zinc-950/20 transition-all shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-6">
               {/* Background Glow */}
               <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-500/10 blur-[100px] pointer-events-none rounded-full" />
               <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/10 blur-[100px] pointer-events-none rounded-full" />
@@ -755,10 +757,10 @@ const Home: React.FC = () => {
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center justify-center lg:justify-start gap-2">
-                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">Token Forge</h2>
+                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-foreground">Token Forge</h2>
                     <Badge variant="outline" className="bg-blue-500/15 text-blue-400 border-none px-2 py-0.5 text-[8px] tracking-[0.2em] font-black rounded-full uppercase">TJ_GEN_V2</Badge>
                   </div>
-                  <p className="text-zinc-400 font-medium text-xs sm:text-sm max-w-xl leading-relaxed">
+                  <p className="text-muted-foreground font-medium text-xs sm:text-sm max-w-xl leading-relaxed">
                     Instantly forge TON into JAM tokens. Participate in decentralized staking, access premium creator contracts, and acquire exclusive limited audio NFTs.
                   </p>
                 </div>
@@ -767,12 +769,12 @@ const Home: React.FC = () => {
               {/* Balances and Rate Block */}
               <div className="relative z-10 flex flex-col sm:flex-row items-stretch gap-4 w-full xl:w-auto">
                 {/* Rate conversion display */}
-                <div className="bg-black/40 px-4 py-3 rounded-2xl flex items-center justify-between gap-6 min-w-full sm:min-w-[180px]">
+                <div className="bg-zinc-100 dark:bg-zinc-900/50 px-4 py-3 rounded-2xl flex items-center justify-between gap-6 min-w-full sm:min-w-[180px]">
                   <div className="flex items-center gap-2">
                     <img src={TON_LOGO} alt="TON" className="w-5 h-5 object-contain" />
                     <div>
                       <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Rate</p>
-                      <p className="text-xs font-black text-white">1 TON</p>
+                      <p className="text-xs font-black text-foreground">1 TON</p>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-blue-500/40" />
@@ -786,12 +788,12 @@ const Home: React.FC = () => {
                 </div>
 
                 {/* Balances */}
-                <div className="bg-black/40 px-5 py-3 rounded-2xl flex items-center justify-around gap-6 min-w-full sm:min-w-[200px]">
+                <div className="bg-zinc-100 dark:bg-zinc-900/50 px-5 py-3 rounded-2xl flex items-center justify-around gap-6 min-w-full sm:min-w-[200px]">
                   <div className="text-center sm:text-left">
                     <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">TON Balance</span>
-                    <span className="text-sm font-black text-white">{userProfile.tonBalance?.toFixed(2) || '0.00'} TON</span>
+                    <span className="text-sm font-black text-foreground">{userProfile.tonBalance?.toFixed(2) || '0.00'} TON</span>
                   </div>
-                  <div className="h-8 w-px bg-white/5" />
+                  <div className="h-8 w-px bg-zinc-200 dark:bg-white/5" />
                   <div className="text-center sm:text-left">
                     <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">JAM Balance</span>
                     <span className="text-sm font-black text-blue-400">{userProfile.jamBalance || '0'} JAM</span>
@@ -809,7 +811,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* Hero Section - Neural Protocol Aesthetic */}
-            <section className="relative rounded-3xl overflow-hidden bg-slate-950 shadow-2xl shadow-blue-900/40">
+            <section className="relative -mx-4 sm:mx-0 rounded-none sm:rounded-3xl overflow-hidden bg-transparent dark:bg-black">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(37,99,235,0.15),transparent)] pointer-events-none"></div>
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
               
@@ -824,35 +826,35 @@ const Home: React.FC = () => {
                     </div>
                     
                     <div className="space-y-3 sm:space-y-4">
-                      <h1 className="text-5xl sm:text-8xl font-black uppercase tracking-tighter leading-[0.8] text-white">
+                      <h1 className="text-5xl sm:text-8xl font-black uppercase tracking-tighter leading-[0.8] text-foreground">
                         FORGE<br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 animate-gradient-x">LEGACY</span>
                       </h1>
                       <div className="h-px w-20 sm:w-24 bg-blue-500/50"></div>
                     </div>
                   
-                  <p className="text-base sm:text-2xl text-blue-100/60 leading-relaxed font-medium max-w-lg font-display">
+                  <p className="text-base sm:text-2xl text-muted-foreground leading-relaxed font-medium max-w-lg font-display">
                     Welcome to the nexus of decentralized sound. Forge rare artifacts and engage in global community frequencies via the TON blockchain.
                   </p>
                   
                   <div className="flex flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4">
                     <button 
                       onClick={() => playAll(MOCK_TRACKS)}
-                      className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-white text-black font-black uppercase tracking-widest rounded-full transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base"
+                      className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-foreground text-background font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base cursor-pointer"
                     >
-                      <Play className="h-4 w-4 sm:h-5 sm:w-5 fill-black group-hover:scale-110 transition-transform" />
+                      <Play className="h-4 w-4 sm:h-5 sm:w-5 fill-current group-hover:scale-110 transition-transform" />
                       Initiate
                     </button>
                     <Link 
                       to="/marketplace"
-                      className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-blue-600/10 border border-blue-500/30 hover:bg-blue-600/20 text-white font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 backdrop-blur-md text-[11px] sm:text-base"
+                      className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-secondary hover:bg-secondary/80 text-foreground font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base"
                     >
-                      <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400 group-hover:rotate-12 transition-transform" />
+                      <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-primary group-hover:rotate-12 transition-transform" />
                       Market
                     </Link>
                     <button 
                       onClick={() => setIsBuyTJModalOpen(true)}
-                      className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-purple-600/10 border border-purple-500/30 hover:bg-purple-600/20 text-white font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 backdrop-blur-md text-[11px] sm:text-base"
+                      className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-secondary hover:bg-secondary/80 text-foreground font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base cursor-pointer"
                     >
                       <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400 group-hover:rotate-12 transition-transform" />
                       Buy Jam Token
@@ -896,7 +898,7 @@ const Home: React.FC = () => {
                 title="Trending NFTs" 
                 viewAllLink="/marketplace" 
               />
-              <div className="w-full">
+              <div className="-mx-4 sm:mx-0">
                 <TiltedCoverflow items={nftCoverflowItems} />
               </div>
             </section>
@@ -907,7 +909,7 @@ const Home: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-blue-600/20 via-slate-900 to-black rounded-[4px] p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden border border-blue-500/20 shadow-2xl"
+                  className="bg-transparent dark:bg-black -mx-4 sm:mx-0 rounded-none sm:rounded-3xl p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden shadow-2xl"
                 >
                   {/* Digital particles effect */}
                   <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -926,7 +928,7 @@ const Home: React.FC = () => {
                           const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
                           playAll(tracks);
                         }}
-                        className="h-14 w-14 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all"
+                        className="h-14 w-14 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer"
                       >
                         <Play className="h-7 w-7 fill-black translate-x-1" />
                       </button>
@@ -941,8 +943,8 @@ const Home: React.FC = () => {
                           SYNTHESIS_MAPPING
                         </Badge>
                       </div>
-                      <h3 className="text-2xl sm:text-5xl font-black uppercase tracking-tighter text-white leading-[0.9]">{aiResult.playlist.title}</h3>
-                      <p className="text-blue-100/60 text-xs sm:text-base leading-relaxed max-w-2xl font-medium">
+                      <h3 className="text-2xl sm:text-5xl font-black uppercase tracking-tighter text-foreground leading-[0.9]">{aiResult.playlist.title}</h3>
+                      <p className="text-muted-foreground text-xs sm:text-base leading-relaxed max-w-2xl font-medium">
                         {aiResult.explanation}
                       </p>
                     </div>
@@ -953,14 +955,14 @@ const Home: React.FC = () => {
                           const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
                           playAll(tracks);
                         }}
-                        className="px-8 py-3 sm:px-10 sm:py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-blue-500 shadow-lg shadow-blue-600/20 flex items-center gap-3 active:scale-95"
+                        className="px-8 py-3 sm:px-10 sm:py-4 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-primary/90 shadow-lg active:scale-95 cursor-pointer"
                       >
-                        <Play className="h-4 w-4 fill-white" />
+                        <Play className="h-4 w-4 fill-current" />
                         Initiate
                       </button>
                       <button 
                         onClick={() => setAiResult(null)}
-                        className="px-6 py-3 sm:px-8 sm:py-4 bg-blue-950/20 border border-blue-900/10 text-white font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-blue-900/40 active:scale-95"
+                        className="px-6 py-3 sm:px-8 sm:py-4 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-secondary/80 border border-border active:scale-95 cursor-pointer"
                       >
                         Recalibrate
                       </button>
@@ -969,7 +971,7 @@ const Home: React.FC = () => {
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 bg-gradient-to-br from-blue-600/10 via-zinc-950 to-black border border-blue-500/20 rounded-3xl p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group shadow-2xl">
+                  <div className="lg:col-span-2 bg-transparent dark:bg-black -mx-4 sm:mx-0 rounded-none sm:rounded-3xl p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group shadow-2xl">
                     <div className="absolute inset-0 bg-blue-600/10 blur-[100px] opacity-30 group-hover:scale-110 transition-transform duration-1000"></div>
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
                     
@@ -985,22 +987,22 @@ const Home: React.FC = () => {
                           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce"></div>
                           <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500">Neural.Relay_Active</h4>
                         </div>
-                        <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-white">KRUPY_CO_PILOT</h3>
+                        <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-foreground">KRUPY_CO_PILOT</h3>
                       </div>
-                      <p className="text-blue-100/40 text-[10px] sm:text-xs font-medium leading-relaxed max-w-sm uppercase tracking-wider">Your personal generative host. Synching vibes, parsing lyrics, and forging custom frequency streams.</p>
+                      <p className="text-muted-foreground text-[10px] sm:text-xs font-medium leading-relaxed max-w-sm uppercase tracking-wider">Your personal generative host. Synching vibes, parsing lyrics, and forging custom frequency streams.</p>
                       
                       <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
                         <button 
                           onClick={handleGenerateAIPlaylist}
                           disabled={isGeneratingAI}
-                          className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] active:scale-95"
+                          className="px-8 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg active:scale-95 disabled:opacity-50 cursor-pointer"
                         >
                           {isGeneratingAI ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                           {isGeneratingAI ? "SYNTHESIZING..." : "GENERATE_VIBE"}
                         </button>
                         <Link 
                           to="/dj-krupy"
-                          className="px-6 py-3 bg-blue-950/20 border border-blue-900/10 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-blue-900/40 transition-all flex items-center gap-2 group"
+                          className="px-6 py-3 bg-secondary border border-border text-foreground rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-secondary/80 transition-all flex items-center gap-2 group"
                         >
                           <Brain className="h-3.5 w-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
                           Launch DJ Krupy
@@ -1010,14 +1012,14 @@ const Home: React.FC = () => {
                   </div>
 
                   <div className="hidden lg:flex flex-col gap-4">
-                    <div className="flex-1 bg-zinc-950 border border-white/5 rounded-3xl p-6 flex flex-col justify-center gap-3 group hover:border-blue-500/30 transition-all shadow-xl">
+                    <div className="flex-1 bg-transparent dark:bg-black/50 border border-border rounded-3xl p-6 flex flex-col justify-center gap-3 group hover:border-blue-500/30 transition-all shadow-xl">
                       <Activity className="h-6 w-6 text-blue-500/40 group-hover:scale-110 transition-transform" />
-                      <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Neural_Relay</p>
+                      <p className="text-[10px] font-black text-foreground uppercase tracking-[0.2em]">Neural_Relay</p>
                       <p className="text-[9px] text-zinc-500 font-bold uppercase leading-relaxed tracking-wider">Multimodal BPM parsing and genre density calibration.</p>
                     </div>
-                    <div className="flex-1 bg-zinc-950 border border-white/5 rounded-3xl p-6 flex flex-col justify-center gap-3 group hover:border-purple-500/30 transition-all shadow-xl">
+                    <div className="flex-1 bg-transparent dark:bg-black/50 border border-border rounded-3xl p-6 flex flex-col justify-center gap-3 group hover:border-purple-500/30 transition-all shadow-xl">
                       <Globe className="h-6 w-6 text-purple-500/40 group-hover:scale-110 transition-transform" />
-                      <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">TON_Nexus</p>
+                      <p className="text-[10px] font-black text-foreground uppercase tracking-[0.2em]">TON_Nexus</p>
                       <p className="text-[9px] text-zinc-500 font-bold uppercase leading-relaxed tracking-wider">Decentralized trend mapping across the entire protocol.</p>
                     </div>
                   </div>
@@ -1032,7 +1034,7 @@ const Home: React.FC = () => {
                 viewAllLink={`/playlist/${featuredPlaylist.id}`} 
               />
               
-              <Card className="relative overflow-hidden border-none bg-[#0a192f] shadow-2xl group">
+              <Card className="relative overflow-hidden border-none -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black shadow-2xl group">
                 <CardContent className="p-4 sm:p-8 flex flex-col md:flex-row items-center gap-5 sm:gap-8 relative overflow-hidden">
                   {/* Background effects */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-transparent z-0"></div>
@@ -1117,7 +1119,7 @@ const Home: React.FC = () => {
                     <AccordionItem 
                       key={item.id} 
                       value={item.id} 
-                      className="bg-secondary/20 rounded-2xl px-6 transition-all data-[state=open]:bg-secondary/40 overflow-hidden"
+                      className="bg-zinc-100 dark:bg-black border border-border/40 rounded-2xl px-6 transition-all data-[state=open]:bg-zinc-200/50 dark:data-[state=open]:bg-zinc-950/50 overflow-hidden"
                     >
                       <AccordionTrigger className="text-sm font-bold uppercase tracking-tight hover:no-underline py-5 text-foreground leading-none">
                         {item.q}
@@ -1149,8 +1151,8 @@ const Home: React.FC = () => {
                             navigate("/dj-krupy");
                          }
                        }}
-                       className={`relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/35 to-slate-900 p-4 space-y-3.5 cursor-pointer select-none border-none ${
-                         aiTask.claimed ? "opacity-60" : "hover:bg-indigo-950/[0.2] transition-colors"
+                       className={`relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black p-4 space-y-3.5 cursor-pointer select-none border-none ${
+                         aiTask.claimed ? "opacity-60" : "hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
                        }`}
                      >
                        {/* Soft visual glow */}

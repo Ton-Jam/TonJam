@@ -28,6 +28,7 @@ import { ProfileCard } from '@/components/ProfileCard';
 import { UserProfile as UserProfileType } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '@/services/storageService';
+import { BadgeSystem } from '@/components/BadgeSystem';
 
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -463,6 +464,10 @@ const UserProfile: React.FC = () => {
                   )}
                 </div>
               )}
+            </div>
+
+            <div className="bg-card p-8 rounded-3xl shadow-sm">
+              <BadgeSystem user={user} isOwnProfile={false} />
             </div>
           </div>
         </div>

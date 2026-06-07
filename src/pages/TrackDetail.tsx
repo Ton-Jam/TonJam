@@ -19,7 +19,12 @@ import {
   PlusCircle,
   Sparkles,
   Lock,
+  Unlock,
+  Volume2,
+  Video,
+  Image as ImageIcon,
   DownloadCloud,
+  FileText,
   Loader2
 } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_ARTISTS, MOCK_NFTS, TJ_COIN_ICON } from '@/constants';
@@ -28,7 +33,7 @@ import { getPlaceholderImage } from '@/lib/utils';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'motion/react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import { useTonConnectUI } from '@tonconnect/ui-react';
+import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import TokenGate from '@/components/TokenGate';
 import { useTokenGating } from '@/hooks/useTokenGating';
 import CommentsSection from '@/components/CommentsSection';
@@ -39,18 +44,49 @@ const TrackDetail: React.FC = () => {
   const navigate = useNavigate();
   const { 
     playTrack, currentTrack, isPlaying, jamTrack, purchaseTrack, mintNFT, 
-    allTracks, likedTrackIds, toggleLikeTrack, addNotification, 
+    allTracks, allNFTs, likedTrackIds, toggleLikeTrack, addNotification, 
     setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile,
     isTrackCached, downloadTrackForOffline, deleteCachedTrack
   } = useAudio();
   const [isTipping, setIsTipping] = useState(false);
   const [isProcessingPurchase, setIsProcessingPurchase] = useState(false);
   const [tonConnectUI] = useTonConnectUI();
+  const userAddress = useTonAddress();
   
   const track = useMemo(() => allTracks.find(t => t.id === id), [id, allTracks]);
   const artist = useMemo(() => MOCK_ARTISTS.find(a => a.uid === track?.artistId), [track]);
-  const associatedNFTs = useMemo(() => MOCK_NFTS.filter(n => n.trackId === id), [id]);
+  const associatedNFTs = useMemo(() => allNFTs.filter(n => n.trackId === id), [id, allNFTs]);
   
+  const isOwner = useMemo(() => {
+    if (!track) return false;
+    const currentWallet = userAddress || userProfile?.walletAddress;
+    return (
+      track.artistId === userProfile?.uid ||
+      associatedNFTs.some(n => n.owner === currentWallet || n.owner === userProfile?.uid)
+    );
+  }, [track, associatedNFTs, userAddress, userProfile]);
+
+  const gatingConfig = useMemo(() => {
+    if (track?.tokenGating?.enabled) {
+      return track.tokenGating;
+    }
+    const assocNFT = associatedNFTs[0];
+    if (assocNFT) {
+      return {
+        enabled: true,
+        tokenAddress: assocNFT.contractAddress || assocNFT.id,
+        minAmount: "1",
+        tokenSymbol: "NFT",
+        tokenType: "nft" as const
+      };
+    }
+    return undefined;
+  }, [track?.tokenGating, associatedNFTs]);
+
+  const { hasAccess } = useTokenGating(gatingConfig);
+
+  const [activeTab, setActiveTab] = useState<'lyrics' | 'details' | 'history' | 'nfts' | 'exclusive'>('lyrics');
+
   const [isCached, setIsCached] = useState(false);
   const [isCaching, setIsCaching] = useState(false);
 
@@ -98,9 +134,6 @@ const TrackDetail: React.FC = () => {
   
   const isActive = currentTrack?.id === track?.id;
   const isLiked = track ? likedTrackIds.includes(track.id) : false;
-  const { hasAccess } = useTokenGating(track.tokenGating);
-
-  const [activeTab, setActiveTab] = useState<'lyrics' | 'details' | 'history' | 'nfts'>('lyrics');
 
   if (!track) {
     return (
@@ -527,18 +560,23 @@ const TrackDetail: React.FC = () => {
             {/* Content Tabs */}
             <div className="space-y-4">
               <div className="flex gap-4 pb-4 overflow-x-auto no-scrollbar">
-                {(['lyrics', 'details', 'history', 'nfts'] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
-                  >
-                    {tab}
-                    {activeTab === tab && (
-                      <motion.div layoutId="activeTab" className="absolute -bottom-[17px] left-0 right-0 h-0.5 bg-blue-500" />
-                    )}
-                  </button>
-                ))}
+                {(['lyrics', 'details', 'history', 'nfts', 'exclusive'] as const).map((tab) => {
+                  const hasPerks = associatedNFTs.some(n => n.exclusiveContent && n.exclusiveContent.length > 0) || track.isExclusive;
+                  if (tab === 'exclusive' && !hasPerks) return null;
+                  
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`text-[11px] font-bold uppercase tracking-[0.22em] transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
+                    >
+                      {tab === 'exclusive' ? 'exclusive perks' : tab}
+                      {activeTab === tab && (
+                        <motion.div layoutId="activeTab" className="absolute -bottom-[17px] left-0 right-0 h-0.5 bg-blue-500" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="min-h-[300px]">
@@ -662,6 +700,145 @@ const TrackDetail: React.FC = () => {
                       <div className="col-span-full flex flex-col items-center justify-center py-4 text-muted-foreground/50">
                         <Zap className="h-10 w-10 mb-4 opacity-20" />
                         <p className="text-[10px] font-bold uppercase tracking-widest">No associated artifacts found</p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {activeTab === 'exclusive' && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="space-y-6"
+                  >
+                    {associatedNFTs.some(n => n.exclusiveContent && n.exclusiveContent.length > 0) || track.isExclusive ? (
+                      (() => {
+                        // Gather items
+                        let allExclusives: any[] = associatedNFTs.flatMap(n => n.exclusiveContent || []);
+                        
+                        // Fallback if none defined but track shows isExclusive
+                        if (allExclusives.length === 0 && track.isExclusive) {
+                          allExclusives = [
+                            {
+                              id: 'default-bts-1',
+                              title: 'Behind-The-Scenes Studio Vlog',
+                              type: 'video',
+                              url: 'https://www.youtube.com',
+                              description: 'Studio creation diary of the sonic frequencies.'
+                            },
+                            {
+                              id: 'default-stems-2',
+                              title: 'Lossless Master Audio Stems',
+                              type: 'track',
+                              url: track.audioUrl,
+                              description: 'Individual channels: Drums, Bass, Melodies, Vocals.'
+                            }
+                          ];
+                        }
+                        
+                        if (hasAccess || isOwner) {
+                          return (
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3 p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 mb-2">
+                                <Unlock className="w-5 h-5 text-emerald-400" />
+                                <div>
+                                  <p className="text-xs font-black uppercase tracking-wider text-emerald-400">Holder Perks Unlocked</p>
+                                  <p className="text-[10px] text-muted-foreground/80 font-bold uppercase tracking-widest mt-0.5">Verified Access Granted to Digital Perks</p>
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 gap-4">
+                                {allExclusives.map((item) => {
+                                  let IconComponent = FileText;
+                                  if (item.type === 'video') IconComponent = Video;
+                                  if (item.type === 'track') IconComponent = Volume2;
+                                  if (item.type === 'image') IconComponent = ImageIcon;
+                                  
+                                  return (
+                                    <div key={item.id} className="p-5 rounded-2xl bg-muted/60 border border-border/40 hover:border-blue-500/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                      <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                                          <IconComponent className="w-6 h-6 text-blue-400" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">
+                                            {item.type}
+                                          </span>
+                                          <h4 className="text-sm font-black uppercase tracking-tight text-foreground pt-1">{item.title}</h4>
+                                          {item.description && (
+                                            <p className="text-xs text-muted-foreground font-bold">{item.description}</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <a 
+                                        href={item.url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="px-5 py-3 h-10 bg-blue-600 hover:bg-blue-500 text-foreground font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 flex-shrink-0"
+                                      >
+                                        <DownloadCloud className="w-3.5 h-3.5" />
+                                        Access Perk
+                                      </a>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        } else {
+                          // Locked view
+                          return (
+                            <div className="space-y-6">
+                              <div className="flex flex-col items-center justify-center p-8 border border-dashed border-border/50 rounded-2xl bg-muted/30 text-center">
+                                <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+                                  <Lock className="w-6 h-6 text-red-100" />
+                                </div>
+                                <h3 className="text-sm font-black uppercase tracking-wider text-foreground mb-1">Gated Holder Perks</h3>
+                                <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-6 max-w-sm leading-relaxed">
+                                  This frequency features exclusive content. Connect your wallet and verify NFT ownership to unlock:
+                                </p>
+                                <div className="grid grid-cols-1 gap-2.5 w-full max-w-sm text-left mb-6">
+                                  {allExclusives.map((item, idx) => {
+                                    let IconComponent = FileText;
+                                    if (item.type === 'video') IconComponent = Video;
+                                    if (item.type === 'track') IconComponent = Volume2;
+                                    if (item.type === 'image') IconComponent = ImageIcon;
+                                    
+                                    return (
+                                      <div key={`locked-${idx}`} className="flex items-center gap-3 px-4 py-3 bg-background/40 rounded-xl border border-border/20 opacity-60">
+                                        <IconComponent className="w-4 h-4 text-muted-foreground" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground filter blur-[2px]">
+                                          {item.title}
+                                        </span>
+                                        <span className="ml-auto text-[8px] text-red-400 font-bold uppercase tracking-widest">LOCKED</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                <div className="flex flex-wrap gap-3 justify-center">
+                                  <button 
+                                    onClick={() => navigate('/limited-editions')} 
+                                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-foreground text-[10px] font-extrabold uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                                  >
+                                    Acquire NFT
+                                  </button>
+                                  <button 
+                                    onClick={() => window.location.reload()} 
+                                    className="px-6 py-3 bg-white/5 hover:bg-white/10 text-muted-foreground text-[10px] font-extrabold uppercase tracking-widest rounded-xl transition-all"
+                                  >
+                                    Retry Verification
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                      })()
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50 border border-dashed border-border/20 rounded-2xl bg-muted/10">
+                        <Sparkles className="h-10 w-10 mb-4 opacity-20" />
+                        <p className="text-[10px] font-bold uppercase tracking-widest">No exclusive perks defined for this frequency</p>
+                        <p className="text-[9px] text-muted-foreground/40 uppercase tracking-widest mt-1">Collectors will receive standard access</p>
                       </div>
                     )}
                   </motion.div>

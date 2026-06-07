@@ -21,7 +21,7 @@ const app = initializeApp(firebaseConfig);
 export const analytics = typeof window !== 'undefined' && firebaseConfig.measurementId ? getAnalytics(app) : null;
 
 // Initialize Firestore with settings for reliability in various network environments
-const firestoreDatabaseId = firebaseConfig.firestoreDatabaseId || '(default)';
+const firestoreDatabaseId = (firebaseConfig as any).firestoreDatabaseId || '(default)';
 
 console.log(`[Firebase] Initializing Firestore. Project: ${firebaseConfig.projectId}, Database: ${firestoreDatabaseId}`);
 

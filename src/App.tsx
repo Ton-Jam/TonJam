@@ -79,7 +79,7 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
       damping: 30,
       opacity: { duration: 0.2 }
     }}
-    className="w-full h-full overflow-x-hidden"
+    className="w-full h-full overflow-x-clip"
   >
     {children}
   </motion.div>

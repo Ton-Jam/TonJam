@@ -13,7 +13,7 @@ interface BannerProps {
 
 const TrendingBannerCarousel: React.FC<BannerProps> = ({ banners }) => {
   return (
-    <div className="relative w-full h-64 sm:h-96 rounded-3xl overflow-hidden">
+    <div className="relative w-full h-64 sm:h-96 rounded-none sm:rounded-3xl overflow-hidden">
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
         slidesPerView={1}

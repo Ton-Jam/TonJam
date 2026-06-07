@@ -23,6 +23,8 @@ import { mintTonJamNFT } from "@/services/tonService";
 import { validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from "@/lib/utils";
 import { BackButton } from "@/components/BackButton";
 import { RoyaltySplit } from "@/types";
+import { GoogleDriveImportModal } from "@/components/GoogleDriveImportModal";
+import { Folder } from "lucide-react";
 
 export default function UploadTrackScreen() {
   const navigate = useNavigate();
@@ -46,6 +48,45 @@ export default function UploadTrackScreen() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+  // Google Drive Integration States
+  const [driveModalOpen, setDriveModalOpen] = useState(false);
+  const [driveModalType, setDriveModalType] = useState<'audio' | 'image'>('audio');
+
+  const openDriveModal = (type: 'audio' | 'image') => {
+    setDriveModalType(type);
+    setDriveModalOpen(true);
+  };
+
+  const handleDriveFileSelected = (file: File) => {
+    if (driveModalType === 'image') {
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      addNotification("Imported cover art from Google Drive", "success");
+    } else {
+      if (mode === 'single') {
+        setAudioFile(file);
+        if (!title) setTitle(file.name.replace(/\.[^/.]+$/, ""));
+        addNotification("Imported audio from Google Drive", "success");
+      } else {
+        const trackId = Math.random().toString(36).substr(2, 9);
+        const newTrack = {
+          id: trackId,
+          title: file.name.replace(/\.[^/.]+$/, ""),
+          genre: genre || "Electronic",
+          audioFile: file,
+          coverFile: coverFile,
+          coverPreview: coverPreview
+        };
+        setBatchTracks(prev => [...prev, newTrack]);
+        addNotification(`Imported "${file.name}" to batch queue`, "success");
+      }
+    }
+  };
 
   const [bpm, setBpm] = useState("120");
   const [key, setKey] = useState("C Min");
@@ -417,9 +458,19 @@ export default function UploadTrackScreen() {
 
         {/* Global Cover Upload */}
         <div className="space-y-4">
-          <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-             {mode === 'single' ? 'Cover Art' : 'Default Cover Art'}
-          </label>
+          <div className="flex justify-between items-center">
+            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+               {mode === 'single' ? 'Cover Art' : 'Default Cover Art'}
+            </label>
+            <button
+              type="button"
+              onClick={() => openDriveModal('image')}
+              className="text-[9px] bg-white/5 hover:bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full flex items-center gap-1.5 font-bold uppercase tracking-widest transition-all cursor-pointer"
+            >
+              <Folder className="w-3 h-3 text-cyan-400" />
+              Import Cover from Google Drive
+            </button>
+          </div>
           <div 
             onClick={() => coverInputRef.current?.click()}
             className={`aspect-square sm:aspect-[21/9] w-48 mx-auto sm:w-full rounded-2xl bg-white/5 border-2 border-dashed ${coverPreview ? 'border-transparent' : 'border-white/10 hover:border-cyan-500/50'} transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center group relative`}
@@ -452,16 +503,26 @@ export default function UploadTrackScreen() {
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
                   <Music className="w-3 h-3" /> Audio File *
                 </label>
-                {audioFile && (
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={handleAnalyze}
-                    disabled={isAnalyzing}
-                    className="text-[9px] bg-white/5 px-3 py-1 rounded-full flex items-center gap-1.5 hover:bg-cyan-500/20 text-white/60 font-bold uppercase tracking-widest transition-all"
+                    type="button"
+                    onClick={() => openDriveModal('audio')}
+                    className="text-[9px] bg-white/5 hover:bg-purple-400/20 text-purple-400 px-3 py-1 rounded-full flex items-center gap-1.5 font-bold uppercase tracking-widest transition-all cursor-pointer"
                   >
-                    {isAnalyzing ? <Loader2 className="animate-spin w-3 h-3"/> : <Sparkles className="w-3 h-3 text-cyan-500"/>}
-                    {isAnalyzing ? 'Analyzing...' : 'Auto-Metadata'}
+                    <Folder className="w-3 h-3 text-purple-400" />
+                    Import from Google Drive
                   </button>
-                )}
+                  {audioFile && (
+                    <button
+                      onClick={handleAnalyze}
+                      disabled={isAnalyzing}
+                      className="text-[9px] bg-white/5 px-3 py-1 rounded-full flex items-center gap-1.5 hover:bg-cyan-500/20 text-white/60 font-bold uppercase tracking-widest transition-all cursor-pointer"
+                    >
+                      {isAnalyzing ? <Loader2 className="animate-spin w-3 h-3"/> : <Sparkles className="w-3 h-3 text-cyan-500"/>}
+                      {isAnalyzing ? 'Analyzing...' : 'Auto-Metadata'}
+                    </button>
+                  )}
+                </div>
               </div>
               <div 
                 onClick={() => audioInputRef.current?.click()}
@@ -660,9 +721,19 @@ export default function UploadTrackScreen() {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Batch Audio Upload */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                <Music className="w-3 h-3" /> Batch Audio Artifacts
-              </label>
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <Music className="w-3 h-3" /> Batch Audio Artifacts
+                </label>
+                <button
+                  type="button"
+                  onClick={() => openDriveModal('audio')}
+                  className="text-[9px] bg-white/5 hover:bg-purple-400/20 text-purple-400 px-3 py-1 rounded-full flex items-center gap-1.5 font-bold uppercase tracking-widest transition-all cursor-pointer"
+                >
+                  <Folder className="w-3 h-3 text-purple-400" />
+                  Import from Google Drive
+                </button>
+              </div>
               <div 
                 onClick={() => batchAudioInputRef.current?.click()}
                 className="w-full rounded-3xl bg-white/5 border-2 border-dashed border-white/10 hover:border-purple-500/50 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative"
@@ -822,6 +893,14 @@ export default function UploadTrackScreen() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Google Drive Import Modal */}
+      <GoogleDriveImportModal
+        isOpen={driveModalOpen}
+        onClose={() => setDriveModalOpen(false)}
+        onFileSelected={handleDriveFileSelected}
+        fileType={driveModalType}
+      />
     </div>
   );
 }

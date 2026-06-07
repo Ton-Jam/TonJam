@@ -70,6 +70,7 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
+import { BadgeSystem } from '@/components/BadgeSystem';
 
 const Profile: React.FC = () => {
  const navigate = useNavigate();
@@ -882,6 +883,10 @@ const Profile: React.FC = () => {
               </button>
             )}
           </div>
+        </div>
+
+        <div className="bg-white/5 rounded-3xl p-6 mt-4">
+          <BadgeSystem user={localUser} isOwnProfile={true} />
         </div>
 
         <div className="bg-white/5 border border-white/5 rounded-3xl p-6 mt-4">

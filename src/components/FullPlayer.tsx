@@ -175,6 +175,7 @@ const FullPlayer: React.FC = () => {
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy'>('player');
   const [visualizerVariant, setVisualizerVariant] = useState<'bars' | 'circle' | 'particles' | 'waves'>('bars');
   const [showQueue, setShowQueue] = useState(false);
+  const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl'>('spotify');
   
   // Dynamic color based on mood and variant
   const visualizerColor = useMemo(() => {
@@ -336,39 +337,38 @@ const FullPlayer: React.FC = () => {
       initial={{ y: '100%' }}
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[60] bg-[#0B0F14] text-white overflow-y-auto no-scrollbar"
+      transition={{ type: 'spring', damping: 24, stiffness: 180 }}
+      className="fixed inset-0 z-[60] bg-[#121212] text-white overflow-y-auto no-scrollbar select-none"
       ref={containerRef}
     >
-      {/* Background Ambience */}
+      {/* Dynamic Background Fog & Blur matching Spotify album-bleed backdrop */}
       <div 
-        className="fixed inset-0 z-0 bg-black/40 pointer-events-none"
+        className="fixed inset-0 z-0 bg-[#121212]"
       />
       <div 
-        className="fixed inset-0 z-0 opacity-40 blur-[100px] scale-150 pointer-events-none"
+        className="fixed inset-0 z-0 opacity-35 blur-[120px] scale-125 pointer-events-none transition-all duration-1000"
         style={{
-          backgroundImage: `url(${currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)})`,
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
+          backgroundImage: `radial-gradient(circle at 50% 30%, ${visualizerColor}70, transparent 75%)`,
         }}
       />
-      <div className="fixed inset-0 z-0 bg-gradient-to-t from-[#0B0F14] via-transparent to-[#0B0F14]/60 pointer-events-none" />
+      <div className="fixed inset-0 z-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-[#121212]/80 pointer-events-none" />
 
-      {/* Volume HUD */}
+      {/* Volume HUD - Re-styled without border lines */}
       <AnimatePresence>
         {showVolumeHUD && (
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed top-12 left-1/2 -translate-x-1/2 z-[80] bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-3 shadow-2xl"
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            className="fixed top-12 left-1/2 -translate-x-1/2 z-[80] bg-zinc-900/90 backdrop-blur-2xl rounded-2xl p-4 flex flex-col items-center gap-3 shadow-[0_15px_40px_rgba(0,0,0,0.6)]"
           >
-            <div className="p-2 rounded-full bg-white/10">
-              {volume === 0 || isMuted ? <Volume2 className="h-4 w-4 text-red-500" /> : <Volume2 className="h-4 w-4 text-blue-500" />}
+            <div className="p-2 rounded-full bg-white/5">
+              {volume === 0 || isMuted ? <VolumeX className="h-4 w-4 text-rose-500" /> : <Volume2 className="h-4 w-4 text-emerald-400" />}
             </div>
             <div className="w-1.5 h-16 bg-white/10 rounded-full relative overflow-hidden">
               <motion.div 
-                className="absolute bottom-0 left-0 w-full bg-blue-500 rounded-full" 
+                className="absolute bottom-0 left-0 w-full rounded-full" 
+                style={{ backgroundColor: visualizerColor }}
                 initial={false}
                 animate={{ height: `${volume * 100}%` }}
               />
@@ -377,30 +377,34 @@ const FullPlayer: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 flex flex-col min-h-screen px-6 py-4 pb-24 max-w-screen-xl mx-auto md:px-12 md:py-8">
+      <div className="relative z-10 flex flex-col min-h-screen px-5 py-4 pb-24 max-w-screen-xl mx-auto md:px-12 md:py-8">
         
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4 md:mb-8">
+        {/* Spotify Premium Navigation Header (Strictly no borders, crisp fonts) */}
+        <div className="flex items-center justify-between mb-6 md:mb-10">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => setFullPlayerOpen(false)}
-            className="text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-all h-[42px] w-[42px]"
+            className="text-neutral-400 hover:text-white hover:bg-neutral-800/40 rounded-full transition-all h-10 w-10 flex items-center justify-center shrink-0 cursor-pointer"
           >
-            <ChevronDown className="w-[26px] h-[26px] animate-bounce-slow" />
+            <ChevronDown className="w-6 h-6" />
           </Button>
-          <div className="text-center">
-            <p className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-white/30">Now Playing</p>
-            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-blue-500">Node Transmission</p>
+          
+          <div className="text-center select-none">
+            <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em] text-neutral-400">PLAYING FROM CHANNEL</p>
+            <p className="text-[10px] md:text-xs font-bold text-white tracking-wide truncate max-w-[200px] md:max-w-xs mt-0.5">
+              {currentTrack.isNFT ? "🌌 Web3 Sound Collectible" : "✨ Recommended Audio Transmissions"}
+            </p>
           </div>
+
           <button 
             onClick={(e) => {
               e.stopPropagation();
               setOptionsTrack(currentTrack);
             }}
-            className="p-2 rounded-full text-white/50 hover:text-white hover:bg-white/5 outline-none transition-all h-[42px] w-[42px] flex items-center justify-center"
+            className="h-10 w-10 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/40 transition-all flex items-center justify-center shrink-0"
           >
-            <MoreVertical className="w-[24px] h-[24px]" />
+            <MoreVertical className="w-5 h-5" />
           </button>
         </div>
 
@@ -408,146 +412,199 @@ const FullPlayer: React.FC = () => {
 
           <TabsContent value="player" className="flex-1 mt-0">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.98 }}
+              initial={{ opacity: 0, scale: 0.99 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col h-full justify-between py-2 md:grid md:grid-cols-12 md:gap-16 md:items-center md:py-6"
+              className="flex flex-col h-full justify-between py-2 md:grid md:grid-cols-12 md:gap-16 md:items-center md:py-8"
             >
-              {/* Cover Art Area (Exquisite glass spinning vinyl disk based on @aicanvas/glass-music-player design) */}
-              <div className="relative flex-1 flex flex-col items-center justify-center md:col-span-5 py-4 select-none">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentTrack.id}
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ type: 'spring', stiffness: 260, damping: 26 }}
-                    className="relative"
+              {/* Cover Art Stage - Centered on Mobile, beautiful layout with interactive Toggle */}
+              <div className="relative flex-1 flex flex-col items-center justify-center md:col-span-5 py-2 select-none">
+                
+                {/* Artwork Mode Switcher (Spotify-standard vs Spinning Disc) - Borderless Pill */}
+                <div className="mb-4 bg-zinc-900/60 p-1 rounded-full flex gap-1 shadow-inner relative z-20">
+                  <button 
+                    onClick={() => setArtworkStyle('spotify')}
+                    className={cn(
+                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer",
+                      artworkStyle === 'spotify' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
+                    )}
                   >
-                    {/* Ambient glow behind the disc - matching track mood color */}
-                    <div
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        background: visualizerColor,
-                        opacity: 0.22,
-                        filter: 'blur(35px)',
-                        transform: 'scale(1.2)',
-                      }}
-                    />
-                    
-                    {/* Disc shell - premium dual borders, 3D shadows */}
-                    <div
-                      className="relative flex h-60 w-60 sm:h-72 sm:w-72 items-center justify-center rounded-full transition-all duration-300 cursor-pointer"
+                    Classic Cover
+                  </button>
+                  <button 
+                    onClick={() => setArtworkStyle('vinyl')}
+                    className={cn(
+                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer",
+                      artworkStyle === 'vinyl' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
+                    )}
+                  >
+                    Vinyl Disc
+                  </button>
+                </div>
+
+                <AnimatePresence mode="wait">
+                  {artworkStyle === 'spotify' ? (
+                    /* Spotify Immersive High-Res Cover art with soft mood backglow */
+                    <motion.div
+                      key="spotify-art"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                      className="relative group cursor-pointer"
                       onClick={() => {
                         const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
                         const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
                         setVisualizerVariant(variants[nextIndex]);
                       }}
-                      style={{
-                        background: `radial-gradient(circle at 38% 35%, ${visualizerColor}20, ${visualizerColor}04 60%, transparent)`,
-                        outline: `1px solid ${visualizerColor}18`,
-                        boxShadow: `0 0 0 8px rgba(255,255,255,0.02), 0 20px 60px rgba(0,0,0,0.85)`,
-                      }}
                     >
-                      {/* Spinning artwork & groove records */}
-                      <motion.div
-                        animate={{ rotate: isPlaying ? 360 : 0 }}
-                        transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
-                        className="relative h-44 w-44 sm:h-52 sm:w-52 rounded-full overflow-hidden flex items-center justify-center"
+                      {/* Interactive Aura reflection breathing with audio track mood */}
+                      <div
+                        className="absolute inset-0 rounded-2xl transition-all duration-1000 scale-[1.03]"
                         style={{
-                          boxShadow: `inset 0 0 15px rgba(0,0,0,0.9)`,
+                          background: `radial-gradient(circle, ${visualizerColor}40 0%, transparent 70%)`,
+                          filter: 'blur(35px)',
+                          opacity: isPlaying ? 0.8 : 0.4
                         }}
-                      >
-                        {/* Album art cover */}
+                      />
+                      
+                      {/* Main cover art frame - No border lines, crisp radius and heavy shadow */}
+                      <div className="relative w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none">
                         <img
                           src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out select-none"
                           alt={currentTrack.title}
-                          className="absolute inset-0 w-full h-full object-cover rounded-full select-none"
                           referrerPolicy="no-referrer"
                         />
                         
-                        {/* Continuous Concentric Grooves overlay for authentic vinyl aesthetic */}
-                        {[0.88, 0.76, 0.64, 0.52].map((s, i) => (
-                          <div
-                            key={i}
-                            className="absolute inset-0 rounded-full pointer-events-none"
-                            style={{
-                              transform: `scale(${s})`,
-                              border: `1px solid rgba(255,255,255, ${0.06 - (i * 0.01)})`,
-                            }}
-                          />
-                        ))}
-
-                        {/* Center spindle cap and label with color highlights */}
-                        <div
-                          className="absolute left-1/2 top-1/2 h-[44px] w-[44px] sm:h-[50px] sm:w-[50px] -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center"
+                        {/* Shimmer on hover */}
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <Sparkles className="w-8 h-8 text-white/50 animate-pulse" />
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    /* Vinyl mode - Spinning disk overlay */
+                    <motion.div
+                      key="vinyl-art"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                      className="relative"
+                    >
+                      <div
+                        className="absolute inset-0 rounded-full"
+                        style={{
+                          background: visualizerColor,
+                          opacity: 0.22,
+                          filter: 'blur(35px)',
+                          transform: 'scale(1.2)',
+                        }}
+                      />
+                      
+                      <div
+                        className="relative flex h-60 w-60 sm:h-72 sm:w-72 items-center justify-center rounded-full transition-all duration-300 cursor-pointer"
+                        onClick={() => {
+                          const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
+                          const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
+                          setVisualizerVariant(variants[nextIndex]);
+                        }}
+                        style={{
+                          background: `radial-gradient(circle at 38% 35%, ${visualizerColor}20, ${visualizerColor}04 60%, transparent)`,
+                          boxShadow: `0 0 0 8px rgba(255,255,255,0.02), 0 20px 60px rgba(0,0,0,0.85)`,
+                        }}
+                      >
+                        <motion.div
+                          animate={{ rotate: isPlaying ? 360 : 0 }}
+                          transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+                          className="relative h-44 w-44 sm:h-52 sm:w-52 rounded-full overflow-hidden flex items-center justify-center"
                           style={{
-                            background: `radial-gradient(circle at 40% 40%, ${visualizerColor}e0, ${visualizerColor}90)`,
-                            boxShadow: `0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)`,
+                            boxShadow: `inset 0 0 15px rgba(0,0,0,0.9)`,
                           }}
                         >
-                          <div className="w-[10px] h-[10px] rounded-full bg-neutral-950/95" />
-                        </div>
-                      </motion.div>
-                    </div>
-
-                    {/* Small Floating Sparkle indicator of Active Mood Transmission */}
-                    <div className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 shadow-lg select-none">
-                      <Sparkles className="w-3.5 h-3.5" style={{ color: visualizerColor }} />
-                    </div>
-                  </motion.div>
+                          <img
+                            src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
+                            alt={currentTrack.title}
+                            className="absolute inset-0 w-full h-full object-cover rounded-full select-none"
+                            referrerPolicy="no-referrer"
+                          />
+                          {[0.88, 0.76, 0.64, 0.52].map((s, i) => (
+                            <div
+                              key={i}
+                              className="absolute inset-0 rounded-full pointer-events-none"
+                              style={{
+                                transform: `scale(${s})`,
+                                border: `1px solid rgba(255,255,255, ${0.06 - (i * 0.01)})`,
+                              }}
+                            />
+                          ))}
+                          <div
+                            className="absolute left-1/2 top-1/2 h-[44px] w-[44px] sm:h-[50px] sm:w-[50px] -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center"
+                            style={{
+                              background: `radial-gradient(circle at 40% 40%, ${visualizerColor}e0, ${visualizerColor}90)`,
+                              boxShadow: `0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)`,
+                            }}
+                          >
+                            <div className="w-[10px] h-[10px] rounded-full bg-neutral-950/95" />
+                          </div>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </div>
 
-              {/* Controls and Metadata (Right Column on Desktop, Bottom on Mobile) */}
-              <div className="space-y-6 pt-8 md:pt-0 md:col-span-7 flex flex-col justify-center h-full">
+              {/* Controls Deck - Styled perfectly like Spotify's structural layout */}
+              <div className="space-y-6 pt-6 md:pt-0 md:col-span-7 flex flex-col justify-center h-full">
                 
-                {/* Info Block */}
+                {/* Information Header Block */}
                 <div className="flex justify-between items-center px-1">
                   <div className="flex-1 min-w-0 pr-6">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h1 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tight text-white leading-tight truncate">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight truncate">
                         {currentTrack.title}
                       </h1>
                       {isOffline && (
-                        <span className="bg-emerald-500/20 text-emerald-400 text-[6px] font-black px-1.5 py-0.5 rounded-[2px] tracking-widest uppercase">
+                        <span className="bg-emerald-500/20 text-emerald-400 text-[6px] font-bold px-1.5 py-0.5 rounded-sm tracking-widest uppercase">
                           OFFLINE
                         </span>
                       )}
                       {isCached && (
-                        <span className="bg-blue-500/20 text-blue-400 text-[8px] font-black px-2 py-0.5 rounded-full tracking-widest uppercase flex items-center gap-1 border border-blue-500/30">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                        <span className="bg-blue-500/10 text-blue-400 text-[7px] font-black px-2 py-0.5 rounded-full tracking-widest uppercase flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-blue-400 animate-pulse" />
                           OFFLINE READY
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
+                    
+                    <div className="flex items-center gap-2 mt-1.5">
                       <p 
-                        className="text-xs sm:text-sm font-bold text-neutral-400 uppercase tracking-widest cursor-pointer hover:text-blue-400 transition-all" 
+                        className="text-sm sm:text-base font-medium text-neutral-400 hover:text-white hover:underline transition-all cursor-pointer" 
                         onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }}
                       >
                         {currentTrack.artist}
                       </p>
-                      {artistData?.verified && <Verified className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />}
+                      {artistData?.verified && <Verified className="h-4 w-4 text-blue-500 flex-shrink-0" />}
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* Offline Cache Download Action */}
+                  {/* Action block - Download and Heart aligned dynamically to the right */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
                     <Button 
                       variant="ghost" 
                       size="sm"
                       onClick={handleToggleCache}
                       disabled={isCaching}
                       className={cn(
-                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 h-[52px] w-[52px] flex items-center justify-center",
-                        isCached && "text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10"
+                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-neutral-800/40 active:scale-95 h-11 w-11 flex items-center justify-center cursor-pointer",
+                        isCached && "text-blue-400 bg-blue-500/5 hover:bg-blue-500/10"
                       )}
-                      title={isCached ? "Remove from offline cache" : "Download for offline listening"}
+                      title={isCached ? "Remove from cache" : "Download for offline"}
                     >
                       {isCaching ? (
-                        <Loader2 className="w-[28px] h-[28px] animate-spin text-blue-500" />
+                        <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
                       ) : (
-                        <DownloadCloud className={cn("w-[28px] h-[28px]", isCached && "fill-blue-500/20")} />
+                        <DownloadCloud className={cn("w-5.5 h-5.5", isCached && "fill-blue-500/10")} />
                       )}
                     </Button>
 
@@ -556,31 +613,31 @@ const FullPlayer: React.FC = () => {
                       size="sm"
                       onClick={() => toggleLikeTrack(currentTrack.id)}
                       className={cn(
-                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 h-[52px] w-[52px] flex items-center justify-center",
-                        isLiked && "text-blue-500 hover:text-blue-400 bg-blue-500/5 hover:bg-blue-500/15"
+                        "rounded-full p-2.5 transition-all text-neutral-400 hover:text-white hover:bg-neutral-800/40 active:scale-95 h-11 w-11 flex items-center justify-center cursor-pointer",
+                        isLiked && "text-emerald-400 hover:text-emerald-300 bg-emerald-500/5"
                       )}
                     >
-                      <Heart className={`w-[28px] h-[28px] ${isLiked ? 'fill-current' : ''}`} />
+                      <Heart className={`w-5.5 h-5.5 ${isLiked ? 'fill-current text-emerald-400' : ''}`} />
                     </Button>
                   </div>
                 </div>
 
-                {/* Ambient Lyrics Snapshot Widget (On Desktop for premium feel) */}
+                {/* Spotify-style Lyrics Preview overlay (Translucent card with zero borders) */}
                 {currentTrack.lyrics && (
                   <div 
                     onClick={() => setActiveView('lyrics')}
-                    className="hidden md:block rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent hover:from-white/[0.06] p-6 h-36 overflow-hidden relative cursor-pointer group transition-all"
+                    className="hidden md:block rounded-2xl bg-zinc-900/40 hover:bg-zinc-800/20 p-5 h-36 overflow-hidden relative cursor-pointer group transition-all"
                   >
-                    <div className="absolute top-4 right-5 flex items-center gap-1 opacity-40 group-hover:opacity-85 transition-opacity">
-                      <span className="text-[8px] font-black uppercase tracking-widest">Full Screen</span>
-                      <Mic2 className="w-3.5 h-3.5 text-blue-400" />
+                    <div className="absolute top-4 right-5 flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400">Full Lyrics</span>
+                      <Mic2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-2">Lyrics Snippet</p>
-                    <div className="space-y-1.5 opacity-60 group-hover:opacity-90 transition-opacity">
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2">Lyrics Preview</p>
+                    <div className="space-y-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                       {currentTrack.lyrics.split('\n').slice(0, 3).map((line, i) => (
                         <p key={i} className={cn(
-                          "text-sm sm:text-base font-black tracking-tight uppercase truncate leading-none",
-                          i === 0 ? "text-white" : "text-white/45"
+                          "text-sm sm:text-base font-extrabold tracking-tight truncate leading-normal",
+                          i === 0 ? "text-white" : "text-neutral-400"
                         )}>
                           {line}
                         </p>
@@ -589,153 +646,145 @@ const FullPlayer: React.FC = () => {
                   </div>
                 )}
 
-                {/* If no lyrics, show DJ Krupy Neural Recommendation teaser */}
+                {/* DJ Krupy AI Consult insight cards if no lyrics */}
                 {!currentTrack.lyrics && recommendations && (
                   <div 
                     onClick={() => setActiveView('krupy')}
-                    className="hidden md:block rounded-2xl bg-gradient-to-b from-blue-500/[0.05] to-transparent hover:from-blue-500/[0.07] p-6 h-36 overflow-hidden relative cursor-pointer group transition-all"
+                    className="hidden md:block rounded-2xl bg-zinc-900/40 hover:bg-zinc-800/20 p-5 h-36 overflow-hidden relative cursor-pointer group transition-all"
                   >
-                    <div className="absolute top-4 right-5 flex items-center gap-1.5 opacity-50 group-hover:opacity-90 transition-opacity">
-                      <span className="text-[8px] font-black uppercase tracking-[0.2em] text-blue-400">Consult AI</span>
+                    <div className="absolute top-4 right-5 flex items-center gap-1.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-blue-400">DJ AIRLAB</span>
                       <Sparkles className="w-3.5 h-3.5 text-blue-400" />
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-2">DJ Krupy Insights</p>
-                    <p className="text-xs font-bold text-neutral-300 leading-snug italic max-w-[90%]">
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400 mb-2">AI Trivia Insight</p>
+                    <p className="text-xs font-bold leading-relaxed text-zinc-300 italic line-clamp-3">
                       "{recommendations.reasoning}"
                     </p>
                   </div>
                 )}
 
-                {/* Timeline Slider with smooth interaction */}
-                <div className="space-y-3 px-1 group/slider-deck">
+                {/* Spotify-standard Progress Slider Deck */}
+                <div className="space-y-2 px-1 group/slider-deck">
                   <Slider 
                     value={[progress]}
                     min={0}
                     max={100}
                     step={0.1}
                     onValueChange={(val) => seek(val[0])}
-                    className="cursor-pointer py-2 [&_[data-slot=slider-track]]:!h-[6px] [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-range]]:!bg-neutral-200 group-hover/slider-deck:[&_[data-slot=slider-range]]:!bg-blue-500 [&_[data-slot=slider-thumb]]:!size-3.5 [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/slider-deck:[&_[data-slot=slider-thumb]]:opacity-100 transition-all [&_[data-slot=slider-thumb]]:transition-opacity"
-                    style={{
-                      contentVisibility: 'auto'
-                    }}
+                    className="cursor-pointer py-1.5 [&_[data-slot=slider-track]]:!h-[4px] [&_[data-slot=slider-track]]:bg-neutral-700/60 [&_[data-slot=slider-range]]:!bg-neutral-200 group-hover/slider-deck:[&_[data-slot=slider-range]]:!bg-emerald-400 [&_[data-slot=slider-thumb]]:!size-3 [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/slider-deck:[&_[data-slot=slider-thumb]]:opacity-100 transition-all"
                   />
-                  <div className="flex justify-between text-[11px] md:text-xs font-bold text-neutral-400 uppercase tracking-widest font-mono">
+                  <div className="flex justify-between text-[10px] font-bold text-neutral-400 tracking-wider font-mono">
                     <span>{formatTime(currentTime)}</span>
-                    <span style={{ color: `${visualizerColor}aa` }}>{formatTime(duration)}</span>
+                    <span style={{ color: `${visualizerColor}cc` }}>{formatTime(duration)}</span>
                   </div>
                 </div>
 
-                {/* Core Playback Controls Row */}
-                <div className="flex items-center justify-center gap-6 sm:gap-10 md:gap-14 px-2 pt-2 md:pt-6">
+                {/* Main Playback Control Deck - Pure Spotify Layout Mapping */}
+                <div className="flex items-center justify-between px-4 max-w-md mx-auto w-full pt-1">
+                  
+                  {/* Shuffle Button */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={toggleShuffle} 
-                    className={cn(
-                      "relative h-14 w-14 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5 flex items-center justify-center shrink-0"
-                    )}
-                    style={{
-                      color: isShuffle ? visualizerColor : undefined,
-                      backgroundColor: isShuffle ? `${visualizerColor}0c` : undefined
-                    }}
+                    className="relative h-12 w-12 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/20 flex items-center justify-center cursor-pointer transition-colors"
                   >
-                    <ShuffleIcon className="w-7 h-7" />
+                    <ShuffleIcon className="w-[22px] h-[22px]" style={{ color: isShuffle ? visualizerColor : undefined }} />
                     {isShuffle && (
-                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: visualizerColor }} />
+                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ backgroundColor: visualizerColor }} />
                     )}
                   </Button>
 
+                  {/* Previous Track */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={prevTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-90 transition-all h-16 w-16 md:h-20 md:w-20 rounded-full flex items-center justify-center shrink-0"
+                    className="text-neutral-200 hover:text-white hover:bg-neutral-800/20 active:scale-90 transition-all h-14 w-14 rounded-full flex items-center justify-center cursor-pointer"
                   >
-                    <SkipBack className="w-12 h-12 md:w-14 md:h-14 fill-current" />
+                    <SkipBack className="w-8 h-8 fill-current" />
                   </Button>
                   
+                  {/* Center Play Button - Perfect big rounded Spotify Play block */}
                   <Button
                     onClick={togglePlay}
-                    className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center p-0 shrink-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-white hover:bg-white"
+                    className="w-18 h-18 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-white hover:bg-white text-black"
                     style={{
-                      background: `radial-gradient(circle at 38% 35%, ${visualizerColor}ee, ${visualizerColor}99)`,
-                      boxShadow: `0 12px 30px ${visualizerColor}40, inset 0 1px 0 rgba(255,255,255,0.25)`
+                      boxShadow: `0 12px 30px rgba(255,255,255,0.06)`
                     }}
                   >
                     {isPlaying ? (
-                      <Pause className="w-8 h-8 md:w-10 md:h-10 text-white fill-white" />
+                      <Pause className="w-7 h-7 text-black fill-black" />
                     ) : (
-                      <Play className="w-8 h-8 md:w-10 md:h-10 text-white fill-white ml-1" />
+                      <Play className="w-7 h-7 text-black fill-black ml-0.5" />
                     )}
                   </Button>
 
+                  {/* Next Track */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={nextTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-white/5 active:scale-90 transition-all h-16 w-16 md:h-20 md:w-20 rounded-full flex items-center justify-center shrink-0"
+                    className="text-neutral-200 hover:text-white hover:bg-neutral-800/20 active:scale-90 transition-all h-14 w-14 rounded-full flex items-center justify-center cursor-pointer"
                   >
-                    <SkipForward className="w-12 h-12 md:w-14 md:h-14 fill-current" />
+                    <SkipForward className="w-8 h-8 fill-current" />
                   </Button>
 
+                  {/* Repeat Button */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={toggleRepeat} 
-                    className={cn(
-                      "relative h-14 w-14 rounded-full transition-all text-neutral-400 hover:text-white hover:bg-white/5 flex items-center justify-center shrink-0"
-                    )}
-                    style={{
-                      color: repeatMode !== 'off' ? visualizerColor : undefined,
-                      backgroundColor: repeatMode !== 'off' ? `${visualizerColor}0c` : undefined
-                    }}
+                    className="relative h-12 w-12 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/20 flex items-center justify-center cursor-pointer transition-colors"
                   >
-                    <RepeatIcon className="w-7 h-7" />
+                    <RepeatIcon className="w-[22px] h-[22px]" style={{ color: repeatMode !== 'off' ? visualizerColor : undefined }} />
                     {repeatMode !== 'off' && (
-                      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: visualizerColor }} />
+                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ backgroundColor: visualizerColor }} />
                     )}
                     {repeatMode === 'one' && (
-                      <span className="absolute top-[3px] right-[3px] text-[8px] font-black text-white rounded-full w-4.5 h-4.5 flex items-center justify-center border border-zinc-950 scale-90" style={{ backgroundColor: visualizerColor }}>1</span>
+                      <span className="absolute top-[2px] right-[2px] text-[7px] font-black text-black rounded-full w-3.5 h-3.5 flex items-center justify-center" style={{ backgroundColor: visualizerColor }}>1</span>
                     )}
                   </Button>
                 </div>
 
-                {/* Bottom accessory tools row */}
-                <div className="flex items-center justify-between pt-8 pb-3 px-2 text-neutral-450 border-t border-white/5 mt-4">
-                  <div className="flex items-center gap-3 w-1/3 group/volume">
+                {/* Dynamic Bottom Utility Accessories Row - No borders */}
+                <div className="flex items-center justify-between pt-5 pb-1 px-2 text-neutral-400 mt-2 select-none">
+                  {/* Volume Slider - Interactive matching Spotify bottom bar */}
+                  <div className="flex items-center gap-2 w-1/3 group/volume">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-11 w-11 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                      className="h-10 w-10 text-neutral-400 hover:text-white hover:bg-neutral-800/20 rounded-md transition-colors cursor-pointer"
                       onClick={toggleMute}
                     >
-                      {volume === 0 || isMuted ? <VolumeX className="w-5.5 h-5.5 text-rose-500" /> : <Volume2 className="w-5.5 h-5.5" />}
+                      {volume === 0 || isMuted ? <VolumeX className="w-5 h-5 text-rose-500" /> : <Volume2 className="w-5 h-5" />}
                     </Button>
                     <Slider
                       value={[isMuted ? 0 : volume * 100]}
                       max={100}
                       step={1}
-                      className="w-24 hidden sm:flex cursor-pointer py-1 [&_[data-slot=slider-track]]:!h-[4px] [&_[data-slot=slider-track]]:bg-neutral-800 [&_[data-slot=slider-range]]:!bg-neutral-450 group-hover/volume:[&_[data-slot=slider-range]]:!bg-blue-500 [&_[data-slot=slider-thumb]]:!size-[11px] [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/volume:[&_[data-slot=slider-thumb]]:opacity-100 [&_[data-slot=slider-thumb]]:transition-opacity"
+                      className="w-20 hidden sm:flex cursor-pointer py-1 [&_[data-slot=slider-track]]:!h-[3px] [&_[data-slot=slider-track]]:bg-neutral-700/60 [&_[data-slot=slider-range]]:!bg-neutral-300 group-hover/volume:[&_[data-slot=slider-range]]:!bg-emerald-400 [&_[data-slot=slider-thumb]]:!size-[10px] [&_[data-slot=slider-thumb]]:!border-none [&_[data-slot=slider-thumb]]:!bg-white [&_[data-slot=slider-thumb]]:!ring-0 [&_[data-slot=slider-thumb]]:opacity-0 group-hover/volume:[&_[data-slot=slider-thumb]]:opacity-100"
                       onValueChange={(vals) => setVolume(vals[0] / 100)}
                     />
                   </div>
                   
-                  <div className="flex items-center gap-6 justify-end w-1/2">
+                  {/* Right hand Queue and Share accessories */}
+                  <div className="flex items-center gap-4 justify-end w-1/2">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={handleShare}
-                      className="h-11 w-11 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors flex items-center justify-center"
+                      className="h-10 w-10 text-neutral-400 hover:text-white hover:bg-neutral-800/20 rounded-md transition-colors flex items-center justify-center cursor-pointer"
                     >
-                      <Share2 className="w-[24px] h-[24px]" />
+                      <Share2 className="w-5 h-5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowQueue(true)}
-                      className="h-11 w-11 text-neutral-400 hover:text-white hover:bg-white/5 rounded-md transition-colors flex items-center justify-center"
+                      className="h-10 w-10 text-neutral-400 hover:text-white hover:bg-neutral-800/20 rounded-md transition-colors flex items-center justify-center cursor-pointer"
                     >
-                      <ListMusic className="w-[24px] h-[24px]" />
+                      <ListMusic className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
@@ -744,69 +793,69 @@ const FullPlayer: React.FC = () => {
             </motion.div>
           </TabsContent>
 
+          {/* Premium Bottom Mode Bar Selector (No border lines, transparent capsule rounded list) */}
           <TabsList className={cn(
-            "grid w-full max-w-md mx-auto bg-white/5 border-none h-12 p-1 mb-6 relative z-10 rounded-xl",
+            "grid w-full max-w-lg mx-auto bg-zinc-900/60 border-none h-12 p-1 mb-6 relative z-10 rounded-xl shadow-lg",
             currentTrack.isNFT ? "grid-cols-6" : "grid-cols-5"
           )}>
-            <TabsTrigger value="player" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 font-bold py-2 rounded-lg">
-              <Music className="w-5 h-5" />
+            <TabsTrigger value="player" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white font-bold py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
+              <Music className="w-4.5 h-4.5" />
             </TabsTrigger>
-            <TabsTrigger value="lyrics" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 font-bold py-2 rounded-lg">
-              <Mic2 className="w-5 h-5" />
+            <TabsTrigger value="lyrics" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white font-bold py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
+              <Mic2 className="w-4.5 h-4.5" />
             </TabsTrigger>
-            <TabsTrigger value="krupy" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 relative font-bold py-2 rounded-lg">
-
-              <Sparkles className="w-5 h-5" />
+            <TabsTrigger value="krupy" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white relative font-bold py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
+              <Sparkles className="w-4.5 h-4.5" />
               <motion.div 
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"
+                className="absolute -top-0.5 -right-0.5 w-1 h-1 bg-emerald-400 rounded-full"
               />
             </TabsTrigger>
-            <TabsTrigger value="comments" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 py-2 rounded-lg">
-              <MessageSquare className="w-5 h-5" />
+            <TabsTrigger value="comments" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
+              <MessageSquare className="w-4.5 h-4.5" />
             </TabsTrigger>
-            <TabsTrigger value="artist" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 py-2 rounded-lg">
-              <Hash className="w-5 h-5" />
+            <TabsTrigger value="artist" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
+              <User className="w-4.5 h-4.5" />
             </TabsTrigger>
             {currentTrack.isNFT && (
-              <TabsTrigger value="nft" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white/40 py-2 rounded-lg">
-                <Zap className="w-5 h-5" />
+              <TabsTrigger value="nft" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
+                <Zap className="w-4.5 h-4.5" />
               </TabsTrigger>
             )}
           </TabsList>
 
+          {/* AI Tab - Clean Translucent Capsule with NO BORDERS */}
           <TabsContent value="krupy" className="flex-1 mt-0">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col h-[520px] max-w-2xl mx-auto"
+              className="flex flex-col h-[460px] max-w-2xl mx-auto rounded-2xl bg-zinc-900/40 backdrop-blur-md overflow-hidden shadow-2xl pb-4 mt-2"
             >
-              <div className="flex items-center gap-3 p-4 bg-blue-500/10 rounded-t-[4px] border-b border-white/5">
-                <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center p-0.5 border border-white/10">
-                  <img src={DJ_KRUPY_AVATAR} alt="DJ Krupy" className="w-full h-full rounded-full object-cover" />
+              <div className="flex items-center gap-3 p-4 bg-zinc-800/10">
+                <div className="w-10 h-10 rounded-full bg-neutral-850 flex items-center justify-center p-0.5 shadow-sm">
+                  <img src={DJ_KRUPY_AVATAR} alt="DJ Krupy" className="w-full h-full rounded-full object-cover select-none" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-blue-500">Neural Insights</h3>
-                  <p className="text-[8px] font-bold text-white uppercase tracking-widest">Active Relay: {currentTrack.title}</p>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-emerald-400">DJ Krupy Neural Assistant</h3>
+                  <p className="text-[8px] font-bold text-neutral-400 uppercase tracking-widest mt-0.5">Frequency Lock: {currentTrack.title}</p>
                 </div>
               </div>
 
               <div ref={krupyScrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
-                {/* Recommendations Section */}
                 {recommendations && (
                   <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 space-y-3"
+                    className="mb-4 space-y-3"
                   >
                     <div className="flex items-center justify-between">
-                      <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">Neural Recommendations</h4>
-                      {isRecsLoading && <Loader2 className="w-2.5 h-2.5 animate-spin text-blue-500" />}
+                      <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400">AI Recommendation Layer</h4>
+                      {isRecsLoading && <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />}
                     </div>
                     
                     <div className="flex flex-col gap-2">
-                       <p className="text-[10px] text-white/60 font-medium italic">"{recommendations.reasoning}"</p>
+                       <p className="text-[10px] text-neutral-400 font-medium italic">"{recommendations.reasoning}"</p>
                        
                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                           {recommendations.tracks.map((trackTitle, idx) => {
@@ -815,10 +864,10 @@ const FullPlayer: React.FC = () => {
                               <button 
                                 key={idx}
                                 onClick={() => track && playTrack(track)}
-                                className="flex-shrink-0 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[4px] px-3 py-2 transition-all"
+                                className="flex-shrink-0 bg-neutral-800/30 hover:bg-neutral-800/60 rounded-xl px-3.5 py-2 transition-all cursor-pointer"
                               >
                                 <p className="text-[10px] font-black uppercase tracking-tighter text-white truncate max-w-[120px]">{trackTitle}</p>
-                                <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Track</p>
+                                <p className="text-[8px] font-bold text-emerald-400/80 uppercase tracking-widest mt-0.5">Track</p>
                               </button>
                             );
                           })}
@@ -832,36 +881,35 @@ const FullPlayer: React.FC = () => {
                                   navigate(`/artist/${artist.uid}`);
                                 }
                               }}
-                              className="flex-shrink-0 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 rounded-[4px] px-3 py-2 transition-all"
+                              className="flex-shrink-0 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl px-3.5 py-2 transition-all cursor-pointer"
                             >
-                              <p className="text-[10px] font-black uppercase tracking-tighter text-blue-500 truncate max-w-[120px]">{artistName}</p>
-                              <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest">Artist</p>
+                              <p className="text-[10px] font-black uppercase tracking-tighter text-blue-400 truncate max-w-[120px]">{artistName}</p>
+                              <p className="text-[8px] font-bold text-blue-400/80 uppercase tracking-widest mt-0.5">Artist</p>
                             </button>
                           ))}
                        </div>
                     </div>
-                    <Separator className="bg-white/5" />
                   </motion.div>
                 )}
 
-                {/* Quick Actions */}
-                <div className="flex flex-wrap gap-2 mb-4">
+                {/* Quick actions for IA bot */}
+                <div className="flex flex-wrap gap-2 mb-4 select-none">
                   <button 
                     onClick={() => handleAskKrupy("Show me some trivia about this track!")}
-                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all"
+                    className="bg-neutral-800/40 hover:bg-neutral-800/80 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all cursor-pointer"
                   >
                     Get Trivia
                   </button>
                   <button 
                     onClick={fetchRecommendations}
-                    className="bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-blue-500 transition-all flex items-center gap-1.5"
+                    className="bg-zinc-800/50 hover:bg-zinc-800 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-emerald-400 transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <RefreshCw className={cn("w-2.5 h-2.5", isRecsLoading && "animate-spin")} />
                     Refresh Recs
                   </button>
                   <button 
                     onClick={() => handleAskKrupy("Describe the mood of this track.")}
-                    className="bg-white/5 hover:bg-white/10 border border-white/5 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all"
+                    className="bg-neutral-800/40 hover:bg-neutral-800/80 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all cursor-pointer"
                   >
                     Vibe Check
                   </button>
@@ -870,14 +918,14 @@ const FullPlayer: React.FC = () => {
                 {krupyChat.map((chat, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div className={`max-w-[85%] p-3 rounded-[4px] text-[10px] sm:text-xs font-bold leading-relaxed ${
+                    <div className={`max-w-[85%] p-3 rounded-2xl text-[10px] sm:text-xs font-bold leading-relaxed shadow-sm ${
                       chat.role === 'user' 
-                        ? 'bg-blue-600 text-white rounded-tr-none' 
-                        : 'bg-white/5 text-white/80 border border-white/5 rounded-tl-none'
+                        ? 'bg-zinc-100 text-black rounded-tr-none' 
+                        : 'bg-neutral-900/60 text-white/80 rounded-tl-none'
                     }`}>
                       {chat.text}
                     </div>
@@ -885,15 +933,15 @@ const FullPlayer: React.FC = () => {
                 ))}
                 {isKrupyLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-white/5 p-3 rounded-[4px] rounded-tl-none flex items-center gap-2">
-                      <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-white/30">Syncing...</span>
+                    <div className="bg-neutral-900/60 p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400">Thinking...</span>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="p-4 bg-white/5 rounded-b-[4px]">
+              <div className="px-4">
                 <div className="relative">
                   <input 
                     type="text" 
@@ -901,14 +949,14 @@ const FullPlayer: React.FC = () => {
                     onChange={(e) => setKrupyMessage(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAskKrupy()}
                     placeholder="Ask DJ Krupy about this track..."
-                    className="w-full bg-black/40 border border-white/10 rounded-[4px] py-3 px-4 pr-12 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-white/20"
+                    className="w-full bg-neutral-950/40 border-none rounded-xl py-3.5 px-4 pr-12 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:bg-neutral-950/80 transition-all placeholder:text-neutral-500"
                   />
                   <Button 
                     size="icon"
                     variant="ghost"
                     onClick={() => handleAskKrupy()}
                     disabled={isKrupyLoading || !krupyMessage.trim()}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-blue-500 hover:text-blue-400 disabled:opacity-50"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-emerald-400 hover:text-emerald-300 disabled:opacity-50 cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
                   </Button>
@@ -917,63 +965,65 @@ const FullPlayer: React.FC = () => {
             </motion.div>
           </TabsContent>
 
+          {/* Lyrics View - Absolute Spotify layout matching lyrics view */}
           <TabsContent value="lyrics" className="flex-1 mt-0">
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               className="h-full flex flex-col max-w-2xl mx-auto"
             >
               {currentTrack.lyrics ? (
                 <LyricsView lyrics={currentTrack.lyrics} />
               ) : (
-                <div className="flex flex-col items-center justify-center h-[400px] text-center space-y-4">
-                  <div className="p-6 rounded-[4px] bg-white/5">
-                    <Mic2 className="w-12 h-12 text-white/20" />
+                <div className="flex flex-col items-center justify-center h-[360px] text-center space-y-4">
+                  <div className="p-5 rounded-full bg-zinc-900">
+                    <Mic2 className="w-10 h-10 text-neutral-600" />
                   </div>
-                  <p className="text-sm font-black uppercase tracking-widest text-white/30">No neural lyrics found for this frequency</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-neutral-450">No lyrics available for this transmission</p>
                 </div>
               )}
             </motion.div>
           </TabsContent>
 
+          {/* Comments board - Borderless matching UI layout */}
           <TabsContent value="comments" className="flex-1 mt-0">
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-6 h-full flex flex-col max-w-2xl mx-auto"
+              className="space-y-4 h-full flex flex-col max-w-2xl mx-auto mt-2"
             >
               <div className="relative">
                 <input 
                   type="text" 
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="Drop a vibe..."
-                  className="w-full bg-white/5 border border-white/10 rounded-[4px] py-3 px-4 pr-12 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-white/20"
+                  placeholder="Drop a vibe on this frequency..."
+                  className="w-full bg-zinc-900/60 border-none rounded-xl py-3.5 px-4 pr-12 text-xs focus:outline-none focus:bg-zinc-900 transition-all placeholder:text-neutral-500 font-bold"
                 />
                 <Button 
                   size="icon"
                   variant="ghost"
                   onClick={handlePostComment}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-blue-600 hover:bg-blue-500 text-white rounded-[4px] transition-all"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-white hover:bg-neutral-100 text-black rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-md"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </Button>
               </div>
               
-              <ScrollArea className="flex-1 h-[400px] pr-4">
-                <div className="space-y-3 pb-4">
+              <ScrollArea className="flex-1 h-[360px] pr-2">
+                <div className="space-y-3 pb-4 no-scrollbar">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex gap-3 p-4 rounded-[4px] bg-white/[0.02] border border-white/5 items-center">
-                      <Avatar className="w-10 h-10 rounded-[4px] border border-white/5">
-                        <AvatarFallback className="bg-blue-600/10 text-blue-500/30 text-[10px] font-black">#</AvatarFallback>
+                    <div key={i} className="flex gap-3 p-4 rounded-xl bg-neutral-900/30 hover:bg-neutral-900/50 items-center transition-colors">
+                      <Avatar className="w-10 h-10 rounded-full bg-neutral-800">
+                        <AvatarFallback className="bg-emerald-500/10 text-emerald-400 text-[10px] font-black">#</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[9px] font-black uppercase text-white truncate">vibe_node_{i}</span>
-                          <span className="text-[7px] font-bold text-white/10 whitespace-nowrap ml-2">{i}m ago</span>
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-[10px] font-black uppercase text-neutral-300 truncate">transmitting_node_{i}</span>
+                          <span className="text-[8px] font-bold text-neutral-500 whitespace-nowrap ml-2">{i}m ago</span>
                         </div>
-                        <p className="text-[11px] text-white/60 leading-normal font-bold">
-                          {i % 3 === 0 ? "Incredible sonic landscape." : i % 3 === 1 ? "Minted this artifact immediately." : "This vibration is pure energy."}
+                        <p className="text-xs text-neutral-200 leading-normal font-medium">
+                          {i % 3 === 0 ? "Breathtaking production on this track. Heavy rotation!" : i % 3 === 1 ? "Collector artifact obtained. Absolute gem." : "Pure auditory bliss."}
                         </p>
                       </div>
                     </div>
@@ -983,133 +1033,117 @@ const FullPlayer: React.FC = () => {
             </motion.div>
           </TabsContent>
 
+          {/* Artist details - styled beautifully */}
           <TabsContent value="artist" className="flex-1 mt-0">
             <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="space-y-8 max-w-2xl mx-auto"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="space-y-6 max-w-2xl mx-auto rounded-2xl bg-zinc-900/40 backdrop-blur-md p-6 shadow-2xl mt-2"
             >
               {artistData && (
-                <div className="bg-white/5 border-none rounded-[4px] p-6 space-y-4">
+                <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <Avatar className="w-16 h-16 rounded-[4px] border-2 border-blue-600/20 shadow-xl">
+                    <Avatar className="w-16 h-16 rounded-full shadow-lg">
                       <AvatarImage src={artistData.avatarUrl || getPlaceholderImage(`artist-${artistData.uid}`)} referrerPolicy="no-referrer" className="object-cover" />
-                      <AvatarFallback className="bg-blue-600/10 text-blue-500 font-black">{(artistData.name || '').slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback className="bg-zinc-800 text-white font-black">{(artistData.name || '').slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-lg font-black uppercase tracking-tight text-white truncate">{artistData.name}</h4>
-                        {artistData.verified && <Verified className="h-4 w-4 text-blue-500 flex-shrink-0" />}
+                        <h4 className="text-xl font-black uppercase tracking-tight text-white truncate">{artistData.name}</h4>
+                        {artistData.verified && <Verified className="h-4.5 w-4.5 text-blue-500 flex-shrink-0" />}
                       </div>
-                      <p className="text-[8px] font-black uppercase text-white/20 tracking-widest">{artistData.followers?.toLocaleString()} Listeners</p>
+                      <p className="text-[9px] font-black uppercase text-neutral-400 tracking-wider mt-0.5">{artistData.followers?.toLocaleString()} Followers</p>
                     </div>
                   </div>
-                  <p className="text-xs text-white/40 leading-relaxed font-medium line-clamp-4">
-                    {artistData.bio || "No biography data available. This artist is forging new frequencies in silence."}
+                  <p className="text-xs text-neutral-400 leading-relaxed font-semibold line-clamp-4">
+                    {artistData.bio || "No biography details released. This creator communicates directly through frequencies."}
                   </p>
                   <Button 
                     variant="secondary"
-                    className="w-full h-11 bg-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-[0.2em] rounded-[4px] transition-all gap-2 border-none"
+                    className="w-full h-11 bg-white hover:bg-neutral-100 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all gap-2 border-none text-black text-black cursor-pointer shadow-md"
                     onClick={() => {
                       setFullPlayerOpen(false);
                       navigate(`/artist/${artistData.uid}`);
                     }}
                   >
-                    View Domain <ExternalLink className="w-3 h-3" />
+                    Explore Artist Domain <ExternalLink className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/5 p-4 rounded-[4px] border-none flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-blue-500/40" />
+                <div className="bg-neutral-900/60 p-4 rounded-xl flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-neutral-500" />
                   <div>
-                    <p className="text-[8px] font-black uppercase tracking-widest text-white/20">Release</p>
-                    <p className="font-black uppercase tracking-tighter text-sm">{currentTrack.releaseDate ? new Date(currentTrack.releaseDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'MAR 2024'}</p>
+                    <p className="text-[8px] font-black uppercase tracking-wider text-neutral-500">Release Date</p>
+                    <p className="font-extrabold uppercase tracking-tight text-xs mt-0.5">{currentTrack.releaseDate ? new Date(currentTrack.releaseDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'MAR 2026'}</p>
                   </div>
                 </div>
-                <div className="bg-white/5 p-4 rounded-[4px] border-none flex items-center gap-3">
-                  <Hash className="w-4 h-4 text-blue-500/40" />
+                <div className="bg-neutral-900/60 p-4 rounded-xl flex items-center gap-3">
+                  <Hash className="w-5 h-5 text-neutral-500" />
                   <div>
-                    <p className="text-[8px] font-black uppercase tracking-widest text-white/20">ID</p>
-                    <p className="font-black uppercase tracking-tighter text-sm">TJ-{currentTrack.id?.slice(-4).toUpperCase()}</p>
+                    <p className="text-[8px] font-black uppercase tracking-wider text-neutral-500">Record ID</p>
+                    <p className="font-extrabold uppercase tracking-tight text-xs mt-0.5">TJ-{currentTrack.id?.slice(-4).toUpperCase()}</p>
                   </div>
                 </div>
               </div>
             </motion.div>
           </TabsContent>
 
+          {/* NFT Detail Screen - redesigned with pure style and zero borders */}
           {currentTrack.isNFT && currentNFT && (
             <TabsContent value="nft" className="flex-1 mt-0">
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="space-y-6 max-w-2xl mx-auto"
+                className="space-y-5 max-w-2xl mx-auto rounded-2xl bg-zinc-900/40 p-6 shadow-2xl mt-2 select-none"
               >
-                {/* NFT Hero Info */}
-                <div className="bg-white/5 border-none rounded-[4px] p-6 space-y-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-xl font-black uppercase tracking-tight text-white mb-1">Sonic Artifact</h3>
-                      <p className="text-[10px] font-black uppercase text-blue-500 tracking-[0.2em]">{currentNFT.edition} Edition</p>
-                    </div>
-                    <Badge className="bg-blue-600 text-white shadow-lg shadow-blue-500/20 h-8 px-4 font-black tracking-tighter text-lg border-none">
-                      {currentNFT.price} TON
-                    </Badge>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-xl font-black uppercase tracking-tight text-white mb-0.5">Sonic NFT Artifact</h3>
+                    <p className="text-[9px] font-black uppercase text-emerald-400 tracking-wider">{currentNFT.edition} Edition ID</p>
                   </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-white/5 rounded-[4px]">
-                      <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                        <Music className="w-4 h-4 text-blue-500" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[8px] font-black uppercase text-white/30 tracking-widest">Collector / Owner</p>
-                        <p className="text-xs font-bold text-white truncate">{currentNFT.owner === userProfile.walletAddress ? 'You (Owner)' : currentNFT.owner}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-white/5 rounded-[4px]">
-                      <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                        <History className="w-4 h-4 text-purple-500" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[8px] font-black uppercase text-white/30 tracking-widest">Provenance</p>
-                        <p className="text-xs font-bold text-white">{currentNFT.history?.length || 0} Transfers recorded</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {currentNFT.owner !== userProfile.walletAddress && (
-                    <Button 
-                      onClick={() => setShowBuyModal(true)}
-                      className="w-full h-12 bg-blue-600 hover:bg-blue-500 rounded-[4px] text-xs font-black uppercase tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(37,99,235,0.2)] gap-3 border-none"
-                    >
-                      <ShoppingBag className="w-4 h-4" /> Acquire Asset
-                    </Button>
-                  )}
+                  <Badge className="bg-emerald-400 text-black shadow-lg shadow-emerald-400/10 h-8 px-4 font-black tracking-tight text-sm border-none">
+                    {currentNFT.price} TON
+                  </Badge>
                 </div>
 
-                {/* Traits/Details Grid */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-neutral-900/40 rounded-xl">
+                    <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center">
+                      <Music className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[8px] font-black uppercase text-neutral-500 tracking-wider">Blockchain Owner</p>
+                      <p className="text-xs font-bold text-white truncate mt-0.5">{currentNFT.owner === userProfile.walletAddress ? 'You (Collector)' : currentNFT.owner}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 bg-neutral-900/40 rounded-xl">
+                    <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center">
+                      <History className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[8px] font-black uppercase text-neutral-500 tracking-wider">Verification History</p>
+                      <p className="text-xs font-bold text-white mt-0.5">{currentNFT.history?.length || 0} Ledger logs recorded</p>
+                    </div>
+                  </div>
+                </div>
+
+                {currentNFT.owner !== userProfile.walletAddress && (
+                  <Button 
+                    onClick={() => setShowBuyModal(true)}
+                    className="w-full h-12 bg-emerald-400 hover:bg-emerald-300 text-black rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg hover:shadow-emerald-400/10 gap-2.5 border-none cursor-pointer"
+                  >
+                    <ShoppingBag className="w-4 h-4" /> Acquire Web3 Asset
+                  </Button>
+                )}
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
                   {currentNFT.traits?.slice(0, 4).map((trait, i) => (
-                    <div key={i} className="bg-white/5 p-4 rounded-[4px] border-none">
-                      <p className="text-[8px] font-black uppercase tracking-widest text-white/20 mb-1">{trait.trait_type}</p>
-                      <p className="font-black uppercase tracking-tighter text-sm text-white/80">{trait.value}</p>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Purchase History Preview */}
-                <div className="space-y-3 pb-8">
-                  <p className="text-[10px] font-black uppercase text-white/20 tracking-[0.3em] px-1">Blockchain Ledger</p>
-                  {currentNFT.history?.slice(0, 3).map((item, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 rounded-[4px] bg-white/[0.02] border-none">
-                      <div className="flex items-center gap-3">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                        <p className="text-[10px] font-bold text-white/60 uppercase">{item.event}</p>
-                      </div>
-                      <p className="text-[10px] font-black text-white/20">{item.date}</p>
+                    <div key={i} className="bg-neutral-900/40 p-4 rounded-xl">
+                      <p className="text-[8px] font-black uppercase tracking-wider text-neutral-500 mb-0.5">{trait.trait_type}</p>
+                      <p className="font-extrabold uppercase tracking-tight text-xs text-white/90">{trait.value}</p>
                     </div>
                   ))}
                 </div>
@@ -1119,7 +1153,7 @@ const FullPlayer: React.FC = () => {
         </Tabs>
       </div>
 
-      {/* Modals */}
+      {/* Buy Modal trigger */}
       {showBuyModal && currentNFT && (
         <BuyNFTModal 
           nft={currentNFT} 
@@ -1127,64 +1161,74 @@ const FullPlayer: React.FC = () => {
         />
       )}
 
-      {/* Queue Overlay */}
+      {/* Spotify-style Slide-up Queue overlay with zero border lines */}
       <AnimatePresence>
         {showQueue && (
           <motion.div 
             initial={{ opacity: 0, y: '100%' }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
-            className="fixed inset-0 z-[70] bg-[#0B0F14]/95 backdrop-blur-3xl flex flex-col pt-10"
+            transition={{ type: 'spring', damping: 24, stiffness: 180 }}
+            className="fixed inset-0 z-[70] bg-[#121212] flex flex-col pt-8 select-none"
           >
-            <div className="flex items-center justify-between p-6 mb-4">
-              <h3 className="text-2xl font-black uppercase tracking-tight">Transmission Queue</h3>
+            <div className="flex items-center justify-between px-6 pb-4">
+              <div>
+                <h3 className="text-xl font-extrabold text-white tracking-tight">Up Next</h3>
+                <p className="text-[9px] font-black uppercase text-neutral-500 tracking-wider mt-0.5">Awaiting Transmission</p>
+              </div>
               <Button 
                 variant="ghost" 
                 size="icon"
                 onClick={() => setShowQueue(false)}
-                className="rounded-full bg-white/5 text-white/50"
+                className="rounded-full bg-neutral-850 text-neutral-450 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer w-10 h-10"
               >
                 <ChevronDown className="h-6 w-6" />
               </Button>
             </div>
             
-            <ScrollArea className="flex-1 px-6 pb-20">
+            <ScrollArea className="flex-1 px-6 pb-20 no-scrollbar">
               <div className="space-y-6">
-                <div className="p-6 rounded-[4px] bg-blue-500/10 border-none flex items-center gap-4">
-                  <Avatar className="w-16 h-16 rounded-[4px]">
+                <div className="p-4 rounded-xl bg-zinc-900/60 flex items-center gap-4">
+                  <Avatar className="w-12 h-12 rounded-lg">
                     <AvatarImage src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)} />
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="text-lg font-black uppercase text-blue-500 truncate">{currentTrack.title}</p>
-                    <p className="text-xs font-bold text-white uppercase tracking-widest">{currentTrack.artist}</p>
+                    <p className="text-[9px] font-black uppercase tracking-wider text-emerald-400">NOW TRANSMITTING</p>
+                    <p className="text-base font-bold text-white truncate mt-0.5">{currentTrack.title}</p>
+                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest leading-none mt-0.5">{currentTrack.artist}</p>
                   </div>
                 </div>
 
-                <div className="space-y-3 pb-10">
-                  {queue.map((track, i) => (
-                    <motion.div 
-                      key={`${track.id}-${i}`} 
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      onClick={() => { playTrack(track); setShowQueue(false); }}
-                      className="group flex items-center gap-4 p-3 rounded-lg hover:bg-white/10 transition-all cursor-pointer border border-transparent hover:border-white/5"
-                    >
-                      <Avatar className="w-10 h-10 rounded-lg">
-                        <AvatarImage src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="object-cover" />
-                        <AvatarFallback className="rounded-lg bg-white/5">{(track.title || '').slice(0, 1)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-white truncate group-hover:text-blue-400 transition-colors">{track.title}</p>
-                        <p className="text-[10px] font-medium text-white/40 truncate">{track.artist}</p>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-white/20 group-hover:text-white transition-colors">
-                        <Play className="w-3.5 h-3.5 fill-current" />
-                      </Button>
-                    </motion.div>
-                  )
-                )
-              }
+                <div className="space-y-2 pb-10">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-3 px-1">Queued Tracks</p>
+                  {queue.length > 0 ? (
+                    queue.map((track, i) => (
+                      <motion.div 
+                        key={`${track.id}-${i}`} 
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        onClick={() => { playTrack(track); setShowQueue(false); }}
+                        className="group flex items-center gap-4 p-3 rounded-xl hover:bg-zinc-900/60 transition-all cursor-pointer"
+                      >
+                        <Avatar className="w-10 h-10 rounded-lg">
+                          <AvatarImage src={track.coverUrl || getPlaceholderImage(`track-${track.id}`)} className="object-cover" />
+                          <AvatarFallback className="rounded-lg bg-zinc-800">{(track.title || '').slice(0, 1)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-white truncate group-hover:text-emerald-400 transition-colors">{track.title}</p>
+                          <p className="text-[10px] font-medium text-neutral-400 truncate mt-0.5">{track.artist}</p>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-600 group-hover:text-white transition-colors cursor-pointer">
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                        </Button>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="py-12 text-center text-neutral-500 font-bold text-xs uppercase tracking-widest pl-1 select-none">
+                      Queue is empty. Let the standard algorithm guide you.
+                    </div>
+                  )}
                 </div>
               </div>
             </ScrollArea>

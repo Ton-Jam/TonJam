@@ -21,7 +21,6 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ title, subtitle, viewAllL
             <div className="w-1 h-3 bg-primary/40 rounded-full"></div>
             <div className="w-1 h-3 bg-primary/10 rounded-full"></div>
           </div>
-          <span className="text-[9px] font-black uppercase tracking-[0.5em] text-muted-foreground/40 font-mono">Stream_Access_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
         </div>
         <h2 className="text-base sm:text-xl font-black uppercase tracking-tight text-foreground leading-none truncate font-display">{title}</h2>
         {subtitle && <p className="text-[10px] font-bold text-muted-foreground dark:text-white/85 uppercase tracking-[0.2em] max-w-md mt-1.5">{subtitle}</p>}
