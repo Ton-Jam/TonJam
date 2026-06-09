@@ -49,7 +49,7 @@ const MyNFTs: React.FC = () => {
             <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max -mx-5 px-5">
               <TabsTrigger 
                 value="owned" 
-                className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
+                className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground border border-[#C0C0C0]/35 data-[state=active]:border-transparent hover:border-[#C0C0C0]/60 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
               >
                 Collection
                 {userNFTs && userNFTs.length > 0 && (
@@ -60,7 +60,7 @@ const MyNFTs: React.FC = () => {
               </TabsTrigger>
               <TabsTrigger 
                 value="bids" 
-                className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
+                className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground border border-[#C0C0C0]/35 data-[state=active]:border-transparent hover:border-[#C0C0C0]/60 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
               >
                 Bids
                 {userBids && userBids.length > 0 && (

@@ -123,6 +123,7 @@ export interface NFTItem {
   trackId: string;
   title: string;
   owner: string;
+  ownerId?: string;
   creator: string;
   artist?: string;
   artistId?: string;
@@ -552,4 +553,29 @@ export interface Vote {
   choice: 'for' | 'against';
   power: number;
   createdAt: string;
+}
+
+export interface TrackMetadata {
+  track_id: string;
+  title: string;
+  artist: {
+    name: string;
+    id: string;
+  };
+  album?: string;
+  release_year?: number;
+  sonic_attributes: {
+    bpm: number;
+    energy_score: number;
+    valence: number;
+  };
+  taxonomy: {
+    primary_genre: 'Pop' | 'Hip-Hop & Rap' | 'R&B & Soul' | 'Electronic & Dance' | 'Afrobeats & African' | 'Latin' | 'Rock & Alternative' | 'Country & Americana' | 'Jazz & Blues' | 'Classical & Instrumental' | 'Reggae & Dancehall' | 'Global Fusion';
+    subgenres: string[];
+  };
+  semantic_tags: {
+    moods: string[];
+    activities: string[];
+    textures: string[];
+  };
 }

@@ -71,6 +71,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data.createdAt = (data.createdAt as any).toDate().toISOString();
         }
         
+        // Ensure krusherkrupy@gmail.com is admin
+        if (auth.currentUser?.email === 'krusherkrupy@gmail.com' && data.role !== 'admin') {
+          try {
+            await setDoc(docRef, { role: 'admin' }, { merge: true });
+            data.role = 'admin';
+          } catch (writeErr) {
+            console.error("Failed to update admin role for krusherkrupy in Firestore:", writeErr);
+          }
+        }
+        
         // Ensure currently logged in user has a short artist bio if missing
         if (!data.bio || data.bio.trim() === '') {
           const shortBio = "Creating the future of sound. Electronic producer and synth enthusiast.";
@@ -93,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           followers: 0,
           following: 0,
           earnings: 0,
-          role: 'collector',
+          role: auth.currentUser?.email === 'krusherkrupy@gmail.com' ? 'admin' : 'collector',
           bio: "Creating the future of sound. Electronic producer and synth enthusiast.",
           createdAt: new Date().toISOString()
         };

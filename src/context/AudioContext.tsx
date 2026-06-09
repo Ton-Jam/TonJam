@@ -1928,34 +1928,39 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       if (expiredEmptyAuctions.length === 0) return;
 
       for (const nft of expiredEmptyAuctions) {
-        console.log(
-          `Auto-returning NFT ${nft.id} because auction ended without bids.`,
-        );
+        const currentWallet = tonAddress || userProfile?.walletAddress;
+        const isOwnerOfNFT = nft.owner === currentWallet || nft.owner === userProfile?.uid || nft.ownerId === userProfile?.uid || nft.artistId === userProfile?.uid;
+        const isUserAdmin = userProfile?.role === 'admin' || auth.currentUser?.email === 'krusherkrupy@gmail.com';
 
-        // Remove listingType to "return" the NFT to the owner's vault
-        // We use silent=true to avoid multiple notifications if many expire,
-        // but we'll show one specific notification if the current user is the owner
-        await updateNFT(
-          nft.id,
-          {
-            // Use deleteField() for Firestore or null for Local
-            listingType: deleteField() as any,
-            // Clear auction metadata
-            auctionStartTime: deleteField() as any,
-            auctionEndTime: deleteField() as any,
-            auctionEndDate: deleteField() as any,
-            startingBid: deleteField() as any,
-          },
-          true,
-        );
-
-        // Add a notification if the current user is the owner
-        const currentWallet = tonAddress || userProfile.walletAddress;
-        if (nft.owner === currentWallet || nft.owner === userProfile.uid) {
-          addNotification(
-            `Auction for "${nft.title}" ended without bids. Asset returned to your vault.`,
-            "info",
+        if (isOwnerOfNFT || isUserAdmin) {
+          console.log(
+            `Auto-returning NFT ${nft.id} because auction ended without bids.`,
           );
+
+          // Remove listingType to "return" the NFT to the owner's vault
+          // We use silent=true to avoid multiple notifications if many expire,
+          // but we'll show one specific notification if the current user is the owner
+          await updateNFT(
+            nft.id,
+            {
+              // Use deleteField() for Firestore or null for Local
+              listingType: deleteField() as any,
+              // Clear auction metadata
+              auctionStartTime: deleteField() as any,
+              auctionEndTime: deleteField() as any,
+              auctionEndDate: deleteField() as any,
+              startingBid: deleteField() as any,
+            },
+            true,
+          );
+
+          // Add a notification if the current user is the owner
+          if (nft.owner === currentWallet || nft.owner === userProfile?.uid) {
+            addNotification(
+              `Auction for "${nft.title}" ended without bids. Asset returned to your vault.`,
+              "info",
+            );
+          }
         }
       }
     };

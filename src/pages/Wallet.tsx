@@ -13,7 +13,9 @@ import {
   AlertTriangle, 
   Download, 
   RefreshCw,
-  Info
+  Info,
+  Copy,
+  Check
 } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
@@ -55,6 +57,22 @@ const Wallet: React.FC = () => {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isClaimingRoyalty, setIsClaimingRoyalty] = useState(false);
+  const [copiedType, setCopiedType] = useState<'TON' | 'EVM' | null>(null);
+
+  const handleCopyAddress = async (address: string, type: 'TON' | 'EVM' = 'TON') => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopiedType(type);
+      toast.success(`${type} Address Copied`, {
+        description: `${address.substring(0, 12)}...${address.substring(address.length - 12)}`
+      });
+      setTimeout(() => {
+        setCopiedType(null);
+      }, 2000);
+    } catch (err) {
+      toast.error("Failed to copy address");
+    }
+  };
   const [unclaimedRoyalty, setUnclaimedRoyalty] = useState(0);
   const [currencyMode, setCurrencyMode] = useState<'CRYPTO' | 'USD'>('CRYPTO');
   
@@ -279,9 +297,25 @@ const Wallet: React.FC = () => {
             <div className="flex items-center justify-between pt-2">
               <div className="text-left">
                 <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Connection Node</p>
-                <p className="font-mono text-[11px] text-foreground font-semibold mt-0.5">
-                  {userAddress ? `${userAddress.substring(0, 9)}...${userAddress.substring(userAddress.length - 8)}` : 'Offline / Disconnected'}
-                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="font-mono text-[11px] text-foreground font-semibold">
+                    {userAddress ? `${userAddress.substring(0, 9)}...${userAddress.substring(userAddress.length - 8)}` : 'Offline / Disconnected'}
+                  </p>
+                  {userAddress && (
+                    <button
+                      onClick={() => handleCopyAddress(userAddress, 'TON')}
+                      className="p-1 text-muted-foreground hover:text-white hover:bg-white/5 transition-all rounded-[4px] flex items-center justify-center"
+                      title="Copy Address"
+                      id="copy-ton-address-btn"
+                    >
+                      {copiedType === 'TON' ? (
+                        <Check className="h-3 w-3 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
               
               {userAddress ? (
@@ -321,9 +355,25 @@ const Wallet: React.FC = () => {
             <div className="flex items-center justify-between pt-2">
               <div className="text-left">
                 <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Linked EVM Address</p>
-                <p className="font-mono text-[11px] text-foreground font-semibold mt-0.5">
-                  {activeEvmAddress ? `${activeEvmAddress.substring(0, 9)}...${activeEvmAddress.substring(activeEvmAddress.length - 6)}` : 'Offline / Disconnected'}
-                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="font-mono text-[11px] text-foreground font-semibold">
+                    {activeEvmAddress ? `${activeEvmAddress.substring(0, 9)}...${activeEvmAddress.substring(activeEvmAddress.length - 6)}` : 'Offline / Disconnected'}
+                  </p>
+                  {activeEvmAddress && (
+                    <button
+                      onClick={() => handleCopyAddress(activeEvmAddress, 'EVM')}
+                      className="p-1 text-muted-foreground hover:text-white hover:bg-white/5 transition-all rounded-[4px] flex items-center justify-center"
+                      title="Copy Address"
+                      id="copy-evm-address-btn"
+                    >
+                      {copiedType === 'EVM' ? (
+                        <Check className="h-3 w-3 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {activeEvmAddress ? (

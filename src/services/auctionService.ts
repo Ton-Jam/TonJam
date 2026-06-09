@@ -1,10 +1,14 @@
 import { collection, query, where, getDocs, doc, writeBatch, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { auth, db } from '../lib/firebase';
 import { NFTItem, NFTOffer, Transaction } from '../types';
 import { processNFTSaleRoyalty } from './royaltyService';
 
 export const resolveEndedAuctions = async () => {
   try {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return; // Only signed-in users can execute writes
+
+    const isAdmin = currentUser.email === 'krusherkrupy@gmail.com';
     const today = new Date().toISOString();
     // Query for all active auctions
     const nftsRef = collection(db, 'nfts');
@@ -24,6 +28,12 @@ export const resolveEndedAuctions = async () => {
     for (const docSnapshot of snapshot.docs) {
       const nft = { id: docSnapshot.id, ...docSnapshot.data() } as NFTItem;
       
+      // Only resolve if current user is admin or original NFT owner/seller
+      const isOwner = nft.ownerId === currentUser.uid || nft.owner === currentUser.uid || nft.artistId === currentUser.uid;
+      if (!isAdmin && !isOwner) {
+        continue;
+      }
+
       // If it's an auction and the end date is in the past
       if (nft.auctionEndTime && new Date(nft.auctionEndTime).getTime() <= new Date().getTime()) {
         const nftRef = doc(db, 'nfts', nft.id);

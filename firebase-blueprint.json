@@ -14,6 +14,7 @@
         "bio": { "type": "string" },
         "isVerifiedArtist": { "type": "boolean" },
         "verificationStatus": { "type": "string", "enum": ["unverified", "pending", "verified"] },
+        "xp": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "name", "email"]
@@ -331,12 +332,45 @@
         "status": { "type": "string" }
       },
       "required": ["id", "name", "apr", "uptime"]
+    },
+    "DailyMission": {
+      "title": "DailyMission",
+      "description": "Daily engagement task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "xpReward": { "type": "number" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "title", "xpReward", "date"]
+    },
+    "UserMissionProgress": {
+      "title": "UserMissionProgress",
+      "description": "User progress on a daily mission",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "missionId": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "missionId", "completed"]
     }
   },
   "firestore": {
     "/validators/{validatorId}": {
       "schema": "Validator",
       "description": "Staking network validators"
+    },
+    "/dailyMissions/{missionId}": {
+      "schema": "DailyMission",
+      "description": "Daily missions"
+    },
+    "/userMissionProgress/{trackingId}": {
+      "schema": "UserMissionProgress",
+      "description": "User mission completion tracking"
     },
     "/listings/{listingId}": {
       "schema": "Listing",

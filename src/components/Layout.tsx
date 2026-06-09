@@ -357,12 +357,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Header */}
       {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isProfile && !isUserProfile && !isArtistProfile && (
         <motion.header 
-          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md border-b border-blue-500/20' : 'bg-transparent'}`}
+          className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md' : 'bg-transparent'}`}
         >
-          {/* Background with higher blur and subtle border - added conditional styling */}
+          {/* Background with higher blur and subtle silver boundary */}
           <motion.div 
-            className={`absolute inset-0 bg-background -z-10 transition-opacity duration-300 ${isArtistProfile && !isCompact ? 'opacity-0' : 'opacity-100'} border-b border-blue-500/20`}
+            className={`absolute inset-0 bg-background -z-10 transition-opacity duration-300 ${isArtistProfile && !isCompact ? 'opacity-0' : 'opacity-100'}`}
           />
+          <div className="absolute -bottom-[1px] left-0 right-0 h-[1px] bg-gradient-to-r from-zinc-400/20 via-zinc-200/50 to-zinc-400/20" />
           
           <div className={`flex items-center ${headerTitle ? 'justify-center flex-1' : 'gap-4 flex-1'}`}>
             {isHome ? (

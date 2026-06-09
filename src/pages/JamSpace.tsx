@@ -369,11 +369,17 @@ const JamSpace: React.FC = () => {
                       { name: 'Trending', icon: Flame }
                     ].map((filter) => {
                       const Icon = filter.icon;
+                      const isActive = filterType === filter.name;
                       return (
                         <TabsTrigger
                           key={filter.name}
                           value={filter.name}
-                          className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto flex items-center gap-1.5"
+                          className={cn(
+                            "px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer h-auto flex items-center gap-1.5",
+                            isActive 
+                              ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30" 
+                              : "bg-zinc-900/50 text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                          )}
                         >
                           <Icon className="h-3.5 w-3.5" />
                           {filter.name}

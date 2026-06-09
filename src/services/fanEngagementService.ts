@@ -57,6 +57,41 @@ export const createCommunity = async (community: Omit<Community, 'id'>) => {
   return await addDoc(collection(db, 'communities'), community);
 };
 
+export interface DailyMission {
+  id: string;
+  title: string;
+  description: string;
+  xpReward: number;
+  date: string;
+}
+
+export interface UserMissionProgress {
+  userId: string;
+  missionId: string;
+  completed: boolean;
+  completedAt?: any;
+}
+
+export const getDailyMissions = async (date: string) => {
+  const q = query(collection(db, 'dailyMissions'), where('date', '==', date));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DailyMission));
+};
+
+export const getUserMissionProgress = async (userId: string) => {
+  const q = query(collection(db, 'userMissionProgress'), where('userId', '==', userId));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserMissionProgress));
+};
+
+export const completeMission = async (userId: string, missionId: string) => {
+  const trackingId = `${userId}_${missionId}`;
+  return await updateDoc(doc(db, 'userMissionProgress', trackingId), {
+    completed: true,
+    completedAt: serverTimestamp()
+  });
+};
+
 export const subscribeToCommunity = async (userId: string, artistId: string) => {
   return await addDoc(collection(db, 'subscriptions'), {
     userId,

@@ -27,6 +27,7 @@ import SectionHeader from '@/components/SectionHeader';
 import DiscoveryFeed from '@/components/DiscoveryFeed';
 import ArtistSlider from '@/components/ArtistSlider';
 import TrendingBannerCarousel from '@/components/TrendingBannerCarousel';
+import { FanLeaderboard } from '@/components/FanLeaderboard';
 import { SearchCommandDialog } from '@/components/SearchCommandDialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -678,10 +679,10 @@ const Home: React.FC = () => {
               onClick={() => setSelectedGenre(null)}
               className="flex-shrink-0 group relative cursor-pointer"
             >
-              <div className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border-none ${
+              <div className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
                 selectedGenre === null 
-                  ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)]' 
-                  : 'bg-blue-950/20 text-muted-foreground hover:bg-blue-900/40 hover:text-foreground border border-blue-900/10'
+                  ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)] border border-transparent' 
+                  : 'bg-blue-950/20 text-muted-foreground hover:bg-blue-900/40 hover:text-foreground border border-[#C0C0C0]/35 hover:border-[#C0C0C0]/60'
               }`}>
                 ALL_FREQUENCIES
               </div>
@@ -694,10 +695,10 @@ const Home: React.FC = () => {
                   onClick={() => setSelectedGenre(genre.name)}
                   className="flex-shrink-0 group relative cursor-pointer"
                 >
-                  <div className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border-none flex items-center gap-1.5 ${
+                  <div className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${
                     isSelected 
-                      ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)]' 
-                      : 'bg-blue-950/20 text-muted-foreground hover:bg-blue-900/40 hover:text-foreground border border-blue-900/10'
+                      ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)] border border-transparent' 
+                      : 'bg-blue-950/20 text-muted-foreground hover:bg-blue-900/40 hover:text-foreground border border-[#C0C0C0]/35 hover:border-[#C0C0C0]/60'
                   }`}>
                     <genre.icon className="h-3.5 w-3.5" />
                     {genre.name.replace(' ', '_')}
@@ -890,6 +891,11 @@ const Home: React.FC = () => {
             {/* Neural Leaderboard Section */}
             <section className="w-full">
               <Leaderboard artists={artists} limit={5} />
+            </section>
+
+            {/* Global Top Fan Leaderboard */}
+            <section className="w-full">
+              <FanLeaderboard />
             </section>
 
             {/* Trending NFTs Section */}

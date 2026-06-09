@@ -32,6 +32,7 @@ import TrendingNFTCard from '@/components/TrendingNFTCard';
 import TrackCard from '@/components/TrackCard';
 import AlbumCard from '@/components/AlbumCard';
 import ArtistListItem from '@/components/ArtistListItem';
+import TrendingArtistLeaderboard from '@/components/TrendingArtistLeaderboard';
 import SkeletonCard from '@/components/SkeletonCard';
 import SonicSearchSection from '@/components/SonicSearchSection';
 import { FilterSection } from '@/components/FilterSection';
@@ -525,7 +526,7 @@ const Discover: React.FC = () => {
                   <TabsTrigger
                     key={filter}
                     value={filter}
-                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground border-none shrink-0 cursor-pointer h-auto"
+                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground border border-[#C0C0C0]/35 data-[state=active]:border-transparent hover:border-[#C0C0C0]/60 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
                   >
                     {filter}
                   </TabsTrigger>
@@ -677,6 +678,11 @@ const Discover: React.FC = () => {
                   ))}
                 </CarouselContent>
               </Carousel>
+            </section>
+
+            {/* Trending Artist Leaderboard with Sparklines */}
+            <section className="space-y-6">
+              <TrendingArtistLeaderboard limit={5} />
             </section>
 
             {/* AI Dj Krupy Section removed to avoid duplication on Home screen context */}

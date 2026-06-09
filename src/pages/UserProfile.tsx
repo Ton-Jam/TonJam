@@ -29,6 +29,7 @@ import { UserProfile as UserProfileType } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '@/services/storageService';
 import { BadgeSystem } from '@/components/BadgeSystem';
+import { DailyMissions } from '@/components/DailyMissions';
 
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -469,6 +470,11 @@ const UserProfile: React.FC = () => {
             <div className="bg-card p-8 rounded-3xl shadow-sm">
               <BadgeSystem user={user} isOwnProfile={false} />
             </div>
+            {id === userProfile.uid && (
+              <div className="bg-card p-8 rounded-3xl shadow-sm">
+                <DailyMissions />
+              </div>
+            )}
           </div>
         </div>
       </div>

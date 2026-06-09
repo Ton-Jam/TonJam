@@ -68,6 +68,7 @@
     "cmdk": "^1.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "d3": "^7.9.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.3.1",
     "embla-carousel-auto-scroll": "^8.6.0",

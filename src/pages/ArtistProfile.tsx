@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Play, Heart, UserCheck, 
   Edit2, MoreVertical, LayoutGrid, Zap, 
-  MapPin, Ticket, Calendar, ArrowLeft, Verified, ChevronRight, Activity, Award, UserPlus, Gem
+  MapPin, Ticket, Calendar, ArrowLeft, Verified, ChevronRight, Activity, Award, UserPlus, Gem,
+  Twitter, Instagram, Globe, Send, ExternalLink
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import TrackCard from '@/components/TrackCard';
@@ -71,6 +72,10 @@ const ArtistProfile: React.FC = () => {
   const artistPosts = useMemo(() => {
     return allPosts.filter(p => (p.userId === id || p.artistId === id || p.targetId === id) && (!p.isExclusive || isFanClubMember));
   }, [allPosts, id, isFanClubMember]);
+
+  const listedNFTs = useMemo(() => {
+    return artistNFTs.filter(n => n.listingType === 'fixed' || n.listingType === 'auction');
+  }, [artistNFTs]);
 
   const exclusiveTracksList = useMemo(() => {
     if (!isFanClubMember) return [];
@@ -345,6 +350,66 @@ const ArtistProfile: React.FC = () => {
                   </span>
                 </div>
               </div>
+
+              {artist.socials && Object.values(artist.socials).some(Boolean) && (
+                <div className="pt-4 border-t border-white/[0.04] space-y-2">
+                  <span className="text-muted-foreground uppercase tracking-wider font-bold text-[11px] block">Socials & Networks</span>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {artist.socials.x && (
+                      <a 
+                        href={artist.socials.x} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all text-xs font-semibold"
+                        id="artist-social-x"
+                      >
+                        <Twitter className="w-3.5 h-3.5 text-blue-400" />
+                        <span>X.Com</span>
+                        <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                      </a>
+                    )}
+                    {artist.socials.instagram && (
+                      <a 
+                        href={artist.socials.instagram} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all text-xs font-semibold"
+                        id="artist-social-instagram"
+                      >
+                        <Instagram className="w-3.5 h-3.5 text-pink-500" />
+                        <span>Instagram</span>
+                        <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                      </a>
+                    )}
+                    {artist.socials.telegram && (
+                      <a 
+                        href={artist.socials.telegram} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all text-xs font-semibold"
+                        id="artist-social-telegram"
+                      >
+                        <Send className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Telegram</span>
+                        <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                      </a>
+                    )}
+                    {artist.socials.website && (
+                      <a 
+                        href={artist.socials.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all text-xs font-semibold"
+                        id="artist-social-website"
+                      >
+                        <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Website</span>
+                        <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Direct Support via Crypto block */}
@@ -496,13 +561,38 @@ const ArtistProfile: React.FC = () => {
             </TabsContent>
 
             {/* NFTS */}
-            <TabsContent value="nfts" className="m-0 focus-visible:outline-none">
-              <div className="space-y-8 animate-in fade-in">
-                <h3 className="text-2xl font-bold tracking-tight mb-6">Minted Items</h3>
+            <TabsContent value="nfts" className="m-0 focus-visible:outline-none space-y-12">
+              {/* Active Market Listings (Buy / Bid CTAs active) */}
+              <div className="space-y-6 animate-in fade-in" id="active-market-listings-section">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-2xl font-bold tracking-tight">Active Market Listings</h3>
+                  <p className="text-xs text-muted-foreground">Digital collectibles open for direct purchase or active auction bidding.</p>
+                </div>
+                
+                {listedNFTs.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {listedNFTs.map(nft => (
+                      <NFTCard key={`listed-${nft.id}`} nft={nft} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="col-span-full border border-dashed border-white/5 rounded-2xl p-8 text-center bg-white/[0.01]">
+                    <p className="text-muted-foreground text-sm">No active listings or live auctions for this artist at the moment.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* All Curated Creations */}
+              <div className="space-y-6 pt-6 border-t border-white/[0.04]" id="all-created-artifacts-section">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-xl font-bold tracking-tight font-sans">All Curated Creations</h3>
+                  <p className="text-xs text-muted-foreground">The complete decentralized catalog of minted creative artifacts.</p>
+                </div>
+                
                 {artistNFTs.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {artistNFTs.map(nft => (
-                      <NFTCard key={nft.id} nft={nft} />
+                      <NFTCard key={`created-${nft.id}`} nft={nft} />
                     ))}
                   </div>
                 ) : (

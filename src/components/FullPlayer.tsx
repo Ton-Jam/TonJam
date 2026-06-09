@@ -175,7 +175,7 @@ const FullPlayer: React.FC = () => {
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy'>('player');
   const [visualizerVariant, setVisualizerVariant] = useState<'bars' | 'circle' | 'particles' | 'waves'>('bars');
   const [showQueue, setShowQueue] = useState(false);
-  const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl'>('spotify');
+  const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl' | 'visualizer'>('spotify');
   
   // Dynamic color based on mood and variant
   const visualizerColor = useMemo(() => {
@@ -419,7 +419,7 @@ const FullPlayer: React.FC = () => {
               {/* Cover Art Stage - Centered on Mobile, beautiful layout with interactive Toggle */}
               <div className="relative flex-1 flex flex-col items-center justify-center md:col-span-5 py-2 select-none">
                 
-                {/* Artwork Mode Switcher (Spotify-standard vs Spinning Disc) - Borderless Pill */}
+                {/* Artwork Mode Switcher (Spotify-standard vs Spinning Disc vs Visualizer) - Borderless Pill */}
                 <div className="mb-4 bg-zinc-900/60 p-1 rounded-full flex gap-1 shadow-inner relative z-20">
                   <button 
                     onClick={() => setArtworkStyle('spotify')}
@@ -439,10 +439,19 @@ const FullPlayer: React.FC = () => {
                   >
                     Vinyl Disc
                   </button>
+                  <button 
+                    onClick={() => setArtworkStyle('visualizer')}
+                    className={cn(
+                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer",
+                      artworkStyle === 'visualizer' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
+                    )}
+                  >
+                    Visualizer
+                  </button>
                 </div>
 
                 <AnimatePresence mode="wait">
-                  {artworkStyle === 'spotify' ? (
+                  {artworkStyle === 'spotify' && (
                     /* Spotify Immersive High-Res Cover art with soft mood backglow */
                     <motion.div
                       key="spotify-art"
@@ -482,7 +491,9 @@ const FullPlayer: React.FC = () => {
                         </div>
                       </div>
                     </motion.div>
-                  ) : (
+                  )}
+
+                  {artworkStyle === 'vinyl' && (
                     /* Vinyl mode - Spinning disk overlay */
                     <motion.div
                       key="vinyl-art"
@@ -548,6 +559,59 @@ const FullPlayer: React.FC = () => {
                             <div className="w-[10px] h-[10px] rounded-full bg-neutral-950/95" />
                           </div>
                         </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {artworkStyle === 'visualizer' && (
+                    /* Real-time Visualizer component with quick-variant selectors at the bottom */
+                    <motion.div
+                      key="visualizer-art"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                      className="relative w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] flex flex-col items-center justify-center rounded-2xl overflow-hidden bg-black/40 backdrop-blur-sm shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none px-4 py-8 group"
+                    >
+                      {/* Interactive Aura reflection breathing with audio track mood */}
+                      <div
+                        className="absolute inset-0 rounded-2xl transition-all duration-1000 scale-[1.03] pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle, ${visualizerColor}30 0%, transparent 70%)`,
+                          filter: 'blur(35px)',
+                          opacity: isPlaying ? 0.85 : 0.4
+                        }}
+                      />
+
+                      {/* Interactive visualizer area */}
+                      <div className="absolute inset-x-0 top-0 bottom-12 overflow-hidden flex items-center justify-center p-3">
+                        <DynamicVisualizer
+                          variant={visualizerVariant}
+                          color={visualizerColor}
+                          interactive={true}
+                          className="w-full h-full"
+                        />
+                      </div>
+
+                      {/* Variant pill selectors */}
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 bg-zinc-900/80 backdrop-blur-xl p-1 rounded-full shadow-lg z-10">
+                        {(['bars', 'circle', 'waves', 'particles'] as const).map((v) => (
+                          <button
+                            key={v}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setVisualizerVariant(v);
+                            }}
+                            className={cn(
+                              "text-[8px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full transition-all cursor-pointer leading-none",
+                              visualizerVariant === v 
+                                ? "bg-white text-black shadow-sm" 
+                                : "text-neutral-400 hover:text-white"
+                            )}
+                          >
+                            {v}
+                          </button>
+                        ))}
                       </div>
                     </motion.div>
                   )}

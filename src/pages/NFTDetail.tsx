@@ -31,6 +31,9 @@ import {
   Send,
   Coins,
   TrendingUp,
+  TrendingDown,
+  Bell,
+  BellOff,
   Activity,
   Award,
   ArrowUpDown,
@@ -85,6 +88,7 @@ import BidModal from "@/components/BidModal";
 import PlaceOfferModal from "@/components/PlaceOfferModal";
 import BidAcceptanceModal from "@/components/BidAcceptanceModal";
 import ManageNFTModal from "@/components/ManageNFTModal";
+import ShareNFTDialog from "@/components/ShareNFTDialog";
 import NFTCard from "@/components/NFTCard";
 import SendNFTModal from "@/components/SendNFTModal";
 import ConfirmationModal from "@/components/ConfirmationModal";
@@ -133,6 +137,7 @@ const NFTDetail: React.FC = () => {
   const [showBidModal, setShowBidModal] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const isOwner = useMemo(() => {
@@ -160,6 +165,136 @@ const NFTDetail: React.FC = () => {
   const [offerToDecline, setOfferToDecline] = useState<string | null>(null);
   const [offerToAccept, setOfferToAccept] = useState<NFTOffer | null>(null);
   const [isCancelBidConfirmOpen, setIsCancelBidConfirmOpen] = useState(false);
+
+  /* Price Alert System - Simulated on LocalStorage */
+  const [priceAlertEnabled, setPriceAlertEnabled] = useState(false);
+  const [priceAlertPercent, setPriceAlertPercent] = useState<number>(10);
+
+  useEffect(() => {
+    if (localNft) {
+      const alertsData = localStorage.getItem(`nft_price_alerts_${userProfile?.uid || 'guest'}`);
+      if (alertsData) {
+        try {
+          const alerts = JSON.parse(alertsData);
+          const alertForThisNFT = alerts[localNft.id];
+          if (alertForThisNFT) {
+            setPriceAlertEnabled(alertForThisNFT.enabled || false);
+            setPriceAlertPercent(alertForThisNFT.thresholdPercent || 10);
+          } else {
+            setPriceAlertEnabled(false);
+            setPriceAlertPercent(10);
+          }
+        } catch (err) {
+          console.error("Error loading price alert state", err);
+        }
+      } else {
+        setPriceAlertEnabled(false);
+        setPriceAlertPercent(10);
+      }
+    }
+  }, [localNft?.id, userProfile]);
+
+  const handleTogglePriceAlert = () => {
+    if (!localNft) return;
+    const newValue = !priceAlertEnabled;
+    setPriceAlertEnabled(newValue);
+
+    const key = `nft_price_alerts_${userProfile?.uid || 'guest'}`;
+    const alertsData = localStorage.getItem(key);
+    let alerts: Record<string, any> = {};
+    if (alertsData) {
+      try {
+        alerts = JSON.parse(alertsData);
+      } catch (err) {
+        alerts = {};
+      }
+    }
+
+    if (newValue) {
+      alerts[localNft.id] = {
+        enabled: true,
+        thresholdPercent: priceAlertPercent,
+        initialPrice: parseFloat(localNft.price) || 0
+      };
+      import('sonner').then(({ toast }) => {
+        toast.success("Price Alert Configured", {
+          description: `You will be notified when ${localNft.title} drops by ${priceAlertPercent}%.`
+        });
+      });
+    } else {
+      delete alerts[localNft.id];
+      import('sonner').then(({ toast }) => {
+        toast.info("Price Alert Cleared", {
+          description: `Unsubscribed from price updates for ${localNft.title}.`
+        });
+      });
+    }
+
+    localStorage.setItem(key, JSON.stringify(alerts));
+  };
+
+  const handlePercentChange = (percent: number) => {
+    setPriceAlertPercent(percent);
+    if (!localNft) return;
+    
+    const key = `nft_price_alerts_${userProfile?.uid || 'guest'}`;
+    const alertsData = localStorage.getItem(key);
+    let alerts: Record<string, any> = {};
+    if (alertsData) {
+      try {
+        alerts = JSON.parse(alertsData);
+      } catch (err) {
+        alerts = {};
+      }
+    }
+    
+    if (priceAlertEnabled) {
+      alerts[localNft.id] = {
+        enabled: true,
+        thresholdPercent: percent,
+        initialPrice: parseFloat(localNft.price) || 0
+      };
+      localStorage.setItem(key, JSON.stringify(alerts));
+      import('sonner').then(({ toast }) => {
+        toast.success(`Alert Delta Updated: ${percent}%`, {
+          description: `Notifications will trigger if the floor price decreases by ${percent}%.`
+        });
+      });
+    }
+  };
+
+  const handleSimulateDrop = () => {
+    if (!localNft) return;
+    const currentPrice = parseFloat(localNft.price) || 1.0;
+    const dropAmount = (currentPrice * priceAlertPercent) / 100;
+    const newPrice = (currentPrice - dropAmount).toFixed(2);
+
+    addNotification(
+      `Price Alert: ${localNft.title}'s valuation node recorded a ${priceAlertPercent}% drop down to ${newPrice} TON.`,
+      "warning"
+    );
+
+    import('sonner').then(({ toast }) => {
+      toast.custom((t) => (
+        <div className="flex bg-[#030712]/95 backdrop-blur-md rounded-[4px] p-4 shadow-2xl items-center gap-3">
+          <div className="bg-rose-500/10 p-2 rounded-full flex items-center justify-center text-rose-400">
+            <TrendingDown className="h-5 w-5 animate-pulse" />
+          </div>
+          <div className="flex flex-col text-left">
+            <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1.5">
+              Price Alert Triggered
+            </p>
+            <p className="text-[11px] text-white font-bold uppercase tracking-tight mt-0.5">
+              {localNft.title} dropped by {priceAlertPercent}%!
+            </p>
+            <p className="text-[9px] font-mono text-zinc-400 mt-1">
+              Initial: <span className="line-through">{currentPrice} TON</span> → New: <span className="text-emerald-400 font-bold font-mono">{newPrice} TON</span>
+            </p>
+          </div>
+        </div>
+      ), { duration: 5000 });
+    });
+  };
 
   const loadMetadata = () => {
     if (localNft?.contractAddress) {
@@ -515,38 +650,8 @@ const NFTDetail: React.FC = () => {
     }, 1500);
   };
 
-  const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/nft/${localNft.id}`;
-    const shareData = {
-      title: `${localNft.title} by ${localNft.creator}`,
-      text: `Check out this NFT on TonJam: ${localNft.title}`,
-      url: shareUrl,
-    };
-
-    try {
-      if (
-        navigator.share &&
-        navigator.canShare &&
-        navigator.canShare(shareData)
-      ) {
-        await navigator.share(shareData);
-        addNotification("Shared successfully!", "success");
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        addNotification("Link copied to clipboard!", "success");
-      }
-    } catch (err: any) {
-      // Don't log or show an error if the user just cancelled the share dialog
-      const isCancel =
-        err.name === "AbortError" ||
-        err.message?.toLowerCase().includes("canceled") ||
-        err.message?.toLowerCase().includes("aborted");
-
-      if (!isCancel) {
-        console.error("Error sharing:", err);
-        addNotification("Failed to share.", "error");
-      }
-    }
+  const handleShare = () => {
+    setShowShareModal(true);
   };
 
   return (
@@ -1196,6 +1301,87 @@ const NFTDetail: React.FC = () => {
                   </div>
                 )}
               </AnimatePresence>
+
+              {/* Price Alert Control panel - Styled premium, no border lines */}
+              <div id="price-alert-panel" className="mt-6 pt-5 bg-white/[0.02] rounded-[4px] p-4 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "p-2 rounded-full flex items-center justify-center transition-all duration-300",
+                      priceAlertEnabled ? "bg-blue-500/10 text-blue-400" : "bg-white/5 text-muted-foreground/40"
+                    )}>
+                      {priceAlertEnabled ? (
+                        <Bell className="h-4 w-4" />
+                      ) : (
+                        <BellOff className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-white uppercase tracking-[0.25em]">
+                        Price Alert Protocol
+                      </h4>
+                      <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-0.5">
+                        Monitor floor drops & receive instant push signals
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {priceAlertEnabled && (
+                      <button
+                        onClick={handleSimulateDrop}
+                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-[4px] font-bold text-[8px] uppercase tracking-widest transition-all cursor-pointer flex items-center gap-1"
+                        id="simulate-drop-btn"
+                        title="Simulate a sudden floor drop to test your alerts"
+                      >
+                        <TrendingDown className="h-3 w-3" /> Simulate Drop
+                      </button>
+                    )}
+                    
+                    <button
+                      onClick={handleTogglePriceAlert}
+                      className={cn(
+                        "px-4 py-1.5 rounded-[4px] font-black text-[9px] uppercase tracking-widest transition-all cursor-pointer focus:outline-none",
+                        priceAlertEnabled 
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500" 
+                          : "bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-white"
+                      )}
+                      id="price-alert-toggle-btn"
+                    >
+                      {priceAlertEnabled ? "Active Alert" : "Enable Alert"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Drop Percentage Selector */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 items-center">
+                  <div className="flex flex-col">
+                    <span className="text-[7.5px] font-black text-muted-foreground uppercase tracking-[0.3em]">
+                      Trigger Delta
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-400 mt-0.5">
+                      Notify me when floor drops by {priceAlertPercent}% or more.
+                    </span>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1.5 justify-start sm:justify-end">
+                    {[5, 10, 15, 25, 40].map((percent) => (
+                      <button
+                        key={percent}
+                        onClick={() => handlePercentChange(percent)}
+                        className={cn(
+                          "px-2.5 py-1 text-[9px] font-mono font-bold rounded-[3px] transition-all cursor-pointer focus:outline-none",
+                           priceAlertPercent === percent
+                            ? "bg-blue-600 text-white font-black"
+                            : "bg-white/5 text-muted-foreground hover:text-white hover:bg-white/8"
+                        )}
+                      >
+                        {percent}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* AI Lore / Origin Narrative - Removed */}
@@ -1874,6 +2060,14 @@ const NFTDetail: React.FC = () => {
           offer={selectedOffer}
           onClose={() => setSelectedOffer(null)}
           onAccept={onConfirmAcceptance}
+        />
+      )}
+
+      {showShareModal && localNft && (
+        <ShareNFTDialog
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          nft={localNft}
         />
       )}
 

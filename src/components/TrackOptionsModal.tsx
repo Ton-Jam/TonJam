@@ -118,7 +118,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
       <DrawerContent className="bg-background border-none shadow-[0_-12px_40px_rgba(0,0,0,0.8)] rounded-t-3xl">
         <div className="mx-auto w-full max-w-md relative z-10 px-4 pb-12">
           <div className="flex justify-center pt-2 pb-1">
-            <div className="w-12 h-1 rounded-full bg-white/10" />
+            <div className="w-12 h-1 rounded-full bg-blue-500/20 dark:bg-white/10" />
           </div>
 
           <DrawerHeader className="pb-6 pt-4 flex flex-row items-center gap-4 text-left">
@@ -156,7 +156,7 @@ const TrackOptionsModal: React.FC<TrackOptionsModalProps> = ({ track, onClose, o
               <button
                 key={option.id}
                 onClick={option.action}
-                className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 active:bg-white/10 transition-colors text-left group focus-visible:outline-none"
+                className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-500/5 active:bg-blue-500/10 dark:hover:bg-white/5 dark:active:bg-white/10 transition-colors text-left group focus-visible:outline-none"
               >
                 <div className="flex items-center gap-3">
                   <option.icon className={cn("h-5 w-5", option.iconColor)} />
