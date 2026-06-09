@@ -4,6 +4,7 @@ import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS } from '@/constants';
 import { NFTItem } from '@/types';
 import { ShoppingCart } from 'lucide-react';
+import { LazyImage } from '@/components/aicanvas/LazyImage';
 
 interface TrendingNFTCardProps {
   nft: NFTItem;
@@ -53,11 +54,13 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
       </div>
       
       {/* Content */}
-      <img 
-        src={nft.imageUrl || 'https://via.placeholder.com/150'} 
-        alt={nft.title} 
-        className="w-24 h-24 object-cover rounded-[4px] mt-4 mb-2 shadow-lg" 
-      />
+      <div className="w-24 h-24 rounded-[4px] mt-4 mb-2 shadow-lg overflow-hidden flex-shrink-0">
+        <LazyImage 
+          src={nft.imageUrl || 'https://via.placeholder.com/150'} 
+          alt={nft.title} 
+          className="w-full h-full object-cover rounded-[4px]" 
+        />
+      </div>
       
       <div className="text-center px-1 flex-grow">
         <h4 className="text-white font-semibold text-[10px] truncate max-w-[120px]">{nft.title}</h4>

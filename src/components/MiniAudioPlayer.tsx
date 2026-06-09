@@ -27,14 +27,7 @@ import { getPlaceholderImage, cn, shareContent } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Tooltip,
   TooltipContent,
@@ -153,42 +146,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     }
   };
 
-  const PlayerMenuContent = () => (
-    <>
-      <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Neural Output</DropdownMenuLabel>
-      <DropdownMenuSeparator className="bg-white/5" />
-      <DropdownMenuItem onClick={handleToggleLike} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-        <Heart className={cn("h-4 w-4", isLiked && "fill-current text-red-500")} />
-        <span className="text-[10px] font-black uppercase tracking-widest">{isLiked ? "Unlike Track" : "Like Track"}</span>
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={handleAddToQueue} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-        <ListMusic className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Add to Queue</span>
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={handleAddToPlaylist} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-        <Plus className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Add to Playlist</span>
-      </DropdownMenuItem>
-      <DropdownMenuSeparator className="bg-white/5" />
-      <DropdownMenuItem onClick={() => navigate(`/artist/${currentTrack.artistId}`)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-        <User className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">View Artist</span>
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => navigate(`/track/${currentTrack.id}`)} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-        <Info className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Track Intelligence</span>
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => navigate('/mint', { state: { track: currentTrack } })} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-        <Gem className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Mint as NFT</span>
-      </DropdownMenuItem>
-      <DropdownMenuSeparator className="bg-white/5" />
-      <DropdownMenuItem onClick={handleShare} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
-        <Share2 className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-widest">Share Signal</span>
-      </DropdownMenuItem>
-    </>
-  );
+
 
   return (
     <motion.div
@@ -422,18 +380,12 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           </Tooltip>
 
           {/* Dropdown Options */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button 
-                className="h-8 w-8 flex items-center justify-center rounded-[4px] text-zinc-400 hover:text-white hover:bg-white/5 outline-none transition-colors"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-zinc-950/95 border border-white/10 backdrop-blur-md rounded-[4px]">
-              <PlayerMenuContent />
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <button 
+            onClick={handleOptionsClick}
+            className="h-8 w-8 flex items-center justify-center rounded-[4px] text-zinc-400 hover:text-white hover:bg-white/5 outline-none transition-colors"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </button>
 
           {/* Discard Player Toggle */}
           <Button 

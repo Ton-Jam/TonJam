@@ -6,6 +6,7 @@ import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { cn, getPlaceholderImage, shareContent } from '@/lib/utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { LazyImage } from '@/components/aicanvas/LazyImage';
 import NFTQuickViewModal from './NFTQuickViewModal';
 import SendNFTModal from './SendNFTModal';
 import SellNFTModal from './SellNFTModal';
@@ -300,7 +301,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           aria-label={`View NFT ${nft.title}`}
         >
             <div className="relative w-12 h-12 rounded-[4px] overflow-hidden flex-shrink-0 bg-neutral-900 shadow-sm border border-white/5">
-              <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} alt={nft.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <LazyImage src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)} alt={nft.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               {rarity && (
                 <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-r ${getRarityColor(rarity)} h-1`}></div>
               )}
@@ -388,9 +389,8 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           >
             {/* Image Container - 1:1 Aspect Ratio with NFT Gradient Border */}
             <div className="relative aspect-square overflow-hidden bg-neutral-900 transition-all rounded-[4px] mb-2 border border-white/5">
-              <img
+              <LazyImage
                 src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
-                loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 alt={nft.title}
                 onError={(e) => { e.currentTarget.src = getPlaceholderImage(`nft-${nft.id}`); }}

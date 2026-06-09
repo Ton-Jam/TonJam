@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { motion, type PanInfo } from 'motion/react'
+import { LazyImage } from './LazyImage'
 
 export interface CoverflowItem {
   id: string | number
@@ -220,10 +221,9 @@ export default function TiltedCoverflow({
                   ease: 'easeInOut',
                 }}
               >
-                <img
+                <LazyImage
                   src={item.imageUrl}
                   alt={item.title}
-                  loading="lazy"
                   draggable={false}
                   className="absolute inset-0 h-full w-full object-cover"
                 />

@@ -737,32 +737,38 @@ const Home: React.FC = () => {
             </AnimatePresence>
 
             {/* Trending NFTs Section */}
-            <section className="section-container">
+            <section className="mb-6 sm:mb-12 w-full">
               <SectionHeader 
                 title="Trending NFTs" 
                 viewAllLink="/marketplace" 
               />
-              <div className="-mx-4 sm:mx-0">
+              <div className="-mx-4 md:-mx-8 lg:-mx-12">
                 <TiltedCoverflow items={nftCoverflowItems} />
               </div>
             </section>
 
             {/* Edge-to-Edge Token Forge Section */}
-            <section className="relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black p-6 sm:p-8 hover:bg-zinc-50 dark:hover:bg-zinc-950/20 transition-all shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-6">
+            <section className="relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-[#09132e] dark:bg-[#09132e] p-6 sm:p-8 transition-all flex flex-col xl:flex-row items-center justify-between gap-6 border-none">
               {/* Background Glow */}
               <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-500/10 blur-[100px] pointer-events-none rounded-full" />
               <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/10 blur-[100px] pointer-events-none rounded-full" />
 
               <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-center lg:items-start gap-4 text-center lg:text-left">
-                <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Zap className="h-8 w-8 text-blue-400 animate-pulse" />
+                <div className="w-24 h-24 flex items-center justify-center flex-shrink-0">
+                  <motion.img 
+                    src={TJ_COIN_ICON} 
+                    alt="TJ Coin" 
+                    className="w-20 h-20 object-contain pointer-events-none drop-shadow-[0_0_12px_rgba(59,130,246,0.3)]" 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center justify-center lg:justify-start gap-2">
-                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-foreground">Token Forge</h2>
-                    <Badge variant="outline" className="bg-blue-500/15 text-blue-400 border-none px-2 py-0.5 text-[8px] tracking-[0.2em] font-black rounded-full uppercase">TJ_GEN_V2</Badge>
+                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">Token Forge</h2>
                   </div>
-                  <p className="text-muted-foreground font-medium text-xs sm:text-sm max-w-xl leading-relaxed">
+                  <p className="text-blue-100/70 font-medium text-xs sm:text-sm max-w-xl leading-relaxed">
                     Instantly forge TON into JAM tokens. Participate in decentralized staking, access premium creator contracts, and acquire exclusive limited audio NFTs.
                   </p>
                 </div>
@@ -771,33 +777,33 @@ const Home: React.FC = () => {
               {/* Balances and Rate Block */}
               <div className="relative z-10 flex flex-col sm:flex-row items-stretch gap-4 w-full xl:w-auto">
                 {/* Rate conversion display */}
-                <div className="bg-zinc-100 dark:bg-zinc-900/50 px-4 py-3 rounded-2xl flex items-center justify-between gap-6 min-w-full sm:min-w-[180px]">
+                <div className="bg-[#060c1f]/80 dark:bg-[#060c1f]/80 px-4 py-3 rounded-2xl flex items-center justify-between gap-6 min-w-full sm:min-w-[180px] border-none">
                   <div className="flex items-center gap-2">
                     <img src={TON_LOGO} alt="TON" className="w-5 h-5 object-contain" />
                     <div>
-                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Rate</p>
-                      <p className="text-xs font-black text-foreground">1 TON</p>
+                      <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Rate</p>
+                      <p className="text-xs font-black text-white">1 TON</p>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-blue-500/40" />
                   <div className="flex items-center gap-2">
                     <img src={TJ_COIN_ICON} alt="JAM" className="w-5 h-5 object-contain" />
                     <div>
-                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Yield</p>
+                      <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Yield</p>
                       <p className="text-xs font-black text-blue-400">100 JAM</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Balances */}
-                <div className="bg-zinc-100 dark:bg-zinc-900/50 px-5 py-3 rounded-2xl flex items-center justify-around gap-6 min-w-full sm:min-w-[200px]">
+                <div className="bg-[#060c1f]/80 dark:bg-[#060c1f]/80 px-5 py-3 rounded-2xl flex items-center justify-around gap-6 min-w-full sm:min-w-[200px] border-none">
                   <div className="text-center sm:text-left">
-                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">TON Balance</span>
-                    <span className="text-sm font-black text-foreground">{userProfile.tonBalance?.toFixed(2) || '0.00'} TON</span>
+                    <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest block">TON Balance</span>
+                    <span className="text-sm font-black text-white">{userProfile.tonBalance?.toFixed(2) || '0.00'} TON</span>
                   </div>
-                  <div className="h-8 w-px bg-zinc-200 dark:bg-white/5" />
+                  <div className="h-8 w-px bg-white/5" />
                   <div className="text-center sm:text-left">
-                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">JAM Balance</span>
+                    <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest block">JAM Balance</span>
                     <span className="text-sm font-black text-blue-400">{userProfile.jamBalance || '0'} JAM</span>
                   </div>
                 </div>
@@ -805,7 +811,7 @@ const Home: React.FC = () => {
                 {/* Forge Button */}
                 <button
                   onClick={() => setIsBuyTJModalOpen(true)}
-                  className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest rounded-2xl text-xs active:scale-95 transition-all shadow-lg hover:shadow-blue-500/20 min-w-full sm:min-w-[150px] cursor-pointer"
+                  className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest rounded-2xl text-xs active:scale-95 transition-all shadow-lg hover:shadow-blue-500/20 min-w-full sm:min-w-[150px] cursor-pointer border-none"
                 >
                   Forge JAM Now
                 </button>

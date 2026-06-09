@@ -247,6 +247,46 @@
   html {
     @apply font-sans;
   }
+
+  /* Force navy blue background globally on all components in dark mode */
+  .dark {
+    background-color: #060c1f !important;
+  }
+  .dark body,
+  .dark .bg-background {
+    background-color: #060c1f !important;
+  }
+  .dark .bg-zinc-950,
+  .dark .bg-zinc-900,
+  .dark .bg-black,
+  .dark .bg-zinc-950\/60,
+  .dark .bg-zinc-950\/80,
+  .dark .bg-[rgba\(0,0,0,0.5\)],
+  .dark .bg-[rgba\(0,0,0,0.3\)],
+  .dark .bg-zinc-900\/50 {
+    background-color: #060c1f !important;
+  }
+  .dark .bg-card,
+  .dark .bg-secondary,
+  .dark .bg-zinc-800,
+  .dark .bg-accent,
+  .dark .bg-slate-900,
+  .dark .bg-zinc-900\/40,
+  .dark .bg-zinc-900\/60 {
+    background-color: #09132e !important;
+  }
+
+  /* Flat, subtle borders, with no active border lines */
+  .dark .border,
+  .dark .border-t,
+  .dark .border-b,
+  .dark .border-l,
+  .dark .border-r,
+  .dark .border-border,
+  .dark .border-white\/10,
+  .dark .border-white\/5 {
+    border-color: rgba(59, 130, 246, 0.05) !important;
+  }
 }
 
 @keyframes bid-pulse {
