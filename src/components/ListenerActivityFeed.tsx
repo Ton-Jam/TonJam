@@ -63,6 +63,20 @@ const COMMENT_POOL = [
   'Beautiful atmospheric arrangement.'
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: -15, scale: 0.98 },
+  visible: { opacity: 1, y: 0, scale: 1 }
+};
+
 export default function ListenerActivityFeed({ tracks }: ListenerActivityFeedProps) {
   const { playTrack, currentTrack, isPlaying, addNotification } = useAudio();
   const [activeFilter, setActiveFilter] = useState<'all' | 'streams' | 'likes' | 'engagements'>('all');
@@ -331,14 +345,18 @@ export default function ListenerActivityFeed({ tracks }: ListenerActivityFeedPro
       </div>
 
       {/* Activities Container */}
-      <div className="max-h-[300px] overflow-y-auto no-scrollbar space-y-2 pr-1">
-        <AnimatePresence initial={false}>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-h-[300px] overflow-y-auto no-scrollbar space-y-2 pr-1"
+      >
+        <AnimatePresence>
           {filteredActivities.length > 0 ? (
             filteredActivities.map((act) => (
               <motion.div
                 key={act.id}
-                initial={{ opacity: 0, y: -15, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                variants={itemVariants}
                 exit={{ opacity: 0, scale: 0.95 }}
                 className={`flex flex-col p-3 bg-black/30 border rounded-2xl transition-all ${getStyleTheme(act.type)}`}
               >
@@ -477,7 +495,7 @@ export default function ListenerActivityFeed({ tracks }: ListenerActivityFeedPro
             </div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </div>
   );
 }

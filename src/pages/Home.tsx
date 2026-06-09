@@ -42,6 +42,14 @@ import { useAudio } from '@/context/AudioContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { generateAIPlaylist, GenerateAIPlaylistResult } from '@/services/aiPlaylistService';
 import { Loader2, Brain, Sparkle } from 'lucide-react';
+import {
+  Carousel as MissionCarousel,
+  CarouselContent as MissionCarouselContent,
+  CarouselItem as MissionCarouselItem,
+  CarouselNext as MissionCarouselNext,
+  CarouselPrevious as MissionCarouselPrevious,
+} from '@/components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 const HomeSection = ({ title, icon: Icon, link, children }: { title: string, icon: React.ElementType, link?: string, children: React.ReactNode }) => {
   return (
@@ -144,22 +152,7 @@ const Home: React.FC = () => {
     claimTaskReward: globalClaimTaskReward
   } = useAudio();
   
-  const carouselItems = useMemo(() => {
-    const approvedSponsorships = sponsoredPosts
-      .filter(post => post.status === 'approved')
-      .map(post => ({
-        id: post.id,
-        title: post.title,
-        subtitle: post.artistName,
-        imageUrl: post.imageUrl,
-        link: post.link,
-        cta: post.type === 'track' ? 'Play' : 'View'
-      }));
-
-    // Combine with default featured tracks, ensuring uniqueness if needed (though IDs might differ)
-    return [...approvedSponsorships, ...FEATURED_TRACKS_CAROUSEL];
-  }, [sponsoredPosts]);
-
+  
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'discovery'>('overview');
   const [showWelcome, setShowWelcome] = useState(false);
@@ -172,6 +165,18 @@ const Home: React.FC = () => {
   const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const missionAutoplayRef = useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true })
+  );
+
+  const combinedMissions = useMemo(() => {
+    const aiTask = globalTasks.find(t => t.id === '11');
+    const list = [...tasks];
+    if (aiTask && !list.some(t => t.id === aiTask.id)) {
+      list.unshift(aiTask);
+    }
+    return list;
+  }, [tasks, globalTasks]);
 
   const handleGenerateAIPlaylist = async () => {
     setIsGeneratingAI(true);
@@ -731,20 +736,16 @@ const Home: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Featured Sponsored Posts Carousel */}
-            <div className="space-y-4">
-              <SectionHeader title="Featured" viewAllLink="/explore" />
+            {/* Trending NFTs Section */}
+            <section className="section-container">
+              <SectionHeader 
+                title="Trending NFTs" 
+                viewAllLink="/marketplace" 
+              />
               <div className="-mx-4 sm:mx-0">
-                <TrendingBannerCarousel 
-                  banners={carouselItems.map(item => ({
-                    id: item.id,
-                    title: item.title,
-                    image: item.imageUrl,
-                    link: item.link
-                  }))} 
-                />
+                <TiltedCoverflow items={nftCoverflowItems} />
               </div>
-            </div>
+            </section>
 
             {/* Edge-to-Edge Token Forge Section */}
             <section className="relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black p-6 sm:p-8 hover:bg-zinc-50 dark:hover:bg-zinc-950/20 transition-all shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-6">
@@ -896,17 +897,6 @@ const Home: React.FC = () => {
             {/* Global Top Fan Leaderboard */}
             <section className="w-full">
               <FanLeaderboard />
-            </section>
-
-            {/* Trending NFTs Section */}
-            <section className="section-container">
-              <SectionHeader 
-                title="Trending NFTs" 
-                viewAllLink="/marketplace" 
-              />
-              <div className="-mx-4 sm:mx-0">
-                <TiltedCoverflow items={nftCoverflowItems} />
-              </div>
             </section>
 
             {/* AI Dj Krupy Section - Neural Synthesis Interface */}
@@ -1145,115 +1135,41 @@ const Home: React.FC = () => {
             {/* Tasks */}
             <section className="section-container">
                <SectionHeader title="Daily Missions" viewAllLink="/tasks" />
-               <div className="space-y-4">
-                 {/* Premium AI Task Block inside task section */}
-                 {(() => {
-                   const aiTask = globalTasks.find(t => t.id === "11");
-                   if (!aiTask) return null;
-                   return (
-                     <div
-                       onClick={() => {
-                         if (!aiTask.completed && !aiTask.claimed) {
-                            navigate("/dj-krupy");
-                         }
-                       }}
-                       className={`relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black p-4 space-y-3.5 cursor-pointer select-none border-none ${
-                         aiTask.claimed ? "opacity-60" : "hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-                       }`}
-                     >
-                       {/* Soft visual glow */}
-                       <div className="absolute -left-12 -top-12 w-48 h-48 bg-blue-500/10 blur-[80px] pointer-events-none rounded-full" />
-                       <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-purple-500/10 blur-[80px] pointer-events-none rounded-full" />
-
-                       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                         <div className="flex gap-3 items-start">
-                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-                             <Sparkles className="w-5 h-5 text-white animate-pulse" />
+               <div className="relative w-full">
+                 {combinedMissions.length > 0 ? (
+                   <MissionCarousel
+                     plugins={[missionAutoplayRef.current]}
+                     className="w-full"
+                     onMouseEnter={missionAutoplayRef.current.stop}
+                     onMouseLeave={missionAutoplayRef.current.reset}
+                     opts={{
+                       align: "start",
+                       loop: true,
+                     }}
+                   >
+                     <MissionCarouselContent className="-ml-4">
+                       {combinedMissions.map((task) => (
+                         <MissionCarouselItem 
+                           key={task.id} 
+                           className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
+                         >
+                           <div className="h-full">
+                             <TaskCard 
+                               task={task} 
+                               onClaim={handleTaskClaim} 
+                               onToggle={handleTaskToggle} 
+                               onClick={handleTaskClick} 
+                             />
                            </div>
-                           <div>
-                             <div className="flex items-center gap-2">
-                               <span className="text-[8px] font-black uppercase tracking-[0.2em] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full inline-block leading-none">
-                                 Neural Protocol
-                               </span>
-                               <span className="text-[8px] font-black text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                 Featured AI
-                               </span>
-                             </div>
-                             <h3 className="text-xs font-black text-white uppercase tracking-tight mt-1.5">
-                               {aiTask.title}
-                             </h3>
-                             <p className="text-[10px] text-zinc-400 font-medium leading-normal mt-0.5 max-w-xl">
-                               {aiTask.description}
-                             </p>
-                           </div>
-                         </div>
-
-                         <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
-                           <div className="text-left sm:text-right">
-                             <div className="flex items-center gap-1">
-                               <span className="text-xs font-black text-white">{aiTask.reward}</span>
-                               <img
-                                 src={TJ_COIN_ICON}
-                                 alt="TJ"
-                                 className="w-3.5 h-3.5 object-contain"
-                                 referrerPolicy="no-referrer"
-                               />
-                             </div>
-                             <span className="text-[8px] text-zinc-500 font-bold uppercase mt-0.5 block leading-none">
-                               +{aiTask.points} companion XP
-                             </span>
-                           </div>
-
-                           <div>
-                             {aiTask.claimed ? (
-                               <span className="text-[8px] font-black uppercase tracking-widest bg-zinc-500/10 text-zinc-400 px-3 py-1.5 rounded-full inline-block leading-none">
-                                 Aligned
-                               </span>
-                             ) : aiTask.completed ? (
-                               <button
-                                 onClick={async (e) => {
-                                   e.stopPropagation();
-                                   await globalClaimTaskReward(aiTask.id);
-                                 }}
-                                 className="h-7 text-[8px] font-black uppercase tracking-widest px-3.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-emerald-500/15 font-black"
-                               >
-                                 Claim
-                               </button>
-                             ) : (
-                               <button
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   navigate("/dj-krupy");
-                                 }}
-                                 className="h-7 text-[8px] font-black uppercase tracking-widest px-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/10 font-black"
-                               >
-                                 Align Vibe
-                               </button>
-                             )}
-                           </div>
-                         </div>
-                       </div>
-                     </div>
-                   );
-                 })()}
-
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                   {tasks.length > 0 ? (
-                     tasks.map(task => (
-                       <TaskCard 
-                         key={task.id} 
-                         task={task} 
-                         onClaim={handleTaskClaim} 
-                         onToggle={handleTaskToggle} 
-                         onClick={handleTaskClick} 
-                       />
-                     ))
-                   ) : (
-                     <div className="bg-secondary/15 backdrop-blur-md rounded-2xl p-6 text-center border border-border/10 col-span-full">
-                       <p className="text-muted-foreground text-xs font-medium">All telemetry tasks fully completed. Check back in the next epoch.</p>
-                     </div>
-                   )}
-                 </div>
+                         </MissionCarouselItem>
+                       ))}
+                     </MissionCarouselContent>
+                   </MissionCarousel>
+                 ) : (
+                   <div className="bg-secondary/15 backdrop-blur-md rounded-2xl p-6 text-center border border-border/10">
+                     <p className="text-muted-foreground text-xs font-medium">All telemetry tasks fully completed. Check back in the next epoch.</p>
+                   </div>
+                 )}
                </div>
             </section>
 

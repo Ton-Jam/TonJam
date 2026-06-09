@@ -66,6 +66,7 @@ export interface DailyMission {
 }
 
 export interface UserMissionProgress {
+  id?: string;
   userId: string;
   missionId: string;
   completed: boolean;

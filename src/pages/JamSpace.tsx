@@ -310,29 +310,34 @@ const JamSpace: React.FC = () => {
             </div>
 
             {/* Composer */}
-            <div className="m-4 p-4 flex gap-4 bg-black border border-white/10 rounded-2xl shadow-md">
-              <Avatar className="h-10 w-10 border border-blue-500/20 ring-2 ring-blue-500/10">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="m-4 p-5 flex gap-4 bg-zinc-950/80 border border-blue-500/20 rounded-3xl shadow-2xl shadow-blue-900/10 backdrop-blur-md relative overflow-hidden"
+            >
+              <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+              <Avatar className="h-10 w-10 border border-zinc-800 ring-2 ring-zinc-900">
                 <AvatarImage src={userProfile.avatar} />
-                <AvatarFallback>{userProfile.name?.[0]}</AvatarFallback>
+                <AvatarFallback className="bg-zinc-800 text-zinc-400">{userProfile.name?.[0]}</AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-4">
                 <Textarea 
                   placeholder="Broadcast your frequency..." 
-                  className="border-none bg-transparent text-sm text-white resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-zinc-500 font-bold tracking-tight"
+                  className="border-none bg-transparent text-sm text-zinc-100 resize-none min-h-[60px] focus-visible:ring-0 p-0 placeholder:text-zinc-600 font-bold tracking-tight"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                 />
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     {[
-                      { icon: ImageIcon, color: 'text-blue-400 hover:bg-white/5' },
-                      { icon: Gift, color: 'text-rose-400 hover:bg-white/5' },
-                      { icon: List, color: 'text-amber-400 hover:bg-white/5' },
-                      { icon: Smile, color: 'text-yellow-400 hover:bg-white/5' },
-                      { icon: Calendar, color: 'text-emerald-400 hover:bg-white/5' },
+                      { icon: ImageIcon, color: 'text-zinc-500 hover:text-blue-400 hover:bg-white/5' },
+                      { icon: Gift, color: 'text-zinc-500 hover:text-rose-400 hover:bg-white/5' },
+                      { icon: List, color: 'text-zinc-500 hover:text-amber-400 hover:bg-white/5' },
+                      { icon: Smile, color: 'text-zinc-500 hover:text-yellow-400 hover:bg-white/5' },
+                      { icon: Calendar, color: 'text-zinc-500 hover:text-emerald-400 hover:bg-white/5' },
                     ].map((tool, i) => (
-                      <Button key={i} variant="ghost" size="icon" className={cn("h-8 w-8 rounded-full", tool.color)}>
-                        <tool.icon className={cn("h-4 w-4", tool.color)} />
+                      <Button key={i} variant="ghost" size="icon" className={cn("h-8 w-8 rounded-full transition-colors", tool.color)}>
+                        <tool.icon className="h-4 w-4" />
                       </Button>
                     ))}
                   </div>
@@ -340,7 +345,7 @@ const JamSpace: React.FC = () => {
                     <Button 
                       onClick={() => setIsAiComposeOpen(true)}
                       variant="outline"
-                      className="rounded-lg px-3 bg-zinc-900 hover:bg-purple-600/10 text-purple-400 hover:text-purple-300 font-black uppercase tracking-widest h-7 text-[9px] border border-purple-500/20 transition-all duration-200 flex items-center gap-1 cursor-pointer"
+                      className="rounded-full px-4 bg-zinc-900 hover:bg-purple-950/30 text-purple-400 hover:text-purple-300 font-black uppercase tracking-widest h-8 text-[10px] border border-purple-500/20 transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                       Neural AI
@@ -348,14 +353,14 @@ const JamSpace: React.FC = () => {
                     <Button 
                       disabled={!postContent.trim() || isPosting}
                       onClick={handleCreatePost}
-                      className="rounded-lg px-4 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest h-7 text-[9px] border-none shadow-lg shadow-blue-600/15 transition-all duration-200 cursor-pointer"
+                      className="rounded-full px-6 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest h-8 text-[10px] border-none shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all duration-200 cursor-pointer"
                     >
                       {isPosting ? 'Broadcasting...' : 'Signal'}
                     </Button>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Feed Filters - Sticky & Atmospheric matching Marketplace */}
             <div className="sticky top-14 z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-4 border-b border-white/[0.05]">

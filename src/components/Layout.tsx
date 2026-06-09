@@ -1011,7 +1011,7 @@ const MobileNavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label
       >
           {({ isActive }) => (
             <>
-              <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500' : 'text-white'}`} strokeWidth={isActive ? 3 : 2.5} />
+              <Icon className={`h-6 w-6 transition-all ${isActive ? 'text-blue-500' : 'text-white'}`} strokeWidth={isActive ? 2.5 : 2} />
               <span className={`text-[8px] font-bold uppercase tracking-widest transition-all ${isActive ? 'opacity-100' : 'opacity-0 scale-75'}`}>{label}</span>
             </>
           )}

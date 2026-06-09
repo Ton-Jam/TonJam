@@ -10,8 +10,41 @@ export const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'
 export const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/m4a'];
 export const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
 
-export function getPlaceholderImage(id: string, width = 400, height = 400): string {
-  const cleanId = (id || "tonjam").replace(/[^a-zA-Z0-9\s-_]/g, "").split("-").join(" ");
+export function getPlaceholderImage(type: string, width = 400, height = 400): string {
+  const placeholders: Record<string, string> = {
+    artist: '/placeholders/artist-placeholder.webp',
+    track: '/placeholders/track-placeholder.webp',
+    album: '/placeholders/album-placeholder.webp',
+    playlist: '/placeholders/playlist-placeholder.webp',
+    nft: '/placeholders/nft-placeholder.webp',
+  };
+
+  const lowerType = (type || '').toLowerCase();
+  
+  // Try string match directly or exact look-ups
+  if (lowerType in placeholders) {
+    return placeholders[lowerType];
+  }
+  
+  // Try prefix and fuzzy matching to preserve existing dynamic placeholders
+  if (lowerType.includes('artist') || lowerType.includes('creator') || lowerType.includes('user') || lowerType.includes('avatar')) {
+    return placeholders.artist;
+  }
+  if (lowerType.includes('track') || lowerType.includes('song')) {
+    return placeholders.track;
+  }
+  if (lowerType.includes('album') || lowerType.includes('cover')) {
+    return placeholders.album;
+  }
+  if (lowerType.includes('playlist') || lowerType.includes('jam') || lowerType.includes('collection')) {
+    return placeholders.playlist;
+  }
+  if (lowerType.includes('nft')) {
+    return placeholders.nft;
+  }
+
+  // Backwards compatibility fallback if a fully custom tag was passed
+  const cleanId = (type || "tonjam").replace(/[^a-zA-Z0-9\s-_]/g, "").split("-").join(" ");
   return `https://placehold.co/${width}x${height}/18181b/9ca3af?text=${encodeURIComponent(cleanId)}`;
 }
 
