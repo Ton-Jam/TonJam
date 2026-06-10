@@ -309,7 +309,7 @@ const Marketplace: React.FC = () => {
                     <TabsTrigger 
                       key={tab} 
                       value={tab} 
-                      className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground border border-[#C0C0C0]/35 data-[state=active]:border-transparent hover:border-[#C0C0C0]/60 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
+                      className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-transparent hover:bg-white/5 text-muted-foreground border border-[#C0C0C0]/25 data-[state=active]:border-transparent hover:border-[#C0C0C0]/50 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
                     >
                       {tab}
                     </TabsTrigger>
@@ -328,11 +328,11 @@ const Marketplace: React.FC = () => {
                 onClick={() => setOnlyVerified(prev => !prev)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
                   onlyVerified 
-                    ? 'bg-blue-600/20 text-blue-400 font-extrabold border border-transparent shadow-[0_0_10px_rgba(37,99,235,0.15)]' 
-                    : 'bg-white/5 text-muted-foreground border border-[#C0C0C0]/35 hover:bg-white/10 hover:border-[#C0C0C0]/60 hover:text-foreground'
+                    ? 'bg-blue-600 text-white font-extrabold border border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
+                    : 'bg-transparent text-muted-foreground border border-[#C0C0C0]/25 hover:bg-white/5 hover:border-[#C0C0C0]/50 hover:text-foreground'
                 }`}
               >
-                <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyVerified ? 'bg-blue-400 scale-110 shadow-[0_0_6px_#3b82f6]' : 'bg-muted-foreground/30'}`} />
+                <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyVerified ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
                 Only Verified
               </button>
 
@@ -340,11 +340,11 @@ const Marketplace: React.FC = () => {
                 onClick={() => setOnlyDirectBuy(prev => !prev)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
                   onlyDirectBuy 
-                    ? 'bg-blue-600/20 text-blue-400 font-extrabold border border-transparent shadow-[0_0_10px_rgba(37,99,235,0.15)]' 
-                    : 'bg-white/5 text-muted-foreground border border-[#C0C0C0]/35 hover:bg-white/10 hover:border-[#C0C0C0]/60 hover:text-foreground'
+                    ? 'bg-blue-600 text-white font-extrabold border border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
+                    : 'bg-transparent text-muted-foreground border border-[#C0C0C0]/25 hover:bg-white/5 hover:border-[#C0C0C0]/50 hover:text-foreground'
                 }`}
               >
-                <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyDirectBuy ? 'bg-blue-400 scale-110 shadow-[0_0_6px_#3b82f6]' : 'bg-muted-foreground/30'}`} />
+                <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyDirectBuy ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
                 Direct Buy
               </button>
 

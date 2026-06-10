@@ -221,7 +221,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
                 <Button
                   onClick={handlePurchase}
                   disabled={isProcessing}
-                  className="w-full h-12 rounded-full text-[10px] font-black uppercase tracking-[0.3em] bg-primary text-primary-foreground hover:scale-[1.02] transition-all"
+                  className="w-full h-12 rounded-full text-[10px] font-black uppercase tracking-[0.3em] bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white border border-[#C0C0C0]/50 shadow-lg hover:scale-[1.02] transition-all"
                 >
                   {isProcessing ? (
                     <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { motion, type PanInfo } from 'motion/react'
-import { LazyImage } from './LazyImage'
+import NFTCard from '../NFTCard'
+import { NFTItem } from '@/types'
 
 export interface CoverflowItem {
   id: string | number
@@ -8,6 +9,7 @@ export interface CoverflowItem {
   subtitle?: string
   imageUrl: string
   onClick?: () => void
+  nft?: NFTItem
 }
 
 interface TiltedCoverflowProps {
@@ -68,7 +70,7 @@ export default function TiltedCoverflow({
   const [cardWidth, setCardWidth] = useState(180)
   const [mounted, setMounted] = useState(false)
 
-  const cardRef = useRef<HTMLButtonElement | null>(null)
+  const cardRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -168,12 +170,17 @@ export default function TiltedCoverflow({
           const breathDuration = 5 + index * 0.6
 
           return (
-            <motion.button
+            <motion.div
               key={`${item.id}-${index}`}
               ref={index === 0 ? cardRef : undefined}
-              type="button"
+              role="button"
+              tabIndex={hidden ? -1 : 0}
               aria-label={item.title}
               onClick={(event) => {
+                const target = event.target as HTMLElement;
+                if (target.closest('button, a, [role="button"]:not(.coverflow-card), select, input')) {
+                  return;
+                }
                 event.preventDefault()
                 if (!hidden) {
                   if (!isFocus) {
@@ -185,7 +192,21 @@ export default function TiltedCoverflow({
                   }
                 }
               }}
-              className="absolute aspect-[4/5] w-[clamp(140px,15vw,190px)] focus:outline-none"
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  if (!hidden) {
+                    if (!isFocus) {
+                      setFocus(index)
+                    } else if (onItemClick) {
+                      onItemClick(item)
+                    } else if (item.onClick) {
+                      item.onClick()
+                    }
+                  }
+                }
+              }}
+              className="absolute aspect-[4/5] w-[clamp(140px,15vw,190px)] focus:outline-none coverflow-card"
               style={{
                 transformStyle: 'preserve-3d',
                 transformOrigin: 'center center',
@@ -205,7 +226,7 @@ export default function TiltedCoverflow({
               whileTap={isFocus ? { scale: 0.98 } : undefined}
             >
               <motion.div
-                className="relative h-full w-full overflow-hidden rounded-2xl ring-1 ring-white/10"
+                className={item.nft ? "relative h-full w-full pointer-events-auto" : "relative h-full w-full overflow-hidden rounded-2xl ring-1 ring-white/10"}
                 style={{
                   boxShadow: isFocus
                     ? '0 25px 50px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3)'
@@ -221,45 +242,54 @@ export default function TiltedCoverflow({
                   ease: 'easeInOut',
                 }}
               >
-                <LazyImage
-                  src={item.imageUrl}
-                  alt={item.title}
-                  draggable={false}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end px-3 pb-4 pt-12">
-                  <div
-                    aria-hidden
-                    className="absolute inset-x-0 bottom-0 h-2/3"
-                    style={{
-                      background:
-                        'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%)',
-                    }}
-                  />
-                  <div className="relative text-center">
-                    <span
-                      className="block leading-tight text-white font-extrabold text-sm sm:text-base uppercase tracking-tight truncate px-1"
-                      style={{
-                        textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                      }}
-                    >
-                      {item.title}
-                    </span>
-                    {item.subtitle && (
-                      <span
-                        className="block text-[10px] font-mono tracking-wider text-blue-400 mt-1 uppercase"
-                        style={{
-                          textShadow: '0 1px 2px rgba(0,0,0,0.8)',
-                        }}
-                      >
-                        {item.subtitle}
-                      </span>
-                    )}
+                {item.nft ? (
+                  <div className="text-left w-full h-full pointer-events-auto">
+                    <NFTCard nft={item.nft} />
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      loading="lazy"
+                      draggable={false}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end px-3 pb-4 pt-12">
+                      <div
+                        aria-hidden
+                        className="absolute inset-x-0 bottom-0 h-2/3"
+                        style={{
+                          background:
+                            'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%)',
+                        }}
+                      />
+                      <div className="relative text-center">
+                        <span
+                          className="block leading-tight text-white font-extrabold text-sm sm:text-base uppercase tracking-tight truncate px-1"
+                          style={{
+                            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                          }}
+                        >
+                          {item.title}
+                        </span>
+                        {item.subtitle && (
+                          <span
+                            className="block text-[10px] font-mono tracking-wider text-blue-400 mt-1 uppercase"
+                            style={{
+                              textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                            }}
+                          >
+                            {item.subtitle}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </motion.div>
-            </motion.button>
+            </motion.div>
           )
         })}
       </motion.div>

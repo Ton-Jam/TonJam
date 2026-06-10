@@ -4,7 +4,6 @@ import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS } from '@/constants';
 import { NFTItem } from '@/types';
 import { ShoppingCart } from 'lucide-react';
-import { LazyImage } from '@/components/aicanvas/LazyImage';
 
 interface TrendingNFTCardProps {
   nft: NFTItem;
@@ -54,13 +53,11 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
       </div>
       
       {/* Content */}
-      <div className="w-24 h-24 rounded-[4px] mt-4 mb-2 shadow-lg overflow-hidden flex-shrink-0">
-        <LazyImage 
-          src={nft.imageUrl || 'https://via.placeholder.com/150'} 
-          alt={nft.title} 
-          className="w-full h-full object-cover rounded-[4px]" 
-        />
-      </div>
+      <img 
+        src={nft.imageUrl || 'https://via.placeholder.com/150'} 
+        alt={nft.title} 
+        className="w-24 h-24 object-cover rounded-[4px] mt-4 mb-2 shadow-lg" 
+      />
       
       <div className="text-center px-1 flex-grow">
         <h4 className="text-white font-semibold text-[10px] truncate max-w-[120px]">{nft.title}</h4>
@@ -70,7 +67,7 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
 
       <button 
         onClick={handleBuyClick}
-        className="cursor-pointer transition-all bg-blue-500 text-white px-4 py-1 rounded-[4px] border-blue-600 border-b-[2px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[3px] active:border-b-[1px] active:brightness-90 active:translate-y-[1px] text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 mt-1 w-full justify-center"
+        className="cursor-pointer transition-all bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-4 py-1.5 rounded-[4px] border border-[#C0C0C0]/50 shadow-[0_0_8px_rgba(59,130,246,0.15)] text-[9px] font-black uppercase tracking-widest flex items-center gap-1 mt-1 w-full justify-center active:scale-95"
       >
         <ShoppingCart className="w-3 h-3" /> Buy
       </button>

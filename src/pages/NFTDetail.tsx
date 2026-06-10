@@ -96,6 +96,7 @@ import CommentsSection from "@/components/CommentsSection";
 import ReactionsSection from "@/components/ReactionsSection";
 import confetti from "canvas-confetti";
 import { getPlaceholderImage, cn } from "@/lib/utils";
+import { PriceSparkline } from "@/components/PriceSparkline";
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -1104,26 +1105,30 @@ const NFTDetail: React.FC = () => {
                   </div>
                 </div>
 
-                {isAuction && (
-                  <div className="bg-white/5 backdrop-blur-md p-2 rounded-[4px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
-                    <div className="flex flex-col items-start">
-                      <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                        Highest Bid
-                      </span>
-                      <span className="text-[10px] font-black tracking-tighter text-foreground">
-                        {highestOfferPrice} TON
-                      </span>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 self-stretch md:self-end">
+                  <PriceSparkline basePrice={parseFloat(localNft.price) || 0} />
+
+                  {isAuction && (
+                    <div className="bg-white/5 backdrop-blur-md p-2 rounded-[4px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
+                      <div className="flex flex-col items-start">
+                        <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                          Highest Bid
+                        </span>
+                        <span className="text-[10px] font-black tracking-tighter text-foreground">
+                          {highestOfferPrice} TON
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-0.5">
+                          <Clock className="h-2 w-2" /> Time
+                        </span>
+                        <span className="text-[10px] font-black tracking-tighter text-amber-500 tabular-nums">
+                          {timeRemaining || "00:00:00"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-0.5">
-                        <Clock className="h-2 w-2" /> Time
-                      </span>
-                      <span className="text-[10px] font-black tracking-tighter text-amber-500 tabular-nums">
-                        {timeRemaining || "00:00:00"}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-row gap-2 relative z-10">
@@ -1199,7 +1204,7 @@ const NFTDetail: React.FC = () => {
                     ) : (
                       <button
                         onClick={handleAction}
-                        className="flex-[2] py-2 cursor-pointer transition-all bg-blue-500 text-white rounded-lg border-blue-600 border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em]"
+                        className="flex-[2] py-2.5 cursor-pointer transition-all bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg border border-[#C0C0C0]/50 hover:brightness-110 shadow-lg hover:shadow-blue-500/20 font-black text-[10px] uppercase tracking-[0.3em] active:scale-95"
                       >
                         {isAuction ? "Place Bid" : "Acquire Asset"}
                       </button>

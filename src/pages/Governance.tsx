@@ -388,7 +388,7 @@ const Governance: React.FC = () => {
                <button
                  key={tab}
                  onClick={() => setActiveTab(tab as any)}
-                 className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 border border-transparent' : 'text-muted-foreground border border-[#C0C0C0]/35 hover:bg-muted/50 hover:border-[#C0C0C0]/60'}`}
+                 className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 border border-transparent' : 'bg-transparent text-muted-foreground border border-[#C0C0C0]/25 hover:bg-white/5 hover:border-[#C0C0C0]/50'}`}
                >
                  {tab}
                </button>
