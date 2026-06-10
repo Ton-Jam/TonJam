@@ -342,7 +342,7 @@ const PlaylistDetail: React.FC = () => {
         </div>
 
         {/* Tracks List (Edge-to-Edge) */}
-        <div className="px-0 md:px-0">
+        <div className="w-full">
           <div className="flex flex-col gap-0.5">
             {playlistTracks.map((track, index) => (
               <div 
@@ -359,7 +359,7 @@ const PlaylistDetail: React.FC = () => {
                         ? () => toggleLikeTrack(track.id)
                         : () => handleRemoveTrack(null as any, track.id)
                     }
-                    className="bg-transparent border-none shadow-none hover:bg-white/5 !p-2 !rounded-none"
+                    className="bg-transparent border-none shadow-none hover:bg-white/5 !p-4 !rounded-none"
                   />
                 </div>
               </div>

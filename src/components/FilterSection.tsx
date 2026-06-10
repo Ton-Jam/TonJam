@@ -111,7 +111,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       "py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer",
                       activeFilter === cat.id 
                         ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20" 
-                        : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                        : "bg-white/5 border-zinc-500/40 text-muted-foreground hover:bg-white/10"
                     )}
                   >
                     <cat.icon className="h-3 w-3" />
@@ -140,7 +140,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       "py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer",
                       sortOption === opt.id 
                         ? "bg-white/10 border-white/25 text-white" 
-                        : "bg-transparent border-white/5 text-white/40 hover:border-white/10"
+                        : "bg-transparent border-zinc-500/40 text-white/40 hover:border-white/10"
                     )}
                   >
                     <opt.icon className="h-2.5 w-2.5" />
@@ -210,7 +210,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                           "py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border cursor-pointer",
                           filters.rarity === rarity 
                             ? "bg-amber-500/10 border-amber-500/30 text-amber-500 shadow-lg shadow-amber-500/5" 
-                            : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                            : "bg-white/5 border-zinc-500/40 text-muted-foreground hover:bg-white/10"
                         )}
                       >
                         {rarity}
@@ -235,7 +235,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                           "py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border cursor-pointer",
                           filters.status === status 
                             ? "bg-purple-500/10 border-purple-500/30 text-purple-500 shadow-lg shadow-purple-500/5" 
-                            : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                            : "bg-white/5 border-zinc-500/40 text-muted-foreground hover:bg-white/10"
                         )}
                       >
                         {status}

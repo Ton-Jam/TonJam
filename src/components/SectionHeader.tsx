@@ -13,7 +13,7 @@ interface SectionHeaderProps {
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({ title, subtitle, viewAllLink, onAction, actionLabel, className = "" }) => {
   return (
-    <div className={`flex items-end justify-between mb-6 sm:mb-10 pb-4 relative ${className}`}>
+    <div className={`flex items-end justify-between mb-4 sm:mb-10 pb-3 sm:pb-4 relative ${className}`}>
       <div className="space-y-2">
         <div className="flex items-center gap-3">
           <div className="flex gap-1">

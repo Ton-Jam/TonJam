@@ -936,8 +936,13 @@ const NFTDetail: React.FC = () => {
                     <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                       Creator
                     </span>
-                    <span className="text-xs font-bold text-foreground uppercase tracking-tight group-hover:text-blue-500 transition-colors">
+                    <span className="text-xs font-bold text-foreground uppercase tracking-tight group-hover:text-blue-500 transition-colors flex items-center gap-1">
                       {localNft.creator}
+                      {MOCK_ARTISTS.find((a) => a.name === localNft.creator)?.verified && (
+                        <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                          <Check className="h-2 w-2 text-white" />
+                        </div>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -997,12 +1002,23 @@ const NFTDetail: React.FC = () => {
                     <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                       Current Owner
                     </span>
-                    <span className="text-xs font-bold text-muted-foreground/80 uppercase tracking-tight group-hover:text-foreground transition-colors">
+                    <span className="text-xs font-bold text-muted-foreground/80 uppercase tracking-tight group-hover:text-foreground transition-colors flex items-center gap-1">
                       {isOwner
                         ? "You (Vault)"
                         : localNft.owner
                           ? `${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}`
                           : "Unknown"}
+                      {((MOCK_ARTISTS.find(
+                        (a) =>
+                          a.walletAddress === localNft.owner ||
+                          a.name === localNft.owner,
+                      )?.verified ||
+                        (localNft.owner === userProfile.walletAddress &&
+                          userProfile.isVerified)) && (
+                        <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                          <Check className="h-2 w-2 text-white" />
+                        </div>
+                      ))}
                     </span>
                   </div>
                   <DropdownMenu>

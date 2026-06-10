@@ -343,7 +343,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </main>
       ) : (
-        <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300 relative">
+        <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300 relative border border-zinc-500/20">
           {/* Ambient Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-blue-600/5 rounded-full blur-[120px]" />

@@ -777,17 +777,21 @@ const Home: React.FC = () => {
               {/* Balances and Rate Block */}
               <div className="relative z-10 flex flex-col sm:flex-row items-stretch gap-4 w-full xl:w-auto">
                 {/* Rate conversion display */}
-                <div className="bg-[#060c1f]/80 dark:bg-[#060c1f]/80 px-4 py-3 rounded-2xl flex items-center justify-between gap-6 min-w-full sm:min-w-[180px] border-none">
-                  <div className="flex items-center gap-2">
-                    <img src={TON_LOGO} alt="TON" className="w-5 h-5 object-contain" />
+                <div className="bg-[#060c1f]/80 dark:bg-[#060c1f]/80 px-4 py-3 rounded-2xl flex items-center justify-between gap-6 min-w-full sm:min-w-[200px] border border-blue-500/10 shadow-lg shadow-black/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center p-1.5 border border-white/5">
+                      <img src={TON_LOGO} alt="TON" className="w-5 h-5 object-contain" />
+                    </div>
                     <div>
                       <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Rate</p>
                       <p className="text-xs font-black text-white">1 TON</p>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-blue-500/40" />
-                  <div className="flex items-center gap-2">
-                    <img src={TJ_COIN_ICON} alt="JAM" className="w-5 h-5 object-contain" />
+                  <ArrowRight className="w-4 h-4 text-blue-500/60" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center p-1.5 border border-blue-500/20">
+                      <img src={TJ_COIN_ICON} alt="JAM" className="w-5 h-5 object-contain" />
+                    </div>
                     <div>
                       <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Yield</p>
                       <p className="text-xs font-black text-blue-400">100 JAM</p>
