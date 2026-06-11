@@ -15,6 +15,7 @@ export interface ButtonGroupInputProps {
   className?: string
   inputClassName?: string
   autoFocus?: boolean
+  variant?: 'default' | 'search'
 }
 
 export function ButtonGroupInput({ 
@@ -26,10 +27,13 @@ export function ButtonGroupInput({
   onKeyDown,
   className,
   inputClassName,
-  autoFocus
+  autoFocus,
+  variant = 'default'
 }: ButtonGroupInputProps) {
+  const isSearch = variant === 'search';
+  
   return (
-    <ButtonGroup className={className}>
+    <ButtonGroup className={cn(className, isSearch && "bg-white border border-zinc-300 rounded-md overflow-hidden")}>
       <Input 
         placeholder={placeholder} 
         value={value}
@@ -37,13 +41,13 @@ export function ButtonGroupInput({
         onFocus={onFocus}
         onKeyDown={onKeyDown}
         autoFocus={autoFocus}
-        className={cn("rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0", inputClassName)}
+        className={cn("rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0 border-r-0", isSearch && "bg-transparent border-none", inputClassName)}
       />
       <Button 
-        variant="outline" 
+        variant="ghost"                
         aria-label="Search" 
         onClick={onSearch}
-        className="rounded-l-none border-l-0"
+        className={cn("rounded-l-none", isSearch && "bg-transparent hover:bg-zinc-100 text-zinc-500")}
       >
         <SearchIcon className="h-4 w-4" />
       </Button>

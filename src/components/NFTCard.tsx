@@ -285,9 +285,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       <ContextMenu>
         <ContextMenuTrigger>
         <motion.div 
-          whileHover={{ y: -4, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`group flex items-center gap-4 p-3 rounded-[4px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 bg-muted/10 border border-transparent hover:border-white/5 ${className}`}
+          whileHover={{ y: -3, scale: 1.015 }}
+          whileTap={{ scale: 0.99 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          className={`group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 border border-transparent hover:border-white/5 cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${className}`}
           onClick={handleCardClick}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -369,10 +370,11 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -8, scale: 1.02 }}
+            whileHover={{ y: -6, scale: 1.025, backgroundColor: "rgba(255, 255, 255, 0.04)" }}
             whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 26 }}
             className={cn(
-              "group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent hover:bg-white/[0.03] border border-transparent w-full",
+              "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent w-full",
               className
             )}
             onClick={handleCardClick}

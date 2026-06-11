@@ -25,10 +25,12 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { subscribeToCommunity } from '@/services/fanEngagementService';
 import { createActivityPost } from '@/services/socialService';
 import SocialFeed from '@/components/SocialFeed';
+import { ArtistSummaryCard } from '@/components/ArtistSummaryCard';
+import { PortfolioSection } from '@/components/PortfolioSection';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type TabType = 'discography' | 'nfts' | 'collection' | 'posts' | 'fan_club' | 'events' | 'about';
+type TabType = 'discography' | 'nfts' | 'portfolio' | 'collection' | 'posts' | 'fan_club' | 'events' | 'about';
 
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -320,6 +322,9 @@ const ArtistProfile: React.FC = () => {
               <span className="text-muted-foreground text-xs uppercase tracking-wider">Plays</span>
             </div>
         </div>
+        
+        {/* Visual Summary Card */}
+        <ArtistSummaryCard artist={artist} />
 
         {/* Split Multi-Column Layout: Biography & Direct Crypto Support left, Tabs right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -459,12 +464,12 @@ const ArtistProfile: React.FC = () => {
           <div className="lg:col-span-8 w-full">
             {/* Main Content Tabs */}
             <Tabs defaultValue="discography" value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
-          <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-8 justify-start border-b border-border mb-10 w-full rounded-none pb-px">
-            {(['discography', 'nfts', 'collection', 'posts', 'fan_club', 'events', 'about'] as TabType[]).map((tab) => (
+          <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-8 justify-start border-b border-border mb-10 w-full rounded-none pb-px scroll-smooth snap-x">
+            {(['discography', 'nfts', 'portfolio', 'collection', 'posts', 'fan_club', 'events', 'about'] as TabType[]).map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab}
-                className="px-0 py-3 rounded-none text-sm font-semibold transition-all whitespace-nowrap bg-transparent text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-foreground data-[state=active]:shadow-none hover:text-foreground border-b-2 border-transparent h-auto shadow-none"
+                className="px-0 py-3 rounded-none text-sm font-semibold transition-all whitespace-nowrap bg-transparent text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-foreground data-[state=active]:shadow-none hover:text-foreground border-b-2 border-transparent h-auto shadow-none snap-center cursor-pointer"
               >
                 {tab.replace('_', ' ').toUpperCase()}
               </TabsTrigger>
@@ -558,6 +563,11 @@ const ArtistProfile: React.FC = () => {
                   ))}
                 </div>
               </section>
+            </TabsContent>
+
+            {/* PORTFOLIO */}
+            <TabsContent value="portfolio" className="m-0 focus-visible:outline-none">
+                <PortfolioSection tracks={artistTracks} nfts={artistNFTs} isOwnProfile={isOwnProfile} />
             </TabsContent>
 
             {/* NFTS */}

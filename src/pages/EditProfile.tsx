@@ -33,6 +33,100 @@ const EditProfile: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [cameraStream]);
+
+  const startCamera = async () => {
+    setCameraError(null);
+    setIsCameraOpen(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 480 }, height: { ideal: 480 }, facingMode: "user" },
+        audio: false
+      });
+      setCameraStream(stream);
+    } catch (err: any) {
+      console.error("Camera access error:", err);
+      let message = "Failed to access camera.";
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        message = "Camera permission level denied by browser.";
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        message = "No video input devices found on this client.";
+      }
+      setCameraError(message);
+      addNotification("Could not access camera.", "error");
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setIsCameraOpen(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      if (context) {
+        const size = Math.min(video.videoWidth || 480, video.videoHeight || 480);
+        canvas.width = size;
+        canvas.height = size;
+        
+        const sx = video.videoWidth ? (video.videoWidth - size) / 2 : 0;
+        const sy = video.videoHeight ? (video.videoHeight - size) / 2 : 0;
+        
+        context.drawImage(
+          video,
+          sx, sy, size, size,
+          0, 0, size, size
+        );
+
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            setIsUploading(true);
+            try {
+              const storagePath = `users/${userProfile.uid}/avatar.png`;
+              const file = new File([blob], "camera_avatar.png", { type: "image/png" });
+              const { downloadUrl } = await uploadFile(file, storagePath);
+              setAvatarUrl(downloadUrl);
+              addNotification("Profile snapshot captured successfully.", "success");
+              stopCamera();
+            } catch (error: any) {
+              addNotification("Failed to save captured photo.", "error");
+            } finally {
+              setIsUploading(false);
+            }
+          }
+        }, 'image/png');
+      }
+    }
+  };
+
+  const videoRefCallback = (node: HTMLVideoElement | null) => {
+    if (node) {
+      videoRef.current = node;
+      if (cameraStream) {
+        node.srcObject = cameraStream;
+        node.play().catch(err => console.error("Video play error:", err));
+      }
+    }
+  };
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -170,9 +264,30 @@ const EditProfile: React.FC = () => {
                 <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" accept={ALLOWED_IMAGE_TYPES.join(',')} />
               </div>
               
-              <div className="mb-1 sm:mb-2 text-left">
+              <div className="mb-1 sm:mb-2 text-left flex flex-col gap-1.5">
                 <h4 className="text-[9px] font-black uppercase tracking-widest text-white">Visual Identity</h4>
-                <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest leading-none mt-0.5">Tap cameras to update images</p>
+                <div className="flex flex-wrap gap-1.5 mt-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="h-6 px-2 text-[8px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 text-white rounded-md flex items-center gap-1 border-none shadow-none"
+                  >
+                    <Upload className="h-2.5 w-2.5 text-white/70" /> Upload File
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={startCamera}
+                    disabled={isUploading}
+                    className="h-6 px-2 text-[8px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 text-white rounded-md flex items-center gap-1 border-none shadow-none"
+                  >
+                    <Camera className="h-2.5 w-2.5 text-white/70" /> Take Photo
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -277,6 +392,63 @@ const EditProfile: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {isCameraOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm rounded-2xl bg-zinc-950 p-6 flex flex-col items-center space-y-4 shadow-2xl">
+            <div className="w-full flex justify-between items-center text-left">
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-white">Camera Capture</h3>
+                <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-0.5">Capture portrait avatar directly</p>
+              </div>
+              <Button
+                type="button"
+                onClick={stopCamera}
+                variant="ghost"
+                className="text-white/40 hover:text-white text-[8px] uppercase tracking-widest font-black h-7 px-2.5 bg-white/5 hover:bg-white/10 rounded-lg border-none shadow-none"
+              >
+                Cancel
+              </Button>
+            </div>
+
+            <div className="relative w-full aspect-square rounded-2xl bg-black overflow-hidden flex items-center justify-center">
+              {cameraError ? (
+                <div className="text-center p-4 text-[10px] font-bold text-red-500 uppercase tracking-widest leading-relaxed">
+                  {cameraError}
+                </div>
+              ) : (
+                <>
+                  <video
+                    ref={videoRefCallback}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    playsInline
+                    muted
+                  />
+                  <div className="absolute inset-4 rounded-full ring-2 ring-white/10 ring-offset-2 ring-offset-black/20 pointer-events-none" />
+                </>
+              )}
+            </div>
+
+            <canvas ref={canvasRef} className="hidden" />
+
+            {!cameraError && (
+              <Button
+                type="button"
+                onClick={capturePhoto}
+                disabled={isUploading}
+                className="w-full rounded-xl bg-blue-600 hover:bg-blue-500 text-white uppercase tracking-widest font-black text-[10px] h-11 border-none shadow-lg shadow-blue-600/20"
+              >
+                {isUploading ? (
+                  <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin text-white" /> Saving Portrait...</span>
+                ) : (
+                  "Capture Snapshot"
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

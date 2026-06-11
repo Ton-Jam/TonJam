@@ -33,6 +33,7 @@ import TrackCard from '@/components/TrackCard';
 import AlbumCard from '@/components/AlbumCard';
 import ArtistListItem from '@/components/ArtistListItem';
 import TrendingArtistLeaderboard from '@/components/TrendingArtistLeaderboard';
+import { ArtistLeaderboard } from '@/components/ArtistLeaderboard';
 import SkeletonCard from '@/components/SkeletonCard';
 import SonicSearchSection from '@/components/SonicSearchSection';
 import { FilterSection } from '@/components/FilterSection';
@@ -683,6 +684,11 @@ const Discover: React.FC = () => {
             {/* Trending Artist Leaderboard with Sparklines */}
             <section className="space-y-6">
               <TrendingArtistLeaderboard limit={5} />
+            </section>
+            
+            {/* Artist Leaderboard */}
+            <section className="space-y-6">
+              <ArtistLeaderboard artists={artists.slice(0, 5)} title="Top Artists" />
             </section>
 
             {/* AI Dj Krupy Section removed to avoid duplication on Home screen context */}

@@ -3,12 +3,6 @@ import { useAudio } from '@/context/AudioContext';
 import { 
   Heart, 
   Share2, 
-  Play, 
-  Pause, 
-  SkipBack, 
-  SkipForward, 
-  Repeat as RepeatIcon, 
-  Shuffle as ShuffleIcon,
   Volume2,
   List,
   ListMusic,
@@ -36,6 +30,14 @@ import {
   RefreshCw,
   DownloadCloud
 } from "lucide-react";
+import { 
+  PlayIcon,
+  PauseIcon,
+  BackwardIcon,
+  ForwardIcon,
+  ArrowPathIcon as RepeatIcon,
+  ArrowsRightLeftIcon as ShuffleIcon,
+} from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_ARTISTS, MOCK_TRACKS, DJ_KRUPY_AVATAR } from '@/constants';
 import { useNavigate } from 'react-router-dom';
@@ -377,7 +379,7 @@ const FullPlayer: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 flex flex-col min-h-screen px-5 py-4 pb-24 max-w-screen-xl mx-auto md:px-12 md:py-8">
+      <div className="relative z-10 flex flex-col min-h-screen px-4 py-3 pb-24 max-w-screen-xl mx-auto sm:px-5 sm:py-4 md:px-12 md:py-8">
         
         {/* Spotify Premium Navigation Header (Strictly no borders, crisp fonts) */}
         <div className="flex items-center justify-between mb-6 md:mb-10">
@@ -402,7 +404,7 @@ const FullPlayer: React.FC = () => {
               e.stopPropagation();
               setOptionsTrack(currentTrack);
             }}
-            className="h-10 w-10 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/40 transition-all flex items-center justify-center shrink-0"
+            className="h-10 w-10 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/40 transition-all flex items-center justify-center shrink-0 border border-zinc-500/30"
           >
             <MoreVertical className="w-5 h-5" />
           </button>
@@ -424,7 +426,7 @@ const FullPlayer: React.FC = () => {
                   <button 
                     onClick={() => setArtworkStyle('spotify')}
                     className={cn(
-                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer",
+                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-zinc-500/30",
                       artworkStyle === 'spotify' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
                     )}
                   >
@@ -433,7 +435,7 @@ const FullPlayer: React.FC = () => {
                   <button 
                     onClick={() => setArtworkStyle('vinyl')}
                     className={cn(
-                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer",
+                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-zinc-500/30",
                       artworkStyle === 'vinyl' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
                     )}
                   >
@@ -442,7 +444,7 @@ const FullPlayer: React.FC = () => {
                   <button 
                     onClick={() => setArtworkStyle('visualizer')}
                     className={cn(
-                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer",
+                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-zinc-500/30",
                       artworkStyle === 'visualizer' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
                     )}
                   >
@@ -477,7 +479,7 @@ const FullPlayer: React.FC = () => {
                       />
                       
                       {/* Main cover art frame - No border lines, crisp radius and heavy shadow */}
-                      <div className="relative w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none">
+                      <div className="relative w-[180px] h-[180px] xs:w-[220px] xs:h-[220px] min-[400px]:w-[240px] min-[400px]:h-[240px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none">
                         <img
                           src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
                           className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out select-none"
@@ -514,7 +516,7 @@ const FullPlayer: React.FC = () => {
                       />
                       
                       <div
-                        className="relative flex h-60 w-60 sm:h-72 sm:w-72 items-center justify-center rounded-full transition-all duration-300 cursor-pointer"
+                        className="relative flex h-48 w-48 min-[400px]:h-56 min-[400px]:w-56 sm:h-72 sm:w-72 items-center justify-center rounded-full transition-all duration-300 cursor-pointer"
                         onClick={() => {
                           const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
                           const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
@@ -528,7 +530,7 @@ const FullPlayer: React.FC = () => {
                         <motion.div
                           animate={{ rotate: isPlaying ? 360 : 0 }}
                           transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
-                          className="relative h-44 w-44 sm:h-52 sm:w-52 rounded-full overflow-hidden flex items-center justify-center"
+                          className="relative h-32 w-32 min-[400px]:h-40 min-[400px]:w-40 sm:h-52 sm:w-52 rounded-full overflow-hidden flex items-center justify-center"
                           style={{
                             boxShadow: `inset 0 0 15px rgba(0,0,0,0.9)`,
                           }}
@@ -571,7 +573,7 @@ const FullPlayer: React.FC = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.35, ease: "easeOut" }}
-                      className="relative w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] flex flex-col items-center justify-center rounded-2xl overflow-hidden bg-black/40 backdrop-blur-sm shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none px-4 py-8 group"
+                      className="relative w-[180px] h-[180px] min-[400px]:w-[240px] min-[400px]:h-[240px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] flex flex-col items-center justify-center rounded-2xl overflow-hidden bg-black/40 backdrop-blur-sm shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none px-4 py-8 group"
                     >
                       {/* Interactive Aura reflection breathing with audio track mood */}
                       <div
@@ -603,7 +605,7 @@ const FullPlayer: React.FC = () => {
                               setVisualizerVariant(v);
                             }}
                             className={cn(
-                              "text-[8px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full transition-all cursor-pointer leading-none",
+                              "text-[8px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full transition-all cursor-pointer leading-none border border-zinc-500/30",
                               visualizerVariant === v 
                                 ? "bg-white text-black shadow-sm" 
                                 : "text-neutral-400 hover:text-white"
@@ -619,13 +621,13 @@ const FullPlayer: React.FC = () => {
               </div>
 
               {/* Controls Deck - Styled perfectly like Spotify's structural layout */}
-              <div className="space-y-6 pt-6 md:pt-0 md:col-span-7 flex flex-col justify-center h-full">
+              <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 md:pt-0 md:col-span-7 flex flex-col justify-center h-full">
                 
                 {/* Information Header Block */}
                 <div className="flex justify-between items-center px-1">
                   <div className="flex-1 min-w-0 pr-6">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight truncate">
+                      <h1 className="text-lg xs:text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight truncate">
                         {currentTrack.title}
                       </h1>
                       {isOffline && (
@@ -744,64 +746,64 @@ const FullPlayer: React.FC = () => {
                 </div>
 
                 {/* Main Playback Control Deck - Pure Spotify Layout Mapping */}
-                <div className="flex items-center justify-between px-4 max-w-md mx-auto w-full pt-1">
+                <div className="flex items-center justify-between px-2 sm:px-4 max-w-md mx-auto w-full pt-1">
                   
                   {/* Shuffle Button */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={toggleShuffle} 
-                    className="relative h-16 w-16 md:h-18 md:w-18 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/20 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/20 flex items-center justify-center cursor-pointer transition-colors shrink-0"
                   >
-                    <ShuffleIcon className="w-[28px] h-[28px] md:w-[34px] md:h-[34px]" strokeWidth={2.5} style={{ color: isShuffle ? visualizerColor : undefined }} />
+                    <ShuffleIcon className="w-[18px] h-[18px] sm:w-[30px] sm:h-[30px] md:w-[34px] md:h-[34px]" style={{ color: isShuffle ? visualizerColor : undefined }} />
                     {isShuffle && (
                       <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ backgroundColor: visualizerColor }} />
                     )}
                   </Button>
-
+ 
                   {/* Previous Track */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={prevTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-neutral-800/20 active:scale-90 transition-all h-20 w-20 md:h-22 md:w-22 rounded-full flex items-center justify-center cursor-pointer shrink-0"
+                    className="text-neutral-200 hover:text-white hover:bg-neutral-800/20 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full flex items-center justify-center cursor-pointer shrink-0"
                   >
-                    <SkipBack className="w-12 h-12 md:w-14 md:h-14 fill-current" strokeWidth={2.5} />
+                    <BackwardIcon className="w-5 h-5 sm:w-10 sm:h-10 md:w-12 md:h-12 fill-current" />
                   </Button>
                   
                   {/* Center Play Button - Perfect big rounded Spotify Play block */}
                   <Button
                     onClick={togglePlay}
-                    className="w-24 h-24 md:w-26 md:h-26 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-white hover:bg-white text-black shrink-0"
+                    className="w-16 h-16 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-white hover:bg-white text-black shrink-0"
                     style={{
                       boxShadow: `0 12px 30px rgba(255,255,255,0.06)`
                     }}
                   >
                     {isPlaying ? (
-                      <Pause className="w-10 h-10 md:w-12 md:h-12 text-black fill-black" strokeWidth={3} />
+                      <PauseIcon className="w-6 h-6 sm:w-10 sm:h-10 md:w-12 md:h-12 text-black fill-black" />
                     ) : (
-                      <Play className="w-10 h-10 md:w-12 md:h-12 text-black fill-black ml-1 md:ml-1.5" strokeWidth={3} />
+                      <PlayIcon className="w-6 h-6 sm:w-10 sm:h-10 md:w-12 md:h-12 text-black fill-black ml-0.5 sm:ml-1.5" />
                     )}
                   </Button>
-
+ 
                   {/* Next Track */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={nextTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-neutral-800/20 active:scale-90 transition-all h-20 w-20 md:h-22 md:w-22 rounded-full flex items-center justify-center cursor-pointer shrink-0"
+                    className="text-neutral-200 hover:text-white hover:bg-neutral-800/20 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full flex items-center justify-center cursor-pointer shrink-0"
                   >
-                    <SkipForward className="w-12 h-12 md:w-14 md:h-14 fill-current" strokeWidth={2.5} />
+                    <ForwardIcon className="w-5 h-5 sm:w-10 sm:h-10 md:w-12 md:h-12 fill-current" />
                   </Button>
-
+ 
                   {/* Repeat Button */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={toggleRepeat} 
-                    className="relative h-16 w-16 md:h-18 md:w-18 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/20 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/20 flex items-center justify-center cursor-pointer transition-colors shrink-0"
                   >
-                    <RepeatIcon className="w-[28px] h-[28px] md:w-[34px] md:h-[34px]" strokeWidth={2.5} style={{ color: repeatMode !== 'off' ? visualizerColor : undefined }} />
+                    <RepeatIcon className="w-[18px] h-[18px] sm:w-[30px] sm:h-[30px] md:w-[34px] md:h-[34px]" style={{ color: repeatMode !== 'off' ? visualizerColor : undefined }} />
                     {repeatMode !== 'off' && (
                       <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ backgroundColor: visualizerColor }} />
                     )}
@@ -1284,7 +1286,7 @@ const FullPlayer: React.FC = () => {
                           <p className="text-[10px] font-medium text-neutral-400 truncate mt-0.5">{track.artist}</p>
                         </div>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-600 group-hover:text-white transition-colors cursor-pointer">
-                          <Play className="w-3.5 h-3.5 fill-current" />
+                          <PlayIcon className="w-3.5 h-3.5 fill-current" />
                         </Button>
                       </motion.div>
                     ))

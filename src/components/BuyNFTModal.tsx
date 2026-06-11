@@ -9,6 +9,9 @@ import { processNFTSaleRoyalty } from '@/services/royaltyService';
 import { createActivityPost } from '@/services/socialService';
 import { getPlaceholderImage, cn } from '@/lib/utils';
 import { buyNFT, getActiveListingForNFT } from '@/services/marketplaceService';
+import { GasFeeDisplay } from '@/components/GasFeeDisplay';
+import { toast } from 'sonner';
+import { monitorTransaction } from '@/services/tonService';
 import {
   Dialog,
   DialogContent,
@@ -79,7 +82,15 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
       }
 
       // 2. Execute buy through marketplace service
-      await buyNFT(tonConnectUI, listing, nft);
+      const txId = await buyNFT(tonConnectUI, listing, nft);
+      
+      const toastId = toast.loading("Purchase processing...");
+      await monitorTransaction(txId, (status) => {
+        if (status === 'pending') toast.loading("Transaction initiated...", { id: toastId });
+        else if (status === 'confirming') toast.loading("Blockchain confirming...", { id: toastId });
+        else if (status === 'success') toast.success("Purchase successful!", { id: toastId });
+        else if (status === 'failed') toast.error("Purchase failed.", { id: toastId });
+      });
       
       const updatedNFT = {
         ...nft,
@@ -184,8 +195,7 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
                     <div className="flex justify-between items-center group/item">
                       <span className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">Gas_Load</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-black text-foreground">~{gasFee}</span>
-                        <span className="text-[9px] font-black text-muted-foreground/40">TON</span>
+                        <GasFeeDisplay variant="inline" transactionData={{type: 'buy', nftId: nft.id, price: price}} />
                       </div>
                     </div>
                     

@@ -657,11 +657,11 @@ const Profile: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
                 <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Followers</p>
-                <h3 className="text-3xl font-black">{(localUser.followers || 0).toLocaleString()}</h3>
+                <h3 className="text-3xl font-black metric">{(localUser.followers || 0).toLocaleString()}</h3>
               </div>
               <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
                 <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Following</p>
-                <h3 className="text-3xl font-black">{(localUser.following || 0).toLocaleString()}</h3>
+                <h3 className="text-3xl font-black metric">{(localUser.following || 0).toLocaleString()}</h3>
               </div>
             </div>
           </div>
@@ -818,11 +818,11 @@ const Profile: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Staked Capital</p>
-                  <h3 className="text-4xl font-black text-white">{(stakedBalance || 0).toLocaleString()} <span className="text-sm text-blue-500">TJ</span></h3>
+                  <h3 className="text-4xl font-black text-white metric">{(stakedBalance || 0).toLocaleString()} <span className="text-sm text-blue-500 font-sans">TJ</span></h3>
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Rewards</p>
-                  <h3 className="text-4xl font-black text-emerald-500">{pendingRewards.toFixed(2)} <span className="text-sm">TJ</span></h3>
+                  <h3 className="text-4xl font-black text-emerald-500 metric">{pendingRewards.toFixed(2)} <span className="text-sm font-sans">TJ</span></h3>
                 </div>
                 <button onClick={handleClaimRewards} className="bg-blue-500 text-white rounded-full font-black text-xs uppercase tracking-widest px-8 h-12 self-end">Claim</button>
               </div>
@@ -843,14 +843,14 @@ const Profile: React.FC = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center group cursor-pointer" onClick={() => setActiveTab('staking')}>
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Earnings</span>
-              <span className="text-lg font-black text-white group-hover:text-blue-500 transition-colors">
-                {(localUser.earnings || 0).toLocaleString()} <span className="text-[10px] text-blue-500">TON</span>
+              <span className="text-lg font-black text-white group-hover:text-blue-500 transition-colors metric">
+                {(localUser.earnings || 0).toLocaleString()} <span className="text-[10px] text-blue-500 font-sans">TON</span>
               </span>
             </div>
             <div className="flex justify-between items-center group cursor-pointer" onClick={() => setActiveTab('staking')}>
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">JAM Balance</span>
-              <span className="text-lg font-black text-white group-hover:text-amber-500 transition-colors">
-                {(userProfile?.jamBalance || 0).toLocaleString()} <span className="text-[10px] text-amber-500">JAM</span>
+              <span className="text-lg font-black text-white group-hover:text-amber-500 transition-colors metric">
+                {(userProfile?.jamBalance || 0).toLocaleString()} <span className="text-[10px] text-amber-500 font-sans">JAM</span>
               </span>
             </div>
           </div>

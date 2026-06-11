@@ -67,12 +67,12 @@ export const buyNFT = async (
   tonConnectUI: TonConnectUI,
   listing: Listing,
   nft: NFTItem
-): Promise<boolean> => {
+): Promise<string> => {
   if (!auth.currentUser) throw new Error("User must be authenticated");
   if (!listing.nftId) throw new Error("NFT ID is missing in listing");
 
   // 1. Initiate TON blockchain transaction
-  await buyNFTFromMarketplace(tonConnectUI, nft.contractAddress!, listing.price);
+  const txId = await buyNFTFromMarketplace(tonConnectUI, nft.contractAddress!, listing.price);
 
   // 2. Update listing record in Firestore
   const listingRef = doc(db, 'listings', listing.id);
@@ -95,7 +95,7 @@ export const buyNFT = async (
   // 4. Record transaction and distribute royalties
   await processNFTSaleRoyalty(nft, parseFloat(listing.price));
 
-  return true;
+  return txId;
 };
 
 /**

@@ -312,7 +312,7 @@ export const TrendingArtistLeaderboard: React.FC<TrendingArtistLeaderboardProps>
                 <div className="flex items-center gap-4 sm:gap-6 text-right flex-shrink-0">
                   {/* Percentage Shift */}
                   <div className="flex flex-col items-end">
-                    <div className={`flex items-center gap-0.5 text-[10px] font-extrabold ${
+                    <div className={`flex items-center gap-0.5 text-[10px] font-extrabold metric ${
                       isPositive ? 'text-emerald-500' : 'text-rose-500'
                     }`}>
                       {isPositive ? '+' : ''}
@@ -330,7 +330,7 @@ export const TrendingArtistLeaderboard: React.FC<TrendingArtistLeaderboardProps>
 
                   {/* Absolute Value */}
                   <div className="min-w-[65px] flex flex-col items-end justify-center">
-                    <span className="text-xs sm:text-sm font-black text-white flex items-center gap-1 font-mono">
+                    <span className="text-xs sm:text-sm font-black text-white flex items-center gap-1 metric">
                       {metricTab === 'plays' ? (
                         <>
                           <Play className="h-3 w-3 text-blue-500 fill-current opacity-70" />

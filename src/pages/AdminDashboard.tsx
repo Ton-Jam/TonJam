@@ -418,17 +418,17 @@ const AdminDashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="glass p-6 rounded-xl border border-border/50 bg-foreground/[0.01]">
                 <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Seeded Tracks</h3>
-                <div className="text-3xl font-bold tracking-tighter mb-1">16</div>
+                <div className="text-3xl font-bold tracking-tighter mb-1 metric">16</div>
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Across 11 genres</p>
               </div>
               <div className="glass p-6 rounded-xl border border-border/50 bg-foreground/[0.01]">
                 <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Verified Artists</h3>
-                <div className="text-3xl font-bold tracking-tighter mb-1">11</div>
+                <div className="text-3xl font-bold tracking-tighter mb-1 metric">11</div>
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">With full profiles</p>
               </div>
               <div className="glass p-6 rounded-xl border border-border/50 bg-foreground/[0.01]">
                 <h3 className="text-xs font-bold uppercase tracking-widest mb-4">NFT Inventory</h3>
-                <div className="text-3xl font-bold tracking-tighter mb-1">5</div>
+                <div className="text-3xl font-bold tracking-tighter mb-1 metric">5</div>
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Mythic & Legendary</p>
               </div>
             </div>
@@ -448,7 +448,7 @@ const AdminDashboard: React.FC = () => {
                 {stat.icon}
               </div>
               <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-4">{stat.label}</p>
-              <h3 className="text-xl font-bold text-foreground tracking-tighter">{stat.value}</h3>
+              <h3 className="text-xl font-bold text-foreground tracking-tighter metric">{stat.value}</h3>
             </div>
           ))}
             </div>

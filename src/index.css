@@ -4,6 +4,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/noto-sans";
+@import "./styles/halo-tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -81,32 +82,32 @@
 
 .dark {
   --background: #060c1f;
-  --foreground: oklch(0.985 0 0);
+  --foreground: #F2F4F8;
   --card: #09132e;
-  --card-foreground: oklch(0.985 0 0);
+  --card-foreground: #F2F4F8;
   --popover: #09132e;
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.424 0.199 265.638);
-  --primary-foreground: oklch(0.97 0.014 254.604);
+  --popover-foreground: #F2F4F8;
+  --primary: #5B6BFF;
+  --primary-foreground: #FFFFFF;
   --secondary: #09132e;
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: #09132e;
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: #102047;
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --secondary-foreground: #F2F4F8;
+  --muted: #101a3b;
+  --muted-foreground: #9AA0AE;
+  --accent: #101a3b;
+  --accent-foreground: #F2F4F8;
+  --destructive: #FF3A5C;
   --destructive-foreground: #FFFFFF;
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.552 0.016 285.938);
+  --border: #16244f;
+  --input: #16244f;
+  --ring: rgba(91, 107, 255, 0.35);
   --silver: #C0C0C0;
 
   --tonjam-navy: #060c1f;
   --tonjam-navy-light: #09132e;
 
-  --surface: #0c142a;
-  --elevated: #121d3a;
-  --border-strong: #3A3D4A;
+  --surface: #09132e;
+  --elevated: #101a3b;
+  --border-strong: #20336d;
   --on-surface-muted: #9AA0AE;
   --on-surface-faint: #5C6170;
   --primary-hover: #7886FF;
@@ -116,7 +117,7 @@
   --info: #3DD7E5;
   --error: #FF3A5C;
 
-  --radius: 4px;
+  --radius: 10px;
   --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Inter', sans-serif;
   --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
@@ -126,11 +127,11 @@
   --shadow-opacity: 0;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --chart-1: oklch(0.871 0.006 286.286);
-  --chart-2: oklch(0.552 0.016 285.938);
-  --chart-3: oklch(0.442 0.017 285.786);
-  --chart-4: oklch(0.37 0.013 285.805);
-  --chart-5: oklch(0.274 0.006 286.033);
+  --chart-1: #5B6BFF;
+  --chart-2: #3DD7E5;
+  --chart-3: #F5D547;
+  --chart-4: #2BE08C;
+  --chart-5: #FF3A5C;
   --shadow-2xs: none;
   --shadow-xs: none;
   --shadow-sm: none;
@@ -139,14 +140,14 @@
   --shadow-lg: none;
   --shadow-xl: none;
   --shadow-2xl: none;
-  --sidebar: #040a1c;
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.623 0.214 259.815);
-  --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.552 0.016 285.938);
+  --sidebar: #060c1f;
+  --sidebar-foreground: #F2F4F8;
+  --sidebar-primary: #5B6BFF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #09132e;
+  --sidebar-accent-foreground: #F2F4F8;
+  --sidebar-border: #16244f;
+  --sidebar-ring: rgba(91, 107, 255, 0.35);
 }
 
 @theme inline {
@@ -248,7 +249,7 @@
     @apply font-sans;
   }
 
-  /* Force navy blue background globally on all components in dark mode */
+  /* Force dark-space background globally on all components in dark mode */
   .dark {
     background-color: #060c1f !important;
   }
@@ -276,7 +277,7 @@
     background-color: #09132e !important;
   }
 
-  /* Flat, subtle borders, with no active border lines */
+  /* Flat, subtle borders, matching Halo spec */
   .dark .border,
   .dark .border-t,
   .dark .border-b,
@@ -285,7 +286,35 @@
   .dark .border-border,
   .dark .border-white\/10,
   .dark .border-white\/5 {
-    border-color: rgba(59, 130, 246, 0.05) !important;
+    border-color: #16244f !important;
+  }
+
+  @media (max-width: 639px) {
+    .page-container,
+    .page-container > div,
+    main > div {
+      padding-left: 0px !important;
+      padding-right: 0px !important;
+    }
+    
+    /* Make sure all section containers, cards, and interactive elements span edge-to-edge beautifully on mobile screens */
+    .section-container,
+    section.section-container,
+    main section {
+      border-radius: 0px !important;
+      margin-left: 0px !important;
+      margin-right: 0px !important;
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+    }
+
+    /* Edge-to-edge sliders / carousels inside pages */
+    .scroll-row {
+      margin-left: -16px !important;
+      margin-right: -16px !important;
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+    }
   }
 }
 
@@ -445,7 +474,7 @@
   }
 
   .page-container {
-    @apply px-4 md:px-8 lg:px-12 w-full max-w-full;
+    @apply px-0 sm:px-4 md:px-8 lg:px-12 w-full max-w-full;
   }
 
   .section-container {

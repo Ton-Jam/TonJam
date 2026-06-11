@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from "react";
 import * as RechartsPrimitive from "recharts";
+import { NFTHistory } from "@/types";
 
 const {
   AreaChart,
   Area,
-  Tooltip,
   ResponsiveContainer,
 } = RechartsPrimitive as any;
 
 interface PriceSparklineProps {
   basePrice: number;
+  history?: NFTHistory[];
 }
 
 interface SparklineDataPoint {
@@ -17,11 +18,75 @@ interface SparklineDataPoint {
   price: number;
 }
 
-export const PriceSparkline: React.FC<PriceSparklineProps> = ({ basePrice }) => {
+const cleanPriceValue = (priceStr?: string): number | null => {
+  if (!priceStr) return null;
+  // Remove TON and other non-numeric characters (keep digits and decimals)
+  const cleaned = priceStr.replace(/[^0-9.]/g, "");
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? null : parsed;
+};
+
+export const PriceSparkline: React.FC<PriceSparklineProps> = ({ basePrice, history }) => {
   const [hoveredPrice, setHoveredPrice] = useState<number | null>(null);
   const [hoveredDay, setHoveredDay] = useState<string | null>(null);
 
   const sparklineData = useMemo(() => {
+    // 1. Try to extract real prices from history
+    const priceEntries: { date: Date; price: number }[] = [];
+    
+    if (history && history.length > 0) {
+      history.forEach((h) => {
+        const val = cleanPriceValue(h.price);
+        if (h.price && val !== null) {
+          const dateObj = new Date(h.date);
+          if (!isNaN(dateObj.getTime())) {
+            priceEntries.push({ date: dateObj, price: val });
+          }
+        }
+      });
+    }
+
+    // Sort chronologically (oldest first)
+    priceEntries.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // If there are real price points, let's construct the sparkline data
+    if (priceEntries.length > 0) {
+      const data: SparklineDataPoint[] = [];
+      
+      // Make sure we have at least 2 points to draw a line. If only 1, prepend simulated starting point
+      if (priceEntries.length === 1) {
+        const single = priceEntries[0];
+        const prevDate = new Date(single.date);
+        prevDate.setDate(prevDate.getDate() - 7); // 7 days earlier
+        
+        data.push({
+          day: prevDate.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+          price: Number((single.price * 0.8).toFixed(2)),
+        });
+      }
+
+      // Add real price points
+      priceEntries.forEach((entry) => {
+        data.push({
+          day: entry.date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+          price: Number(entry.price.toFixed(2)),
+        });
+      });
+
+      // Finally, append current basePrice to represent the live/current price if it is different from the last history point
+      const lastPrice = data[data.length - 1]?.price;
+      if (lastPrice !== basePrice) {
+        const now = new Date();
+        data.push({
+          day: now.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+          price: Number(basePrice.toFixed(2)),
+        });
+      }
+
+      return data;
+    }
+
+    // 2. Fall back to deterministic mock walk if history has no price information
     const data: SparklineDataPoint[] = [];
     const now = new Date();
     const prices: number[] = new Array(30);
@@ -35,7 +100,7 @@ export const PriceSparkline: React.FC<PriceSparklineProps> = ({ basePrice }) => 
       if (prices[i] < 0.01) prices[i] = 0.01;
     }
 
-    // Now construct the chronological array
+    // Chronological array
     for (let i = 0; i < 30; i++) {
       const d = new Date();
       d.setDate(now.getDate() - (29 - i));
@@ -47,9 +112,9 @@ export const PriceSparkline: React.FC<PriceSparklineProps> = ({ basePrice }) => 
     }
 
     return data;
-  }, [basePrice]);
+  }, [basePrice, history]);
 
-  // Calculate percentage change over last 30 days
+  // Calculate percentage change over plotted timeline
   const changePercent = useMemo(() => {
     if (sparklineData.length < 2) return 0;
     const start = sparklineData[0].price;
@@ -75,7 +140,7 @@ export const PriceSparkline: React.FC<PriceSparklineProps> = ({ basePrice }) => 
     <div className="flex flex-col gap-1.5 min-w-[140px] sm:min-w-[170px] bg-transparent selection:bg-transparent">
       <div className="flex items-center justify-between">
         <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest">
-          {hoveredDay ? hoveredDay : "30d Floor Trend"}
+          {hoveredDay ? hoveredDay : "historical trend"}
         </span>
         <span
           className={`text-[8px] font-black tracking-tight ${

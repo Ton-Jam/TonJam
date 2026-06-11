@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Loader2, Gavel } from 'lucide-react';
 import { TON_LOGO, APP_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { placeBid } from '@/services/tonService';
+import { placeBid, getTonPrice } from '@/services/tonService';
 import { getPlaceholderImage } from '@/lib/utils';
 import {
   Dialog,
@@ -28,6 +28,17 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
   const minBid = (currentBid * 1.05).toFixed(2); /* 5% minimum increase */
   const [bidAmount, setBidAmount] = useState(minBid);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [tonPrice, setTonPrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const price = await getTonPrice();
+      setTonPrice(price);
+    };
+    fetchPrice();
+  }, []);
+
+  const bidInUsd = tonPrice ? (parseFloat(bidAmount) * tonPrice).toFixed(2) : '---';
 
   const handlePlaceBid = async () => {
     if (!userAddress) {
@@ -157,7 +168,7 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={confirmBid}
         title="Place Bid?"
-        description={`Are you sure you want to place a bid of ${bidAmount} TON for "${nft.title}"? This action will broadcast your bid to the network.`}
+        description={`Are you sure you want to place a bid of ${bidAmount} TON (~$${bidInUsd}) for "${nft.title}"? This action will broadcast your bid to the network.`}
         confirmText="Place Bid"
       />
     </Dialog>

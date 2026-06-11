@@ -2966,70 +2966,71 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       setExclusiveContent(exclusive);
 
       try {
-        // Reset crossOrigin to anonymous for each new track to allow visualizer
-        // Only set crossOrigin if it's a remote URL
-        if (sourceUrl.startsWith("http")) {
-          audioRef.current.crossOrigin = "anonymous";
-        } else {
-          audioRef.current.removeAttribute("crossorigin");
-        }
+        const fallbacks = [
+          // Fallback 1: Same URL but without crossOrigin (fixes CORS but disables frequencies visualizer)
+          { url: sourceUrl, crossOrigin: false },
+          // Fallback 2: Stable public asset URL (CORS allowed)
+          { url: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3", crossOrigin: true },
+          // Fallback 3: Stable public asset URL (no CORS)
+          { url: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3", crossOrigin: false },
+          // Fallback 4: Alternate Google Asset MP3 (no CORS)
+          { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: false },
+          // Fallback 5: Silent data URI (failsafe offline backup)
+          { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
+        ];
 
-        audioRef.current.src = sourceUrl;
-        console.log("[Audio] Playing:", sourceUrl);
-        audioRef.current.load(); // Explicitly call load()
+        let fallbackIndex = 0;
 
-        playPromiseRef.current = audioRef.current.play();
-        if (playPromiseRef.current !== undefined) {
-          playPromiseRef.current.catch((error) => {
-            // Check for common playback errors
-            const isInterrupted =
-              error.name === "AbortError" ||
-              error.message?.includes("interrupted");
-
-            if (!isInterrupted) {
-              console.warn(
-                "[Audio] Primary source failed, attempting fallback...",
-                error,
-              );
-              if (audioRef.current) {
-                // First try: Same URL but without crossOrigin (fixes CORS issues but breaks visualizer)
-                audioRef.current.pause();
-                audioRef.current.removeAttribute("crossorigin");
-                audioRef.current.src = sourceUrl;
-                audioRef.current.load();
-
-                const fallbackPromise = audioRef.current.play();
-                if (fallbackPromise !== undefined) {
-                  fallbackPromise.catch((e) => {
-                    // Second try: different reliable fallback URL
-                    console.warn(
-                      "[Audio] CORS-less reload failed, trying global fallback...",
-                      e,
-                    );
-                    if (audioRef.current) {
-                      audioRef.current.src =
-                        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-                      audioRef.current.load();
-                      audioRef.current.play().catch((err) => {
-                        if (
-                          err.name !== "AbortError" &&
-                          !err.message?.includes("interrupted")
-                        ) {
-                          console.error("[Audio] All fallbacks failed:", err);
-                          addNotification(
-                            "Playback protocol failed. Signal lost.",
-                            "error",
-                          );
-                          setIsPlaying(false);
-                        }
-                      });
-                    }
-                  });
-                }
-              }
+        const playWithFallback = (url: string, useCrossOrigin: boolean) => {
+          if (!audioRef.current) return;
+          try {
+            audioRef.current.pause();
+            if (useCrossOrigin && url.startsWith("http")) {
+              audioRef.current.crossOrigin = "anonymous";
+            } else {
+              audioRef.current.removeAttribute("crossorigin");
             }
-          });
-        }
+            audioRef.current.src = url;
+            console.log("[Audio] Playing source:", url);
+            audioRef.current.load();
+
+            const promise = audioRef.current.play();
+            playPromiseRef.current = promise;
+
+            if (promise !== undefined) {
+              promise.catch((error) => {
+                const isInterrupted =
+                  error.name === "AbortError" ||
+                  error.message?.includes("interrupted");
+
+                if (!isInterrupted) {
+                  console.warn(
+                    `[Audio] Playback failed for source ${url}:`,
+                    error
+                  );
+                  if (fallbackIndex < fallbacks.length) {
+                    const next = fallbacks[fallbackIndex++];
+                    console.log(`[Audio] Switching to fallback index ${fallbackIndex}...`);
+                    playWithFallback(next.url, next.crossOrigin);
+                  } else {
+                    console.error("[Audio] All fallbacks failed:", error);
+                    addNotification(
+                      "Playback protocol failed. Signal lost.",
+                      "error"
+                    );
+                    setIsPlaying(false);
+                  }
+                }
+              });
+            }
+          } catch (err) {
+            console.error("[Audio] Error setting up audio source:", err);
+          }
+        };
+
+        const isRemote = sourceUrl.startsWith("http");
+        playWithFallback(sourceUrl, isRemote);
+
         setIsPlaying(true);
 
         // Record stream transaction
@@ -3089,28 +3090,56 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
               console.error("[Audio] Playback error during toggle:", error);
               /* If it failed because of source issues, try to reload with fallbacks */
               if (currentTrack) {
-                // If it's a "supported source" error, it's likely CORS or a dead link
-                // We'll try the same robust fallback as playTrack
                 console.warn("[Audio] Attempting recovery during toggle...");
-                audioRef.current!.pause();
-                audioRef.current!.removeAttribute("crossorigin");
-                audioRef.current!.src =
-                  currentTrack.audioUrl ||
-                  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-                audioRef.current!.load();
-                audioRef.current!.play().catch((e) => {
-                  if (
-                    e.name !== "AbortError" &&
-                    !e.message?.includes("interrupted")
-                  ) {
-                    console.error("[Audio] Toggle recovery failed:", e);
-                    addNotification(
-                      "Audio signal lost. Recovery failed.",
-                      "error",
-                    );
-                    setIsPlaying(false);
+                
+                const trackSourceUrl = currentTrack.audioUrl || "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3";
+                const toggleFallbacks = [
+                  { url: trackSourceUrl, crossOrigin: false },
+                  { url: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3", crossOrigin: true },
+                  { url: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3", crossOrigin: false },
+                  { url: "https://commondatastorage.googleapis.com/codeskulptor-assets/bgm_gui.mp3", crossOrigin: false },
+                  { url: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=", crossOrigin: false }
+                ];
+
+                let tFallbackIndex = 0;
+
+                const playToggleFallback = (url: string, useCrossOrigin: boolean) => {
+                  if (!audioRef.current) return;
+                  try {
+                    audioRef.current.pause();
+                    if (useCrossOrigin && url.startsWith("http")) {
+                      audioRef.current.crossOrigin = "anonymous";
+                    } else {
+                      audioRef.current.removeAttribute("crossorigin");
+                    }
+                    audioRef.current.src = url;
+                    audioRef.current.load();
+                    const promise = audioRef.current.play();
+                    playPromiseRef.current = promise;
+                    if (promise !== undefined) {
+                      promise.catch((e) => {
+                        const isAbort = e.name === "AbortError" || e.message?.includes("interrupted");
+                        if (!isAbort) {
+                          if (tFallbackIndex < toggleFallbacks.length) {
+                            const next = toggleFallbacks[tFallbackIndex++];
+                            playToggleFallback(next.url, next.crossOrigin);
+                          } else {
+                            console.error("[Audio] Toggle recovery completely failed:", e);
+                            addNotification(
+                              "Audio signal lost. Recovery failed.",
+                              "error",
+                            );
+                            setIsPlaying(false);
+                          }
+                        }
+                      });
+                    }
+                  } catch (subErr) {
+                    console.error("[Audio] Sub-error in toggle recovery:", subErr);
                   }
-                });
+                };
+
+                playToggleFallback(trackSourceUrl, trackSourceUrl.startsWith("http"));
               }
             }
           });

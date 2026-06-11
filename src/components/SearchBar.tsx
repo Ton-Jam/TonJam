@@ -61,6 +61,7 @@ export const SearchBar: React.FC<SearchBarProps & { children?: React.ReactNode }
         className="w-full"
         inputClassName={inputClassName}
         autoFocus={autoFocus}
+        variant="search"
       />
 
       <AnimatePresence>

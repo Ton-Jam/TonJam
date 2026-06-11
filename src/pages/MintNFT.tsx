@@ -13,6 +13,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { TrendingUp } from 'lucide-react';
 import { uploadAudio, uploadCover, uploadMetadata } from '@/services/storageService';
 import { validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES, ALLOWED_DOCUMENT_TYPES } from '@/lib/utils';
+import { GasFeeDisplay } from '@/components/GasFeeDisplay';
+import { toast } from 'sonner';
+import { monitorTransaction } from '@/services/tonService';
 
 const mintSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -264,7 +267,16 @@ const MintNFT: React.FC = () => {
         ],
       };
       
-      await tonConnectUI.sendTransaction(transaction);
+      const txRes = await tonConnectUI.sendTransaction(transaction);
+      const txId = txRes.boc; // Assuming BOC as transaction ID for simulation
+      
+      const toastId = toast.loading("Minting started...");
+      await monitorTransaction(txId, (status) => {
+        if (status === 'pending') toast.loading("Confirming transaction...", { id: toastId });
+        else if (status === 'confirming') toast.loading("Blockchain confirming...", { id: toastId });
+        else if (status === 'success') toast.success("Minting successful!", { id: toastId });
+        else if (status === 'failed') toast.error("Minting failed.", { id: toastId });
+      });
 
       const newNFT: NFTItem = {
         id: `nft-${Date.now()}`,
@@ -683,6 +695,7 @@ const MintNFT: React.FC = () => {
                 <div className="h-px bg-muted/50"></div>
                 <div className="space-y-4 sm:space-y-4">
                   <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest">Deployment Fees</p>
+                  <GasFeeDisplay transactionData={{type: 'mint', title: watch('title')}} />
                   <div className="flex justify-between text-xs sm:text-sm font-bold">
                     <span className="text-muted-foreground/80">Minting Fee</span>
                     <span className="text-foreground">0.05 TON</span>

@@ -279,7 +279,14 @@ const Marketplace: React.FC = () => {
             
             <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2" >
               {topBiddedNfts.map((nft) => (
-                <div key={nft.id} onClick={() => navigate(`/nft/${nft.id}`)} className="flex-shrink-0 w-full lg:w-[calc(50%-8px)] snap-center cursor-pointer group" >
+                <motion.div
+                  key={nft.id}
+                  onClick={() => navigate(`/nft/${nft.id}`)}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className="flex-shrink-0 w-full lg:w-[calc(50%-8px)] snap-center cursor-pointer group"
+                >
                   <div className="relative aspect-[21/9] bg-muted/30 border border-border/10 rounded-2xl overflow-hidden shadow-2xl">
                     <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`, 800, 400)} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-700 group-hover:scale-105" alt={nft.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
@@ -293,7 +300,7 @@ const Marketplace: React.FC = () => {
                       </Button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

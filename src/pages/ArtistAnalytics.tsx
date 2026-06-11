@@ -56,8 +56,8 @@ export default function ArtistAnalytics() {
                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{m.title}</h4>
                    <m.icon className="w-4 h-4 text-primary" />
                 </div>
-                <p className="text-3xl font-black mt-4">{m.value}</p>
-                <p className="text-[10px] font-bold text-emerald-500 mt-1">{m.sub}</p>
+                <p className="text-3xl font-black mt-4 metric">{m.value}</p>
+                <p className="text-[10px] font-bold text-emerald-500 mt-1 metric">{m.sub}</p>
              </div>
           ))}
         </div>

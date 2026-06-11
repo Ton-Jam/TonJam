@@ -16,7 +16,6 @@ import {
   Globe
 } from 'lucide-react';
 
-import { MOCK_USERS, MOCK_TRACKS, MOCK_NFTS, MOCK_POSTS, MOCK_ARTISTS } from '@/constants';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import ArtistListItem from '@/components/ArtistListItem';
@@ -24,47 +23,24 @@ import SocialFeed from '@/components/SocialFeed';
 import PlaylistCard from '@/components/PlaylistCard';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, cn, validateFile, ALLOWED_IMAGE_TYPES } from '@/lib/utils';
-import { ProfileCard } from '@/components/ProfileCard';
 import { UserProfile as UserProfileType } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadFile } from '@/services/storageService';
 import { BadgeSystem } from '@/components/BadgeSystem';
 import { DailyMissions } from '@/components/DailyMissions';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { allTracks, allNFTs, userProfile, toggleFollowUser, followedUserIds, addNotification, playlists } = useAudio();
+  const { userProfile, toggleFollowUser, followedUserIds, addNotification, posts, allTracks, allNFTs, playlists, artists } = useAudio();
   
   const [user, setUser] = useState<UserProfileType | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'activity' | 'network'>('overview');
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // If the ID matches the current user, redirect to their profile
-    if (id === userProfile.uid) {
-      navigate('/profile');
-      return;
-    }
-
-    // Check if the ID matches an artist
-    if (MOCK_ARTISTS.some(a => a.uid === id)) {
-      navigate(`/artist/${id}`, { replace: true });
-      return;
-    }
-
-    const foundUser = MOCK_USERS.find(u => u.uid === id);
-    if (foundUser) {
-      if (foundUser.isVerifiedArtist || foundUser.isVerified) {
-        navigate(`/artist/${id}`, { replace: true });
-        return;
-      }
-      setUser(foundUser);
-    } else {
-      // Handle not found
-      navigate('/');
-    }
-    window.scrollTo(0, 0);
-  }, [id, userProfile.uid, navigate]);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const isFollowing = useMemo(() => {
     return followedUserIds.includes(id || '');
@@ -99,12 +75,41 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    // If the ID matches the current user, redirect to their profile
+    if (id === userProfile.uid) {
+      navigate('/profile');
+      return;
+    }
+
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const userDoc = await getDoc(doc(db, 'users', id!));
+        if (userDoc.exists()) {
+          setUser(userDoc.data() as UserProfileType);
+        } else {
+          // Handle not found
+          navigate('/');
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        addNotification("Error fetching profile", "error");
+        navigate('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+        fetchUser();
+    }
+  }, [id, userProfile.uid, navigate]);
 
   const userPosts = useMemo(() => {
     if (!user) return [];
-    return MOCK_POSTS.filter(p => p.userId === user.uid);
-  }, [user]);
+    return posts.filter(p => p.userId === user.uid);
+  }, [user, posts]);
 
   const ownedNfts = useMemo(() => {
     if (!user) return [];
@@ -293,7 +298,7 @@ const UserProfile: React.FC = () => {
                     {user.followedArtists && user.followedArtists.length > 0 ? (
                       <div className="space-y-4">
                         {user.followedArtists.slice(0, 3).map(artistId => {
-                          const artist = MOCK_ARTISTS.find(a => a.uid === artistId);
+                          const artist = artists.find(a => a.uid === artistId);
                           if (!artist) return null;
                           return <ArtistListItem key={artist.uid} artist={artist} />;
                         })}
@@ -393,7 +398,7 @@ const UserProfile: React.FC = () => {
                     {user.followedArtists && user.followedArtists.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                          {user.followedArtists.map(artistId => {
-                            const artist = MOCK_ARTISTS.find(a => a.uid === artistId);
+                            const artist = artists.find(a => a.uid === artistId);
                             if (!artist) return null;
                             return <ArtistListItem key={artist.uid} artist={artist} />;
                          })}

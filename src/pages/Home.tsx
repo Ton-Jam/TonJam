@@ -53,7 +53,7 @@ import Autoplay from 'embla-carousel-autoplay';
 
 const HomeSection = ({ title, icon: Icon, link, children }: { title: string, icon: React.ElementType, link?: string, children: React.ReactNode }) => {
   return (
-    <section className="section-container">
+    <section className="section-container bg-[#060c1f] p-4 rounded-3xl">
       <SectionHeader title={title} viewAllLink={link} />
       <div className="scroll-row">
         {children}
@@ -737,7 +737,7 @@ const Home: React.FC = () => {
             </AnimatePresence>
 
             {/* Trending NFTs Section */}
-            <section className="mb-6 sm:mb-12 w-full">
+            <section className="mb-6 sm:mb-12 w-full bg-[#060c1f] p-4 rounded-3xl">
               <SectionHeader 
                 title="Trending NFTs" 
                 viewAllLink="/marketplace" 
@@ -900,12 +900,12 @@ const Home: React.FC = () => {
             </section>
 
             {/* Neural Leaderboard Section */}
-            <section className="w-full">
+            <section className="w-full bg-[#060c1f] p-4 rounded-3xl">
               <Leaderboard artists={artists} limit={5} />
             </section>
 
             {/* Global Top Fan Leaderboard */}
-            <section className="w-full">
+            <section className="w-full bg-[#060c1f] p-4 rounded-3xl">
               <FanLeaderboard />
             </section>
 

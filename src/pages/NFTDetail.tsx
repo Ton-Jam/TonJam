@@ -41,7 +41,10 @@ import {
   History,
   ArrowRight,
   ArrowRightLeft,
+  QrCode,
+  Copy,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -114,6 +117,7 @@ const NFTDetail: React.FC = () => {
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isTipping, setIsTipping] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
   const [inlineBidAmount, setInlineBidAmount] = useState<string>("");
   const [isPlacingBid, setIsPlacingBid] = useState(false);
 
@@ -651,8 +655,28 @@ const NFTDetail: React.FC = () => {
     }, 1500);
   };
 
-  const handleShare = () => {
-    setShowShareModal(true);
+  const handleShare = async () => {
+    if (!localNft) return;
+    const shareUrl = `${window.location.origin}/nft/${localNft.id}`;
+    const shareData = {
+      title: localNft.title,
+      text: `Check out "${localNft.title}" by ${localNft.creator || 'unknown'} on TonJam! 💎`,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        addNotification("NFT shared successfully!", "success");
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error("Web Share failed, opening modal instead:", err);
+          setShowShareModal(true);
+        }
+      }
+    } else {
+      setShowShareModal(true);
+    }
   };
 
   return (
@@ -1122,7 +1146,7 @@ const NFTDetail: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 self-stretch md:self-end">
-                  <PriceSparkline basePrice={parseFloat(localNft.price) || 0} />
+                  <PriceSparkline basePrice={parseFloat(localNft.price) || 0} history={localNft.history} />
 
                   {isAuction && (
                     <div className="bg-white/5 backdrop-blur-md p-2 rounded-[4px] border border-white/10 flex items-center justify-between gap-4 shadow-lg text-[10px]">
@@ -1541,7 +1565,7 @@ const NFTDetail: React.FC = () => {
                     </div>
 
                     <div className="col-span-full md:col-span-1 space-y-4">
-                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px] h-full flex flex-col justify-center">
+                      <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px] flex flex-col justify-center">
                         <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
                           <div className="w-1.5 h-4 bg-purple-500 rounded-full" />
                           Provenance
@@ -1573,6 +1597,59 @@ const NFTDetail: React.FC = () => {
                           </div>
                         </div>
                       </div>
+
+                      {localNft.contractAddress && (
+                        <div className="p-6 bg-white/[0.02] backdrop-blur-md rounded-[4px] flex flex-col items-center justify-center text-center space-y-4">
+                          <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] flex items-center gap-3 w-full text-left">
+                            <div className="w-1.5 h-4 bg-blue-500 rounded-full" />
+                            TON Explorer QR
+                          </h4>
+                          <div className="p-3 bg-white rounded-[4px] shadow-lg transition-transform hover:scale-105 duration-300">
+                            <QRCodeSVG
+                              value={`https://tonviewer.com/${localNft.contractAddress}`}
+                              size={130}
+                              bgColor={"#ffffff"}
+                              fgColor={"#030712"}
+                              level={"M"}
+                              includeMargin={true}
+                            />
+                          </div>
+                          <div className="space-y-1.5 w-full">
+                            <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest block">
+                              Asset Contract Address
+                            </p>
+                            <div className="flex items-center justify-between bg-white/5 rounded-[4px] p-2 font-mono text-[9px] text-zinc-400">
+                              <span className="truncate max-w-[140px] sm:max-w-none">
+                                {localNft.contractAddress}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(localNft.contractAddress!);
+                                  setCopiedAddress(true);
+                                  setTimeout(() => setCopiedAddress(false), 2000);
+                                }}
+                                className="ml-2 hover:text-white transition-colors cursor-pointer"
+                                title="Copy Address"
+                              >
+                                {copiedAddress ? (
+                                  <span className="text-emerald-400 font-bold">Copied</span>
+                                ) : (
+                                  <Copy className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                            </div>
+                            <a
+                              href={`https://tonviewer.com/${localNft.contractAddress}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 text-[8.5px] font-bold text-blue-400 hover:text-blue-300 uppercase tracking-widest mt-1"
+                            >
+                              Open Explorer <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {isAuction && (
