@@ -349,9 +349,9 @@ const Discover: React.FC = () => {
             {/* Shiny Gradient Border Effect */}
             <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
             
-            <div className={`relative flex items-center h-11 bg-background border transition-all duration-300 ease-in-out rounded-full overflow-hidden focus-within:scale-[1.02] ${isFocused ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-blue-500/30 group-hover:border-blue-500/50'}`}>
+            <div className={`relative flex items-center h-11 bg-white border transition-all duration-300 ease-in-out rounded-full overflow-hidden focus-within:scale-[1.02] ${isFocused ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-zinc-200 group-hover:border-zinc-300'}`}>
               <div className="absolute left-4 z-10 pointer-events-none">
-                <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-500'}`} />
+                <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-400'}`} />
               </div>
               
               <Input
@@ -361,7 +361,7 @@ const Discover: React.FC = () => {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 pr-24 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest placeholder:text-muted-foreground/30 z-10"
+                className="pl-11 pr-24 h-full bg-white border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-semibold uppercase tracking-widest text-black placeholder:text-zinc-400 z-10"
               />
 
               <div className="absolute right-3 flex items-center gap-1.5 z-20">
@@ -377,20 +377,20 @@ const Discover: React.FC = () => {
                         size="icon"
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
+                        className="h-8 w-8 text-zinc-500 hover:text-black rounded-full"
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <Separator orientation="vertical" className="h-4 bg-white/10" />
+                <Separator orientation="vertical" className="h-4 bg-zinc-200" />
                 <Button
                   variant="ghost"
                   size="icon"
                   type="button"
                   onClick={handleVoiceSearch}
-                  className={`h-8 w-8 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`h-8 w-8 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-zinc-500 hover:text-black'}`}
                 >
                   {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
@@ -527,7 +527,7 @@ const Discover: React.FC = () => {
                   <TabsTrigger
                     key={filter}
                     value={filter}
-                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-transparent hover:bg-white/5 text-muted-foreground border border-[#C0C0C0]/25 data-[state=active]:border-transparent hover:border-[#C0C0C0]/50 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
+                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-transparent text-silver border border-silver data-[state=active]:border-transparent hover:bg-white/5 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-white shrink-0 cursor-pointer h-auto"
                   >
                     {filter}
                   </TabsTrigger>

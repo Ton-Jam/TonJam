@@ -34,8 +34,8 @@ const mintSchema = z.object({
   listNow: z.boolean().optional(),
   audioFile: z.any().optional(),
   coverFile: z.any().optional(),
-  audioPreview: z.string().min(1, 'Audio is required'),
-  coverPreview: z.string().min(1, 'Cover art is required'),
+  audioPreview: z.string().optional(),
+  coverPreview: z.string().optional(),
   traits: z.array(z.object({
     trait_type: z.string().min(1, 'Trait type is required'),
     value: z.union([z.string(), z.number()]),
@@ -45,6 +45,17 @@ const mintSchema = z.object({
     type: z.enum(['video', 'track', 'image', 'document']),
     url: z.string().min(1, 'URL is required'),
   })),
+  isBundle: z.boolean().optional(),
+  bundleTracks: z.array(z.object({
+    title: z.string().min(1, 'Track title is required'),
+    audioPreview: z.string().min(1, 'Audio file is required'),
+    audioFile: z.any().optional(),
+  })).optional(),
+  bundleVisuals: z.array(z.object({
+    title: z.string().min(1, 'Visual asset title is required'),
+    coverPreview: z.string().min(1, 'Visual image is required'),
+    coverFile: z.any().optional(),
+  })).optional(),
 });
 
 type MintFormData = z.infer<typeof mintSchema>;
@@ -88,13 +99,18 @@ const MintNFT: React.FC = () => {
         { trait_type: 'BPM', value: track?.bpm || 128 },
         { trait_type: 'Key', value: track?.key || 'Am' }
       ],
-      exclusiveContent: []
+      exclusiveContent: [],
+      isBundle: false,
+      bundleTracks: [],
+      bundleVisuals: []
     },
   });
 
   const { fields: royaltyFields, append: appendRoyalty, remove: removeRoyalty } = useFieldArray({ control, name: 'royaltySplits' });
   const { fields: traitFields, append: appendTrait, remove: removeTrait } = useFieldArray({ control, name: 'traits' });
   const { fields: exclusiveFields, append: appendExclusive, remove: removeExclusive } = useFieldArray({ control, name: 'exclusiveContent' });
+  const { fields: bundleTrackFields, append: appendBundleTrack, remove: removeBundleTrack } = useFieldArray({ control, name: 'bundleTracks' });
+  const { fields: bundleVisualFields, append: appendBundleVisual, remove: removeBundleVisual } = useFieldArray({ control, name: 'bundleVisuals' });
 
   const mintData = watch();
   const totalRoyaltyPercentage = mintData.royaltySplits.reduce((sum, split) => sum + split.percentage, 0);
@@ -173,6 +189,50 @@ const MintNFT: React.FC = () => {
   const handleAddExclusive = () => appendExclusive({ title: '', type: 'video', url: '' });
   const handleRemoveExclusive = (index: number) => removeExclusive(index);
 
+  const handleAddBundleTrack = () => appendBundleTrack({ title: '', audioPreview: '', audioFile: undefined });
+  const handleRemoveBundleTrack = (index: number) => removeBundleTrack(index);
+
+  const handleAddBundleVisual = () => appendBundleVisual({ title: '', coverPreview: '', coverFile: undefined });
+  const handleRemoveBundleVisual = (index: number) => removeBundleVisual(index);
+
+  const handleBundleTrackFileChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validation = validateFile(file, 'audio', 50);
+      if (!validation.isValid) {
+        addNotification(validation.error || 'Invalid file', 'error');
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setValue(`bundleTracks.${index}.audioFile` as any, file);
+        setValue(`bundleTracks.${index}.audioPreview` as any, reader.result as string);
+        toast.success(`Track "${file.name}" loaded successfully.`);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBundleVisualFileChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validation = validateFile(file, 'image', 10);
+      if (!validation.isValid) {
+        addNotification(validation.error || 'Invalid file', 'error');
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setValue(`bundleVisuals.${index}.coverFile` as any, file);
+        setValue(`bundleVisuals.${index}.coverPreview` as any, reader.result as string);
+        toast.success(`Visual asset "${file.name}" loaded successfully.`);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleMint = async (data: MintFormData) => {
@@ -185,7 +245,7 @@ const MintNFT: React.FC = () => {
     setUploadProgress(0);
     try {
       // 0. Double check validation if files are being uploaded
-      if (data.audioFile instanceof File) {
+      if (!data.isBundle && data.audioFile instanceof File) {
         const audioValidation = validateFile(data.audioFile, 'audio', 50);
         if (!audioValidation.isValid) {
           throw new Error(audioValidation.error);
@@ -199,8 +259,8 @@ const MintNFT: React.FC = () => {
       }
 
       // 1. Upload files to IPFS if they are new
-      let audioUrl = data.audioPreview;
-      let coverUrl = data.coverPreview;
+      let audioUrl = data.audioPreview || '';
+      let coverUrl = data.coverPreview || '';
 
       let audioProg = 0;
       let coverProg = 0;
@@ -208,7 +268,7 @@ const MintNFT: React.FC = () => {
         setUploadProgress(Math.round((audioProg + coverProg) / 2));
       };
 
-      if (data.audioFile instanceof File) {
+      if (!data.isBundle && data.audioFile instanceof File) {
         addNotification("Adding audio file...", "info");
         const audioRes = await uploadAudio(data.audioFile, (p) => { audioProg = p; updateOverallProgress(); });
         if (!audioRes?.downloadUrl) {
@@ -232,6 +292,46 @@ const MintNFT: React.FC = () => {
         updateOverallProgress();
       }
 
+      // Handle bundle tracks
+      let bundleTracksFinal: { title: string; audioUrl: string }[] = [];
+      if (data.isBundle && data.bundleTracks && data.bundleTracks.length > 0) {
+        addNotification(`Uploading ${data.bundleTracks.length} bundle tracks...`, "info");
+        for (let i = 0; i < data.bundleTracks.length; i++) {
+          const bTrack = data.bundleTracks[i];
+          let trackUrl = bTrack.audioPreview;
+          if (bTrack.audioFile instanceof File) {
+            const res = await uploadAudio(bTrack.audioFile);
+            if (res?.downloadUrl) {
+              trackUrl = res.downloadUrl;
+            }
+          }
+          bundleTracksFinal.push({
+            title: bTrack.title,
+            audioUrl: trackUrl
+          });
+        }
+      }
+
+      // Handle bundle visuals
+      let bundleVisualsFinal: { title: string; imageUrl: string }[] = [];
+      if (data.isBundle && data.bundleVisuals && data.bundleVisuals.length > 0) {
+        addNotification(`Uploading ${data.bundleVisuals.length} bundle visual assets...`, "info");
+        for (let i = 0; i < data.bundleVisuals.length; i++) {
+          const bVisual = data.bundleVisuals[i];
+          let visualUrl = bVisual.coverPreview;
+          if (bVisual.coverFile instanceof File) {
+            const res = await uploadCover(bVisual.coverFile);
+            if (res?.downloadUrl) {
+              visualUrl = res.downloadUrl;
+            }
+          }
+          bundleVisualsFinal.push({
+            title: bVisual.title,
+            imageUrl: visualUrl
+          });
+        }
+      }
+
       // 2. Prepare Metadata for Firebase Storage
       const royaltySplitsDecimals = data.royaltySplits.map(s => ({
         ...s,
@@ -242,10 +342,16 @@ const MintNFT: React.FC = () => {
         name: data.title,
         description: data.description,
         image: coverUrl,
-        audio: audioUrl,
-        attributes: data.traits,
+        audio: data.isBundle ? undefined : audioUrl,
+        attributes: [
+          ...data.traits,
+          { trait_type: 'Is Bundle', value: data.isBundle ? 'Yes' : 'No' }
+        ],
         royalty_splits: royaltySplitsDecimals,
-        exclusive_content: data.exclusiveContent
+        exclusive_content: data.exclusiveContent,
+        isBundle: data.isBundle,
+        bundleTracks: bundleTracksFinal,
+        bundleVisuals: bundleVisualsFinal,
       };
 
       addNotification("Synchronizing metadata...", "info");
@@ -293,26 +399,30 @@ const MintNFT: React.FC = () => {
         supply: parseInt(data.supply),
         minted: 1,
         description: data.description || '',
-        audioUrl: audioUrl,
+        audioUrl: data.isBundle ? undefined : audioUrl,
         ipfsUrl: ipfsUrl,
         attributes: [
           ...data.traits,
           { trait_type: 'Edition Type', value: data.editionType },
-          { trait_type: 'Rarity', value: data.rarity || 'Common' }
+          { trait_type: 'Rarity', value: data.rarity || 'Common' },
+          { trait_type: 'Is Bundle', value: data.isBundle ? 'Yes' : 'No' }
         ] as NFTTrait[],
         royaltySplits: royaltySplitsDecimals,
         listingType: data.listNow ? 'fixed' : undefined,
         exclusiveContent: data.exclusiveContent.filter(e => e.title && e.url).map(e => ({
           ...e,
           id: `ex-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-        }))
+        })),
+        isBundle: data.isBundle,
+        bundleTracks: bundleTracksFinal,
+        bundleVisuals: bundleVisualsFinal,
       };
       
       if (track) {
         // Update existing track
         const updatedTrack = { ...track, isNFT: true, price: data.price, genre: data.genre, lyrics: data.lyrics };
         await addUserTrack(updatedTrack);
-      } else {
+      } else if (!data.isBundle) {
         const trackId = newNFT.trackId;
         const newTrack: Track = {
           id: trackId,
@@ -333,6 +443,33 @@ const MintNFT: React.FC = () => {
         };
         await addUserTrack(newTrack);
       }
+
+      // For bundle tracks, integrate playable individual items
+      if (data.isBundle && bundleTracksFinal.length > 0) {
+        addNotification("Integrating track list into server library...", "info");
+        for (let i = 0; i < bundleTracksFinal.length; i++) {
+          const finalBTrack = bundleTracksFinal[i];
+          const newTrackId = `track-bundle-${Date.now()}-${i}`;
+          const newTrack: Track = {
+            id: newTrackId,
+            songId: `song-${newTrackId}`,
+            title: `${data.title} - ${finalBTrack.title}`,
+            artist: userProfile.name,
+            artistId: userProfile.uid,
+            coverUrl: coverUrl,
+            audioUrl: finalBTrack.audioUrl,
+            duration: 180,
+            playCount: 0,
+            streams: 0,
+            likes: 0,
+            genre: data.genre,
+            lyrics: '',
+            isNFT: true,
+            createdAt: new Date().toISOString()
+          };
+          await addUserTrack(newTrack);
+        }
+      }
       
       await addUserNFT(newNFT);
       addNotification("NFT added successfully", "success");
@@ -344,6 +481,29 @@ const MintNFT: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const isStep1Valid = (() => {
+    if (!mintData.title || !mintData.genre || !mintData.coverPreview) return false;
+    if (mintData.isBundle) {
+      const hasTracks = (mintData.bundleTracks && mintData.bundleTracks.length > 0);
+      const hasVisuals = (mintData.bundleVisuals && mintData.bundleVisuals.length > 0);
+      if (!hasTracks && !hasVisuals) return false;
+      
+      if (mintData.bundleTracks) {
+        for (const t of mintData.bundleTracks) {
+          if (!t.title || !t.audioPreview) return false;
+        }
+      }
+      if (mintData.bundleVisuals) {
+        for (const v of mintData.bundleVisuals) {
+          if (!v.title || !v.coverPreview) return false;
+        }
+      }
+      return true;
+    } else {
+      return !!mintData.audioPreview;
+    }
+  })();
 
   return (
     <div className="w-full px-4 sm:px-4 lg:px-4 py-4 sm:py-4 animate-in fade-in duration-1000">
@@ -394,12 +554,37 @@ const MintNFT: React.FC = () => {
 
           <div className="relative z-10">
             {step === 1 && (
-            <div className="space-y-4 sm:space-y-4 animate-in slide-in-from-right duration-300">
+            <div className="space-y-6 sm:space-y-6 animate-in slide-in-from-right duration-300">
+              {/* Type Switcher */}
+              <div className="flex gap-2 bg-muted/30 p-1.5 rounded-[4px] w-full max-w-sm">
+                <button
+                  type="button"
+                  onClick={() => setValue('isBundle', false)}
+                  className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all rounded-[3px] ${!mintData.isBundle ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Single Track
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue('isBundle', true);
+                    if (!bundleTrackFields.length && !bundleVisualFields.length) {
+                      handleAddBundleTrack();
+                    }
+                  }}
+                  className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all rounded-[3px] ${mintData.isBundle ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Bundled Collection
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-4">
                 <div className="space-y-4 sm:space-y-4">
                   <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Artifact Title</label>
-                    <input {...register('title')} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" placeholder="Enter track title..." />
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">
+                      {mintData.isBundle ? 'Collection Title' : 'Artifact Title'}
+                    </label>
+                    <input {...register('title')} className="w-full bg-muted/50 rounded-[4px] py-4 px-4 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all text-foreground" placeholder={mintData.isBundle ? "Enter collection/bundle title..." : "Enter track title..."} />
                     {errors.title && <p className="text-[10px] text-red-500 mt-4">{errors.title.message}</p>}
                   </div>
                   <div className="space-y-4">
@@ -418,29 +603,34 @@ const MintNFT: React.FC = () => {
                     </select>
                     {errors.genre && <p className="text-[10px] text-red-500 mt-4">{errors.genre.message}</p>}
                   </div>
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Sonic Data (Audio)</label>
-                    <div className="relative group">
-                      <input type="file" accept={ALLOWED_AUDIO_TYPES.join(',')} onChange={(e) => handleFileChange(e, 'audio')} className="hidden" id="audio-upload" />
-                      <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-28 sm:h-32 bg-muted/50 hover:bg-muted rounded-[4px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Audio">
-                        {mintData.audioPreview ? (
-                          <div className="text-center">
-                            <FileAudio className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 mb-4 mx-auto" />
-                            <p className="text-[10px] sm:text-xs font-bold text-foreground uppercase truncate px-4">Audio Loaded</p>
-                          </div>
-                        ) : (
-                          <>
-                            <CloudUpload className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground/50 mb-4" />
-                            <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest">Upload Audio</p>
-                          </>
-                        )}
-                      </label>
+
+                  {!mintData.isBundle && (
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Sonic Data (Audio)</label>
+                      <div className="relative group">
+                        <input type="file" accept={ALLOWED_AUDIO_TYPES.join(',')} onChange={(e) => handleFileChange(e, 'audio')} className="hidden" id="audio-upload" />
+                        <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-28 sm:h-32 bg-muted/50 hover:bg-muted rounded-[4px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('audio-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Audio">
+                          {mintData.audioPreview ? (
+                            <div className="text-center">
+                              <FileAudio className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 mb-4 mx-auto" />
+                              <p className="text-[10px] sm:text-xs font-bold text-foreground uppercase truncate px-4">Audio Loaded</p>
+                            </div>
+                          ) : (
+                            <>
+                              <CloudUpload className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground/50 mb-4" />
+                              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest">Upload Audio</p>
+                            </>
+                          )}
+                        </label>
+                      </div>
+                      {errors.audioPreview && <p className="text-[10px] text-red-500 mt-4">{errors.audioPreview.message}</p>}
                     </div>
-                    {errors.audioPreview && <p className="text-[10px] text-red-500 mt-4">{errors.audioPreview.message}</p>}
-                  </div>
+                  )}
                 </div>
                 <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">Visual Matrix (Cover Art)</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-4">
+                    {mintData.isBundle ? 'Collection Cover Art' : 'Visual Matrix (Cover Art)'}
+                  </label>
                   <div className="relative group h-full">
                     <input type="file" accept={ALLOWED_IMAGE_TYPES.join(',')} onChange={(e) => handleFileChange(e, 'cover')} className="hidden" id="cover-upload" />
                     <label htmlFor="cover-upload" className="flex flex-col items-center justify-center w-full h-full min-h-[160px] sm:min-h-[200px] bg-muted/50 hover:bg-muted rounded-[4px] transition-all cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { document.getElementById('cover-upload')?.click(); e.preventDefault(); } }} aria-label="Upload Cover Art">
@@ -449,14 +639,163 @@ const MintNFT: React.FC = () => {
                       ) : (
                         <>
                           <Image className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground/50 mb-4" />
-                          <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest">Upload Cover</p>
+                          <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest">{mintData.isBundle ? 'Upload Assembly Cover' : 'Upload Cover'}</p>
                         </>
                       )}
                     </label>
                   </div>
                 </div>
               </div>
-              <button onClick={() => setStep(2)} disabled={!mintData.title || !mintData.audioPreview || !mintData.genre} className="w-full py-4 sm:py-4 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" > INITIALIZE_METADATA_SEQUENCE </button>
+
+              {/* Bundled Content Section */}
+              {mintData.isBundle && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  {/* Tracks list */}
+                  <div className="p-4 bg-muted/20 rounded-[4px] space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Tracks in Bundle</h3>
+                        <p className="text-[9px] text-muted-foreground mt-1">Upload multiple audio tracks to package within this collection NFT.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAddBundleTrack}
+                        className="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white py-1.5 px-3 rounded-[3px] text-[10px] font-bold uppercase tracking-wider transition-all"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add Track
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {bundleTrackFields.map((field, idx) => (
+                        <div key={field.id} className="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-muted/35 p-3 rounded-[4px] items-center">
+                          <div className="sm:col-span-6 space-y-1">
+                            <label className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Track Title</label>
+                            <input
+                              type="text"
+                              required
+                              {...register(`bundleTracks.${idx}.title` as const)}
+                              className="w-full bg-muted/50 rounded-[4px] py-2 px-3 text-xs outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-foreground"
+                              placeholder="e.g. VIP Remix"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-5 space-y-1">
+                            <label className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Audio File</label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="file"
+                                accept={ALLOWED_AUDIO_TYPES.join(',')}
+                                onChange={(e) => handleBundleTrackFileChange(e, idx)}
+                                className="hidden"
+                                id={`track-audio-${idx}`}
+                              />
+                              <label
+                                htmlFor={`track-audio-${idx}`}
+                                className="flex-1 text-center py-2 bg-muted/65 hover:bg-muted text-[10px] font-bold uppercase tracking-wide rounded-[3px] cursor-pointer"
+                              >
+                                {watch(`bundleTracks.${idx}.audioPreview`) ? 'Loaded' : 'Choose Audio'}
+                              </label>
+                              {watch(`bundleTracks.${idx}.audioPreview`) && (
+                                <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="sm:col-span-1 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBundleTrack(idx)}
+                              className="text-muted-foreground hover:text-red-500 p-1.5 rounded bg-muted/40 transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Visual assets list */}
+                  <div className="p-4 bg-muted/20 rounded-[4px] space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Additional Visuals</h3>
+                        <p className="text-[9px] text-muted-foreground mt-1">Include bonus high-res artwork, photos, or digital visual assets.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAddBundleVisual}
+                        className="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white py-1.5 px-3 rounded-[3px] text-[10px] font-bold uppercase tracking-wider transition-all"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add Visual
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {bundleVisualFields.map((field, idx) => (
+                        <div key={field.id} className="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-muted/35 p-3 rounded-[4px] items-center">
+                          <div className="sm:col-span-6 space-y-1">
+                            <label className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Asset Name</label>
+                            <input
+                              type="text"
+                              required
+                              {...register(`bundleVisuals.${idx}.title` as const)}
+                              className="w-full bg-muted/50 rounded-[4px] py-2 px-3 text-xs outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-foreground"
+                              placeholder="e.g. Concept Art Booklet"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-5 space-y-1">
+                            <label className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Asset Image</label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="file"
+                                accept={ALLOWED_IMAGE_TYPES.join(',')}
+                                onChange={(e) => handleBundleVisualFileChange(e, idx)}
+                                className="hidden"
+                                id={`visual-image-${idx}`}
+                              />
+                              <label
+                                htmlFor={`visual-image-${idx}`}
+                                className="flex-1 text-center py-2 bg-muted/65 hover:bg-muted text-[10px] font-bold uppercase tracking-wide rounded-[3px] cursor-pointer"
+                              >
+                                {watch(`bundleVisuals.${idx}.coverPreview`) ? 'Loaded' : 'Choose Image'}
+                              </label>
+                              {watch(`bundleVisuals.${idx}.coverPreview`) && (
+                                <div className="h-6 w-6 rounded bg-neutral-900 overflow-hidden shrink-0">
+                                  <img src={watch(`bundleVisuals.${idx}.coverPreview`)} className="object-cover w-full h-full" referrerPolicy="no-referrer" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="sm:col-span-1 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBundleVisual(idx)}
+                              className="text-muted-foreground hover:text-red-500 p-1.5 rounded bg-muted/40 transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <button 
+                type="button"
+                onClick={() => setStep(2)} 
+                disabled={!isStep1Valid} 
+                className="w-full py-4 sm:py-4 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-[4px] font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" 
+              > 
+                INITIALIZE_METADATA_SEQUENCE 
+              </button>
             </div>
           )}
 

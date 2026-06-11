@@ -306,7 +306,7 @@ const Marketplace: React.FC = () => {
           </div>
         </section>
 
-        {/* 3. REFINED CONTROLS - Clean Tab Filters */}
+         {/* 3. REFINED CONTROLS - Clean Tab Filters */}
         <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-6 border-b border-border/10">
           <div className="w-full overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -316,7 +316,7 @@ const Marketplace: React.FC = () => {
                     <TabsTrigger 
                       key={tab} 
                       value={tab} 
-                      className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-transparent hover:bg-white/5 text-muted-foreground border border-[#C0C0C0]/25 data-[state=active]:border-transparent hover:border-[#C0C0C0]/50 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
+                      className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-transparent text-silver border border-silver data-[state=active]:border-transparent hover:bg-white/5 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-white shrink-0 cursor-pointer h-auto"
                     >
                       {tab}
                     </TabsTrigger>
@@ -333,10 +333,10 @@ const Marketplace: React.FC = () => {
               
               <button 
                 onClick={() => setOnlyVerified(prev => !prev)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 border ${
                   onlyVerified 
-                    ? 'bg-blue-600 text-white font-extrabold border border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
-                    : 'bg-transparent text-muted-foreground border border-[#C0C0C0]/25 hover:bg-white/5 hover:border-[#C0C0C0]/50 hover:text-foreground'
+                    ? 'bg-blue-600 text-white font-extrabold border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
+                    : 'bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white'
                 }`}
               >
                 <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyVerified ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
@@ -345,10 +345,10 @@ const Marketplace: React.FC = () => {
 
               <button 
                 onClick={() => setOnlyDirectBuy(prev => !prev)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 border ${
                   onlyDirectBuy 
-                    ? 'bg-blue-600 text-white font-extrabold border border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
-                    : 'bg-transparent text-muted-foreground border border-[#C0C0C0]/25 hover:bg-white/5 hover:border-[#C0C0C0]/50 hover:text-foreground'
+                    ? 'bg-blue-600 text-white font-extrabold border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
+                    : 'bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white'
                 }`}
               >
                 <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyDirectBuy ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />

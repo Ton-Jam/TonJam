@@ -88,10 +88,10 @@ const LimitedNFTs: React.FC = () => {
                  key={type}
                  onClick={() => setFilterType(type as any)}
                  className={cn(
-                   "px-6 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border border-white/5",
+                   "px-6 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border",
                    filterType === type 
-                     ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20" 
-                     : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                     ? "bg-blue-600 text-white border-transparent shadow-lg shadow-blue-500/20" 
+                     : "bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white"
                  )}
                >
                  {type.replace('-', ' ')}

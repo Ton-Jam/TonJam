@@ -145,6 +145,9 @@ export interface NFTItem {
   history?: NFTHistory[];
   offers?: NFTOffer[];
   exclusiveContent?: ExclusiveContent[];
+  isBundle?: boolean;
+  bundleTracks?: { title: string; audioUrl: string }[];
+  bundleVisuals?: { title: string; imageUrl: string }[];
   ipfsUrl?: string; // Decentralized metadata link
   cid?: string; // Content Identifier
   createdAt?: string;
