@@ -351,7 +351,7 @@ const Tasks: React.FC = () => {
             onValueChange={setActiveFilter}
             className="w-full"
           >
-            <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+            <div className="scroll-row scroll-smooth">
               <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
                 {FILTERS.map((filter) => (
                   <TabsTrigger

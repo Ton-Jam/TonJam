@@ -41,7 +41,20 @@ const Marketplace: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Trending');
   const [onlyVerified, setOnlyVerified] = useState(false);
   const [onlyDirectBuy, setOnlyDirectBuy] = useState(false);
-  const { addNotification, allNFTs, userProfile, searchQuery, setSearchQuery, marketplaceFilters, setMarketplaceFilters, isLoading, allTracks, artists } = useAudio();
+  const { 
+    addNotification, 
+    allNFTs, 
+    userProfile, 
+    searchQuery, 
+    setSearchQuery, 
+    marketplaceFilters, 
+    setMarketplaceFilters, 
+    isLoading, 
+    allTracks, 
+    artists, 
+    isDiscoverFiltersOpen, 
+    setIsDiscoverFiltersOpen 
+  } = useAudio();
   const { genre: genreFilter, artist: artistFilter, rarity: rarityFilter, priceRange, sortBy, status: statusFilter } = marketplaceFilters;
 
   const setGenreFilter = (genre: string) => setMarketplaceFilters(prev => ({ ...prev, genre }));
@@ -209,7 +222,7 @@ const Marketplace: React.FC = () => {
 
       <div className="relative z-10 animate-in fade-in duration-700 pb-4">
         {/* 1. COMPACT MARKET TICKER */}
-        <div className="px-4 pt-4 pb-2 max-w-[1600px] mx-auto flex flex-col gap-4">
+        <div className="w-full px-4 md:px-8 lg:px-12 pt-4 pb-2 flex flex-col gap-4">
           <div className="bg-muted/30 backdrop-blur-xl py-2 px-3 rounded-xl flex items-center justify-center overflow-hidden whitespace-nowrap border border-border/50">
             <div className="flex gap-6 animate-[marquee_50s_linear_infinite]">
               {[
@@ -235,7 +248,7 @@ const Marketplace: React.FC = () => {
         </div>
 
         {/* Floor Price Analytics Cards */}
-        <section className="mb-6 mt-2 max-w-[1600px] mx-auto px-4">
+        <section className="mb-6 mt-2 w-full px-4 md:px-8 lg:px-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: 'Floor Price', val: Math.min(...allNFTs.map(nft => parseFloat(nft.price))).toFixed(2), unit: 'TON', color: 'text-emerald-500', icon: TrendingUp, desc: 'Lowest Entry' },
@@ -262,7 +275,7 @@ const Marketplace: React.FC = () => {
 
         {/* 2. LIVE BIDDING RELAY - ENHANCED GLASS */}
         <section className="mb-4">
-          <div className="max-w-[1600px] mx-auto px-4">
+          <div className="w-full px-4 md:px-8 lg:px-12">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]"></div>
@@ -277,7 +290,7 @@ const Marketplace: React.FC = () => {
               </Button>
             </div>
             
-            <div ref={scrollRef} className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2" >
+            <div ref={scrollRef} className="scroll-row snap-x pb-2" >
               {topBiddedNfts.map((nft) => (
                 <motion.div
                   key={nft.id}
@@ -310,7 +323,7 @@ const Marketplace: React.FC = () => {
         <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-6 border-b border-border/10">
           <div className="w-full overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+              <div className="scroll-row scroll-smooth">
                 <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
                   {TABS.map(tab => (
                     <TabsTrigger 
@@ -326,48 +339,127 @@ const Marketplace: React.FC = () => {
             </Tabs>
 
             {/* Smart Filters Toggle ribbon */}
-            <div className="flex items-center gap-2 px-4 md:px-8 lg:px-12 mt-3 overflow-x-auto no-scrollbar">
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-1 shrink-0">
-                <Filter className="h-2.5 w-2.5 text-blue-500/80" /> Smart Filters:
-              </span>
-              
-              <button 
-                onClick={() => setOnlyVerified(prev => !prev)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 border ${
-                  onlyVerified 
-                    ? 'bg-blue-600 text-white font-extrabold border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
-                    : 'bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyVerified ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
-                Only Verified
-              </button>
-
-              <button 
-                onClick={() => setOnlyDirectBuy(prev => !prev)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 border ${
-                  onlyDirectBuy 
-                    ? 'bg-blue-600 text-white font-extrabold border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
-                    : 'bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyDirectBuy ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
-                Direct Buy
-              </button>
-
-              {(onlyVerified || onlyDirectBuy) && (
-                <button
-                  onClick={() => { setOnlyVerified(false); setOnlyDirectBuy(false); }}
-                  className="text-[8px] font-black text-rose-400 hover:text-rose-300 uppercase tracking-widest ml-auto shrink-0 transition-all cursor-pointer active:scale-95 px-2.5 py-1 bg-rose-500/5 hover:bg-rose-500/10 rounded-md"
+            <div className="flex items-center gap-2 px-4 md:px-8 lg:px-12 mt-3 overflow-x-auto no-scrollbar justify-between">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-4">
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-1 shrink-0">
+                  <Filter className="h-2.5 w-2.5 text-blue-500/80" /> Filters:
+                </span>
+                
+                <button 
+                  onClick={() => setOnlyVerified(prev => !prev)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 border ${
+                    onlyVerified 
+                      ? 'bg-blue-600 text-white font-extrabold border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
+                      : 'bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white'
+                  }`}
                 >
-                  Clear Smart
+                  <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyVerified ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
+                  Only Verified
                 </button>
-              )}
+
+                <button 
+                  onClick={() => setOnlyDirectBuy(prev => !prev)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 border ${
+                    onlyDirectBuy 
+                      ? 'bg-blue-600 text-white font-extrabold border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
+                      : 'bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyDirectBuy ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
+                  Direct Buy
+                </button>
+
+                {/* Inline Dropdown for Genre */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-transparent hover:bg-white/5 text-silver hover:text-white border border-silver transition-all select-none active:scale-95 shrink-0">
+                      Genre: <span className="text-white font-extrabold">{genreFilter}</span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-background border border-white/10 text-white font-ui max-h-60 overflow-y-auto">
+                    {['All', 'Techno', 'House', 'Ambient', 'Phonk', 'Cyberpunk', 'Lo-Fi', 'Electronic', 'Pop', 'Hip-Hop', 'R&B'].map((genre) => (
+                      <DropdownMenuItem 
+                        key={genre} 
+                        onClick={() => setGenreFilter(genre)}
+                        className={`text-xs font-black uppercase tracking-wider ${genreFilter === genre ? 'text-blue-400 bg-white/5' : 'text-foreground hover:bg-white/10'}`}
+                      >
+                        {genre}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Inline Dropdown for Rarity */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-transparent hover:bg-white/5 text-silver hover:text-white border border-silver transition-all select-none active:scale-95 shrink-0">
+                      Rarity: <span className="text-white font-extrabold">{rarityFilter}</span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-background border border-white/10 text-white font-ui">
+                    {['All', 'Unique', 'Rare', 'Limited', 'Common'].map((rarity) => (
+                      <DropdownMenuItem 
+                        key={rarity} 
+                        onClick={() => setRarityFilter(rarity)}
+                        className={`text-xs font-black uppercase tracking-wider ${rarityFilter === rarity ? 'text-amber-400 bg-white/5' : 'text-foreground hover:bg-white/10'}`}
+                      >
+                        {rarity}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Inline Dropdown for Sort */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-transparent hover:bg-white/5 text-silver hover:text-white border border-silver transition-all select-none active:scale-95 shrink-0">
+                      Sort: <span className="text-white font-extrabold">{sortBy}</span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-background border border-white/10 text-white font-ui">
+                    {['Newest', 'Price: Low', 'Price: High', 'Rarity'].map((sort) => (
+                      <DropdownMenuItem 
+                        key={sort} 
+                        onClick={() => setSortBy(sort)}
+                        className={`text-xs font-black uppercase tracking-wider ${sortBy === sort ? 'text-blue-400 bg-white/5' : 'text-foreground hover:bg-white/10'}`}
+                      >
+                        {sort}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {(onlyVerified || onlyDirectBuy || genreFilter !== 'All' || rarityFilter !== 'All') && (
+                  <button
+                    onClick={() => { 
+                      setOnlyVerified(false); 
+                      setOnlyDirectBuy(false); 
+                      setGenreFilter('All');
+                      setRarityFilter('All');
+                    }}
+                    className="text-[8px] font-black text-rose-400 hover:text-rose-300 uppercase tracking-widest shrink-0 transition-all cursor-pointer active:scale-95 px-2.5 py-1 bg-rose-500/5 hover:bg-rose-500/10 rounded-md animate-in fade-in zoom-in-90"
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 ml-auto shrink-0 pr-4 sm:pr-0">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsDiscoverFiltersOpen(true)}
+                  className="rounded-full h-8 px-4 text-[9px] font-bold uppercase tracking-widest bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 border border-blue-500/20 active:scale-95 transition-all flex items-center gap-1.5"
+                >
+                  <Filter className="h-3 w-3" />
+                  Advanced Filters
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-[1600px] mx-auto px-4 md:px-4">
+        <div className="w-full px-4 md:px-8 lg:px-12">
           {activeTab === 'Genesis' && (
             <div className="mb-4 p-8 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
               <div className="space-y-2">
@@ -398,7 +490,7 @@ const Marketplace: React.FC = () => {
                   VIEW MORE <ChevronRight className="h-3 w-3" />
                 </Button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2">
+              <div className="scroll-row snap-x pb-2">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <div key={`trending-loading-${i}`} className="flex-shrink-0 w-[160px] sm:w-[200px] snap-start">
@@ -425,7 +517,7 @@ const Marketplace: React.FC = () => {
                   VIEW MORE <ChevronRight className="h-3 w-3" />
                 </Button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2">
+              <div className="scroll-row snap-x pb-2">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <div key={`new-loading-${i}`} className="flex-shrink-0 w-[160px] sm:w-[200px] snap-start">
@@ -452,7 +544,7 @@ const Marketplace: React.FC = () => {
                   VIEW MORE <ChevronRight className="h-3 w-3" />
                 </Button>
               </div>
-              <div className="flex overflow-x-auto no-scrollbar snap-x gap-4 pb-2">
+              <div className="scroll-row snap-x pb-2">
                 {featuredArtists.map((artist) => (
                   <div key={artist.uid} className="flex-shrink-0 w-[140px] sm:w-[170px] snap-start">
                     <ArtistCard artist={artist} />
@@ -502,13 +594,14 @@ const Marketplace: React.FC = () => {
               </div>
               
               {filteredNfts.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                  <div className="scroll-row snap-x pb-4">
                     {filteredNfts.map((nft, idx) => (
                       <motion.div 
                         key={nft.id} 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: (idx % 10) * 0.05 }}
+                        className="flex-shrink-0 w-[240px] sm:w-[280px] snap-start"
                       >
                         <NFTCard nft={nft} />
                       </motion.div>

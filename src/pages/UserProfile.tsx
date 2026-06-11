@@ -316,7 +316,7 @@ const UserProfile: React.FC = () => {
                       <h3 className="text-xl font-black">Created Playlists</h3>
                     </div>
                     {userPlaylists.length > 0 ? (
-                      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                      <div className="scroll-row">
                         {userPlaylists.slice(0, 5).map(pl => (
                           <div key={pl.id} className="flex-shrink-0 w-40 sm:w-48">
                             <PlaylistCard playlist={pl} onClick={() => navigate(`/playlist/${pl.id}`)} />

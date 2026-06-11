@@ -346,7 +346,7 @@ const JamSpace: React.FC = () => {
             {/* Feed Filters - Sticky & Atmospheric matching Marketplace */}
             <div className="sticky top-14 z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-4 border-b border-white/[0.05]">
               <Tabs value={filterType} onValueChange={setFilterType} className="w-full">
-                <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+                <div className="scroll-row scroll-smooth">
                   <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
                     {[
                       { name: 'All', icon: Sparkles },

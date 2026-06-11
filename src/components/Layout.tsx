@@ -130,6 +130,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setMarketplaceFilters,
     jamspaceFilters,
     setJamspaceFilters,
+    discoverFilters,
+    setDiscoverFilters,
     trackToAddToPlaylist,
     setTrackToAddToPlaylist,
     optionsTrack,
@@ -791,9 +793,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         setActiveFilter={() => {}} 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        sortOption={isMarketplace ? marketplaceFilters.sortBy : 'newest'}
+        sortOption={isMarketplace ? marketplaceFilters.sortBy : isDiscover ? discoverFilters.sortBy : 'newest'}
         setSortOption={(opt) => {
           if (isMarketplace) setMarketplaceFilters(prev => ({ ...prev, sortBy: opt }));
+          if (isDiscover) setDiscoverFilters(prev => ({ ...prev, sortBy: opt }));
         }}
         filters={{
           priceRange: isMarketplace ? marketplaceFilters.priceRange : undefined,
@@ -802,8 +805,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           setRarity: isMarketplace ? ((rarity) => setMarketplaceFilters(prev => ({ ...prev, rarity }))) : undefined,
           status: isMarketplace ? marketplaceFilters.status : undefined,
           setStatus: isMarketplace ? ((status) => setMarketplaceFilters(prev => ({ ...prev, status }))) : undefined,
-          selectedGenres: isMarketplace ? [marketplaceFilters.genre] : undefined,
-          setSelectedGenres: isMarketplace ? ((genres) => setMarketplaceFilters(prev => ({ ...prev, genre: genres[0] || 'All' }))) : undefined,
+          selectedGenres: isMarketplace ? [marketplaceFilters.genre] : isDiscover ? [discoverFilters.genre] : undefined,
+          setSelectedGenres: isMarketplace 
+            ? ((genres) => setMarketplaceFilters(prev => ({ ...prev, genre: genres[0] || 'All' }))) 
+            : isDiscover 
+              ? ((genres) => setDiscoverFilters(prev => ({ ...prev, genre: genres[0] || 'All' }))) 
+              : undefined,
+          bpmRange: isDiscover ? discoverFilters.bpmRange : undefined,
+          setBpmRange: isDiscover ? ((range) => setDiscoverFilters(prev => ({ ...prev, bpmRange: range }))) : undefined,
+          selectedMoods: isDiscover ? discoverFilters.selectedMoods : undefined,
+          setSelectedMoods: isDiscover ? ((moods) => setDiscoverFilters(prev => ({ ...prev, selectedMoods: moods }))) : undefined,
+          onlyVerified: isDiscover ? discoverFilters.onlyVerified : undefined,
+          setOnlyVerified: isDiscover ? ((v) => setDiscoverFilters(prev => ({ ...prev, onlyVerified: v }))) : undefined,
         }}
       />
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

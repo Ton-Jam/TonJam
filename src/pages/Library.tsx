@@ -240,7 +240,7 @@ const Library: React.FC = () => {
         {/* Global Filter Pills & Grid Toggle controls block */}
         <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-6 border-b border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <Tabs value={filter} onValueChange={(v: any) => setFilter(v)} className="w-full">
-            <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+            <div className="scroll-row scroll-smooth">
               <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
                 {[
                   { id: 'all', label: 'All Symbols', icon: Layers },

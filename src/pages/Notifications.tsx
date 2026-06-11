@@ -128,7 +128,7 @@ const Notifications: React.FC = () => {
 
       <Tabs defaultValue="All" className="flex-1 flex flex-col" onValueChange={(val) => setActiveTab(val as any)}>
         <div className="border-b border-white/5 py-2">
-          <div className="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-8 lg:px-12">
+          <div className="scroll-row scroll-smooth">
             <TabsList className="bg-transparent h-auto p-0 gap-2 flex justify-start">
               {['All', 'Social', 'Syncs', 'Rewards', 'System'].map(tab => (
                 <TabsTrigger 

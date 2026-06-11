@@ -237,7 +237,7 @@ const AuctionScreen: React.FC = () => {
             />
           </div>
           
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto -mx-4 px-4">
+          <div className="scroll-row w-full md:w-auto mt-2 md:mt-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-transparent p-0 rounded-none w-full">
               <TabsList className="bg-transparent border-none p-0 gap-2 flex">
                 <TabsTrigger 

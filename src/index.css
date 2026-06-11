@@ -297,31 +297,58 @@
     border-color: #16244f !important;
   }
 
-  @media (max-width: 639px) {
-    .page-container,
-    .page-container > div,
-    main > div {
-      padding-left: 0px !important;
-      padding-right: 0px !important;
-    }
-    
-    /* Make sure all section containers, cards, and interactive elements span edge-to-edge beautifully on mobile screens */
-    .section-container,
-    section.section-container,
-    main section {
-      border-radius: 0px !important;
-      margin-left: 0px !important;
-      margin-right: 0px !important;
-      padding-left: 16px !important;
-      padding-right: 16px !important;
-    }
+  .page-container,
+  .page-container > div,
+  main > div {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* Make sure all section containers, cards, and interactive elements span edge-to-edge beautifully on all screens */
+  .section-container,
+  section.section-container,
+  main section {
+    border-radius: 0px !important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
 
-    /* Edge-to-edge sliders / carousels inside pages */
+  /* Edge-to-edge sliders / carousels inside pages */
+  .scroll-row {
+    display: flex !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    gap: 1rem !important;
+    scrollbar-width: none !important; /* Firefox */
+    margin-left: -1rem !important;
+    margin-right: -1rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .scroll-row::-webkit-scrollbar {
+    display: none !important; /* Safari and Chrome */
+  }
+  @media (min-width: 768px) {
     .scroll-row {
-      margin-left: -16px !important;
-      margin-right: -16px !important;
-      padding-left: 16px !important;
-      padding-right: 16px !important;
+      margin-left: -2rem !important;
+      margin-right: -2rem !important;
+      padding-left: 2rem !important;
+      padding-right: 2rem !important;
+      gap: 1.5rem !important;
+    }
+  }
+  @media (min-width: 1024px) {
+    .scroll-row {
+      margin-left: -3rem !important;
+      margin-right: -3rem !important;
+      padding-left: 3rem !important;
+      padding-right: 3rem !important;
     }
   }
 }
@@ -482,7 +509,7 @@
   }
 
   .page-container {
-    @apply px-0 sm:px-4 md:px-8 lg:px-12 w-full max-w-full;
+    @apply px-0 w-full max-w-full;
   }
 
   .section-container {

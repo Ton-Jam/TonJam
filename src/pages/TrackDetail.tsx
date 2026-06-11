@@ -559,7 +559,7 @@ const TrackDetail: React.FC = () => {
 
             {/* Content Tabs */}
             <div className="space-y-4">
-              <div className="flex gap-4 pb-4 overflow-x-auto no-scrollbar">
+              <div className="scroll-row">
                 {(['lyrics', 'details', 'history', 'nfts', 'exclusive'] as const).map((tab) => {
                   const hasPerks = associatedNFTs.some(n => n.exclusiveContent && n.exclusiveContent.length > 0) || track.isExclusive;
                   if (tab === 'exclusive' && !hasPerks) return null;

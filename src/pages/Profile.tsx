@@ -707,7 +707,7 @@ const Profile: React.FC = () => {
 
             <div className="p-4 space-y-8">
               <SectionHeader title="Followed Artists" onAction={() => setActiveTab('staking')} />
-              <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+              <div className="scroll-row">
                 {localUser.followedArtists && localUser.followedArtists.length > 0 ? (
                   localUser.followedArtists.slice(0, 5).map(artistId => {
                     const artist = MOCK_ARTISTS.find(a => a.uid === artistId);

@@ -305,6 +305,22 @@ interface AudioContextType {
       viewMode: "list" | "grid";
     }>
   >;
+  discoverFilters: {
+    genre: string;
+    bpmRange: [number, number];
+    selectedMoods: string[];
+    onlyVerified: boolean;
+    sortBy: string;
+  };
+  setDiscoverFilters: React.Dispatch<
+    React.SetStateAction<{
+      genre: string;
+      bpmRange: [number, number];
+      selectedMoods: string[];
+      onlyVerified: boolean;
+      sortBy: string;
+    }>
+  >;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -454,6 +470,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   }>({
     sortOrder: "Newest",
     viewMode: "list",
+  });
+
+  const [discoverFilters, setDiscoverFilters] = useState<{
+    genre: string;
+    bpmRange: [number, number];
+    selectedMoods: string[];
+    onlyVerified: boolean;
+    sortBy: string;
+  }>({
+    genre: "All",
+    bpmRange: [60, 180],
+    selectedMoods: [],
+    onlyVerified: false,
+    sortBy: "Newest",
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -4269,6 +4299,8 @@ Return a JSON object with the following structure:
         setIsHeaderSearchOpen,
         isDiscoverFiltersOpen,
         setIsDiscoverFiltersOpen,
+        discoverFilters,
+        setDiscoverFilters,
         isCreatePlaylistModalOpen,
         setIsCreatePlaylistModalOpen,
         featuredPlaylist,

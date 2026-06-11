@@ -104,7 +104,7 @@ const DiscoveryFeed: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="scroll-row">
             {recommendedTracks.slice(0, 6).map((track, idx) => (
               <div 
                 key={`rec-track-${track.id}-${idx}`} 
@@ -137,7 +137,7 @@ const DiscoveryFeed: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="scroll-row">
             {recommendedNFTs.slice(0, 5).map((nft, idx) => (
               <div 
                 key={`rec-nft-${nft.id}-${idx}`} 
@@ -153,7 +153,7 @@ const DiscoveryFeed: React.FC = () => {
       )}
 
       {/* Discovery Insights / Social Signals */}
-      <section className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+      <section className="scroll-row">
         <div className="glass p-4 rounded-sm relative overflow-hidden group transition-all min-w-[280px] sm:min-w-[320px]">
           <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
             <TrendingUp className="h-16 w-16 text-blue-500" />

@@ -117,7 +117,7 @@ const TrendingNFTs: React.FC = () => {
             <h2 className="text-xl font-black uppercase tracking-tight">Active Collections</h2>
             <button className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors">View All</button>
           </div>
-          <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="scroll-row">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="flex-shrink-0 w-32 sm:w-40 group cursor-pointer">
                 <div className="relative aspect-square rounded-[4px] overflow-hidden mb-2">

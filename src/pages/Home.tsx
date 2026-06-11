@@ -679,7 +679,7 @@ const Home: React.FC = () => {
         </div>
 
         <TabsContent value="overview" className="focus-visible:ring-0 p-0 outline-none">
-          <div className="flex overflow-x-auto no-scrollbar gap-2 py-2 -mx-4 px-4">
+          <div className="scroll-row gap-2 py-2">
             <button
               onClick={() => setSelectedGenre(null)}
               className="flex-shrink-0 group relative cursor-pointer"
@@ -1228,7 +1228,7 @@ const Home: React.FC = () => {
                 viewAllLink="/explore/tracks?title=Trending Signals&filter=trending" 
               />
               {isLoading ? (
-                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
+                <div className="scroll-row">
                   {[1, 2, 3, 4].map(i => (
                     <div key={`trend-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px]">
                       <SkeletonCard />
