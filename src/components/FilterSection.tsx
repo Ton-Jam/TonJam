@@ -252,17 +252,31 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 <div className="space-y-3">
                   <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Frequency Genres</Label>
                   <div className="flex flex-wrap gap-1.5">
+                    <Badge 
+                      variant={(filters.selectedGenres?.includes('All') || !filters.selectedGenres || filters.selectedGenres.length === 0) ? "default" : "outline"}
+                      onClick={() => {
+                        filters.setSelectedGenres!(['All']);
+                      }}
+                      className={cn(
+                        "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
+                        (filters.selectedGenres?.includes('All') || !filters.selectedGenres || filters.selectedGenres.length === 0)
+                          ? "bg-blue-600 text-white" 
+                          : "bg-white/5 text-white/50 hover:bg-white/10"
+                      )}
+                    >
+                      All
+                    </Badge>
                     {GENRES.map((genre) => {
-                      const isSelected = filters.selectedGenres?.includes(genre.name);
+                      const isSelected = filters.selectedGenres?.includes(genre.name) && !filters.selectedGenres?.includes('All');
                       return (
                         <Badge 
                           key={genre.id}
                           variant={isSelected ? "default" : "outline"}
                           onClick={() => {
                             if (isSelected) {
-                              filters.setSelectedGenres!(filters.selectedGenres!.filter(g => g !== genre.name));
+                              filters.setSelectedGenres!(['All']);
                             } else {
-                              filters.setSelectedGenres!([...(filters.selectedGenres || []), genre.name]);
+                              filters.setSelectedGenres!([genre.name]);
                             }
                           }}
                           className={cn(

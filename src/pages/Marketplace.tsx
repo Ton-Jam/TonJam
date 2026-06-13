@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button as MTButton } from "@material-tailwind/react";
 import { Search, Plus, ArrowRight, Satellite, TrendingUp, ChevronRight, Zap, Filter, Bell, Rocket, Box } from 'lucide-react';
 import { TON_LOGO } from '@/constants';
 import { getPlaceholderImage } from '@/lib/utils';
@@ -329,9 +330,18 @@ const Marketplace: React.FC = () => {
                     <TabsTrigger 
                       key={tab} 
                       value={tab} 
-                      className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-transparent text-silver border border-silver data-[state=active]:border-transparent hover:bg-white/5 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-white shrink-0 cursor-pointer h-auto"
+                      asChild
                     >
-                      {tab}
+                      <MTButton
+                        variant={activeTab === tab ? "filled" : "outlined"}
+                        color="blue"
+                        className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap"
+                        placeholder=""
+                        onPointerEnterCapture={() => {}}
+                        onPointerLeaveCapture={() => {}}
+                      >
+                        {tab}
+                      </MTButton>
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -345,29 +355,29 @@ const Marketplace: React.FC = () => {
                   <Filter className="h-2.5 w-2.5 text-blue-500/80" /> Filters:
                 </span>
                 
-                <button 
+                <MTButton 
                   onClick={() => setOnlyVerified(prev => !prev)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 border ${
-                    onlyVerified 
-                      ? 'bg-blue-600 text-white font-extrabold border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
-                      : 'bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white'
-                  }`}
+                  variant={onlyVerified ? "filled" : "outlined"}
+                  color="blue"
+                  className="rounded-full px-4 py-1.5 text-[9px] lowercase font-medium tracking-widest transition-all shrink-0 h-auto"
+                  placeholder=""
+                  onPointerEnterCapture={() => {}}
+                  onPointerLeaveCapture={() => {}}
                 >
-                  <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyVerified ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
                   Only Verified
-                </button>
+                </MTButton>
 
-                <button 
+                <MTButton 
                   onClick={() => setOnlyDirectBuy(prev => !prev)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer select-none active:scale-95 shrink-0 border ${
-                    onlyDirectBuy 
-                      ? 'bg-blue-600 text-white font-extrabold border-transparent shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
-                      : 'bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white'
-                  }`}
+                  variant={onlyDirectBuy ? "filled" : "outlined"}
+                  color="blue"
+                  className="rounded-full px-4 py-1.5 text-[9px] lowercase font-medium tracking-widest transition-all shrink-0 h-auto"
+                  placeholder=""
+                  onPointerEnterCapture={() => {}}
+                  onPointerLeaveCapture={() => {}}
                 >
-                  <div className={`w-1.5 h-1.5 rounded-full transition-all ${onlyDirectBuy ? 'bg-white scale-110 shadow-[0_0_6px_#ffffff]' : 'bg-muted-foreground/30'}`} />
                   Direct Buy
-                </button>
+                </MTButton>
 
                 {/* Inline Dropdown for Genre */}
                 <DropdownMenu>

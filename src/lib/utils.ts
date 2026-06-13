@@ -27,6 +27,9 @@ export const getPlaceholderImage = (type: PlaceholderType, _width?: number, _hei
 
   const lowerType = String(type || '').toLowerCase();
   
+  if (lowerType.includes('banner')) {
+    return '/default_tonjam_banner.jpg';
+  }
   if (lowerType.includes('artist') || lowerType.includes('creator') || lowerType.includes('user') || lowerType.includes('avatar')) {
     return PLACEHOLDERS.artist;
   }

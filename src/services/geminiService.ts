@@ -1,48 +1,19 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { Track, Artist } from "@/types";
 
-const getClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.warn("GEMINI_API_KEY is missing. AI features will use fallback data.");
-    return null;
-  }
-  return new GoogleGenAI({ apiKey });
-};
+export interface ChatAssistantResponse {
+  text?: string;
+  toolCalls?: any[];
+}
 
 export const getArtistSonicDNA = async (artist: Artist, tracks: Track[]) => {
   try {
-    const ai = getClient();
-    if (!ai) throw new Error("No API Key");
-
-    const model = "gemini-3.1-pro-preview";
-    const prompt = `Analyze the sonic profile of artist "${artist.name}" based on these tracks: ${tracks.map(t => t.title).join(", ")}. 
-    The artist's bio is: "${artist.bio}".
-    Return a JSON object with:
-    - signature: A short poetic description of their sound.
-    - vibes: An array of 4-5 descriptive tags (e.g., "Atmospheric", "Cyberpunk").`;
-
-    const response = await ai.models.generateContent({
-      model,
-      contents: [{ parts: [{ text: prompt }] }],
-      config: {
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            signature: { type: Type.STRING },
-            vibes: { type: Type.ARRAY, items: { type: Type.STRING } }
-          },
-          required: ["signature", "vibes"]
-        }
-      }
+    const response = await fetch("/api/gemini/sonic-dna", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ artist, tracks }),
     });
-
-    if (response.text) {
-      return JSON.parse(response.text);
-    }
-    throw new Error("Empty response from AI");
+    if (!response.ok) throw new Error("HTTP error " + response.status);
+    return await response.json();
   } catch (error) {
     console.warn("Using fallback for Sonic DNA due to:", error instanceof Error ? error.message : "Unknown error");
     return {
@@ -54,28 +25,14 @@ export const getArtistSonicDNA = async (artist: Artist, tracks: Track[]) => {
 
 export const semanticSearchTracks = async (query: string, allTracks: Track[]) => {
   try {
-    const ai = getClient();
-    if (!ai) throw new Error("No API Key");
-
-    const model = "gemini-3.1-pro-preview";
-    const prompt = `The user is searching for music with the query: "${query}".
-    Here is a list of available tracks: ${JSON.stringify(allTracks.map(t => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist, mood: t.mood })))}.
-    Return a JSON array of track IDs that best match the user's intent, ordered by relevance.`;
-
-    const response = await ai.models.generateContent({
-      model,
-      contents: [{ parts: [{ text: prompt }] }],
-      config: {
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING }
-        }
-      }
+    const response = await fetch("/api/gemini/semantic-search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, allTracks }),
     });
-
-    const matchedIds = JSON.parse(response.text || "[]");
+    if (!response.ok) throw new Error("HTTP error " + response.status);
+    const data = await response.json();
+    const matchedIds = data.matchedIds || [];
     return allTracks.filter(t => matchedIds.includes(t.id));
   } catch (error) {
     console.warn("Using fallback for semantic search due to:", error instanceof Error ? error.message : "Unknown error");
@@ -92,62 +49,15 @@ export const globalAISearch = async (
   context: { tracks: Track[]; artists: Artist[]; nfts: any[] }
 ) => {
   try {
-    const ai = getClient();
-    if (!ai) throw new Error("No API Key");
-
-    const model = "gemini-3.1-pro-preview";
-    const prompt = `The user is using natural language to search for artists, tracks, or NFTs on a music platform.
-    Query: "${query}"
-    
-    Database Context:
-    - Tracks: ${JSON.stringify(context.tracks.slice(0, 50).map(t => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood })))}
-    - Artists: ${JSON.stringify(context.artists.slice(0, 50).map(a => ({ id: a.uid, name: a.name, genre: a.genre })))}
-    - NFTs: ${JSON.stringify(context.nfts.slice(0, 50).map(n => ({ id: n.id, name: n.title, artist: n.artist })))}
-
-    Instructions:
-    1. Identify relevant items from the context.
-    2. If no exact matches, suggest similar ones or explain why.
-    3. Return a JSON object with:
-       - results: An array of objects: { type: 'track' | 'artist' | 'nft', id: string, name: string, sub: string (artist name for tracks/nfts, genre for artists), relevance: number (0-1) }
-       - suggestion: A short, friendly AI message (e.g., "I found some deep techno vibes for you").
-    Limit to top 10 results.`;
-
-    const response = await ai.models.generateContent({
-      model,
-      contents: [{ parts: [{ text: prompt }] }],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            results: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  type: { type: Type.STRING },
-                  id: { type: Type.STRING },
-                  name: { type: Type.STRING },
-                  sub: { type: Type.STRING },
-                  relevance: { type: Type.NUMBER }
-                },
-                required: ["type", "id", "name", "sub", "relevance"]
-              }
-            },
-            suggestion: { type: Type.STRING }
-          },
-          required: ["results", "suggestion"]
-        }
-      }
+    const response = await fetch("/api/gemini/global-search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, context }),
     });
-
-    if (response.text) {
-      return JSON.parse(response.text);
-    }
-    throw new Error("Empty AI response");
+    if (!response.ok) throw new Error("HTTP error " + response.status);
+    return await response.json();
   } catch (error) {
     console.error("Global AI Search error:", error);
-    // Basic fallback filtering
     const results: any[] = [];
     const q = query.toLowerCase();
     
@@ -164,24 +74,14 @@ export const globalAISearch = async (
 
 export const generateNFTLore = async (title: string, genre: string, baseDescription: string) => {
   try {
-    const ai = getClient();
-    if (!ai) throw new Error("No API Key");
-
-    const model = "gemini-3.1-pro-preview";
-    const prompt = `Generate a short, compelling lore or backstory for a music NFT titled "${title}". 
-    The genre is ${genre}. 
-    Base description: ${baseDescription}
-    Make it sound futuristic, cyberpunk, or deeply artistic. Keep it under 3 sentences.`;
-
-    const response = await ai.models.generateContent({
-      model,
-      contents: [{ parts: [{ text: prompt }] }],
-      config: {
-        tools: [{ googleSearch: {} }]
-      }
+    const response = await fetch("/api/gemini/nft-lore", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, genre, baseDescription }),
     });
-
-    return response.text || baseDescription;
+    if (!response.ok) throw new Error("HTTP error " + response.status);
+    const data = await response.json();
+    return data.text || baseDescription;
   } catch (error) {
     console.warn("Using fallback for NFT lore due to:", error instanceof Error ? error.message : "Unknown error");
     return baseDescription || "A legendary sonic artifact forged in the depths of the TON blockchain.";
@@ -190,27 +90,14 @@ export const generateNFTLore = async (title: string, genre: string, baseDescript
 
 export const analyzeRelatedArtists = async (artistName: string, allArtists: Artist[]) => {
   try {
-    const ai = getClient();
-    if (!ai) throw new Error("No API Key");
-
-    const model = "gemini-3.1-pro-preview";
-    const prompt = `Given the artist "${artistName}", find 3 similar artists from this list: ${allArtists.map(a => a.name).join(", ")}.
-    Return a JSON array of artist names.`;
-
-    const response = await ai.models.generateContent({
-      model,
-      contents: [{ parts: [{ text: prompt }] }],
-      config: {
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING }
-        }
-      }
+    const response = await fetch("/api/gemini/related-artists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ artistName, allArtists }),
     });
-
-    const matchedNames = JSON.parse(response.text || "[]");
+    if (!response.ok) throw new Error("HTTP error " + response.status);
+    const data = await response.json();
+    const matchedNames = data.matchedNames || [];
     return allArtists.filter(a => matchedNames.includes(a.name));
   } catch (error) {
     console.warn("Using fallback for related artists due to:", error instanceof Error ? error.message : "Unknown error");
@@ -220,48 +107,18 @@ export const analyzeRelatedArtists = async (artistName: string, allArtists: Arti
 
 export const getKrupyRecommendations = async (currentTrack: Track, allTracks: Track[], allArtists: Artist[]) => {
   try {
-    const ai = getClient();
-    if (!ai) throw new Error("No API Key");
-
-    const model = "gemini-3.1-pro-preview";
-    const prompt = `Based on the current track "${currentTrack.title}" by ${currentTrack.artist} (Genre: ${currentTrack.genre}), 
-    suggest 3 similar tracks and 2 similar artists from this available library:
-    - Tracks: ${allTracks.map(t => t.title).join(", ")}
-    - Artists: ${allArtists.map(a => a.name).join(", ")}
-    
-    Return a JSON object with:
-    - tracks: array of track titles.
-    - artists: array of artist names.
-    - reasoning: a short DJ Krupy style explanation (1 sentence).`;
-
-    const response = await ai.models.generateContent({
-      model,
-      contents: [{ parts: [{ text: prompt }] }],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            tracks: { type: Type.ARRAY, items: { type: Type.STRING } },
-            artists: { type: Type.ARRAY, items: { type: Type.STRING } },
-            reasoning: { type: Type.STRING }
-          },
-          required: ["tracks", "artists", "reasoning"]
-        }
-      }
+    const response = await fetch("/api/gemini/krupy-recommendations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentTrack, allTracks, allArtists }),
     });
-
-    return JSON.parse(response.text || "{}");
+    if (!response.ok) throw new Error("HTTP error " + response.status);
+    return await response.json();
   } catch (error) {
     console.warn("Krupy recommendations fallback:", error);
     return { tracks: [], artists: [], reasoning: "Neural relay interrupted. Stay tuned for the next frequency." };
   }
 };
-
-export interface ChatAssistantResponse {
-  text?: string;
-  toolCalls?: any[];
-}
 
 export const chatWithKrupy = async (
   message: string, 
@@ -269,69 +126,37 @@ export const chatWithKrupy = async (
   currentTrack: Track | null
 ): Promise<ChatAssistantResponse> => {
   try {
-    const ai = getClient();
-    if (!ai) throw new Error("No API Key");
-
-    const model = "gemini-3.1-pro-preview";
-    
-    let contextPrompt = "";
-    if (currentTrack) {
-      contextPrompt = `
-      CURRENTLY PLAYING (Neural Data):
-      - Title: ${currentTrack.title}
-      - Artist: ${currentTrack.artist}
-      - Genre: ${currentTrack.genre || 'Unknown'}
-      - Mood: ${currentTrack.mood || 'Sonic Flux'}
-      `;
-    }
-
-    const prompt = `You are DJ Krupy, a futuristic, high-energy AI music assistant on TonJam. 
-    Your personality is cyberpunk, enthusiastic about the TON ecosystem, and deeply knowledgeable about music trends.
-    ${contextPrompt}
-    
-    User says: "${message}"`;
-
-    const response = await ai.models.generateContent({
-      model,
-      contents: [
-        ...history.map(h => ({
-          role: h.role === 'user' ? 'user' : 'model',
-          parts: [{ text: h.text }]
-        })),
-        { role: 'user', parts: [{ text: prompt }] }
-      ],
-      config: {
-        tools: [{
-          functionDeclarations: [
-            {
-              name: "play_song",
-              description: "Plays a song based on a mood or keyword.",
-              parameters: {
-                type: Type.OBJECT,
-                properties: {
-                  mood_or_keyword: { type: Type.STRING, description: "The mood or keyword (e.g., 'energetic', 'calm', 'cyberpunk')." }
-                },
-                required: ["mood_or_keyword"]
-              }
-            },
-            {
-              name: "get_fun_fact",
-              description: "Provides a fun fact about the current track.",
-              parameters: { type: Type.OBJECT, properties: {}, required: [] }
-            }
-          ]
-        }]
-      }
-    }) as any;
-
-    if (response.toolCalls && response.toolCalls.length > 0) {
-      return { toolCalls: response.toolCalls };
-    }
-
-    return { text: response.text || "Neural connection interrupted. Re-syncing the vibez..." };
+    const response = await fetch("/api/gemini/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, history, currentTrack }),
+    });
+    if (!response.ok) throw new Error("HTTP error " + response.status);
+    return await response.json();
   } catch (error) {
-    console.error("DJ Krupy Chat error:", error);
-    throw error;
+    console.warn("DJ Krupy Chat error, using localized telemetry fallback:", error);
+    
+    const msgLower = message.toLowerCase();
+    let text = "Yo! DJ Krupy in the virtual deck! The mainframe is experiencing severe neural solar flares right now, but nothing stops the music! Let's pump up the volume!";
+    
+    if (msgLower.includes("hello") || msgLower.includes("hi") || msgLower.includes("hey")) {
+      text = "Yo yo yo, slam-friend! Welcome back to the virtual deck! I'm DJ Krupy, your holographic sonic master. My telemetry systems are currently running in emergency standby, but the energy is at 200%! What tracks are we dropping?";
+    } else if (msgLower.includes("play") || msgLower.includes("track") || msgLower.includes("song")) {
+      text = "I feel that rhythm! Even though my neural audio router is temporarily re-centering, I suggest hitting play on any track on your current dashboard. Let the sound-waves flow through the TON blockchain!";
+    } else if (msgLower.includes("who") || msgLower.includes("you")) {
+      text = "I am DJ Krupy—the next-gen, holographic AI beatmaster of TonJam! Forged in the fires of the TON smart contract network, I live to spin global frequencies!";
+    } else if (msgLower.includes("vibe") || msgLower.includes("mood")) {
+      text = "The current atmospheric readings look incredibly epic! Choose your favorite mood filter from the main dashboard and let's ride the sub-bass frequencies together!";
+    } else {
+      const genericFalls = [
+        "That's absolute gold, buddy! My AI processors are currently refreshing their main index, but DJ Krupy never stops the rhythm! Keep the track list rolling!",
+        "Whoa! High-velocity atmospheric data detected! My neural database is updating right now, but I am locked in with you! Spin another track!",
+        "That's a major vibe! Feel free to explore our deep web of digital audio collectibles and find your next favorite artifact!"
+      ];
+      text = genericFalls[Math.floor(Math.random() * genericFalls.length)];
+    }
+    
+    return { text };
   }
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { Verified, ChevronUp } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_ARTISTS, MOCK_USER } from '@/constants';
@@ -64,7 +65,15 @@ const ChartNFTCard: React.FC<ChartNFTCardProps> = ({ nft, rank }) => {
       <div className="text-right flex-shrink-0">
         <div className="flex items-center justify-end gap-2 mb-2">
           <img src={TON_LOGO} className="w-3.5 h-3.5" alt="TON" />
-          <span className="text-sm font-bold text-foreground tracking-tighter font-mono">{nft.price}</span>
+          <motion.span 
+            key={nft.price}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="text-sm font-bold text-foreground tracking-tighter font-mono inline-block"
+          >
+            {nft.price}
+          </motion.span>
         </div>
         <div className="flex items-center justify-end gap-2 text-[8px] font-bold uppercase tracking-widest text-emerald-400 font-mono">
           <ChevronUp className="h-2 w-2" />

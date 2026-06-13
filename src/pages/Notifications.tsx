@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button as MTButton } from "@material-tailwind/react";
 import { Gem, Heart, Zap, Gavel, UserPlus, ChevronRight, Satellite, X as XMarkIcon } from 'lucide-react';
 import { APP_LOGO, TJ_COIN_ICON } from '@/constants';
 import NotificationDetailModal from '@/components/NotificationDetailModal';
@@ -134,9 +135,18 @@ const Notifications: React.FC = () => {
                 <TabsTrigger 
                   key={tab} 
                   value={tab}
-                  className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-transparent hover:bg-white/5 text-muted-foreground border border-[#C0C0C0]/25 data-[state=active]:border-transparent hover:border-[#C0C0C0]/50 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
+                  asChild
                 >
-                  {tab}
+                  <MTButton
+                    variant={activeTab === tab ? "filled" : "outlined"}
+                    color="blue"
+                    className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0"
+                    placeholder=""
+                    onPointerEnterCapture={() => {}}
+                    onPointerLeaveCapture={() => {}}
+                  >
+                    {tab}
+                  </MTButton>
                 </TabsTrigger>
               ))}
             </TabsList>

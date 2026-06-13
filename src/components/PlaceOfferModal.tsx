@@ -103,8 +103,13 @@ const PlaceOfferModal: React.FC<PlaceOfferModalProps> = ({ nft, onClose }) => {
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={confirmOffer}
         title="Place Offer?"
-        description={`Are you sure you want to place an offer of ${offerAmount} TON for "${nft.title}"?`}
-        confirmText="Place Offer"
+        description={`Confirming will register your offer on the marketplace.`}
+        confirmText="Confirm Offer"
+        assetName={nft.title}
+        assetImage={nft.imageUrl}
+        tonAmount={offerAmount}
+        networkFee="0.05"
+        totalAmount={offerAmount ? (parseFloat(offerAmount) + 0.05).toFixed(2) : undefined}
       />
     </Dialog>
   );

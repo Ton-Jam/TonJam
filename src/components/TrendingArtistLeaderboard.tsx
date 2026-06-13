@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'motion/react';
+import { Button as MTButton } from "@material-tailwind/react";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -211,27 +212,29 @@ export const TrendingArtistLeaderboard: React.FC<TrendingArtistLeaderboardProps>
         </div>
 
         {/* Custom Toggle Selection with zero borders */}
-        <div className="flex bg-white/[0.03] p-1 rounded-full w-fit">
-          <button
+        <div className="flex bg-white/[0.03] p-1 rounded-full w-fit gap-2">
+          <MTButton
             onClick={() => setMetricTab('plays')}
-            className={`px-4 py-2 text-[9px] font-black uppercase tracking-wider rounded-full cursor-pointer transition-all duration-300 ${
-              metricTab === 'plays' 
-                ? 'bg-blue-600 text-white shadow-lg' 
-                : 'text-zinc-400 hover:text-white'
-            }`}
+            variant={metricTab === 'plays' ? "filled" : "outlined"}
+            color="blue"
+            className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap"
+            placeholder=""
+            onPointerEnterCapture={() => {}}
+            onPointerLeaveCapture={() => {}}
           >
             Track Plays
-          </button>
-          <button
+          </MTButton>
+          <MTButton
             onClick={() => setMetricTab('nft-sales')}
-            className={`px-4 py-2 text-[9px] font-black uppercase tracking-wider rounded-full cursor-pointer transition-all duration-300 ${
-              metricTab === 'nft-sales' 
-                ? 'bg-blue-600 text-white shadow-lg' 
-                : 'text-zinc-400 hover:text-white'
-            }`}
+            variant={metricTab === 'nft-sales' ? "filled" : "outlined"}
+            color="blue"
+            className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap"
+            placeholder=""
+            onPointerEnterCapture={() => {}}
+            onPointerLeaveCapture={() => {}}
           >
             Sales Volume
-          </button>
+          </MTButton>
         </div>
       </div>
 

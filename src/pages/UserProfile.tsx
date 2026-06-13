@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Button as MTButton } from "@material-tailwind/react";
 import { 
   Verified, 
   Users, 
@@ -242,26 +243,22 @@ const UserProfile: React.FC = () => {
       </div>
 
       {/* 3. TABS NAVIGATION (Refined) */}
-      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 mb-4 sm:mb-8 overflow-hidden group">
+      <div className="sticky top-[var(--header-height,64px)] z-30 bg-background/90 backdrop-blur-xl border-b border-white/5 py-4 mb-4 sm:mb-8 overflow-hidden group">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar [--scrollbar-width:none]">
+          <div className="flex items-center gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-row">
             {['overview', 'inventory', 'activity', 'network'].map(tab => (
-              <button 
+              <MTButton 
                 key={tab} 
                 onClick={() => setActiveTab(tab as any)} 
-                className={cn(
-                  "py-4 sm:py-6 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] transition-all relative whitespace-nowrap flex items-center gap-2",
-                  activeTab === tab ? "text-blue-500" : "text-muted-foreground hover:text-foreground/80"
-                )} 
+                variant={activeTab === tab ? "filled" : "outlined"}
+                color="blue"
+                className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0"
+                placeholder=""
+                onPointerEnterCapture={() => {}}
+                onPointerLeaveCapture={() => {}}
               >
                 {tab === 'inventory' ? 'Collection' : tab}
-                {activeTab === tab && (
-                  <motion.div 
-                    layoutId="activeTabUser"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
-                  />
-                )}
-              </button>
+              </MTButton>
             ))}
           </div>
         </div>

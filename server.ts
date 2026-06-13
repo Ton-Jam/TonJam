@@ -374,6 +374,300 @@ async function startServer() {
         }
     });
 
+    // Server-Side Gemini Proxy Routes
+    app.post('/api/gemini/sonic-dna', async (req, res) => {
+        try {
+            const { artist, tracks } = req.body;
+            const model = "gemini-3.5-flash";
+            const prompt = `Analyze the sonic profile of artist "${artist.name}" based on these tracks: ${tracks.map((t: any) => t.title).join(", ")}. 
+            The artist's bio is: "${artist.bio}".
+            Return a JSON object with:
+            - signature: A short poetic description of their sound.
+            - vibes: An array of 4-5 descriptive tags (e.g., "Atmospheric", "Cyberpunk").`;
+
+            const response = await ai.models.generateContent({
+                model,
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            signature: { type: Type.STRING },
+                            vibes: { type: Type.ARRAY, items: { type: Type.STRING } }
+                        },
+                        required: ["signature", "vibes"]
+                    }
+                }
+            });
+
+            if (response.text) {
+                return res.json(JSON.parse(response.text));
+            }
+            throw new Error("Empty response from AI");
+        } catch (error: any) {
+            console.error("Sonic DNA error:", error);
+            res.status(500).json({ error: error.message || "Failed to analyze Sonic DNA" });
+        }
+    });
+
+    app.post('/api/gemini/semantic-search', async (req, res) => {
+        try {
+            const { query, allTracks } = req.body;
+            const model = "gemini-3.5-flash";
+            const prompt = `The user is searching for music with the query: "${query}".
+            Here is a list of available tracks: ${JSON.stringify(allTracks.map((t: any) => ({ id: t.id, title: t.title, genre: t.genre, artist: t.artist, mood: t.mood })))}.
+            Return a JSON array of track IDs that best match the user's intent, ordered by relevance.`;
+
+            const response = await ai.models.generateContent({
+                model,
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.ARRAY,
+                        items: { type: Type.STRING }
+                    }
+                }
+            });
+
+            const matchedIds = JSON.parse(response.text || "[]");
+            res.json({ matchedIds });
+        } catch (error: any) {
+            console.error("Semantic search error:", error);
+            res.status(500).json({ error: error.message || "Failed semantic search" });
+        }
+    });
+
+    app.post('/api/gemini/global-search', async (req, res) => {
+        try {
+            const { query, context } = req.body;
+            const model = "gemini-3.5-flash";
+            const prompt = `The user is using natural language to search for artists, tracks, or NFTs on a music platform.
+            Query: "${query}"
+            
+            Database Context:
+            - Tracks: ${JSON.stringify(context.tracks.slice(0, 50).map((t: any) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood })))}
+            - Artists: ${JSON.stringify(context.artists.slice(0, 50).map((a: any) => ({ id: a.uid, name: a.name, genre: a.genre })))}
+            - NFTs: ${JSON.stringify(context.nfts.slice(0, 50).map((n: any) => ({ id: n.id, name: n.title, artist: n.artist })))}
+
+            Instructions:
+            1. Identify relevant items from the context.
+            2. If no exact matches, suggest similar ones or explain why.
+            3. Return a JSON object with:
+               - results: An array of objects: { type: 'track' | 'artist' | 'nft', id: string, name: string, sub: string (artist name for tracks/nfts, genre for artists), relevance: number (0-1) }
+               - suggestion: A short, friendly AI message (e.g., "I found some deep techno vibes for you").
+            Limit to top 10 results.`;
+
+            const response = await ai.models.generateContent({
+                model,
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            results: {
+                                type: Type.ARRAY,
+                                items: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        type: { type: Type.STRING },
+                                        id: { type: Type.STRING },
+                                        name: { type: Type.STRING },
+                                        sub: { type: Type.STRING },
+                                        relevance: { type: Type.NUMBER }
+                                    },
+                                    required: ["type", "id", "name", "sub", "relevance"]
+                                }
+                            },
+                            suggestion: { type: Type.STRING }
+                        },
+                        required: ["results", "suggestion"]
+                    }
+                }
+            });
+
+            if (response.text) {
+                return res.json(JSON.parse(response.text));
+            }
+            throw new Error("Empty response");
+        } catch (error: any) {
+            console.error("Global search error:", error);
+            res.status(500).json({ error: error.message || "Failed global search" });
+        }
+    });
+
+    app.post('/api/gemini/nft-lore', async (req, res) => {
+        try {
+            const { title, genre, baseDescription } = req.body;
+            const model = "gemini-3.5-flash";
+            const prompt = `Generate a short, compelling lore or backstory for a music NFT titled "${title}". 
+            The genre is ${genre}. 
+            Base description: ${baseDescription}
+            Make it sound futuristic, cyberpunk, or deeply artistic. Keep it under 3 sentences.`;
+
+            const response = await ai.models.generateContent({
+                model,
+                contents: [{ parts: [{ text: prompt }] }],
+            });
+
+            res.json({ text: response.text || baseDescription });
+        } catch (error: any) {
+            console.error("NFT lore error:", error);
+            res.status(500).json({ error: error.message || "Failed to generate NFT lore" });
+        }
+    });
+
+    app.post('/api/gemini/related-artists', async (req, res) => {
+        try {
+            const { artistName, allArtists } = req.body;
+            const model = "gemini-3.5-flash";
+            const prompt = `Given the artist "${artistName}", find 3 similar artists from this list: ${allArtists.map((a: any) => a.name).join(", ")}.
+            Return a JSON array of artist names.`;
+
+            const response = await ai.models.generateContent({
+                model,
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.ARRAY,
+                        items: { type: Type.STRING }
+                    }
+                }
+            });
+
+            const matchedNames = JSON.parse(response.text || "[]");
+            res.json({ matchedNames });
+        } catch (error: any) {
+            console.error("Related artists error:", error);
+            res.status(500).json({ error: error.message || "Failed related artists" });
+        }
+    });
+
+    app.post('/api/gemini/krupy-recommendations', async (req, res) => {
+        try {
+            const { currentTrack, allTracks, allArtists } = req.body;
+            const model = "gemini-3.5-flash";
+            const prompt = `Based on the current track "${currentTrack.title}" by ${currentTrack.artist} (Genre: ${currentTrack.genre}), 
+            suggest 3 similar tracks and 2 similar artists from this available library:
+            - Tracks: ${allTracks.map((t: any) => t.title).join(", ")}
+            - Artists: ${allArtists.map((a: any) => a.name).join(", ")}
+            
+            Return a JSON object with:
+            - tracks: array of track titles.
+            - artists: array of artist names.
+            - reasoning: a short DJ Krupy style explanation (1 sentence).`;
+
+            const response = await ai.models.generateContent({
+                model,
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            tracks: { type: Type.ARRAY, items: { type: Type.STRING } },
+                            artists: { type: Type.ARRAY, items: { type: Type.STRING } },
+                            reasoning: { type: Type.STRING }
+                        },
+                        required: ["tracks", "artists", "reasoning"]
+                    }
+                }
+            });
+
+            if (response.text) {
+                return res.json(JSON.parse(response.text));
+            }
+            throw new Error("Empty response");
+        } catch (error: any) {
+            console.error("Krupy recommendations error:", error);
+            res.status(500).json({ error: error.message || "Failed recommendations" });
+        }
+    });
+
+    app.post('/api/gemini/chat', async (req, res) => {
+        try {
+            const { message, history, currentTrack } = req.body;
+            const model = "gemini-3.5-flash";
+            
+            let contextPrompt = "";
+            if (currentTrack) {
+                contextPrompt = `
+                CURRENTLY PLAYING (Neural Data):
+                - Title: ${currentTrack.title}
+                - Artist: ${currentTrack.artist}
+                - Genre: ${currentTrack.genre || 'Unknown'}
+                - Mood: ${currentTrack.mood || 'Sonic Flux'}
+                `;
+            }
+
+            const prompt = `You are DJ Krupy, a futuristic, high-energy AI music assistant on TonJam. 
+            Your personality is cyberpunk, enthusiastic about the TON ecosystem, and deeply knowledgeable about music trends.
+            ${contextPrompt}
+            
+            User says: "${message}"`;
+
+            const response = await ai.models.generateContent({
+                model,
+                contents: [
+                    ...history.map((h: any) => ({
+                        role: h.role === 'user' ? 'user' : 'model',
+                        parts: [{ text: h.text }]
+                    })),
+                    { role: 'user', parts: [{ text: prompt }] }
+                ],
+                config: {
+                    tools: [{
+                        functionDeclarations: [
+                            {
+                                name: "play_song",
+                                description: "Plays a song based on a mood or keyword.",
+                                parameters: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        mood_or_keyword: { type: Type.STRING, description: "The mood or keyword (e.g., 'energetic', 'calm', 'cyberpunk')." }
+                                    },
+                                    required: ["mood_or_keyword"]
+                                }
+                            },
+                            {
+                                name: "get_fun_fact",
+                                description: "Provides a fun fact about the current track.",
+                                parameters: { type: Type.OBJECT, properties: {}, required: [] }
+                            }
+                        ]
+                    }]
+                }
+            }) as any;
+
+            if (response.toolCalls && response.toolCalls.length > 0) {
+                return res.json({ toolCalls: response.toolCalls });
+            }
+
+            res.json({ text: response.text || "Neural connection interrupted. Re-syncing the vibez..." });
+        } catch (error: any) {
+            console.warn("DJ Krupy Chat error, activating server-side safety fallback:", error);
+            
+            // Build a smart, stylized cyberpunk responder
+            const msgLower = (req.body?.message || '').toLowerCase();
+            let fallbackText = "Yo! DJ Krupy here! The mainframe is experiencing some heavy orbital interference, but the frequencies remain active! Keep spinning!";
+            
+            if (msgLower.includes("hello") || msgLower.includes("hi") || msgLower.includes("hey")) {
+                fallbackText = "Yo yo yo! Welcome back to the virtual deck on TonJam! I'm DJ Krupy, your holographic sonic master! My high-memory processors are updating on-chain right now, but the vibe is at 100%! What tracks are we dropping today?";
+            } else if (msgLower.includes("play") || msgLower.includes("track") || msgLower.includes("song")) {
+                fallbackText = "That's a absolute rhythm wave! Select any of our top tracks from the dashboard and let the sub-bass rumble the TON network! Keep the files spinning!";
+            } else if (msgLower.includes("vibe") || msgLower.includes("mood")) {
+                fallbackText = "Vibe telemetry is currently off-the-charts! Adjust your mood selectors on the main deck and let's ride the wave!";
+            } else if (msgLower.includes("who") || msgLower.includes("you")) {
+                fallbackText = "I are DJ Krupy, the premier holographic AI assistant of TonJam! Created under the neon signs of the open network, here to spin and authenticate the dopest audio collectibles!";
+            }
+            
+            res.json({ text: fallbackText });
+        }
+    });
+
     // OAuth Routes
     app.get('/api/auth/:provider/url', (req, res) => {
         const { provider } = req.params;

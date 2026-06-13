@@ -168,8 +168,13 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={confirmBid}
         title="Place Bid?"
-        description={`Are you sure you want to place a bid of ${bidAmount} TON (~$${bidInUsd}) for "${nft.title}"? This action will broadcast your bid to the network.`}
-        confirmText="Place Bid"
+        description={`Confirming will broadcast your bid to the TON blockchain network.`}
+        confirmText="Confirm Bid"
+        assetName={nft.title}
+        assetImage={nft.imageUrl}
+        tonAmount={bidAmount}
+        networkFee="0.05"
+        totalAmount={(parseFloat(bidAmount) + 0.05).toFixed(2)}
       />
     </Dialog>
   );

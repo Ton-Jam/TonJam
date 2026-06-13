@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button as MTButton } from "@material-tailwind/react";
 import {
   Flame,
   Trophy,
@@ -357,9 +358,18 @@ const Tasks: React.FC = () => {
                   <TabsTrigger
                     key={filter}
                     value={filter}
-                    className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-transparent hover:bg-white/5 text-muted-foreground border border-[#C0C0C0]/25 data-[state=active]:border-transparent hover:border-[#C0C0C0]/50 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
+                    asChild
                   >
-                    {filter}
+                    <MTButton
+                      variant={activeFilter === filter ? "filled" : "outlined"}
+                      color="blue"
+                      className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0"
+                      placeholder=""
+                      onPointerEnterCapture={() => {}}
+                      onPointerLeaveCapture={() => {}}
+                    >
+                      {filter}
+                    </MTButton>
                   </TabsTrigger>
                 ))}
               </TabsList>

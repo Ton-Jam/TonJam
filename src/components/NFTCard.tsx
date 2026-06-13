@@ -334,7 +334,15 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   <span className="text-[6px] font-bold text-muted-foreground uppercase tracking-widest">Eval</span>
                   <div className="flex items-center gap-1">
                     <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
-                    <span className="text-[12px] font-bold text-foreground tracking-tighter">{nft.price}</span>
+                    <motion.span 
+                      key={nft.price}
+                      initial={{ opacity: 0, y: -2 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="text-[12px] font-bold text-foreground tracking-tighter inline-block"
+                    >
+                      {nft.price}
+                    </motion.span>
                   </div>
                </div>
                
@@ -453,7 +461,15 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                      <p className="text-[8px] font-medium text-muted-foreground/30 uppercase tracking-[0.1em]">Val_Artifact</p>
                      <div className="flex items-center gap-1 bg-muted/40 py-0.5 px-2 rounded-[4px] border border-border/10">
                         <img src={TON_LOGO} className="w-3 h-3" alt="TON" />
-                        <span className="text-sm font-black text-foreground tracking-tighter">{nft.price}</span>
+                        <motion.span 
+                          key={nft.price}
+                          initial={{ opacity: 0, y: -2 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                          className="text-sm font-black text-foreground tracking-tighter inline-block"
+                        >
+                          {nft.price}
+                        </motion.span>
                      </div>
                   </div>
                   

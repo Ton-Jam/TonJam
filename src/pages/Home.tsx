@@ -5,6 +5,7 @@ import CompleteProfilePrompt from '@/components/CompleteProfilePrompt';
 import { CardSmall } from '@/components/CardSmall';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Button as MTButton } from "@material-tailwind/react";
 import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X, ArrowRight } from 'lucide-react';
 import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES, TON_LOGO, TJ_COIN_ICON } from '@/constants';
 import TiltedCoverflow, { CoverflowItem } from '@/components/aicanvas/tilted-coverflow';
@@ -679,36 +680,34 @@ const Home: React.FC = () => {
         </div>
 
         <TabsContent value="overview" className="focus-visible:ring-0 p-0 outline-none">
-          <div className="scroll-row gap-2 py-2">
-            <button
+          <div className="scroll-row gap-2 py-2 select-none">
+            <MTButton
               onClick={() => setSelectedGenre(null)}
-              className="flex-shrink-0 group relative cursor-pointer"
+              variant={selectedGenre === null ? "filled" : "outlined"}
+              color="blue"
+              className="rounded-full px-6 py-2 text-[10px] h-auto font-bold tracking-widest transition-all whitespace-nowrap shrink-0 uppercase"
+              placeholder=""
+              onPointerEnterCapture={() => {}}
+              onPointerLeaveCapture={() => {}}
             >
-              <div className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                selectedGenre === null 
-                  ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)] border border-transparent' 
-                  : 'bg-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground border border-white/20 hover:border-white/45'
-              }`}>
-                ALL_FREQUENCIES
-              </div>
-            </button>
+              All
+            </MTButton>
             {GENRES.map((genre) => {
               const isSelected = selectedGenre === genre.name;
               return (
-                <button
+                <MTButton
                   key={genre.id}
                   onClick={() => setSelectedGenre(genre.name)}
-                  className="flex-shrink-0 group relative cursor-pointer"
+                  variant={isSelected ? "filled" : "outlined"}
+                  color="blue"
+                  className="rounded-full px-6 py-2 text-[10px] h-auto font-bold tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 uppercase"
+                  placeholder=""
+                  onPointerEnterCapture={() => {}}
+                  onPointerLeaveCapture={() => {}}
                 >
-                  <div className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${
-                    isSelected 
-                      ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.2)] border border-transparent' 
-                      : 'bg-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground border border-white/20 hover:border-white/45'
-                  }`}>
-                    <genre.icon className="h-3.5 w-3.5" />
-                    {genre.name.replace(' ', '_')}
-                  </div>
-                </button>
+                  <genre.icon className="h-3.5 w-3.5" />
+                  {genre.name}
+                </MTButton>
               );
             })}
           </div>

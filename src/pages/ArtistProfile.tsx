@@ -238,7 +238,7 @@ const ArtistProfile: React.FC = () => {
         </button>
 
         <img 
-          src={artist.bannerImageUrl || artist.bannerUrl || getPlaceholderImage(`cover-${artist.uid}`, 1500, 500)} 
+          src={artist.bannerImageUrl || artist.bannerUrl || getPlaceholderImage(`banner-${artist.uid}`, 1500, 500)} 
           className="w-full h-full object-cover" 
           alt="" 
         />

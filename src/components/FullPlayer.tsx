@@ -46,6 +46,8 @@ import { fetchNFTMetadata } from '@/services/nftService';
 import { chatWithKrupy, getKrupyRecommendations, ChatAssistantResponse } from '@/services/geminiService';
 import { NFTItem, Track, Artist } from '@/types';
 import BuyNFTModal from './BuyNFTModal';
+import { SoundscapeMixer } from './SoundscapeMixer';
+import { Sliders } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -174,7 +176,7 @@ const FullPlayer: React.FC = () => {
     }
   };
 
-  const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy'>('player');
+  const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy' | 'ambient'>('player');
   const [visualizerVariant, setVisualizerVariant] = useState<'bars' | 'circle' | 'particles' | 'waves'>('bars');
   const [showQueue, setShowQueue] = useState(false);
   const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl' | 'visualizer'>('spotify');
@@ -862,7 +864,7 @@ const FullPlayer: React.FC = () => {
           {/* Premium Bottom Mode Bar Selector (No border lines, transparent capsule rounded list) */}
           <TabsList className={cn(
             "grid w-full max-w-lg mx-auto bg-zinc-900/60 border-none h-12 p-1 mb-6 relative z-10 rounded-xl shadow-lg",
-            currentTrack.isNFT ? "grid-cols-6" : "grid-cols-5"
+            currentTrack.isNFT ? "grid-cols-7" : "grid-cols-6"
           )}>
             <TabsTrigger value="player" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white font-bold py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
               <Music className="w-4.5 h-4.5" />
@@ -877,6 +879,9 @@ const FullPlayer: React.FC = () => {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="absolute -top-0.5 -right-0.5 w-1 h-1 bg-emerald-400 rounded-full"
               />
+            </TabsTrigger>
+            <TabsTrigger value="ambient" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
+              <Sliders className="w-4.5 h-4.5" />
             </TabsTrigger>
             <TabsTrigger value="comments" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">
               <MessageSquare className="w-4.5 h-4.5" />
@@ -1216,6 +1221,16 @@ const FullPlayer: React.FC = () => {
               </motion.div>
             </TabsContent>
           )}
+
+          <TabsContent value="ambient" className="flex-1 mt-0">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-2xl mx-auto mt-2"
+            >
+              <SoundscapeMixer />
+            </motion.div>
+          </TabsContent>
         </Tabs>
       </div>
 

@@ -1122,13 +1122,19 @@ const NFTDetail: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2 sm:gap-3">
-                    <span className="text-[32px] sm:text-[48px] md:text-[64px] font-black text-foreground tracking-tighter leading-none">
+                    <motion.span 
+                      key={isAuction ? (highestOfferPrice > 0 ? highestOfferPrice : (localNft.startingBid || localNft.price)) : localNft.price}
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="text-[32px] sm:text-[48px] md:text-[64px] font-black text-foreground tracking-tighter leading-none inline-block"
+                    >
                       {isAuction
                         ? highestOfferPrice > 0
                           ? highestOfferPrice
                           : localNft.startingBid || localNft.price
                         : localNft.price}
-                    </span>
+                    </motion.span>
                     <span className="text-[14px] sm:text-[18px] font-black text-blue-500 uppercase tracking-tighter">
                       TON
                     </span>

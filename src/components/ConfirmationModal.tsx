@@ -24,6 +24,11 @@ interface ConfirmationModalProps {
   variant?: 'default' | 'destructive';
   unbondingPeriod?: string;
   penalty?: string;
+  assetName?: string;
+  assetImage?: string;
+  tonAmount?: string;
+  networkFee?: string;
+  totalAmount?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -36,7 +41,12 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   cancelText = "Cancel",
   variant = 'default',
   unbondingPeriod,
-  penalty
+  penalty,
+  assetName,
+  assetImage,
+  tonAmount,
+  networkFee,
+  totalAmount,
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -49,6 +59,42 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        {tonAmount && (
+          <div className="mt-4 p-4 bg-white/[0.02] rounded-xl space-y-4">
+            <div className="flex items-center gap-3">
+              {assetImage && (
+                <img
+                  src={assetImage}
+                  alt={assetName}
+                  className="w-12 h-12 rounded-lg object-cover bg-neutral-800"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-blue-400">Sonic Artifact</span>
+                <h4 className="text-xs font-bold text-white truncate">{assetName || "Unspecified Asset"}</h4>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-neutral-400 font-medium font-sans">Transaction cost</span>
+                <span className="font-mono text-white font-extrabold">{tonAmount} TON</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-neutral-400 font-medium font-sans">Network Fee</span>
+                <span className="font-mono text-neutral-400 font-bold">{networkFee || "0.05"} TON</span>
+              </div>
+
+              {totalAmount && (
+                <div className="flex justify-between items-center pt-2.5 bg-white/[0.01]">
+                  <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white">Estimated total</span>
+                  <span className="font-mono text-blue-400 font-black text-sm">{totalAmount} TON</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {(unbondingPeriod || penalty) && (
           <div className="mt-4 p-3 bg-white/[0.03] rounded-xl space-y-2.5">

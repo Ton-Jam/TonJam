@@ -476,7 +476,7 @@ export const MOCK_USER: UserProfile = {
   name: 'DJ Krupy',
   username: '@dj_krupy',
   avatar: 'https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png',
-  bannerUrl: 'https://image.pollinations.ai/prompt/cool%20dj%20profile%20banner%20cyberpunk%20night%20city?width=1200&height=400&nologo=true',
+  bannerUrl: '/default_tonjam_banner.jpg',
   bio: 'Pioneering the Krupy Vibez on TON. Underground electronic beats and rare synthwave NFTs collector.',
   walletAddress: 'UQCc_DJ_Krupy_Vibez_x9y1_8888',
   followers: 1240,
@@ -642,8 +642,8 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Electronic',
     bio: "The legend of the Krupy Vibez. Delivering high-energy underground electronic beats and exclusive digital artifacts.",
-    bannerUrl: "https://image.pollinations.ai/prompt/cool%20dj%20profile%20banner%20cyberpunk%20night%20city?width=1200&height=400&nologo=true",
-    bannerImageUrl: "https://image.pollinations.ai/prompt/cool%20dj%20profile%20banner%20cyberpunk%20night%20city?width=1500&height=500&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
+    bannerImageUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/dj_krupy', instagram: 'https://instagram.com/dj_krupy', telegram: 'https://t.me/dj_krupy' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQCc_DJ_Krupy_Vibez_x9y1_8888', percentage: 0.08, label: 'Main Artist' }],
@@ -665,7 +665,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Hip Hop',
     bio: "Global icon bringing the best of hip hop to the TonJam network.",
-    bannerUrl: "https://image.pollinations.ai/prompt/cool%20hip%20hop%20banner%20drake?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/drake', instagram: 'https://instagram.com/drake' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQDrake_x9y1_8888', percentage: 0.10, label: 'Main Artist' }],
@@ -686,7 +686,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Afrobeats',
     bio: "Pioneering the afrobeats sound globally.",
-    bannerUrl: "https://image.pollinations.ai/prompt/afrobeats%20vibe%20banner%20wizkid?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/wizkid', instagram: 'https://instagram.com/wizkid' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQualWizkid_n7m2_k9p4', percentage: 0.08, label: 'Main Artist' }],
@@ -707,7 +707,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Pop',
     bio: "Global icon and fashion mogul.",
-    bannerUrl: "https://image.pollinations.ai/prompt/glamorous%20pop%20star%20banner%20rihanna?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/rihanna', instagram: 'https://instagram.com/rihanna' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQRihanna_v8s1_m5n6', percentage: 0.10, label: 'Main Artist' }],
@@ -728,7 +728,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Afrobeats',
     bio: "Energy, Afrobeats, vibes.",
-    bannerUrl: "https://image.pollinations.ai/prompt/asake%20vibe%20banner?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/asake', instagram: 'https://instagram.com/asake' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQAsake_p3q9_r7t8', percentage: 0.07, label: 'Main Artist' }],
@@ -749,7 +749,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Pop',
     bio: "Global pop sensation.",
-    bannerUrl: "https://image.pollinations.ai/prompt/bieber%20pop%20banner?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/justinbieber', instagram: 'https://instagram.com/justinbieber' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQJBieber_w2x4_b1c2', percentage: 0.10, label: 'Main Artist' }],
@@ -770,7 +770,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Pop / R&B',
     bio: "Queen Bey. Global superstar.",
-    bannerUrl: "https://image.pollinations.ai/prompt/beyonce%20queen%20banner?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/beyonce', instagram: 'https://instagram.com/beyonce' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQBeyonce_d5f6_g7h8', percentage: 0.12, label: 'Main Artist' }],
@@ -791,7 +791,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Hip Hop',
     bio: "West coast hip hop legend.",
-    bannerUrl: "https://image.pollinations.ai/prompt/snoop%20dogg%20banner?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/snoopdogg', instagram: 'https://instagram.com/snoopdogg' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQSnoopDogg_j1a2_z3z4', percentage: 0.08, label: 'Main Artist' }],
@@ -812,7 +812,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Hip Hop',
     bio: "Hip hop legend and mogul.",
-    bannerUrl: "https://image.pollinations.ai/prompt/jayz%20banner?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/jayz', instagram: 'https://instagram.com/jayz' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQJayZ_h1i2_p3h4', percentage: 0.10, label: 'Main Artist' }],
@@ -833,7 +833,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Hip Hop',
     bio: "Legendary hip hop artist.",
-    bannerUrl: "https://image.pollinations.ai/prompt/2pac%20banner?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/2pac' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQ2Pac_c1l2_a3s4', percentage: 0.10, label: 'Main Artist' }],
@@ -854,7 +854,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Hip Hop',
     bio: "Hip hop legend and star.",
-    bannerUrl: "https://image.pollinations.ai/prompt/50cent%20banner?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/50cent', instagram: 'https://instagram.com/50cent' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQ50Cent_r1o2_c3k4', percentage: 0.08, label: 'Main Artist' }],
@@ -875,7 +875,7 @@ export const MOCK_ARTISTS: Artist[] = [
     isVerifiedArtist: true,
     genre: 'Hip Hop',
     bio: "Hip hop artist and lifestyle icon.",
-    bannerUrl: "https://image.pollinations.ai/prompt/wiz%20khalifa%20banner?width=1200&height=400&nologo=true",
+    bannerUrl: "/default_tonjam_banner.jpg",
     socials: { x: 'https://x.com/wizkhalifa', instagram: 'https://instagram.com/wizkhalifa' },
     royaltyConfig: { 
       streamingSplits: [{ address: 'UQLoFi_l1o2_f3i4', percentage: 0.07, label: 'Main Artist' }],
@@ -1021,7 +1021,7 @@ export const MOCK_USERS: UserProfile[] = [
     name: 'Sarah Jenkins',
     username: '@sarahj',
     avatar: 'https://image.pollinations.ai/prompt/young%20woman%20avatar%20with%20cool%20glasses%20and%20headphones?width=400&height=400&nologo=true',
-    bannerUrl: 'https://image.pollinations.ai/prompt/aesthetic%20bedroom%20lofi%20vibes%20banner?width=1200&height=400&nologo=true',
+    bannerUrl: "/default_tonjam_banner.jpg",
     bio: 'Digital art enthusiast and music lover. Collectible hunter on TON.',
     followers: 450,
     following: 120,
@@ -1035,7 +1035,7 @@ export const MOCK_USERS: UserProfile[] = [
     name: 'Alex Rivera',
     username: '@arivera',
     avatar: 'https://image.pollinations.ai/prompt/young%20man%20avatar%20with%20streetwear%20and%20cap?width=400&height=400&nologo=true',
-    bannerUrl: 'https://image.pollinations.ai/prompt/abstract%20sound%20waves%20colorful%20banner?width=1200&height=400&nologo=true',
+    bannerUrl: "/default_tonjam_banner.jpg",
     bio: 'Creating the future of sound. Electronic producer and synth enthusiast.',
     followers: 890,
     following: 340,

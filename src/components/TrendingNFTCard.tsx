@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { useAudio } from '@/context/AudioContext';
 import { MOCK_TRACKS } from '@/constants';
 import { NFTItem } from '@/types';
@@ -62,7 +63,17 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
       <div className="text-center px-1 flex-grow">
         <h4 className="text-white font-semibold text-[10px] truncate max-w-[120px]">{nft.title}</h4>
         <p className="text-gray-400 text-[9px] font-medium truncate mb-1">{nft.creator || nft.artist}</p>
-        <p className="text-blue-400 font-bold text-[11px] tracking-tight">{nft.price} TON</p>
+        <p className="text-blue-400 font-bold text-[11px] tracking-tight">
+          <motion.span
+            key={nft.price}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="inline-block"
+          >
+            {nft.price}
+          </motion.span> TON
+        </p>
       </div>
 
       <button 

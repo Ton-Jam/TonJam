@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button as MTButton } from "@material-tailwind/react";
 import { 
   Radio, 
   Volume2, 
@@ -360,15 +361,19 @@ const JamSpace: React.FC = () => {
                         <TabsTrigger
                           key={filter.name}
                           value={filter.name}
-                          className={cn(
-                            "px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer h-auto flex items-center gap-1.5 border",
-                            isActive 
-                              ? "bg-blue-600 text-white border-transparent shadow-[0_0_12px_rgba(37,99,235,0.2)]" 
-                              : "bg-transparent text-silver border-silver hover:bg-white/5 hover:text-white"
-                          )}
+                          asChild
                         >
-                          <Icon className="h-3.5 w-3.5" />
-                          {filter.name}
+                          <MTButton
+                            variant={isActive ? "filled" : "outlined"}
+                            color="blue"
+                            className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5"
+                            placeholder=""
+                            onPointerEnterCapture={() => {}}
+                            onPointerLeaveCapture={() => {}}
+                          >
+                            <Icon className="h-3.5 w-3.5" />
+                            {filter.name}
+                          </MTButton>
                         </TabsTrigger>
                       );
                     })}

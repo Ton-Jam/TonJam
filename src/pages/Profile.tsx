@@ -1,6 +1,7 @@
 // Updated Profile Styling
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Button as MTButton } from "@material-tailwind/react";
 import { 
  Camera, 
  Check, 
@@ -546,9 +547,9 @@ const Profile: React.FC = () => {
   {/* Tab Navigation */}
   <div className="w-full sticky top-[0px] z-40 bg-background/95 backdrop-blur-md border-b border-border/10 mb-2">
     <div className="max-w-7xl mx-auto px-4">
-      <div className="flex items-center justify-between py-1.5 sm:py-2 overflow-hidden">
+      <div className="flex items-center justify-between py-2 overflow-hidden">
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-          <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 justify-start scroll-smooth -mx-4 px-4">
+          <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-2 justify-start -mx-4 px-4 scroll-row">
           {[
             { id: 'feed', label: 'Activity' },
             { id: 'overview', label: 'Overview' },
@@ -561,9 +562,18 @@ const Profile: React.FC = () => {
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap bg-white/5 hover:bg-white/10 text-muted-foreground border border-[#C0C0C0]/35 data-[state=active]:border-transparent hover:border-[#C0C0C0]/60 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(37,99,235,0.2)] hover:text-foreground shrink-0 cursor-pointer h-auto"
+              asChild
             >
-              {tab.label}
+              <MTButton
+                variant={activeTab === tab.id ? "filled" : "outlined"}
+                color="blue"
+                className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0"
+                placeholder=""
+                onPointerEnterCapture={() => {}}
+                onPointerLeaveCapture={() => {}}
+              >
+                {tab.label}
+              </MTButton>
             </TabsTrigger>
           ))}
           </TabsList>
