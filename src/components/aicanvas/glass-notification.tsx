@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, ChatCircle, Heart, ShieldCheck, X, ArrowUp } from '@phosphor-icons/react'
+import { Bell } from '@phosphor-icons/react/dist/ssr/Bell'
+import { ChatCircle } from '@phosphor-icons/react/dist/ssr/ChatCircle'
+import { Heart } from '@phosphor-icons/react/dist/ssr/Heart'
+import { ShieldCheck } from '@phosphor-icons/react/dist/ssr/ShieldCheck'
+import { X } from '@phosphor-icons/react/dist/ssr/X'
+import { ArrowUp } from '@phosphor-icons/react/dist/ssr/ArrowUp'
 
 interface Notification {
   id: number

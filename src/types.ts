@@ -151,6 +151,7 @@ export interface NFTItem {
   ipfsUrl?: string; // Decentralized metadata link
   cid?: string; // Content Identifier
   createdAt?: string;
+  views?: number;
   // Auction specific fields
   listingType?: 'fixed' | 'auction';
   auctionStartTime?: string; // ISO string or timestamp
@@ -391,6 +392,8 @@ export interface UserProfile {
   anthemId?: string;
   createdAt?: string;
   role?: 'artist' | 'collector' | 'admin';
+  collectorTier?: 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Legend' | 'None';
+  badges?: string[];
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   isVerified?: boolean;
   verificationStatus?: 'unverified' | 'pending' | 'verified' | 'rejected';

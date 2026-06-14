@@ -332,14 +332,17 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={executePurchase}
-        title="Confirm Purchase"
-        description={`Confirming will request a signature via TON Connect to authorize transfer of ownership.`}
-        confirmText="Confirm & Pay"
+        title="Execute Purchase Protocol?"
+        description="Verify signal parameters before broadcasting to the TON blockchain relay."
+        confirmText="Confirm & Acquire"
         assetName={nft.title}
-        assetImage={nft.imageUrl}
+        assetImage={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`)}
         tonAmount={price.toString()}
         networkFee={gasFee.toString()}
         totalAmount={total}
+        fromAddress={userAddress}
+        recipient={nft.owner}
+        transactionType="Acquisition Execution"
       />
     </Dialog>
   );

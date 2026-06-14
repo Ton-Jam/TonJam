@@ -1,55 +1,58 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ScrollToTop from '@/components/ScrollToTop';
-import Home from '@/pages/Home';
-import Discover from '@/pages/Discover';
-import JamSpace from '@/pages/JamSpace';
-import Marketplace from '@/pages/Marketplace';
-import Profile from '@/pages/Profile';
-import EditProfile from '@/pages/EditProfile';
-import UserProfile from '@/pages/UserProfile';
-import ArtistProfile from '@/pages/ArtistProfile';
-import ArtistDashboard from '@/pages/ArtistDashboard';
-import ProfileSettings from '@/pages/ProfileSettings';
-import Library from '@/pages/Library';
-import Settings from '@/pages/Settings';
-import Tasks from '@/pages/Tasks';
-import NFTDetail from '@/pages/NFTDetail';
-import ExploreList from '@/pages/ExploreList';
-import Notifications from '@/pages/Notifications';
-import UploadTrack from '@/pages/UploadTrack';
-import MintNFT from '@/pages/MintNFT';
-import MyNFTs from '@/pages/MyNFTs';
-import FavoriteTracks from '@/pages/FavoriteTracks';
-import FavoriteArtists from '@/pages/FavoriteArtists';
-import ArtistMinting from '@/pages/ArtistMinting';
-import TrendingNFTs from '@/pages/TrendingNFTs';
-import AuctionScreen from '@/pages/AuctionScreen';
-import GenesisScreen from '@/pages/GenesisScreen';
-import LimitedNFTs from '@/pages/LimitedNFTs';
+
+const Home = lazy(() => import('@/pages/Home'));
+const Discover = lazy(() => import('@/pages/Discover'));
+const JamSpace = lazy(() => import('@/pages/JamSpace'));
+const Marketplace = lazy(() => import('@/pages/Marketplace'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const EditProfile = lazy(() => import('@/pages/EditProfile'));
+const UserProfile = lazy(() => import('@/pages/UserProfile'));
+const ArtistProfile = lazy(() => import('@/pages/ArtistProfile'));
+const ArtistDashboard = lazy(() => import('@/pages/ArtistDashboard'));
+const ProfileSettings = lazy(() => import('@/pages/ProfileSettings'));
+const Library = lazy(() => import('@/pages/Library'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Tasks = lazy(() => import('@/pages/Tasks'));
+const NFTDetail = lazy(() => import('@/pages/NFTDetail'));
+const ExploreList = lazy(() => import('@/pages/ExploreList'));
+const Notifications = lazy(() => import('@/pages/Notifications'));
+const UploadTrack = lazy(() => import('@/pages/UploadTrack'));
+const MintNFT = lazy(() => import('@/pages/MintNFT'));
+const MyNFTs = lazy(() => import('@/pages/MyNFTs'));
+const FavoriteTracks = lazy(() => import('@/pages/FavoriteTracks'));
+const FavoriteArtists = lazy(() => import('@/pages/FavoriteArtists'));
+const ArtistMinting = lazy(() => import('@/pages/ArtistMinting'));
+const TrendingNFTs = lazy(() => import('@/pages/TrendingNFTs'));
+const AuctionScreen = lazy(() => import('@/pages/AuctionScreen'));
+const GenesisScreen = lazy(() => import('@/pages/GenesisScreen'));
+const LimitedNFTs = lazy(() => import('@/pages/LimitedNFTs'));
+const HorizontalCanvas = lazy(() => import('@/pages/HorizontalCanvas'));
+const StatsPreview = lazy(() => import('@/pages/StatsPreview'));
 import LoadingScreen from '@/components/LoadingScreen';
-import PlaylistDetail from '@/pages/PlaylistDetail';
-import PostDetail from '@/pages/PostDetail';
-import SocialFeedPage from '@/pages/SocialFeedPage';
-import TrackDetail from '@/pages/TrackDetail';
-import AdminDashboard from '@/pages/AdminDashboard';
-import About from '@/pages/About';
-import Wallet from '@/pages/Wallet';
-import Login from '@/pages/Login';
+const PlaylistDetail = lazy(() => import('@/pages/PlaylistDetail'));
+const PostDetail = lazy(() => import('@/pages/PostDetail'));
+const SocialFeedPage = lazy(() => import('@/pages/SocialFeedPage'));
+const TrackDetail = lazy(() => import('@/pages/TrackDetail'));
+const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
+const About = lazy(() => import('@/pages/About'));
+const Wallet = lazy(() => import('@/pages/Wallet'));
+const Login = lazy(() => import('@/pages/Login'));
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Staking from '@/pages/Staking';
-import DJKrupy from '@/pages/DJKrupy';
-import FollowersFollowing from '@/pages/FollowersFollowing';
-import AlbumDetails from '@/pages/AlbumDetails';
-import Governance from '@/pages/Governance';
+const Staking = lazy(() => import('@/pages/Staking'));
+const DJKrupy = lazy(() => import('@/pages/DJKrupy'));
+const FollowersFollowing = lazy(() => import('@/pages/FollowersFollowing'));
+const AlbumDetails = lazy(() => import('@/pages/AlbumDetails'));
+const Governance = lazy(() => import('@/pages/Governance'));
 import { AudioProvider } from '@/context/AudioContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import ArtistOnboarding from '@/pages/ArtistOnboarding';
-import ArtistAnalytics from '@/pages/ArtistAnalytics';
+const ArtistOnboarding = lazy(() => import('@/pages/ArtistOnboarding'));
+const ArtistAnalytics = lazy(() => import('@/pages/ArtistAnalytics'));
 import { useProactivePreloader } from '@/hooks/useProactivePreloader';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -195,7 +198,8 @@ const AppContent: React.FC = () => {
       ) : (
         <Layout key="app">
           <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
+            <React.Suspense fallback={null}>
+              <Routes location={location} key={location.pathname}>
               <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
               <Route path="/discover" element={<PageWrapper><Discover /></PageWrapper>} />
               <Route path="/jamspace" element={<PageWrapper><JamSpace /></PageWrapper>} />
@@ -235,9 +239,12 @@ const AppContent: React.FC = () => {
               <Route path="/social" element={<PageWrapper><SocialFeedPage /></PageWrapper>} />
               <Route path="/admin" element={<PageWrapper><ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute></PageWrapper>} />
               <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
+              <Route path="/canvas" element={<PageWrapper><HorizontalCanvas /></PageWrapper>} />
+              <Route path="/stats" element={<PageWrapper><StatsPreview /></PageWrapper>} />
               <Route path="/login" element={<Login />} />
               <Route path="/user/:id/follows/:type" element={<PageWrapper><FollowersFollowing /></PageWrapper>} />
             </Routes>
+            </React.Suspense>
           </AnimatePresence>
         </Layout>
       )}

@@ -43,6 +43,9 @@ import {
   ArrowRightLeft,
   QrCode,
   Copy,
+  Gavel,
+  MoreHorizontal,
+  Flag,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -67,7 +70,7 @@ import { useTokenGating } from "@/hooks/useTokenGating";
 import { NFTItem, Track, NFTOffer } from "@/types";
 import { fetchNFTMetadata } from "@/services/nftService";
 import { db } from "@/lib/firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, increment } from "firebase/firestore";
 import {
   cancelListing,
   getActiveListingForNFT,
@@ -75,16 +78,6 @@ import {
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Virtuoso } from 'react-virtuoso';
-import * as RechartsPrimitive from "recharts";
-const {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} = RechartsPrimitive as any;
 import BuyNFTModal from "@/components/BuyNFTModal";
 import SellNFTModal from "@/components/SellNFTModal";
 import BidModal from "@/components/BidModal";
@@ -94,6 +87,8 @@ import ManageNFTModal from "@/components/ManageNFTModal";
 import ShareNFTDialog from "@/components/ShareNFTDialog";
 import NFTCard from "@/components/NFTCard";
 import SendNFTModal from "@/components/SendNFTModal";
+import ReportNFTModal from "@/components/ReportNFTModal";
+import { MarketActivityChart } from "@/components/MarketActivityChart";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import CommentsSection from "@/components/CommentsSection";
 import ReactionsSection from "@/components/ReactionsSection";
@@ -114,16 +109,54 @@ const NFTDetail: React.FC = () => {
     setFullPlayerOpen,
     userProfile,
   } = useAudio();
+  const localNft = useMemo(() => {
+    return allNFTs.find((n) => n.id === id) || null;
+  }, [id, allNFTs]);
+
+  // View Counter Effect: Real-time update increment and listener
+  useEffect(() => {
+    if (!localNft?.id) return;
+
+    // 1. Increment view count on visit (debounced or just once per mount)
+    const incrementViews = async () => {
+      try {
+        const nftRef = doc(db, "nfts", localNft.id);
+        await updateDoc(nftRef, {
+          views: increment(1)
+        });
+      } catch (err) {
+        console.error("Failed to increment views", err);
+      }
+    };
+    
+    // Only increment when the ID changes to avoid double counting on re-renders
+    const hasViewedKey = `viewed_nft_${localNft.id}`;
+    const sessionViewed = sessionStorage.getItem(hasViewedKey);
+    
+    if (!sessionViewed) {
+      incrementViews();
+      sessionStorage.setItem(hasViewedKey, "true");
+    }
+
+    // 2. Setup real-time listener for views to show live updates
+    const unsub = onSnapshot(doc(db, "nfts", localNft.id), (doc) => {
+      if (doc.exists()) {
+        const nftData = doc.data() as NFTItem;
+        if (nftData.views !== undefined && nftData.views !== localNft.views) {
+          updateNFT(localNft.id, { views: nftData.views }, true);
+        }
+      }
+    });
+
+    return () => unsub();
+  }, [localNft?.id]);
+
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
   const [isTipping, setIsTipping] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [inlineBidAmount, setInlineBidAmount] = useState<string>("");
   const [isPlacingBid, setIsPlacingBid] = useState(false);
-
-  const localNft = useMemo(() => {
-    return allNFTs.find((n) => n.id === id) || null;
-  }, [id, allNFTs]);
 
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
   const [activeTab, setActiveTab] = useState<
@@ -143,6 +176,7 @@ const NFTDetail: React.FC = () => {
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const isOwner = useMemo(() => {
@@ -361,6 +395,7 @@ const NFTDetail: React.FC = () => {
   }, [isAuction, localNft?.auctionEndTime]);
 
   const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [isEndingSoon, setIsEndingSoon] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isAuction || !localNft?.auctionEndTime) return;
@@ -371,9 +406,13 @@ const NFTDetail: React.FC = () => {
       const distance = end - now;
 
       if (distance < 0) {
-        setTimeRemaining("Auction Ended");
+        setTimeRemaining("EXPIRED");
+        setIsEndingSoon(false);
         return;
       }
+
+      // Check if ending in less than 1 hour (3600000 ms)
+      setIsEndingSoon(distance < 3600000);
 
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
@@ -382,7 +421,13 @@ const NFTDetail: React.FC = () => {
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+      const parts = [];
+      if (days > 0) parts.push(`${days}D`);
+      parts.push(`${hours.toString().padStart(2, "0")}H`);
+      parts.push(`${minutes.toString().padStart(2, "0")}M`);
+      parts.push(`${seconds.toString().padStart(2, "0")}S`);
+
+      setTimeRemaining(parts.join(" "));
     };
 
     calculateTimeRemaining();
@@ -455,19 +500,6 @@ const NFTDetail: React.FC = () => {
 
     return filtered.slice(0, 4);
   }, [localNft, associatedTrack, allNFTs, relatedSort]);
-
-  const priceHistoryData = useMemo(() => {
-    if (!localNft) return [];
-    const basePrice = parseFloat(localNft.price) || 0.5;
-    return [
-      { name: "Jan", price: basePrice * 0.4 },
-      { name: "Feb", price: basePrice * 0.6 },
-      { name: "Mar", price: basePrice * 0.5 },
-      { name: "Apr", price: basePrice * 0.9 },
-      { name: "May", price: basePrice * 0.8 },
-      { name: "Jun", price: basePrice },
-    ];
-  }, [localNft?.price]);
 
   if (allNFTs.length === 0)
     return (
@@ -655,28 +687,8 @@ const NFTDetail: React.FC = () => {
     }, 1500);
   };
 
-  const handleShare = async () => {
-    if (!localNft) return;
-    const shareUrl = `${window.location.origin}/nft/${localNft.id}`;
-    const shareData = {
-      title: localNft.title,
-      text: `Check out "${localNft.title}" by ${localNft.creator || 'unknown'} on TonJam! 💎`,
-      url: shareUrl,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        addNotification("NFT shared successfully!", "success");
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          console.error("Web Share failed, opening modal instead:", err);
-          setShowShareModal(true);
-        }
-      }
-    } else {
-      setShowShareModal(true);
-    }
+  const handleShare = () => {
+    setShowShareModal(true);
   };
 
   return (
@@ -718,6 +730,24 @@ const NFTDetail: React.FC = () => {
             >
               <Share2 className="h-4 w-4" />
             </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="w-10 h-10 flex items-center justify-center bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-muted-foreground hover:text-foreground hover:border-white/30 transition-all"
+                  title="More Options"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-neutral-900 border-white/10 text-white min-w-[160px]">
+                <DropdownMenuItem 
+                  onClick={() => setShowReportModal(true)}
+                  className="flex items-center gap-2 p-3 text-[10px] font-black uppercase tracking-widest focus:bg-rose-500/10 focus:text-rose-500 cursor-pointer"
+                >
+                  <Flag className="h-3.5 w-3.5" /> Report Artifact
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -788,8 +818,15 @@ const NFTDetail: React.FC = () => {
                         <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5 sm:mb-1">
                           Time Remaining
                         </span>
-                        <span className="text-[10px] sm:text-[12px] font-black text-amber-500 uppercase tracking-widest">
-                          {timeRemaining || "Loading..."}
+                        <span 
+                          className={cn(
+                            "text-[10px] sm:text-[14px] font-black uppercase tracking-widest font-mono transition-all duration-300",
+                            isEndingSoon 
+                              ? "text-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" 
+                              : "text-amber-500"
+                          )}
+                        >
+                          {timeRemaining || "SYNCING..."}
                         </span>
                       </div>
                     </div>
@@ -843,87 +880,12 @@ const NFTDetail: React.FC = () => {
               ))}
             </div>
 
-            {/* Price Analysis Section */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-[4px] p-4 sm:p-6 border border-white/5 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-[10px] font-bold text-foreground uppercase tracking-[0.4em]">
-                    Protocol Value Analysis
-                  </h3>
-                </div>
-                <div className="flex items-center gap-4 text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
-                  <span className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    Market Floor
-                  </span>
-                </div>
-              </div>
-
-              <div className="h-[120px] sm:h-[180px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={priceHistoryData}>
-                    <defs>
-                      <linearGradient
-                        id="colorPrice"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#3b82f6"
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#3b82f6"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#0a0a0a",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "12px",
-                        fontSize: "10px",
-                        fontFamily: "Poppins, sans-serif",
-                      }}
-                      itemStyle={{ color: "#3b82f6" }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="price"
-                      stroke="#3b82f6"
-                      fillOpacity={1}
-                      fill="url(#colorPrice)"
-                      strokeWidth={3}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="flex justify-between items-center pt-2">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                    All Time High
-                  </p>
-                  <p className="text-sm font-bold text-foreground font-mono">
-                    {(parseFloat(localNft.price) * 2.4).toFixed(2)} TON
-                  </p>
-                </div>
-                <div className="text-right space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
-                    Protocol Velocity
-                  </p>
-                  <p className="text-sm font-bold text-emerald-500 font-mono">
-                    +12.4%
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Advanced Market Activity Chart */}
+            <MarketActivityChart 
+              history={localNft.history} 
+              offers={localNft.offers} 
+              currentPrice={localNft.price} 
+            />
           </div>
 
           {/* Right Column: Identity & Action */}
@@ -1083,6 +1045,14 @@ const NFTDetail: React.FC = () => {
                   <span className="text-[9px] sm:text-[10px] font-mono text-blue-500/60 uppercase tracking-widest">
                     {localNft.id.toUpperCase()}
                   </span>
+                  {localNft.views !== undefined && (
+                    <div className="flex items-center gap-1.5 ml-4 px-2 py-0.5 bg-white/5 rounded-full border border-white/5">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                        {localNft.views.toLocaleString()} Protocol Accesses
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-4">
                   {localNft.contractAddress && (
@@ -1168,7 +1138,14 @@ const NFTDetail: React.FC = () => {
                         <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-0.5">
                           <Clock className="h-2 w-2" /> Time
                         </span>
-                        <span className="text-[10px] font-black tracking-tighter text-amber-500 tabular-nums">
+                        <span 
+                          className={cn(
+                            "text-[12px] font-black tracking-tighter tabular-nums font-mono transition-all duration-300",
+                            isEndingSoon 
+                              ? "text-red-500 animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" 
+                              : "text-amber-500"
+                          )}
+                        >
                           {timeRemaining || "00:00:00"}
                         </span>
                       </div>
@@ -1210,59 +1187,35 @@ const NFTDetail: React.FC = () => {
                         Cancel
                       </button>
                     )}
-                    <button
-                      onClick={handleShare}
-                      className="py-2 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-1.5 border border-white/10"
-                    >
-                      <Share2 className="h-3 w-3 text-blue-400" /> Share
-                    </button>
                   </>
                 ) : (
                   <>
-                    {isAuction ? (
-                      <div className="flex-[2] flex gap-2">
-                        <input
-                          type="number"
-                          value={inlineBidAmount}
-                          onChange={(e) => setInlineBidAmount(e.target.value)}
-                          placeholder={`${minNextBid}+`}
-                          className="w-1/4 bg-white/5 border border-white/10 rounded-[4px] px-3 text-white font-bold outline-none focus-visible:ring-1 focus-visible:ring-amber-500 transition-all text-xs"
-                        />
-                        <button
-                          onClick={handleInlineBid}
-                          disabled={isPlacingBid || isAuctionEnded}
-                          className={cn(
-                            "flex-1 py-2 cursor-pointer transition-all text-white rounded-lg border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] font-black text-[10px] uppercase tracking-[0.3em] border flex items-center justify-center gap-2",
-                            isAuctionEnded
-                              ? "bg-muted border-border text-muted-foreground cursor-not-allowed"
-                              : "bg-orange-500 border-orange-600",
-                          )}
-                        >
-                          {isPlacingBid ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : isAuctionEnded ? (
-                            "EXPIRED"
-                          ) : (
-                            "Place Bid"
-                          )}
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={handleAction}
-                        className="flex-[2] py-2.5 cursor-pointer transition-all bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg border border-[#C0C0C0]/50 hover:brightness-110 shadow-lg hover:shadow-blue-500/20 font-black text-[10px] uppercase tracking-[0.3em] active:scale-95"
-                      >
-                        {isAuction ? "Place Bid" : "Acquire Asset"}
-                      </button>
-                    )}
-                    {!isAuction && (
-                      <button
-                        onClick={() => setShowOfferModal(true)}
-                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10"
-                      >
-                        Offer
-                      </button>
-                    )}
+                    <button
+                      onClick={handleAction}
+                      disabled={isPlacingBid || (isAuction && isAuctionEnded)}
+                      className={cn(
+                        "flex-[2] py-2.5 cursor-pointer transition-all bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg border border-[#C0C0C0]/50 hover:brightness-110 shadow-lg hover:shadow-blue-500/20 font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 flex items-center justify-center gap-2",
+                        (isAuction && isAuctionEnded) && "opacity-50 grayscale cursor-not-allowed"
+                      )}
+                    >
+                      {isPlacingBid ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (isAuction && isAuctionEnded) ? (
+                        "Auction Expired"
+                      ) : isAuction ? (
+                        <>
+                          <Gavel className="h-3.5 w-3.5" /> Place Bid
+                        </>
+                      ) : (
+                        "Acquire Asset"
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setShowOfferModal(true)}
+                      className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-foreground rounded-lg font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all border border-white/10 flex items-center justify-center gap-1.5"
+                    >
+                      <Handshake className="h-3.5 w-3.5" /> Make Offer
+                    </button>
                     {userOffer && (
                       <button
                         onClick={handleCancelBid}
@@ -1271,20 +1224,20 @@ const NFTDetail: React.FC = () => {
                         Retract
                       </button>
                     )}
-                    <button
-                      onClick={() => setIsTipping(true)}
-                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
-                    >
-                      <Coins className="h-3.5 w-3.5 text-blue-400" /> Support
-                    </button>
-                    <button
-                      onClick={handleShare}
-                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
-                    >
-                      <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
-                    </button>
                   </>
                 )}
+                <button
+                  onClick={() => setIsTipping(true)}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                >
+                  <Coins className="h-3.5 w-3.5 text-blue-400" /> Support
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-[4px] font-bold text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+                >
+                  <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
+                </button>
               </div>
 
               {/* Tip Selection Modal */}
@@ -1530,6 +1483,79 @@ const NFTDetail: React.FC = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Rarity Section */}
+                    <div className="col-span-full space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-500/20"></div>
+                        <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
+                          Scarcity & Rarity Protocol
+                        </h4>
+                        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-500/20"></div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-white/[0.03] border border-white/5 p-8 rounded-[4px] relative overflow-hidden group">
+                           {/* Decorative Background */}
+                           <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+                             <Crown className="h-48 w-48 text-amber-500" />
+                           </div>
+                           
+                           <div className="relative z-10">
+                             <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] block mb-2">Edition Scarcity</span>
+                             <div className="flex items-end gap-3 mb-6">
+                               <span className="text-[42px] font-black text-amber-500 leading-none tracking-tighter">
+                                 {localNft.supply ? ((1 / localNft.supply) * 100).toFixed(2) : "1.00"}%
+                               </span>
+                               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pb-1.5">Universal Scarcity Index</span>
+                             </div>
+                             
+                             <div className="space-y-4">
+                               <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                                 <span className="text-muted-foreground/60">Edition Sequence</span>
+                                 <span className="text-foreground">#{localNft.edition} / {localNft.supply || 100}</span>
+                               </div>
+                               <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                 <motion.div 
+                                   initial={{ width: 0 }}
+                                   animate={{ width: `${(1 / (localNft.supply || 100)) * 100}%` }}
+                                   className="h-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                                 />
+                               </div>
+                               <p className="text-[9px] text-muted-foreground/60 leading-relaxed italic">
+                                 This specific edition number represents one unique point in the finite supply distribution space.
+                               </p>
+                             </div>
+                           </div>
+                        </div>
+
+                        <div className="bg-white/[0.03] border border-white/5 p-8 rounded-[4px] flex flex-col justify-between">
+                          <div className="space-y-6">
+                             <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] block mb-4">Rarity Assessment</span>
+                             <div className="flex items-center gap-3">
+                                <div className={cn(
+                                   "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
+                                   (localNft.supply || 100) <= 25 ? "bg-amber-500/20 text-amber-500 border border-amber-500/30" :
+                                   (localNft.supply || 100) <= 100 ? "bg-purple-500/20 text-purple-500 border border-purple-500/30" :
+                                   "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                                )}>
+                                   {(localNft.supply || 100) <= 25 ? "LEGENDARY" : (localNft.supply || 100) <= 100 ? "RARE" : "COMMON"} CLASSIFICATION
+                                </div>
+                             </div>
+                             <p className="text-[11px] text-zinc-400 leading-relaxed uppercase tracking-wider">
+                               The protocol identifies this artifact as 
+                               <span className="text-foreground font-black"> {(localNft.supply || 100) <= 25 ? " highly exclusive" : (localNft.supply || 100) <= 100 ? " a scarce release" : " a standard issue release"}</span>. 
+                               The emission curve is finalized at {localNft.supply || 100} units.
+                             </p>
+                          </div>
+                          
+                          <div className="mt-8 flex items-center gap-2">
+                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                             <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">Supply Fully Audited</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
                     <div className="col-span-full md:col-span-2 space-y-4">
                       <div className="p-8 bg-white/[0.02] backdrop-blur-md border border-white/5 rounded-[4px]">
@@ -2175,6 +2201,15 @@ const NFTDetail: React.FC = () => {
         />
       )}
 
+      {showReportModal && localNft && (
+        <ReportNFTModal 
+          isOpen={showReportModal} 
+          onClose={() => setShowReportModal(false)}
+          nft={localNft}
+          userAddress={userAddress || userProfile.walletAddress || "anonymous"}
+        />
+      )}
+
       {/* Confirmation Modals */}
       <ConfirmationModal
         isOpen={isCancelListingConfirmOpen}
@@ -2200,9 +2235,17 @@ const NFTDetail: React.FC = () => {
         isOpen={!!offerToAccept}
         onClose={() => setOfferToAccept(null)}
         onConfirm={confirmAcceptOffer}
-        title="Accept Offer?"
-        description={`Are you sure you want to accept the offer of ${offerToAccept?.price} TON from ${offerToAccept?.offerer}? This will transfer ownership of the NFT.`}
-        confirmText="Accept Offer"
+        title="Accept Acquisition Offer?"
+        description="Verify the incoming signal before authorizing ownership transfer."
+        confirmText="Execute Transfer"
+        assetName={localNft.title}
+        assetImage={localNft.imageUrl || getPlaceholderImage(`nft-${localNft.id}`)}
+        tonAmount={offerToAccept?.price}
+        networkFee="0.05"
+        totalAmount={(parseFloat(offerToAccept?.price || "0") + 0.05).toFixed(2)}
+        fromAddress={offerToAccept?.offerer}
+        recipient={userAddress}
+        transactionType="Offer Acceptance"
       />
 
       <ConfirmationModal

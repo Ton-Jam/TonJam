@@ -55,6 +55,7 @@ import NFTVaultSection from '@/components/NFTVaultSection';
 import PlaylistCard from '@/components/PlaylistCard';
 import SocialFeed from '@/components/SocialFeed';
 import UserCard from '@/components/UserCard';
+import CollectorTier from '@/components/CollectorTier';
 import { ArtistDashboardTab } from '@/components/ArtistDashboardTab';
 import SellNFTModal from '@/components/SellNFTModal';
 import ManageNFTModal from '@/components/ManageNFTModal';
@@ -507,6 +508,18 @@ const Profile: React.FC = () => {
           )}>
             {localUser.role || 'collector'}
           </span>
+          {localUser.collectorTier && localUser.collectorTier !== 'None' && (
+            <span className={cn(
+              "px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-wider",
+              localUser.collectorTier === 'Legend' ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
+              localUser.collectorTier === 'Platinum' ? "bg-slate-400/10 text-slate-400 border border-slate-400/20" :
+              localUser.collectorTier === 'Gold' ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20" :
+              localUser.collectorTier === 'Silver' ? "bg-slate-300/10 text-white border border-white/20" :
+              "bg-amber-700/10 text-amber-700 border border-amber-700/10"
+            )}>
+              {localUser.collectorTier} Tier
+            </span>
+          )}
         </div>
         
         {/* Bio */}
@@ -893,6 +906,10 @@ const Profile: React.FC = () => {
               </button>
             )}
           </div>
+        </div>
+
+        <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
+          <CollectorTier user={localUser} isOwnProfile={user?.uid === localUser.uid} />
         </div>
 
         <div className="bg-white/5 rounded-3xl p-6 mt-4">

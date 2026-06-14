@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
-import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Queue, ArrowLeft } from '@phosphor-icons/react'
+import { Play } from '@phosphor-icons/react/dist/ssr/Play'
+import { Pause } from '@phosphor-icons/react/dist/ssr/Pause'
+import { SkipBack } from '@phosphor-icons/react/dist/ssr/SkipBack'
+import { SkipForward } from '@phosphor-icons/react/dist/ssr/SkipForward'
+import { Heart } from '@phosphor-icons/react/dist/ssr/Heart'
+import { Shuffle } from '@phosphor-icons/react/dist/ssr/Shuffle'
+import { Queue } from '@phosphor-icons/react/dist/ssr/Queue'
+import { ArrowLeft } from '@phosphor-icons/react/dist/ssr/ArrowLeft'
 
 const TRACKS = [
   { title: 'Midnight Drive',  artist: 'Neon Collective', color: '#FF6BF5', duration: 234 },

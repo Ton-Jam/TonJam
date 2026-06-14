@@ -50,6 +50,29 @@ export const getJettonBalance = async (
 };
 
 /**
+ * Fetches the TON balance for a given wallet address
+ */
+export const getTonBalance = async (walletAddress: string): Promise<number> => {
+  try {
+    if (!walletAddress) return 0;
+    
+    // In a real app with a provider:
+    /*
+    const client = new TonClient({ endpoint: TON_ENDPOINT, apiKey: TONCENTER_API_KEY });
+    const balance = await client.getBalance(Address.parse(walletAddress));
+    return Number(balance) / 10**9;
+    */
+    
+    // For the prototype, we'll return the mock balance from the user profile or a random one
+    const savedBalance = localStorage.getItem('tonjam_wallet_balance');
+    return savedBalance ? parseFloat(savedBalance) : 124.50; 
+  } catch (error) {
+    console.warn("Error fetching TON balance:", error);
+    return 124.50;
+  }
+};
+
+/**
  * Checks if a wallet address owns at least one NFT from a specific collection
  */
 export const checkNFTOwnership = async (

@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Pause,
-  Play,
-  ArrowCounterClockwise,
-  X,
-  ArrowsOutSimple,
-  ArrowsInSimple,
-} from '@phosphor-icons/react'
+import { Play } from '@phosphor-icons/react/dist/ssr/Play'
+import { Pause } from '@phosphor-icons/react/dist/ssr/Pause'
+import { ArrowCounterClockwise } from '@phosphor-icons/react/dist/ssr/ArrowCounterClockwise'
+import { X } from '@phosphor-icons/react/dist/ssr/X'
+import { ArrowsOutSimple } from '@phosphor-icons/react/dist/ssr/ArrowsOutSimple'
+import { ArrowsInSimple } from '@phosphor-icons/react/dist/ssr/ArrowsInSimple'
 
 const FILES = [
   { name: 'Brand reel.mp4', durationMs: 8000 },

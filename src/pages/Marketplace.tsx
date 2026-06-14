@@ -292,15 +292,22 @@ const Marketplace: React.FC = () => {
             </div>
             
             <div ref={scrollRef} className="scroll-row snap-x pb-2" >
-              {topBiddedNfts.map((nft) => (
-                <motion.div
-                  key={nft.id}
-                  onClick={() => navigate(`/nft/${nft.id}`)}
-                  whileHover={{ y: -4, scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  className="flex-shrink-0 w-full lg:w-[calc(50%-8px)] snap-center cursor-pointer group"
-                >
+              {isLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={`bidding-loading-${i}`} className="flex-shrink-0 w-full lg:w-[calc(50%-8px)] snap-center">
+                    <SkeletonCard />
+                  </div>
+                ))
+              ) : (
+                topBiddedNfts.map((nft) => (
+                  <motion.div
+                    key={nft.id}
+                    onClick={() => navigate(`/nft/${nft.id}`)}
+                    whileHover={{ y: -4, scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    className="flex-shrink-0 w-full lg:w-[calc(50%-8px)] snap-center cursor-pointer group"
+                  >
                   <div className="relative aspect-[21/9] bg-muted/30 border border-border/10 rounded-2xl overflow-hidden shadow-2xl">
                     <img src={nft.imageUrl || getPlaceholderImage(`nft-${nft.id}`, 800, 400)} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-700 group-hover:scale-105" alt={nft.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
@@ -315,7 +322,7 @@ const Marketplace: React.FC = () => {
                     </div>
                   </div>
                 </motion.div>
-              ))}
+              )))}
             </div>
           </div>
         </section>
@@ -555,11 +562,22 @@ const Marketplace: React.FC = () => {
                 </Button>
               </div>
               <div className="scroll-row snap-x pb-2">
-                {featuredArtists.map((artist) => (
-                  <div key={artist.uid} className="flex-shrink-0 w-[140px] sm:w-[170px] snap-start">
-                    <ArtistCard artist={artist} />
-                  </div>
-                ))}
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <div key={`artists-loading-${i}`} className="flex-shrink-0 w-[140px] sm:w-[170px] snap-start">
+                      <div className="animate-pulse bg-muted/20 p-6 rounded-[4px] space-y-4">
+                        <div className="w-24 h-24 rounded-full bg-muted mx-auto"></div>
+                        <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  featuredArtists.map((artist) => (
+                    <div key={artist.uid} className="flex-shrink-0 w-[140px] sm:w-[170px] snap-start">
+                      <ArtistCard artist={artist} />
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
@@ -603,7 +621,15 @@ const Marketplace: React.FC = () => {
                 </div>
               </div>
               
-              {filteredNfts.length > 0 ? (
+              {isLoading ? (
+                  <div className="scroll-row snap-x pb-4">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div key={`nfts-loading-${i}`} className="flex-shrink-0 w-[240px] sm:w-[280px] snap-start">
+                        <SkeletonCard />
+                      </div>
+                    ))}
+                  </div>
+              ) : filteredNfts.length > 0 ? (
                   <div className="scroll-row snap-x pb-4">
                     {filteredNfts.map((nft, idx) => (
                       <motion.div 

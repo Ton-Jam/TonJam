@@ -3,7 +3,11 @@
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { CheckmarkCircle02Icon, InformationCircleIcon, Alert02Icon, MultiplicationSignCircleIcon, Loading03Icon } from "@hugeicons/core-free-icons"
+import CheckmarkCircle02Icon from "@hugeicons/core-free-icons/dist/esm/CheckmarkCircle02Icon"
+import InformationCircleIcon from "@hugeicons/core-free-icons/dist/esm/InformationCircleIcon"
+import Alert02Icon from "@hugeicons/core-free-icons/dist/esm/Alert02Icon"
+import MultiplicationSignCircleIcon from "@hugeicons/core-free-icons/dist/esm/MultiplicationSignCircleIcon"
+import Loading03Icon from "@hugeicons/core-free-icons/dist/esm/Loading03Icon"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()

@@ -52,80 +52,8 @@ import {
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
-const HomeSection = ({ title, icon: Icon, link, children }: { title: string, icon: React.ElementType, link?: string, children: React.ReactNode }) => {
-  return (
-    <section className="section-container bg-[#060c1f] p-4 rounded-3xl">
-      <SectionHeader title={title} viewAllLink={link} />
-      <div className="scroll-row">
-        {children}
-      </div>
-    </section>
-  );
-};
-
-const FEATURED_TRACKS_CAROUSEL: CarouselItem[] = MOCK_TRACKS.slice(0, 3).map(track => ({
-  id: track.id,
-  title: track.title,
-  subtitle: track.artist,
-  imageUrl: track.coverUrl,
-  link: `/track/${track.id}`,
-  cta: 'Play'
-}));
-
-const WelcomeBanner = ({ onDismiss, onGetTokens }: { onDismiss: () => void, onGetTokens: () => void }) => {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-      animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
-      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-    >
-      <Card className="relative overflow-hidden border-none -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black text-foreground">
-        <button 
-          onClick={onDismiss}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors z-20 text-muted-foreground"
-        >
-          <X className="h-5 w-5" />
-        </button>
-        
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
-            <div className="w-20 h-20 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="h-10 w-10 text-primary" />
-            </div>
-            
-            <div className="space-y-3 text-center md:text-left">
-              <div className="flex flex-col md:flex-row md:items-center gap-2">
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Welcome to TonJam</h2>
-                <Badge variant="outline" className="w-fit mx-auto md:mx-0 bg-secondary border-border text-foreground uppercase text-[8px] tracking-[0.2em]">v2.1_CORE</Badge>
-              </div>
-              <p className="text-muted-foreground font-medium max-w-xl text-sm leading-relaxed">
-                You've just entered the future of music. Discover decentralized sounds, collect rare NFTs, and connect with your favorite artists on the TON blockchain.
-              </p>
-              <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
-                <button 
-                  onClick={onDismiss}
-                  className="px-6 py-2 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-primary/90 transition-all shadow-lg active:scale-95 cursor-pointer"
-                >
-                  Start Exploring
-                </button>
-                <button 
-                  onClick={onGetTokens}
-                  className="px-6 py-2 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-secondary/80 transition-all shadow-lg active:scale-95 cursor-pointer"
-                >
-                  Get Free Tokens
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Decorative elements */}
-          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/5 blur-3xl rounded-full"></div>
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-purple-500/5 blur-3xl rounded-full"></div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-};
+import HomeSection from '@/components/HomeSection';
+import WelcomeBanner from '@/components/WelcomeBanner';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -169,6 +97,15 @@ const Home: React.FC = () => {
   const missionAutoplayRef = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
+
+  const FEATURED_TRACKS_CAROUSEL: CarouselItem[] = useMemo(() => MOCK_TRACKS.slice(0, 3).map(track => ({
+    id: track.id,
+    title: track.title,
+    subtitle: track.artist,
+    imageUrl: track.coverUrl,
+    link: `/track/${track.id}`,
+    cta: 'Play'
+  })), []);
 
   const combinedMissions = useMemo(() => {
     const aiTask = globalTasks.find(t => t.id === '11');
@@ -735,6 +672,28 @@ const Home: React.FC = () => {
               )}
             </AnimatePresence>
 
+            {/* Feature Showcase Grid */}
+            <section className="mb-6 sm:mb-12 w-full overflow-hidden">
+              <SectionHeader 
+                title="NFTs for you" 
+              />
+              <div className="flex overflow-x-auto gap-4 px-4 sm:px-0 pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {isLoading ? (
+                  [1, 2, 3, 4].map(i => (
+                    <div key={`foryou-loading-${i}`} className="w-[75vw] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-10.66px)] lg:w-[calc(25%-12px)] snap-start shrink-0">
+                      <SkeletonCard />
+                    </div>
+                  ))
+                ) : (
+                  recommendedNFTs.map(nft => (
+                    <div key={`foryou-${nft.id}`} className="w-[75vw] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-10.66px)] lg:w-[calc(25%-12px)] snap-start shrink-0">
+                      <NFTCard nft={nft} />
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+
             {/* Trending NFTs Section */}
             <section className="mb-6 sm:mb-12 w-full bg-[#060c1f] p-4 rounded-3xl">
               <SectionHeader 
@@ -1247,9 +1206,13 @@ const Home: React.FC = () => {
                 <SectionHeader title="Global_Streaming" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
                 <div className="-mx-4 sm:mx-0">
                   <div className="flex flex-col">
-                    {trendingTracks.slice(0, 10).map((track, idx) => (
-                      <TrackCard key={`chart-${track.id}`} track={track} variant="row" index={idx} className="!mx-0 rounded-none border-none" />
-                    ))}
+                    {isLoading ? (
+                      [1, 2, 3, 4, 5].map(i => <SkeletonCard key={`chart-loading-${i}`} variant="row" className="!mx-0 rounded-none border-none mb-1" />)
+                    ) : (
+                      trendingTracks.slice(0, 10).map((track, idx) => (
+                        <TrackCard key={`chart-${track.id}`} track={track} variant="row" index={idx} className="!mx-0 rounded-none border-none" />
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -1258,15 +1221,19 @@ const Home: React.FC = () => {
                 <SectionHeader title="Latest_Releases" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
                 <div className="-mx-4 sm:mx-0">
                   <div className="flex flex-col">
-                    {newReleases.map((track, index) => (
-                      <TrackCard 
-                        key={`new-${track.id}`} 
-                        track={track} 
-                        variant="row"
-                        index={index}
-                        className="!mx-0 rounded-none border-none"
-                      />
-                    ))}
+                    {isLoading ? (
+                      [1, 2, 3, 4, 5].map(i => <SkeletonCard key={`new-loading-${i}`} variant="row" className="!mx-0 rounded-none border-none mb-1" />)
+                    ) : (
+                      newReleases.map((track, index) => (
+                        <TrackCard 
+                          key={`new-${track.id}`} 
+                          track={track} 
+                          variant="row"
+                          index={index}
+                          className="!mx-0 rounded-none border-none"
+                        />
+                      ))
+                    )}
                   </div>
                 </div>
                 

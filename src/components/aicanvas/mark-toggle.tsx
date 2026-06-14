@@ -1,6 +1,7 @@
 import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
-import { X, Check } from '@phosphor-icons/react'
+import { X } from '@phosphor-icons/react/dist/ssr/X'
+import { Check } from '@phosphor-icons/react/dist/ssr/Check'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 

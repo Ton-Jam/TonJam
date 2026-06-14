@@ -29,6 +29,9 @@ interface ConfirmationModalProps {
   tonAmount?: string;
   networkFee?: string;
   totalAmount?: string;
+  fromAddress?: string;
+  recipient?: string;
+  transactionType?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -47,49 +50,72 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   tonAmount,
   networkFee,
   totalAmount,
+  fromAddress,
+  recipient,
+  transactionType,
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-[4px] bg-neutral-900/95 backdrop-blur-xl p-6">
+      <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-[4px] bg-neutral-900/95 backdrop-blur-xl p-6 border-none">
         <AlertDialogHeader className="space-y-3">
-          <AlertDialogTitle className="text-xl font-bold text-white tracking-tight">
+          <div className="flex items-center gap-2 mb-1">
+             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
+             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-blue-500">{transactionType || "Signal Confirmation"}</span>
+          </div>
+          <AlertDialogTitle className="text-xl font-black text-white tracking-tighter uppercase leading-none">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-neutral-400 text-sm leading-relaxed">
+          <AlertDialogDescription className="text-neutral-400 text-[11px] leading-relaxed uppercase tracking-widest font-bold">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {tonAmount && (
-          <div className="mt-4 p-4 bg-white/[0.02] rounded-xl space-y-4">
-            <div className="flex items-center gap-3">
+          <div className="mt-4 p-5 bg-white/[0.04] rounded-xl space-y-5 relative overflow-hidden group">
+            {/* Asset Background Glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-blue-500/10 transition-colors" />
+
+            <div className="flex items-center gap-4 relative z-10 border-b border-white/5 pb-4">
               {assetImage && (
                 <img
                   src={assetImage}
                   alt={assetName}
-                  className="w-12 h-12 rounded-lg object-cover bg-neutral-800"
+                  className="w-14 h-14 rounded-lg object-cover bg-neutral-800 shadow-2xl border border-white/10"
                 />
               )}
               <div className="flex-1 min-w-0">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-blue-400">Sonic Artifact</span>
-                <h4 className="text-xs font-bold text-white truncate">{assetName || "Unspecified Asset"}</h4>
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400 block mb-0.5">TARGET FREQUENCY</span>
+                <h4 className="text-[13px] font-black text-white truncate uppercase tracking-tight">{assetName || "Unspecified Asset"}</h4>
+                {recipient && (
+                   <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 truncate">To: {recipient.slice(0, 10)}...{recipient.slice(-6)}</p>
+                )}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-neutral-400 font-medium font-sans">Transaction cost</span>
-                <span className="font-mono text-white font-extrabold">{tonAmount} TON</span>
+            <div className="space-y-3 relative z-10">
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Signal Magnitude</span>
+                <span className="font-mono text-white font-black">{tonAmount} TON</span>
               </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-neutral-400 font-medium font-sans">Network Fee</span>
-                <span className="font-mono text-neutral-400 font-bold">{networkFee || "0.05"} TON</span>
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">Network Fee</span>
+                <span className="font-mono text-neutral-400 font-bold">~{networkFee || "0.05"} TON</span>
               </div>
 
+              {fromAddress && (
+                <div className="flex justify-between items-center text-[10px] pt-1">
+                  <span className="text-neutral-500 font-bold uppercase tracking-[0.2em] font-sans">From Node</span>
+                  <span className="font-mono text-zinc-500 font-bold">{fromAddress.slice(0, 4)}...{fromAddress.slice(-4)}</span>
+                </div>
+              )}
+
               {totalAmount && (
-                <div className="flex justify-between items-center pt-2.5 bg-white/[0.01]">
-                  <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white">Estimated total</span>
-                  <span className="font-mono text-blue-400 font-black text-sm">{totalAmount} TON</span>
+                <div className="flex justify-between items-center pt-4 mt-2 border-t border-white/5">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Estimated total</span>
+                  <div className="text-right">
+                    <span className="font-mono text-blue-400 font-black text-lg leading-none">{totalAmount} TON</span>
+                    <p className="text-[8px] font-bold text-blue-500/40 uppercase tracking-widest mr-1">Final Approval Required</p>
+                  </div>
                 </div>
               )}
             </div>

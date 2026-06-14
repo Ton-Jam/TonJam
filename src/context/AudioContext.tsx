@@ -10,7 +10,6 @@ import React, {
 import { toast } from "sonner";
 import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
 import { useAccount } from "wagmi";
-import { GoogleGenAI, Type } from "@google/genai";
 import {
   Track,
   Playlist,
@@ -3776,22 +3775,44 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const createRecommendedPlaylist = async () => {
     setIsLoading(true);
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        // Fallback to basic recommendation if no API key
-        const { recommendedTracks } = getRecommendations();
-        const tracksToUse = recommendedTracks.slice(0, 10);
+      const userContext = {
+        likedTracks: likedTrackIds,
+        recentlyPlayed: recentlyPlayed,
+        followedArtistIds: followedUserIds,
+      };
 
-        if (tracksToUse.length === 0) {
-          addNotification(
-            "Not enough data to generate recommendations yet",
-            "info",
-          );
-          setIsLoading(false);
-          return;
-        }
+      const availableTracks = allTracks.map(t => ({
+        id: t.id,
+        title: t.title,
+        artist: t.artist,
+        genre: t.genre,
+        mood: t.mood
+      }));
 
-        const name = `AI Playlist ${playlists.length + 1}`;
+      const response = await fetch('/api/gemini/generate-playlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userContext, availableTracks })
+      });
+
+      if (!response.ok) throw new Error('Server returned error for AI playlist generation');
+      
+      const { playlist } = await response.json();
+
+      if (auth.currentUser) {
+        await setDoc(doc(db, "playlists", playlist.id), playlist);
+      }
+
+      setPlaylists((prev) => [playlist, ...prev]);
+      addNotification(`AI Playlist "${playlist.title}" created!`, "success");
+    } catch (error) {
+      console.error("AI Playlist Generation Error:", error);
+      // Fallback
+      const { recommendedTracks } = getRecommendations();
+      const tracksToUse = recommendedTracks.slice(0, 5);
+
+      if (tracksToUse.length > 0) {
+        const name = `AI Quick Pick ${playlists.length + 1}`;
         const playlistId = Date.now().toString();
         const newPlaylist: Playlist = {
           id: playlistId,
@@ -3799,120 +3820,19 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           coverUrl: "",
           trackCount: tracksToUse.length,
           creator: "TonJam AI",
-          description: "AI playlist generated based on your listening history.",
-          trackIds: tracksToUse.map((t) => t.id),
-          updatedAt: new Date().toISOString(),
+          description: "A quick selection based on your profile.",
+          trackIds: tracksToUse.map(t => t.id),
+          updatedAt: new Date().toISOString()
         };
 
         if (auth.currentUser) {
           await setDoc(doc(db, "playlists", playlistId), newPlaylist);
         }
-
         setPlaylists((prev) => [newPlaylist, ...prev]);
-        addNotification(
-          `AI Playlist "${name}" created with ${tracksToUse.length} tracks`,
-          "success",
-        );
-        setIsLoading(false);
-        return;
+        addNotification(`Created fallback playlist: ${name}`, "info");
+      } else {
+        addNotification("Failed to generate AI playlist. Try again later.", "error");
       }
-
-      // Use Gemini to generate a smart playlist
-      const ai = new GoogleGenAI({ apiKey });
-
-      const recentTrackNames = recentlyPlayed
-        .slice(0, 5)
-        .map((t) => `${t.title} by ${t.artist}`)
-        .join(", ");
-      const likedTrackNames = allTracks
-        .filter((t) => likedTrackIds.includes(t.id))
-        .slice(0, 5)
-        .map((t) => `${t.title} by ${t.artist}`)
-        .join(", ");
-      const availableTracks = allTracks
-        .map(
-          (t) =>
-            `ID: ${t.id} | Title: ${t.title} | Artist: ${t.artist} | Genre: ${t.genre}`,
-        )
-        .join("\n");
-
-      const prompt = `
-You are an expert AI DJ. Based on the user's recent listening history and liked tracks, create a new personalized playlist from the available catalog.
-Recent listens: ${recentTrackNames || "None"}
-Liked tracks: ${likedTrackNames || "None"}
-
-Available Catalog:
-${availableTracks}
-
-Create a cohesive playlist of 5 to 10 tracks.
-Return a JSON object with the following structure:
-{
-  "title": "A creative, catchy name for the playlist",
-  "description": "A short, engaging description of the vibe",
-  "trackIds": ["id1", "id2", ...]
-}
-`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING },
-              description: { type: Type.STRING },
-              trackIds: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-              },
-            },
-            required: ["title", "description", "trackIds"],
-          },
-        },
-      });
-
-      const result = JSON.parse(response.text || "{}");
-
-      if (!result.trackIds || result.trackIds.length === 0) {
-        throw new Error("AI didn't return any tracks");
-      }
-
-      // Filter out invalid IDs just in case
-      const validTrackIds = result.trackIds.filter((id: string) =>
-        allTracks.some((t) => t.id === id),
-      );
-
-      if (validTrackIds.length === 0) {
-        throw new Error("AI returned invalid track IDs");
-      }
-
-      const playlistId = Date.now().toString();
-      const newPlaylist: Playlist = {
-        id: playlistId,
-        title: result.title || `AI Playlist ${playlists.length + 1}`,
-        coverUrl: "",
-        trackCount: validTrackIds.length,
-        creator: "TonJam AI",
-        description: result.description || "AI generated playlist.",
-        trackIds: validTrackIds,
-        updatedAt: new Date().toISOString(),
-      };
-
-      if (auth.currentUser) {
-        await setDoc(doc(db, "playlists", playlistId), newPlaylist);
-      }
-
-      setPlaylists((prev) => [newPlaylist, ...prev]);
-      addNotification(`AI Playlist "${newPlaylist.title}" created!`, "success");
-    } catch (error) {
-      console.error("AI Playlist Generation Error:", error);
-      // Fallback
-      addNotification(
-        "Failed to generate AI playlist. Try again later.",
-        "error",
-      );
     } finally {
       setIsLoading(false);
     }

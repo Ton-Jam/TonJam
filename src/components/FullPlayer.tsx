@@ -342,12 +342,12 @@ const FullPlayer: React.FC = () => {
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 24, stiffness: 180 }}
-      className="fixed inset-0 z-[60] bg-[#121212] text-white overflow-y-auto no-scrollbar select-none"
+      className="fixed inset-0 z-[60] bg-[#060c1f] text-white overflow-y-auto no-scrollbar select-none"
       ref={containerRef}
     >
       {/* Dynamic Background Fog & Blur matching Spotify album-bleed backdrop */}
       <div 
-        className="fixed inset-0 z-0 bg-[#121212]"
+        className="fixed inset-0 z-0 bg-[#060c1f]"
       />
       <div 
         className="fixed inset-0 z-0 opacity-35 blur-[120px] scale-125 pointer-events-none transition-all duration-1000"
@@ -355,7 +355,7 @@ const FullPlayer: React.FC = () => {
           backgroundImage: `radial-gradient(circle at 50% 30%, ${visualizerColor}70, transparent 75%)`,
         }}
       />
-      <div className="fixed inset-0 z-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-[#121212]/80 pointer-events-none" />
+      <div className="fixed inset-0 z-0 bg-gradient-to-t from-[#060c1f] via-transparent to-[#060c1f]/80 pointer-events-none" />
 
       {/* Volume HUD - Re-styled without border lines */}
       <AnimatePresence>
@@ -1250,7 +1250,7 @@ const FullPlayer: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
             transition={{ type: 'spring', damping: 24, stiffness: 180 }}
-            className="fixed inset-0 z-[70] bg-[#121212] flex flex-col pt-8 select-none"
+            className="fixed inset-0 z-[70] bg-[#060c1f] flex flex-col pt-8 select-none"
           >
             <div className="flex items-center justify-between px-6 pb-4">
               <div>

@@ -22,6 +22,7 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@aicanvas": "https://aicanvas.me/r/{name}.json"
+    "@aicanvas": "https://aicanvas.me/r/{name}.json",
+    "@ui-layouts": "https://ui-layouts.com/r/{name}.json"
   }
 }

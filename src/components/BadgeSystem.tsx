@@ -98,7 +98,7 @@ export const BadgeSystem: React.FC<BadgeSystemProps> = ({ user, isOwnProfile }) 
       },
       {
         id: 'super-collector',
-        name: 'Super Collector',
+        name: 'TONJam Collector',
         description: 'Elite digital curator acquiring sound waves on-chain. Supporting and funding creators through scarce NFT ownership.',
         icon: Gem,
         color: '#A855F7',

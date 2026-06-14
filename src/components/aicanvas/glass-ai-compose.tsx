@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import {
-  PaperPlaneRight,
-  ImageSquare,
-  GlobeSimple,
-  X,
-} from '@phosphor-icons/react'
+import { PaperPlaneRight } from '@phosphor-icons/react/dist/ssr/PaperPlaneRight'
+import { ImageSquare } from '@phosphor-icons/react/dist/ssr/ImageSquare'
+import { GlobeSimple } from '@phosphor-icons/react/dist/ssr/GlobeSimple'
+import { X } from '@phosphor-icons/react/dist/ssr/X'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 

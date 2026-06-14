@@ -3,7 +3,10 @@ import { Select as SelectPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { UnfoldMoreIcon, Tick02Icon, ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons"
+import UnfoldMoreIcon from "@hugeicons/core-free-icons/dist/esm/UnfoldMoreIcon"
+import Tick02Icon from "@hugeicons/core-free-icons/dist/esm/Tick02Icon"
+import ArrowUp01Icon from "@hugeicons/core-free-icons/dist/esm/ArrowUp01Icon"
+import ArrowDown01Icon from "@hugeicons/core-free-icons/dist/esm/ArrowDown01Icon"
 
 function Select({
   ...props

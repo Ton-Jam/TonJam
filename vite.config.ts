@@ -11,8 +11,18 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react(), tailwindcss()],
+      logLevel: 'silent',
+      build: {
+        target: 'esnext',
+        minify: false,
+        sourcemap: false,
+        cssCodeSplit: true,
+        rollupOptions: {
+          maxParallelFileOps: 1,
+          cache: false,
+        }
+      },
       define: {
-        'process.env.GEMINI_API_KEY': JSON.stringify(process.env.GEMINI_API_KEY || env.GEMINI_API_KEY),
         global: 'globalThis',
       },
       resolve: {

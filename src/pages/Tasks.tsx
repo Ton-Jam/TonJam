@@ -27,6 +27,7 @@ import { TJ_COIN_ICON } from "@/constants";
 import TaskCard from "@/components/TaskCard";
 import { useAudio } from "@/context/AudioContext";
 import { Task } from "@/types";
+import SkeletonCard from "@/components/SkeletonCard";
 
 const STREAK_DAYS = [
   { day: "Mon", active: true },
@@ -58,6 +59,7 @@ const Tasks: React.FC = () => {
     userProfile,
     transactions,
     firestoreUsers,
+    isLoading
   } = useAudio();
   const [activeFilter, setActiveFilter] = useState("All");
 
@@ -118,9 +120,9 @@ const Tasks: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-[140px]">
-      <div className="px-4 py-3 space-y-4">
+      <div className="py-3 space-y-4">
         {/* HEADER */}
-        <div className="flex items-center justify-between pb-1">
+        <div className="flex items-center justify-between pb-1 px-4">
           <div>
             <p className="text-[8px] uppercase tracking-[0.25em] text-muted-foreground font-black font-ui">
               TonJam Rewards
@@ -147,7 +149,7 @@ const Tasks: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 p-4 shadow-lg shadow-blue-600/10"
+          className="relative overflow-hidden rounded-none bg-[#09132e] p-4"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -203,7 +205,7 @@ const Tasks: React.FC = () => {
         </motion.div>
 
         {/* DAILY STREAK - NEW COMPACT SLIDERS */}
-        <section className="bg-foreground/[0.02] rounded-2xl p-3 space-y-2.5">
+        <section className="bg-[#09132e] rounded-none p-4 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Flame className="w-4 h-4 text-orange-500 fill-orange-500/10" />
@@ -250,8 +252,8 @@ const Tasks: React.FC = () => {
                    navigate("/dj-krupy");
                 }
               }}
-              className={`relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/35 to-slate-900 p-4 space-y-3.5 cursor-pointer select-none ${
-                aiTask.claimed ? "opacity-60" : "hover:bg-indigo-950/[0.2] transition-colors"
+              className={`relative overflow-hidden rounded-none bg-[#09132e] p-4 space-y-3.5 cursor-pointer select-none ${
+                aiTask.claimed ? "opacity-60" : "hover:bg-[#101a3b] transition-colors"
               }`}
             >
               {/* Soft visual glow */}
@@ -346,13 +348,13 @@ const Tasks: React.FC = () => {
         })()}
 
         {/* FILTERS - FRAMELESS HIGH-CONTRAST PILLES */}
-        <div className="py-0.5 -mx-4 md:-mx-8 lg:-mx-12">
+        <div className="py-1">
           <Tabs
             value={activeFilter}
             onValueChange={setActiveFilter}
             className="w-full"
           >
-            <div className="scroll-row scroll-smooth">
+            <div className="scroll-row scroll-smooth px-4">
               <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
                 {FILTERS.map((filter) => (
                   <TabsTrigger
@@ -377,22 +379,28 @@ const Tasks: React.FC = () => {
           </Tabs>
         </div>
 
-        {/* TASK LIST - COMPLETED WITH OUR SLICK ROW TASK CARDS */}
-        <section className="space-y-1.5 max-h-[480px] overflow-y-auto pr-1 no-scrollbar">
-          {filteredTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onClaim={handleClaim}
-              onToggle={handleToggle}
-              onClick={handleClick}
-            />
-          ))}
+        {/* TASK LIST - RESPONSIVE MISSION CARDS GRID WALLED IN UNLIMITED HEIGHT TO FILL THE SCREEN */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+          {isLoading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={`tasks-loading-${i}`} />
+            ))
+          ) : (
+            filteredTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onClaim={handleClaim}
+                onToggle={handleToggle}
+                onClick={handleClick}
+              />
+            ))
+          )}
         </section>
 
         {/* LEADERBOARD - ULTRA COMPACT WITHOUT BORDER LINES */}
         <section className="space-y-2.5">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-4">
             <Trophy className="w-3.5 h-3.5 text-yellow-500" />
             <h2 className="font-bold text-[10px] uppercase tracking-wider text-muted-foreground font-ui">
               Top Earners
@@ -403,7 +411,7 @@ const Tasks: React.FC = () => {
             {topEarners.map((user, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between rounded-xl bg-foreground/[0.02] p-2.5"
+                className="flex items-center justify-between rounded-none bg-[#09132e] px-4 py-3"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -441,7 +449,7 @@ const Tasks: React.FC = () => {
         </section>
 
         {/* FOOTER - COMPACT */}
-        <div className="pt-2 text-center text-[9px] uppercase tracking-[0.25em] text-muted-foreground space-y-1">
+        <div className="pt-2 px-4 text-center text-[9px] uppercase tracking-[0.25em] text-muted-foreground space-y-1">
           <p>Powered by TON Blockchain</p>
           <div className="flex items-center justify-center gap-1.5 text-foreground/70 font-bold uppercase tracking-widest text-[8px]">
             <Music2 className="w-3 h-3 text-primary animate-pulse" />

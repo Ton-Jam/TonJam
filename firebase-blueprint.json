@@ -15,6 +15,8 @@
         "isVerifiedArtist": { "type": "boolean" },
         "verificationStatus": { "type": "string", "enum": ["unverified", "pending", "verified"] },
         "xp": { "type": "number" },
+        "collectorTier": { "type": "string", "enum": ["Bronze", "Silver", "Gold", "Platinum", "Legend"] },
+        "badges": { "type": "array", "items": { "type": "string" } },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "name", "email"]
@@ -75,7 +77,8 @@
         "supply": { "type": "number" },
         "listingType": { "type": "string" },
         "owner": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "views": { "type": "number" }
       },
       "required": ["id", "title", "artistId", "trackId"]
     },
@@ -357,9 +360,46 @@
         "completedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "missionId", "completed"]
+    },
+    "Offer": {
+      "title": "Offer",
+      "description": "Custom price offer for an NFT",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nftId": { "type": "string" },
+        "offerer": { "type": "string" },
+        "price": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "nftId", "offerer", "price", "status", "createdAt"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "User report for inappropriate content",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nftId": { "type": "string" },
+        "reporterId": { "type": "string" },
+        "reason": { "type": "string" },
+        "details": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewed", "resolved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "nftId", "reporterId", "reason", "status", "createdAt"]
     }
   },
   "firestore": {
+    "/reports/{reportId}": {
+      "schema": "Report",
+      "description": "Content reports"
+    },
+    "/offers/{offerId}": {
+      "schema": "Offer",
+      "description": "NFT buy offers"
+    },
     "/validators/{validatorId}": {
       "schema": "Validator",
       "description": "Staking network validators"

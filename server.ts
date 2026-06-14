@@ -270,6 +270,119 @@ async function startServer() {
         res.json({ trend });
     });
 
+    app.post('/api/gemini/generate-playlist', async (req, res) => {
+        try {
+            const { userContext, availableTracks } = req.body;
+            const prompt = `
+                You are TonJam's "Dj Krupy" AI curator. 
+                Your goal is to create a highly personalized 5-track playlist for a user based on their profile, listening history, and available tracks in our library.
+
+                USER CONTEXT:
+                - Liked Tracks (IDs): ${userContext.likedTracks.join(', ')}
+                - Recently Played Tracks (Titles): ${userContext.recentlyPlayed.slice(0, 5).map((t: any) => t.title).join(', ')}
+                - Followed Artists (IDs): ${userContext.followedArtistIds.join(', ')}
+                ${userContext.userDescription ? `- User's custom vibe request: "${userContext.userDescription}"` : ''}
+
+                AVAILABLE TRACKS LIBRARY:
+                ${JSON.stringify(availableTracks, null, 2)}
+
+                TASK:
+                1. Select EXACTLY 5 tracks from the library that best match this user's profile and request.
+                2. Create a cool, evocative title for the playlist.
+                3. Write a brief (1-2 sentence) explanation of why this selection was made.
+                4. Provide a creative prompt for an AI image generator to create a cover for this playlist.
+
+                OUTPUT FORMAT:
+                You must return a JSON object that matches this schema:
+                {
+                  "title": "Evocative Playlist Title",
+                  "trackIds": ["id1", "id2", "id3", "id4", "id5"],
+                  "explanation": "Why this matches you...",
+                  "coverPrompt": "A highly descriptive prompt for an image generator"
+                }
+            `;
+
+            const response = await ai.models.generateContent({
+                model: "gemini-3.5-flash",
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                }
+            });
+
+            if (response.text) {
+                const data = JSON.parse(response.text);
+                const coverUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(data.coverPrompt)}?width=600&height=600&nologo=true`;
+                
+                const playlist = {
+                    id: `ai-${Date.now()}`,
+                    title: data.title,
+                    coverUrl: coverUrl,
+                    trackCount: data.trackIds.length,
+                    creator: "TonJam AI",
+                    description: data.explanation,
+                    trackIds: data.trackIds
+                };
+
+                return res.json({ playlist, explanation: data.explanation });
+            }
+            throw new Error("Empty response from AI");
+        } catch (error: any) {
+            console.error("AI Playlist generation error:", error);
+            res.status(500).json({ error: error.message || "Failed to generate AI playlist" });
+        }
+    });
+
+    app.post('/api/gemini/generate-bio', async (req, res) => {
+        try {
+            const { name, username } = req.body;
+            const prompt = `
+                You are an expert Web3 and music profile bio generator.
+                Generate a short, catchy, and creative bio (max 150 characters) for a user on a Web3 music streaming platform called TonJam.
+                The user's name is "${name || 'Anonymous'}" and their username is "@${username || 'user'}".
+                Make it sound cool, crypto-native, and passionate about music.
+                Return ONLY the bio text, nothing else.
+            `;
+
+            const response = await ai.models.generateContent({
+                model: "gemini-3.5-flash",
+                contents: [{ parts: [{ text: prompt }] }]
+            });
+            const generatedBio = response.text?.trim() || '';
+            res.json({ bio: generatedBio });
+        } catch (error: any) {
+            console.error("AI Bio generation error:", error);
+            res.status(500).json({ error: error.message || "Failed to generate AI bio" });
+        }
+    });
+
+    app.post('/api/gemini/generate-image', async (req, res) => {
+        try {
+            const { title, trackInfo } = req.body;
+            const promptContext = `
+                Create a highly descriptive and artistic prompt for an image generation model to create a playlist cover for a playlist titled "${title}". 
+                The playlist contains tracks like: ${trackInfo}. 
+                The style should be modern, vibrant, and reflect the mood of the music. 
+                Return ONLY the prompt text.
+            `;
+
+            // Use text model to generate the vision prompt
+            const visionPromptResponse = await ai.models.generateContent({
+                model: "gemini-3.5-flash",
+                contents: [{ parts: [{ text: promptContext }] }]
+            });
+            const imagePrompt = visionPromptResponse.text?.trim() || `Artistic playlist cover for ${title}, modern music theme, vibrant colors`;
+
+            // Use pollinations for the actual image to keep it reliable in this environment
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1000&height=1000&nologo=true&seed=${Date.now()}`;
+            
+            res.json({ imageUrl });
+        } catch (error: any) {
+            console.error("AI Image generation error:", error);
+            res.status(500).json({ error: error.message || "Failed to generate AI image" });
+        }
+    });
+
     // Serve static files from public/uploads
     app.use('/uploads', express.static(uploadsDir));
 

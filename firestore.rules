@@ -31,6 +31,8 @@ service cloud.firestore {
         && (!data.keys().contains('email') || (data.email is string && data.email.size() <= 256))
         && (!data.keys().contains('bio') || (data.bio is string && data.bio.size() <= 1000))
         && (!data.keys().contains('avatar') || (data.avatar is string && data.avatar.size() <= 2048))
+        && (!data.keys().contains('collectorTier') || data.collectorTier in ['Bronze', 'Silver', 'Gold', 'Platinum', 'Legend'])
+        && (!data.keys().contains('badges') || data.badges is list)
         && (!data.keys().contains('xp') || data.xp is number);
     }
 
@@ -44,7 +46,8 @@ service cloud.firestore {
     function isValidNFT(data) {
       return data.id is string && data.id.size() <= 128
         && data.title is string && data.title.size() <= 200
-        && data.price is string && data.price.size() <= 20;
+        && data.price is string && data.price.size() <= 20
+        && (!data.keys().contains('views') || data.views is number);
     }
 
     function isValidPost(data) {
@@ -129,6 +132,22 @@ service cloud.firestore {
         && data.completed is bool;
     }
 
+    function isValidOffer(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.nftId is string && data.nftId.size() <= 128
+        && data.offerer is string && data.offerer.size() <= 128
+        && data.price is string && data.price.size() <= 20
+        && data.status in ['pending', 'accepted', 'rejected', 'cancelled'];
+    }
+
+    function isValidReport(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.nftId is string && data.nftId.size() <= 128
+        && data.reporterId is string && data.reporterId.size() <= 128
+        && data.reason is string && data.reason.size() <= 500
+        && data.status in ['pending', 'reviewed', 'resolved'];
+    }
+
     function isValidJamMessage(data) {
       return data.senderId is string && data.senderId.size() <= 128
         && data.senderName is string && data.senderName.size() <= 100
@@ -168,7 +187,7 @@ service cloud.firestore {
             'likedTrackIds', 'followedUserIds', 'role', 'isVerifiedArtist', 'following', 
             'earnings', 'streamingEarnings', 'nftEarnings', 'jamBalance', 'stakedJam', 
             'pendingJamRewards', 'tjBalance', 'lastStakingUpdate', 'isPremium', 'royaltyConfig',
-            'isVerified', 'verificationStatus', 'xp'
+            'isVerified', 'verificationStatus', 'xp', 'collectorTier', 'badges'
           ])
         ) || (
           // System/Public updates across users (like following, stream earnings)
@@ -212,6 +231,9 @@ service cloud.firestore {
           // Action: Transfer Ownership (Buy/Send) or Place offer/bid
           (isOwner(existing().ownerId) || isOwner(existing().owner) || existing().isListed == true || existing().listingType == 'auction') &&
           incoming().diff(existing()).affectedKeys().hasOnly(['ownerId', 'owner', 'isListed', 'price', 'offers', 'updatedAt'])
+        ) || (
+          // Action: Engagement Stats (Views)
+          incoming().diff(existing()).affectedKeys().hasOnly(['views'])
         )
       );
       allow delete: if isAdmin();
@@ -448,6 +470,32 @@ service cloud.firestore {
     match /test/{docId} {
       allow read: if true;
       allow write: if false;
+    }
+
+    // 🤝 OFFERS
+    match /offers/{offerId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidOffer(incoming()) && isValidId(offerId);
+      allow update: if isSignedIn() && (
+        isAdmin() || (
+          // Offerer can cancel
+          (existing().offerer == request.auth.uid || existing().offerer == request.auth.token.email) && 
+          incoming().status == 'cancelled' &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+        ) || (
+          // Recipient can accept/reject (Simplified for now)
+          incoming().status in ['accepted', 'rejected'] &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 🚩 REPORTS
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn() && isValidReport(incoming()) && isValidId(reportId);
+      allow update, delete: if isAdmin();
     }
   }
 }

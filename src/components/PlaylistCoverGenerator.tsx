@@ -3,7 +3,6 @@ import { Sparkles, LayoutGrid, Loader2, X, Check, Image as ImageIcon } from 'luc
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Playlist, Track } from '@/types';
-import { GoogleGenAI } from '@google/genai';
 import { useAudio } from '@/context/AudioContext';
 
 interface PlaylistCoverGeneratorProps {
@@ -23,42 +22,20 @@ const PlaylistCoverGenerator: React.FC<PlaylistCoverGeneratorProps> = ({ isOpen,
     setIsGenerating(true);
     setGenerationType('ai');
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      
-      // First, generate a descriptive prompt for the image based on the tracks
       const trackInfo = tracks.slice(0, 10).map(t => `${t.title} by ${t.artist} (${t.genre})`).join(', ');
-      const promptResponse = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
-        contents: `Create a highly descriptive and artistic prompt for an image generation model to create a playlist cover for a playlist titled "${playlist.title}". The playlist contains tracks like: ${trackInfo}. The style should be modern, vibrant, and reflect the mood of the music. Return only the prompt text.`,
+      const response = await fetch('/api/gemini/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: playlist.title, trackInfo })
       });
 
-      const imagePrompt = promptResponse.text || `Artistic playlist cover for ${playlist.title}, modern music theme, vibrant colors`;
-
-      // Now generate the image using gemini-2.5-flash-image
-      const imageResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: {
-          parts: [{ text: imagePrompt }]
-        },
-        config: {
-          imageConfig: {
-            aspectRatio: "1:1"
-          }
-        }
-      });
-
-      let base64Data = '';
-      for (const part of imageResponse.candidates?.[0]?.content?.parts || []) {
-        if (part.inlineData) {
-          base64Data = part.inlineData.data;
-          break;
-        }
-      }
-
-      if (base64Data) {
-        setGeneratedImage(`data:image/png;base64,${base64Data}`);
+      if (!response.ok) throw new Error('Server returned error for AI image generation');
+      
+      const { imageUrl } = await response.json();
+      if (imageUrl) {
+        setGeneratedImage(imageUrl);
       } else {
-        throw new Error("No image data received");
+        throw new Error("No image URL received");
       }
     } catch (error) {
       console.error("AI Generation failed:", error);

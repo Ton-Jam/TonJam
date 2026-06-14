@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Music, Image, Box, Loader2, Upload, Info, Check, ChevronRight, Plus, Percent } from 'lucide-react';
+import { Music, Image, Box, Loader2, Upload, Info, Check, ChevronRight, Plus, Percent, Cloud, Zap, Sparkles, Database } from 'lucide-react';
 import { useAudio } from '@/context/AudioContext';
 import { getPlaceholderImage, validateFile, ALLOWED_IMAGE_TYPES, ALLOWED_AUDIO_TYPES } from '@/lib/utils';
 import { uploadAudio, uploadCover, uploadMetadata } from '@/services/storageService';
 import { Track, NFTItem, RoyaltySplitExtended } from '@/types';
 import { BackButton } from '@/components/BackButton';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import MintingProgressOverlay, { MintingStep } from '@/components/MintingProgressOverlay';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { mintTonJamNFT } from '@/services/tonService';
 import { motion } from 'motion/react';
@@ -20,6 +21,14 @@ const ArtistMinting: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingType, setLoadingType] = useState<'default' | 'transaction' | 'upload' | 'mint'>('default');
   const [loadingMessage, setLoadingMessage] = useState('Processing...');
+  
+  const [mintingSteps, setMintingSteps] = useState<MintingStep[]>([
+    { id: 'upload', label: 'Asset Portal', status: 'pending', description: 'Cloud deployment', icon: Cloud },
+    { id: 'metadata', label: 'Neural Metadata', status: 'pending', description: 'Artifact genesis', icon: Sparkles },
+    { id: 'transaction', label: 'TON Protocol', status: 'pending', description: 'Blockchain sync', icon: Zap },
+    { id: 'registry', label: 'Local Registry', status: 'pending', description: 'Database anchor', icon: Database },
+  ]);
+  const [overallProgress, setOverallProgress] = useState(0);
 
   const artistTracks = allTracks.filter(t => t.artistId === userProfile.uid && !t.isNFT);
 
@@ -120,19 +129,35 @@ const ArtistMinting: React.FC = () => {
     setIsLoading(true);
     setLoadingType('upload');
     setLoadingMessage('Uploading assets to storage...');
+    
+    // Reset steps
+    setMintingSteps(steps => steps.map(s => ({ ...s, status: 'pending' })));
+    setOverallProgress(5);
+
+    const updateStep = (id: string, status: 'pending' | 'processing' | 'completed' | 'error', progress: number) => {
+      setMintingSteps(steps => steps.map(s => s.id === id ? { ...s, status } : s));
+      setOverallProgress(progress);
+    };
 
     try {
+      updateStep('upload', 'processing', 15);
       let audioUrl = selectedTrack?.audioUrl || '';
       let coverUrl = selectedTrack?.coverUrl || '';
 
       if (trackData.audioFile) {
+        setLoadingMessage('Broadcasting audio signal...');
         const { downloadUrl } = await uploadAudio(trackData.audioFile);
         audioUrl = downloadUrl;
       }
+      setOverallProgress(25);
       if (trackData.coverFile) {
+        setLoadingMessage('Transmitting visual data...');
         const { downloadUrl } = await uploadCover(trackData.coverFile);
         coverUrl = downloadUrl;
       }
+      
+      updateStep('upload', 'completed', 35);
+      updateStep('metadata', 'processing', 45);
 
       setLoadingType('mint');
       setLoadingMessage('Creating metadata artifact...');
@@ -163,11 +188,17 @@ const ArtistMinting: React.FC = () => {
       };
       
       const metadataRes = await uploadMetadata(metadata);
+      
+      updateStep('metadata', 'completed', 55);
+      updateStep('transaction', 'processing', 65);
 
       setLoadingType('transaction');
       setLoadingMessage('Confirming on TON Blockchain...');
 
       await mintTonJamNFT(tonConnectUI, wallet, metadataRes.downloadUrl);
+      
+      updateStep('transaction', 'completed', 85);
+      updateStep('registry', 'processing', 90);
 
       // Save to database
       const finalTrackId = selectedTrack?.id || `track-nft-${Date.now()}`;
@@ -242,11 +273,20 @@ const ArtistMinting: React.FC = () => {
       
       await addUserNFT(newNFT);
 
+      updateStep('registry', 'completed', 100);
+      
+      // Artificial delay to show completion
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       setIsLoading(false);
       addNotification("Track minted as NFT successfully!", "success");
       navigate('/artist-dashboard');
     } catch (error) {
       console.error("Minting failed:", error);
+      
+      // Tag current processing step as error
+      setMintingSteps(steps => steps.map(s => s.status === 'processing' ? { ...s, status: 'error' } : s));
+      
       setIsLoading(false);
       addNotification("Minting failed. Check your connection.", "error");
     }
@@ -254,7 +294,12 @@ const ArtistMinting: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0B0F14] text-white p-6 pb-24 relative overflow-x-hidden">
-      <LoadingOverlay isVisible={isLoading} type={loadingType} message={loadingMessage} />
+      <MintingProgressOverlay 
+        isVisible={isLoading} 
+        steps={mintingSteps} 
+        overallProgress={overallProgress} 
+        currentMessage={loadingMessage} 
+      />
       
       {/* Background Glow */}
       <div className="fixed inset-0 opacity-10 blur-[120px] pointer-events-none z-0">

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { UserCircleIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { useAudio } from '@/context/AudioContext';
 import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react';
-import { GoogleGenAI } from '@google/genai';
 import { Loader2, Upload, Twitter, Instagram, Globe } from 'lucide-react';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -131,31 +130,17 @@ export default function ProfileSettings() {
   const generateAIBio = async () => {
     setAiLoading(true);
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("Gemini API key is missing");
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-      
-      const prompt = `
-You are an expert Web3 and music profile bio generator.
-Generate a short, catchy, and creative bio (max 150 characters) for a user on a Web3 music streaming platform called TonJam.
-The user's name is "${profile.name || 'Anonymous'}" and their username is "@${profile.username || 'user'}".
-Make it sound cool, crypto-native, and passionate about music.
-Return ONLY the bio text, nothing else.`;
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
-        contents: prompt,
-        config: {
-          tools: [{ googleSearch: {} }]
-        }
+      const response = await fetch('/api/gemini/generate-bio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: profile.name, username: profile.username })
       });
 
-      const generatedBio = response.text?.trim() || '';
-      if (generatedBio) {
-        setProfile(prev => ({ ...prev, bio: generatedBio }));
+      if (!response.ok) throw new Error('Server returned error for AI bio generation');
+      
+      const { bio } = await response.json();
+      if (bio) {
+        setProfile(prev => ({ ...prev, bio }));
         addNotification('AI Bio generated!', 'success');
       }
     } catch (error) {
