@@ -12,6 +12,7 @@ import SellNFTModal from './SellNFTModal';
 import SkeletonCard from './SkeletonCard';
 import NFTOptionsModal from './NFTOptionsModal';
 import ManageNFTModal from './ManageNFTModal';
+import { AuctionCountdownTimer } from './AuctionCountdownTimer';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -418,9 +419,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                       {supplyIndicator.label}
                     </span>
                     {nft.listingType === 'auction' && (
-                      <span className="px-1.5 py-0.5 bg-amber-500 rounded-[4px] text-[8px] font-bold uppercase tracking-[0.1em] text-black shadow-lg border border-white/10">
-                        AUCTION
-                      </span>
+                      <AuctionCountdownTimer nft={nft} variant="badge" />
                     )}
                     {rarity && (
                       <span className={`px-1.5 py-0.5 bg-gradient-to-r ${getRarityColor(rarity)} rounded-[4px] text-[8px] font-bold uppercase tracking-[0.1em] text-white shadow-lg border border-white/10`}>

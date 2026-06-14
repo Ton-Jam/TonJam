@@ -18,7 +18,7 @@ const CompleteProfilePrompt = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black p-4 md:p-6 text-foreground shadow-2xl mb-8">
+    <div className="section-container relative overflow-hidden rounded-2xl bg-transparent dark:bg-black p-4 md:p-6 text-foreground shadow-2xl">
       <button 
         onClick={() => setIsVisible(false)}
         className="absolute top-2 right-2 p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors text-muted-foreground"

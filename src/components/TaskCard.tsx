@@ -109,7 +109,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClaim, onToggle, onClick })
       layout
       whileHover={{ y: -2 }}
       onClick={handleCardClick}
-      className={`relative w-full rounded-none transition-all duration-300 select-none overflow-hidden cursor-pointer flex flex-col justify-between p-4 shadow-none ${
+      className={`relative w-full rounded-none transition-all duration-300 select-none overflow-hidden cursor-pointer flex flex-col justify-between p-4 shadow-none task-card-silver-outline ${
         task.claimed 
           ? 'bg-[#09132e]/50 opacity-65' 
           : task.completed

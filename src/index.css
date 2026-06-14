@@ -83,15 +83,15 @@
 }
 
 .dark {
-  --background: #060c1f;
+  --background: #050a24;
   --foreground: #F2F4F8;
-  --card: #09132e;
+  --card: #0a113a;
   --card-foreground: #F2F4F8;
-  --popover: #09132e;
+  --popover: #0a113a;
   --popover-foreground: #F2F4F8;
   --primary: #5B6BFF;
   --primary-foreground: #FFFFFF;
-  --secondary: #09132e;
+  --secondary: #0a113a;
   --secondary-foreground: #F2F4F8;
   --muted: #101a3b;
   --muted-foreground: #9AA0AE;
@@ -104,10 +104,10 @@
   --ring: rgba(91, 107, 255, 0.35);
   --silver: #C0C0C0;
 
-  --tonjam-navy: #060c1f;
-  --tonjam-navy-light: #09132e;
+  --tonjam-navy: #050a24;
+  --tonjam-navy-light: #0a113a;
 
-  --surface: #09132e;
+  --surface: #0a113a;
   --elevated: #101a3b;
   --border-strong: #20336d;
   --on-surface-muted: #9AA0AE;
@@ -142,11 +142,11 @@
   --shadow-lg: none;
   --shadow-xl: none;
   --shadow-2xl: none;
-  --sidebar: #060c1f;
+  --sidebar: #050a24;
   --sidebar-foreground: #F2F4F8;
   --sidebar-primary: #5B6BFF;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #09132e;
+  --sidebar-accent: #0a113a;
   --sidebar-accent-foreground: #F2F4F8;
   --sidebar-border: #16244f;
   --sidebar-ring: rgba(91, 107, 255, 0.35);
@@ -261,11 +261,11 @@
 
   /* Force dark-space background globally on all components in dark mode */
   .dark {
-    background-color: #060c1f !important;
+    background-color: #050a24 !important;
   }
   .dark body,
   .dark .bg-background {
-    background-color: #060c1f !important;
+    background-color: #050a24 !important;
   }
   .dark .bg-zinc-950,
   .dark .bg-zinc-900,
@@ -273,7 +273,7 @@
   .dark .bg-zinc-950\/60,
   .dark .bg-zinc-950\/80,
   .dark .bg-zinc-900\/50 {
-    background-color: #060c1f !important;
+    background-color: #050a24 !important;
   }
   .dark .bg-card,
   .dark .bg-secondary,
@@ -285,7 +285,13 @@
   .dark .section-container,
   .dark .bg-zinc-900\/40,
   .dark .bg-zinc-900\/60 {
-    background-color: #09132e !important;
+    background-color: #0a113a !important;
+  }
+
+  /* Force premium subtle silver outlines for target task card components */
+  .task-card-silver-outline {
+    border: 1px solid rgba(192, 192, 192, 0.35) !important;
+    border-radius: 12px !important;
   }
 
   /* Flat, subtle borders, matching Halo spec */
@@ -320,6 +326,19 @@
     padding-right: 16px !important;
     max-width: 100% !important;
     width: 100% !important;
+  }
+
+  /* Specific borderless / gapless override for home-page sections as requested */
+  .home-page .section-container,
+  .home-page section.section-container,
+  .home-page main section,
+  .home-page section {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
   }
 
   /* Edge-to-edge sliders / carousels inside pages */
@@ -516,7 +535,7 @@
   }
 
   .section-container {
-    @apply mb-6 sm:mb-12;
+    @apply mb-2 sm:mb-3;
   }
 
   .text-glow {

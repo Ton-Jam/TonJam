@@ -12,11 +12,12 @@ interface WelcomeBannerProps {
 const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ onDismiss, onGetTokens }) => {
   return (
     <motion.div 
+      className="section-container"
       initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-      animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+      animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
     >
-      <Card className="relative overflow-hidden border-none -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black text-foreground">
+      <Card className="relative overflow-hidden border-none bg-transparent dark:bg-black text-foreground rounded-2xl">
         <button 
           onClick={onDismiss}
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors z-20 text-muted-foreground"

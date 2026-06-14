@@ -95,6 +95,8 @@ import ReactionsSection from "@/components/ReactionsSection";
 import confetti from "canvas-confetti";
 import { getPlaceholderImage, cn } from "@/lib/utils";
 import { PriceSparkline } from "@/components/PriceSparkline";
+import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
+import { QuickBid } from "@/components/QuickBid";
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -807,29 +809,7 @@ const NFTDetail: React.FC = () => {
                 {/* Live Auction Badge */}
                 {isAuction && (
                   <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
-                    <div className="bg-background/60 backdrop-blur-2xl border border-border px-3 py-2 sm:px-4 sm:py-4 rounded-[4px] flex items-center justify-between shadow-2xl flex-wrap gap-2 sm:gap-4">
-                      <div className="flex items-center gap-2 sm:gap-4 px-3 py-1.5 sm:px-4 sm:py-4 bg-orange-500 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)]">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
-                        <span className="text-[8px] sm:text-[10px] font-bold text-white uppercase tracking-[0.2em]">
-                          Live Auction Active
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[7px] sm:text-[8px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5 sm:mb-1">
-                          Time Remaining
-                        </span>
-                        <span 
-                          className={cn(
-                            "text-[10px] sm:text-[14px] font-black uppercase tracking-widest font-mono transition-all duration-300",
-                            isEndingSoon 
-                              ? "text-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" 
-                              : "text-amber-500"
-                          )}
-                        >
-                          {timeRemaining || "SYNCING..."}
-                        </span>
-                      </div>
-                    </div>
+                    <AuctionCountdownTimer nft={localNft} variant="default" className="bg-background/80 backdrop-blur-2xl border border-transparent shadow-2xl" />
                   </div>
                 )}
               </div>
@@ -1134,21 +1114,7 @@ const NFTDetail: React.FC = () => {
                           {highestOfferPrice} TON
                         </span>
                       </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-[6px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-0.5">
-                          <Clock className="h-2 w-2" /> Time
-                        </span>
-                        <span 
-                          className={cn(
-                            "text-[12px] font-black tracking-tighter tabular-nums font-mono transition-all duration-300",
-                            isEndingSoon 
-                              ? "text-red-500 animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" 
-                              : "text-amber-500"
-                          )}
-                        >
-                          {timeRemaining || "00:00:00"}
-                        </span>
-                      </div>
+                      <AuctionCountdownTimer nft={localNft} variant="compact" className="items-end" />
                     </div>
                   )}
                 </div>
@@ -1239,6 +1205,12 @@ const NFTDetail: React.FC = () => {
                   <Share2 className="h-3.5 w-3.5 text-blue-400" /> Share
                 </button>
               </div>
+
+              {isAuction && !isOwner && !isAuctionEnded && (
+                <div className="mt-4">
+                  <QuickBid nft={localNft} />
+                </div>
+              )}
 
               {/* Tip Selection Modal */}
               <AnimatePresence>

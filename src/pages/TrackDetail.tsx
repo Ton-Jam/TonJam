@@ -46,7 +46,8 @@ const TrackDetail: React.FC = () => {
     playTrack, currentTrack, isPlaying, jamTrack, purchaseTrack, mintNFT, 
     allTracks, allNFTs, likedTrackIds, toggleLikeTrack, addNotification, 
     setTrackToAddToPlaylist, setOptionsTrack, setFullPlayerOpen, userProfile,
-    isTrackCached, downloadTrackForOffline, deleteCachedTrack
+    isTrackCached, downloadTrackForOffline, deleteCachedTrack,
+    toggleFollowUser, followedUserIds
   } = useAudio();
   const [isTipping, setIsTipping] = useState(false);
   const [isProcessingPurchase, setIsProcessingPurchase] = useState(false);
@@ -877,7 +878,7 @@ const TrackDetail: React.FC = () => {
                 <button 
                   onClick={() => {
                     if (artist?.uid) {
-                      useAudio().toggleFollowUser(artist.uid);
+                      toggleFollowUser(artist.uid);
                     }
                   }}
                   className="p-4 rounded-lg bg-muted/50 text-muted-foreground hover:bg-foreground hover:text-background transition-all"

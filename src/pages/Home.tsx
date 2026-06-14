@@ -426,7 +426,7 @@ const Home: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="page-container w-full pt-2 bg-background text-foreground min-h-screen"
+      className="page-container home-page w-full pt-2 bg-background text-foreground min-h-screen"
     >
       <GetFreeTokensModal isOpen={isTokensModalOpen} onClose={() => setIsTokensModalOpen(false)} />
       {isBuyTJModalOpen && <BuyTJModal onClose={() => setIsBuyTJModalOpen(false)} onSuccess={() => setIsBuyTJModalOpen(false)} />}
@@ -564,7 +564,7 @@ const Home: React.FC = () => {
         />
       )}
       
-      <div className="w-full relative z-20 mb-6 px-0">
+      <section className="section-container w-full relative z-20 mb-4 pb-0">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.25em] mb-1">User Console</p>
@@ -580,12 +580,12 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <Tabs 
         value={activeTab} 
         onValueChange={(v) => setActiveTab(v as 'overview' | 'discovery')}
-        className="w-full relative z-20 mb-[18px] sm:mb-[34px]"
+        className="section-container w-full relative z-20 mb-4 sm:mb-6"
       >
         <div className="flex items-center justify-between mb-4 px-0">
           <TabsList variant="line" className="bg-transparent gap-4 sm:gap-8">
@@ -662,7 +662,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="w-full space-y-12 sm:space-y-16 pb-24 px-0"
+            className="w-full space-y-0 pb-12 px-0"
           >
             {/* Welcome Banner */}
             <CompleteProfilePrompt />
@@ -673,7 +673,7 @@ const Home: React.FC = () => {
             </AnimatePresence>
 
             {/* Feature Showcase Grid */}
-            <section className="mb-6 sm:mb-12 w-full overflow-hidden">
+            <section className="section-container w-full overflow-hidden">
               <SectionHeader 
                 title="NFTs for you" 
               />
@@ -695,7 +695,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* Trending NFTs Section */}
-            <section className="mb-6 sm:mb-12 w-full bg-[#060c1f] p-4 rounded-3xl">
+            <section className="section-container w-full bg-[#060c1f] p-4 rounded-3xl">
               <SectionHeader 
                 title="Trending NFTs" 
                 viewAllLink="/marketplace" 
@@ -706,7 +706,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* Edge-to-Edge Token Forge Section */}
-            <section className="relative overflow-hidden -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-[#09132e] dark:bg-[#09132e] p-6 sm:p-8 transition-all flex flex-col xl:flex-row items-center justify-between gap-6 border-none">
+            <section className="section-container relative overflow-hidden bg-[#09132e] dark:bg-[#09132e] p-6 sm:p-8 transition-all flex flex-col xl:flex-row items-center justify-between gap-6 border-none rounded-2xl">
               {/* Background Glow */}
               <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-500/10 blur-[100px] pointer-events-none rounded-full" />
               <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/10 blur-[100px] pointer-events-none rounded-full" />
@@ -781,12 +781,12 @@ const Home: React.FC = () => {
             </section>
 
             {/* Hero Section - Neural Protocol Aesthetic */}
-            <section className="relative -mx-4 sm:mx-0 rounded-none sm:rounded-3xl overflow-hidden bg-transparent dark:bg-black">
+            <section className="section-container relative overflow-hidden bg-transparent dark:bg-black rounded-2xl">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(37,99,235,0.15),transparent)] pointer-events-none"></div>
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
               
               <div className="relative z-10 p-5 sm:p-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                  <div className="space-y-6 sm:space-y-8">
+                  <div className="space-y-3 sm:space-y-4">
                     <div className="flex items-center gap-4">
                       <Badge variant="outline" className="px-3 py-1 bg-blue-500/10 border-blue-500/20 text-blue-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 rounded-full">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
@@ -795,7 +795,7 @@ const Home: React.FC = () => {
                       <div className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest hidden sm:block">Lat: 0.12ms</div>
                     </div>
                     
-                    <div className="space-y-3 sm:space-y-4">
+                    <div className="space-y-1 sm:space-y-2">
                       <h1 className="text-5xl sm:text-8xl font-black uppercase tracking-tighter leading-[0.8] text-foreground">
                         FORGE<br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 animate-gradient-x">LEGACY</span>
@@ -858,22 +858,22 @@ const Home: React.FC = () => {
             </section>
 
             {/* Neural Leaderboard Section */}
-            <section className="w-full bg-[#060c1f] p-4 rounded-3xl">
+            <section className="section-container w-full bg-[#060c1f] p-4 rounded-3xl">
               <Leaderboard artists={artists} limit={5} />
             </section>
 
             {/* Global Top Fan Leaderboard */}
-            <section className="w-full bg-[#060c1f] p-4 rounded-3xl">
+            <section className="section-container w-full bg-[#060c1f] p-4 rounded-3xl">
               <FanLeaderboard />
             </section>
 
             {/* AI Dj Krupy Section - Neural Synthesis Interface */}
-            <section className="relative">
+            <section className="section-container relative">
               {aiResult ? (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-transparent dark:bg-black -mx-4 sm:mx-0 rounded-none sm:rounded-3xl p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden shadow-2xl"
+                  className="bg-transparent dark:bg-black p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden shadow-2xl rounded-2xl"
                 >
                   {/* Digital particles effect */}
                   <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -935,7 +935,7 @@ const Home: React.FC = () => {
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 bg-transparent dark:bg-black -mx-4 sm:mx-0 rounded-none sm:rounded-3xl p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group shadow-2xl">
+                  <div className="lg:col-span-2 bg-transparent dark:bg-black p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group shadow-2xl rounded-2xl">
                     <div className="absolute inset-0 bg-blue-600/10 blur-[100px] opacity-30 group-hover:scale-110 transition-transform duration-1000"></div>
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
                     
@@ -992,13 +992,13 @@ const Home: React.FC = () => {
             </section>
 
             {/* Featured Tracks Dynamic Playlist */}
-            <section>
+            <section className="section-container">
               <SectionHeader 
                 title="Featured_Streams" 
                 viewAllLink={`/playlist/${featuredPlaylist.id}`} 
               />
               
-              <Card className="relative overflow-hidden border-none -mx-4 sm:mx-0 rounded-none sm:rounded-3xl bg-transparent dark:bg-black shadow-2xl group">
+              <Card className="relative overflow-hidden border-none bg-transparent dark:bg-black shadow-2xl group rounded-2xl">
                 <CardContent className="p-4 sm:p-8 flex flex-col md:flex-row items-center gap-5 sm:gap-8 relative overflow-hidden">
                   {/* Background effects */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-transparent z-0"></div>
@@ -1064,13 +1064,13 @@ const Home: React.FC = () => {
 
             {/* Protocol Mechanics Accordion */}
             <section className="section-container">
-              <div className="w-full space-y-8">
-                <div className="text-center space-y-2">
+              <div className="w-full space-y-3">
+                <div className="text-center space-y-1">
                   <Badge variant="outline" className="px-4 py-1 bg-blue-950/20 dark:bg-blue-950/20 border-zinc-700 dark:border-blue-900/30 text-zinc-400 dark:text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] rounded-full">
                     Protocol_Documentation
                   </Badge>
                   <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground">Synthesis Mechanics</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Understanding the decentralized frequency protocol.</p>
+                  <p className="text-muted-foreground text-xs font-medium">Understanding the decentralized frequency protocol.</p>
                 </div>
 
                 <Accordion type="single" collapsible className="w-full space-y-2">
@@ -1352,7 +1352,7 @@ const Home: React.FC = () => {
             )}
 
             {/* Community & Artist CTA Section */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <section className="section-container grid grid-cols-1 lg:grid-cols-2 gap-6">
               <motion.div 
                 whileHover={{ y: -5 }}
                 className="relative overflow-hidden rounded-2xl bg-secondary/50 dark:bg-black/30 border border-border p-6 sm:p-8 shadow-xl group cursor-pointer"

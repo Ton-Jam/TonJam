@@ -73,14 +73,13 @@ const manifestUrl = 'https://ton-connect.github.io/demo-dapp-with-react-ui/tonco
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -20 }}
+    initial={{ opacity: 0, x: 20, scale: 0.98 }}
+    animate={{ opacity: 1, x: 0, scale: 1 }}
+    exit={{ opacity: 0, x: -20, scale: 0.98 }}
     transition={{ 
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-      opacity: { duration: 0.2 }
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1],
+      opacity: { duration: 0.3 }
     }}
     className="w-full h-full overflow-x-clip"
   >

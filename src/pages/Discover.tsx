@@ -549,11 +549,11 @@ const Discover: React.FC = () => {
       </div>
 
 
-      <div className="w-full max-w-full px-4 pb-24 space-y-6">
+      <div className="w-full max-w-full px-4 pb-24 space-y-2 sm:space-y-3">
         
 
         {isLoading ? (
-          <div className="space-y-12">
+          <div className="space-y-3">
             <div className="aspect-[2/1] w-full bg-muted rounded-[4px] animate-pulse"></div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
@@ -632,7 +632,7 @@ const Discover: React.FC = () => {
             )}
 
             {/* Browse Categories - Modern Bento Grid */}
-            <section className="space-y-6">
+            <section className="space-y-2">
               <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800 font-ui">Browse Dimensions</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {BROWSE_CATEGORIES.map((category, idx) => (
@@ -667,7 +667,7 @@ const Discover: React.FC = () => {
             </section>
 
             {/* Albums Section */}
-            <section className="space-y-6">
+            <section className="space-y-2">
               <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800">Featured Albums</h2>
               <Carousel
                 opts={{
@@ -692,12 +692,12 @@ const Discover: React.FC = () => {
             </section>
 
             {/* Trending Artist Leaderboard with Sparklines */}
-            <section className="space-y-6">
+            <section className="space-y-2">
               <TrendingArtistLeaderboard limit={5} />
             </section>
             
             {/* Artist Leaderboard */}
-            <section className="space-y-6">
+            <section className="space-y-2">
               <ArtistLeaderboard artists={artists.slice(0, 5)} title="Top Artists" />
             </section>
 

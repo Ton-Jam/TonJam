@@ -32,6 +32,7 @@ import {
 import { MOCK_NFTS, MOCK_ARTISTS, TON_LOGO, APP_LOGO } from '@/constants';
 import NFTCard from '@/components/NFTCard';
 import SectionHeader from '@/components/SectionHeader';
+import { AuctionAnalyticsSection } from '@/components/AuctionAnalyticsSection';
 import { useAudio } from '@/context/AudioContext';
 import { NFTItem } from '@/types';
 import { cn } from '@/lib/utils';
@@ -331,6 +332,9 @@ const AuctionScreen: React.FC = () => {
             </motion.div>
           ))}
         </section>
+
+        {/* Auction Data Visualization Section */}
+        <AuctionAnalyticsSection totalAuctionsCount={auctionNFTs.length} />
 
         {/* Live Grid */}
         <section className="space-y-8">
