@@ -935,7 +935,7 @@ const Home: React.FC = () => {
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 bg-transparent dark:bg-black p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group shadow-2xl rounded-2xl">
+                  <div className="lg:col-span-2 bg-blue-950 dark:bg-blue-950 p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group shadow-2xl rounded-2xl">
                     <div className="absolute inset-0 bg-blue-600/10 blur-[100px] opacity-30 group-hover:scale-110 transition-transform duration-1000"></div>
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
                     
@@ -998,7 +998,7 @@ const Home: React.FC = () => {
                 viewAllLink={`/playlist/${featuredPlaylist.id}`} 
               />
               
-              <Card className="relative overflow-hidden border-none bg-transparent dark:bg-black shadow-2xl group rounded-2xl">
+              <Card className="relative overflow-hidden border-none bg-blue-950 dark:bg-blue-950 shadow-2xl group rounded-2xl">
                 <CardContent className="p-4 sm:p-8 flex flex-col md:flex-row items-center gap-5 sm:gap-8 relative overflow-hidden">
                   {/* Background effects */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-transparent z-0"></div>

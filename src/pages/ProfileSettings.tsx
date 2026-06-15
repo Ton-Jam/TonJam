@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UserCircleIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { useAudio } from '@/context/AudioContext';
+import { useNotification } from '@/context/NotificationContext';
 import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react';
 import { Loader2, Upload, Twitter, Instagram, Globe } from 'lucide-react';
 import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '@/lib/firebase';
@@ -16,6 +17,7 @@ import { ShieldCheck, CheckCircle, Clock } from 'lucide-react';
 
 export default function ProfileSettings() {
   const { userProfile, addNotification } = useAudio();
+  const { preferences, updatePreferences, requestPushPermission } = useNotification();
   const tonAddress = useTonAddress();
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -310,6 +312,52 @@ export default function ProfileSettings() {
                       <option value="ocean">Ocean</option>
                       <option value="neon">Neon</option>
                     </select>
+                  </div>
+                </div>
+
+                <div className="col-span-full pt-6 border-t border-white/5">
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-1.5 h-4 bg-blue-500 rounded-full" />
+                    <h3 className="text-sm font-bold text-foreground cursor-default uppercase tracking-widest">Real-time Push Alerts</h3>
+                  </div>
+                  
+                  <div className="p-4 bg-blue-500/5 rounded-2xl flex items-center justify-between gap-4 border-none">
+                    <div className="text-left">
+                      <h4 className="text-xs font-black uppercase text-zinc-100 flex items-center gap-1.5">
+                        NFT Auction Outbid Signals
+                      </h4>
+                      <p className="text-[9px] font-medium text-zinc-400 mt-1">
+                        Transmit standard browser push notifications to desktop when another collector outbids your active auction signals.
+                      </p>
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const isGranted = await requestPushPermission();
+                        updatePreferences({
+                          ...preferences,
+                          bidAlerts: !preferences.bidAlerts
+                        });
+                        addNotification(
+                          !preferences.bidAlerts 
+                            ? "NFT Outbid telemetry alerts linked and secured." 
+                            : "NFT Outbid telemetry alerts silenced.", 
+                          "info"
+                        );
+                      }}
+                      className={cn(
+                        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-blue-500 border-none",
+                        preferences.bidAlerts ? "bg-blue-600" : "bg-zinc-800"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-y-0.5",
+                          preferences.bidAlerts ? "translate-x-5" : "translate-x-0.5"
+                        )}
+                      />
+                    </button>
                   </div>
                 </div>
 

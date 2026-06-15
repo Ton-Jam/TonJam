@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { useAudio } from "@/context/AudioContext";
+import SubtleFrequencyVisualizer from "./SubtleFrequencyVisualizer";
 import { useNavigate } from "react-router-dom";
 import { 
   Play, 
@@ -182,13 +183,19 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
             className="flex items-center gap-3 min-w-0 cursor-pointer group"
             onClick={() => setFullPlayerOpen(true)}
           >
-            <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-[4px] overflow-hidden flex-shrink-0 bg-zinc-900 shadow-md ring-1 ring-white/10">
+            <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-[4px] overflow-hidden flex-shrink-0 bg-zinc-900 shadow-md ring-1 ring-white/10 flex items-center justify-center">
               <img
                 src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 alt=""
                 referrerPolicy="no-referrer"
               />
+              {/* Subtle frequency visualizer overlay */}
+              {/* Visualizer removed as requested */}
+              {isPlaying && (
+                <div className="absolute inset-0 bg-black/55 backdrop-blur-[0.5px] flex items-end justify-center pb-1.5 px-1 pb-1">
+                </div>
+              )}
             </div>
             
             <div className="min-w-0 flex flex-col gap-1">
@@ -252,9 +259,16 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
 
             <Button
               size="icon"
-              className="w-10 h-10 rounded-full bg-white hover:bg-neutral-100 text-black shadow-lg transition-transform hover:scale-105 active:scale-95"
+              className="relative w-10 h-10 rounded-full bg-white hover:bg-neutral-100 text-black shadow-lg transition-transform hover:scale-105 active:scale-95 overflow-hidden"
               onClick={(e) => { e.stopPropagation(); togglePlay(); }}
             >
+              <motion.div
+                className="absolute inset-0 bg-black/10"
+                initial={{ scale: 0, opacity: 0 }}
+                whileTap={{ scale: 2, opacity: 0.4 }}
+                transition={{ duration: 0.3 }}
+                style={{ pointerEvents: 'none' }}
+              />
               {isPlaying ? (
                 <Pause className="h-4 w-4 fill-current text-black" />
               ) : (
@@ -316,9 +330,16 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
           {/* Mobile-only Play Button */}
           <Button
             size="icon"
-            className="sm:hidden w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all hover:scale-105 active:scale-95"
+            className="relative sm:hidden w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all hover:scale-105 active:scale-95 overflow-hidden"
             onClick={(e) => { e.stopPropagation(); togglePlay(); }}
           >
+            <motion.div
+              className="absolute inset-0 bg-white/20"
+              initial={{ scale: 0, opacity: 0 }}
+              whileTap={{ scale: 2, opacity: 0.4 }}
+              transition={{ duration: 0.3 }}
+              style={{ pointerEvents: 'none' }}
+            />
             {isPlaying ? (
               <Pause className="h-4 w-4 fill-current" />
             ) : (

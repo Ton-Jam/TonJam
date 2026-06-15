@@ -315,7 +315,7 @@ const Discover: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 relative">
+    <div className="min-h-screen bg-background pb-24 relative discover-page w-full px-0 max-w-full">
       {/* Atmospheric Background Blobs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -z-10" />
       <div className="absolute top-1/4 -left-24 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px] -z-10" />
@@ -340,8 +340,8 @@ const Discover: React.FC = () => {
         continuous
       />
 
-      {/* Search Header - Sticky & Atmospheric with standard top padding */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg pt-5 pb-3 w-full border-b border-blue-500/10 transition-colors duration-300">
+      {/* Search Header - Sticky & Atmospheric - tight padding */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg pt-4 pb-1 w-full border-b border-blue-500/10 transition-colors duration-300">
         <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
           <form 
             onSubmit={handleSearchSubmit} 
@@ -350,7 +350,7 @@ const Discover: React.FC = () => {
             {/* Shiny Gradient Border Effect */}
             <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
             
-            <div className={`relative flex items-center h-11 bg-white border transition-all duration-300 ease-in-out rounded-full overflow-hidden focus-within:scale-[1.02] ${isFocused ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-zinc-200 group-hover:border-zinc-300'}`}>
+            <div className={`relative flex items-center h-10 bg-white border transition-all duration-300 ease-in-out rounded-full overflow-hidden focus-within:scale-[1.02] ${isFocused ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-zinc-200 group-hover:border-zinc-300'}`}>
               <div className="absolute left-4 z-10 pointer-events-none">
                 <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-400'}`} />
               </div>
@@ -511,15 +511,15 @@ const Discover: React.FC = () => {
             variant="outline" 
             size="icon"
             onClick={() => setIsDiscoverFiltersOpen(true)}
-            className="h-11 w-11 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
+            className="h-10 w-10 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
           >
             <ListFilter className="h-4 w-4 text-foreground" />
           </Button>
         </div>
       </div>
 
-      {/* Filter Tabs Section - Sticky directly below Header */}
-      <div className="sticky top-[76px] z-40 bg-background/95 backdrop-blur-lg py-3 w-full border-b border-blue-500/10 transition-colors duration-300">
+      {/* Filter Tabs Section - Sticky directly below Header, tight padding */}
+      <div className="sticky top-[56px] z-40 bg-background/95 backdrop-blur-lg pt-0 pb-1 w-full border-b border-blue-500/10 transition-colors duration-300">
         <div className="w-full filter-tabs">
           <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
             <div className="scroll-row scroll-smooth flex justify-start md:justify-center py-1">
@@ -549,7 +549,7 @@ const Discover: React.FC = () => {
       </div>
 
 
-      <div className="w-full max-w-full px-4 pb-24 space-y-2 sm:space-y-3">
+      <div className="w-full max-w-full px-0 pb-24 space-y-0">
         
 
         {isLoading ? (
@@ -576,7 +576,7 @@ const Discover: React.FC = () => {
               <section>
                 <Card 
                   onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
-                  className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer border-none shadow-none group transition-all duration-500 bg-background"
+                  className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl group transition-all duration-500"
                 >
                   <img 
                     src={discoverWeekly.coverUrl} 

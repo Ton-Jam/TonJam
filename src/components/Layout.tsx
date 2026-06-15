@@ -639,6 +639,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       onClick={() => {
                         if (userAddress) tonConnectUI.disconnect();
                         if (isEvmConnected) disconnectEvm();
+                        navigate('/wallet');
                       }}
                       className={`p-2.5 rounded-[4px] hover:bg-destructive/10 hover:text-destructive transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
                     >
@@ -660,6 +661,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       onClick={() => {
                         // Simple toggle to choose EVM
                         connect({ connector: injected() });
+                        navigate('/wallet');
                       }}
                       className={`p-2.5 rounded-[4px] hover:bg-muted transition-all flex items-center gap-2 ${isWallet ? 'text-blue-500' : 'text-muted-foreground'}`}
                     >

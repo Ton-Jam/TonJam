@@ -73,6 +73,7 @@ import { db, auth, handleFirestoreError, OperationType, cleanUpdateData } from '
 import { doc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { BadgeSystem } from '@/components/BadgeSystem';
+import { JamPointsTracker } from '@/components/JamPointsTracker';
 
 const Profile: React.FC = () => {
  const navigate = useNavigate();
@@ -729,6 +730,8 @@ const Profile: React.FC = () => {
             )}
 
             <div className="p-4 space-y-8">
+              <JamPointsTracker />
+
               <SectionHeader title="Followed Artists" onAction={() => setActiveTab('staking')} />
               <div className="scroll-row">
                 {localUser.followedArtists && localUser.followedArtists.length > 0 ? (

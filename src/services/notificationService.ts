@@ -49,5 +49,35 @@ export const notificationService = {
     };
     notifications.unshift(newNotification);
     notificationService.saveNotifications(userId, notifications);
+
+    // Trigger standard HTML5 native desktop/push alerts if enabled and approved
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (window.Notification.permission === 'granted') {
+        try {
+          new window.Notification(notification.title, {
+            body: notification.message,
+            icon: '/favicon.ico'
+          });
+        } catch (error) {
+          console.warn("Native push notification display failed:", error);
+        }
+      }
+    }
+  },
+
+  requestPushPermission: async (): Promise<boolean> => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (window.Notification.permission === 'granted') return true;
+      if (window.Notification.permission === 'denied') return false;
+      
+      try {
+        const permission = await window.Notification.requestPermission();
+        return permission === 'granted';
+      } catch (error) {
+        console.error("Error requesting push permissions:", error);
+        return false;
+      }
+    }
+    return false;
   }
 };

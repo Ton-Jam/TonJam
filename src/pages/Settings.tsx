@@ -18,7 +18,8 @@ import {
   Database,
   Trash2,
   Plus,
-  WifiOff
+  WifiOff,
+  Palette
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
@@ -50,7 +51,7 @@ import { motion } from 'motion/react';
 const Settings: React.FC = () => {
   const navigate = useNavigate();
   const { user, userProfile, signOut } = useAuth();
-  const { isOffline, toggleOfflineMode } = useAudio();
+  const { isOffline, toggleOfflineMode, artworkStyle, setArtworkStyle } = useAudio();
   const { theme, setTheme } = useTheme();
   const { totalSizeMB, cachedCount, clearAllCache, isPurging } = useCacheManagement();
   
@@ -280,6 +281,23 @@ const Settings: React.FC = () => {
                         <SelectItem value="dark" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Dark</SelectItem>
                         <SelectItem value="system" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Auto</SelectItem>
                     </SelectContent>
+                    </Select>
+                </SettingRow>
+                <Separator className="bg-white/5" />
+                <SettingRow 
+                    icon={Palette} 
+                    title="Artwork Style" 
+                    description="Spotify, Vinyl, or Visualizer"
+                >
+                    <Select value={artworkStyle} onValueChange={(val: any) => setArtworkStyle(val)}>
+                      <SelectTrigger className="w-[100px] h-7 bg-muted/20 border border-white/5 rounded-full text-[9px] font-black uppercase tracking-widest focus:ring-1 focus:ring-blue-500/50">
+                          <SelectValue placeholder="Style" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border-white/5 rounded-2xl shadow-2xl">
+                          <SelectItem value="spotify" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Spotify</SelectItem>
+                          <SelectItem value="vinyl" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Vinyl</SelectItem>
+                          <SelectItem value="visualizer" className="text-[9px] font-black uppercase tracking-widest cursor-pointer focus:bg-blue-600 focus:text-white rounded-lg m-1">Visualizer</SelectItem>
+                      </SelectContent>
                     </Select>
                 </SettingRow>
                 <Separator className="bg-white/5" />

@@ -71,6 +71,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 
 import DynamicVisualizer from './DynamicVisualizer';
+import SubtleFrequencyVisualizer from './SubtleFrequencyVisualizer';
 
 const LyricsView: React.FC<{ lyrics: string }> = ({ lyrics }) => {
   const lines = lyrics.split('\n');
@@ -179,7 +180,7 @@ const FullPlayer: React.FC = () => {
   const [activeView, setActiveView] = useState<'player' | 'lyrics' | 'comments' | 'artist' | 'nft' | 'krupy' | 'ambient'>('player');
   const [visualizerVariant, setVisualizerVariant] = useState<'bars' | 'circle' | 'particles' | 'waves'>('bars');
   const [showQueue, setShowQueue] = useState(false);
-  const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl' | 'visualizer'>('spotify');
+  const { artworkStyle, setArtworkStyle } = useAudio();
   
   // Dynamic color based on mood and variant
   const visualizerColor = useMemo(() => {
@@ -418,41 +419,11 @@ const FullPlayer: React.FC = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.99 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col h-full justify-between py-2 md:grid md:grid-cols-12 md:gap-16 md:items-center md:py-8"
+              className="flex flex-col h-full gap-6 py-2 md:gap-12 md:py-8 items-center"
             >
               {/* Cover Art Stage - Centered on Mobile, beautiful layout with interactive Toggle */}
-              <div className="relative flex-1 flex flex-col items-center justify-center md:col-span-5 py-2 select-none">
+              <div className="relative flex items-center justify-center py-2 select-none w-full max-w-2xl">
                 
-                {/* Artwork Mode Switcher (Spotify-standard vs Spinning Disc vs Visualizer) - Borderless Pill */}
-                <div className="mb-4 bg-zinc-900/60 p-1 rounded-full flex gap-1 shadow-inner relative z-20">
-                  <button 
-                    onClick={() => setArtworkStyle('spotify')}
-                    className={cn(
-                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-zinc-500/30",
-                      artworkStyle === 'spotify' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
-                    )}
-                  >
-                    Classic Cover
-                  </button>
-                  <button 
-                    onClick={() => setArtworkStyle('vinyl')}
-                    className={cn(
-                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-zinc-500/30",
-                      artworkStyle === 'vinyl' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
-                    )}
-                  >
-                    Vinyl Disc
-                  </button>
-                  <button 
-                    onClick={() => setArtworkStyle('visualizer')}
-                    className={cn(
-                      "text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-zinc-500/30",
-                      artworkStyle === 'visualizer' ? "bg-white text-black shadow-md" : "text-neutral-400 hover:text-white"
-                    )}
-                  >
-                    Visualizer
-                  </button>
-                </div>
 
                 <AnimatePresence mode="wait">
                   {artworkStyle === 'spotify' && (
@@ -463,7 +434,7 @@ const FullPlayer: React.FC = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.35, ease: "easeOut" }}
-                      className="relative group cursor-pointer"
+                      className="relative group cursor-pointer w-full"
                       onClick={() => {
                         const variants: ('bars' | 'circle' | 'particles' | 'waves')[] = ['bars', 'circle', 'particles', 'waves'];
                         const nextIndex = (variants.indexOf(visualizerVariant) + 1) % variants.length;
@@ -481,7 +452,7 @@ const FullPlayer: React.FC = () => {
                       />
                       
                       {/* Main cover art frame - No border lines, crisp radius and heavy shadow */}
-                      <div className="relative w-[180px] h-[180px] xs:w-[220px] xs:h-[220px] min-[400px]:w-[240px] min-[400px]:h-[240px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] overflow-hidden rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none">
+                      <div className="relative w-full aspect-square overflow-hidden rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.92)] select-none">
                         <img
                           src={currentTrack.coverUrl || getPlaceholderImage(`track-${currentTrack.id}`)}
                           className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out select-none"
@@ -623,14 +594,24 @@ const FullPlayer: React.FC = () => {
               </div>
 
               {/* Controls Deck - Styled perfectly like Spotify's structural layout */}
-              <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 md:pt-0 md:col-span-7 flex flex-col justify-center h-full">
+              <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 md:pt-8 w-full max-w-2xl flex flex-col justify-center">
                 
                 {/* Information Header Block */}
                 <div className="flex justify-between items-center px-1">
                   <div className="flex-1 min-w-0 pr-6">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h1 className="text-lg xs:text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight truncate">
-                        {currentTrack.title}
+                    <motion.div 
+                      className="flex items-center gap-2 flex-wrap"
+                      key={currentTrack.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <h1 className="text-lg xs:text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight truncate flex items-center gap-2">
+                        <span>{currentTrack.title}</span>
+                        {isPlaying && (
+                          <SubtleFrequencyVisualizer isPlaying={isPlaying} color={visualizerColor} barCount={6} className="h-6 w-8 flex-shrink-0 inline-flex items-end self-center pb-1" />
+                        )}
                       </h1>
                       {isOffline && (
                         <span className="bg-emerald-500/20 text-emerald-400 text-[6px] font-bold px-1.5 py-0.5 rounded-sm tracking-widest uppercase">
@@ -643,9 +624,15 @@ const FullPlayer: React.FC = () => {
                           OFFLINE READY
                         </span>
                       )}
-                    </div>
+                    </motion.div>
                     
-                    <div className="flex items-center gap-2 mt-1.5">
+                    <motion.div 
+                      className="flex items-center gap-2 mt-1.5"
+                      key={`${currentTrack.id}-artist`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4, delay: 0.1, ease: "easeInOut" }}
+                    >
                       <p 
                         className="text-sm sm:text-base font-medium text-neutral-400 hover:text-white hover:underline transition-all cursor-pointer" 
                         onClick={() => { setFullPlayerOpen(false); navigate(`/artist/${currentTrack.artistId}`); }}
@@ -653,7 +640,7 @@ const FullPlayer: React.FC = () => {
                         {currentTrack.artist}
                       </p>
                       {artistData?.verified && <Verified className="h-4 w-4 text-blue-500 flex-shrink-0" />}
-                    </div>
+                    </motion.div>
                   </div>
                   
                   {/* Action block - Download and Heart aligned dynamically to the right */}
@@ -776,11 +763,18 @@ const FullPlayer: React.FC = () => {
                   {/* Center Play Button - Perfect big rounded Spotify Play block */}
                   <Button
                     onClick={togglePlay}
-                    className="w-16 h-16 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-white hover:bg-white text-black shrink-0"
+                    className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-white hover:bg-white text-black shrink-0 overflow-hidden"
                     style={{
                       boxShadow: `0 12px 30px rgba(255,255,255,0.06)`
                     }}
                   >
+                    <motion.div
+                      className="absolute inset-0 bg-black/10"
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileTap={{ scale: 2, opacity: 0.4 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ pointerEvents: 'none' }}
+                    />
                     {isPlaying ? (
                       <PauseIcon className="w-6 h-6 sm:w-10 sm:h-10 md:w-12 md:h-12 text-black fill-black" />
                     ) : (

@@ -11,6 +11,7 @@ interface NotificationContextType {
   updatePreferences: (prefs: NotificationPreferences) => void;
   refreshNotifications: () => void;
   addNotification: (notification: Omit<Notification, 'id' | 'read' | 'timestamp'>) => void;
+  requestPushPermission: () => Promise<boolean>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -67,8 +68,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  const requestPushPermission = async () => {
+    return await notificationService.requestPushPermission();
+  };
+
   return (
-    <NotificationContext.Provider value={{ notifications, preferences, unreadCount, markAsRead, updatePreferences, refreshNotifications, addNotification }}>
+    <NotificationContext.Provider value={{ 
+      notifications, 
+      preferences, 
+      unreadCount, 
+      markAsRead, 
+      updatePreferences, 
+      refreshNotifications, 
+      addNotification,
+      requestPushPermission
+    }}>
       {children}
     </NotificationContext.Provider>
   );

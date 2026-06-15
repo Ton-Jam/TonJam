@@ -108,7 +108,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     key={cat.id}
                     onClick={() => setActiveFilter(cat.id)}
                     className={cn(
-                      "py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer",
+                      "py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer whitespace-nowrap",
                       activeFilter === cat.id 
                         ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20" 
                         : "bg-white/5 border-zinc-500/40 text-muted-foreground hover:bg-white/10"

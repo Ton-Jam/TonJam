@@ -247,6 +247,8 @@ interface AudioContextType {
     listeners: number;
     currentTrack: Track | null;
   } | null;
+  artworkStyle: 'spotify' | 'vinyl' | 'visualizer';
+  setArtworkStyle: (style: 'spotify' | 'vinyl' | 'visualizer') => void;
   isOffline: boolean;
   toggleOfflineMode: () => void;
   downloadTrackForOffline: (track: Track) => Promise<void>;
@@ -408,6 +410,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     currentTrack: Track | null;
   } | null>(null);
 
+  const [artworkStyle, setArtworkStyle] = useState<'spotify' | 'vinyl' | 'visualizer'>('spotify');
+  
   const [isOffline, setIsOffline] = useState(false);
   const toggleOfflineMode = useCallback(() => {
     setIsOffline((prev) => {
@@ -4241,6 +4245,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         rejectSponsorship,
         isOffline,
         toggleOfflineMode,
+        artworkStyle,
+        setArtworkStyle,
         downloadTrackForOffline,
         isTrackCached,
         deleteCachedTrack,
