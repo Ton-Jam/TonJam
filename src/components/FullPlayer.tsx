@@ -737,16 +737,15 @@ const FullPlayer: React.FC = () => {
                 {/* Main Playback Control Deck - Pure Spotify Layout Mapping */}
                 <div className="flex items-center justify-between px-2 sm:px-4 max-w-md mx-auto w-full pt-1">
                   
-                  {/* Shuffle Button */}
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={toggleShuffle} 
-                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/20 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center cursor-pointer transition-colors shrink-0"
                   >
-                    <ShuffleIcon className="w-[18px] h-[18px] sm:w-[30px] sm:h-[30px] md:w-[34px] md:h-[34px]" style={{ color: isShuffle ? visualizerColor : undefined }} />
+                    <ShuffleIcon className="w-[26px] h-[26px] sm:w-[40px] sm:h-[40px] md:w-[44px] md:h-[44px]" style={{ color: isShuffle ? 'white' : 'white' }} />
                     {isShuffle && (
-                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ backgroundColor: visualizerColor }} />
+                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white" />
                     )}
                   </Button>
  
@@ -755,30 +754,30 @@ const FullPlayer: React.FC = () => {
                     variant="ghost" 
                     size="icon" 
                     onClick={prevTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-neutral-800/20 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full flex items-center justify-center cursor-pointer shrink-0"
+                    className="text-white hover:bg-blue-700 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer shrink-0"
                   >
-                    <BackwardIcon className="w-5 h-5 sm:w-10 sm:h-10 md:w-12 md:h-12 fill-current" />
+                    <BackwardIcon className="w-9 h-9 sm:w-16 sm:h-16 md:w-18 md:h-18 fill-white" />
                   </Button>
                   
                   {/* Center Play Button - Perfect big rounded Spotify Play block */}
                   <Button
                     onClick={togglePlay}
-                    className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-white hover:bg-white text-black shrink-0 overflow-hidden"
+                    className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all bg-blue-600 hover:bg-blue-700 text-white shrink-0 overflow-hidden"
                     style={{
-                      boxShadow: `0 12px 30px rgba(255,255,255,0.06)`
+                      boxShadow: `0 12px 30px rgba(0,0,0,0.3)`
                     }}
                   >
                     <motion.div
-                      className="absolute inset-0 bg-black/10"
+                      className="absolute inset-0 bg-white/10"
                       initial={{ scale: 0, opacity: 0 }}
                       whileTap={{ scale: 2, opacity: 0.4 }}
                       transition={{ duration: 0.3 }}
                       style={{ pointerEvents: 'none' }}
                     />
                     {isPlaying ? (
-                      <PauseIcon className="w-6 h-6 sm:w-10 sm:h-10 md:w-12 md:h-12 text-black fill-black" />
+                      <PauseIcon className="w-10 h-10 sm:w-16 sm:h-16 md:w-18 md:h-18 text-white fill-white" />
                     ) : (
-                      <PlayIcon className="w-6 h-6 sm:w-10 sm:h-10 md:w-12 md:h-12 text-black fill-black ml-0.5 sm:ml-1.5" />
+                      <PlayIcon className="w-10 h-10 sm:w-16 sm:h-16 md:w-18 md:h-18 text-white fill-white ml-0.5 sm:ml-1.5" />
                     )}
                   </Button>
  
@@ -787,9 +786,9 @@ const FullPlayer: React.FC = () => {
                     variant="ghost" 
                     size="icon" 
                     onClick={nextTrack} 
-                    className="text-neutral-200 hover:text-white hover:bg-neutral-800/20 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full flex items-center justify-center cursor-pointer shrink-0"
+                    className="text-white hover:bg-blue-700 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer shrink-0"
                   >
-                    <ForwardIcon className="w-5 h-5 sm:w-10 sm:h-10 md:w-12 md:h-12 fill-current" />
+                    <ForwardIcon className="w-9 h-9 sm:w-16 sm:h-16 md:w-18 md:h-18 fill-white" />
                   </Button>
  
                   {/* Repeat Button */}
@@ -797,14 +796,14 @@ const FullPlayer: React.FC = () => {
                     variant="ghost" 
                     size="icon" 
                     onClick={toggleRepeat} 
-                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800/20 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center cursor-pointer transition-colors shrink-0"
                   >
-                    <RepeatIcon className="w-[18px] h-[18px] sm:w-[30px] sm:h-[30px] md:w-[34px] md:h-[34px]" style={{ color: repeatMode !== 'off' ? visualizerColor : undefined }} />
+                    <RepeatIcon className="w-[26px] h-[26px] sm:w-[40px] sm:h-[40px] md:w-[44px] md:h-[44px]" style={{ color: repeatMode !== 'off' ? 'white' : 'white' }} />
                     {repeatMode !== 'off' && (
-                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style={{ backgroundColor: visualizerColor }} />
+                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white" />
                     )}
                     {repeatMode === 'one' && (
-                      <span className="absolute top-[2px] right-[2px] text-[8px] font-black text-black rounded-full w-4 h-4 flex items-center justify-center" style={{ backgroundColor: visualizerColor }}>1</span>
+                      <span className="absolute top-[2px] right-[2px] text-[8px] font-black text-blue-600 rounded-full w-4 h-4 flex items-center justify-center bg-white">1</span>
                     )}
                   </Button>
                 </div>
