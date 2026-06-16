@@ -8,7 +8,7 @@
   --color-background: #050a24;
   --color-surface: #0a113a;
   --color-elevated: #101a3b;
-  --color-overlay: rgba(6, 12, 31, 0.72);
+  --color-overlay: rgba(5, 10, 36, 0.72);
 
   /* ---------- Color: Borders ---------- */
   --color-border: #16244f;
@@ -19,7 +19,7 @@
   --color-text-primary: #F2F4F8;
   --color-text-secondary: #9AA0AE;
   --color-text-muted: #5C6170;
-  --color-text-inverse: #060c1f;
+  --color-text-inverse: #0A0B0F;
 
   /* ---------- Color: Brand ---------- */
   --color-primary: #5B6BFF;

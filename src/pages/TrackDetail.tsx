@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { 
   Play, 
   Pause, 
@@ -90,6 +92,25 @@ const TrackDetail: React.FC = () => {
 
   const [isCached, setIsCached] = useState(false);
   const [isCaching, setIsCaching] = useState(false);
+  const [livePlayCount, setLivePlayCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!track?.id) return;
+
+    const trackDocRef = doc(db, 'tracks', track.id);
+    const unsubscribe = onSnapshot(trackDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (typeof data.playCount === 'number') {
+          setLivePlayCount(data.playCount);
+        }
+      }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, `tracks/${track.id}`);
+    });
+
+    return () => unsubscribe();
+  }, [track?.id]);
 
   React.useEffect(() => {
     let active = true;
@@ -524,8 +545,12 @@ const TrackDetail: React.FC = () => {
 
               <div className="flex flex-wrap gap-2 md:gap-3 mt-4">
                 <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-                  <Activity className="h-3 w-3 text-cyan-500" />
-                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{track.playCount?.toLocaleString() || '0'} Streams</span>
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
+                  </span>
+                  <span className="text-[9px] font-extrabold text-[#00b4d8] uppercase tracking-widest">Live</span>
+                  <span className="text-[9px] font-extrabold text-foreground/90 uppercase tracking-widest">{(livePlayCount !== null ? livePlayCount : (track.playCount || 0)).toLocaleString()} Streams</span>
                 </div>
                 <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
                   <Clock className="h-3 w-3 text-purple-500" />

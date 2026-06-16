@@ -729,6 +729,99 @@ async function startServer() {
         }
     });
 
+    app.post('/api/gemini/similar-tracks', async (req, res) => {
+        try {
+            const { recentlyPlayed = [], likedTracks = [], availableTracks = [] } = req.body;
+            const model = "gemini-3.5-flash";
+            
+            if (!availableTracks || availableTracks.length === 0) {
+                return res.json({ recommendedTrackIds: [], explanation: "No references available in catalog." });
+            }
+
+            const prompt = `
+                You are TonJam's AI music recommendation assistant.
+                Based on the user's recent listening activity and likes, generate a list of exactly 4 similar tracks they might love from our available catalog.
+                
+                USER ACTIVITY LOGS:
+                - Recently Played Tracks: ${recentlyPlayed.slice(0, 10).map((t: any) => `"${t.title}" by ${t.artist} [Genre: ${t.genre}, Mood: ${t.mood || 'N/A'}]`).join(', ')}
+                - Liked Track IDs: ${JSON.stringify(likedTracks)}
+
+                AVAILABLE CATALOG:
+                ${JSON.stringify(availableTracks.map((t: any) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood })))}
+
+                INSTRUCTIONS:
+                1. Select EXACTLY 4 track IDs from the AVAILABLE CATALOG that are highly similar in genre, style, or mood, but are NOT the same as the user's recently played or liked tracks if possible.
+                2. If there are not enough distinct tracks, fallback to selecting the closest matching active tracks in the catalog.
+                3. Keep the selected IDs strictly from the IDs present in the AVAILABLE CATALOG.
+                4. Provide a warm, personalized 1-2 sentence explanation of your recommendations.
+
+                OUTPUT FORMAT:
+                Return a JSON object with:
+                {
+                  "recommendedTrackIds": ["id1", "id2", "id3", "id4"],
+                  "explanation": "Brief explanation of similarities..."
+                }
+            `;
+
+            const response = await ai.models.generateContent({
+                model,
+                contents: [{ parts: [{ text: prompt }] }],
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            recommendedTrackIds: {
+                                type: Type.ARRAY,
+                                items: { type: Type.STRING }
+                            },
+                            explanation: { type: Type.STRING }
+                        },
+                        required: ["recommendedTrackIds", "explanation"]
+                    }
+                }
+            });
+
+            if (response.text) {
+                return res.json(JSON.parse(response.text));
+            }
+            throw new Error("Empty response from Gemini");
+        } catch (error: any) {
+            const errorStr = String(error?.message || error);
+            if (errorStr.includes("429") || errorStr.includes("quota") || errorStr.includes("RESOURCE_EXHAUSTED")) {
+                console.log("Gemini API quota limit reached for similar-tracks. Seamlessly serving heuristic fallback recommendations.");
+            } else {
+                console.warn("AI Similar tracks generation error, using heuristic fallback:", errorStr);
+            }
+            
+            // HEURISTIC FALLBACK
+            const { recentlyPlayed = [], likedTracks = [], availableTracks = [] } = req.body;
+            
+            // Collect favorite genres/moods
+            const preferredGenres = new Set<string>();
+            recentlyPlayed.forEach((t: any) => { if (t?.genre) preferredGenres.add(t.genre); });
+            
+            // Exclude already played/liked tracks
+            const excludeIds = new Set([...recentlyPlayed.map((t: any) => t.id), ...likedTracks]);
+            
+            let candidates = availableTracks.filter((t: any) => !excludeIds.has(t.id) && preferredGenres.has(t.genre));
+            if (candidates.length < 4) {
+                candidates = availableTracks.filter((t: any) => !excludeIds.has(t.id));
+            }
+            if (candidates.length < 4) {
+                candidates = [...availableTracks];
+            }
+            
+            const selected = candidates.sort(() => 0.5 - Math.random()).slice(0, 4);
+            const recommendedTrackIds = selected.map((t: any) => t.id);
+            
+            res.json({
+                recommendedTrackIds,
+                explanation: "These tracks are matched from your preferred genres and sonic signature automatically."
+            });
+        }
+    });
+
     app.post('/api/gemini/chat', async (req, res) => {
         try {
             const { message, history, currentTrack } = req.body;

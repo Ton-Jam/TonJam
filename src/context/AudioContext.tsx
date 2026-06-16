@@ -165,7 +165,7 @@ interface AudioContextType {
   ) => void;
   deletePlaylist: (playlistId: string) => void;
   updatePlaylist: (playlistId: string, updates: Partial<Playlist>) => void;
-  generateDiscoverWeekly: () => void;
+  generateDiscoverWeekly: (userDescription?: string, forceRegenerate?: boolean) => Promise<void>;
   createRecommendedPlaylist: () => void;
   clearRecentlyPlayed: () => void;
   discoverWeekly: Playlist | null;
@@ -1612,6 +1612,36 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const nftRef = doc(db, "nfts", nftId);
       const nftSnap = await getDoc(nftRef);
+
+      // Check for anti-sniping window trigger
+      const currentNftData = nftSnap.exists()
+        ? (nftSnap.data() as NFTItem)
+        : allNFTs.find((n) => n.id === nftId);
+
+      const isAuctionNow = currentNftData?.listingType === "auction" || currentNftData?.isAuction;
+      const isPlacingBid = updates.offers !== undefined;
+
+      if (isAuctionNow && isPlacingBid) {
+        const currentEndTimeStr = currentNftData?.auctionEndTime || currentNftData?.auctionEndDate;
+        if (currentEndTimeStr) {
+          const endTime = new Date(currentEndTimeStr).getTime();
+          if (!isNaN(endTime)) {
+            const now = Date.now();
+            const remainingMs = endTime - now;
+            // If bid is placed within the final minute (60,000 ms)
+            if (remainingMs > 0 && remainingMs <= 60000) {
+              const newEndTime = new Date(endTime + 120000).toISOString();
+              cleanUpdates.auctionEndTime = newEndTime;
+              cleanUpdates.auctionEndDate = newEndTime;
+              updates.auctionEndTime = newEndTime;
+              updates.auctionEndDate = newEndTime;
+              
+              addNotification("Anti-sniping protocol: Auction extended by 2 minutes!", "info");
+              console.log(`Bidding sniper buffer active: Extended end time from ${currentEndTimeStr} to ${newEndTime} for NFT ${nftId}`);
+            }
+          }
+        }
+      }
 
       if (!nftSnap.exists()) {
         // If it doesn't exist in Firestore, it must be a mock NFT
@@ -3645,7 +3675,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const generateDiscoverWeekly = async () => {
+  const generateDiscoverWeekly = async (userDescription?: string, forceRegenerate = false) => {
     setIsLoading(true);
     try {
       // Check if Discover Weekly already exists and was updated this week
@@ -3655,7 +3685,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       const now = new Date();
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-      if (existingIndex !== -1) {
+      if (!forceRegenerate && existingIndex !== -1) {
         const existing = playlists[existingIndex];
         // If we have a timestamp and it's less than a week old, don't regenerate
         if (existing.updatedAt && new Date(existing.updatedAt) > oneWeekAgo) {
@@ -3663,108 +3693,146 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
-      // Analyze user data
-      const historyIds = new Set(recentlyPlayed.map((t) => t.id));
-      const likedIds = new Set(likedTrackIds);
-      const likedNftIds = new Set(userProfile.likedNftIds || []);
-      const nftTrackIds = new Set(userNFTs.map((n) => n.trackId));
-
-      // Find preferred genres and artists
-      const preferredGenres = new Map<string, number>();
-      const preferredArtists = new Map<string, number>();
-      const favoredArtistIds = new Set(followedUserIds || []);
-
-      const analyzeTrack = (trackId: string, weight: number) => {
-        const track = allTracks.find((t) => t.id === trackId);
-        if (track) {
-          preferredGenres.set(
-            track.genre,
-            (preferredGenres.get(track.genre) || 0) + weight,
-          );
-          const artistKey = track.artistId || track.artist;
-          preferredArtists.set(
-            artistKey,
-            (preferredArtists.get(artistKey) || 0) + weight,
-          );
-        }
+      const userContext = {
+        likedTracks: likedTrackIds,
+        recentlyPlayed: recentlyPlayed,
+        followedArtistIds: followedUserIds,
+        userDescription: userDescription || ""
       };
 
-      recentlyPlayed.forEach((t) => analyzeTrack(t.id, 1));
-      likedTrackIds.forEach((id) => analyzeTrack(id, 3)); // Likes weighted more
-      userNFTs.forEach((n) => analyzeTrack(n.trackId, 5)); // Collected tracks weighted most
+      const availableTracks = allTracks.map(t => ({
+        id: t.id,
+        title: t.title,
+        artist: t.artist,
+        genre: t.genre,
+        mood: t.mood
+      }));
 
-      // Add weight for interacted (liked) NFTs
-      likedNftIds.forEach((nftId) => {
-        const nft = allNFTs.find((n) => n.id === nftId);
-        if (nft && nft.trackId) analyzeTrack(nft.trackId, 4);
-      });
+      let playlistId = existingIndex !== -1 ? playlists[existingIndex].id : `dw-${Date.now()}`;
+      let title = "Discover Weekly";
+      let coverUrl = getPlaceholderImage("discover", 400, 400);
+      let explanation = "Your weekly dose of fresh music, personalized based on your listening history, likes, and NFT collection.";
+      let trackIdsToUse: string[] = [];
 
-      // Add weight for followed artists
-      favoredArtistIds.forEach((artistId) => {
-        preferredArtists.set(
-          artistId,
-          (preferredArtists.get(artistId) || 0) + 4,
-        );
-      });
+      try {
+        const response = await fetch('/api/gemini/generate-playlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userContext, availableTracks })
+        });
 
-      // Sort preferences
-      const topGenresList = Array.from(preferredGenres.entries())
-        .sort((a, b) => b[1] - a[1])
-        .map((e) => e[0]);
-      const topArtistsList = Array.from(preferredArtists.entries())
-        .sort((a, b) => b[1] - a[1])
-        .map((e) => e[0]);
+        if (!response.ok) throw new Error('Server returned error for AI playlist generation');
+        
+        const data = await response.json();
+        if (data.playlist) {
+          // Keep title "Discover Weekly" so the App identifies it correctly as the weekly discovery playlist
+          title = "Discover Weekly";
+          coverUrl = data.playlist.coverUrl || getPlaceholderImage("discover", 400, 400);
+          explanation = data.playlist.description || explanation;
+          playlistId = existingIndex !== -1 ? playlists[existingIndex].id : data.playlist.id;
+          
+          // Verify that we got some valid tracks from the library
+          const tempIds = data.playlist.trackIds || [];
+          trackIdsToUse = tempIds.filter((id: string) => allTracks.some(t => t.id === id));
+        }
 
-      // Generate recommendations
-      const recommendations = allTracks.filter((track) => {
-        // Don't recommend tracks they already own NFT of, but they can be in history
-        if (nftTrackIds.has(track.id)) return false;
+        if (trackIdsToUse.length === 0) {
+          throw new Error('Gemini did not return any valid track IDs');
+        }
+      } catch (geminiError) {
+        console.warn("AI Playlist Generation via Gemini failed, loading heuristic fallback:", geminiError);
+        
+        // HEURISTIC FALLBACK ALGORITHM
+        const likedIds = new Set(likedTrackIds);
+        const likedNftIds = new Set(userProfile.likedNftIds || []);
+        const nftTrackIds = new Set(userNFTs.map((n) => n.trackId));
 
-        // Exclude tracks already liked too much? No, maybe keep them if they are favorites,
-        // but Discover Weekly usually aims for NEW stuff.
-        if (likedIds.has(track.id)) return false;
+        // Find preferred genres and artists
+        const preferredGenres = new Map<string, number>();
+        const preferredArtists = new Map<string, number>();
+        const favoredArtistIds = new Set(followedUserIds || []);
 
-        // Recommend based on genre or artist
-        const matchesGenre = topGenresList.slice(0, 5).includes(track.genre);
-        const matchesArtist = topArtistsList
-          .slice(0, 5)
-          .includes(track.artistId || track.artist);
+        const analyzeTrack = (trackId: string, weight: number) => {
+          const track = allTracks.find((t) => t.id === trackId);
+          if (track) {
+            preferredGenres.set(
+              track.genre,
+              (preferredGenres.get(track.genre) || 0) + weight,
+            );
+            const artistKey = track.artistId || track.artist;
+            preferredArtists.set(
+              artistKey,
+              (preferredArtists.get(artistKey) || 0) + weight,
+            );
+          }
+        };
 
-        return matchesGenre || matchesArtist;
-      });
+        recentlyPlayed.forEach((t) => analyzeTrack(t.id, 1));
+        likedTrackIds.forEach((id) => analyzeTrack(id, 3)); 
+        userNFTs.forEach((n) => analyzeTrack(n.trackId, 5)); 
 
-      // If we don't have enough recommendations, add some trending tracks from same genres
-      let finalTracks = recommendations
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 20);
-      if (finalTracks.length < 20) {
-        const trendingByGenre = getTrendingTracks().filter(
-          (t) =>
-            !finalTracks.find((ft) => ft.id === t.id) &&
-            topGenresList.slice(0, 3).includes(t.genre),
-        );
-        finalTracks = [...finalTracks, ...trendingByGenre].slice(0, 20);
+        likedNftIds.forEach((nftId) => {
+          const nft = allNFTs.find((n) => n.id === nftId);
+          if (nft && nft.trackId) analyzeTrack(nft.trackId, 4);
+        });
+
+        favoredArtistIds.forEach((artistId) => {
+          preferredArtists.set(
+            artistId,
+            (preferredArtists.get(artistId) || 0) + 4,
+          );
+        });
+
+        const topGenresList = Array.from(preferredGenres.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map((e) => e[0]);
+        const topArtistsList = Array.from(preferredArtists.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map((e) => e[0]);
+
+        const recommendations = allTracks.filter((track) => {
+          if (nftTrackIds.has(track.id)) return false;
+          if (likedIds.has(track.id)) return false;
+
+          const matchesGenre = topGenresList.slice(0, 5).includes(track.genre);
+          const matchesArtist = topArtistsList
+            .slice(0, 5)
+            .includes(track.artistId || track.artist);
+
+          return matchesGenre || matchesArtist;
+        });
+
+        let finalTracks = recommendations
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 10);
+          
+        if (finalTracks.length < 10) {
+          const trendingByGenre = getTrendingTracks().filter(
+            (t) =>
+              !finalTracks.find((ft) => ft.id === t.id) &&
+              topGenresList.slice(0, 3).includes(t.genre),
+          );
+          finalTracks = [...finalTracks, ...trendingByGenre].slice(0, 10);
+        }
+
+        if (finalTracks.length < 5) {
+          const trending = getTrendingTracks().filter(
+            (t) => !finalTracks.find((ft) => ft.id === t.id),
+          );
+          finalTracks = [...finalTracks, ...trending].slice(0, 10);
+        }
+
+        trackIdsToUse = finalTracks.map((t) => t.id);
       }
 
-      // If still not enough, just trending
-      if (finalTracks.length < 10) {
-        const trending = getTrendingTracks().filter(
-          (t) => !finalTracks.find((ft) => ft.id === t.id),
-        );
-        finalTracks = [...finalTracks, ...trending].slice(0, 20);
-      }
-
-      const playlistId =
-        existingIndex !== -1 ? playlists[existingIndex].id : `dw-${Date.now()}`;
       const newPlaylist: Playlist = {
         id: playlistId,
         title: "Discover Weekly",
-        coverUrl: getPlaceholderImage("discover", 400, 400),
-        trackCount: finalTracks.length,
+        coverUrl: coverUrl,
+        trackCount: trackIdsToUse.length,
         creator: "TonJam AI",
-        description:
-          "Your weekly dose of fresh music, personalized based on your listening history, likes, and NFT collection.",
-        trackIds: finalTracks.map((t) => t.id),
+        description: explanation,
+        trackIds: trackIdsToUse,
         updatedAt: now.toISOString(),
       };
 
@@ -3783,7 +3851,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       addNotification(
-        "Your Discover Weekly playlist has been updated!",
+        forceRegenerate ? "Neural algorithm generated a custom Discover Weekly!" : "Your Discover Weekly has been synchronized!",
         "success",
       );
     } catch (error) {

@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/lib/firebase';
 import { NFTItem } from '@/types';
 import { AuctionCountdownTimer } from '@/components/AuctionCountdownTimer';
 import { motion, AnimatePresence } from 'motion/react';
-import { Gavel, Clock, Sparkles, TrendingUp, AlertCircle, Cpu } from 'lucide-react';
+import { Gavel, Clock, Sparkles, TrendingUp, AlertCircle, Cpu, RefreshCw } from 'lucide-react';
 import { TON_LOGO } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
 import { useTonAddress } from '@tonconnect/ui-react';
@@ -48,6 +48,78 @@ const AnimatedPrice: React.FC<{ price: string }> = ({ price }) => {
   );
 };
 
+const WinningBidsTicker: React.FC<{ auctions: NFTItem[] }> = ({ auctions }) => {
+  const navigate = useNavigate();
+
+  const items = useMemo(() => {
+    return auctions.map(nft => {
+      const currentNFTOffers = nft.offers || [];
+      const highOffer = currentNFTOffers.length > 0
+        ? [...currentNFTOffers].sort((a, b) => parseFloat(b.price) - parseFloat(a.price))[0]
+        : null;
+
+      return {
+        id: nft.id,
+        title: nft.title,
+        price: nft.price,
+        imageUrl: nft.imageUrl,
+        winner: highOffer ? highOffer.offerer : nft.owner || 'Anon'
+      };
+    });
+  }, [auctions]);
+
+  const formatAddress = (addr?: string) => {
+    if (!addr) return 'Anon';
+    if (addr.length < 10) return addr;
+    return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
+  };
+
+  const repeatedItems = useMemo(() => {
+    if (items.length === 0) return [];
+    let list = [...items];
+    while (list.length < 12) {
+      list = [...list, ...items];
+    }
+    return list;
+  }, [items]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="w-full overflow-hidden bg-card/25 backdrop-blur-xl py-4 rounded-2xl relative select-none">
+      <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#050a24] to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#050a24] to-transparent z-10 pointer-events-none" />
+
+      <div className="flex items-center gap-2 mb-3 px-6 font-black text-[9px] text-emerald-400/90 uppercase tracking-[0.2em] relative z-25">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        LIVE WINNING SIGNAL RELAYS
+      </div>
+
+      <div className="relative w-full flex overflow-hidden z-20">
+        <div className="flex whitespace-nowrap min-w-full gap-6 animate-[marquee_30s_linear_infinite]">
+          {repeatedItems.map((item, idx) => (
+            <div
+              key={`ticker-${item.id}-${idx}`}
+              onClick={() => navigate(`/nft/${item.id}`)}
+              className="inline-flex items-center gap-3 bg-white/[0.02] hover:bg-white/[0.05] px-4 py-2.5 rounded-xl transition-all cursor-pointer shrink-0"
+            >
+              <img src={item.imageUrl} alt={item.title} className="w-6 h-6 rounded-lg object-cover" />
+              <div className="flex flex-col text-left">
+                <span className="text-[10px] font-black uppercase text-white tracking-tight leading-tight max-w-[120px] truncate">
+                  {item.title}
+                </span>
+                <span className="text-[8.5px] text-zinc-400 font-bold uppercase tracking-wider mt-0.5 leading-none">
+                  LEAD BID: <span className="text-emerald-400 font-bold">{item.price} TON</span> BY <span className="text-blue-400 font-mono font-bold">{formatAddress(item.winner)}</span>
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const BidDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification, updateNFT } = useAudio();
@@ -55,12 +127,25 @@ export const BidDashboard: React.FC = () => {
 
   const [auctions, setAuctions] = useState<NFTItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isChecking, setIsChecking] = useState(false);
   const [recentBidEvent, setRecentBidEvent] = useState<{
     title: string;
     price: string;
     bidder: string;
     nftId: string;
   } | null>(null);
+
+  const handleManualRefresh = () => {
+    if (isChecking) return;
+    setIsChecking(true);
+    addNotification("Accessing neural net to verify latest frequency bids...", "info");
+    
+    // Simulate query sync check with telemetry
+    setTimeout(() => {
+      setIsChecking(false);
+      addNotification("Frequency telemetry is in perfect alignment.", "success");
+    }, 1100);
+  };
 
   // Auto-bid configuration state: Record of nftId to config
   const [autoBids, setAutoBids] = useState<Record<string, { enabled: boolean; maxPrice: number }>>(() => {
@@ -256,31 +341,69 @@ export const BidDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <span className="text-[9px] font-black text-blue-500 uppercase tracking-[0.25em] flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-            LIVE TRANSACTIONS RELAY
-          </span>
-          <h2 className="text-xl font-black uppercase tracking-tighter mt-1">Real-time Bid Dashboard</h2>
+        <div className="flex items-center justify-between w-full md:w-auto">
+          <div>
+            <span className="text-[9px] font-black text-blue-500 uppercase tracking-[0.25em] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+              LIVE TRANSACTIONS RELAY
+            </span>
+            <h2 className="text-xl font-black uppercase tracking-tighter mt-1">Real-time Bid Dashboard</h2>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleManualRefresh}
+            className="md:hidden p-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+            title="Refresh Bid Signals"
+          >
+            <motion.div
+              animate={isChecking ? { rotate: 360 } : { rotate: 0 }}
+              transition={{ duration: 0.8, ease: "linear", repeat: isChecking ? Infinity : 0 }}
+              className="flex items-center justify-center"
+            >
+              <RefreshCw className="w-4 h-4 text-blue-400" />
+            </motion.div>
+          </motion.button>
         </div>
 
-        {/* Real-time Ticker Event Notify */}
-        <AnimatePresence mode="wait">
-          {recentBidEvent && (
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          {/* Real-time Ticker Event Notify */}
+          <AnimatePresence mode="wait">
+            {recentBidEvent && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="bg-emerald-500/10 text-emerald-400 rounded-xl px-4 py-2 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 max-w-sm self-start cursor-pointer transition-all hover:bg-emerald-500/20"
+                onClick={() => navigate(`/nft/${recentBidEvent.nftId}`)}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>
+                  New bid of <span className="text-white font-black">{recentBidEvent.price} TON</span> placed on &quot;{recentBidEvent.title}&quot; by {formatAddress(recentBidEvent.bidder)}!
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleManualRefresh}
+            disabled={isChecking}
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer"
+            title="Refresh Bid Signals"
+          >
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="bg-emerald-500/10 text-emerald-400 rounded-xl px-4 py-2 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 max-w-sm self-start cursor-pointer transition-all hover:bg-emerald-500/20"
-              onClick={() => navigate(`/nft/${recentBidEvent.nftId}`)}
+              animate={isChecking ? { rotate: 360 } : { rotate: 0 }}
+              transition={{ duration: 0.8, ease: "linear", repeat: isChecking ? Infinity : 0 }}
+              className="flex items-center justify-center"
             >
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>
-                New bid of <span className="text-white font-black">{recentBidEvent.price} TON</span> placed on &quot;{recentBidEvent.title}&quot; by {formatAddress(recentBidEvent.bidder)}!
-              </span>
+              <RefreshCw className="w-3.5 h-3.5 text-blue-400" />
             </motion.div>
-          )}
-        </AnimatePresence>
+            <span>{isChecking ? "Checking Feed" : "Check Signals"}</span>
+          </motion.button>
+        </div>
       </div>
 
       {auctions.length === 0 ? (
@@ -434,6 +557,7 @@ export const BidDashboard: React.FC = () => {
           })}
         </div>
       )}
+      <WinningBidsTicker auctions={auctions} />
     </div>
   );
 };

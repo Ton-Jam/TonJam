@@ -32,6 +32,13 @@
   --ring: oklch(0.705 0.015 286.067);
   --silver: #C0C0C0;
 
+  --bg-dark: #FAFAFB;
+  --bg-surface: #FFFFFF;
+  --text-muted: #9AA0AE;
+  --silver-border: rgba(192, 192, 192, 0.5);
+  --primary-blue: #5B6BFF;
+  --text-main: #121212;
+
   --tonjam-navy: #FFFFFF;
   --tonjam-navy-light: #FAFAFB;
 
@@ -103,6 +110,13 @@
   --input: #16244f;
   --ring: rgba(91, 107, 255, 0.35);
   --silver: #C0C0C0;
+
+  --bg-dark: #050a24;
+  --bg-surface: #0a113a;
+  --text-muted: #9AA0AE;
+  --silver-border: rgba(192, 192, 192, 0.3);
+  --primary-blue: #00b4d8;
+  --text-main: #FFFFFF;
 
   --tonjam-navy: #050a24;
   --tonjam-navy-light: #0a113a;
@@ -228,6 +242,11 @@
   @keyframes shimmer {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-55%); }
   }
 
   --font-heading: var(--font-sans);
@@ -772,4 +791,76 @@ html, body {
   --token-attr-value: #52b7ff;
   --token-function-variable: #b392f0;
   --token-black: #ffffff;
+}
+
+/* =========================================================
+   PILL FILTER SCROLL SECTION
+   Theme: Navy Blue & Silver
+   ========================================================= */
+
+.filter-wrapper {
+  width: 100%;
+  overflow: hidden;
+  padding: 1rem 0;
+  background-color: var(--bg-dark);
+}
+
+.filter-scroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0 1rem;
+  
+  /* Smooth scrolling experience on mobile */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  /* Left and right fade-out mask for overflow scroll */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.filter-scroll {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Pill Component Design */
+.pill {
+  flex: 0 0 auto; /* Prevents pills from shrinking */
+  background: #0a113a !important;
+  color: var(--on-surface-muted, #9AA0AE) !important;
+  border: 1px solid rgba(192, 192, 192, 0.3) !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 50px !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Active State */
+.pill.active {
+  background: transparent !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+  font-weight: 600 !important;
+}
+
+/* Hover/Focus State for Desktop */
+@media (hover: hover) {
+  .pill:hover:not(.active) {
+    border-color: rgba(192, 192, 192, 0.6) !important;
+    background: #101a3b !important;
+    color: #FFFFFF !important;
+  }
 }

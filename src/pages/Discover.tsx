@@ -22,7 +22,11 @@ import {
   ArrowRight,
   ListFilter,
   History,
-  Zap
+  Zap,
+  Sparkles,
+  Loader2,
+  Sliders,
+  Heart
 } from 'lucide-react';
 import { GENRES, MOODS, MOCK_ALBUMS } from '@/constants';
 import { auth } from '@/lib/firebase';
@@ -109,22 +113,24 @@ const Discover: React.FC = () => {
     artists, 
     firestoreUsers,
     playTrack,
+    playAll,
     followedUserIds,
+    likedTrackIds,
+    recentlyPlayed,
     isDiscoverFiltersOpen,
-    setIsDiscoverFiltersOpen
+    setIsDiscoverFiltersOpen,
+    generateDiscoverWeekly,
+    playlists: allUserPlaylists
   } = useAudio();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [customVibe, setCustomVibe] = useState('');
+  const [isGeneratingWeekly, setIsGeneratingWeekly] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
-
-  const { 
-    generateDiscoverWeekly,
-    playlists: allUserPlaylists
-  } = useAudio();
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -340,8 +346,8 @@ const Discover: React.FC = () => {
         continuous
       />
 
-      {/* Search Header - Sticky & Atmospheric - tight padding */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg pt-4 pb-1 w-full border-b border-blue-500/10 transition-colors duration-300">
+      {/* Search & Filter Header - Sticky & Atmospheric with zero padding gap */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg pt-4 pb-2 w-full border-b border-blue-500/10 transition-colors duration-300 flex flex-col gap-1">
         <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
           <form 
             onSubmit={handleSearchSubmit} 
@@ -520,11 +526,9 @@ const Discover: React.FC = () => {
             )}
           </Button>
         </div>
-      </div>
 
-      {/* Filter Tabs Section - Sticky directly below Header, tight padding */}
-      <div className="sticky top-[56px] z-40 bg-background/95 backdrop-blur-lg pt-0 pb-1 w-full border-b border-blue-500/10 transition-colors duration-300">
-        <div className="w-full filter-tabs">
+        {/* Filter Tabs Section - Placed directly under the search row with zero vertical separation */}
+        <div className="w-full filter-tabs px-4 md:px-8 lg:px-12 pt-0 pb-0">
           <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
             <div className="scroll-row scroll-smooth flex justify-start md:justify-center py-1">
               <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
@@ -550,9 +554,10 @@ const Discover: React.FC = () => {
             </div>
           </Tabs>
         </div>
+
         {/* Active Filter Summary Bar */}
         {(bpmRange[0] !== 60 || bpmRange[1] !== 180 || selectedMoods.length > 0 || onlyVerified) && (
-          <div className="px-4 pb-2 flex flex-wrap gap-2 text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
+          <div className="px-4 md:px-8 lg:px-12 pb-1 flex flex-wrap gap-2 text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
             { (bpmRange[0] !== 60 || bpmRange[1] !== 180) && <span>BPM: {bpmRange[0]}-{bpmRange[1]}</span> }
             { selectedMoods.length > 0 && <span>Mood: {selectedMoods.join(', ')}</span> }
             { onlyVerified && <span>Verified Only</span> }
@@ -583,40 +588,180 @@ const Discover: React.FC = () => {
           </div>
         ) : !searchQuery ? (
           <>
-            {/* Discover Weekly Banner - Premium Look */}
+            {/* Discover Weekly Banner & AI Lab Section */}
             {auth.currentUser && discoverWeekly && (
-              <section>
-                <Card 
-                  onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
-                  className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl group transition-all duration-500"
-                >
-                  <img 
-                    src={discoverWeekly.coverUrl} 
-                    alt="Discover Weekly" 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-                  <CardContent className="absolute bottom-0 left-0 p-6 md:p-12 w-full flex justify-between items-end">
-                    <div className="space-y-2 md:space-y-4 max-w-[70%]">
-                      <div className="flex items-center gap-2 md:gap-3">
-                        <Badge className="bg-blue-600 hover:bg-blue-600 text-[7px] md:text-[9px] font-bold uppercase tracking-[0.2em] rounded-sm py-0.5 md:py-1 border-none">
-                          Daily Frequency
-                        </Badge>
-                        <span className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live.Sync_2026</span>
+              <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                
+                {/* Left Side: Premium Banner */}
+                <div className="xl:col-span-2">
+                  <motion.div
+                    whileHover={{ 
+                      scale: 1.015,
+                      y: -4,
+                      boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.25)"
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer"
+                  >
+                    <Card 
+                      onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
+                      className="relative h-full w-full rounded-2xl overflow-hidden bg-white/5 backdrop-blur-md shadow-2xl group transition-all duration-500 border-none"
+                    >
+                      <img 
+                        src={discoverWeekly.coverUrl} 
+                        alt="Discover Weekly" 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+                      <CardContent className="absolute bottom-0 left-0 p-6 md:p-10 w-full flex justify-between items-end">
+                        <div className="space-y-2 md:space-y-4 max-w-[75%]">
+                          <div className="flex items-center gap-2 md:gap-3">
+                            <Badge className="bg-blue-600 hover:bg-blue-600 text-[7px] md:text-[9px] font-bold uppercase tracking-[0.2em] rounded-sm py-0.5 md:py-1 border-none">
+                              AI DISCOVERY
+                            </Badge>
+                            <span className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live.Sync_2026</span>
+                          </div>
+                          <div>
+                            <h2 className="text-2xl md:text-5xl font-bold uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
+                            <p className="text-[10px] md:text-xs text-blue-400 font-extrabold max-w-md mt-2 md:mt-3 line-clamp-2">
+                              {discoverWeekly.description || "Personalized frequency stream generated by Gemini based on your unique neural listening patterns."}
+                            </p>
+                          </div>
+                        </div>
+                        <Button 
+                          size="icon" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const tracks = discoverWeekly.trackIds?.map(id => allTracks.find(t => t.id === id)).filter(Boolean) as any[];
+                            if (tracks && tracks.length > 0) playAll(tracks);
+                          }}
+                          className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-blue-600 hover:bg-blue-500 text-white hover:scale-110 transition-all border-none flex-shrink-0"
+                        >
+                          <Play className="h-5 w-5 md:h-6 md:w-6 fill-current" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </div>
+
+                {/* Right Side: Gemini AI Customizer Lab */}
+                <div className="bg-[#0b122c]/60 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-2xl">
+                  {/* Lab Header */}
+                  <div className="space-y-1.5Packed">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="h-4 w-4 text-cyan-400 animate-pulse" />
+                        <h3 className="text-xs font-black uppercase tracking-[0.15em] text-white">Gemini AI Discovery Lab</h3>
                       </div>
-                      <div>
-                        <h2 className="text-2xl md:text-6xl font-bold uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
-                        <p className="text-[10px] md:text-sm text-blue-400 font-extrabold max-w-md mt-2 md:mt-4 line-clamp-2">Personalized frequency stream based on your unique neural listening patterns.</p>
+                      <Badge className="bg-cyan-500/10 text-cyan-400 text-[8px] font-black tracking-widest uppercase border-none py-0.5">
+                        ACTIVE
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 leading-snug">
+                      Your listening patterns and likes are continuously indexed. Direct our Gemini-powered AI engine to generate your Weekly discovery mix.
+                    </p>
+                  </div>
+
+                  {/* Telemetry/Insight Badges (no borders) */}
+                  <div className="grid grid-cols-3 gap-2 bg-black/30 p-2.5 rounded-xl">
+                    <div className="flex flex-col items-center text-center p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                      <Heart className="h-3 w-3 text-pink-500 mb-1" />
+                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Favorites</span>
+                      <span className="text-[10px] text-white font-black mt-0.5">{likedTrackIds?.length || 0}</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                      <History className="h-3 w-3 text-cyan-400 mb-1" />
+                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">History</span>
+                      <span className="text-[10px] text-white font-black mt-0.5">{recentlyPlayed?.length || 0}</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                      <Zap className="h-3 w-3 text-purple-400 mb-1" />
+                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Engine</span>
+                      <span className="text-[10px] text-purple-400 font-black mt-0.5">GEMINI 3.5</span>
+                    </div>
+                  </div>
+
+                  {/* Input form */}
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Guide the AI Mix (Optional)</p>
+                    <div className="relative">
+                      <textarea
+                        value={customVibe}
+                        onChange={(e) => setCustomVibe(e.target.value)}
+                        placeholder="e.g. ambient ethereal techno for night drives, lo-fi beats with warm synth bass..."
+                        rows={2}
+                        className="w-full bg-black/40 text-xs text-white rounded-xl p-3 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action/Submit */}
+                  <button
+                    onClick={async () => {
+                      if (isGeneratingWeekly) return;
+                      setIsGeneratingWeekly(true);
+                      try {
+                        await generateDiscoverWeekly(customVibe, true);
+                      } catch (err) {
+                        console.error(err);
+                      } finally {
+                        setIsGeneratingWeekly(false);
+                      }
+                    }}
+                    disabled={isGeneratingWeekly}
+                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black uppercase text-[10px] tracking-widest py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 transition-all cursor-pointer"
+                  >
+                    {isGeneratingWeekly ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span>SYNTHESIZING...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                        <span>REGENERATE DISCOVERY MIX</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Mini-track list peek rendering inside (without border lines) */}
+                  {discoverWeekly.trackIds && discoverWeekly.trackIds.length > 0 && (
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex items-center justify-between text-zinc-500 text-[8px] font-black uppercase tracking-widest">
+                        <span>Curated Selections</span>
+                        <span>{discoverWeekly.trackIds.length} tracks</span>
+                      </div>
+                      <div className="space-y-1 max-h-[110px] overflow-y-auto pr-1 select-none">
+                        {discoverWeekly.trackIds.map((id) => {
+                          const tr = allTracks.find(t => t.id === id);
+                          if (!tr) return null;
+                          return (
+                            <div 
+                              key={`dw-peek-${id}`}
+                              className="group/item flex items-center justify-between p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                              onClick={() => {
+                                playTrack(tr);
+                              }}
+                            >
+                              <div className="flex items-center gap-2 truncate">
+                                <span className="text-[10px] text-zinc-600 font-mono group-hover/item:text-cyan-400">▶</span>
+                                <div className="truncate">
+                                  <p className="text-[10px] text-white font-bold truncate">{tr.title}</p>
+                                  <p className="text-[8px] text-zinc-500 truncate">{tr.artist}</p>
+                                </div>
+                              </div>
+                              <span className="text-[8px] text-cyan-400 bg-cyan-400/10 px-1 py-0.5 rounded font-mono uppercase">
+                                {tr.genre}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                    <Button 
-                      size="icon" 
-                      className="h-10 w-10 md:h-16 md:w-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white hover:scale-110 transition-all border-none flex-shrink-0"
-                    >
-                      <Play className="h-5 w-5 md:h-8 md:w-8 fill-current" />
-                    </Button>
-                  </CardContent>
-                </Card>
+                  )}
+
+                </div>
+
               </section>
             )}
 

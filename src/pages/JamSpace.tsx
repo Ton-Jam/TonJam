@@ -421,13 +421,17 @@ const JamSpace: React.FC = () => {
                   <CardContent className="p-5 pt-0 space-y-4">
                     {aiResult ? (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-                        <div className="flex gap-4 items-center bg-white/[0.03] p-3 rounded-2xl border border-white/5">
+                        <motion.div 
+                          whileHover={{ scale: 1.02, y: -2 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                          className="flex gap-4 items-center bg-white/[0.03] p-3 rounded-2xl border border-white/5 cursor-pointer"
+                        >
                           <img src={aiResult.playlist.coverUrl} className="h-12 w-12 rounded-lg shadow-2xl" alt="" />
                           <div className="min-w-0">
                             <p className="text-[10px] font-black uppercase truncate text-blue-400">{aiResult.playlist.title}</p>
                             <p className="text-[9px] text-muted-foreground line-clamp-2 mt-0.5 leading-tight">{aiResult.explanation}</p>
                           </div>
-                        </div>
+                        </motion.div>
                         <Button 
                           className="w-full rounded-2xl bg-blue-600 hover:bg-blue-500 text-white h-10 text-[10px] font-black uppercase tracking-widest border-none shadow-lg shadow-blue-600/20"
                           onClick={() => {
