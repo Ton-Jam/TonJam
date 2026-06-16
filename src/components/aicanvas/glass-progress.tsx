@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { motion, useSpring, useMotionValueEvent, useReducedMotion } from 'framer-motion'
+import { motion, useSpring, useMotionValueEvent, useReducedMotion } from 'motion/react'
 import { ArrowClockwise } from '@phosphor-icons/react/dist/ssr/ArrowClockwise'
 
 // ─── Constants ────────────────────────────────────────────────────────────────

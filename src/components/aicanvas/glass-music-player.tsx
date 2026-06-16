@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'motion/react'
 import { Play } from '@phosphor-icons/react/dist/ssr/Play'
 import { Pause } from '@phosphor-icons/react/dist/ssr/Pause'
 import { SkipBack } from '@phosphor-icons/react/dist/ssr/SkipBack'

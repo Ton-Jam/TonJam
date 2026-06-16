@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Play } from '@phosphor-icons/react/dist/ssr/Play'
 import { Pause } from '@phosphor-icons/react/dist/ssr/Pause'
 import { ArrowCounterClockwise } from '@phosphor-icons/react/dist/ssr/ArrowCounterClockwise'

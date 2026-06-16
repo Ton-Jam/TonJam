@@ -23,6 +23,7 @@ import {
   ExclusiveContent,
   Task,
   SponsoredContent,
+  Collection,
 } from "@/types";
 import {
   MOCK_PLAYLISTS,
@@ -176,6 +177,7 @@ interface AudioContextType {
   userTracks: Track[];
   userNFTs: NFTItem[];
   userBids: NFTItem[];
+  collections: Collection[];
   allTracks: Track[];
   allNFTs: NFTItem[];
   artists: Artist[];
@@ -189,6 +191,8 @@ interface AudioContextType {
     updates: Partial<NFTItem>,
     silent?: boolean,
   ) => void;
+  addCollection: (collection: Collection) => void;
+  updateCollection: (collectionId: string, updates: Partial<Collection>) => void;
   recordTransaction: (
     transaction: Omit<Transaction, "id" | "timestamp" | "status">,
   ) => void;
@@ -502,6 +506,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   >(null);
 
   const [playlistFolders, setPlaylistFolders] = useState<PlaylistFolder[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [firestorePlaylistFolders, setFirestorePlaylistFolders] = useState<
     PlaylistFolder[]
   >([]);
@@ -3522,6 +3527,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const addCollection = (collection: Collection) => {
+    setCollections((prev) => {
+      const updated = [...prev, collection];
+      localStorage.setItem('tonjam_collections', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const updateCollection = (collectionId: string, updates: Partial<Collection>) => {
+    setCollections((prev) => {
+      const updated = prev.map((c) => (c.id === collectionId ? { ...c, ...updates } : c));
+      localStorage.setItem('tonjam_collections', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const renameFolder = async (folderId: string, newTitle: string) => {
     setIsLoading(true);
     try {
@@ -4255,6 +4276,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         userAddress: tonAddress || evmAddress || null,
         headerTitle,
         setHeaderTitle,
+        collections,
+        addCollection,
+        updateCollection,
       }}
     >
       {children}

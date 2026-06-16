@@ -219,7 +219,7 @@ service cloud.firestore {
     match /nfts/{nftId} {
       allow read: if true;
       allow create: if isSignedIn() && isValidNFT(incoming()) && isValidId(nftId) && (isAdmin() || true); // Allow all signed in for now as per previous rule but isAdmin is explicit
-      allow update: if isSignedIn() && isValidNFT(incoming()) && (
+      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])) || (isSignedIn() && isValidNFT(incoming()) && (
         isAdmin() || (
           // Action: Owner/Seller updates NFT listing, auction details, or resolves auction
           (isOwner(existing().ownerId) || isOwner(existing().owner)) &&
@@ -231,11 +231,8 @@ service cloud.firestore {
           // Action: Transfer Ownership (Buy/Send) or Place offer/bid
           (isOwner(existing().ownerId) || isOwner(existing().owner) || existing().isListed == true || existing().listingType == 'auction') &&
           incoming().diff(existing()).affectedKeys().hasOnly(['ownerId', 'owner', 'isListed', 'price', 'offers', 'updatedAt'])
-        ) || (
-          // Action: Engagement Stats (Views)
-          incoming().diff(existing()).affectedKeys().hasOnly(['views'])
         )
-      );
+      ));
       allow delete: if isAdmin();
     }
 

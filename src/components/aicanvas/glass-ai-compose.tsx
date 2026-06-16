@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { PaperPlaneRight } from '@phosphor-icons/react/dist/ssr/PaperPlaneRight'
 import { ImageSquare } from '@phosphor-icons/react/dist/ssr/ImageSquare'
 import { GlobeSimple } from '@phosphor-icons/react/dist/ssr/GlobeSimple'

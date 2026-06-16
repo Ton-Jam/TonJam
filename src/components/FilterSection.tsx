@@ -70,7 +70,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             <Filter className="h-5 w-5 text-blue-500" />
             Signal Filters
           </SheetTitle>
-          <SheetDescription className="text-[9px] font-black text-white/40 uppercase tracking-[0.15em] mt-1">
+          <SheetDescription className="text-[9px] font-black text-white/40 uppercase tracking-[0.15em] mt-1 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse inline-block" />
             Refine your sensory exploration parameters
           </SheetDescription>
         </SheetHeader>
@@ -79,7 +80,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
           <div className="space-y-6 sm:space-y-8">
             {/* Search Input inside Filters */}
             <div className="space-y-2.5">
-              <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Query Identification</Label>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Query Identification</Label>
+              </div>
               <div className="relative group">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20 group-focus-within:text-blue-500 transition-colors" />
                 <input 
@@ -96,7 +100,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
 
             {/* Category Filter */}
             <div className="space-y-2.5">
-              <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Dimension</Label>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Dimension</Label>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: 'all', label: 'All Signals', icon: Zap },
@@ -104,8 +111,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   { id: 'artists', label: 'Artists', icon: Users },
                   { id: 'nfts', label: 'NFT Artifacts', icon: ShoppingBag }
                 ].map((cat) => (
-                  <button
+                  <motion.button
                     key={cat.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveFilter(cat.id)}
                     className={cn(
                       "py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer whitespace-nowrap",
@@ -116,7 +125,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   >
                     <cat.icon className="h-3 w-3" />
                     {cat.label}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -125,7 +134,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
 
             {/* Sorting Section */}
             <div className="space-y-2.5">
-              <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Sort Protocol</Label>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Sort Protocol</Label>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: 'newest', label: 'Newest', icon: Clock3 },
@@ -133,19 +145,21 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   { id: 'price-low', label: 'Price Low', icon: ArrowDown },
                   { id: 'price-high', label: 'Price High', icon: ArrowUp }
                 ].map((opt) => (
-                  <button
+                  <motion.button
                     key={opt.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setSortOption(opt.id)}
                     className={cn(
                       "py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 justify-center cursor-pointer",
                       sortOption === opt.id 
-                        ? "bg-white/10 border-white/25 text-white" 
-                        : "bg-transparent border-zinc-500/40 text-white/40 hover:border-white/10"
+                        ? "bg-white/10 border-white/25 text-white shadow-md shadow-white/5" 
+                        : "bg-transparent border-zinc-500/40 text-white/45 hover:border-white/10 hover:bg-white/5"
                     )}
                   >
                     <opt.icon className="h-2.5 w-2.5" />
                     {opt.label}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -155,8 +169,11 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 <Separator className="bg-white/5" />
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Price Range (TON)</Label>
-                    <span className="text-[9px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Price Range (TON)</Label>
+                    </div>
+                    <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded font-black tracking-wide">
                       {filters.priceRange[0]} - {filters.priceRange[1]}
                     </span>
                   </div>
@@ -167,7 +184,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     step={10}
                     value={filters.priceRange}
                     onValueChange={filters.setPriceRange}
-                    className="py-2"
+                    className="py-2 cursor-pointer"
                   />
                 </div>
               </>
@@ -178,8 +195,11 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 <Separator className="bg-white/5" />
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Tempo (BPM)</Label>
-                    <span className="text-[9px] font-mono text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                      <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Tempo (BPM)</Label>
+                    </div>
+                    <span className="text-[9px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded font-black tracking-wide">
                       {filters.bpmRange[0]} - {filters.bpmRange[1]}
                     </span>
                   </div>
@@ -190,7 +210,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     step={1}
                     value={filters.bpmRange}
                     onValueChange={filters.setBpmRange}
-                    className="py-2"
+                    className="py-2 cursor-pointer"
                   />
                 </div>
               </>
@@ -200,11 +220,16 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               <>
                 <Separator className="bg-white/5" />
                 <div className="space-y-3">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Artifact Rarity</Label>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Artifact Rarity</Label>
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     {['All', 'Unique', 'Rare', 'Limited', 'Common'].map((rarity) => (
-                      <button
+                      <motion.button
                         key={rarity}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => filters.setRarity!(rarity)}
                         className={cn(
                           "py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border cursor-pointer",
@@ -214,7 +239,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                         )}
                       >
                         {rarity}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -225,11 +250,16 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               <>
                 <Separator className="bg-white/5" />
                 <div className="space-y-3">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Listing Status</Label>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Listing Status</Label>
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     {['All', 'Active Auctions'].map((status) => (
-                      <button
+                      <motion.button
                         key={status}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => filters.setStatus!(status)}
                         className={cn(
                           "py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border cursor-pointer",
@@ -239,7 +269,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                         )}
                       >
                         {status}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -250,44 +280,50 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               <>
                 <Separator className="bg-white/5" />
                 <div className="space-y-3">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Frequency Genres</Label>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Frequency Genres</Label>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
-                    <Badge 
-                      variant={(filters.selectedGenres?.includes('All') || !filters.selectedGenres || filters.selectedGenres.length === 0) ? "default" : "outline"}
-                      onClick={() => {
-                        filters.setSelectedGenres!(['All']);
-                      }}
-                      className={cn(
-                        "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
-                        (filters.selectedGenres?.includes('All') || !filters.selectedGenres || filters.selectedGenres.length === 0)
-                          ? "bg-blue-600 text-white" 
-                          : "bg-white/5 text-white/50 hover:bg-white/10"
-                      )}
-                    >
-                      All
-                    </Badge>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="inline-block">
+                      <Badge 
+                        variant={(filters.selectedGenres?.includes('All') || !filters.selectedGenres || filters.selectedGenres.length === 0) ? "default" : "outline"}
+                        onClick={() => {
+                          filters.setSelectedGenres!(['All']);
+                        }}
+                        className={cn(
+                          "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
+                          (filters.selectedGenres?.includes('All') || !filters.selectedGenres || filters.selectedGenres.length === 0)
+                            ? "bg-blue-600 text-white" 
+                            : "bg-white/5 text-white/50 hover:bg-white/10"
+                        )}
+                      >
+                        All
+                      </Badge>
+                    </motion.div>
                     {GENRES.map((genre) => {
                       const isSelected = filters.selectedGenres?.includes(genre.name) && !filters.selectedGenres?.includes('All');
                       return (
-                        <Badge 
-                          key={genre.id}
-                          variant={isSelected ? "default" : "outline"}
-                          onClick={() => {
-                            if (isSelected) {
-                              filters.setSelectedGenres!(['All']);
-                            } else {
-                              filters.setSelectedGenres!([genre.name]);
-                            }
-                          }}
-                          className={cn(
-                            "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
-                            isSelected 
-                              ? "bg-blue-600 text-white" 
-                              : "bg-white/5 text-white/50 hover:bg-white/10"
-                          )}
-                        >
-                          {genre.name}
-                        </Badge>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} key={genre.id} className="inline-block">
+                          <Badge 
+                            variant={isSelected ? "default" : "outline"}
+                            onClick={() => {
+                              if (isSelected) {
+                                filters.setSelectedGenres!(['All']);
+                              } else {
+                                filters.setSelectedGenres!([genre.name]);
+                              }
+                            }}
+                            className={cn(
+                              "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
+                              isSelected 
+                                ? "bg-blue-600 text-white" 
+                                : "bg-white/5 text-white/50 hover:bg-white/10"
+                            )}
+                          >
+                            {genre.name}
+                          </Badge>
+                        </motion.div>
                       );
                     })}
                   </div>
@@ -299,30 +335,34 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               <>
                 <Separator className="bg-white/5" />
                 <div className="space-y-3">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Mood Exploration</Label>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-foreground">Mood Exploration</Label>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {MOODS.map((mood) => {
                       const isSelected = filters.selectedMoods?.includes(mood.name);
                       return (
-                        <Badge 
-                          key={mood.id}
-                          variant={isSelected ? "default" : "outline"}
-                          onClick={() => {
-                            if (isSelected) {
-                              filters.setSelectedMoods!(filters.selectedMoods!.filter(m => m !== mood.name));
-                            } else {
-                              filters.setSelectedMoods!([...(filters.selectedMoods || []), mood.name]);
-                            }
-                          }}
-                          className={cn(
-                            "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
-                            isSelected 
-                              ? "bg-purple-600 text-white" 
-                              : "bg-white/5 text-white/50 hover:bg-white/10"
-                          )}
-                        >
-                          {mood.name}
-                        </Badge>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} key={mood.id} className="inline-block">
+                          <Badge 
+                            variant={isSelected ? "default" : "outline"}
+                            onClick={() => {
+                              if (isSelected) {
+                                filters.setSelectedMoods!(filters.selectedMoods!.filter(m => m !== mood.name));
+                              } else {
+                                filters.setSelectedMoods!([...(filters.selectedMoods || []), mood.name]);
+                              }
+                            }}
+                            className={cn(
+                              "px-2.5 py-0.5 cursor-pointer text-[8px] font-black uppercase tracking-widest rounded-full transition-all border-none shadow-none",
+                              isSelected 
+                                ? "bg-purple-600 text-white" 
+                                : "bg-white/5 text-white/50 hover:bg-white/10"
+                            )}
+                          >
+                            {mood.name}
+                          </Badge>
+                        </motion.div>
                       );
                     })}
                   </div>
@@ -333,7 +373,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             {filters?.setOnlyVerified && (
               <>
                 <Separator className="bg-white/5" />
-                <div className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-xl">
+                <div className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/[0.08] transition-colors">
                   <div className="space-y-0.5">
                     <Label className="text-[9px] font-black uppercase tracking-widest text-foreground cursor-pointer" htmlFor="verified-filter">Verified Entities</Label>
                     <p className="text-[8px] text-muted-foreground font-semibold uppercase tracking-wider">Only show signals from identified artists</p>
@@ -351,29 +391,33 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         </ScrollArea>
 
         <SheetFooter className="p-4 sm:p-6 border-t border-white/5 bg-background relative z-10 sm:flex-row gap-2">
-          <Button 
-            variant="ghost" 
-            className="flex-1 rounded-xl text-[9px] font-black uppercase tracking-widest h-10 border-none"
-            onClick={() => {
-              setSortOption('newest');
-              setActiveFilter('all');
-              setSearchQuery('');
-              filters?.setBpmRange?.([60, 180]);
-              filters?.setPriceRange?.([0, 1000]);
-              filters?.setSelectedGenres?.([]);
-              filters?.setSelectedMoods?.([]);
-              filters?.setRarity?.('All');
-              filters?.setOnlyVerified?.(false);
-            }}
-          >
-            Reset
-          </Button>
-          <Button 
-            className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest h-10 shadow-lg shadow-blue-600/20"
-            onClick={() => onOpenChange(false)}
-          >
-            Engage
-          </Button>
+          <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              variant="ghost" 
+              className="w-full rounded-xl text-[9px] font-black uppercase tracking-widest h-10 border-none cursor-pointer"
+              onClick={() => {
+                setSortOption('newest');
+                setActiveFilter('all');
+                setSearchQuery('');
+                filters?.setBpmRange?.([60, 180]);
+                filters?.setPriceRange?.([0, 1000]);
+                filters?.setSelectedGenres?.([]);
+                filters?.setSelectedMoods?.([]);
+                filters?.setRarity?.('All');
+                filters?.setOnlyVerified?.(false);
+              }}
+            >
+              Reset
+            </Button>
+          </motion.div>
+          <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              className="w-full rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest h-10 shadow-lg shadow-blue-600/20 cursor-pointer"
+              onClick={() => onOpenChange(false)}
+            >
+              Engage
+            </Button>
+          </motion.div>
         </SheetFooter>
       </SheetContent>
     </Sheet>

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { ReactLenis } from 'lenis/react';
-import { motion, useTransform, useScroll } from 'framer-motion';
+import { motion, useTransform, useScroll } from 'motion/react';
 
 interface HorizontalScrollProps {
   children?: React.ReactNode;

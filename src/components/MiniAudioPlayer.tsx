@@ -191,9 +191,9 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 referrerPolicy="no-referrer"
               />
               {/* Subtle frequency visualizer overlay */}
-              {/* Visualizer removed as requested */}
               {isPlaying && (
                 <div className="absolute inset-0 bg-black/55 backdrop-blur-[0.5px] flex items-end justify-center pb-1.5 px-1 pb-1">
+                  <SubtleFrequencyVisualizer isPlaying={isPlaying} color="#60a5fa" barCount={4} className="h-4.5 w-6" />
                 </div>
               )}
             </div>

@@ -365,7 +365,7 @@ const FullPlayer: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            className="fixed top-12 left-1/2 -translate-x-1/2 z-[80] bg-zinc-900/90 backdrop-blur-2xl rounded-2xl p-4 flex flex-col items-center gap-3 shadow-[0_15px_40px_rgba(0,0,0,0.6)]"
+            className="fixed top-12 left-1/2 -translate-x-1/2 z-[80] backdrop-blur-2xl rounded-2xl p-4 flex flex-col items-center gap-3"
           >
             <div className="p-2 rounded-full bg-white/5">
               {volume === 0 || isMuted ? <VolumeX className="h-4 w-4 text-rose-500" /> : <Volume2 className="h-4 w-4 text-emerald-400" />}
@@ -419,7 +419,7 @@ const FullPlayer: React.FC = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.99 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col h-full gap-6 py-2 md:gap-12 md:py-8 items-center"
+              className="flex flex-col h-full gap-2 py-1 md:gap-4 md:py-4 items-center"
             >
               {/* Cover Art Stage - Centered on Mobile, beautiful layout with interactive Toggle */}
               <div className="relative flex items-center justify-center py-2 select-none w-full max-w-2xl">
@@ -594,7 +594,7 @@ const FullPlayer: React.FC = () => {
               </div>
 
               {/* Controls Deck - Styled perfectly like Spotify's structural layout */}
-              <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 md:pt-8 w-full max-w-2xl flex flex-col justify-center">
+              <div className="space-y-2 sm:space-y-4 pt-1 sm:pt-2 md:pt-4 w-full max-w-2xl flex flex-col justify-center">
                 
                 {/* Information Header Block */}
                 <div className="flex justify-between items-center px-1">
@@ -681,7 +681,7 @@ const FullPlayer: React.FC = () => {
                 {currentTrack.lyrics && (
                   <div 
                     onClick={() => setActiveView('lyrics')}
-                    className="hidden md:block rounded-2xl bg-zinc-900/40 hover:bg-zinc-800/20 p-5 h-36 overflow-hidden relative cursor-pointer group transition-all"
+                    className="hidden md:block rounded-2xl hover:bg-white/5 p-5 h-36 overflow-hidden relative cursor-pointer group transition-all"
                   >
                     <div className="absolute top-4 right-5 flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                       <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400">Full Lyrics</span>
@@ -705,7 +705,7 @@ const FullPlayer: React.FC = () => {
                 {!currentTrack.lyrics && recommendations && (
                   <div 
                     onClick={() => setActiveView('krupy')}
-                    className="hidden md:block rounded-2xl bg-zinc-900/40 hover:bg-zinc-800/20 p-5 h-36 overflow-hidden relative cursor-pointer group transition-all"
+                    className="hidden md:block rounded-2xl hover:bg-white/5 p-5 h-36 overflow-hidden relative cursor-pointer group transition-all"
                   >
                     <div className="absolute top-4 right-5 flex items-center gap-1.5 opacity-40 group-hover:opacity-100 transition-opacity">
                       <span className="text-[8px] font-black uppercase tracking-widest text-blue-400">DJ AIRLAB</span>
@@ -856,7 +856,7 @@ const FullPlayer: React.FC = () => {
 
           {/* Premium Bottom Mode Bar Selector (No border lines, transparent capsule rounded list) */}
           <TabsList className={cn(
-            "grid w-full max-w-lg mx-auto bg-zinc-900/60 border-none h-12 p-1 mb-6 relative z-10 rounded-xl shadow-lg",
+            "grid w-full max-w-lg mx-auto border-none h-12 p-1 mb-6 relative z-10 rounded-xl",
             currentTrack.isNFT ? "grid-cols-7" : "grid-cols-6"
           )}>
             <TabsTrigger value="player" className="data-[state=active]:bg-white data-[state=active]:text-black text-neutral-400 hover:text-white font-bold py-1.5 rounded-lg text-xs leading-none transition-all cursor-pointer">

@@ -1,4 +1,15 @@
 
+export interface Collection {
+  id: string;
+  artistId: string;
+  name: string;
+  description?: string;
+  coverUrl: string;
+  nftIds: string[]; // List of NFT IDs in this collection
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Notification {
   id: string;
   userId: string;

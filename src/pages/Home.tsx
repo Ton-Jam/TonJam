@@ -680,13 +680,13 @@ const Home: React.FC = () => {
               <div className="flex overflow-x-auto gap-4 px-4 sm:px-0 pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {isLoading ? (
                   [1, 2, 3, 4].map(i => (
-                    <div key={`foryou-loading-${i}`} className="w-[75vw] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-10.66px)] lg:w-[calc(25%-12px)] snap-start shrink-0">
+                    <div key={`foryou-loading-${i}`} className="w-[60vw] sm:w-[calc(33.33%-8px)] md:w-[calc(25%-10.66px)] lg:w-[calc(20%-12px)] snap-start shrink-0">
                       <SkeletonCard />
                     </div>
                   ))
                 ) : (
                   recommendedNFTs.map(nft => (
-                    <div key={`foryou-${nft.id}`} className="w-[75vw] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-10.66px)] lg:w-[calc(25%-12px)] snap-start shrink-0">
+                    <div key={`foryou-${nft.id}`} className="w-[60vw] sm:w-[calc(33.33%-8px)] md:w-[calc(25%-10.66px)] lg:w-[calc(20%-12px)] snap-start shrink-0">
                       <NFTCard nft={nft} />
                     </div>
                   ))

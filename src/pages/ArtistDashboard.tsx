@@ -68,7 +68,7 @@ export default function ArtistDashboard() {
   const { user, isArtist, loading } = useAuth();
   
   // Tabs state
-  const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "sonic" | "analytics" | "nfts" | "fanconnect" | "collections">("overview");
 
   // Bulk Selection States
   const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>([]);

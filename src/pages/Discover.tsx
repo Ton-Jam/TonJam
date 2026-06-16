@@ -45,7 +45,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { getPlaceholderImage } from '@/lib/utils';
+import { getPlaceholderImage, cn } from '@/lib/utils';
 
 // shadcn imports
 import { Input } from "@/components/ui/input"
@@ -511,9 +511,13 @@ const Discover: React.FC = () => {
             variant="outline" 
             size="icon"
             onClick={() => setIsDiscoverFiltersOpen(true)}
-            className="h-10 w-10 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
+            className={cn("h-10 w-10 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0 relative", 
+                (bpmRange[0] !== 60 || bpmRange[1] !== 180 || selectedMoods.length > 0 || onlyVerified) && "border-blue-500")}
           >
             <ListFilter className="h-4 w-4 text-foreground" />
+            {(bpmRange[0] !== 60 || bpmRange[1] !== 180 || selectedMoods.length > 0 || onlyVerified) && (
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-blue-500 rounded-full" />
+            )}
           </Button>
         </div>
       </div>
@@ -546,6 +550,14 @@ const Discover: React.FC = () => {
             </div>
           </Tabs>
         </div>
+        {/* Active Filter Summary Bar */}
+        {(bpmRange[0] !== 60 || bpmRange[1] !== 180 || selectedMoods.length > 0 || onlyVerified) && (
+          <div className="px-4 pb-2 flex flex-wrap gap-2 text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
+            { (bpmRange[0] !== 60 || bpmRange[1] !== 180) && <span>BPM: {bpmRange[0]}-{bpmRange[1]}</span> }
+            { selectedMoods.length > 0 && <span>Mood: {selectedMoods.join(', ')}</span> }
+            { onlyVerified && <span>Verified Only</span> }
+          </div>
+        )}
       </div>
 
 

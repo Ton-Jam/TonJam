@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Bell } from '@phosphor-icons/react/dist/ssr/Bell'
 import { ChatCircle } from '@phosphor-icons/react/dist/ssr/ChatCircle'
 import { Heart } from '@phosphor-icons/react/dist/ssr/Heart'

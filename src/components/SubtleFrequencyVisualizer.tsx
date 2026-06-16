@@ -1,6 +1,7 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useRef } from 'react';
+import { motion, useAnimationFrame } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useAudio } from '@/context/AudioContext';
 
 interface SubtleFrequencyVisualizerProps {
   isPlaying: boolean;
@@ -15,38 +16,41 @@ export const SubtleFrequencyVisualizer: React.FC<SubtleFrequencyVisualizerProps>
   barCount = 5,
   className
 }) => {
-  // Delays and randomized cycle speeds to create an authentic organic spectrum bounce
-  const barDelays = [0.05, 0.25, 0.1, 0.3, 0.15, 0.35, 0.2, 0.0];
+  const { analyser } = useAudio();
+  const barRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  useAnimationFrame(() => {
+    if (!isPlaying || !analyser) {
+        // Reset bars if not playing
+        barRefs.current.forEach(bar => {
+            if (bar) bar.style.height = '15%';
+        });
+        return;
+    }
+
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+
+    for (let i = 0; i < barCount; i++) {
+        // Map bar index to frequency bin
+        const value = dataArray[i * 2 + 16]; // Focus on audible mids
+        const height = (value / 255) * 100;
+        if (barRefs.current[i]) {
+            barRefs.current[i]!.style.height = `${Math.max(10, height)}%`;
+        }
+    }
+  });
 
   return (
     <div className={cn("flex items-end gap-[1.5px] h-full justify-center", className)}>
       {Array.from({ length: barCount }).map((_, i) => {
-        const delay = barDelays[i % barDelays.length];
-        const duration = 1.3 + (i * 0.14) % 0.8; // between 1.3s and 2.1s
-
         return (
-          <motion.div
+          <div
             key={i}
-            className="w-[2px] rounded-full bg-current"
-            style={{ color }}
-            animate={
-              isPlaying
-                ? {
-                    height: ['10%', '85%', '30%', '95%', '40%', '10%'],
-                  }
-                : { height: '15%' }
-            }
-            transition={
-              isPlaying
-                ? {
-                    duration: duration,
-                    repeat: Infinity,
-                    repeatType: 'reverse',
-                    ease: 'easeInOut',
-                    delay: delay,
-                  }
-                : { duration: 0.3 }
-            }
+            ref={el => barRefs.current[i] = el}
+            className="w-[2px] rounded-full transition-all duration-75"
+            style={{ backgroundColor: color, height: '15%' }}
           />
         );
       })}
