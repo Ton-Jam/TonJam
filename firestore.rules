@@ -155,6 +155,34 @@ service cloud.firestore {
         && data.timestamp is string;
     }
 
+    function isValidFanToken(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.artistId is string && data.artistId.size() <= 128
+        && data.balance is number;
+    }
+
+    function isValidUnlockedExclusiveContent(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.artistId is string && data.artistId.size() <= 128
+        && data.contentId is string && data.contentId.size() <= 128;
+    }
+
+    function isValidArtistPoll(data) {
+      return data.artistId is string && data.artistId.size() <= 128
+        && data.question is string && data.question.size() <= 500
+        && data.options is list
+        && data.status in ['active', 'closed'];
+    }
+
+    function isValidArtistPollVote(data) {
+      return data.pollId is string && data.pollId.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.choiceIndex is number
+        && data.weight is number;
+    }
+
     // 🏷 MARKETPLACE LISTINGS
     match /listings/{listingId} {
       allow read: if true;
@@ -493,6 +521,36 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow create: if isSignedIn() && isValidReport(incoming()) && isValidId(reportId);
       allow update, delete: if isAdmin();
+    }
+
+    // 🎫 FAN TOKENS & ARTIST GOVERNANCE
+    match /fanTokens/{tokenId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidFanToken(incoming()) && isValidId(tokenId);
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'updatedAt']) && isValidFanToken(incoming()))
+      );
+    }
+
+    match /unlockedContents/{unlockedId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isOwner(incoming().userId) && isValidUnlockedExclusiveContent(incoming()) && isValidId(unlockedId);
+    }
+
+    match /artistPolls/{pollId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (isOwner(incoming().artistId) || isAdmin()) && isValidArtistPoll(incoming()) && isValidId(pollId);
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'endTime']) && isOwner(existing().artistId))
+      );
+      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
+
+      match /votes/{userId} {
+        allow read: if true;
+        allow create: if isSignedIn() && isOwner(userId) && isValidArtistPollVote(incoming()) && userId == request.auth.uid;
+      }
     }
   }
 }

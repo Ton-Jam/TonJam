@@ -29,8 +29,10 @@ import { ArtistSummaryCard } from '@/components/ArtistSummaryCard';
 import { PortfolioSection } from '@/components/PortfolioSection';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FanTokenHub } from '@/components/FanTokenHub';
+import { FanPowerTracker } from '@/components/FanPowerTracker';
 
-type TabType = 'discography' | 'nfts' | 'portfolio' | 'collection' | 'posts' | 'fan_club' | 'events' | 'about';
+type TabType = 'discography' | 'nfts' | 'tokens' | 'portfolio' | 'collection' | 'posts' | 'fan_club' | 'events' | 'about' | 'fan_power';
 
 const ArtistProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -465,7 +467,7 @@ const ArtistProfile: React.FC = () => {
             {/* Main Content Tabs */}
             <Tabs defaultValue="discography" value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
           <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-8 justify-start border-b border-border mb-10 w-full rounded-none pb-px scroll-smooth snap-x">
-            {(['discography', 'nfts', 'portfolio', 'collection', 'posts', 'fan_club', 'events', 'about'] as TabType[]).map((tab) => (
+            {(['discography', 'tokens', 'fan_power', 'nfts', 'portfolio', 'collection', 'posts', 'fan_club', 'events', 'about'] as TabType[]).map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab}
@@ -659,6 +661,20 @@ const ArtistProfile: React.FC = () => {
                     {isJoining ? 'Processing...' : isFanClubMember ? 'Member' : 'Join Club - 5 TON/mo'}
                   </button>
                 </div>
+              </div>
+            </TabsContent>
+
+            {/* FAN TOKENS */}
+            <TabsContent value="tokens" className="m-0 focus-visible:outline-none">
+              <div className="mt-8">
+                <FanTokenHub artist={artist} />
+              </div>
+            </TabsContent>
+
+            {/* FAN POWER */}
+            <TabsContent value="fan_power" className="m-0 focus-visible:outline-none">
+              <div className="mt-8">
+                {artist && <FanPowerTracker artist={artist} />}
               </div>
             </TabsContent>
 

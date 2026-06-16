@@ -115,7 +115,7 @@ export const getKrupyRecommendations = async (currentTrack: Track, allTracks: Tr
     if (!response.ok) throw new Error("HTTP error " + response.status);
     return await response.json();
   } catch (error) {
-    console.warn("Krupy recommendations fallback:", error);
+    // Return gracefully under quota limit or network issue
     return { tracks: [], artists: [], reasoning: "Neural relay interrupted. Stay tuned for the next frequency." };
   }
 };
@@ -134,7 +134,7 @@ export const chatWithKrupy = async (
     if (!response.ok) throw new Error("HTTP error " + response.status);
     return await response.json();
   } catch (error) {
-    console.warn("DJ Krupy Chat error, using localized telemetry fallback:", error);
+    // Return graceful fallback without trace 
     
     const msgLower = message.toLowerCase();
     let text = "Yo! DJ Krupy in the virtual deck! The mainframe is experiencing severe neural solar flares right now, but nothing stops the music! Let's pump up the volume!";

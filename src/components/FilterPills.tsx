@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +23,8 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
   onSelect,
   isLoading = false,
 }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   // Skeleton Loader State
   if (isLoading) {
     const skeletonWidths = [
@@ -53,9 +55,29 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
 
   const activeCategory = selectedGenre || 'All';
 
+  const handlePillClick = (category: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    onSelect(category === 'All' ? null : category);
+    
+    const button = e.currentTarget;
+    const container = scrollContainerRef.current;
+    if (button && container) {
+      const containerWidth = container.clientWidth;
+      const buttonLeft = button.offsetLeft;
+      const buttonWidth = button.clientWidth;
+      
+      // Calculate target scrollLeft to center the button in the container viewport
+      const targetScrollLeft = buttonLeft - (containerWidth / 2) + (buttonWidth / 2);
+      
+      container.scrollTo({
+        left: targetScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="filter-wrapper select-none">
-      <div className="filter-scroll">
+      <div className="filter-scroll" ref={scrollContainerRef}>
         {CATEGORY_PILLS.map((category) => {
           const isSelected = activeCategory === category;
           return (
@@ -63,7 +85,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
               key={category}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => onSelect(category === 'All' ? null : category)}
+              onClick={(e) => handlePillClick(category, e)}
               className={cn(
                 "pill relative z-10 overflow-hidden",
                 isSelected && "active"

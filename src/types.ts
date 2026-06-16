@@ -596,3 +596,39 @@ export interface TrackMetadata {
     textures: string[];
   };
 }
+
+export interface FanTokenBalance {
+  id: string;
+  userId: string;
+  artistId: string;
+  balance: number;
+  updatedAt: string;
+}
+
+export interface UnlockedExclusiveContent {
+  id: string;
+  userId: string;
+  artistId: string;
+  contentId: string;
+  unlockedAt: string;
+}
+
+export interface ArtistPoll {
+  id: string;
+  artistId: string;
+  artistName: string;
+  question: string;
+  options: string[];
+  status: 'active' | 'closed';
+  endTime: string;
+  createdAt: string;
+}
+
+export interface ArtistPollVote {
+  id: string;
+  pollId: string;
+  userId: string;
+  choiceIndex: number;
+  weight: number;
+  votedAt: string;
+}

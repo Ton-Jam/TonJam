@@ -724,8 +724,15 @@ async function startServer() {
             }
             throw new Error("Empty response");
         } catch (error: any) {
-            console.error("Krupy recommendations error:", error);
-            res.status(500).json({ error: error.message || "Failed recommendations" });
+            // Silently fallback without logging the massive stack trace when rate limited
+            const { currentTrack, allTracks, allArtists } = req.body;
+            const fallbackTracks = allTracks ? allTracks.slice(0, 3).map((t: any) => t.title) : [];
+            const fallbackArtists = allArtists ? allArtists.slice(0, 2).map((a: any) => a.name) : [];
+            return res.json({
+                tracks: fallbackTracks,
+                artists: fallbackArtists,
+                reasoning: "DJ Krupy is currently recalibrating! Here are some curated highlights from the vault."
+            });
         }
     });
 
@@ -883,7 +890,7 @@ async function startServer() {
 
             res.json({ text: response.text || "Neural connection interrupted. Re-syncing the vibez..." });
         } catch (error: any) {
-            console.warn("DJ Krupy Chat error, activating server-side safety fallback:", error);
+            // Silently catch and activate server-side safety fallback  
             
             // Build a smart, stylized cyberpunk responder
             const msgLower = (req.body?.message || '').toLowerCase();
