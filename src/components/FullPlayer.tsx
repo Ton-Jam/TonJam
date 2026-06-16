@@ -889,7 +889,7 @@ const FullPlayer: React.FC = () => {
                     variant="ghost"
                     size="icon"
                     onClick={toggleShuffle}
-                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full border border-white/20 bg-transparent text-white hover:bg-white/10 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full border border-blue-500 bg-transparent text-white hover:bg-blue-500/10 flex items-center justify-center cursor-pointer transition-colors shrink-0"
                   >
                     <Shuffle
                       strokeWidth={2.5}
@@ -903,7 +903,7 @@ const FullPlayer: React.FC = () => {
                     variant="ghost"
                     size="icon"
                     onClick={prevTrack}
-                    className="text-white hover:bg-white/10 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full border border-white/20 bg-transparent flex items-center justify-center cursor-pointer shrink-0"
+                    className="text-white hover:bg-blue-500/10 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full border border-blue-500 bg-transparent flex items-center justify-center cursor-pointer shrink-0"
                   >
                     <SkipBack strokeWidth={2.5} className="w-6 h-6 sm:w-10 sm:h-10 md:w-12 md:h-12" />
                   </Button>
@@ -911,13 +911,13 @@ const FullPlayer: React.FC = () => {
                   {/* Center Play Button - Perfect big rounded Spotify Play block */}
                   <Button
                     onClick={togglePlay}
-                    className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all border-2 border-white bg-transparent hover:bg-white/10 text-white shrink-0 overflow-hidden"
+                    className="relative w-16 h-16 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-full flex items-center justify-center p-0 hover:scale-[1.05] active:scale-[0.95] transition-all border-2 border-blue-500 bg-transparent hover:bg-blue-500/10 text-white shrink-0 overflow-hidden"
                     style={{
                       boxShadow: `0 12px 30px rgba(0,0,0,0.3)`,
                     }}
                   >
                     <motion.div
-                      className="absolute inset-0 bg-white/10"
+                      className="absolute inset-0 bg-blue-500/10"
                       initial={{ scale: 0, opacity: 0 }}
                       whileTap={{ scale: 2, opacity: 0.4 }}
                       transition={{ duration: 0.3 }}
@@ -935,7 +935,7 @@ const FullPlayer: React.FC = () => {
                     variant="ghost"
                     size="icon"
                     onClick={nextTrack}
-                    className="text-white hover:bg-white/10 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full border border-white/20 bg-transparent flex items-center justify-center cursor-pointer shrink-0"
+                    className="text-white hover:bg-blue-500/10 active:scale-90 transition-all h-12 w-12 sm:h-20 sm:w-20 md:h-22 md:w-22 rounded-full border border-blue-500 bg-transparent flex items-center justify-center cursor-pointer shrink-0"
                   >
                     <SkipForward strokeWidth={2.5} className="w-6 h-6 sm:w-10 sm:h-10 md:w-12 md:h-12" />
                   </Button>
@@ -945,7 +945,7 @@ const FullPlayer: React.FC = () => {
                     variant="ghost"
                     size="icon"
                     onClick={toggleRepeat}
-                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full border border-white/20 bg-transparent text-white hover:bg-white/10 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                    className="relative h-11 w-11 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-full border border-blue-500 bg-transparent text-white hover:bg-blue-500/10 flex items-center justify-center cursor-pointer transition-colors shrink-0"
                   >
                     <Repeat
                       strokeWidth={2.5}
