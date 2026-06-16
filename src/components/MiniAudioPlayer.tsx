@@ -2,7 +2,6 @@ import React from "react";
 import { motion } from "motion/react";
 import { useAudio } from "@/context/AudioContext";
 import SubtleFrequencyVisualizer from "./SubtleFrequencyVisualizer";
-import DynamicVisualizer from "./DynamicVisualizer";
 import { useNavigate } from "react-router-dom";
 import {
   Play,
@@ -190,16 +189,6 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* Dynamic Waveform Background */}
-      <div className="absolute inset-0 z-[1] overflow-hidden opacity-[0.12] mix-blend-screen pointer-events-none fade-in">
-        <DynamicVisualizer
-          variant="waves"
-          color="#a8b2d1"
-          interactive={false}
-          className="w-full h-[200%] -translate-y-1/4 scale-x-110"
-        />
-      </div>
-
       {/* Top Progress Bar for Mobile Screen only (Compact indicator, interactive slider is on desktop center column) */}
       <div
         className="absolute -top-2 left-0 right-0 px-0 z-20 sm:hidden cursor-pointer h-5 flex items-center bg-transparent group/mobileseek"
@@ -207,7 +196,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
         onTouchStart={handleProgressScrub}
         onTouchMove={handleProgressScrub}
       >
-        <div className="w-full h-[3px] bg-white/10 relative transition-all group-active/mobileseek:h-[5px]">
+        <div className="w-full h-[2px] bg-white/10 relative transition-all group-active/mobileseek:h-[4px]">
           <div
             className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-100"
             style={{ width: `${progress}%` }}
@@ -378,7 +367,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 }
               }}
             >
-              <div className="w-full h-1 bg-zinc-700/60 rounded-full relative transition-all group-hover/seek-deck:h-[5px] overflow-hidden">
+              <div className="w-full h-[2px] bg-zinc-700/60 rounded-full relative transition-all group-hover/seek-deck:h-[4px] overflow-hidden">
                 <div
                   className="absolute top-0 left-0 h-full bg-blue-500 rounded-full group-hover/seek-deck:bg-emerald-400 transition-all duration-75"
                   style={{ width: `${progress}%` }}
