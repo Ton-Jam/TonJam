@@ -41,6 +41,7 @@ import TrendingArtistLeaderboard from '@/components/TrendingArtistLeaderboard';
 import { ArtistLeaderboard } from '@/components/ArtistLeaderboard';
 import SkeletonCard from '@/components/SkeletonCard';
 import SonicSearchSection from '@/components/SonicSearchSection';
+import FilterPills from '@/components/FilterPills';
 import { FilterSection } from '@/components/FilterSection';
 import { useAudio } from '@/context/AudioContext';
 import Autoplay from "embla-carousel-autoplay";
@@ -347,31 +348,35 @@ const Discover: React.FC = () => {
       />
 
       {/* Search & Filter Header - Sticky & Atmospheric with zero padding gap */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg pt-4 pb-2 w-full border-b border-blue-500/10 transition-colors duration-300 flex flex-col gap-1">
+      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-lg py-2 w-full border-b border-blue-500/10 transition-colors duration-300 flex flex-col gap-1">
         <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
           <form 
             onSubmit={handleSearchSubmit} 
             className="relative flex-1 group"
           >
-            {/* Shiny Gradient Border Effect */}
-            <div className={`absolute -inset-[1px] rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 opacity-20 blur-[2px] transition-all duration-500 ${isFocused ? 'opacity-60 blur-[4px] scale-[1.01]' : 'group-hover:opacity-40 blur-[2px]'}`} />
-            
-            <div className={`relative flex items-center h-10 bg-white border transition-all duration-300 ease-in-out rounded-full overflow-hidden focus-within:scale-[1.02] ${isFocused ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-zinc-200 group-hover:border-zinc-300'}`}>
-              <div className="absolute left-4 z-10 pointer-events-none">
-                <Search className={`h-4 w-4 transition-colors ${isFocused ? 'text-blue-500' : 'text-zinc-400'}`} />
+            {/* Search Input Container - Cleaned up */}
+            <div className={`relative flex items-center h-12 bg-card border border-border/60 rounded-xl overflow-hidden transition-all ${isFocused ? 'ring-1 ring-primary' : ''}`}>
+              <div className="absolute left-4 z-10">
+                <Search className={`h-4 w-4 ${isFocused ? 'text-primary' : 'text-muted-foreground'}`} />
               </div>
               
               <Input
                 type="text"
-                placeholder="Search artists, tracks, NFTs..."
+                placeholder={aiVibeResults ? "Enter a vibe description..." : "Search artists, tracks, or nfts..."}
                 value={searchQuery}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 pr-24 h-full bg-white border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-semibold uppercase tracking-widest text-black placeholder:text-zinc-400 z-10"
+                className="pl-12 pr-32 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest text-zinc-900 placeholder:text-zinc-400 z-10"
               />
 
-              <div className="absolute right-3 flex items-center gap-1.5 z-20">
+              {aiVibeResults && (
+                <Badge className="absolute right-28 h-6 bg-cyan-900/40 text-cyan-400 border-cyan-800/50 hover:bg-cyan-900/60 uppercase text-[9px] font-bold tracking-widest">
+                  AI VIBE
+                </Badge>
+              )}
+
+              <div className="absolute right-3 flex items-center gap-1 z-20">
                 <AnimatePresence>
                   {searchQuery && (
                     <motion.div
@@ -384,20 +389,20 @@ const Discover: React.FC = () => {
                         size="icon"
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="h-8 w-8 text-zinc-500 hover:text-black rounded-full"
+                        className="h-8 w-8 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-full"
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <Separator orientation="vertical" className="h-4 bg-zinc-200" />
+                <div className="w-[1px] h-4 bg-zinc-200 mx-1" />
                 <Button
                   variant="ghost"
                   size="icon"
                   type="button"
                   onClick={handleVoiceSearch}
-                  className={`h-8 w-8 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-500 bg-rose-500/10 animate-pulse' : 'text-zinc-500 hover:text-black'}`}
+                  className={`h-9 w-9 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-600 bg-rose-50 animate-pulse' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}
                 >
                   {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
@@ -411,7 +416,7 @@ const Discover: React.FC = () => {
                   initial={{ opacity: 0, y: 4, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-background border border-border/40 shadow-none rounded-[4px] overflow-hidden z-50 p-2"
+                  className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-[0_10px_40px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden z-50 p-2"
                 >
                   <Command className="bg-transparent border-none">
                     <CommandList className="max-h-[300px]">
@@ -527,32 +532,12 @@ const Discover: React.FC = () => {
           </Button>
         </div>
 
-        {/* Filter Tabs Section - Placed directly under the search row with zero vertical separation */}
-        <div className="w-full filter-tabs px-4 md:px-8 lg:px-12 pt-0 pb-0">
-          <Tabs value={activeFilter} onValueChange={(v: any) => setActiveFilter(v)} className="w-full">
-            <div className="scroll-row scroll-smooth flex justify-start md:justify-center py-1">
-              <TabsList className="bg-transparent h-auto p-0 gap-2 flex flex-nowrap min-w-max">
-                {(['all', 'tracks', 'artists', 'nfts', 'playlists', 'users'] as const).map((filter) => (
-                  <TabsTrigger
-                    key={filter}
-                    value={filter}
-                    asChild
-                  >
-                    <MTButton
-                      variant={activeFilter === filter ? "filled" : "outlined"}
-                      color="blue"
-                      className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0"
-                      placeholder=""
-                      onPointerEnterCapture={() => {}}
-                      onPointerLeaveCapture={() => {}}
-                    >
-                      {filter}
-                    </MTButton>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-          </Tabs>
+        <div className="w-full filter-tabs pt-1 pb-1 px-4 md:px-8 lg:px-12">
+          <FilterPills
+            selectedGenre={activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
+            onSelect={(v) => setActiveFilter(v ? v.toLowerCase() : 'all')}
+            categories={['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users']}
+          />
         </div>
 
         {/* Active Filter Summary Bar */}
@@ -566,7 +551,7 @@ const Discover: React.FC = () => {
       </div>
 
 
-      <div className="w-full max-w-full px-0 pb-24 space-y-0">
+      <div className="w-full max-w-full px-4 md:px-8 lg:px-12 pb-24 space-y-8 mt-6">
         
 
         {isLoading ? (
@@ -645,19 +630,19 @@ const Discover: React.FC = () => {
                 </div>
 
                 {/* Right Side: Gemini AI Customizer Lab */}
-                <div className="bg-[#0b122c]/60 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-2xl">
+                <div className="bg-card border border-border/60 backdrop-blur-md rounded-xl p-6 flex flex-col justify-between space-y-4 shadow-none">
                   {/* Lab Header */}
-                  <div className="space-y-1.5Packed">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
-                        <Sparkles className="h-4 w-4 text-cyan-400 animate-pulse" />
-                        <h3 className="text-xs font-black uppercase tracking-[0.15em] text-white">Gemini AI Discovery Lab</h3>
+                        <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                        <h3 className="section-title !text-xs !tracking-widest">Gemini AI Lab</h3>
                       </div>
-                      <Badge className="bg-cyan-500/10 text-cyan-400 text-[8px] font-black tracking-widest uppercase border-none py-0.5">
+                      <Badge className="bg-primary/10 text-primary text-[8px] font-black tracking-widest uppercase border-none py-0.5">
                         ACTIVE
                       </Badge>
                     </div>
-                    <p className="text-[11px] text-zinc-400 leading-snug">
+                    <p className="micro-label !text-muted-foreground leading-snug">
                       Your listening patterns and likes are continuously indexed. Direct our Gemini-powered AI engine to generate your Weekly discovery mix.
                     </p>
                   </div>

@@ -38,9 +38,11 @@ interface NFTCardProps {
   onAction?: (nft: NFTItem) => void;
   isLoading?: boolean;
   className?: string;
+  isSelectedForCompare?: boolean;
+  onToggleCompare?: (nft: NFTItem) => void;
 }
 
-const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false, className = '' }) => {
+const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false, className = '', isSelectedForCompare = false, onToggleCompare }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying, setOptionsTrack, userProfile, setAnthem, addNotification } = useAudio();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -143,6 +145,10 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
     <>
       <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 py-3 px-4">Artifact Actions</DropdownMenuLabel>
       <DropdownMenuSeparator className="bg-white/5" />
+      <DropdownMenuItem onClick={() => onToggleCompare?.(nft)} className="flex items-center gap-3 py-3 px-4 cursor-pointer hover:bg-zinc-800 transition-colors">
+        <LayoutGrid className={cn("h-4 w-4", isSelectedForCompare ? "text-emerald-400" : "text-zinc-500")} />
+        <span className="text-[10px] font-bold uppercase tracking-widest">{isSelectedForCompare ? "Remove from Compare" : "Compare"}</span>
+      </DropdownMenuItem>
       <DropdownMenuItem onClick={handlePlayClick} className="flex items-center gap-3 py-3 px-4 cursor-pointer focus:bg-blue-600 focus:text-white transition-colors">
         {isActive && isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         <span className="text-[10px] font-bold uppercase tracking-widest">Play Associated Track</span>
@@ -286,8 +292,9 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       <ContextMenu>
         <ContextMenuTrigger>
         <motion.div 
-          whileHover={{ y: -3, scale: 1.015 }}
-          whileTap={{ scale: 0.99 }}
+          layout
+          whileHover={{ y: -4, scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
           className={`group flex items-center gap-4 p-3 rounded-[4px] bg-muted/10 border border-transparent hover:border-white/5 cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${className}`}
           onClick={handleCardClick}
@@ -377,11 +384,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
       <ContextMenu>
         <ContextMenuTrigger>
           <motion.div
+            layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -6, scale: 1.025, backgroundColor: "rgba(255, 255, 255, 0.04)" }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 400, damping: 26 }}
+            whileHover={{ y: -4, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={cn(
               "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent w-full",
               className

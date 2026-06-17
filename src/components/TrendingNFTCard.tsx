@@ -42,9 +42,12 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
   };
 
   return (
-    <div 
+    <motion.div 
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={handleCardClick}
-      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5 cursor-pointer hover:scale-[1.05] transition-transform duration-300"
+      className="w-[160px] h-[240px] rounded-[4px] bg-gradient-to-br from-blue-900 via-blue-900 to-slate-950 relative shadow-2xl flex flex-col items-center p-3 border border-white/5 cursor-pointer"
     >
       {/* Premium Badge */}
       <div className="absolute top-[-8px] left-[-8px] w-[100px] h-[100px] overflow-hidden flex items-center justify-center pointer-events-none">
@@ -83,7 +86,7 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
         <ShoppingCart className="w-3 h-3" /> Buy
       </button>
 
-    </div>
+    </motion.div>
   );
 };
 

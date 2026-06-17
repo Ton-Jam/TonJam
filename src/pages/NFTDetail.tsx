@@ -97,6 +97,7 @@ import { getPlaceholderImage, cn } from "@/lib/utils";
 import { PriceSparkline } from "@/components/PriceSparkline";
 import { AuctionCountdownTimer } from "@/components/AuctionCountdownTimer";
 import { QuickBid } from "@/components/QuickBid";
+import { CollectionStats } from "@/components/CollectionStats";
 
 const NFTDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -107,6 +108,8 @@ const NFTDetail: React.FC = () => {
     isPlaying,
     playTrack,
     allNFTs,
+    collections, // Added collections
+    transactions, // Added transactions
     updateNFT,
     setFullPlayerOpen,
     userProfile,
@@ -162,7 +165,7 @@ const NFTDetail: React.FC = () => {
 
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "details" | "history" | "offers" | "comments" | "exclusive" | "collection"
+    "details" | "activity" | "offers" | "comments" | "exclusive" | "collection"
   >("details");
   const { hasAccess } = useTokenGating(
     localNft?.tokenGating || { enabled: false, tokenType: "nft" },
@@ -367,7 +370,7 @@ const NFTDetail: React.FC = () => {
 
   // Sync specific NFT history from Firestore
   useEffect(() => {
-    if (activeTab !== "history" || !localNft) return;
+    if (activeTab !== "activity" || !localNft) return;
     
     // Subscribe to this specific NFT to pull latest history
     const unsub = onSnapshot(doc(db, "nfts", localNft.id), (doc) => {
@@ -972,7 +975,26 @@ const NFTDetail: React.FC = () => {
                       {isOwner
                         ? "You (Vault)"
                         : localNft.owner
-                          ? `${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}`
+                          ? (
+                            <div 
+                               className="flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer hover:bg-white/10 transition-colors border border-white/5"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 if (localNft.owner === userProfile.walletAddress) {
+                                   navigate("/profile");
+                                 } else {
+                                   const artist = MOCK_ARTISTS.find(
+                                     (a) =>
+                                       a.walletAddress === localNft.owner ||
+                                       a.name === localNft.owner,
+                                   );
+                                   if (artist) navigate(`/artist/${artist.uid}`);
+                                 }
+                               }}
+                            >
+                                <span className="font-mono text-blue-400/80">{`${localNft.owner.slice(0, 6)}...${localNft.owner.slice(-4)}`}</span>
+                            </div>
+                          )
                           : "Unknown"}
                       {((MOCK_ARTISTS.find(
                         (a) =>
@@ -1054,6 +1076,13 @@ const NFTDetail: React.FC = () => {
                 </div>
               </div>
             </header>
+
+            <CollectionStats 
+              nft={localNft} 
+              allNFTs={allNFTs} 
+              allCollections={collections} 
+              transactions={transactions} 
+            />
 
             {/* Pricing Section - Hardware Style */}
             <div className="bg-white/5 backdrop-blur-xl rounded-[4px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group">
@@ -1366,7 +1395,7 @@ const NFTDetail: React.FC = () => {
             <div className="flex items-center gap-4 mb-4">
               {[
                 "details",
-                "history",
+                "activity",
                 "offers",
                 "comments",
                 ...((isOwner || hasAccess) && localNft.exclusiveContent?.length
@@ -1379,7 +1408,7 @@ const NFTDetail: React.FC = () => {
                   onClick={() => setActiveTab(tab as any)}
                   className={`pb-4 text-[10px] font-bold uppercase tracking-[0.4em] transition-all relative ${activeTab === tab ? "text-blue-500" : "text-muted-foreground/50 hover:text-foreground"}`}
                 >
-                  {tab === "exclusive" ? "Holder Perks" : tab}
+                  {tab === "exclusive" ? "Holder Perks" : tab === "activity" ? "Activity" : tab}
                   {activeTab === tab && (
                     <motion.div
                       layoutId="activeTab"
@@ -1733,9 +1762,9 @@ const NFTDetail: React.FC = () => {
                   </motion.div>
                 )}
 
-                {activeTab === "history" && (
+                {activeTab === "activity" && (
                   <motion.div
-                    key="history"
+                    key="activity"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}

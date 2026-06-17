@@ -147,9 +147,9 @@ const Home: React.FC = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            recentlyPlayed: recentlyPlayed || [],
+            recentlyPlayed: (recentlyPlayed || []).map((t: any) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood })),
             likedTracks: likedTrackIds || [],
-            availableTracks: allTracks
+            availableTracks: (allTracks || []).map((t: any) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood }))
           })
         });
         if (response.ok) {

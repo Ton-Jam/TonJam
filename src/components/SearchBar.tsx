@@ -1,142 +1,122 @@
-import React, { useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ClockIcon, ArrowRightIcon, XMarkIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
-import { ButtonGroupInput } from './ButtonGroupInput';
+import React, { useState, useEffect, useRef } from 'react';
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
+import { db } from "@/lib/firebase"
+import { collection, query, limit, getDocs, where } from "firebase/firestore"
 
-interface SearchBarProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  isSearchOpen: boolean;
-  setIsSearchOpen: (open: boolean) => void;
-  handleSearch: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  handleSuggestionClick: (query: string) => void;
-  recentSearches: string[];
-  removeRecentSearch: (query: string) => void;
-  trendingTopics: string[];
-  placeholder: string;
-  inputClassName?: string;
-  className?: string;
-  dropdownClassName?: string;
-  autoFocus?: boolean;
-}
+export function SearchBar() {
+  const [queryText, setQueryText] = useState('');
+  const [history, setHistory] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-export const SearchBar: React.FC<SearchBarProps & { children?: React.ReactNode }> = ({
-  searchQuery,
-  setSearchQuery,
-  isSearchOpen,
-  setIsSearchOpen,
-  handleSearch,
-  handleSuggestionClick,
-  recentSearches,
-  removeRecentSearch,
-  trendingTopics,
-  placeholder,
-  inputClassName,
-  className,
-  dropdownClassName = "absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-xl border border-blue-500/20 rounded-2xl shadow-2xl overflow-hidden z-50 p-2",
-  children,
-  autoFocus
-}) => {
-  const searchRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('searchHistory');
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (queryText.length >= 2) {
+        // Fetch suggestions from Firestore
+        try {
+          const trackQuery = query(collection(db, 'tracks'), limit(5));
+          const snapshot = await getDocs(trackQuery);
+          const tracks = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data(), type: 'track' }))
+            .filter((t: any) => t.title?.toLowerCase().includes(queryText.toLowerCase()));
+          setSuggestions(tracks);
+        } catch (error) {
+          console.error("Error fetching suggestions:", error);
+          setSuggestions([]);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [queryText]);
+
+  const saveToHistory = (newQuery: string) => {
+    if (!newQuery.trim()) return;
+    setHistory(prev => {
+      const updated = [newQuery, ...prev.filter(item => item !== newQuery)].slice(0, 5);
+      localStorage.setItem('searchHistory', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveToHistory(queryText);
+    setShowDropdown(false);
+  };
+
+  const handleSelect = (term: string) => {
+    setQueryText(term);
+    saveToHistory(term);
+    setShowDropdown(false);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsSearchOpen(false);
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [setIsSearchOpen]);
+  }, []);
 
   return (
-    <div className={className} ref={searchRef}>
-      <ButtonGroupInput 
-        placeholder={placeholder} 
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onFocus={() => setIsSearchOpen(true)}
-        onKeyDown={handleSearch}
-        className="w-full"
-        inputClassName={inputClassName}
-        autoFocus={autoFocus}
-        variant="search"
-      />
-
-      <AnimatePresence>
-        {isSearchOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className={dropdownClassName}
-          >
-            {children || (
-              <div className="grid grid-cols-1 gap-1">
-                {/* Search Header for Results */}
-                {searchQuery && (
-                  <div className="px-3 pt-2 pb-1 border-b border-border/40">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Search Results</span>
-                  </div>
-                )}
-                
-                {/* Search Results Area */}
-                {searchQuery && (
-                  <div className="max-h-[60vh] overflow-y-auto custom-scrollbar p-1">
-                    {children}
-                  </div>
-                )}
-
-                {/* Recent & Trending (Only if not searching) */}
-                {!searchQuery && (
-                  <div className="grid grid-cols-1 gap-4 p-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2 px-1">
-                        <ClockIcon className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Recent Searches</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {recentSearches.length > 0 ? (
-                          recentSearches.map((item, index) => (
-                            <button
-                              key={`${item}-${index}`}
-                              onClick={() => handleSuggestionClick(item)}
-                              className="px-2 py-1 rounded bg-muted/50 hover:bg-muted text-[10px] font-black uppercase tracking-tight text-foreground transition-colors"
-                            >
-                              {item}
-                            </button>
-                          ))
-                        ) : (
-                          <p className="text-[9px] text-muted-foreground">No recent searches</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-2 mb-2 px-1">
-                        <ArrowTrendingUpIcon className="h-3 w-3 text-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">Trending Now</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {trendingTopics.map((topic, index) => (
-                          <button
-                            key={`${topic}-${index}`}
-                            onClick={() => handleSuggestionClick(topic)}
-                            className="px-2 py-1 rounded bg-primary/5 hover:bg-primary/10 text-[10px] font-black uppercase tracking-tight text-primary transition-colors"
-                          >
-                            {topic}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="relative w-full max-w-sm" ref={containerRef}>
+      <form onSubmit={handleSearch}>
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Search..."
+          className="pl-9 pr-4"
+          value={queryText}
+          onChange={(e) => setQueryText(e.target.value)}
+          onFocus={() => setShowDropdown(true)}
+        />
+      </form>
+      
+      {showDropdown && (history.length > 0 || suggestions.length > 0) && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-md shadow-md z-50 p-2">
+          {history.length > 0 && (
+            <>
+              <p className="text-xs text-muted-foreground px-2 py-1">Recent Searches</p>
+              {history.map((term, index) => (
+                <button
+                  key={`history-${index}`}
+                  className="w-full text-left px-2 py-1 text-sm hover:bg-accent rounded-sm"
+                  onClick={() => handleSelect(term)}
+                >
+                  {term}
+                </button>
+              ))}
+            </>
+          )}
+          {suggestions.length > 0 && (
+            <>
+              <p className="text-xs text-muted-foreground px-2 py-1 mt-2">Suggestions</p>
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={`suggestion-${index}`}
+                  className="w-full text-left px-2 py-1 text-sm hover:bg-accent rounded-sm"
+                  onClick={() => handleSelect(suggestion.title)}
+                >
+                  {suggestion.title} - {suggestion.artist}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      )}
     </div>
-  );
-};
+  )
+}

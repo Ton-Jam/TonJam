@@ -63,6 +63,7 @@ import { generateAIPlaylist, GenerateAIPlaylistResult } from '@/services/aiPlayl
 import { Loader2 } from 'lucide-react';
 import GlassAiCompose from '@/components/aicanvas/glass-ai-compose';
 import TiltedCoverflow, { CoverflowItem } from '@/components/aicanvas/tilted-coverflow';
+import FilterPills from '@/components/FilterPills';
 
 const JamSpace: React.FC = () => {
   const navigate = useNavigate();
@@ -345,41 +346,12 @@ const JamSpace: React.FC = () => {
             </motion.div>
 
             {/* Feed Filters - Sticky & Atmospheric matching Marketplace */}
-            <div className="sticky top-14 z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-4 border-b border-white/[0.05]">
-              <Tabs value={filterType} onValueChange={setFilterType} className="w-full">
-                <div className="scroll-row scroll-smooth">
-                  <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
-                    {[
-                      { name: 'All', icon: Sparkles },
-                      { name: 'Tracks', icon: Disc },
-                      { name: 'NFTs', icon: Zap },
-                      { name: 'Trending', icon: Flame }
-                    ].map((filter) => {
-                      const Icon = filter.icon;
-                      const isActive = filterType === filter.name;
-                      return (
-                        <TabsTrigger
-                          key={filter.name}
-                          value={filter.name}
-                          asChild
-                        >
-                          <MTButton
-                            variant={isActive ? "filled" : "outlined"}
-                            color="blue"
-                            className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5"
-                            placeholder=""
-                            onPointerEnterCapture={() => {}}
-                            onPointerLeaveCapture={() => {}}
-                          >
-                            <Icon className="h-3.5 w-3.5" />
-                            {filter.name}
-                          </MTButton>
-                        </TabsTrigger>
-                      );
-                    })}
-                  </TabsList>
-                </div>
-              </Tabs>
+            <div className="sticky top-14 z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-4 border-b border-white/[0.05] px-4">
+              <FilterPills
+                selectedGenre={filterType}
+                onSelect={(v) => setFilterType(v || 'All')}
+                categories={['All', 'Tracks', 'NFTs', 'Trending']}
+              />
             </div>
 
             {/* Main Feed */}

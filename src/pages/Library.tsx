@@ -35,6 +35,7 @@ import AlbumCard from '@/components/AlbumCard';
 import PlaylistFolderCard from '@/components/PlaylistFolderCard';
 import FolderModal from '@/components/FolderModal';
 import PlaylistOptionsModal from '@/components/PlaylistOptionsModal';
+import FilterPills from '@/components/FilterPills';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn, getPlaceholderImage } from '@/lib/utils';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -239,37 +240,12 @@ const Library: React.FC = () => {
       <div className="px-4 py-3 sm:px-6 max-w-7xl mx-auto space-y-6">
         
         {/* Global Filter Pills & Grid Toggle controls block */}
-        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-6 border-b border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <Tabs value={filter} onValueChange={(v: any) => setFilter(v)} className="w-full">
-            <div className="scroll-row scroll-smooth">
-              <TabsList className="bg-transparent h-auto p-0 flex flex-nowrap gap-2 justify-start">
-                {[
-                  { id: 'all', label: 'All Symbols', icon: Layers },
-                  { id: 'playlists', label: 'Playlists', icon: ListMusic },
-                  { id: 'artists', label: 'Artists', icon: Users },
-                  { id: 'nfts', label: 'NFTs', icon: ShoppingBag }
-                ].map((tab) => (
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    asChild
-                  >
-                    <MTButton
-                      variant={filter === tab.id ? "filled" : "outlined"}
-                      color="blue"
-                      className="rounded-full px-6 py-2 text-[10px] h-auto lowercase font-medium tracking-widest transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5"
-                      placeholder=""
-                      onPointerEnterCapture={() => {}}
-                      onPointerLeaveCapture={() => {}}
-                    >
-                      <tab.icon className="w-3.5 h-3.5" />
-                      {tab.label}
-                    </MTButton>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-          </Tabs>
+        <div className="sticky top-0 lg:top-[var(--header-height,64px)] z-[37] bg-background/80 backdrop-blur-md py-4 w-full mb-6 border-b border-border/30 flex flex-col md:flex-row md:items-center justify-between gap-4 px-4">
+          <FilterPills
+            selectedGenre={filter === 'all' ? 'All' : filter.charAt(0).toUpperCase() + filter.slice(1)}
+            onSelect={(v) => setFilter(v ? (v === 'All Symbols' ? 'all' : v.toLowerCase()) as any : 'all')}
+            categories={['All Symbols', 'Playlists', 'Artists', 'NFTs']}
+          />
         </div>
 
         {/* Folders Section - List Layout */}

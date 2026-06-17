@@ -24,6 +24,7 @@ import {
   Gem,
   DownloadCloud,
 } from "lucide-react";
+import { MarqueeTitle } from "./MarqueeTitle";
 import { getPlaceholderImage, cn, shareContent } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -174,7 +175,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       className={cn(
-        "fixed left-0 right-0 z-[48] bg-background/85 backdrop-blur-xl border-t border-blue-500/10 px-6 py-3 flex flex-col items-stretch shadow-[0_-12px_45px_rgba(0,0,0,0.4)] h-[76px] md:h-24 lg:left-64 transition-all duration-300",
+        "fixed left-0 right-0 z-[48] bg-black/40 backdrop-blur-3xl border-t border-white/10 px-6 py-3 flex flex-col items-stretch shadow-[0_-12px_45px_rgba(0,0,0,0.4)] h-[76px] md:h-24 lg:left-64 transition-all duration-300",
         isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0",
       )}
     >
@@ -236,9 +237,10 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
 
             <div className="min-w-0 flex flex-col gap-1">
               <div className="flex items-center gap-2 overflow-hidden">
-                <h4 className="text-[11px] md:text-sm font-black truncate text-white uppercase tracking-tighter leading-tight">
-                  {currentTrack.title}
-                </h4>
+                <MarqueeTitle
+                  text={currentTrack.title}
+                  className="text-[11px] md:text-sm font-black text-white uppercase tracking-tighter leading-tight"
+                />
                 {isHighFidelity && (
                   <span className="bg-blue-600 text-white text-[6px] md:text-[8px] font-black px-1.5 py-0.5 rounded-[2px] tracking-[0.2em] uppercase flex-shrink-0">
                     Hi-Fi

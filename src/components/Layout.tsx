@@ -93,7 +93,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isLibrary = location.pathname.startsWith('/library');
   const isExplore = location.pathname.startsWith('/explore');
   const isDiscover = location.pathname === '/discover';
-  const isSearch = location.pathname === '/search' || location.pathname === '/discover';
+  const isSearch = location.pathname === '/search';
   const isArtistProfile = location.pathname.startsWith('/artist/');
   const isUserProfile = location.pathname.startsWith('/user/') || location.pathname === '/profile';
   const isPostDetail = location.pathname.startsWith('/post/');
@@ -759,10 +759,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
 
       {/* Audio Player */}
-      {currentTrack && !isFullPlayerOpen && !isDJKrupy && <MiniAudioPlayer isMobileNavHidden={isMobileNavHidden} />}
-      <AnimatePresence>
-        {isFullPlayerOpen && <FullPlayer />}
-      </AnimatePresence>
+      <motion.div
+        layoutId="player"
+        transition={{ duration: 0.35 }}
+      >
+        {currentTrack && !isFullPlayerOpen && !isDJKrupy && <MiniAudioPlayer isMobileNavHidden={isMobileNavHidden} />}
+        <AnimatePresence>
+          {isFullPlayerOpen && <FullPlayer />}
+        </AnimatePresence>
+      </motion.div>
 
       {trackToAddToPlaylist && (
         <AddToPlaylistModal 

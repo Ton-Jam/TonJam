@@ -790,13 +790,21 @@ async function startServer() {
             });
 
             if (response.text) {
-                return res.json(JSON.parse(response.text));
+                console.log("Raw Gemini response text:", response.text);
+                try {
+                    const parsedData = JSON.parse(response.text);
+                    return res.json(parsedData);
+                } catch (parseError) {
+                    console.error("Gemini response is not valid JSON:", response.text);
+                    throw new Error("Invalid JSON from Gemini");
+                }
             }
             throw new Error("Empty response from Gemini");
         } catch (error: any) {
+            console.error("Similarity API Error:", error);
             const errorStr = String(error?.message || error);
-            if (errorStr.includes("429") || errorStr.includes("quota") || errorStr.includes("RESOURCE_EXHAUSTED")) {
-                console.log("Gemini API quota limit reached for similar-tracks. Seamlessly serving heuristic fallback recommendations.");
+            if (errorStr.includes("429") || errorStr.includes("quota") || errorStr.includes("RESOURCE_EXHAUSTED") || errorStr.includes("503") || errorStr.includes("UNAVAILABLE")) {
+                console.log("Gemini API temporarily unavailable for similar-tracks. Seamlessly serving heuristic fallback recommendations.");
             } else {
                 console.warn("AI Similar tracks generation error, using heuristic fallback:", errorStr);
             }

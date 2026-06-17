@@ -19,6 +19,8 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, index }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ delay: index * 0.1 }}
       onClick={() => navigate(`/album/${album.id}`)}
       className="group relative w-full cursor-pointer"

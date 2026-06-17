@@ -40,6 +40,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { MOCK_ARTISTS, MOCK_TRACKS, DJ_KRUPY_AVATAR } from "@/constants";
 import { useNavigate } from "react-router-dom";
 import { getPlaceholderImage, shareContent, cn } from "@/lib/utils";
+import { MarqueeTitle } from "./MarqueeTitle";
 import { fetchNFTMetadata } from "@/services/nftService";
 import {
   chatWithKrupy,
@@ -69,10 +70,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-
-import DynamicVisualizer from "./DynamicVisualizer";
+import { Progress } from "@/components/ui/progress";                
 import SubtleFrequencyVisualizer from "./SubtleFrequencyVisualizer";
 
 const LyricsView: React.FC<{ lyrics: string }> = ({ lyrics }) => {
@@ -406,7 +404,7 @@ const FullPlayer: React.FC = () => {
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 24, stiffness: 180 }}
-      className="fixed inset-0 z-[60] bg-[#060c1f] text-white overflow-y-auto no-scrollbar select-none"
+      className="fixed inset-0 z-[60] bg-[#060c1f]/60 backdrop-blur-2xl text-white overflow-y-auto no-scrollbar select-none"
       ref={containerRef}
     >
       {/* Dynamic Background Fog & Blur matching Spotify album-bleed backdrop */}
@@ -702,8 +700,11 @@ const FullPlayer: React.FC = () => {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.4, ease: "easeInOut" }}
                     >
-                      <h1 className="text-lg xs:text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight truncate flex items-center gap-2">
-                        <span>{currentTrack.title}</span>
+                      <div className="flex items-center gap-2 overflow-hidden w-full">
+                        <MarqueeTitle
+                          text={currentTrack.title}
+                          className="text-lg xs:text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight flex-shrink-0"
+                        />
                         {isPlaying && (
                           <SubtleFrequencyVisualizer
                             isPlaying={isPlaying}
@@ -712,7 +713,7 @@ const FullPlayer: React.FC = () => {
                             className="h-6 w-8 flex-shrink-0 inline-flex items-end self-center pb-1"
                           />
                         )}
-                      </h1>
+                      </div>
                       {isOffline && (
                         <span className="bg-emerald-500/20 text-emerald-400 text-[6px] font-bold px-1.5 py-0.5 rounded-sm tracking-widest uppercase">
                           OFFLINE

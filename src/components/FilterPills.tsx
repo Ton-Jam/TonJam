@@ -6,9 +6,10 @@ interface FilterPillsProps {
   selectedGenre: string | null;
   onSelect: (category: string | null) => void;
   isLoading?: boolean;
+  categories?: string[];
 }
 
-const CATEGORY_PILLS = [
+const DEFAULT_CATEGORY_PILLS = [
   'All',
   'Trending',
   'Playlists',
@@ -18,10 +19,11 @@ const CATEGORY_PILLS = [
   'Live'
 ];
 
-export const FilterPills: React.FC<FilterPillsProps> = ({
+const FilterPills: React.FC<FilterPillsProps> = ({
   selectedGenre,
   onSelect,
   isLoading = false,
+  categories = DEFAULT_CATEGORY_PILLS,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -78,7 +80,7 @@ export const FilterPills: React.FC<FilterPillsProps> = ({
   return (
     <div className="filter-wrapper select-none">
       <div className="filter-scroll" ref={scrollContainerRef}>
-        {CATEGORY_PILLS.map((category) => {
+        {categories.map((category) => {
           const isSelected = activeCategory === category;
           return (
             <motion.button
