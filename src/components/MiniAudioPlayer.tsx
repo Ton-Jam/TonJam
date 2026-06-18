@@ -190,14 +190,18 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* Top Progress Bar for Mobile Screen only (Compact indicator, interactive slider is on desktop center column) */}
+      {/* Top Progress Bar (Compact, slim visual indicator & interactive scrub running perfectly along the top edge of mini player) */}
       <div
-        className="absolute -top-2 left-0 right-0 px-0 z-20 sm:hidden cursor-pointer h-5 flex items-center bg-transparent group/mobileseek"
+        className="absolute top-0 left-0 right-0 px-0 z-30 cursor-pointer h-1.5 flex items-center bg-transparent group/topseek select-none"
         onClick={handleProgressScrub}
         onTouchStart={handleProgressScrub}
-        onTouchMove={handleProgressScrub}
+        onTouchMove={(e) => {
+          if (e.touches.length > 0) {
+            handleProgressScrub(e);
+          }
+        }}
       >
-        <div className="w-full h-[2px] bg-white/10 relative transition-all group-active/mobileseek:h-[4px]">
+        <div className="w-full h-[2px] bg-white/10 relative transition-all group-hover/topseek:h-[3.5px]">
           <div
             className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-100"
             style={{ width: `${progress}%` }}

@@ -355,11 +355,10 @@
     width: 100% !important;
   }
 
-  /* Make sure all section containers, cards, and interactive elements span edge-to-edge beautifully on all screens */
+  /* Make sure all section containers, cards, and interactive elements align beautifully on all screens */
   .section-container,
   section.section-container,
   main section {
-    border-radius: 0px !important;
     margin-left: 0px !important;
     margin-right: 0px !important;
     padding-left: 16px !important;
@@ -368,11 +367,16 @@
     width: 100% !important;
   }
 
-  /* Specific borderless / gapless override for home-page and discover-page sections as requested */
-  .home-page .section-container,
-  .home-page section.section-container,
-  .home-page main section,
-  .home-page section,
+  @media (min-width: 768px) {
+    .section-container,
+    section.section-container,
+    main section {
+      padding-left: 32px !important;
+      padding-right: 32px !important;
+    }
+  }
+
+  /* Specific borderless / gapless override for discover-page sections as requested */
   .discover-page .section-container,
   .discover-page section.section-container,
   .discover-page main section,
@@ -449,7 +453,7 @@
 }
 
 .bid-container-glow {
-  animation: bid-container-glow 0.2s ease-in-out;
+  animation: bid-container-glow 1.2s ease-in-out;
 }
 
 @layer components {

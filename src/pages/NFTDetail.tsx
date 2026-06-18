@@ -162,6 +162,7 @@ const NFTDetail: React.FC = () => {
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [inlineBidAmount, setInlineBidAmount] = useState<string>("");
   const [isPlacingBid, setIsPlacingBid] = useState(false);
+  const [showGlow, setShowGlow] = useState(false);
 
   const [associatedTrack, setAssociatedTrack] = useState<Track | null>(null);
   const [activeTab, setActiveTab] = useState<
@@ -581,6 +582,8 @@ const NFTDetail: React.FC = () => {
 
       addNotification(`Bid of ${bidValue} TON placed!`, "success");
       setInlineBidAmount("");
+      setShowGlow(true);
+      setTimeout(() => setShowGlow(false), 1200);
     } catch (e) {
       console.error(e);
       addNotification("Bid broadcast failed.", "error");
@@ -1085,7 +1088,10 @@ const NFTDetail: React.FC = () => {
             />
 
             {/* Pricing Section - Hardware Style */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-[4px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group">
+            <div className={cn(
+              "bg-white/5 backdrop-blur-xl rounded-[4px] p-4 sm:p-8 mb-4 border border-white/10 relative overflow-hidden group transition-all duration-300",
+              showGlow && "bid-container-glow"
+            )}>
               <div className="absolute top-0 right-0 p-8 opacity-[0.05] rotate-12 pointer-events-none group-hover:rotate-[30deg] transition-transform duration-1000">
                 <Zap className="h-64 w-64 text-blue-500" />
               </div>
@@ -1237,7 +1243,13 @@ const NFTDetail: React.FC = () => {
 
               {isAuction && !isOwner && !isAuctionEnded && (
                 <div className="mt-4">
-                  <QuickBid nft={localNft} />
+                  <QuickBid 
+                    nft={localNft} 
+                    onBidPlaced={() => {
+                      setShowGlow(true);
+                      setTimeout(() => setShowGlow(false), 1200);
+                    }}
+                  />
                 </div>
               )}
 
@@ -2169,7 +2181,14 @@ const NFTDetail: React.FC = () => {
         <SellNFTModal nft={localNft} onClose={() => setShowListModal(false)} />
       )}
       {showBidModal && (
-        <BidModal nft={localNft} onClose={() => setShowBidModal(false)} />
+        <BidModal 
+          nft={localNft} 
+          onClose={() => setShowBidModal(false)} 
+          onBidPlaced={() => {
+            setShowGlow(true);
+            setTimeout(() => setShowGlow(false), 1200);
+          }}
+        />
       )}
       {showSendModal && (
         <SendNFTModal

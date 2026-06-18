@@ -355,19 +355,19 @@ const Discover: React.FC = () => {
             className="relative flex-1 group"
           >
             {/* Search Input Container - Cleaned up */}
-            <div className={`relative flex items-center h-12 bg-card border border-border/60 rounded-xl overflow-hidden transition-all ${isFocused ? 'ring-1 ring-primary' : ''}`}>
-              <div className="absolute left-4 z-10">
+            <div className={`relative flex items-center h-12 bg-card border border-border/60 rounded-full overflow-hidden transition-all ${isFocused ? 'ring-1 ring-primary' : ''}`}>
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
                 <Search className={`h-4 w-4 ${isFocused ? 'text-primary' : 'text-muted-foreground'}`} />
               </div>
-              
+               
               <Input
                 type="text"
-                placeholder={aiVibeResults ? "Enter a vibe description..." : "Search artists, tracks, or nfts..."}
+                placeholder={aiVibeResults ? "Enter a vibe description..." : "artists, tracks, or nfts..."}
                 value={searchQuery}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-32 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest text-zinc-900 placeholder:text-zinc-400 z-10"
+                className="pl-10 pr-32 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest text-zinc-900 placeholder:text-zinc-400 z-10"
               />
 
               {aiVibeResults && (

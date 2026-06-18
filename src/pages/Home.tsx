@@ -622,7 +622,7 @@ const Home: React.FC = () => {
                       setSelectedCoverflowNFT(null);
                       navigate(`/nft/${selectedCoverflowNFT.id}`);
                     }}
-                    className="flex-1 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl text-[10px] active:scale-95 transition-all cursor-pointer"
+                    className="flex-1 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl text-[10px] active:scale-95 transition-all cursor-pointer border-2 border-[#C0C0C0]/85"
                   >
                     More Details
                   </button>
@@ -874,14 +874,14 @@ const Home: React.FC = () => {
                       </button>
                       <Link 
                         to="/marketplace"
-                        className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-secondary hover:bg-secondary/80 text-foreground font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base"
+                        className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-secondary hover:bg-secondary/80 text-foreground font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base border-2 border-[#C0C0C0]/85"
                       >
                         <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-primary group-hover:rotate-12 transition-transform" />
                         Market
                       </Link>
                       <button 
                         onClick={() => setIsBuyTJModalOpen(true)}
-                        className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-secondary hover:bg-secondary/80 text-foreground font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base cursor-pointer"
+                        className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-secondary hover:bg-secondary/80 text-foreground font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base cursor-pointer border-2 border-[#C0C0C0]/85"
                       >
                         <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400 group-hover:rotate-12 transition-transform" />
                         Buy Jam Token
@@ -992,7 +992,7 @@ const Home: React.FC = () => {
                         </button>
                         <button 
                           onClick={() => setAiResult(null)}
-                          className="px-6 py-3 sm:px-8 sm:py-4 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-secondary/80 border border-border active:scale-95 cursor-pointer"
+                          className="px-6 py-3 sm:px-8 sm:py-4 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-secondary/80 border-2 border-[#C0C0C0]/85 active:scale-95 cursor-pointer"
                         >
                           Recalibrate
                         </button>
@@ -1040,7 +1040,7 @@ const Home: React.FC = () => {
                           </button>
                           <Link 
                             to="/dj-krupy"
-                            className="px-6 py-3 bg-secondary border border-border text-foreground rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-secondary/80 transition-all flex items-center gap-2 group"
+                            className="px-6 py-3 bg-secondary border-2 border-[#C0C0C0]/85 text-foreground rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-secondary/80 transition-all flex items-center gap-2 group"
                           >
                             <Brain className="h-3.5 w-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
                             Launch DJ Krupy
@@ -1127,7 +1127,7 @@ const Home: React.FC = () => {
                         </button>
                         <button 
                           onClick={() => navigate(`/playlist/${featuredPlaylist.id}`)}
-                          className="px-6 py-3 bg-blue-950/20 border border-blue-900/10 hover:bg-blue-900/40 text-white font-black uppercase tracking-widest rounded-full text-[10px] transition-all active:scale-95"
+                          className="px-6 py-3 bg-blue-950/20 border-2 border-[#C0C0C0]/85 hover:bg-blue-900/40 text-white font-black uppercase tracking-widest rounded-full text-[10px] transition-all active:scale-95"
                         >
                           Data Details
                         </button>

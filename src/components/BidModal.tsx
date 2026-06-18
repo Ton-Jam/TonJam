@@ -18,9 +18,10 @@ import { AlertCircle } from 'lucide-react';
 interface BidModalProps {
   nft: NFTItem;
   onClose: () => void;
+  onBidPlaced?: () => void;
 }
 
-const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
+const BidModal: React.FC<BidModalProps> = ({ nft, onClose, onBidPlaced }) => {
   const { addNotification, updateNFT, userProfile } = useAudio();
   const [tonConnectUI] = useTonConnectUI();
   const userAddress = useTonAddress();
@@ -107,6 +108,9 @@ const BidModal: React.FC<BidModalProps> = ({ nft, onClose }) => {
       /* Update NFT with new offer and update current price to reflect highest bid */
       updateNFT(nft.id, { price: bidAmount, offers: [newOffer, ...(nft.offers || [])] });
       addNotification(`Bid of ${bidAmount} TON placed!`, "success");
+      if (onBidPlaced) {
+        onBidPlaced();
+      }
       onClose();
     } catch (e) {
       console.error(e);

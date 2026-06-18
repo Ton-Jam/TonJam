@@ -48,7 +48,7 @@ const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ onDismiss, onGetTokens })
                 </button>
                 <button 
                   onClick={onGetTokens}
-                  className="px-6 py-2 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-secondary/80 transition-all shadow-lg active:scale-95 cursor-pointer"
+                  className="px-6 py-2 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] hover:bg-secondary/80 transition-all border-2 border-[#C0C0C0]/85 shadow-lg active:scale-95 cursor-pointer"
                 >
                   Get Free Tokens
                 </button>
