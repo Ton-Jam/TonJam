@@ -317,11 +317,11 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#060B1E] via-[#091535] to-[#040817] text-white flex flex-col items-center justify-center p-4 relative overflow-y-auto">
+    <div className="min-h-screen bg-[#050a24] text-white flex flex-col items-center justify-center p-4 relative overflow-y-auto">
       {/* Background Glow */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-500/10 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-500/10 rounded-full blur-[150px]" />
+        <div className="absolute top-[10%] left-[20%] w-[40%] h-[40%] bg-blue-500/[0.02] rounded-full blur-[150px]" />
+        <div className="absolute bottom-[10%] right-[20%] w-[40%] h-[40%] bg-purple-500/[0.02] rounded-full blur-[150px]" />
       </div>
 
       <Button
@@ -368,7 +368,7 @@ const Login: React.FC = () => {
           onValueChange={(val) => { resetLoginForm(); resetRegisterForm(); setTabMode(val as any); }}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-3 bg-[#0d1636]/80 border border-white/5 mb-6 h-11 rounded-[4px] p-1">
+          <TabsList className="grid w-full grid-cols-3 bg-white/[0.03] backdrop-blur-lg border border-white/5 mb-6 h-11 rounded-[4px] p-1">
             <TabsTrigger value="login" className="text-[10px] font-semibold uppercase tracking-widest rounded-[4px] cursor-pointer text-white/60 data-[state=active]:bg-[#1e2d5a] data-[state=active]:text-blue-400">
               Log In
             </TabsTrigger>
@@ -380,7 +380,7 @@ const Login: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          <Card className="bg-[#0b132e]/85 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(59,130,246,0.15)] relative overflow-hidden rounded-[4px] text-white">
+          <Card className="bg-transparent border-none shadow-none relative overflow-visible text-white">
             {/* EMAIL LOGIN VIEW */}
             {tabMode === 'login' && (
               <>
@@ -404,7 +404,7 @@ const Login: React.FC = () => {
                           type="email"
                           {...loginRegister('email')}
                           placeholder="email@example.com"
-                          className="pl-10 h-10 bg-[#070c22]/80 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
+                          className="pl-10 h-10 bg-white/[0.02] backdrop-blur-md border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
                       {loginErrors.email && <p className="text-[9px] text-red-400 font-medium tracking-tight ml-1">{loginErrors.email.message}</p>}
@@ -428,7 +428,7 @@ const Login: React.FC = () => {
                           type="password"
                           {...loginRegister('password')}
                           placeholder="••••••••"
-                          className="pl-10 h-10 bg-[#070c22]/80 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
+                          className="pl-10 h-10 bg-white/[0.02] backdrop-blur-md border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
                       {loginErrors.password && <p className="text-[9px] text-red-400 font-medium tracking-tight ml-1">{loginErrors.password.message}</p>}
@@ -455,7 +455,7 @@ const Login: React.FC = () => {
                       <div className="w-full border-t border-white/10"></div>
                     </div>
                     <div className="relative flex justify-center">
-                      <span className="bg-[#0b132e] px-3 text-[8px] font-bold text-white/40 uppercase tracking-[0.3em]">OR</span>
+                      <span className="bg-[#050a24] px-3 text-[8px] font-bold text-white/40 uppercase tracking-[0.3em]">OR</span>
                     </div>
                   </div>
 
@@ -504,7 +504,7 @@ const Login: React.FC = () => {
                           id="username_reg"
                           {...registerRegister('username')}
                           placeholder="Select username"
-                          className="pl-10 h-10 bg-[#070c22]/80 border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
+                          className="pl-10 h-10 bg-white/[0.02] backdrop-blur-md border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
                       {registerErrors.username && <p className="text-[9px] text-red-400 font-medium tracking-tight ml-1">{registerErrors.username.message}</p>}
@@ -519,7 +519,7 @@ const Login: React.FC = () => {
                           type="email"
                           {...registerRegister('email')}
                           placeholder="email@example.com"
-                          className="pl-10 h-10 bg-[#070c22]/80 border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
+                          className="pl-10 h-10 bg-white/[0.02] backdrop-blur-md border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
                       {registerErrors.email && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{registerErrors.email.message}</p>}
@@ -534,7 +534,7 @@ const Login: React.FC = () => {
                           type="password"
                           {...registerRegister('password')}
                           placeholder="••••••••"
-                          className="pl-10 h-10 bg-[#070c22]/80 border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
+                          className="pl-10 h-10 bg-white/[0.02] backdrop-blur-md border border-white/10 text-white placeholder:text-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                         />
                       </div>
                       {registerErrors.password && <p className="text-[9px] text-red-500 font-medium tracking-tight ml-1">{registerErrors.password.message}</p>}
@@ -618,7 +618,7 @@ const Login: React.FC = () => {
                           ))}
 
                           {/* Interactive Standard QR Simulator Card to represent premium WalletConnect capabilities */}
-                          <div className="border border-white/10 p-3 rounded-[4px] flex items-center justify-between bg-[#070d24]/60 mt-1">
+                          <div className="border border-white/10 p-3 rounded-[4px] flex items-center justify-between bg-white/[0.02] backdrop-blur-md mt-1">
                             <div className="flex items-center gap-2">
                               <RefreshCw className="h-4 w-4 text-emerald-400 animate-spin" />
                               <div className="text-left">
@@ -651,7 +651,7 @@ const Login: React.FC = () => {
                     /* STEP 2: STUNNING INTERACTIVE WEB3 PROFILE CREATION FORM */
                     <div className="space-y-4">
                       {/* Active Connection Badge */}
-                      <div className="p-3 bg-[#070d24]/80 border border-white/10 rounded-[4px] flex items-center justify-between">
+                      <div className="p-3 bg-white/[0.02] backdrop-blur-md border border-white/10 rounded-[4px] flex items-center justify-between">
                         <div className="text-left">
                           <p className="text-[8px] font-black uppercase text-white/50 tracking-widest">Linked Node Address</p>
                           <p className="font-mono text-[10px] text-white font-black mt-0.5">
@@ -722,7 +722,7 @@ const Login: React.FC = () => {
                                 setAvatarSeed(e.target.value);
                               }}
                               placeholder="Avatar seed..."
-                              className="h-7 text-[10px] font-semibold text-center bg-[#070c22]/80 border border-white/10 text-white placeholder-white/30 rounded-[4px]"
+                              className="h-7 text-[10px] font-semibold text-center bg-white/[0.02] backdrop-blur-md border border-white/10 text-white placeholder-white/30 rounded-[4px]"
                             />
                             <Button
                               type="button"
@@ -751,7 +751,7 @@ const Login: React.FC = () => {
                             value={onboardUsername}
                             onChange={(e) => setOnboardUsername(e.target.value)}
                             placeholder="Input profile name (e.g. SatoshiSonics)"
-                            className="h-10 bg-[#070c22]/80 border border-white/10 text-white placeholder-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
+                            className="h-10 bg-white/[0.02] backdrop-blur-md border border-white/10 text-white placeholder-white/30 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50 font-semibold rounded-[4px]"
                           />
                         </div>
 
@@ -762,7 +762,7 @@ const Login: React.FC = () => {
                             value={onboardBio}
                             onChange={(e) => setOnboardBio(e.target.value)}
                             placeholder="Share your musical style and details..."
-                            className="w-full bg-[#070c22]/80 border border-white/10 text-white p-3 text-xs font-semibold rounded-[4px] resize-none focus:outline-none focus:border-blue-500/50"
+                            className="w-full bg-white/[0.02] backdrop-blur-md border border-white/10 text-white p-3 text-xs font-semibold rounded-[4px] resize-none focus:outline-none focus:border-blue-500/50"
                             rows={3}
                           />
                         </div>
@@ -777,7 +777,7 @@ const Login: React.FC = () => {
                                 value={socialTwitter}
                                 onChange={(e) => setSocialTwitter(e.target.value)}
                                 placeholder="username"
-                                className="pl-6 h-8 text-[10px] font-semibold bg-[#070c22]/80 border-white/10 text-white rounded-[4px]"
+                                className="pl-6 h-8 text-[10px] font-semibold bg-white/[0.02] backdrop-blur-md border-white/10 text-white rounded-[4px]"
                               />
                             </div>
                             <div className="relative">
@@ -786,7 +786,7 @@ const Login: React.FC = () => {
                                 value={socialTelegram}
                                 onChange={(e) => setSocialTelegram(e.target.value)}
                                 placeholder="username"
-                                className="pl-8 h-8 text-[10px] font-semibold bg-[#070c22]/80 border-white/10 text-white rounded-[4px]"
+                                className="pl-8 h-8 text-[10px] font-semibold bg-white/[0.02] backdrop-blur-md border-white/10 text-white rounded-[4px]"
                               />
                             </div>
                           </div>
@@ -826,7 +826,7 @@ const Login: React.FC = () => {
               </>
             )}
 
-            <CardFooter className="justify-center border-t border-white/10 bg-[#070d24]/30 p-3">
+            <CardFooter className="justify-center border-none bg-transparent p-3">
               <p className="text-[8px] font-bold text-white/50 uppercase tracking-widest flex items-center gap-1.5">
                 <ShieldCheck className="h-3 w-3 text-emerald-400" />
                 Access Protocol Secured

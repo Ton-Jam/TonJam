@@ -535,7 +535,7 @@ const Discover: React.FC = () => {
         <div className="w-full filter-tabs pt-1 pb-1 px-4 md:px-8 lg:px-12">
           <FilterPills
             selectedGenre={activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
-            onSelect={(v) => setActiveFilter(v ? v.toLowerCase() : 'all')}
+            onSelect={(v) => setActiveFilter((v ? v.toLowerCase() : 'all') as any)}
             categories={['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users']}
           />
         </div>

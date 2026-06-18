@@ -28,9 +28,9 @@ export const NFTComparisonModal: React.FC<NFTComparisonModalProps> = ({ nfts, is
               <div className="mt-4 space-y-2">
                 <h4 className="font-semibold text-sm">Traits</h4>
                 <ul className="text-xs list-disc pl-4 space-y-1">
-                  {Object.entries(nft.traits || {}).map(([key, value]) => (
-                    <li key={key}>
-                      <span className="font-medium">{key}:</span> {value}
+                  {(nft.traits || nft.attributes || []).map((trait, index) => (
+                    <li key={index}>
+                      <span className="font-medium">{trait.trait_type}:</span> {trait.value}
                     </li>
                   ))}
                 </ul>

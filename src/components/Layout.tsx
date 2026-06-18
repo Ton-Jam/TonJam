@@ -763,7 +763,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         layoutId="player"
         transition={{ duration: 0.35 }}
       >
-        {currentTrack && !isFullPlayerOpen && !isDJKrupy && <MiniAudioPlayer isMobileNavHidden={isMobileNavHidden} />}
+        {currentTrack && !isFullPlayerOpen && !isDJKrupy && !isPostDetail && <MiniAudioPlayer isMobileNavHidden={isMobileNavHidden} />}
         <AnimatePresence>
           {isFullPlayerOpen && <FullPlayer />}
         </AnimatePresence>

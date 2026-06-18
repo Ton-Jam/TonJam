@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MOCK_ARTISTS, MOCK_TRACKS, DJ_KRUPY_AVATAR } from "@/constants";
+import DynamicVisualizer from "./DynamicVisualizer";
 import { useNavigate } from "react-router-dom";
 import { getPlaceholderImage, shareContent, cn } from "@/lib/utils";
 import { MarqueeTitle } from "./MarqueeTitle";

@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useAudio } from '@/context/AudioContext';
-import { MOCK_TRACKS } from '@/constants';
+import { MOCK_TRACKS, MOCK_ARTISTS } from '@/constants';
 import { NFTItem } from '@/types';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, BadgeCheck, Layers } from 'lucide-react';
 
 interface TrendingNFTCardProps {
   nft: NFTItem;
@@ -13,7 +13,15 @@ interface TrendingNFTCardProps {
 
 const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
   const navigate = useNavigate();
-  const { allTracks, playTrack } = useAudio();
+  const { allTracks, playTrack, collections } = useAudio();
+
+  const artist = MOCK_ARTISTS.find(a => a.name.toLowerCase() === (nft.creator || nft.artist || '').toLowerCase());
+  const isVerified = nft.artistVerified || artist?.verified || artist?.isVerifiedArtist;
+
+  const nftCollection = collections?.find(c => c.nftIds?.includes(nft.id));
+  const traitCollection = nft.traits?.find(t => t.trait_type.toLowerCase() === 'collection' || t.trait_type.toLowerCase() === 'series')?.value as string ||
+                          nft.attributes?.find(t => t.trait_type.toLowerCase() === 'collection' || t.trait_type.toLowerCase() === 'series')?.value as string;
+  const collectionName = nftCollection?.name || traitCollection || (nft.title.includes(':') ? nft.title.split(':')[0] : null);
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (onClick) {
@@ -65,8 +73,16 @@ const TrendingNFTCard: React.FC<TrendingNFTCardProps> = ({ nft, onClick }) => {
       
       <div className="text-center px-1 flex-grow">
         <h4 className="text-white font-semibold text-[10px] truncate max-w-[120px]">{nft.title}</h4>
-        <p className="text-gray-400 text-[9px] font-medium truncate mb-1">{nft.creator || nft.artist}</p>
-        <p className="text-blue-400 font-bold text-[11px] tracking-tight">
+        <div className="flex items-center justify-center gap-1 min-w-0 max-w-[130px] mx-auto">
+          <p className="text-gray-400 text-[9px] font-medium truncate">{nft.creator || nft.artist}</p>
+          {isVerified && <BadgeCheck className="w-2.5 h-2.5 text-blue-400 fill-current inline-block flex-shrink-0" />}
+        </div>
+        {collectionName && (
+          <p className="text-indigo-400 text-[8px] font-bold uppercase tracking-wider truncate max-w-[130px] mx-auto flex items-center justify-center gap-0.5 mt-0.5">
+            <Layers className="w-2 h-2 inline-block flex-shrink-0" /> {collectionName}
+          </p>
+        )}
+        <p className="text-blue-400 font-bold text-[11px] tracking-tight mt-1">
           <motion.span
             key={nft.price}
             initial={{ opacity: 0, scale: 0.95 }}

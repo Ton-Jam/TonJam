@@ -14,14 +14,39 @@ import { verifyFirebaseToken, AuthRequest } from './src/middleware/authMiddlewar
 
 dotenv.config();
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY!,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      }
+let aiInstance: GoogleGenAI | null = null;
+function getGeminiClient(): GoogleGenAI {
+    if (!aiInstance) {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error("GEMINI_API_KEY environment variable is required");
+        }
+        aiInstance = new GoogleGenAI({
+            apiKey,
+            httpOptions: {
+                headers: {
+                    'User-Agent': 'aistudio-build',
+                }
+            }
+        });
     }
-  });
+    return aiInstance;
+}
+
+const ai = {
+    get models() {
+        return getGeminiClient().models;
+    },
+    get chats() {
+        return getGeminiClient().chats;
+    },
+    get operations() {
+        return getGeminiClient().operations;
+    },
+    get live() {
+        return getGeminiClient().live;
+    }
+};
 
 const PORT = 3000;
 
@@ -801,12 +826,13 @@ async function startServer() {
             }
             throw new Error("Empty response from Gemini");
         } catch (error: any) {
-            console.error("Similarity API Error:", error);
             const errorStr = String(error?.message || error);
-            if (errorStr.includes("429") || errorStr.includes("quota") || errorStr.includes("RESOURCE_EXHAUSTED") || errorStr.includes("503") || errorStr.includes("UNAVAILABLE")) {
-                console.log("Gemini API temporarily unavailable for similar-tracks. Seamlessly serving heuristic fallback recommendations.");
+            const isTemporaryUpstreamIssue = errorStr.includes("429") || errorStr.includes("quota") || errorStr.includes("RESOURCE_EXHAUSTED") || errorStr.includes("503") || errorStr.includes("UNAVAILABLE");
+            
+            if (isTemporaryUpstreamIssue) {
+                console.log("Upstream Gemini API is temporarily busy; safely serving seamless algorithmic fallback recommendations.");
             } else {
-                console.warn("AI Similar tracks generation error, using heuristic fallback:", errorStr);
+                console.warn("AI Similar tracks generation warning, using fallback recommendations:", errorStr);
             }
             
             // HEURISTIC FALLBACK

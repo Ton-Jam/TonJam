@@ -84,12 +84,36 @@ const BuyNFTModal: React.FC<BuyNFTModalProps> = ({ nft, onClose }) => {
       // 2. Execute buy through marketplace service
       const txId = await buyNFT(tonConnectUI, listing, nft);
       
-      const toastId = toast.loading("Purchase processing...");
+      const toastId = toast.loading("Purchase processing...", {
+        description: "Checking wallet state and initializing sync..."
+      });
       await monitorTransaction(txId, (status) => {
-        if (status === 'pending') toast.loading("Transaction initiated...", { id: toastId });
-        else if (status === 'confirming') toast.loading("Blockchain confirming...", { id: toastId });
-        else if (status === 'success') toast.success("Purchase successful!", { id: toastId });
-        else if (status === 'failed') toast.error("Purchase failed.", { id: toastId });
+        if (status === 'pending') {
+          toast.loading("Transaction initiated...", { 
+            id: toastId,
+            description: "Broadcasting payment instruction to TON network..."
+          });
+        } else if (status === 'confirming') {
+          toast.loading("Blockchain confirming...", { 
+            id: toastId, 
+            description: "Validator validation in progress. This will take a moment..."
+          });
+        } else if (status === 'success') {
+          toast.success("Transaction success!", { 
+            id: toastId,
+            description: `You are now the certified owner of "${nft.title}"!`,
+            duration: 8000,
+            action: {
+              label: "View Wallet",
+              onClick: () => navigate("/wallet")
+            }
+          });
+        } else if (status === 'failed') {
+          toast.error("Transaction failed", { 
+            id: toastId,
+            description: "The network reverted the transaction or the signature was rejected."
+          });
+        }
       });
       
       const updatedNFT = {

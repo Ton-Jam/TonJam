@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag } from 'lucide-react';
+import { Play, Pause, MoreVertical, Eye, Send, Star, Clock, User, Share2, Info, Gem, Trash2, ArrowUp, ArrowDown, ExternalLink, ListMusic, Plus, LayoutGrid, Settings, Wallet, Tag, BadgeCheck, Layers } from 'lucide-react';
 import { NFTItem } from '@/types';
 import { TON_LOGO, MOCK_TRACKS, MOCK_USER, MOCK_ARTISTS } from '@/constants';
 import { useAudio } from '@/context/AudioContext';
@@ -44,7 +44,7 @@ interface NFTCardProps {
 
 const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, isLoading = false, className = '', isSelectedForCompare = false, onToggleCompare }) => {
   const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, setOptionsTrack, userProfile, setAnthem, addNotification } = useAudio();
+  const { playTrack, currentTrack, isPlaying, setOptionsTrack, userProfile, setAnthem, addNotification, collections } = useAudio();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -58,6 +58,14 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
   const isActive = currentTrack?.id === nft.trackId;
   const isOwner = nft.owner === userProfile.walletAddress;
   const isAnthem = userProfile.anthemId === nft.id;
+
+  const nftCollection = collections?.find(c => c.nftIds?.includes(nft.id));
+  const traitCollection = nft.traits?.find(t => t.trait_type.toLowerCase() === 'collection' || t.trait_type.toLowerCase() === 'series')?.value as string ||
+                          nft.attributes?.find(t => t.trait_type.toLowerCase() === 'collection' || t.trait_type.toLowerCase() === 'series')?.value as string;
+  const collectionName = nftCollection?.name || traitCollection || (nft.title.includes(':') ? nft.title.split(':')[0] : null);
+
+  const artist = MOCK_ARTISTS.find(a => a.name.toLowerCase() === nft.creator.toLowerCase() || a.name.toLowerCase() === nft.artist?.toLowerCase());
+  const isVerified = nft.artistVerified || artist?.verified || artist?.isVerifiedArtist;
   
   const isAuctionEnded = React.useMemo(() => {
     if (nft.listingType !== 'auction' || !nft.auctionEndTime) return false;
@@ -321,17 +329,29 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                    <div className={`hidden sm:block w-1 h-1 rounded-full bg-gradient-to-r ${getRarityColor(rarity)}`}></div>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <p 
-                  className="text-[7px] font-semibold text-foreground/80 uppercase tracking-widest truncate hover:text-blue-500 transition-all"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
-                    if (artist) navigate(`/artist/${artist.uid}`);
-                  }}
-                >
-                  {nft.creator}
-                </p>
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                <div className="flex items-center gap-1">
+                  <p 
+                    className="text-[7px] font-semibold text-foreground/80 uppercase tracking-widest truncate hover:text-blue-500 transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const artist = MOCK_ARTISTS.find(a => a.name === nft.creator);
+                      if (artist) navigate(`/artist/${artist.uid}`);
+                    }}
+                  >
+                    {nft.creator}
+                  </p>
+                  {isVerified && (
+                    <span title="Verified Creator">
+                      <BadgeCheck className="w-2.5 h-2.5 text-blue-400 fill-current inline-block" />
+                    </span>
+                  )}
+                </div>
+                {collectionName && (
+                  <span className="text-[6.5px] text-indigo-400 font-bold uppercase tracking-widest flex items-center gap-0.5">
+                    • <Layers className="w-1.5 h-1.5 inline" /> {collectionName}
+                  </span>
+                )}
                 <span className={cn("text-[6px] px-1 py-0.5 rounded font-extrabold uppercase tracking-widest shrink-0 ml-1.5", supplyIndicator.className)}>
                   {supplyIndicator.label}
                 </span>
@@ -458,8 +478,16 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                   <h3 className={`text-[9.5px] font-semibold uppercase tracking-tighter line-clamp-2 whitespace-normal break-words leading-tight ${isActive ? 'text-blue-500' : 'text-foreground'}`}>
                     {nft.title}
                   </h3>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                      <p className="text-[8px] font-medium text-foreground/80 uppercase tracking-[0.1em]">{nft.creator}</p>
+                     {isVerified && (
+                        <span title="Verified Creator"><BadgeCheck className="w-3 h-3 text-blue-400 fill-current inline-block" /></span>
+                     )}
+                     {collectionName && (
+                        <span className="text-[7.5px] text-indigo-400 font-bold uppercase tracking-[0.1em] flex items-center gap-0.5" title={`Collection: ${collectionName}`}>
+                           • <Layers className="w-2.5 h-2.5 inline" /> {collectionName}
+                        </span>
+                     )}
                   </div>
                </div>
 

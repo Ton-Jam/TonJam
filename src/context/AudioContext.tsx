@@ -3291,6 +3291,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       console.warn("Attempted to like undefined track");
       return;
     }
+    const track = allTracks.find((t) => t.id === trackId);
+    const trackTitle = track ? track.title : "Track";
+    const trackArtist = track ? track.artist : "TonJam Artist";
+
     setIsLoading(true);
     try {
       const isLiked = likedTrackIds.includes(trackId);
@@ -3327,9 +3331,21 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (isLiked) {
-        addNotification("Track removed from favorites", "info");
+        toast.info("Track removed from favorites", {
+          description: `"${trackTitle}" by ${trackArtist}`,
+          action: {
+            label: "Undo",
+            onClick: () => toggleLikeTrack(trackId)
+          }
+        });
       } else {
-        addNotification("Track added to favorites", "success");
+        toast.success("Track added to favorites", {
+          description: `"${trackTitle}" by ${trackArtist}`,
+          action: {
+            label: "Undo",
+            onClick: () => toggleLikeTrack(trackId)
+          }
+        });
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `tracks/${trackId}`);
@@ -3964,7 +3980,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           return pl;
         }),
       );
-      addNotification(`Added "${track.title}" to ${playlist.title}`);
+      toast.success("Added to playlist", {
+        description: `"${track.title}" added to "${playlist.title}"`,
+        action: {
+          label: "Undo",
+          onClick: () => removeTrackFromPlaylist(playlistId, track.id)
+        }
+      });
     } catch (error) {
       handleFirestoreError(
         error,
@@ -4001,7 +4023,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           return pl;
         }),
       );
-      addNotification("Track removed from playlist", "info");
+      const track = allTracks.find((t) => t.id === trackId);
+      const trackTitle = track ? track.title : "Track";
+      toast.info("Removed from playlist", {
+        description: `"${trackTitle}" removed from "${playlist.title}"`,
+        action: track ? {
+          label: "Undo",
+          onClick: () => addTrackToPlaylist(playlistId, track)
+        } : undefined
+      });
     } catch (error) {
       handleFirestoreError(
         error,
