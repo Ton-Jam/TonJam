@@ -108,10 +108,10 @@ const DiscoveryFeed: React.FC = () => {
             {recommendedTracks.slice(0, 6).map((track, idx) => (
               <div 
                 key={`rec-track-${track.id}-${idx}`} 
-                className="min-w-[280px] sm:min-w-[320px] animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="w-[165px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
-                <TrackCard track={track} variant="row" />
+                <TrackCard track={track} variant="default" className="w-[165px]" />
               </div>
             ))}
           </div>
@@ -141,10 +141,10 @@ const DiscoveryFeed: React.FC = () => {
             {recommendedNFTs.slice(0, 5).map((nft, idx) => (
               <div 
                 key={`rec-nft-${nft.id}-${idx}`} 
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="w-[165px] shrink-0 animate-in fade-in slide-in-from-bottom-4 duration-500"
                 style={{ animationDelay: `${idx * 100 + 300}ms` }}
               >
-                <NFTCard nft={nft} />
+                <NFTCard nft={nft} className="w-[165px]" />
               </div>
             ))}
           </div>

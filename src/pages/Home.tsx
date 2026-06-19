@@ -1,1589 +1,926 @@
-import GetFreeTokensModal from '@/components/GetFreeTokensModal';
-import BuyTJModal from '@/components/BuyTJModal';
-import BuyNFTModal from '@/components/BuyNFTModal';
-import CompleteProfilePrompt from '@/components/CompleteProfilePrompt';
-import { CardSmall } from '@/components/CardSmall';
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button as MTButton } from "@material-tailwind/react";
-import { Play, ChevronRight, Zap, TrendingUp, TrendingDown, Music2, ShoppingBag, Sparkles, Activity, Flame, Clock, Gavel, PlusCircle, UserCheck, ListMusic, Globe, Radio, Disc, Search, X, ArrowRight } from 'lucide-react';
-import { MOCK_TRACKS, MOCK_NFTS, CURATED_PLAYLISTS, GENRES, TON_LOGO, TJ_COIN_ICON } from '@/constants';
-import TiltedCoverflow, { CoverflowItem } from '@/components/aicanvas/tilted-coverflow';
-import { Track, Task, NFTItem } from '@/types';
-import { getTasks, updateTaskProgress, completeTask, claimTaskReward } from '@/services/taskService';
-import { getPlaceholderImage } from '@/lib/utils';
-import { auth } from '@/lib/firebase';
-import TrackCard from '@/components/TrackCard';
-import NFTCard from '@/components/NFTCard';
-import TrendingNFTCard from '@/components/TrendingNFTCard';
-import ArtistCard from '@/components/ArtistCard';
-import TaskCard from '@/components/TaskCard';
-import PlaylistCard from '@/components/PlaylistCard';
-import GenreCard from '@/components/GenreCard';
-import SkeletonCard from '@/components/SkeletonCard';
-import Leaderboard from '@/components/Leaderboard';
-import AutoCarousel, { CarouselItem } from '@/components/AutoCarousel';
-import NFTAlphaCarousel from '@/components/NFTAlphaCarousel';
-import SectionHeader from '@/components/SectionHeader';
-import DiscoveryFeed from '@/components/DiscoveryFeed';
-import ArtistSlider from '@/components/ArtistSlider';
-import TrendingBannerCarousel from '@/components/TrendingBannerCarousel';
-import { FanLeaderboard } from '@/components/FanLeaderboard';
-import { SearchCommandDialog } from '@/components/SearchCommandDialog';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { NetworkStatus } from '@/components/NetworkStatus';
-import { useAudio } from '@/context/AudioContext';
-import { motion, AnimatePresence } from 'motion/react';
-import { generateAIPlaylist, GenerateAIPlaylistResult } from '@/services/aiPlaylistService';
-import { Loader2, Brain, Sparkle } from 'lucide-react';
-import {
-  Carousel as MissionCarousel,
-  CarouselContent as MissionCarouselContent,
-  CarouselItem as MissionCarouselItem,
-  CarouselNext as MissionCarouselNext,
-  CarouselPrevious as MissionCarouselPrevious,
-} from '@/components/ui/carousel';
-import Autoplay from 'embla-carousel-autoplay';
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { 
+  Play, 
+  ChevronRight, 
+  Zap, 
+  TrendingUp, 
+  Music, 
+  ShoppingBag, 
+  Sparkles, 
+  Activity, 
+  Flame, 
+  Clock, 
+  Award, 
+  Radio, 
+  Disc, 
+  Plus, 
+  UserCheck, 
+  UserPlus,
+  Coins, 
+  ArrowUpRight, 
+  MessageSquare,
+  FlameKindling,
+  Users,
+  CheckCircle,
+  HelpCircle,
+  Volume2
+} from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { useAudio } from "@/context/AudioContext";
+import { TJ_COIN_ICON, TON_LOGO, MOCK_TRACKS } from "@/constants";
+import confetti from "canvas-confetti";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/ui/avatar";
 
-import HomeSection from '@/components/HomeSection';
-import WelcomeBanner from '@/components/WelcomeBanner';
-import FilterPills from '@/components/FilterPills';
+// Import custom card components and types
+import ArtistCard from "@/components/ArtistCard";
+import UserCard from "@/components/UserCard";
+import NFTCard from "@/components/NFTCard";
+import TrackCard from "@/components/TrackCard";
+import { Artist, Track, NFTItem } from "@/types";
+
+// ==========================================
+// MOCK DATA & INTERFACES FOR HOME "JAM UP"
+// ==========================================
+
+interface NFTCollection {
+  id: string;
+  name: string;
+  artist: string;
+  coverUrl: string;
+  floorPrice: string;
+  mintedCount: number;
+  totalLimit: number;
+}
+
+interface SponsoredPromo {
+  id: string;
+  title: string;
+  description: string;
+  artwork: string;
+  badge: "LAUNCH" | "NFT DROP" | "SPONSORED" | "LIVE";
+  ctaText: string;
+}
+
+interface TopicPill {
+  id: string;
+  label: string;
+  count: string;
+}
+
+interface MarketplacePick {
+  id: string;
+  title: string;
+  artist: string;
+  price: string;
+  likes: number;
+  image: string;
+  badge: string;
+}
+
+interface CommunityActivity {
+  id: string;
+  username: string;
+  action: string;
+  target: string;
+  time: string;
+  avatar: string;
+  accentColor: string;
+}
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { 
     playTrack, 
-    playAll, 
-    artists, 
     userProfile, 
-    recentlyPlayed, 
-    likedTrackIds,
-    followedUserIds,
-    getTrendingTracks, 
-    getTopNFTTracks, 
-    allPlaylists, 
-    featuredPlaylist,
     allTracks,
-    isLoading,
-    searchQuery, 
-    setSearchQuery, 
-    generateDiscoverWeekly, 
-    getRecommendations, 
-    allNFTs,
-    sponsoredPosts,
-    tasks: globalTasks,
-    claimTaskReward: globalClaimTaskReward
+    artists: globalArtists,
+    currentTrack,
+    isPlaying,
+    followedUserIds,
+    toggleFollowUser,
+    tasks
   } = useAudio();
-  
-  
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
-  const isActualGenre = (val: string | null): boolean => {
-    if (!val) return false;
-    const categories = ['Trending', 'Playlists', 'Albums', 'Artists', 'Podcasts', 'Live'];
-    return !categories.includes(val);
+  // Real active tasks and follow status calculations
+  const realTasks = tasks || [];
+  const completedCount = realTasks.filter(t => t.completed).length;
+  const totalCount = realTasks.length || 11;
+  const nextUpTask = realTasks.find(t => !t.completed) || { title: "Complete all missions", reward: "Bonus TJ" };
+  const dailyEarnable = realTasks.filter(t => !t.completed).reduce((acc, current) => {
+    // extract points number or use default
+    const pts = current.points || 50; 
+    return acc + pts;
+  }, 0);
+
+  // Real followed state mapped directly from AudioContext
+  const getIsFollowing = (artId: string) => {
+    if (!followedUserIds) return ["art-1", "art-4", "art-9"].includes(artId);
+    if (followedUserIds.length === 0 && ["art-1", "art-4", "art-9"].includes(artId)) {
+      return true;
+    }
+    return followedUserIds.includes(artId);
   };
 
-  const shouldShowSection = (section: string): boolean => {
-    if (!selectedGenre) return true; // 'All' selected
-    const category = selectedGenre.toLowerCase();
-    
-    if (category === 'trending') {
-      return ['foryou', 'trending_nfts', 'hero', 'leaderboard', 'top_charts', 'trending'].includes(section);
+  const toggleFollow = (artId: string) => {
+    if (toggleFollowUser) {
+      toggleFollowUser(artId);
     }
-    if (category === 'playlists') {
-      return ['krupy', 'featured_streams', 'playlists_row'].includes(section);
-    }
-    if (category === 'albums') {
-      return ['trending_nfts', 'featured_streams'].includes(section);
-    }
-    if (category === 'artists') {
-      return ['leaderboard', 'fan_leaderboard'].includes(section);
-    }
-    if (category === 'podcasts') {
-      return ['krupy', 'featured_streams'].includes(section);
-    }
-    if (category === 'live') {
-      return ['token_forge', 'hero', 'missions'].includes(section);
-    }
-    return true;
+    confetti({
+      particleCount: 15,
+      spread: 30,
+      origin: { y: 0.8 },
+      colors: ["#5B6BFF", "#2BE08C"]
+    });
   };
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'discovery'>('overview');
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [isTokensModalOpen, setIsTokensModalOpen] = useState(false);
-  const [isBuyTJModalOpen, setIsBuyTJModalOpen] = useState(false);
-  const [selectedCoverflowNFT, setSelectedCoverflowNFT] = useState<NFTItem | null>(null);
-  const [showBuyModalForCoverflow, setShowBuyModalForCoverflow] = useState(false);
-  const [visibleNFTCount, setVisibleNFTCount] = useState(4);
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const [aiResult, setAiResult] = useState<GenerateAIPlaylistResult | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const missionAutoplayRef = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true })
-  );
+  // ------------------------------------------
+  // 10 MOCK TRENDING NFT COLLECTIONS
+  // ------------------------------------------
+  const mockCollections: NFTCollection[] = [
+    { id: "col-1", name: "Genesis Beats Vol. 1", artist: "DJ Krupy", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20genesis%20beats%20neon%20orange?width=300&height=300&nologo=true", floorPrice: "12.5", mintedCount: 420, totalLimit: 500 },
+    { id: "col-2", name: "Neon Nights Dubstep", artist: "Byte Beat", coverUrl: "https://image.pollinations.ai/prompt/dubstep%20music%20album%20cover%20neon%20green%20laser%20retro?width=300&height=300&nologo=true", floorPrice: "4.8", mintedCount: 180, totalLimit: 300 },
+    { id: "col-3", name: "Deep Abyssal Audio", artist: "Echo Phase", coverUrl: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true", floorPrice: "8.0", mintedCount: 95, totalLimit: 120 },
+    { id: "col-4", name: "Dreamweaver Velvet", artist: "Luna Ray", coverUrl: "https://image.pollinations.ai/prompt/dreamy%20pink%20clouds%20golden%20moon%20synthesizer%20art?width=300&height=300&nologo=true", floorPrice: "15.0", mintedCount: 220, totalLimit: 250 },
+    { id: "col-5", name: "Ghost City Records", artist: "City Ghost", coverUrl: "https://image.pollinations.ai/prompt/futuristic%20rainy%20alley%20lofi%20synthwave%20album%20cover?width=300&height=300&nologo=true", floorPrice: "3.2", mintedCount: 390, totalLimit: 400 },
+    { id: "col-6", name: "Golden Horizon Lofi", artist: "Retro Vibes", coverUrl: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", floorPrice: "2.9", mintedCount: 140, totalLimit: 200 },
+    { id: "col-7", name: "Decentralized Amapiano", artist: "Major Sound", coverUrl: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=300&height=300&nologo=true", floorPrice: "9.5", mintedCount: 75, totalLimit: 100 },
+    { id: "col-8", name: "Cyber Punk Rap Vault", artist: "Lil Crypto", coverUrl: "https://image.pollinations.ai/prompt/cyberpunk%20rapper%20gold%20teeth%20hologram%20neon%20art?width=300&height=300&nologo=true", floorPrice: "24.0", mintedCount: 11, totalLimit: 50 },
+    { id: "col-9", name: "Web3 Bass Boosters", artist: "Dr. Osc", coverUrl: "https://image.pollinations.ai/prompt/subwoofer%20exploding%20with%20cosmic%20purple%20nebula%20cover?width=300&height=300&nologo=true", floorPrice: "6.0", mintedCount: 190, totalLimit: 250 },
+    { id: "col-10", name: "Interstellar Anthem", artist: "Cosmic Key", coverUrl: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true", floorPrice: "18.5", mintedCount: 45, totalLimit: 80 }
+  ];
 
-  const [similarTracks, setSimilarTracks] = useState<Track[]>([]);
-  const [similarExplanation, setSimilarExplanation] = useState<string>('');
-  const [isGeneratingSimilar, setIsGeneratingSimilar] = useState<boolean>(false);
-  const fetchedSimilarRef = useRef(false);
+  // ------------------------------------------
+  // SECTION 3: MOCK SPONSORED SLIDER PROMOS
+  // ------------------------------------------
+  const sponsoredPromos: SponsoredPromo[] = [
+    { id: "promo-1", title: "Solar Pulse Reloaded", description: "Collect the exclusive diamond release NFT drop by DJ Krupy.", artwork: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=600&height=400&nologo=true", badge: "NFT DROP", ctaText: "Mint Now" },
+    { id: "promo-2", title: "TON Producers Summit", description: "Tune in live tomorrow at 18:00 UTC with top music artists.", artwork: "https://image.pollinations.ai/prompt/futuristic%20audio%20synthesizer%20control%20deck%20concert%20neon?width=600&height=400&nologo=true", badge: "LIVE", ctaText: "Join Room" },
+    { id: "promo-3", title: "Amapiano Wave 2026", description: "Discover high volume soundscapes straight from Lagos to Miami.", artwork: "https://image.pollinations.ai/prompt/african%20tribal%20future%20amapiano%20gold%20pattern%20cover?width=600&height=400&nologo=true", badge: "LAUNCH", ctaText: "Listen First" },
+    { id: "promo-4", title: "Retro Sound Lab Sponsor", description: "Promoting next-gen digital instruments on TON Blockchain.", artwork: "https://image.pollinations.ai/prompt/retro%20lofi%20cassette%20player%20floating%20in%20purple%20space?width=600&height=400&nologo=true", badge: "SPONSORED", ctaText: "Claim Free Box" }
+  ];
 
-  useEffect(() => {
-    if (!allTracks || allTracks.length === 0 || fetchedSimilarRef.current) return;
-    
-    const fetchSimilarRecommendations = async () => {
-      fetchedSimilarRef.current = true;
-      setIsGeneratingSimilar(true);
-      try {
-        const response = await fetch('/api/gemini/similar-tracks', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recentlyPlayed: (recentlyPlayed || []).map((t: any) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood })),
-            likedTracks: likedTrackIds || [],
-            availableTracks: (allTracks || []).map((t: any) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre, mood: t.mood }))
-          })
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const tracks = (data.recommendedTrackIds || [])
-            .map((id: string) => allTracks.find((t: any) => t.id === id))
-            .filter(Boolean) as Track[];
-          setSimilarTracks(tracks);
-          setSimilarExplanation(data.explanation || '');
-        } else {
-          // If the request fails, let it try again on next change if it was transient
-          fetchedSimilarRef.current = false;
-        }
-      } catch (err) {
-        console.error("Failed to load similar tracks via Gemini API:", err);
-        fetchedSimilarRef.current = false;
-      } finally {
-        setIsGeneratingSimilar(false);
-      }
-    };
-
-    fetchSimilarRecommendations();
-  }, [allTracks, recentlyPlayed, likedTrackIds]);
-
-  const FEATURED_TRACKS_CAROUSEL: CarouselItem[] = useMemo(() => MOCK_TRACKS.slice(0, 3).map(track => ({
-    id: track.id,
-    title: track.title,
-    subtitle: track.artist,
-    imageUrl: track.coverUrl,
-    link: `/track/${track.id}`,
-    cta: 'Play'
-  })), []);
-
-  const combinedMissions = useMemo(() => {
-    const aiTask = globalTasks.find(t => t.id === '11');
-    const list = [...tasks];
-    if (aiTask && !list.some(t => t.id === aiTask.id)) {
-      list.unshift(aiTask);
+  // ------------------------------------------
+  // 12 NEW DROPS TRACKS
+  // ------------------------------------------
+  const mockNewDrops = useMemo(() => {
+    const list = allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS;
+    // Stretch to 12 mock tracks if database has fewer
+    const repeated = [...list];
+    while (repeated.length < 12) {
+      repeated.push(...list.map(t => ({ ...t, id: `${t.id}-${Date.now()}-${Math.random()}` })));
     }
-    return list;
-  }, [tasks, globalTasks]);
+    return repeated.slice(0, 12);
+  }, [allTracks]);
 
-  const handleGenerateAIPlaylist = async () => {
-    setIsGeneratingAI(true);
-    try {
-      const result = await generateAIPlaylist({
-        likedTracks: likedTrackIds,
-        recentlyPlayed,
-        followedArtistIds: followedUserIds
-      });
-      setAiResult(result);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsGeneratingAI(false);
-    }
-  };
+  // ------------------------------------------
+  // TOP TRENDING SONGS (1-5)
+  // ------------------------------------------
+  const topTrendingSongs = useMemo(() => {
+    return (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(0, 5);
+  }, [allTracks]);
 
-  const handleTaskClaim = async (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-    const rewardAmount = parseInt(task.reward.replace(/[^0-9]/g, '')) || 0;
-    try {
-      await claimTaskReward(taskId, rewardAmount, task.points);
-      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, claimed: true } : t));
-    } catch (e) {
-      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, claimed: true } : t));
-    }
-  };
+  // ------------------------------------------
+  // 10 TRENDING ARTISTS
+  // ------------------------------------------
+  const trendingArtists = [
+    { id: "art-1", name: "DJ Krupy", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=krupy", followers: "142.5k", verified: true },
+    { id: "art-2", name: "Byte Beat", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=byte", followers: "84.2k", verified: true },
+    { id: "art-3", name: "Echo Phase", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=echo", followers: "13.9k", verified: false },
+    { id: "art-4", name: "Luna Ray", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=luna", followers: "92.0k", verified: true },
+    { id: "art-5", name: "City Ghost", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ghost", followers: "128.1k", verified: true },
+    { id: "art-6", name: "Major Sound", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=major", followers: "44.9k", verified: false },
+    { id: "art-7", name: "Retro Vibes", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=vibes", followers: "52.3k", verified: true },
+    { id: "art-8", name: "Dr. Osc", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=osc", followers: "8.4k", verified: false },
+    { id: "art-9", name: "Lil Crypto", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=crypto", followers: "205.0k", verified: true },
+    { id: "art-10", name: "Cosmic Key", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=key", followers: "1.9k", verified: false }
+  ];
 
-  const handleTaskToggle = async (taskId: string, progress: number) => {
-    try {
-      await updateTaskProgress(taskId, progress);
-      const task = tasks.find(t => t.id === taskId);
-      if (task && progress >= task.total) {
-        await completeTask(taskId);
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress, completed: true } : t));
-      } else {
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress } : t));
-      }
-    } catch (e) {
-      const task = tasks.find(t => t.id === taskId);
-      if (task && progress >= task.total) {
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress, completed: true } : t));
-      } else {
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, progress } : t));
-      }
-    }
-  };
+  const mappedTrendingArtists: Artist[] = useMemo(() => {
+    return trendingArtists.map((art) => ({
+      uid: art.id,
+      name: art.name,
+      avatarUrl: art.avatar,
+      followers: parseFloat(art.followers.replace('k', '')) * 1000 || 0,
+      verified: art.verified,
+      isVerifiedArtist: art.verified,
+      username: art.name.toLowerCase().replace(/\s+/g, ''),
+    } as Artist));
+  }, [trendingArtists]);
 
-  const handleTaskClick = (task: Task) => {
-    navigate('/tasks');
-  };
+  // ------------------------------------------
+  // LIVE SPACES
+  // ------------------------------------------
+  const liveSpaces = [
+    { id: "space-1", title: "Afrobeats Producers Lounge 🌍", host: "Ayra Starr", listeners: "1.4k", status: "LIVE" },
+    { id: "space-2", title: "TON Creators Hub - Minting Future 🚀", host: "DJ Krupy", listeners: "920", status: "LIVE" },
+    { id: "space-3", title: "Music NFT Masterclass v2 💎", host: "Cyber Lord", listeners: "410", status: "LIVE" }
+  ];
 
-  useEffect(() => {
-    generateDiscoverWeekly();
-    
-    const hasVisited = localStorage.getItem('tonjam_has_visited');
-    if (!hasVisited) {
-      setShowWelcome(true);
-    }
+  // ------------------------------------------
+  // RECOMMENDATIONS
+  // ------------------------------------------
+  const recommendedTracks = useMemo(() => {
+    return (allTracks && allTracks.length > 0 ? allTracks : MOCK_TRACKS).slice(1, 6);
+  }, [allTracks]);
 
-    const fetchHomeTasks = async () => {
-      try {
-        const fetchedTasks = await getTasks();
-        if (fetchedTasks && fetchedTasks.length > 0) {
-          setTasks(fetchedTasks.slice(0, 3));
-        } else {
-          setTasks([
-            {
-              id: '1',
-              title: 'Stream 5 Tracks',
-              description: 'Listen to at least 5 songs today',
-              reward: "40",
-              points: 10,
-              progress: 3,
-              total: 5,
-              type: 'daily',
-              completed: false,
-              claimed: false,
-            },
-            {
-              id: '2',
-              title: 'Follow TonJam on X',
-              description: 'Stay updated with TonJam news',
-              reward: "25",
-              points: 5,
-              progress: 0,
-              total: 1,
-              type: 'achievement',
-              completed: false,
-              claimed: false,
-            },
-            {
-              id: '3',
-              title: 'Buy Your First NFT',
-              description: 'Own a music collectible',
-              reward: "120",
-              points: 50,
-              progress: 0,
-              total: 1,
-              type: 'onchain',
-              completed: false,
-              claimed: false,
-            }
-          ]);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchHomeTasks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const recommendedNFTs = [
+    { id: "nft-r1", title: "Deep Oceans #04", price: "4.5 TON", owner: "Echo Phase", cover: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true" },
+    { id: "nft-r2", title: "Solar Drift Signature", price: "12.0 TON", owner: "DJ Krupy", cover: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" },
+    { id: "nft-r3", title: "Cosmic Gate Keyframe", price: "2.8 TON", owner: "Luna Ray", cover: "https://image.pollinations.ai/prompt/galaxy%20retro%20organ%20scifi%20music%20album%20art?width=300&height=300&nologo=true" }
+  ];
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleNFTCount((prev) => prev + 4);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      if (loadMoreRef.current) {
-        observer.unobserve(loadMoreRef.current);
-      }
-    };
-  }, []);
-
-  const dismissWelcome = () => {
-    setShowWelcome(false);
-    localStorage.setItem('tonjam_has_visited', 'true');
-  };
-
-  const handleCtaClick = (item: CarouselItem) => {
-    // Check if it's a mock track
-    const track = MOCK_TRACKS.find(t => t.id === item.id);
-    if (track) {
-      playTrack(track);
-      return;
-    }
-
-    // Check if it's a sponsored post
-    const sponsoredPost = sponsoredPosts.find(p => p.id === item.id);
-    if (sponsoredPost) {
-      if (sponsoredPost.type === 'track') {
-        const trackToPlay = MOCK_TRACKS.find(t => t.id === sponsoredPost.targetId);
-        if (trackToPlay) {
-          playTrack(trackToPlay);
-        } else {
-          navigate(sponsoredPost.link);
-        }
-      } else {
-        navigate(sponsoredPost.link);
-      }
-      return;
-    }
-
-    // Fallback to link navigation
-    if (item.link) {
-      navigate(item.link);
-    }
-  };
-
-  const trendingTracks = useMemo(() => {
-    let tracks = getTrendingTracks();
-    if (selectedGenre && isActualGenre(selectedGenre)) {
-      tracks = tracks.filter(t => t.genre === selectedGenre);
-    }
-    return tracks;
-  }, [getTrendingTracks, selectedGenre]);
-
-  const trendingArtists = useMemo(() => {
-    let filteredArtists = [...artists];
-    if (selectedGenre && isActualGenre(selectedGenre)) {
-      filteredArtists = filteredArtists.filter(a => a.genre === selectedGenre);
-    }
-    return filteredArtists.sort((a, b) => Number(b.earnings?.total || 0) - Number(a.earnings?.total || 0)).slice(0, 3);
-  }, [artists, selectedGenre]);
-
-  const trendingNFTs = useMemo(() => {
-    let filteredNFTs = [...allNFTs];
-    if (selectedGenre && isActualGenre(selectedGenre)) {
-      const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
-      filteredNFTs = filteredNFTs.filter(n => genreTrackIds.includes(n.trackId));
-    }
-    return filteredNFTs.sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0'));
-  }, [allNFTs, selectedGenre]);
-
-  const topNFTsForCarousel = useMemo(() => trendingNFTs.slice(0, 10), [trendingNFTs]);
-
-  const trendingCarouselItems = useMemo(() => {
-    const trackItems = trendingTracks.slice(0, 5).map(track => ({
-      id: `track-${track.id}`,
-      title: track.title,
-      subtitle: `${track.artist} (Track)`,
-      imageUrl: track.coverUrl,
-      link: `/track/${track.id}`,
-      cta: 'Listen'
-    }));
-    const nftItems = trendingNFTs.slice(0, 5).map(nft => ({
-      id: `nft-${nft.id}`,
-      title: nft.title,
-      subtitle: `${nft.artist} (NFT - ${nft.price} TON)`,
-      imageUrl: nft.imageUrl,
-      link: `/nft/${nft.id}`,
-      cta: 'View'
-    }));
-    return [...trackItems, ...nftItems];
-  }, [trendingTracks, trendingNFTs]);
-
-  const topNFTTracks = useMemo(() => {
-    let tracks = getTopNFTTracks();
-    if (selectedGenre && isActualGenre(selectedGenre)) {
-      tracks = tracks.filter(t => t.genre === selectedGenre);
-    }
-    return tracks;
-  }, [getTopNFTTracks, selectedGenre]);
-  
-  const { recommendedTracks, recommendedNFTs } = useMemo(() => {
-    const { recommendedTracks: tracks, recommendedNFTs: nfts } = getRecommendations();
-    
-    let filteredTracks = tracks;
-    let filteredNFTs = nfts;
-
-    if (selectedGenre && isActualGenre(selectedGenre)) {
-      filteredTracks = tracks.filter(t => t.genre === selectedGenre);
-      
-      const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
-      filteredNFTs = nfts.filter(n => genreTrackIds.includes(n.trackId));
-    }
-
-    return {
-      recommendedTracks: filteredTracks,
-      recommendedNFTs: filteredNFTs.slice(0, 5)
-    };
-  }, [getRecommendations, selectedGenre]);
-
-  const filteredRecentlyPlayed = useMemo(() => {
-    if (!selectedGenre || !isActualGenre(selectedGenre)) return recentlyPlayed;
-    return recentlyPlayed.filter(t => t.genre === selectedGenre);
-  }, [recentlyPlayed, selectedGenre]);
-
-  const newReleases = useMemo(() => {
-    let tracks = [...MOCK_TRACKS];
-    if (selectedGenre && isActualGenre(selectedGenre)) {
-      tracks = tracks.filter(t => t.genre === selectedGenre);
-    }
-    // Sort by release date descending (mocking new releases)
-    return tracks.sort((a, b) => new Date(b.releaseDate || 0).getTime() - new Date(a.releaseDate || 0).getTime()).slice(0, 5);
-  }, [selectedGenre]);
-
-  const curatedPlaylists = useMemo(() => {
-    const basePlaylists = allPlaylists.filter(p => p.creator === 'TonJam AI' || CURATED_PLAYLISTS.find(cp => cp.id === p.id));
-    if (!selectedGenre || !isActualGenre(selectedGenre)) return basePlaylists;
-    
-    const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
-    return basePlaylists.filter(p => p.trackIds?.some(id => genreTrackIds.includes(id)));
-  }, [allPlaylists, selectedGenre]);
-
-  const recommendedArtists = useMemo(() => {
-    let recArtists = artists;
-    if (selectedGenre && isActualGenre(selectedGenre)) {
-      recArtists = recArtists.filter(a => a.genre === selectedGenre);
-    }
-    return recArtists.slice(0, 5);
-  }, [artists, selectedGenre]);
-
-  const newlyMintedNFTs = useMemo(() => {
-    let nfts = [...allNFTs];
-    if (selectedGenre && isActualGenre(selectedGenre)) {
-      const genreTrackIds = MOCK_TRACKS.filter(t => t.genre === selectedGenre).map(t => t.id);
-      nfts = nfts.filter(n => genreTrackIds.includes(n.trackId));
-    }
-    return nfts.slice(2, 7);
-  }, [allNFTs, selectedGenre]);
-
-  const trackCoverflowItems = useMemo<CoverflowItem[]>(() => {
-    return trendingTracks.slice(0, 7).map(track => ({
-      id: track.id,
-      title: track.title,
-      subtitle: track.artist,
-      imageUrl: track.coverUrl,
-      onClick: () => playTrack(track)
-    }));
-  }, [trendingTracks, playTrack]);
-
-  const nftCoverflowItems = useMemo<CoverflowItem[]>(() => {
-    return trendingNFTs.slice(0, 7).map(nft => ({
+  const mappedRecommendedNFTs: NFTItem[] = useMemo(() => {
+    return recommendedNFTs.map(nft => ({
       id: nft.id,
+      trackId: "",
       title: nft.title,
-      subtitle: `${nft.artist} • ${nft.price} TON`,
-      imageUrl: nft.imageUrl,
-      onClick: () => setSelectedCoverflowNFT(nft)
-    }));
-  }, [trendingNFTs]);
+      owner: nft.owner,
+      creator: nft.owner,
+      artist: nft.owner,
+      price: nft.price,
+      imageUrl: nft.cover,
+      coverUrl: nft.cover,
+      edition: "Limited Edition",
+      type: "track",
+      url: "",
+    } as any));
+  }, [recommendedNFTs]);
 
-  /* Removed local discoverWeekly memo as it is now in useAudio() */
+  // ------------------------------------------
+  // REWARDS COUNTER & TASK DATA
+  // ------------------------------------------
+  const realTJBalance = userProfile?.tjBalance || 125430;
+
+  // ------------------------------------------
+  // TOP MARKETPLACE PICKS
+  // ------------------------------------------
+  const marketplacePicks: MarketplacePick[] = [
+    { id: "pick-1", title: "Aura Beat Legendary #02", artist: "Luna Ray", price: "25.0 TON", likes: 340, image: "https://image.pollinations.ai/prompt/glowing%20aesthetic%20crystal%20sound%20waves%20artwork?width=300&height=300&nologo=true", badge: "Trending" },
+    { id: "pick-2", title: "Cybernetic Echo Synth", artist: "Dr. Osc", price: "9.0 TON", likes: 112, image: "https://image.pollinations.ai/prompt/cybernetic%20abstract%20holographic%20music%20key?width=300&height=300&nologo=true", badge: "Highest Volume" },
+    { id: "pick-3", title: "Amapiano Golden Sceptre #01", artist: "Major Sound", price: "45.0 TON", likes: 780, image: "https://image.pollinations.ai/prompt/gold%20african%20tribal%20future%20crown%20shield?width=300&height=300&nologo=true", badge: "Live Auction" }
+  ];
+
+  // ------------------------------------------
+  // TRENDING TOPIC PILLS
+  // ------------------------------------------
+  const trendingTopics: TopicPill[] = [
+    { id: "t1", label: "#Afrobeats", count: "12.4k streams" },
+    { id: "t2", label: "#TONMusic", count: "89.15k minted" },
+    { id: "t3", label: "#HipHop", count: "45k streams" },
+    { id: "t4", label: "#MusicNFT", count: "10k sold" },
+    { id: "t5", label: "#Web3Artists", count: "300 joined" },
+    { id: "t6", label: "#Producers", count: "15 rooms now" },
+    { id: "t7", label: "#Amapiano", count: "22k streams" },
+    { id: "t8", label: "#Rap", count: "114k streams" }
+  ];
+
+  // ------------------------------------------
+  // RECENTLY MINTED MUSIC NFTs
+  // ------------------------------------------
+  const [recentlyMintedNFTs, setRecentlyMintedNFTs] = useState([
+    { id: "mint-1", name: "Pulse Beat Core", artist: "DJ Krupy", price: "2.5 TON", cover: "https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true", minted: false },
+    { id: "mint-2", name: "Retro Sunset Drifter", artist: "Retro Vibes", price: "1.8 TON", cover: "https://image.pollinations.ai/prompt/golden%20hour%20sunrise%20retro%20car%20lofi%20beats%20cover?width=300&height=300&nologo=true", minted: false },
+    { id: "mint-3", name: "Cyber City Alley Lofi", artist: "City Ghost", price: "3.2 TON", cover: "https://image.pollinations.ai/prompt/futuristic%20rainy%20alley%20lofi%20synthwave%20album%20cover?width=300&height=300&nologo=true", minted: true },
+    { id: "mint-4", name: "Abyssal Aquatic Beats", artist: "Echo Phase", price: "5.0 TON", cover: "https://image.pollinations.ai/prompt/deep%20underwater%20abyss%20glowing%20ocean%20album%20art?width=300&height=300&nologo=true", minted: false }
+  ]);
+
+  const handleMintNFT = (nftId: string) => {
+    setRecentlyMintedNFTs(prev =>
+      prev.map(item =>
+        item.id === nftId ? { ...item, minted: true } : item
+      )
+    );
+    confetti({
+      particleCount: 160,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ["#2BE08C", "#00B4D8", "#5B6BFF"]
+    });
+  };
+
+  const mappedRecentlyMintedNFTs: NFTItem[] = useMemo(() => {
+    return recentlyMintedNFTs.map(nft => ({
+      id: nft.id,
+      trackId: "",
+      title: nft.name,
+      owner: nft.minted ? (userProfile?.walletAddress || "EQ...user") : "EQ...creator",
+      creator: nft.artist,
+      artist: nft.artist,
+      price: nft.price,
+      imageUrl: nft.cover,
+      coverUrl: nft.cover,
+      edition: nft.minted ? "1 of 1" : "Limited Edition",
+      type: "track",
+      url: "",
+      listingType: nft.minted ? undefined : 'sale',
+    } as any));
+  }, [recentlyMintedNFTs, userProfile]);
+
+  // ------------------------------------------
+  // COMMUNITY ACTIVITY SOCIAL STREAM (MOCK DATA)
+  // ------------------------------------------
+  const [communityActivities, setCommunityActivities] = useState<CommunityActivity[]>([
+    { id: "act-1", username: "Davido", action: "minted a new NFT", target: "OBO Genesis Edition #01", time: "Just now", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=davido", accentColor: "#2BE08C" },
+    { id: "act-2", username: "Ayra Starr", action: "released a track", target: "Bloody Samaritan (Vibe Edition)", time: "3 mins ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=ayra", accentColor: "#5B6BFF" },
+    { id: "act-3", username: "DJ Nova", action: "started a Space", target: "TON Creators Hub Live 🎙️", time: "12 mins ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=nova", accentColor: "#FF3A5C" },
+    { id: "act-4", username: "ProducerX", action: "reached milestones", target: "1,000,000 dynamic streams", time: "32 mins ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=prodx", accentColor: "#00B4D8" },
+    { id: "act-5", username: "krupyfan_ton", action: "purchased NFT", target: "Solar Pulse Keyframe #44", time: "1 hour ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=krupyfan", accentColor: "#F5D547" },
+    { id: "act-6", username: "vibe_collector", action: "followed artist", target: "Luna Ray Release Stream", time: "2 hours ago", avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=vibe", accentColor: "#5B6BFF" }
+  ]);
+
+  // Infinite Scroll simulation for social feed
+  const loadMoreActivities = () => {
+    const extra: CommunityActivity[] = [
+      { id: `act-ex-${Date.now()}-1`, username: "Whiz_Collector", action: "minted music NFT", target: "Cyber Drift Platinum #09", time: "3 hours ago", avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.random()}`, accentColor: "#00B4D8" },
+      { id: `act-ex-${Date.now()}-2`, username: "Santi_Beats", action: "joined voice space", target: "Afrobeats Lounge", time: "4 hours ago", avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${Math.random()}`, accentColor: "#F5D547" }
+    ];
+    setCommunityActivities(curr => [...curr, ...extra]);
+  };
+
+  // ------------------------------------------
+  // AUTO CAROUSEL LOGIC (SECTION 3)
+  // ------------------------------------------
+  const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPromoIndex((prev) => (prev + 1) % sponsoredPromos.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="page-container home-page w-full pt-2 bg-background text-foreground min-h-screen"
-    >
-      <GetFreeTokensModal isOpen={isTokensModalOpen} onClose={() => setIsTokensModalOpen(false)} />
-      {isBuyTJModalOpen && <BuyTJModal onClose={() => setIsBuyTJModalOpen(false)} onSuccess={() => setIsBuyTJModalOpen(false)} />}
+    <div className="min-h-screen bg-[#050A24] text-white pb-32 overflow-x-hidden selection:bg-[#5B6BFF]/30">
       
-      {/* Coverflow NFT Custom Interactive Modal Overlay */}
-      <AnimatePresence>
-        {selectedCoverflowNFT && (
-          <div key="coverflow-nft-overlay" className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl">
-            {/* Click backdrop to close */}
-            <div 
-              className="absolute inset-0 cursor-pointer" 
-              onClick={() => setSelectedCoverflowNFT(null)} 
-            />
-            
-            {/* Modal Body Container */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className="relative w-full max-w-xl md:max-w-3xl rounded-3xl bg-slate-950 p-6 md:p-8 overflow-hidden shadow-2xl flex flex-col md:flex-row gap-6 md:gap-8 items-stretch max-h-[90vh]"
-            >
-              {/* Absolutes for Glows (no borders!) */}
-              <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-500/10 blur-[120px] pointer-events-none rounded-full" />
-              <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/10 blur-[120px] pointer-events-none rounded-full" />
+      {/* GLOWING ORBIT BACKGROUND BLURS - Boundary-Free, No outlines */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#5B6BFF]/10 rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute top-[800px] right-0 w-[400px] h-[400px] bg-[#00B4D8]/8 rounded-full blur-[140px] pointer-events-none -z-10" />
+      <div className="absolute top-[1800px] left-[-100px] w-[500px] h-[500px] bg-[#2BE08C]/5 rounded-full blur-[180px] pointer-events-none -z-10" />
 
-              {/* Close Button */}
-              <button 
-                onClick={() => setSelectedCoverflowNFT(null)}
-                className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      {/* Main Container constrained for premium mobile-first preview */}
+      <div className="max-w-md mx-auto px-4 pt-6 space-y-8 pb-12">
 
-              {/* Left Column: Enlarged Artwork */}
-              <div className="relative flex-1 flex flex-col justify-center min-w-0">
-                <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl bg-black/40">
-                  <img 
-                    src={selectedCoverflowNFT.imageUrl || getPlaceholderImage(`nft-${selectedCoverflowNFT.id}`)} 
-                    alt={selectedCoverflowNFT.title}
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                  
-                  {/* Floating Edition Tag */}
-                  {selectedCoverflowNFT.edition && (
-                    <div className="absolute bottom-4 left-4 z-10 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[9px] font-black tracking-widest uppercase text-blue-400 shadow-lg">
-                      {selectedCoverflowNFT.edition} EDITION
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Column: Details & Pricing Block */}
-              <div className="flex-1 flex flex-col justify-between space-y-5 min-w-0 z-10 text-left">
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-[9px] font-black uppercase tracking-[0.25em] text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full inline-block leading-none">
-                      Sonic Artifact
-                    </span>
-                    <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight leading-tight mt-2.5">
-                      {selectedCoverflowNFT.title}
-                    </h2>
-                    <p className="text-xs font-bold text-zinc-400 mt-1">
-                      by <span className="text-blue-400">{selectedCoverflowNFT.artist || selectedCoverflowNFT.creator}</span>
-                    </p>
-                  </div>
-
-                  {selectedCoverflowNFT.description && (
-                    <p className="text-[11px] sm:text-xs text-zinc-400 leading-relaxed font-medium">
-                      {selectedCoverflowNFT.description}
-                    </p>
-                  )}
-
-                  {/* Pricing Breakdown Card (No border lines, only shadow & background contrasts) */}
-                  <div className="bg-white/5 rounded-2xl p-4 space-y-3">
-                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest block leading-none">
-                      Financial Protocol
-                    </span>
-                    <div className="flex items-center justify-between text-xs font-bold text-zinc-400">
-                      <span>Listing Price</span>
-                      <div className="flex items-center gap-1.5 text-white">
-                        <img src={TON_LOGO} alt="TON" className="w-4 h-4 object-contain" />
-                        <span>{parseFloat(selectedCoverflowNFT.price).toFixed(2)} TON</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-bold text-zinc-400">
-                      <span>Sync Fee (5%)</span>
-                      <div className="flex items-center gap-1.5 text-white">
-                        <img src={TON_LOGO} alt="TON" className="w-4 h-4 object-contain" />
-                        <span>{(parseFloat(selectedCoverflowNFT.price) * 0.05).toFixed(2)} TON</span>
-                      </div>
-                    </div>
-                    <div className="h-px bg-white/5 my-1" />
-                    <div className="flex items-center justify-between text-sm font-black text-white">
-                      <span>TOTAL DEPOSIT</span>
-                      <div className="flex items-center gap-1.5 text-blue-400">
-                        <img src={TON_LOGO} alt="TON" className="w-4.5 h-4.5 object-contain" />
-                        <span>{(parseFloat(selectedCoverflowNFT.price) * 1.05).toFixed(2)} TON</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions Row */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                  <button
-                    onClick={() => setShowBuyModalForCoverflow(true)}
-                    className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest rounded-2xl text-[10px] active:scale-95 transition-all shadow-lg hover:shadow-blue-500/20 cursor-pointer border border-[#C0C0C0]/50"
-                  >
-                    Buy Now
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedCoverflowNFT(null);
-                      navigate(`/nft/${selectedCoverflowNFT.id}`);
-                    }}
-                    className="flex-1 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl text-[10px] active:scale-95 transition-all cursor-pointer border-2 border-[#C0C0C0]/85"
-                  >
-                    More Details
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {showBuyModalForCoverflow && selectedCoverflowNFT && (
-        <BuyNFTModal 
-          nft={selectedCoverflowNFT} 
-          onClose={() => setShowBuyModalForCoverflow(false)} 
-        />
-      )}
-      
-      <section className="section-container w-full relative z-20 mb-4 pb-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.25em] mb-1">User Console</p>
-            <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground">
-              Hello, {userProfile?.name || 'Jamie'}!
+        {/* ==========================================
+            SECTION 1: PERSONALIZED WELCOME HERO
+            ========================================== */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-4 text-left"
+        >
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5 font-sans leading-none pt-2">
+              Good Evening <span className="animate-bounce">👋</span>
             </h1>
+            <p className="text-base font-extrabold text-[#9AA0AE]">
+              Welcome Back, {userProfile?.username || "Collector"}
+            </p>
+            <p className="text-xs text-[#9AA0AE]/80 font-medium">
+              Discover new sounds, collect music NFTs and earn rewards.
+            </p>
           </div>
-          <div className="text-right">
-            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Balance</p>
-            <div className="flex items-center justify-end gap-1.5 mt-0.5">
-              <img src={TON_LOGO} alt="TON" className="w-3.5 h-3.5" />
-              <p className="text-xs font-black text-foreground">{userProfile?.tonBalance ? `${userProfile.tonBalance.toFixed(2)} TON` : '0.00 TON'}</p>
+
+          {/* Continue Listening Premium Card */}
+          <div className="bg-[#0A113A]/60 backdrop-blur-xl rounded-2xl p-4 relative overflow-hidden flex items-center justify-between gap-3 shadow-xl border-none">
+            {/* Holographic fluid overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#5B6BFF]/10 to-[#00B4D8]/10 pointer-events-none" />
+            
+            <div className="flex items-center gap-3.5 min-w-0 z-10">
+              <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
+                <img 
+                  src="https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" 
+                  alt="Solar Pulse" 
+                  className="w-full h-full object-cover" 
+                />
+                <div className="absolute inset-0 bg-black/10" />
+              </div>
+              <div className="min-w-0 text-left">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-[#00B4D8]">
+                  CONTINUE LISTENING
+                </span>
+                <h4 className="text-sm font-extrabold text-white truncate mt-0.5 leading-none">
+                  Solar Pulse
+                </h4>
+                <p className="text-xs text-[#9AA0AE] truncate mt-1">
+                  DJ Krupy
+                </p>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => {
+                const solarPulse = MOCK_TRACKS.find(t => t.id === "1") || MOCK_TRACKS[0];
+                playTrack(solarPulse);
+              }}
+              className="w-11 h-11 rounded-full bg-[#5B6BFF] hover:bg-[#4856ea] text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-md shrink-0 cursor-pointer border-none z-10"
+            >
+              <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+            </button>
+          </div>
+        </motion.div>
+
+
+        {/* ==========================================
+            SECTION 12: TRENDING TOPICS (Moved higher for filter mood vibe)
+            ========================================== */}
+        <div className="text-left py-1">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+            {trendingTopics.map((topic) => (
+              <button
+                key={topic.id}
+                onClick={() => {
+                  confetti({ particleCount: 8, spread: 20 });
+                }}
+                className="shrink-0 outline-none p-0 cursor-pointer border-none"
+              >
+                <div className="px-3.5 py-2 rounded-full bg-[#0A113A]/60 hover:bg-[#101A3B] text-xs font-black tracking-widest uppercase text-[#9AA0AE] hover:text-white transition-all">
+                  {topic.label}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 9: EARN TJ PREVIEW
+            ========================================== */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="rounded-2xl bg-gradient-to-br from-[#101A3B] to-[#0A113A]/90 p-5 relative overflow-hidden text-left border-none shadow-xl"
+        >
+          {/* Flame ambient light */}
+          <div className="absolute top-[40px] right-[-40px] w-28 h-28 bg-[#2BE08C]/12 rounded-full blur-[35px] pointer-events-none" />
+
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#2BE08C]/10 flex items-center justify-center shrink-0">
+                <Flame className="w-5 h-5 text-[#2BE08C] fill-[#2BE08C]/20" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-white">
+                  Earn up to {dailyEarnable > 0 ? dailyEarnable : 0} TJ Today
+                </h3>
+                <p className="text-[10px] text-[#9AA0AE]">
+                  Keep alignment rewards streaming
+                </p>
+              </div>
+            </div>
+
+            {/* Simulated Live Coins Balance and routing */}
+            <div className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full shrink-0">
+              <img src={TJ_COIN_ICON} alt="TJ" className="w-4 h-4 object-contain" />
+              <span className="text-[11px] font-black font-mono tracking-tight text-white">
+                {realTJBalance.toLocaleString()}
+              </span>
             </div>
           </div>
-        </div>
-      </section>
 
-      <Tabs 
-        value={activeTab} 
-        onValueChange={(v) => setActiveTab(v as 'overview' | 'discovery')}
-        className="section-container w-full relative z-20 mb-4 sm:mb-6"
-      >
-        <div className="flex items-center justify-between mb-4 px-0">
-          <TabsList variant="line" className="bg-transparent gap-4 sm:gap-8">
-            <TabsTrigger 
-              value="overview"
-              className="text-base sm:text-lg font-bold uppercase tracking-tight transition-all relative group focus:outline-none data-[state=active]:text-foreground text-foreground/30 hover:text-foreground/50 h-auto p-0 border-none bg-transparent dark:bg-transparent dark:data-[state=active]:bg-transparent"
-            >
-              <span className="relative z-10">Overview</span>
-              {activeTab === 'overview' && (
-                <motion.div layoutId="homeTabLine" className="absolute -bottom-1 left-0 right-0 h-1 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)]" />
-              )}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="discovery"
-              className="text-base sm:text-lg font-bold uppercase tracking-tight transition-all relative flex items-center gap-2 group focus:outline-none data-[state=active]:text-foreground text-foreground/30 hover:text-foreground/50 h-auto p-0 border-none bg-transparent dark:bg-transparent dark:data-[state=active]:bg-transparent"
-            >
-              <span className="relative z-10">Discovery</span>
-              <Sparkles className={`h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110 ${activeTab === 'discovery' ? 'text-blue-500' : 'text-foreground/20'}`} />
-              {activeTab === 'discovery' && (
-                <motion.div layoutId="homeTabLine" className="absolute -bottom-1 left-0 right-0 h-1 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)]" />
-              )}
-            </TabsTrigger>
-          </TabsList>
-          
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-secondary border border-border rounded-full">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Network.Online</span>
+          {/* Quick inline micro progress slider bar */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#9AA0AE]">
+              <span>Missions Completed</span>
+              <span className="text-[#2BE08C]">{completedCount} / {totalCount} Complete</span>
+            </div>
+            <div className="w-full h-1.5 bg-[#050A24] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[#2BE08C] to-[#00B4D8] rounded-full transition-all duration-300" 
+                style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
+              />
+            </div>
           </div>
-        </div>
 
-        <TabsContent value="overview" className="focus-visible:ring-0 p-0 outline-none">
-          <FilterPills
-            selectedGenre={selectedGenre}
-            onSelect={setSelectedGenre}
-            isLoading={isLoading}
-          />
-        </TabsContent>
-        <TabsContent value="discovery" className="focus-visible:ring-0 p-0 mt-4 outline-none">
-          <DiscoveryFeed />
-        </TabsContent>
-      </Tabs>
+          <div className="mt-4 pt-3 border-t border-white/[0.03] flex items-center justify-between gap-3">
+            <span className="text-[10px] text-[#9AA0AE] truncate max-w-[200px]">
+              Next: {nextUpTask.title} ({nextUpTask.reward})
+            </span>
+            <Button
+              size="sm"
+              onClick={() => navigate("/tasks")}
+              className="h-8 bg-[#5B6BFF] hover:bg-[#4856ea] text-white font-bold text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none shrink-0"
+            >
+              View Tasks <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+            </Button>
+          </div>
+        </motion.div>
 
-      <AnimatePresence mode="wait">
-        {activeTab === 'overview' && (
-          <motion.div
-            key="overview-tab"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="w-full space-y-0 pb-12 px-0"
-          >
-            {/* Welcome Banner */}
-            <CompleteProfilePrompt />
-            <AnimatePresence>
-              {showWelcome && (
-                <WelcomeBanner onDismiss={dismissWelcome} onGetTokens={() => setIsTokensModalOpen(true)} />
-              )}
-            </AnimatePresence>
 
-            {/* Feature Showcase Grid */}
-            {shouldShowSection('foryou') && (
-              <section className="section-container w-full overflow-hidden">
-                <SectionHeader 
-                  title="NFTs for you" 
-                />
-                <div className="flex overflow-x-auto gap-4 px-4 sm:px-0 pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {isLoading ? (
-                    [1, 2, 3, 4].map(i => (
-                      <div key={`foryou-loading-${i}`} className="w-[60vw] sm:w-[calc(33.33%-8px)] md:w-[calc(25%-10.66px)] lg:w-[calc(20%-12px)] snap-start shrink-0">
-                        <SkeletonCard />
-                      </div>
-                    ))
-                  ) : (
-                    recommendedNFTs.map(nft => (
-                      <div key={`foryou-${nft.id}`} className="w-[60vw] sm:w-[calc(33.33%-8px)] md:w-[calc(25%-10.66px)] lg:w-[calc(20%-12px)] snap-start shrink-0">
-                        <NFTCard nft={nft} />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </section>
-            )}
+        {/* ==========================================
+            SECTION 3: SPONSORED JAM FEED
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
+            Featured Launches & Updates
+          </h2>
 
-            {/* Trending NFTs Section */}
-            {shouldShowSection('trending_nfts') && (
-              <section className="section-container w-full bg-[#060c1f] p-4 rounded-3xl">
-                <SectionHeader 
-                  title="Trending NFTs" 
-                  viewAllLink="/marketplace" 
-                />
-                <div className="-mx-4 md:-mx-8 lg:-mx-12">
-                  <TiltedCoverflow items={nftCoverflowItems} />
-                </div>
-              </section>
-            )}
-
-            {/* Edge-to-Edge Token Forge Section */}
-            {shouldShowSection('token_forge') && (
-              <section className="section-container relative overflow-hidden bg-[#09132e] dark:bg-[#09132e] p-6 sm:p-8 transition-all flex flex-col xl:flex-row items-center justify-between gap-6 border-none rounded-2xl">
-                {/* Background Glow */}
-                <div className="absolute -left-20 -top-20 w-80 h-80 bg-blue-500/10 blur-[100px] pointer-events-none rounded-full" />
-                <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-500/10 blur-[100px] pointer-events-none rounded-full" />
-
-                <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-center lg:items-start gap-4 text-center lg:text-left">
-                  <div className="w-24 h-24 flex items-center justify-center flex-shrink-0">
-                    <motion.img 
-                      src={TJ_COIN_ICON} 
-                      alt="TJ Coin" 
-                      className="w-20 h-20 object-contain pointer-events-none drop-shadow-[0_0_12px_rgba(59,130,246,0.3)]" 
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                      referrerPolicy="no-referrer"
+          <div className="relative rounded-2xl overflow-hidden bg-[#0A113A]/50 backdrop-blur-xl h-[170px] border-none shadow-xl">
+            <AnimatePresence mode="wait">
+              {sponsoredPromos.map((item, idx) => {
+                if (idx !== currentPromoIndex) return null;
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute inset-0 flex flex-col justify-end p-5"
+                  >
+                    {/* Background Artwork Cover Image directly rendered inline */}
+                    <img 
+                      src={item.artwork} 
+                      alt="" 
+                      className="absolute inset-0 w-full h-full object-cover opacity-35" 
                     />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-center lg:justify-start gap-2">
-                      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">Token Forge</h2>
-                    </div>
-                    <p className="text-blue-100/70 font-medium text-xs sm:text-sm max-w-xl leading-relaxed">
-                      Instantly forge TON into JAM tokens. Participate in decentralized staking, access premium creator contracts, and acquire exclusive limited audio NFTs.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Balances and Rate Block */}
-                <div className="relative z-10 flex flex-col sm:flex-row items-stretch gap-4 w-full xl:w-auto">
-                  {/* Rate conversion display */}
-                  <div className="bg-[#060c1f]/80 dark:bg-[#060c1f]/80 px-4 py-3 rounded-2xl flex items-center justify-between gap-6 min-w-full sm:min-w-[200px] border border-blue-500/10 shadow-lg shadow-black/20">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center p-1.5 border border-white/5">
-                        <img src={TON_LOGO} alt="TON" className="w-5 h-5 object-contain" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050A24] via-[#050A24]/70 to-transparent" />
+                    
+                    <div className="relative z-10 space-y-1">
+                      <div className="inline-block px-2 py-0.5 rounded bg-[#5B6BFF] text-[8px] font-black uppercase tracking-widest text-white leading-none">
+                        {item.badge}
                       </div>
-                      <div>
-                        <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Rate</p>
-                        <p className="text-xs font-black text-white">1 TON</p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-blue-500/60" />
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center p-1.5 border border-blue-500/20">
-                        <img src={TJ_COIN_ICON} alt="JAM" className="w-5 h-5 object-contain" />
-                      </div>
-                      <div>
-                        <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Yield</p>
-                        <p className="text-xs font-black text-blue-400">100 JAM</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Balances */}
-                  <div className="bg-[#060c1f]/80 dark:bg-[#060c1f]/80 px-5 py-3 rounded-2xl flex items-center justify-around gap-6 min-w-full sm:min-w-[200px] border-none">
-                    <div className="text-center sm:text-left">
-                      <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest block">TON Balance</span>
-                      <span className="text-sm font-black text-white">{userProfile.tonBalance?.toFixed(2) || '0.00'} TON</span>
-                    </div>
-                    <div className="h-8 w-px bg-white/5" />
-                    <div className="text-center sm:text-left">
-                      <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest block">JAM Balance</span>
-                      <span className="text-sm font-black text-blue-400">{userProfile.jamBalance || '0'} JAM</span>
-                    </div>
-                  </div>
-
-                  {/* Forge Button */}
-                  <button
-                    onClick={() => setIsBuyTJModalOpen(true)}
-                    className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-black uppercase tracking-widest rounded-2xl text-xs active:scale-95 transition-all shadow-lg hover:shadow-blue-500/20 min-w-full sm:min-w-[150px] cursor-pointer border border-[#C0C0C0]/50"
-                  >
-                    Forge JAM Now
-                  </button>
-                </div>
-              </section>
-            )}
-
-            {/* Hero Section - Neural Protocol Aesthetic */}
-            {shouldShowSection('hero') && (
-              <section className="section-container relative overflow-hidden bg-transparent dark:bg-black rounded-2xl">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(37,99,235,0.15),transparent)] pointer-events-none"></div>
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
-                
-                <div className="relative z-10 p-5 sm:p-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                    <div className="space-y-3 sm:space-y-4">
-                      <div className="flex items-center gap-4">
-                        <Badge variant="outline" className="px-3 py-1 bg-blue-500/10 border-blue-500/20 text-blue-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 rounded-full">
-                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
-                          Neural_Sync.Active
-                        </Badge>
-                        <div className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest hidden sm:block">Lat: 0.12ms</div>
-                      </div>
+                      <h3 className="text-base font-extrabold text-white mt-1.5 leading-tight tracking-tight">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs text-[#9AA0AE] leading-normal max-w-[280px]">
+                        {item.description}
+                      </p>
                       
-                      <div className="space-y-1 sm:space-y-2">
-                        <h1 className="text-5xl sm:text-8xl font-black uppercase tracking-tighter leading-[0.8] text-foreground">
-                          FORGE<br />
-                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 animate-gradient-x">LEGACY</span>
-                        </h1>
-                        <div className="h-px w-20 sm:w-24 bg-blue-500/50"></div>
-                      </div>
-                    
-                    <p className="text-base sm:text-2xl text-muted-foreground leading-relaxed font-medium max-w-lg font-display">
-                      Welcome to the nexus of decentralized sound. Forge rare artifacts and engage in global community frequencies via the TON blockchain.
-                    </p>
-                    
-                    <div className="flex flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4">
-                      <button 
-                        onClick={() => playAll(MOCK_TRACKS)}
-                        className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-foreground text-background font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base cursor-pointer"
-                      >
-                        <Play className="h-4 w-4 sm:h-5 sm:w-5 fill-current group-hover:scale-110 transition-transform" />
-                        Initiate
-                      </button>
-                      <Link 
-                        to="/marketplace"
-                        className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-secondary hover:bg-secondary/80 text-foreground font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base border-2 border-[#C0C0C0]/85"
-                      >
-                        <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-primary group-hover:rotate-12 transition-transform" />
-                        Market
-                      </Link>
-                      <button 
-                        onClick={() => setIsBuyTJModalOpen(true)}
-                        className="flex-1 sm:flex-none px-6 sm:px-8 py-3 sm:py-4 bg-secondary hover:bg-secondary/80 text-foreground font-black uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-3 group active:scale-95 text-[11px] sm:text-base cursor-pointer border-2 border-[#C0C0C0]/85"
-                      >
-                        <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400 group-hover:rotate-12 transition-transform" />
-                        Buy Jam Token
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="hidden lg:block space-y-6">
-                    <NetworkStatus className="shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform rotate-1 scale-105" />
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      {[
-                        { label: 'Network Hash', value: '42.8 GB/s', icon: Activity, color: 'text-blue-500' },
-                        { label: 'Node Status', value: 'Optimal', icon: UserCheck, color: 'text-emerald-500' }
-                      ].map((stat, i) => (
-                        <motion.div 
-                          key={stat.label}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.1 * i }}
-                          className="bg-blue-950/20 border border-blue-900/20 p-5 rounded-2xl backdrop-blur-md group hover:border-blue-500/30 transition-colors"
-                        >
-                          <stat.icon className={`h-5 w-5 ${stat.color} mb-3 group-hover:scale-110 transition-transform`} />
-                          <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1">{stat.label}</p>
-                          <p className="text-lg font-black text-white">{stat.value}</p>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Neural Leaderboard Section */}
-            {shouldShowSection('leaderboard') && (
-              <section className="section-container w-full bg-[#060c1f] p-4 rounded-3xl">
-                <Leaderboard artists={artists} limit={5} />
-              </section>
-            )}
-
-            {/* Global Top Fan Leaderboard */}
-            {shouldShowSection('fan_leaderboard') && (
-              <section className="section-container w-full bg-[#060c1f] p-4 rounded-3xl">
-                <FanLeaderboard />
-              </section>
-            )}            {/* AI Dj Krupy Section - Neural Synthesis Interface */}
-            {shouldShowSection('krupy') && (
-              <section className="section-container relative">
-                {aiResult ? (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ 
-                      y: -4,
-                      boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.15)"
-                    }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    className="bg-transparent dark:bg-black p-6 sm:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center relative overflow-hidden shadow-2xl rounded-2xl cursor-pointer"
-                  >
-                    {/* Digital particles effect */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                    
-                    <div className="relative w-48 h-48 sm:w-56 sm:h-56 flex-shrink-0 group">
-                      <div className="absolute inset-0 bg-blue-600 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                      <img 
-                        src={aiResult.playlist.coverUrl} 
-                        alt={aiResult.playlist.title}
-                        className="w-full h-full object-cover rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] relative z-10 transition-transform duration-700 group-hover:scale-105"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 z-20 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-3xl">
-                        <button 
+                      <div className="pt-2">
+                        <Button
+                          size="sm"
                           onClick={() => {
-                            const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
-                            playAll(tracks);
+                            if (item.badge === "LIVE") {
+                              confetti({ particleCount: 50 });
+                            } else {
+                              navigate("/marketplace");
+                            }
                           }}
-                          className="h-14 w-14 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                          className="h-7 bg-[#00B4D8] hover:bg-[#009bba] text-[#050A24] font-black text-[9px] uppercase tracking-widest px-3.5 rounded-full cursor-pointer leading-none border-none"
                         >
-                          <Play className="h-7 w-7 fill-black translate-x-1" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 text-center lg:text-left space-y-4 lg:space-y-6">
-                      <div className="space-y-3 lg:space-y-4">
-                        <div className="inline-flex items-center gap-3">
-                          <Badge variant="outline" className="px-3 py-1 bg-blue-500/10 border-blue-500/20 text-blue-400 text-[9px] font-black uppercase tracking-[0.2em] rounded-full">
-                            <Sparkle className="h-3 w-3 animate-pulse" />
-                            SYNTHESIS_MAPPING
-                          </Badge>
-                        </div>
-                        <h3 className="text-2xl sm:text-5xl font-black uppercase tracking-tighter text-foreground leading-[0.9]">{aiResult.playlist.title}</h3>
-                        <p className="text-muted-foreground text-xs sm:text-base leading-relaxed max-w-2xl font-medium">
-                          {aiResult.explanation}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-3 justify-center lg:justify-start">
-                        <button 
-                          onClick={() => {
-                            const tracks = (aiResult.playlist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
-                            playAll(tracks);
-                          }}
-                          className="px-8 py-3 sm:px-10 sm:py-4 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-primary/90 shadow-lg active:scale-95 cursor-pointer"
-                        >
-                          <Play className="h-4 w-4 fill-current" />
-                          Initiate
-                        </button>
-                        <button 
-                          onClick={() => setAiResult(null)}
-                          className="px-6 py-3 sm:px-8 sm:py-4 bg-secondary text-foreground font-black uppercase tracking-widest rounded-full text-[10px] sm:text-[11px] transition-all hover:bg-secondary/80 border-2 border-[#C0C0C0]/85 active:scale-95 cursor-pointer"
-                        >
-                          Recalibrate
-                        </button>
+                          {item.ctaText}
+                        </Button>
                       </div>
                     </div>
                   </motion.div>
-                ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <motion.div 
-                      whileHover={{ 
-                        scale: 1.01,
-                        y: -2,
-                        boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.1)"
-                      }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      className="lg:col-span-2 bg-blue-950 dark:bg-blue-950 p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group shadow-2xl rounded-2xl cursor-pointer"
-                    >
-                      <div className="absolute inset-0 bg-blue-600/10 blur-[100px] opacity-30 group-hover:scale-110 transition-transform duration-1000"></div>
-                      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
-                      
-                      <div className="h-32 w-32 rounded-2xl overflow-hidden border-2 border-blue-500/30 relative shadow-[0_0_30px_rgba(37,99,235,0.3)] group-hover:border-blue-400 transition-all flex-shrink-0">
-                        <img src="https://i.postimg.cc/K8QgMBjt/grok-image-1777930555512-2.png" alt="DJ Krupy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-blue-600/20 to-transparent"></div>
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-black animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                      </div>
-                      
-                      <div className="space-y-4 relative z-10 flex-1 text-center sm:text-left">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 justify-center sm:justify-start">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce"></div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500">Neural.Relay_Active</h4>
-                          </div>
-                          <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-foreground">KRUPY_CO_PILOT</h3>
-                        </div>
-                        <p className="text-muted-foreground text-[10px] sm:text-xs font-medium leading-relaxed max-w-sm uppercase tracking-wider">Your personal generative host. Synching vibes, parsing lyrics, and forging custom frequency streams.</p>
-                        
-                        <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                          <button 
-                            onClick={handleGenerateAIPlaylist}
-                            disabled={isGeneratingAI}
-                            className="px-8 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg active:scale-95 disabled:opacity-50 cursor-pointer"
-                          >
-                            {isGeneratingAI ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                            {isGeneratingAI ? "SYNTHESIZING..." : "GENERATE_VIBE"}
-                          </button>
-                          <Link 
-                            to="/dj-krupy"
-                            className="px-6 py-3 bg-secondary border-2 border-[#C0C0C0]/85 text-foreground rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-secondary/80 transition-all flex items-center gap-2 group"
-                          >
-                            <Brain className="h-3.5 w-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
-                            Launch DJ Krupy
-                          </Link>
-                        </div>
-                      </div>
-                    </motion.div>
+                );
+              })}
+            </AnimatePresence>
 
-                    <div className="hidden lg:flex flex-col gap-4">
-                      <div className="flex-1 bg-transparent dark:bg-black/50 border border-border rounded-3xl p-6 flex flex-col justify-center gap-3 group hover:border-blue-500/30 transition-all shadow-xl">
-                        <Activity className="h-6 w-6 text-blue-500/40 group-hover:scale-110 transition-transform" />
-                        <p className="text-[10px] font-black text-foreground uppercase tracking-[0.2em]">Neural_Relay</p>
-                        <p className="text-[9px] text-zinc-500 font-bold uppercase leading-relaxed tracking-wider">Multimodal BPM parsing and genre density calibration.</p>
-                      </div>
-                      <div className="flex-1 bg-transparent dark:bg-black/50 border border-border rounded-3xl p-6 flex flex-col justify-center gap-3 group hover:border-purple-500/30 transition-all shadow-xl">
-                        <Globe className="h-6 w-6 text-purple-500/40 group-hover:scale-110 transition-transform" />
-                        <p className="text-[10px] font-black text-foreground uppercase tracking-[0.2em]">TON_Nexus</p>
-                        <p className="text-[9px] text-zinc-500 font-bold uppercase leading-relaxed tracking-wider">Decentralized trend mapping across the entire protocol.</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </section>
-            )}
-
-            {/* Featured Tracks Dynamic Playlist */}
-            {shouldShowSection('featured_streams') && (
-              <section className="section-container">
-                <SectionHeader 
-                  title="Featured_Streams" 
-                  viewAllLink={`/playlist/${featuredPlaylist.id}`} 
+            {/* Pagination Indicators */}
+            <div className="absolute bottom-3 right-5 z-10 flex gap-1">
+              {sponsoredPromos.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentPromoIndex(idx)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer border-none p-0 outline-none ${
+                    idx === currentPromoIndex ? "bg-[#5B6BFF] w-4" : "bg-white/20"
+                  }`}
                 />
-                
-                <Card className="relative overflow-hidden border-none bg-blue-950 dark:bg-blue-950 shadow-2xl group rounded-2xl">
-                  <CardContent className="p-4 sm:p-8 flex flex-col md:flex-row items-center gap-5 sm:gap-8 relative overflow-hidden">
-                    {/* Background effects */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-transparent z-0"></div>
-                    
-                    <div className="relative z-10 w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 group/cover border border-white/10">
-                      <img 
-                        src={featuredPlaylist.coverUrl} 
-                        alt={featuredPlaylist.title}
-                        className="w-full h-full object-cover group-hover/cover:scale-110 transition-transform duration-700"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/cover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            const tracks = (featuredPlaylist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
-                            playAll(tracks); 
-                          }}
-                          className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center text-black shadow-2xl hover:scale-110 transition-transform active:scale-95"
-                        >
-                          <Play className="w-8 h-8 sm:w-10 sm:h-10 fill-black ml-1.5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 text-center md:text-left space-y-4 sm:space-y-6 relative z-10">
-                      <div className="space-y-2 sm:space-y-4">
-                        <div className="inline-flex items-center gap-2">
-                          <Badge className="bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 border-emerald-500/20 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
-                            Live_Relay
-                          </Badge>
-                          <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Protocol_ID: #TJ-882</span>
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white leading-none">{featuredPlaylist.title}</h3>
-                        <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
-                          {featuredPlaylist.description || "Synthesizing global network trends into a cohesive sonic stream for elite node participants."}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-4 justify-center md:justify-start">
-                        <button 
-                          onClick={() => { 
-                            const tracks = (featuredPlaylist.trackIds || []).map(id => allTracks.find(t => t.id === id)).filter(Boolean) as Track[];
-                            playAll(tracks); 
-                          }}
-                          className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest rounded-full text-[10px] transition-all flex items-center gap-2 shadow-xl shadow-blue-600/20 active:scale-95"
-                        >
-                          <Play className="h-4 w-4 fill-white" />
-                          Initiate Stream
-                        </button>
-                        <button 
-                          onClick={() => navigate(`/playlist/${featuredPlaylist.id}`)}
-                          className="px-6 py-3 bg-blue-950/20 border-2 border-[#C0C0C0]/85 hover:bg-blue-900/40 text-white font-black uppercase tracking-widest rounded-full text-[10px] transition-all active:scale-95"
-                        >
-                          Data Details
-                        </button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </section>
-            )}
-
-
-            {/* Protocol Mechanics Accordion */}
-            {shouldShowSection('synthesis_mechanics') && (
-              <section className="section-container">
-                <div className="w-full space-y-3">
-                  <div className="text-center space-y-1">
-                    <Badge variant="outline" className="px-4 py-1 bg-blue-950/20 dark:bg-blue-950/20 border-zinc-700 dark:border-blue-900/30 text-zinc-400 dark:text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] rounded-full">
-                      Protocol_Documentation
-                    </Badge>
-                    <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground">Synthesis Mechanics</h2>
-                    <p className="text-muted-foreground text-xs font-medium">Understanding the decentralized frequency protocol.</p>
-                  </div>
-
-                  <Accordion type="single" collapsible className="w-full space-y-2">
-                    {[
-                      { id: 'item-1', q: 'How does Neural Play work?', a: 'TonJam uses a proprietary BPM-sync relay that rewards both artists and listeners through the TON blockchain. Every stream triggers a micro-transaction, ensuring immediate artist compensation.' },
-                      { id: 'item-2', q: 'What are Artifact Collectibles?', a: 'Artifacts are rare NFT fragments linked to specific audio wave stems. Collecting full sets allows node participants to unlock exclusive stems, alternative mixes, and digital royalties.' },
-                      { id: 'item-3', q: 'Is it completely decentralized?', a: 'The metadata and audio assets are stored across TON Storage and IPFS. This ensures that your music collection remains accessible even if the central interface node is offline.' },
-                      { id: 'item-4', q: 'How can I become a Verified Node?', a: 'Artists can apply for node verification by linking their TON wallet and uploading original genesis tracks. Once verified, you gain access to the Artist Nexus and minting permissions.' }
-                    ].map((item) => (
-                      <AccordionItem 
-                        key={item.id} 
-                        value={item.id} 
-                        className="bg-zinc-100 dark:bg-black border border-border/40 rounded-2xl px-6 transition-all data-[state=open]:bg-zinc-200/50 dark:data-[state=open]:bg-zinc-950/50 overflow-hidden"
-                      >
-                        <AccordionTrigger className="text-sm font-bold uppercase tracking-tight hover:no-underline py-5 text-foreground leading-none">
-                          {item.q}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground text-sm font-medium leading-relaxed pb-6 pr-8 border-t border-border/10 pt-4">
-                           <div className="flex gap-4">
-                             <div className="w-1 h-full bg-primary/20 rounded-full mt-1 flex-shrink-0" />
-                             {item.a}
-                           </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </div>
-              </section>
-            )}
-
-            {/* Tasks */}
-            {shouldShowSection('missions') && (
-              <section className="section-container">
-                 <SectionHeader title="Daily Missions" viewAllLink="/tasks" />
-                 <div className="relative w-full">
-                   {combinedMissions.length > 0 ? (
-                     <MissionCarousel
-                       plugins={[missionAutoplayRef.current]}
-                       className="w-full"
-                       onMouseEnter={missionAutoplayRef.current.stop}
-                       onMouseLeave={missionAutoplayRef.current.reset}
-                       opts={{
-                         align: "start",
-                         loop: true,
-                       }}
-                     >
-                       <MissionCarouselContent className="-ml-4">
-                         {combinedMissions.map((task) => (
-                           <MissionCarouselItem 
-                             key={task.id} 
-                             className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
-                           >
-                             <div className="h-full">
-                               <TaskCard 
-                                 task={task} 
-                                 onClaim={handleTaskClaim} 
-                                 onToggle={handleTaskToggle} 
-                                 onClick={handleTaskClick} 
-                               />
-                             </div>
-                           </MissionCarouselItem>
-                         ))}
-                       </MissionCarouselContent>
-                     </MissionCarousel>
-                   ) : (
-                     <div className="bg-secondary/15 backdrop-blur-md rounded-2xl p-6 text-center border border-border/10">
-                       <p className="text-muted-foreground text-xs font-medium">All telemetry tasks fully completed. Check back in the next epoch.</p>
-                     </div>
-                   )}
-                 </div>
-              </section>
-            )}
-
-            {/* Recently Played */}
-            {shouldShowSection('foryou') && (
-              isLoading ? (
-                <HomeSection title="Jump Back In" icon={Clock}>
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={`recent-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <SkeletonCard />
-                    </div>
-                  ))}
-                </HomeSection>
-              ) : filteredRecentlyPlayed.length > 0 && (
-                <HomeSection title="Jump Back In" icon={Clock} link="/explore/tracks?title=Recently Played&filter=recent">
-                  {filteredRecentlyPlayed.map(track => (
-                    <div key={`recent-${track.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <TrackCard track={track} />
-                    </div>
-                  ))}
-                </HomeSection>
-              )
-            )}
-
-            {/* Recommended Tracks */}
-            {shouldShowSection('foryou') && (
-              isLoading ? (
-                <HomeSection title="Recommended for You" icon={Sparkles}>
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={`rec-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <SkeletonCard />
-                    </div>
-                  ))}
-                </HomeSection>
-              ) : recommendedTracks.length > 0 && (
-                <HomeSection title="Recommended for You" icon={Sparkles} link="/explore/tracks?title=Recommended for You&filter=recommended">
-                  {recommendedTracks.map(track => (
-                    <div key={`rec-track-${track.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <TrackCard track={track} />
-                    </div>
-                  ))}
-                </HomeSection>
-              )
-            )}
-
-            {/* Gemini-Powered: Similar Tracks You Might Love */}
-            {shouldShowSection('foryou') && (isGeneratingSimilar || similarTracks.length > 0) && (
-              <section className="section-container w-full relative z-20">
-                <div className="bg-[#101f42]/40 backdrop-blur-md rounded-2xl p-6 mb-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-[#00b4d8] animate-pulse" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#00b4d8]">Gemini Neural Match</span>
-                      </div>
-                      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">Similar Tracks You Might Love</h2>
-                      {similarExplanation && (
-                        <p className="text-xs text-[#a0aec0] max-w-2xl leading-relaxed font-semibold">
-                          {similarExplanation}
-                        </p>
-                      )}
-                    </div>
-                    {similarTracks.length > 0 && (
-                      <button
-                        onClick={() => playAll(similarTracks)}
-                        className="self-start md:self-auto bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black uppercase text-[10px] tracking-widest py-2.5 px-5 rounded-full flex items-center gap-2 shadow-lg hover:scale-105 transition-all cursor-pointer"
-                      >
-                        <Play className="h-3 w-3 fill-current" />
-                        <span>Play All Mix</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {isGeneratingSimilar ? (
-                    <div className="scroll-row">
-                      {[1, 2, 3, 4].map(i => (
-                        <div key={`similar-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                          <SkeletonCard />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="scroll-row gap-4 py-2 select-none">
-                      {similarTracks.map(track => (
-                        <div key={`similar-track-${track.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                          <TrackCard track={track} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* Trending Tracks */}
-            {shouldShowSection('trending') && (
-              <section className="section-container">
-                <SectionHeader 
-                  title="Trending Signals" 
-                  viewAllLink="/explore/tracks?title=Trending Signals&filter=trending" 
-                />
-                {isLoading ? (
-                  <div className="scroll-row">
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={`trend-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px]">
-                        <SkeletonCard />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="w-full">
-                    <TiltedCoverflow items={trackCoverflowItems} />
-                  </div>
-                )}
-              </section>
-            )}
-
-            {/* Top Charts - Tactical Grid Layout */}
-            {shouldShowSection('top_charts') && (
-              <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-6">
-                  <SectionHeader title="Global_Streaming" viewAllLink="/explore/tracks?title=Global Top 10&filter=trending" />
-                  <div className="-mx-4 sm:mx-0">
-                    <div className="flex flex-col">
-                      {isLoading ? (
-                        [1, 2, 3, 4, 5].map(i => <SkeletonCard key={`chart-loading-${i}`} variant="row" className="!mx-0 rounded-none border-none mb-1" />)
-                      ) : (
-                        trendingTracks.slice(0, 10).map((track, idx) => (
-                          <TrackCard key={`chart-${track.id}`} track={track} variant="row" index={idx} className="!mx-0 rounded-none border-none" />
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <SectionHeader title="Latest_Releases" viewAllLink="/explore/tracks?title=New Releases&filter=new" />
-                  <div className="-mx-4 sm:mx-0">
-                    <div className="flex flex-col">
-                      {isLoading ? (
-                        [1, 2, 3, 4, 5].map(i => <SkeletonCard key={`new-loading-${i}`} variant="row" className="!mx-0 rounded-none border-none mb-1" />)
-                      ) : (
-                        newReleases.map((track, index) => (
-                          <TrackCard 
-                            key={`new-${track.id}`} 
-                            track={track} 
-                            variant="row"
-                            index={index}
-                            className="!mx-0 rounded-none border-none"
-                          />
-                        ))
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Decorative Stats Box */}
-                  <div className="bg-gradient-to-br from-primary/10 via-background to-secondary/30 border border-border rounded-3xl p-6 text-center sm:text-left space-y-3">
-                    <Activity className="h-6 w-6 text-primary mx-auto sm:mx-0" />
-                    <h4 className="text-base font-bold uppercase tracking-tight text-foreground">Protocol_Analytics</h4>
-                    <p className="text-muted-foreground text-[10px] font-medium">Streaming velocity is up 24.8% this cycle. Active node participation at peak efficiency.</p>
-                    <Link to="/jamspace" className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-primary hover:text-primary/80 transition-colors">
-                      View Network Map <ChevronRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Curated Playlists */}
-            {shouldShowSection('playlists_row') && (
-              isLoading ? (
-                <HomeSection title="Curated for You" icon={Sparkles}>
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={`curated-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <SkeletonCard />
-                    </div>
-                  ))}
-                </HomeSection>
-              ) : curatedPlaylists.length > 0 && (
-                <HomeSection title="Curated for You" icon={Sparkles} link="/explore/playlists?title=Curated Playlists&filter=curated">
-                  {curatedPlaylists.map(playlist => (
-                    <div key={`playlist-${playlist.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <PlaylistCard playlist={playlist} onClick={() => navigate(`/playlist/${playlist.id}`)} />
-                    </div>
-                  ))}
-                </HomeSection>
-              )
-            )}
-
-            {/* Genre Grid - Quick Access */}
-            {shouldShowSection('genres_row') && (
-              <HomeSection title="Explore Genres" icon={Sparkles}>
-                {GENRES.map(genre => (
-                  <div key={genre.id} className="flex-shrink-0 w-[140px] sm:w-[160px] snap-start">
-                    <GenreCard genre={genre} />
-                  </div>
-                ))}
-              </HomeSection>
-            )}
-
-            {/* Top NFT Sales */}
-            {shouldShowSection('nfts_row') && (
-              <section className="section-container">
-                <SectionHeader title="NFT Alpha" viewAllLink="/explore/nfts?title=NFT Alpha&filter=top_nfts" />
-                {isLoading ? (
-                  <div className="flex gap-4 overflow-hidden">
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={`nft-alpha-loading-${i}`} className="w-full">
-                         <SkeletonCard />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <NFTAlphaCarousel nfts={topNFTsForCarousel} />
-                )}
-              </section>
-            )}
-
-            {/* Recommended Artists */}
-            {shouldShowSection('artists_row') && (
-              isLoading ? (
-                <HomeSection title="Rising Stars" icon={UserCheck}>
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={`artists-loading-${i}`} className="flex-shrink-0 w-[140px] sm:w-[160px] snap-start">
-                      <div className="animate-pulse bg-muted/20 p-6 rounded-[4px] space-y-4">
-                        <div className="w-24 h-24 rounded-full bg-muted mx-auto"></div>
-                        <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
-                        <div className="h-3 bg-muted rounded w-1/2 mx-auto"></div>
-                      </div>
-                    </div>
-                  ))}
-                </HomeSection>
-              ) : (
-                <section className="section-container">
-                  <SectionHeader title="Rising Stars" viewAllLink="/explore/artists?title=Rising Stars&filter=rising" />
-                  <ArtistSlider artists={recommendedArtists} />
-                </section>
-              )
-            )}
-
-            {/* Recommended NFTs */}
-            {shouldShowSection('nfts_row') && (
-              isLoading ? (
-                 <HomeSection title="Curated Collectibles" icon={Sparkles}>
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={`rec-nfts-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <SkeletonCard />
-                    </div>
-                  ))}
-                </HomeSection>
-              ) : recommendedNFTs.length > 0 && (
-                <HomeSection title="Curated Collectibles" icon={Sparkles} link="/explore/nfts?title=Curated Collectibles&filter=recommended">
-                  {recommendedNFTs.map(nft => (
-                    <div key={`rec-nft-${nft.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <NFTCard nft={nft} />
-                    </div>
-                  ))}
-                </HomeSection>
-              )
-            )}
-
-            {/* Marketplace Highlights */}
-            {shouldShowSection('nfts_row') && (
-              isLoading ? (
-                 <HomeSection title="New in Marketplace" icon={PlusCircle}>
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={`new-nfts-loading-${i}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <SkeletonCard />
-                    </div>
-                  ))}
-                </HomeSection>
-              ) : (
-                <HomeSection title="New in Marketplace" icon={PlusCircle} link="/explore/nfts?title=New in Marketplace&filter=new_nfts">
-                  {newlyMintedNFTs.map(nft => (
-                    <div key={`minted-${nft.id}`} className="flex-shrink-0 w-[150px] sm:w-[200px] snap-start">
-                      <NFTCard nft={nft} />
-                    </div>
-                  ))}
-                </HomeSection>
-              )
-            )}
-
-            {/* Community & Artist CTA Section */}
-            <section className="section-container grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <motion.div 
-                whileHover={{ y: -5 }}
-                className="relative overflow-hidden rounded-2xl bg-secondary/50 dark:bg-black/30 border border-border p-6 sm:p-8 shadow-xl group cursor-pointer"
-                onClick={() => navigate('/jamspace')}
-              >
-                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
-                  <Radio className="h-32 w-32 text-primary" />
-                </div>
-                
-                <div className="relative z-10 space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-inner">
-                    <Music2 className="h-6 w-6" />
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-bold uppercase tracking-tight text-foreground mb-1 leading-tight">Join the JamSpace</h3>
-                    <p className="text-muted-foreground text-[11px] sm:text-xs leading-relaxed max-w-xs font-medium">
-                      The core neural relay for music enthusiasts. Synced community feed, real-time reactions, and collaborative frequency streams.
-                    </p>
-                  </div>
-                  
-                  <div className="pt-2">
-                    <Link to="/jamspace" className="inline-flex items-center gap-3 px-6 py-2.5 bg-primary text-[10px] font-black text-primary-foreground uppercase tracking-[0.2em] rounded-full hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 group/link">
-                      Initiate Sync <ChevronRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                whileHover={{ y: -5 }}
-                className="relative overflow-hidden rounded-2xl bg-secondary/50 dark:bg-black/30 border border-border p-6 sm:p-8 shadow-xl group cursor-pointer"
-                onClick={() => navigate(userProfile.isVerifiedArtist ? '/artist-dashboard' : '/artist-onboarding')}
-              >
-                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-12">
-                  <Disc className="h-32 w-32 text-purple-500" />
-                </div>
-                
-                <div className="relative z-10 space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/20 shadow-inner">
-                    <TrendingUp className="h-6 w-6" />
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-bold uppercase tracking-tight text-foreground mb-1 leading-tight">
-                      {userProfile.isVerifiedArtist ? 'Artist Nexus' : 'Mint Your Legacy'}
-                    </h3>
-                    <p className="text-muted-foreground text-[11px] sm:text-xs leading-relaxed max-w-xs font-medium">
-                      {userProfile.isVerifiedArtist 
-                        ? 'Your command center for NFT monetization, streaming metrics, and audience engagement protocol. Maximize your neural reach.'
-                        : 'Forge your decentralized identity. Upload original waves, mint genesis artifacts, and claim your share of the TON music economy.'}
-                    </p>
-                  </div>
-                  
-                  <div className="pt-2">
-                    <Link 
-                      to={userProfile.isVerifiedArtist ? '/artist-dashboard' : '/artist-onboarding'} 
-                      className="inline-flex items-center gap-3 px-6 py-2.5 bg-purple-600 text-[10px] font-black text-white uppercase tracking-[0.2em] rounded-full hover:bg-purple-500 transition-all shadow-lg shadow-purple-600/20 group/link"
-                    >
-                      {userProfile.isVerifiedArtist ? 'Open Dashboard' : 'Begin Onboarding'} <ChevronRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            </section>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Decentralized Footer Info */}
-      <section className="py-4 flex flex-col items-center text-center space-y-1">
-        <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.4em]">
-          <Globe className="h-3 w-3" />
-          Secured by TON Blockchain
+              ))}
+            </div>
+          </div>
         </div>
-        <p className="text-[9px] text-muted-foreground/30 uppercase tracking-widest">
-          TonJam v2.6.4 • Decentralized Music Protocol
-        </p>
-      </section>
-      <SearchCommandDialog />
-    </motion.div>
+
+
+        {/* ==========================================
+            SECTION 2: TRENDING NFT COLLECTIONS (Horizontal Scroll)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              Trending NFT Collections
+            </h2>
+            <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-[#5B6BFF] flex items-center outline-none cursor-pointer border-none bg-transparent">
+              All <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
+            {mockCollections.map((col) => (
+              <NFTCard 
+                key={col.id} 
+                nft={{
+                  id: col.id,
+                  trackId: col.id,
+                  title: col.name,
+                  owner: col.artist,
+                  creator: col.artist,
+                  price: col.floorPrice,
+                  imageUrl: col.coverUrl,
+                  edition: `${col.mintedCount}/${col.totalLimit}`,
+                  description: '',
+                  isAuction: false
+                } as any}
+                className="w-[165px] shrink-0"
+              />
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 4: NEW DROPS (Horizontal scroll music cards)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-4">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              New Drops
+            </h2>
+            <span className="text-[10px] text-[#9AA0AE] font-medium">12 Fresh Releases</span>
+          </div>
+
+          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
+            {mockNewDrops.map((track) => (
+              <TrackCard 
+                key={track.id} 
+                track={track} 
+                variant="default" 
+                className="w-[165px] shrink-0"
+              />
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 5: TOP TRENDING SONGS (Rank #1 - #5)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
+            Top Trending Songs
+          </h2>
+
+          <div className="rounded-2xl bg-[#0A113A]/50 backdrop-blur-md p-2 space-y-1.5 shadow-md border-none">
+            {topTrendingSongs.map((track, idx) => (
+              <TrackCard 
+                key={track.id} 
+                track={track} 
+                variant="row" 
+                index={idx} 
+                className="w-full" 
+              />
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 6: TRENDING ARTISTS (Horizontal Cards with profile items)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
+            Trending Artists
+          </h2>
+
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 px-0.5">
+            {mappedTrendingArtists.map((art) => (
+              <ArtistCard 
+                key={art.uid} 
+                artist={art} 
+                variant="default" 
+                className="w-[150px] shrink-0 bg-[#0A113A]/50 px-3 py-4 rounded-2xl" 
+              />
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 7: LIVE SPACES
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              Live Spaces
+            </h2>
+            <span className="text-[9px] text-[#FF3A5C] bg-[#FF3A5C]/10 px-2 py-0.5 rounded-full font-black uppercase tracking-widest animate-pulse">
+              On Air
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {liveSpaces.map((room) => (
+              <div
+                key={room.id}
+                className="p-4 rounded-2xl bg-[#0A113A]/60 backdrop-blur-md flex items-center justify-between gap-3 shadow-md border-none"
+              >
+                <div className="space-y-1.5 text-left min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#FF3A5C]" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-[#9AA0AE] leading-none">
+                      {room.host} Space
+                    </span>
+                  </div>
+                  <h4 className="text-xs font-black text-white leading-tight tracking-tight truncate max-w-[220px]">
+                    {room.title}
+                  </h4>
+                  <div className="flex items-center gap-1 text-[10px] text-[#9AA0AE]">
+                    <Users className="w-3.5 h-3.5 text-[#00B4D8]" /> Shared with <span className="font-extrabold text-white">{room.listeners} listening</span>
+                  </div>
+                </div>
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    confetti({ particleCount: 30, spread: 50 });
+                  }}
+                  className="h-8 bg-[#FF3A5C] hover:bg-[#e02d4d] text-white font-bold text-[10px] uppercase tracking-widest px-4 rounded-full cursor-pointer border-none"
+                >
+                  Join
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 8: RECOMMENDED FOR YOU (Curated Tracks, Artists, NFTs)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-4">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              Recommended For Your Vibe
+            </h2>
+            <Sparkles className="w-4 h-4 text-[#F5D547]" />
+          </div>
+
+          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
+            {/* Curated Track recommendation */}
+            {recommendedTracks.map((rec) => (
+              <TrackCard 
+                key={rec.id} 
+                track={rec} 
+                variant="default" 
+                className="w-[165px] shrink-0" 
+              />
+            ))}
+
+            {/* Recommended Music NFT card */}
+            {mappedRecommendedNFTs.map((nft) => (
+              <NFTCard 
+                key={nft.id} 
+                nft={nft} 
+                variant="default" 
+                className="w-[165px] shrink-0" 
+              />
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 10: TOP MARKETPLACE PICKS
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-4 border-none">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              Top Marketplace Picks
+            </h2>
+            <ShoppingBag className="w-4 h-4 text-[#00B4D8]" />
+          </div>
+
+          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
+            {marketplacePicks.map((pick) => (
+              <NFTCard 
+                key={pick.id}
+                nft={{
+                  id: pick.id,
+                  trackId: pick.id,
+                  title: pick.title,
+                  owner: pick.artist,
+                  creator: pick.artist,
+                  artist: pick.artist,
+                  price: pick.price,
+                  imageUrl: pick.image,
+                  edition: '',
+                  description: '',
+                  isAuction: false
+                } as any}
+                className="w-[165px] shrink-0"
+              />
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 11: FAVORITE ARTISTS Latest Releases (User's followed ones)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-lg font-black tracking-tight text-white font-sans">
+              Favorite Artists Updates
+            </h2>
+            <span className="text-[9px] uppercase tracking-widest font-black text-[#2BE08C] bg-[#2BE08C]/15 px-2 py-0.5 rounded-full leading-none">
+              Live Updates
+            </span>
+          </div>
+
+          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-2 px-4 animate-fade-in">
+            {mappedTrendingArtists.filter(art => getIsFollowing(art.uid)).map((art) => (
+              <ArtistCard 
+                key={art.uid} 
+                artist={art}
+                variant="default"
+                className="w-[120px] shrink-0 bg-[#0A113A]/50 px-3 py-4 rounded-2xl"
+              />
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 13: RECENTLY MINTED MUSIC NFTs (Horizontal Scroll)
+            ========================================= */}
+        <div className="space-y-3 text-left">
+          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
+            Recently Minted Music NFTs
+          </h2>
+
+          <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4 animate-fade-in">
+            {mappedRecentlyMintedNFTs.map((nft) => (
+              <NFTCard 
+                key={nft.id} 
+                nft={nft} 
+                variant="default"
+                className="w-[165px] shrink-0"
+                onAction={(nftItem) => {
+                  if (nftItem.owner !== userProfile?.walletAddress) {
+                    handleMintNFT(nftItem.id);
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+
+        {/* ==========================================
+            SECTION 14: COMMUNITY ACTIVITY FEED (Infinite Scrolling Support)
+            ========================================== */}
+        <div className="space-y-3 text-left">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-lg font-black tracking-tight text-white">
+              Community Activity Feed
+            </h2>
+            <Activity className="w-4.5 h-4.5 text-[#2BE08C] animate-pulse" />
+          </div>
+
+          <div className="rounded-2xl bg-[#0A113A]/50 p-4 space-y-3.5 border-none shadow-md text-left">
+            <div className="space-y-3.5">
+              {communityActivities.map((act) => (
+                <div
+                  key={act.id}
+                  className="flex items-start justify-between gap-3 text-xs pb-3 border-b border-white/[0.02] last:border-b-0 last:pb-0"
+                >
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <Avatar className="w-7 h-7 bg-[#050A24] rounded-lg shrink-0 overflow-hidden flex items-center justify-center">
+                      <img src={act.avatar} alt="" className="w-6 h-6 object-contain" />
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="text-[11.5px] leading-tight text-[#9AA0AE]">
+                        <span className="font-extrabold text-white">{act.username}</span> {act.action}{" "}
+                        <span className="font-semibold text-white tracking-tight" style={{ color: act.accentColor }}>{act.target}</span>
+                      </p>
+                      <span className="text-[9px] text-[#9AA0AE]/60 block mt-0.5 font-medium">{act.time}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={loadMoreActivities}
+              className="w-full h-8 text-[9px] font-black uppercase tracking-widest bg-white/[0.02] text-[#9AA0AE]/80 hover:bg-white/5 border-none rounded-xl mt-2 cursor-pointer flex items-center gap-1 justify-center leading-none"
+            >
+              Load Older Stream Activities <ArrowUpRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+
+
+        {/* DESIGN FOOTER & ORACLE PROTOCOL NOTE */}
+        <div className="pt-6 text-center space-y-1.5 pb-10">
+          <p className="text-[8.5px] uppercase tracking-[0.22em] text-[#9AA0AE]/40 font-black">
+            TonJam Decentralized Music Marketplace
+          </p>
+          <div className="flex items-center justify-center gap-1.5 text-white/30 text-[8px] font-bold uppercase tracking-widest">
+            <Disc className="w-3.5 h-3.5 text-[#00B4D8] animate-spin" />
+            <span>Smart Node Web3 Interface Connected</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
   );
 };
 

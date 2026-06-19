@@ -520,61 +520,51 @@ const Tasks: React.FC = () => {
           transition={{ delay: 0.1 }}
           className="relative overflow-hidden rounded-2xl bg-[#0A113A]/60 backdrop-blur-lg p-5 border-none"
         >
-          {/* Inner ambient shine overlay */}
-          <div className="absolute -top-12 -right-12 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
+          {/* Subtle Ambient Glow */}
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#5B6BFF]/5 rounded-full blur-2xl pointer-events-none" />
 
-          <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center justify-between gap-4 mb-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center animate-pulse">
-                <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
+              <div className="w-10 h-10 rounded-xl bg-[#5B6BFF]/10 flex items-center justify-center">
+                <Flame className="w-6 h-6 text-[#5B6BFF] fill-[#5B6BFF]/20" />
               </div>
               <div className="text-left">
                 <span className="text-[10px] uppercase font-black tracking-widest text-[#9AA0AE]">
                   Streak Multiplier
                 </span>
                 <h3 className="text-[15px] font-bold text-white flex items-center gap-2">
-                  🔥 Current Streak: <span className="text-orange-400 font-extrabold">7 Days</span>
+                  Current Streak: <span className="text-[#00B4D8] font-extrabold">7 Days</span>
                 </h3>
               </div>
             </div>
 
             <div className="text-right">
               <span className="text-[11px] font-black text-[#2BE08C] bg-[#2BE08C]/10 px-2.5 py-1 rounded-full">
-                7 / 30 Days
+                7 / 30
               </span>
             </div>
           </div>
 
           {/* Quick Mon-Sun Nodes */}
-          <div className="grid grid-cols-7 gap-2 mb-3 pt-1">
+          <div className="grid grid-cols-7 gap-2 pt-1">
             {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => {
-              const isActive = i < 6; // Active streak includes Monday -> Saturday
-              const isToday = i === 6; // Sunday is active today!
+              const isActive = i < 6; 
+              const isToday = i === 6; 
               return (
                 <div 
                   key={i} 
-                  className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
+                  className={`flex flex-col items-center justify-center py-2 rounded-xl transition-all ${
                     isActive 
-                      ? "bg-gradient-to-b from-orange-500 to-[#FF3A5C] text-white shadow-lg" 
+                      ? "bg-[#5B6BFF] text-white shadow-md shadow-[#5B6BFF]/20" 
                       : isToday 
                         ? "bg-[#5B6BFF]/20 border border-[#5B6BFF]/40 text-[#5B6BFF] font-bold" 
-                        : "bg-[#101A3B] text-[#9AA0AE]/40"
+                        : "bg-[#050A24] text-[#9AA0AE]/40"
                   }`}
                 >
-                  <span className="text-[9px] font-bold uppercase tracking-wider mb-1">{day}</span>
-                  {isActive ? (
-                    <Flame className="w-3 h-3 fill-white text-white" />
-                  ) : (
-                    <Clock className="w-3 h-3 opacity-60" />
-                  )}
+                  <span className="text-[9px] font-bold uppercase tracking-wider">{day}</span>
                 </div>
               );
             })}
-          </div>
-
-          <div className="flex items-center justify-between text-xs text-[#9AA0AE] pt-2 border-t border-white/[0.03]">
-            <span>Day 30 Milestone Reward</span>
-            <span className="font-extrabold text-[#2BE08C]">+500 TJ</span>
           </div>
         </motion.div>
 

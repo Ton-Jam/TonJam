@@ -263,11 +263,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
 
   const handleCardClickInner = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (track.tokenGating?.enabled && !hasAccess) {
-      addNotification(`This track is exclusive to ${track.tokenGating.tokenSymbol} holders.`, 'warning');
-      return;
-    }
-    playTrack(track);
+    navigate(`/track/${track.id}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
@@ -500,11 +496,16 @@ const TrackCard: React.FC<TrackCardProps> = ({
     <ContextMenu>
       <ContextMenuTrigger>
         <motion.div 
+          layout
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ y: -8, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`group relative cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent hover:border-blue-500/20 hover:bg-white/[0.03] border border-transparent w-full ${className}`}
+          whileHover={{ y: -4, scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          className={cn(
+            "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent w-full",
+            className
+          )}
           onClick={handleCardClickInner}
           onKeyDown={(e) => handleKeyDown(e, () => handleCardClickInner(e as any))}
           role="button"
@@ -564,76 +565,36 @@ const TrackCard: React.FC<TrackCardProps> = ({
           </div>
 
           {/* Content Below Card */}
-          <div className="px-0.5 flex flex-col">
-            <div className="flex justify-between items-start gap-1">
-              <h3 className={`text-xs font-black leading-tight line-clamp-2 whitespace-normal break-words uppercase tracking-tighter ${isActive ? 'text-primary' : 'text-foreground'}`}>
+          <div className="px-0.5 flex flex-col items-start w-full gap-1 mt-2">
+            <div className="flex justify-between items-start gap-1 w-full">
+              <h3 className={`text-[10px] font-black leading-tight line-clamp-2 whitespace-normal break-words uppercase tracking-tighter ${isActive ? 'text-primary' : 'text-foreground'}`}>
                 {track.title}
               </h3>
               <MoreOptionsButton />
             </div>
             
-            <div className="flex items-center gap-1 mt-1">
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <p 
-                    className="text-[10px] font-black text-foreground/80 uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
-                    onClick={handleArtistClick}
-                  >
-                    {track.artist}
-                  </p>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-64 bg-zinc-950/90 backdrop-blur-xl border-white/10 p-4 z-[100]">
-                  <div className="flex justify-between space-x-4">
-                    <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
-                      <AvatarImage src={artist?.avatarUrl} />
-                      <AvatarFallback className="text-[10px] bg-blue-500/10 text-blue-400">{track.artist?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-1 flex-1">
-                      <h4 className="text-[11px] font-black uppercase tracking-tighter text-white">{track.artist}</h4>
-                      <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
-                        {artist?.followers?.toLocaleString() || '0'} Followers
-                      </p>
-                      <button className="w-full mt-2 py-1.5 bg-blue-600 rounded-[4px] text-[8px] font-black text-white uppercase tracking-widest hover:bg-blue-500 transition-colors">
-                        View Dossier
-                      </button>
-                    </div>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-            </div>
+            <p 
+              className="text-[9px] font-black text-foreground/60 uppercase tracking-[0.2em] truncate hover:text-primary transition-colors cursor-pointer hover:underline"
+              onClick={handleArtistClick}
+            >
+              {track.artist}
+            </p>
 
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-[9px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
-                    <Headphones className="w-3 h-3" />
-                    {formatNumber(track.playCount || 0)}
-                </div>
-                {!track.isNFT && track.price && (
-                    <div className="flex items-center gap-1 text-[9px] font-medium text-amber-500 uppercase tracking-[0.2em]">
-                        <Coins className="w-3 h-3" />
-                        {track.price} TON
-                    </div>
-                )}
+            <div className="flex items-center justify-between w-full mt-2">
+              <div className="flex items-center gap-1 text-[9px] font-medium text-muted-foreground uppercase tracking-[0.2em]">
+                  <Headphones className="w-3 h-3" />
+                  {formatNumber(track.playCount || 0)}
               </div>
 
-              {associatedNft ? (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/nft/${associatedNft.id}`);
-                  }}
-                  className="text-[8px] font-black text-white hover:text-white transition-all px-2 py-1 bg-purple-600 hover:bg-purple-550 rounded-[4px] uppercase tracking-[0.2em] shadow-md shadow-purple-600/10 border-none flex items-center gap-1 cursor-pointer"
-                >
-                  <Gem className="w-2.5 h-2.5 text-white" /> NFT
-                </button>
-              ) : onMint && !track.isNFT ? (
-                <button
-                  onClick={handleMint}
-                  className="text-[8px] font-black text-white hover:text-white transition-all px-2 py-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-[4px] uppercase tracking-[0.2em] shadow-md shadow-blue-600/10 border-none cursor-pointer"
-                >
-                  MINT
-                </button>
-              ) : null}
+              <button
+                onClick={handlePlay}
+                className={cn(
+                    "cursor-pointer transition-all rounded-full hover:scale-105 active:scale-95 h-6 px-3 text-[9px] font-black uppercase tracking-[0.1em] text-white",
+                    'bg-gradient-to-r from-blue-600 to-blue-400 shadow-md shadow-blue-500/20'
+                )}
+              >
+                Play
+              </button>
             </div>
           </div>
         </motion.div>

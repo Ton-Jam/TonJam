@@ -470,54 +470,7 @@ const TrackDetail: React.FC = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {track.price && parseFloat(track.price) > 0 && (
-                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-xl space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[9px] font-bold text-emerald-500/50 uppercase tracking-widest mb-4">Track Acquisition Price</p>
-                        <div className="flex items-baseline gap-4">
-                          <span className="text-[20px] font-black tracking-tighter text-emerald-500">{track.price} TON</span>
-                        </div>
-                      </div>
-                      <ShoppingCart className="w-8 h-8 text-emerald-500/20" />
-                    </div>
-                    <button
-                      onClick={handlePurchase}
-                      disabled={isProcessingPurchase || userProfile.ownedTrackIds?.includes(track.id) || userProfile.uid === track.artistId}
-                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50"
-                    >
-                      {isProcessingPurchase 
-                        ? "Processing Neural Link..." 
-                        : userProfile.ownedTrackIds?.includes(track.id) 
-                          ? "Artifact Owned" 
-                          : userProfile.uid === track.artistId
-                            ? "Your Artifact"
-                            : "Purchase Track Access"}
-                    </button>
-                  </div>
-                )}
-
-                {userProfile.uid === track.artistId && (
-                  <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 backdrop-blur-xl space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                        <Zap className="h-5 w-5 text-purple-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">Mint as NFT</h3>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Turn this track into a digital artifact</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => navigate('/mint', { state: { track } })}
-                      className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-foreground rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20"
-                    >
-                      Mint NFT
-                    </button>
-                  </div>
-                )}
-              </div>
+              <></>
             )}
           </div>
 

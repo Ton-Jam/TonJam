@@ -100,7 +100,7 @@
 }
 
 .dark {
-  --background: #050a24;
+  --background: #0A113A;
   --foreground: #f8fafc;
   --card: #0a113a;
   --card-foreground: #f8fafc;
@@ -123,14 +123,14 @@
   --ring: rgba(91,107,255,0.25);
   --silver: #c0c0c0;
 
-  --bg-dark: #050a24;
+  --bg-dark: #0A113A;
   --bg-surface: #0a113a;
   --text-muted: #9aa0ae;
   --silver-border: rgba(192, 192, 192, 0.3);
   --primary-blue: #00b4d8;
   --text-main: #ffffff;
 
-  --tonjam-navy: #050a24;
+  --tonjam-navy: #0A113A;
   --tonjam-navy-light: #0a113a;
 
   --surface: #0a113a;
@@ -169,7 +169,7 @@
   --shadow-lg: none;
   --shadow-xl: none;
   --shadow-2xl: none;
-  --sidebar: #050a24;
+  --sidebar: #0A113A;
   --sidebar-foreground: #f2f4f8;
   --sidebar-primary: #5b6bff;
   --sidebar-primary-foreground: #ffffff;
@@ -301,11 +301,11 @@
 
   /* Force dark-space background globally on all components in dark mode */
   .dark {
-    background-color: #050a24 !important;
+    background-color: #0A113A !important;
   }
   .dark body,
   .dark .bg-background {
-    background-color: #050a24 !important;
+    background-color: #0A113A !important;
   }
   .dark .bg-zinc-950,
   .dark .bg-zinc-900,
@@ -313,7 +313,7 @@
   .dark .bg-zinc-950\/60,
   .dark .bg-zinc-950\/80,
   .dark .bg-zinc-900\/50 {
-    background-color: #050a24 !important;
+    background-color: #0A113A !important;
   }
   .dark .bg-card,
   .dark .bg-secondary,

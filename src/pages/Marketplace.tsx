@@ -40,7 +40,7 @@ import { Avatar } from "@/components/ui/avatar";
 
 // Import custom reusable subcomponents
 import { AnalyticsCard } from "@/components/marketplace/AnalyticsCard";
-import { MarketplaceNFTCard } from "@/components/marketplace/MarketplaceNFTCard";
+import NFTCard from "@/components/NFTCard";
 import { CollectionCard } from "@/components/marketplace/CollectionCard";
 import { RankingCard } from "@/components/marketplace/RankingCard";
 
@@ -315,7 +315,7 @@ const Marketplace: React.FC = () => {
       >
         {/* --- SECTION 2: MARKETPLACE ANALYTICS --- */}
         <motion.section variants={itemVariants} className="w-full px-4 md:px-8">
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
+          <div className="-mx-4 flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory px-4">
             {ANALYTICS_DATA.map((card, idx) => (
               <AnalyticsCard
                 key={`analytics-${idx}`}
@@ -464,9 +464,9 @@ const Marketplace: React.FC = () => {
 
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
             {safeNFTs.slice(0, 8).map((nft) => (
-              <MarketplaceNFTCard
+              <NFTCard
                 key={`trending-${nft.id}`}
-                nft={nft}
+                nft={{ ...nft, owner: 'marketplace' } as any}
                 className="w-52 flex-shrink-0 snap-start"
               />
             ))}
@@ -487,7 +487,7 @@ const Marketplace: React.FC = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {filteredNewDrops.slice(0, 8).map((nft) => (
-              <MarketplaceNFTCard key={`drop-${nft.id}`} nft={nft} />
+              <NFTCard key={`drop-${nft.id}`} nft={{ ...nft, owner: 'marketplace' } as any} />
             ))}
           </div>
         </motion.section>
@@ -655,9 +655,9 @@ const Marketplace: React.FC = () => {
 
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
             {safeNFTs.slice(3, 9).map((nft) => (
-              <MarketplaceNFTCard
+              <NFTCard
                 key={`rec-${nft.id}`}
-                nft={nft}
+                nft={{ ...nft, owner: 'marketplace' } as any}
                 className="w-52 flex-shrink-0 snap-start"
               />
             ))}
@@ -678,9 +678,9 @@ const Marketplace: React.FC = () => {
 
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
             {safeNFTs.slice(6, 12).reverse().map((nft) => (
-              <MarketplaceNFTCard
+              <NFTCard
                 key={`recent-${nft.id}`}
-                nft={nft}
+                nft={{ ...nft, owner: 'marketplace' } as any}
                 className="w-48 flex-shrink-0 snap-start"
               />
             ))}

@@ -117,22 +117,12 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onAction) {
-      onAction(nft);
-    } else if (isOwner && nft.listingType) {
-      setIsManageModalOpen(true);
-    } else if (isOwner && !nft.listingType) {
-      setIsSellModalOpen(true);
-    } else if (!isOwner && nft.listingType !== 'auction') {
-      navigate(`/nft/${nft.id}`);
-    } else {
-      navigate(`/nft/${nft.id}`);
-    }
+    navigate(`/nft/${nft.id}`);
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/nft/${nft.id}`);
+    handlePlayClick(e);
   };
 
   const handleShare = async (e?: React.MouseEvent) => {
@@ -369,7 +359,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                       transition={{ duration: 0.3, ease: "easeOut" }}
                       className="text-[12px] font-bold text-foreground tracking-tighter inline-block"
                     >
-                      {nft.price}
+                      {nft.price.replace(' TON', '')}
                     </motion.span>
                   </div>
                </div>
@@ -503,7 +493,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ nft, variant = 'default', onAction, i
                           transition={{ duration: 0.3, ease: "easeOut" }}
                           className="text-sm font-black text-foreground tracking-tighter inline-block"
                         >
-                          {nft.price}
+                          {nft.price.replace(' TON', '')}
                         </motion.span>
                      </div>
                   </div>

@@ -879,10 +879,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           // Process real royalty distribution
           try {
             await royaltyService.processStreamRoyalty(currentTrack);
-            addNotification(
-              `Stream royalty processed for "${currentTrack.title}"`,
-              "info",
-            );
           } catch (error) {
             console.error("Failed to process stream royalty:", error);
           }
@@ -1745,7 +1741,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const mintNFT = async (trackId: string, tonConnectUI: any) => {
     setIsLoading(true);
     try {
-      if (!userProfile.uid) throw new Error("User must be logged in");
+      if (!auth.currentUser) throw new Error("User must be logged in");
 
       const trackRef = doc(db, "tracks", trackId);
       const trackSnap = await getDoc(trackRef);
