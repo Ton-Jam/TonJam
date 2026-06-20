@@ -630,14 +630,14 @@ const Profile: React.FC = () => {
   </div>
 
   {/* Main Dashboard Layout */}
-  <div className="max-w-7xl mx-auto px-0 md:px-4">
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-8">
+  <div className="w-full px-4 sm:px-6 md:px-8 py-6">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       {/* Main Column (Feed/Content) */}
-      <div className="lg:col-span-8 bg-background/50 min-h-screen">
+      <div className="lg:col-span-8 space-y-8">
         {activeTab === 'feed' && (
-          <div className="animate-in fade-in duration-500">
+          <div className="animate-in fade-in duration-500 bg-background/50 rounded-3xl border border-white/5 overflow-hidden">
             {/* Quick Share (X style) */}
-            <div className="px-5 py-4 border-b border-white/5 bg-background/40 backdrop-blur-md">
+            <div className="px-5 py-4 border-b border-white/5 backdrop-blur-md">
               <form onSubmit={handleSharePost} className="flex gap-4">
                 <Avatar className="w-12 h-12 border border-white/5">
                   <AvatarImage src={localUser.avatar || getPlaceholderImage(`user-${localUser.uid}`)} />
@@ -647,21 +647,21 @@ const Profile: React.FC = () => {
                     value={newPostContent}
                     onChange={(e) => setNewPostContent(e.target.value)}
                     placeholder="What is happening?!"
-                    className="w-full bg-transparent text-xl text-white outline-none resize-none pt-2 placeholder:text-muted-foreground/30 min-h-[50px]"
+                    className="w-full bg-transparent text-xl text-white outline-none resize-none pt-2 placeholder:text-muted-foreground/30 min-h-[50px] font-sans"
                   />
                   <div className="flex justify-between items-center border-t border-white/5 pt-3">
                     <div className="flex items-center gap-2">
                        {currentTrack && (
                          <div className="flex items-center gap-2 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
                            <Disc className="h-3 w-3 text-blue-500 animate-spin-slow" />
-                           <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{currentTrack.title}</span>
+                           <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest font-sans">{currentTrack.title}</span>
                          </div>
                        )}
                     </div>
                     <button 
                       type="submit"
                       disabled={!newPostContent.trim() && !currentTrack}
-                      className="px-6 py-2 bg-blue-500 text-white rounded-full font-black text-xs uppercase tracking-widest disabled:opacity-50 hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20"
+                      className="px-6 py-2 bg-blue-500 text-white rounded-full font-bold text-xs uppercase tracking-widest disabled:opacity-50 hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 font-sans"
                     >
                       Post
                     </button>

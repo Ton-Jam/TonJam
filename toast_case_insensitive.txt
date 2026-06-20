@@ -1,0 +1,184 @@
+src/components/ui/sonner.tsx:4:import { Toaster as Sonner, type ToasterProps } from "sonner"
+src/components/ui/sonner.tsx:12:const Toaster = ({ ...props }: ToasterProps) => {
+src/components/ui/sonner.tsx:17:      theme={theme as ToasterProps["theme"]}
+src/components/ui/sonner.tsx:18:      className="toaster group"
+src/components/ui/sonner.tsx:44:      toastOptions={{
+src/components/ui/sonner.tsx:46:          toast: "cn-toast",
+src/components/ui/sonner.tsx:54:export { Toaster }
+src/components/ArtistLeaderboard.tsx:10:import { toast } from 'sonner';
+src/components/ArtistLeaderboard.tsx:30:        toast.success("Follow status updated");
+src/components/ArtistLeaderboard.tsx:32:        toast.error("Failed to update follow status");
+src/components/TaskCard.tsx:5:import { toast } from 'sonner';
+src/components/TaskCard.tsx:29:      toast.success(`Successfully claimed ${task.reward} TJ!`);
+src/components/TaskCard.tsx:38:      toast.error("Failed to claim reward");
+src/components/AIAssistant.tsx:7:import { toast } from 'sonner';
+src/components/AIAssistant.tsx:88:      toast.error("Sonic communication failed.");
+src/components/ShareNFTDialog.tsx:13:import { toast } from 'sonner';
+src/components/ShareNFTDialog.tsx:30:      toast.success("Link copied to clipboard!");
+src/components/ShareNFTDialog.tsx:33:      toast.error("Failed to copy link");
+src/components/AuthModal.tsx:8:import { toast } from 'sonner';
+src/components/AuthModal.tsx:61:      toast.success('Wallet Connected', {
+src/components/AuthModal.tsx:66:      toast.error('Wallet Connection Failed', {
+src/components/AuthModal.tsx:100:      toast.error('Email Required', {
+src/components/AuthModal.tsx:109:      toast.success('Reset Email Sent', {
+src/components/AuthModal.tsx:113:      toast.error('Reset Failed', {
+src/components/AuthModal.tsx:126:        toast.success('Access Granted', {
+src/components/AuthModal.tsx:133:        toast.success('Protocol Initialized', {
+src/components/AuthModal.tsx:139:      toast.error('Authentication Failed', {
+src/components/BuyNFTModal.tsx:13:import { toast } from 'sonner';
+src/components/BuyNFTModal.tsx:87:      const toastId = toast.loading("Purchase processing...", {
+src/components/BuyNFTModal.tsx:92:          toast.loading("Transaction initiated...", { 
+src/components/BuyNFTModal.tsx:93:            id: toastId,
+src/components/BuyNFTModal.tsx:97:          toast.loading("Blockchain confirming...", { 
+src/components/BuyNFTModal.tsx:98:            id: toastId, 
+src/components/BuyNFTModal.tsx:102:          toast.success("Transaction success!", { 
+src/components/BuyNFTModal.tsx:103:            id: toastId,
+src/components/BuyNFTModal.tsx:112:          toast.error("Transaction failed", { 
+src/components/BuyNFTModal.tsx:113:            id: toastId,
+src/components/ReportNFTModal.tsx:22:import { toast } from "sonner";
+src/components/ReportNFTModal.tsx:52:      toast.error("Please select a reason for reporting.");
+src/components/ReportNFTModal.tsx:72:      toast.success("Artifact reported. Our moderation protocols will review the signal.");
+src/components/ReportNFTModal.tsx:79:      toast.error("Failed to submit report. Please try again later.");
+src/components/ArtistProfileHeader.tsx:7:import { toast } from 'sonner';
+src/components/ArtistProfileHeader.tsx:36:      toast(isFollowing ? "Signal disconnected" : "Neural connection established");
+src/components/CollaboratorManager.tsx:22:import { toast } from 'sonner';
+src/components/CollaboratorManager.tsx:57:      toast.error("Please enter a username or wallet address");
+src/components/CollaboratorManager.tsx:73:    toast.success(`Added ${newCollaborator.name} as ${newCollaborator.role}`);
+src/components/CollaboratorManager.tsx:78:    toast.info("Collaborator removed");
+src/components/FanPowerTracker.tsx:20:import { toast } from 'sonner';
+src/components/FanPowerTracker.tsx:230:      toast.error('Please register/login to track your fan engagement history');
+src/components/FanPowerTracker.tsx:249:      toast.success(`Engagement reported! Fan power boosted by +50 XP and earned +15 ${tokenTicker}!`);
+src/components/FanPowerTracker.tsx:259:      toast.error('Please sign in first');
+src/components/FanPowerTracker.tsx:268:    toast.success("Engagement multiplier applied! Added +250 XP total impact points.");
+src/components/RoyaltyConfigModal.tsx:3:import { toast } from 'sonner';
+src/components/RoyaltyConfigModal.tsx:66:      toast.error("Total percentage cannot exceed 100%");
+src/components/SponsorshipSubmissionModal.tsx:7:import { toast } from 'sonner';
+src/components/SponsorshipSubmissionModal.tsx:30:      toast.error("Please fill in all required fields");
+src/components/FanTokenHub.tsx:23:import { toast } from 'sonner';
+src/components/FanTokenHub.tsx:188:      toast.error('Please sign in to buy fan tokens');
+src/components/FanTokenHub.tsx:194:      toast.error(`You need ${costInJam} JAM to buy ${purchaseAmount} tokens, but you only have ${(userProfile.jamBalance || 0).toFixed(2)} JAM.`);
+src/components/FanTokenHub.tsx:207:      toast.success(`Successfully obtained ${purchaseAmount} ${tokenTicker}!`);
+src/components/FanTokenHub.tsx:210:      toast.error(err.message || 'Failed to complete swap');
+src/components/FanTokenHub.tsx:219:      toast.error('Please sign in to complete daily challenges');
+src/components/FanTokenHub.tsx:233:      toast.error('Incorrect! Try reviewing the bio and try again tomorrow.');
+src/components/FanTokenHub.tsx:247:      toast.error('Please sign in to unlock exclusive content');
+src/components/FanTokenHub.tsx:252:      toast.error(`Insufficient ${tokenTicker} tokens! You need ${tokenCost} but only have ${tokenBalance}.`);
+src/components/FanTokenHub.tsx:257:      toast.loading(`Unlocking content...`);
+src/components/FanTokenHub.tsx:260:      toast.dismiss();
+src/components/FanTokenHub.tsx:261:      toast.success('Decentralized content vault unlocked successfully!');
+src/components/FanTokenHub.tsx:263:      toast.dismiss();
+src/components/FanTokenHub.tsx:264:      toast.error(err.message || 'Error unlocking content');
+src/components/FanTokenHub.tsx:275:      toast.error('Please specify a question and at least 2 voting choices.');
+src/components/FanTokenHub.tsx:288:      toast.success('Proposal posted securely to the Artist DAO Board!');
+src/components/FanTokenHub.tsx:293:      toast.error('Failed to draft decision poll');
+src/components/FanTokenHub.tsx:302:      toast.error('Please sign in to interact with governance');
+src/components/FanTokenHub.tsx:307:      toast.error(`You need at least 1 ${tokenTicker} token to participate in artist governance decision!`);
+src/components/FanTokenHub.tsx:317:      toast.success(`Vote cast securely! Your ${tokenBalance} ${tokenTicker} voting power applied, and earned +10 tokens!`);
+src/components/FanTokenHub.tsx:319:      toast.error('Friction on decentralized ledger. Try voting again.');
+src/components/FanTokenHub.tsx:530:              toast.success('Discout voucher copied successfully!');
+src/components/SoundscapeMixer.tsx:22:import { toast } from 'sonner';
+src/components/SoundscapeMixer.tsx:186:      toast.error("Audio Synthesis not fully supported in this environment.");
+src/components/SoundscapeMixer.tsx:696:    toast.success(`Activated: ${preset.name} environment`);
+src/components/SoundscapeMixer.tsx:705:    toast.info("Soundscape reset. Silence restored.");
+src/pages/Notifications.tsx:41:  const { followedUserIds, artists, firestoreUsers, addNotification: addToast, userProfile } = useAudio();
+src/pages/Notifications.tsx:135:    addToast("All signals marked as read.", "success");
+src/pages/Notifications.tsx:141:    addToast("Notification cache cleared.", "info");
+src/pages/Notifications.tsx:161:      addToast("Enable Outbid alerts in Settings to receive browser banners!", "warning");
+src/pages/Notifications.tsx:172:    addToast("Simulated outbid signal broadcasted to relay!", "success");
+src/pages/Governance.tsx:26:import { toast } from 'sonner';
+src/pages/Governance.tsx:47:      toast.error('Please sign in to vote');
+src/pages/Governance.tsx:54:      toast.success('Vote cast successfully!');
+src/pages/Governance.tsx:56:      toast.error(error.message || 'Failed to cast vote');
+src/pages/Governance.tsx:190:      toast.success('Proposal submitted successfully!');
+src/pages/Governance.tsx:193:      toast.error(error.message || 'Failed to submit proposal');
+src/pages/MintNFT.tsx:17:import { toast } from 'sonner';
+src/pages/MintNFT.tsx:211:        toast.success(`Track "${file.name}" loaded successfully.`);
+src/pages/MintNFT.tsx:230:        toast.success(`Visual asset "${file.name}" loaded successfully.`);
+src/pages/MintNFT.tsx:379:      const toastId = toast.loading("Minting started...");
+src/pages/MintNFT.tsx:381:        if (status === 'pending') toast.loading("Confirming transaction...", { id: toastId });
+src/pages/MintNFT.tsx:382:        else if (status === 'confirming') toast.loading("Blockchain confirming...", { id: toastId });
+src/pages/MintNFT.tsx:383:        else if (status === 'success') toast.success("Minting successful!", { id: toastId });
+src/pages/MintNFT.tsx:384:        else if (status === 'failed') toast.error("Minting failed.", { id: toastId });
+src/pages/Login.tsx:12:import { toast } from 'sonner';
+src/pages/Login.tsx:168:      toast.error('Email Required', {
+src/pages/Login.tsx:176:      toast.success('Reset Email Sent');
+src/pages/Login.tsx:178:      toast.error('Reset Failed', {
+src/pages/Login.tsx:189:      toast.success('Welcome Back');
+src/pages/Login.tsx:192:      toast.error('Authentication Failed', {
+src/pages/Login.tsx:205:      toast.success('Account Created');
+src/pages/Login.tsx:208:      toast.error('Authentication Failed', {
+src/pages/Login.tsx:221:        toast.error("File Too Large", { description: "Max visual size is 2MB" });
+src/pages/Login.tsx:237:      toast.error("No Wallet Connected");
+src/pages/Login.tsx:287:        toast.success('Sonic Profile Registered', {
+src/pages/Login.tsx:294:      toast.error('Node Launch Failed', {
+src/pages/Login.tsx:316:    toast.info("Wallet Disconnected");
+src/pages/Login.tsx:640:                                toast.success("WalletConnected Successfully");
+src/pages/AdminDashboard.tsx:32:import { toast } from 'sonner';
+src/pages/AdminDashboard.tsx:80:      toast.success('Database re-seeded with high-quality mock data!');
+src/pages/AdminDashboard.tsx:83:      toast.error('Failed to re-seed database');
+src/pages/AdminDashboard.tsx:113:      toast.success('Funds distributed and proposal executed!');
+src/pages/AdminDashboard.tsx:116:      toast.error('Failed to execute treasury proposal');
+src/pages/AdminDashboard.tsx:189:      toast.success(`Artist ${request.artistName} verified!`);
+src/pages/AdminDashboard.tsx:192:      toast.error('Failed to approve verification');
+src/pages/AdminDashboard.tsx:213:      toast.success('Verification rejected');
+src/pages/AdminDashboard.tsx:216:      toast.error('Failed to reject verification');
+src/pages/AdminDashboard.tsx:231:      toast.success(`Role updated successfully to ${newRole}`);
+src/pages/AdminDashboard.tsx:234:      toast.error('Failed to update user role');
+src/pages/AdminDashboard.tsx:242:      toast.error("Please connect your wallet first");
+src/pages/AdminDashboard.tsx:252:      toast.success("Collection contract deployment initiated!");
+src/pages/AdminDashboard.tsx:255:      toast.error("Failed to deploy collection contract");
+src/pages/AdminDashboard.tsx:263:      toast.error("Please connect your wallet first");
+src/pages/AdminDashboard.tsx:272:      toast.success("Marketplace contract deployment initiated!");
+src/pages/AdminDashboard.tsx:275:      toast.error("Failed to deploy marketplace contract");
+src/pages/NFTDetail.tsx:264:      import('sonner').then(({ toast }) => {
+src/pages/NFTDetail.tsx:265:        toast.success("Price Alert Configured", {
+src/pages/NFTDetail.tsx:271:      import('sonner').then(({ toast }) => {
+src/pages/NFTDetail.tsx:272:        toast.info("Price Alert Cleared", {
+src/pages/NFTDetail.tsx:303:      import('sonner').then(({ toast }) => {
+src/pages/NFTDetail.tsx:304:        toast.success(`Alert Delta Updated: ${percent}%`, {
+src/pages/NFTDetail.tsx:322:    import('sonner').then(({ toast }) => {
+src/pages/NFTDetail.tsx:323:      toast.custom((t) => (
+src/pages/NFTDetail.tsx:590:        // For now, we'll just show a toast if the current user IS the one who was outbid.
+src/pages/NFTDetail.tsx:592:            import('sonner').then(({ toast }) => {
+src/pages/NFTDetail.tsx:593:              toast.error("You've been outbid!", {
+src/pages/ArtistProfile.tsx:30:import { toast } from 'sonner';
+src/pages/ArtistProfile.tsx:202:      toast(isFollowing ? "Unfollowed" : "Followed");
+src/pages/ArtistProfile.tsx:440:                        toast("Wallet address copied to clipboard!");
+src/pages/Wallet.tsx:26:import { toast } from 'sonner';
+src/pages/Wallet.tsx:66:      toast.success(`${type} Address Copied`, {
+src/pages/Wallet.tsx:73:      toast.error("Failed to copy address");
+src/pages/Wallet.tsx:114:      toast.warning("Please connect a TON or MetaMask wallet to purchase");
+src/pages/Wallet.tsx:127:      toast.warning("Please connect a wallet to subscribe to premium");
+src/pages/Wallet.tsx:166:      toast.error(`Please connect your ${targetWallet} wallet to receive payouts`);
+src/pages/Wallet.tsx:170:      toast.warning("No outstanding royalties detected on your nodes");
+src/pages/Wallet.tsx:175:    toast.info(`Initiating royalty payout release to your connected ${targetWallet} wallet...`);
+src/pages/Wallet.tsx:207:        toast.success(`Broadcasting complete! Disbursed ${unclaimedRoyalty.toFixed(3)} TON to on-chain node ${address.substring(0, 8)}...`);
+src/pages/Wallet.tsx:212:      toast.error("Failed to release royalties. Connection error.");
+src/pages/Wallet.tsx:223:    toast.success("MetaMask connection simulated! Address synced.");
+src/pages/Wallet.tsx:232:    toast.success("MetaMask disconnected successfully.");
+src/pages/DJKrupy.tsx:15:import { toast } from 'sonner';
+src/pages/DJKrupy.tsx:80:        toast.error("Play a track first to fetch neural trivia!");
+src/pages/DJKrupy.tsx:89:        toast.error("No sonic stream detected. Play a track to view lyrics.");
+src/context/AudioContext.tsx:10:import { toast } from "sonner";
+src/context/AudioContext.tsx:926:            toast.warning(`Auction ending soon`, {
+src/context/AudioContext.tsx:2117:    if (type === "success") toast.success(message, { duration });
+src/context/AudioContext.tsx:2118:    else if (type === "error") toast.error(message, { duration });
+src/context/AudioContext.tsx:2119:    else if (type === "warning") toast.warning(message, { duration });
+src/context/AudioContext.tsx:2120:    else toast.info(message, { duration });
+src/context/AudioContext.tsx:3330:        toast.info("Track removed from favorites", {
+src/context/AudioContext.tsx:3338:        toast.success("Track added to favorites", {
+src/context/AudioContext.tsx:3979:      toast.success("Added to playlist", {
+src/context/AudioContext.tsx:4024:      toast.info("Removed from playlist", {
+src/services/fanTokenService.ts:4:import { toast } from 'sonner';
+src/services/fanTokenService.ts:117:    toast.success(`Earned +${amountToEarn} Fan Tokens for ${reason}!`);
+src/lib/toast.ts:1:import { toast } from 'sonner';
+src/lib/toast.ts:3:export const showTransactionToast = (message: string) => {
+src/lib/toast.ts:4:  toast.success(message, {
+src/lib/toast.ts:9:export const showBidToast = (message: string) => {
+src/lib/toast.ts:10:  toast.info(message, {
+src/lib/toast.ts:15:export const showSocialToast = (message: string) => {
+src/lib/toast.ts:16:  toast.message(message, {
+src/lib/toast.ts:21:export const showErrorToast = (message: string) => {
+src/lib/toast.ts:22:  toast.error(message, {
+src/App.tsx:57:import { Toaster } from 'sonner';
+src/App.tsx:269:                    <Toaster theme="light" position="top-right" />

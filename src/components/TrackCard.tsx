@@ -278,7 +278,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
       <ContextMenu>
         <ContextMenuTrigger>
         <motion.div 
-          whileHover={{ y: -4, scale: 1.02 }}
+          whileHover={{ scale: 1.015 }}
           whileTap={{ scale: 0.98 }}
           className={`group flex items-center gap-5 p-3 rounded-[4px] hover:bg-white/5 transition-all cursor-pointer w-full outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 ${className}`}
           onClick={handleCardClickInner}
@@ -341,7 +341,7 @@ const TrackCard: React.FC<TrackCardProps> = ({
     );
   }
 
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  // Removed handleToggleExpand
 
   if (variant === 'row') {
     return (
@@ -447,44 +447,10 @@ const TrackCard: React.FC<TrackCardProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-                      className={`p-2 rounded-xl transition-all ${isExpanded ? 'bg-blue-500/10 text-blue-500' : 'text-muted-foreground/20 hover:text-blue-400 hover:bg-white/5'}`}
-                      aria-label="Toggle details"
-                    >
-                      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </button>
                     <MoreOptionsButton />
                 </div>
               </div>
             </div>
-            
-            {isExpanded && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                className="px-5 pb-5 pt-2 overflow-hidden"
-              >
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-[4px] bg-white/[0.02] border border-white/5 backdrop-blur-md shadow-inner">
-                    <div className="space-y-1">
-                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">Pulse_BPM</p>
-                      <p className="text-xs font-bold text-blue-500 uppercase tracking-widest">{track.bpm || '128'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">Harmonic_Key</p>
-                      <p className="text-xs font-bold text-cyan-500 uppercase tracking-widest">{track.key || 'C# Maj'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">Encoded_Format</p>
-                      <p className="text-xs font-bold text-purple-500 uppercase tracking-widest">{track.bitrate || '320k'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">Core_Genre</p>
-                      <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest">{track.genre || 'Sonic'}</p>
-                    </div>
-                </div>
-              </motion.div>
-            )}
           </motion.div>
         </ContextMenuTrigger>
         <ContextMenuContentRefined />
@@ -499,9 +465,9 @@ const TrackCard: React.FC<TrackCardProps> = ({
           layout
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ y: -4, scale: 1.02 }}
+          whileHover={{ scale: 1.015 }}
           whileTap={{ scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
           className={cn(
             "group relative cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50 rounded-[4px] p-2 bg-transparent border border-transparent w-full",
             className
@@ -570,7 +536,9 @@ const TrackCard: React.FC<TrackCardProps> = ({
               <h3 className={`text-[10px] font-black leading-tight line-clamp-2 whitespace-normal break-words uppercase tracking-tighter ${isActive ? 'text-primary' : 'text-foreground'}`}>
                 {track.title}
               </h3>
-              <MoreOptionsButton />
+              <div className="scale-75">
+                <MoreOptionsButton />
+              </div>
             </div>
             
             <p 

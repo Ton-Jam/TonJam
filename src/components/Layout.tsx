@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { getTonBalance } from '@/services/tonService';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { BackButton } from '@/components/BackButton';
 import { 
@@ -150,6 +151,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isTippingModalOpen, setIsTippingModalOpen] = useState(false);
+  const [tonBalance, setTonBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (userAddress) {
+      getTonBalance(userAddress).then(setTonBalance);
+    }
+  }, [userAddress]);
 
   useEffect(() => {
     const handleTippingState = (e: any) => {
@@ -357,7 +365,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </a>
 
       {/* Header */}
-      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isProfile && !isUserProfile && !isArtistProfile && (
+      {!isExplore && !isSearch && !isAuthModalOpen && !isTippingModalOpen && !isDJKrupy && !isProfile && !isUserProfile && !isArtistProfile && !isDiscover && (
         <motion.header 
           className={`fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between transition-all duration-300 ${isPostDetail ? '' : 'lg:left-64'} ${isHeaderHidden ? '-translate-y-full' : 'translate-y-0'} ${isCompact ? 'bg-background/80 backdrop-blur-md' : 'bg-transparent'}`}
         >
@@ -590,13 +598,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
 
-            {/* JAM Balance Badge */}
-            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-2 px-3 py-1.5 rounded-[4px] hover:bg-white/5 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
-               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[35px] h-[35px] object-contain" />
-               <div className="flex flex-col items-start hidden sm:flex">
-                  <span className="text-[7px] font-bold uppercase tracking-widest text-blue-500 opacity-60">Balance (Tasks)</span>
-                  <span className="text-[9px] font-bold tracking-tighter">{parseFloat(String(userProfile.jamBalance || '0')).toLocaleString()} JAM</span>
-               </div>
+            {/* Task Center Badge */}
+            <button onClick={() => navigate('/tasks')} className={`flex items-center gap-3 px-3 py-1.5 rounded-[4px] hover:bg-white/5 transition-colors ${!isHome ? 'hidden sm:flex' : ''}`}>
+               <img src={TJ_COIN_ICON} alt="TJ Coin" className="w-[20px] h-[20px] object-contain" />
+               {tonBalance !== null && (
+                  <span className="text-[9px] font-black tracking-tighter text-blue-500 opacity-60">{tonBalance.toFixed(2)} TON</span>
+               )}
             </button>
 
             <Separator orientation="vertical" className="h-6 bg-border/40 mx-1 hidden sm:block" />
@@ -752,7 +759,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy || isArtistProfile || isProfile || isUserProfile || isSearch ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 ${isSearch ? 'overflow-visible' : 'overflow-x-clip'} ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
+      <main id="main-content" className={`transition-all w-full flex-1 ${isExplore || isPostDetail || isDJKrupy || isArtistProfile || isProfile || isUserProfile || isSearch || isDiscover ? '' : 'pt-16'} ${isPostDetail ? '' : 'lg:w-[calc(100%-16rem)] lg:ml-64'} relative z-10 ${isSearch ? 'overflow-visible' : 'overflow-x-clip'} ${isDJKrupy ? '' : 'pb-40'} min-h-screen`}>
         <div className={`w-full max-w-full ${isSearch ? 'overflow-visible' : 'overflow-x-clip'}`}>
           {children}
         </div>

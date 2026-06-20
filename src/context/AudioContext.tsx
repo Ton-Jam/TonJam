@@ -3014,15 +3014,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
           if (track.audioIpfsUrl) {
             sourceUrl = track.audioIpfsUrl;
           }
-          addNotification(
-            "NFT Verified: Playing high-fidelity version",
-            "success",
-          );
-        } else {
-          addNotification(
-            "Standard streaming. Own the NFT for high-fidelity audio.",
-            "info",
-          );
         }
       }
 

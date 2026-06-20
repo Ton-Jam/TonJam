@@ -175,7 +175,7 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       className={cn(
-        "fixed left-0 right-0 z-[48] bg-black/40 backdrop-blur-3xl border-t border-white/10 px-6 py-3 flex flex-col items-stretch shadow-[0_-12px_45px_rgba(0,0,0,0.4)] h-[76px] md:h-24 lg:left-64 transition-all duration-300",
+        "fixed left-0 right-0 z-[48] bg-black/40 backdrop-blur-3xl px-6 py-3 flex flex-col items-stretch shadow-[0_-12px_45px_rgba(0,0,0,0.4)] h-[76px] md:h-24 lg:left-64 transition-all duration-300",
         isMobileNavHidden ? "bottom-0" : "bottom-16 lg:bottom-0",
       )}
     >

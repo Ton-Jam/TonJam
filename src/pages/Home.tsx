@@ -24,7 +24,10 @@ import {
   Users,
   CheckCircle,
   HelpCircle,
-  Volume2
+  Volume2,
+  Mic2,
+  Headphones,
+  Guitar
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "@/context/AudioContext";
@@ -34,12 +37,14 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import FilterPills from "@/components/FilterPills";
 
 // Import custom card components and types
 import ArtistCard from "@/components/ArtistCard";
 import UserCard from "@/components/UserCard";
 import NFTCard from "@/components/NFTCard";
 import TrackCard from "@/components/TrackCard";
+import GenreCard from "@/components/GenreCard";
 import { Artist, Track, NFTItem } from "@/types";
 
 // ==========================================
@@ -136,6 +141,11 @@ const Home: React.FC = () => {
       colors: ["#5B6BFF", "#2BE08C"]
     });
   };
+
+  // ------------------------------------------
+  // GLOBAL FILTER STATE
+  // ------------------------------------------
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // ------------------------------------------
   // 10 MOCK TRENDING NFT COLLECTIONS
@@ -264,19 +274,8 @@ const Home: React.FC = () => {
     { id: "pick-3", title: "Amapiano Golden Sceptre #01", artist: "Major Sound", price: "45.0 TON", likes: 780, image: "https://image.pollinations.ai/prompt/gold%20african%20tribal%20future%20crown%20shield?width=300&height=300&nologo=true", badge: "Live Auction" }
   ];
 
-  // ------------------------------------------
-  // TRENDING TOPIC PILLS
-  // ------------------------------------------
-  const trendingTopics: TopicPill[] = [
-    { id: "t1", label: "#Afrobeats", count: "12.4k streams" },
-    { id: "t2", label: "#TONMusic", count: "89.15k minted" },
-    { id: "t3", label: "#HipHop", count: "45k streams" },
-    { id: "t4", label: "#MusicNFT", count: "10k sold" },
-    { id: "t5", label: "#Web3Artists", count: "300 joined" },
-    { id: "t6", label: "#Producers", count: "15 rooms now" },
-    { id: "t7", label: "#Amapiano", count: "22k streams" },
-    { id: "t8", label: "#Rap", count: "114k streams" }
-  ];
+
+
 
   // ------------------------------------------
   // RECENTLY MINTED MUSIC NFTs
@@ -374,74 +373,88 @@ const Home: React.FC = () => {
           className="space-y-4 text-left"
         >
           <div className="space-y-1">
-            <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5 font-sans leading-none pt-2">
+            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5 font-sans leading-none pt-2">
               Good Evening <span className="animate-bounce">👋</span>
             </h1>
-            <p className="text-base font-extrabold text-[#9AA0AE]">
+            <p className="text-sm font-medium text-[#9AA0AE] font-sans">
               Welcome Back, {userProfile?.username || "Collector"}
             </p>
-            <p className="text-xs text-[#9AA0AE]/80 font-medium">
+            <p className="text-[11px] text-[#9AA0AE]/80 font-normal font-sans">
               Discover new sounds, collect music NFTs and earn rewards.
             </p>
           </div>
-
-          {/* Continue Listening Premium Card */}
-          <div className="bg-[#0A113A]/60 backdrop-blur-xl rounded-2xl p-4 relative overflow-hidden flex items-center justify-between gap-3 shadow-xl border-none">
-            {/* Holographic fluid overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#5B6BFF]/10 to-[#00B4D8]/10 pointer-events-none" />
-            
-            <div className="flex items-center gap-3.5 min-w-0 z-10">
-              <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
-                <img 
-                  src="https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" 
-                  alt="Solar Pulse" 
-                  className="w-full h-full object-cover" 
-                />
-                <div className="absolute inset-0 bg-black/10" />
-              </div>
-              <div className="min-w-0 text-left">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-[#00B4D8]">
-                  CONTINUE LISTENING
-                </span>
-                <h4 className="text-sm font-extrabold text-white truncate mt-0.5 leading-none">
-                  Solar Pulse
-                </h4>
-                <p className="text-xs text-[#9AA0AE] truncate mt-1">
-                  DJ Krupy
-                </p>
-              </div>
-            </div>
-
-            <button 
-              onClick={() => {
-                const solarPulse = MOCK_TRACKS.find(t => t.id === "1") || MOCK_TRACKS[0];
-                playTrack(solarPulse);
-              }}
-              className="w-11 h-11 rounded-full bg-[#5B6BFF] hover:bg-[#4856ea] text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-md shrink-0 cursor-pointer border-none z-10"
-            >
-              <Play className="w-5 h-5 fill-white text-white ml-0.5" />
-            </button>
-          </div>
         </motion.div>
 
+        <div className="space-y-3 text-left">
+          <h2 className="text-xs font-black tracking-widest text-[#9AA0AE] uppercase px-0.5">
+            Continue Listening
+          </h2>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 px-0.5">
+            <div className="bg-[#0A113A]/60 backdrop-blur-xl rounded-xl p-2.5 relative overflow-hidden flex items-center justify-between gap-2 shadow-md border-none flex-shrink-0 w-64">
+              {/* Holographic fluid overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#5B6BFF]/10 to-[#00B4D8]/10 pointer-events-none" />
+              
+              <div className="flex items-center gap-2 min-w-0 z-10">
+                <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                  <img 
+                    src="https://image.pollinations.ai/prompt/cyberpunk%20electronic%20music%20album%20cover%20solar%20pulse%20neon%20orange?width=300&height=300&nologo=true" 
+                    alt="Solar Pulse" 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                <div className="min-w-0 text-left">
+                  <h4 className="text-[11px] font-extrabold text-white truncate leading-none">
+                    Solar Pulse
+                  </h4>
+                  <p className="text-[9px] text-[#9AA0AE] truncate mt-0.5">
+                    DJ Krupy
+                  </p>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  const solarPulse = MOCK_TRACKS.find(t => t.id === "1") || MOCK_TRACKS[0];
+                  playTrack(solarPulse);
+                }}
+                className="w-8 h-8 rounded-full bg-[#5B6BFF] hover:bg-[#4856ea] text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-md shrink-0 cursor-pointer border-none z-10"
+              >
+                <Play className="w-3.5 h-3.5 fill-white text-white ml-0.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <FilterPills selectedGenre={selectedCategory} onSelect={setSelectedCategory} />
 
         {/* ==========================================
-            SECTION 12: TRENDING TOPICS (Moved higher for filter mood vibe)
+            BROWSE GENRES (Horizontal Scroll)
             ========================================== */}
-        <div className="text-left py-1">
-          <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-            {trendingTopics.map((topic) => (
-              <button
-                key={topic.id}
-                onClick={() => {
-                  confetti({ particleCount: 8, spread: 20 });
-                }}
-                className="shrink-0 outline-none p-0 cursor-pointer border-none"
-              >
-                <div className="px-3.5 py-2 rounded-full bg-[#0A113A]/60 hover:bg-[#101A3B] text-xs font-black tracking-widest uppercase text-[#9AA0AE] hover:text-white transition-all">
-                  {topic.label}
-                </div>
-              </button>
+        <div className="space-y-3 text-left">
+          <h2 className="text-lg font-black tracking-tight text-white px-0.5">
+            Browse Genres
+          </h2>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-3 px-0.5">
+            {[
+              { id: '1', name: 'Electronic', icon: Radio, color: 'from-blue-600 to-cyan-400' },
+              { id: '2', name: 'Amapiano', icon: Music, color: 'from-yellow-500 to-orange-400' },
+              { id: '3', name: 'Lofi', icon: Headphones, color: 'from-purple-600 to-indigo-400' },
+              { id: '4', name: 'Afrobeats', icon: Mic2, color: 'from-red-600 to-orange-400' },
+              { id: '5', name: 'Rock', icon: Guitar, color: 'from-zinc-600 to-zinc-400' },
+              { id: '6', name: 'Hip-Hop', icon: Disc, color: 'from-rose-600 to-pink-400' },
+              { id: '7', name: 'Pop', icon: Zap, color: 'from-yellow-400 to-amber-300' },
+              { id: '8', name: 'Jazz', icon: Music, color: 'from-emerald-600 to-teal-400' },
+              { id: '9', name: 'Classical', icon: Music, color: 'from-amber-700 to-yellow-600' },
+              { id: '10', name: 'Ambient', icon: Radio, color: 'from-cyan-600 to-blue-500' },
+              { id: '11', name: 'R&B', icon: Flame, color: 'from-pink-600 to-rose-400' },
+              { id: '12', name: 'Reggae', icon: Radio, color: 'from-green-600 to-lime-400' },
+              { id: '13', name: 'Funk', icon: Zap, color: 'from-orange-600 to-yellow-400' },
+              { id: '14', name: 'Techno', icon: Disc, color: 'from-zinc-800 to-zinc-500' },
+              { id: '15', name: 'House', icon: Headphones, color: 'from-violet-600 to-purple-400' },
+            ].map((genre) => (
+              <div key={genre.id} className="w-[120px] shrink-0">
+                <GenreCard genre={genre} />
+              </div>
             ))}
           </div>
         </div>
@@ -477,8 +490,9 @@ const Home: React.FC = () => {
             <div className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full shrink-0">
               <img src={TJ_COIN_ICON} alt="TJ" className="w-4 h-4 object-contain" />
               <span className="text-[11px] font-black font-mono tracking-tight text-white">
-                {realTJBalance.toLocaleString()}
+                {parseFloat(String(userProfile?.jamBalance || '0')).toLocaleString()}
               </span>
+              <span className="text-[9px] font-bold text-[#9AA0AE] ml-1">JAM</span>
             </div>
           </div>
 
@@ -589,12 +603,12 @@ const Home: React.FC = () => {
 
 
         {/* ==========================================
-            SECTION 2: TRENDING NFT COLLECTIONS (Horizontal Scroll)
+            SECTION 2: TRENDING TRACKS
             ========================================== */}
         <div className="space-y-3 text-left">
           <div className="flex items-center justify-between px-0.5">
             <h2 className="text-lg font-black tracking-tight text-white">
-              Trending NFT Collections
+              Trending Now
             </h2>
             <button onClick={() => navigate("/marketplace")} className="text-xs font-bold text-[#5B6BFF] flex items-center outline-none cursor-pointer border-none bg-transparent">
               All <ChevronRight className="w-3.5 h-3.5" />
@@ -602,21 +616,11 @@ const Home: React.FC = () => {
           </div>
 
           <div className="-mx-4 flex gap-4 overflow-x-auto no-scrollbar pb-3 px-4">
-            {mockCollections.map((col) => (
-              <NFTCard 
-                key={col.id} 
-                nft={{
-                  id: col.id,
-                  trackId: col.id,
-                  title: col.name,
-                  owner: col.artist,
-                  creator: col.artist,
-                  price: col.floorPrice,
-                  imageUrl: col.coverUrl,
-                  edition: `${col.mintedCount}/${col.totalLimit}`,
-                  description: '',
-                  isAuction: false
-                } as any}
+            {(allTracks && allTracks.length > 0 ? [...allTracks].sort((a,b) => (b.playCount || 0) - (a.playCount || 0)).slice(0, 5) : MOCK_TRACKS.slice(0, 5)).map((track) => (
+              <TrackCard 
+                key={track.id} 
+                track={track} 
+                variant="default"
                 className="w-[165px] shrink-0"
               />
             ))}

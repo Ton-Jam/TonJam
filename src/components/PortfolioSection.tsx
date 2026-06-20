@@ -1,58 +1,53 @@
 import React, { useState } from 'react';
-import { Track, NFTItem } from '@/types';
+import { Track, NFTItem, Artist } from '@/types';
 import TrackCard from '@/components/TrackCard';
 import NFTCard from '@/components/NFTCard';
 import { cn } from '@/lib/utils';
+import { Gem, Disc } from 'lucide-react';
 
 interface PortfolioSectionProps {
+  artist: Artist;
   tracks: Track[];
   nfts: NFTItem[];
   isOwnProfile: boolean;
 }
 
-export const PortfolioSection: React.FC<PortfolioSectionProps> = ({ tracks, nfts, isOwnProfile }) => {
-  const [filter, setFilter] = useState<'All' | 'Tracks' | 'NFTs'>('All');
-
-  const filteredItems: Array<{ type: 'track'; data: Track } | { type: 'nft'; data: NFTItem }> = [
-    ...(filter === 'All' || filter === 'Tracks' ? tracks.map(t => ({ type: 'track' as const, data: t })) : []),
-    ...(filter === 'All' || filter === 'NFTs' ? nfts.map(n => ({ type: 'nft' as const, data: n })) : [])
-  ];
-
+export const PortfolioSection: React.FC<PortfolioSectionProps> = ({ artist, tracks, nfts, isOwnProfile }) => {
   return (
-    <div className="space-y-8 animate-in fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h3 className="text-2xl font-bold tracking-tight">Portfolio</h3>
-        <div className="flex overflow-x-auto no-scrollbar gap-1 max-w-full bg-muted/30 rounded-full p-1 border border-border flex-nowrap shrink-0 snap-x">
-          {(['All', 'Tracks', 'NFTs'] as const).map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap snap-center cursor-pointer",
-                filter === f ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {f}
-            </button>
+    <div className="space-y-12 animate-in fade-in">
+      {/* Biography Section */}
+      <section className="bg-[#18181b]/20 p-8 rounded-3xl">
+        <h3 className="text-xs font-black uppercase tracking-[0.25em] text-muted-foreground mb-4">Biography</h3>
+        <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+          {artist.bio || "No biography provided yet."}
+        </p>
+      </section>
+
+      {/* Discography Section (Tracks as NFTs or standard) */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+            <h3 className="text-2xl font-bold tracking-tight">Discography</h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {tracks.map(track => (
+            <TrackCard key={`port-track-${track.id}`} track={track} />
           ))}
+          {tracks.length === 0 && <p className="text-sm text-muted-foreground">No tracks yet.</p>}
         </div>
-      </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredItems.map((item, i) => (
-          item.type === 'track' ? (
-            <TrackCard key={`track-${item.data.id}`} track={item.data} />
-          ) : (
-            <NFTCard key={`nft-${item.data.id}`} nft={item.data} />
-          )
-        ))}
-      </div>
-      
-      {filteredItems.length === 0 && (
-        <div className="text-center py-12 border border-dashed border-border rounded-2xl">
-          <p className="text-muted-foreground text-sm">No items in portfolio.</p>
+      </section>
+
+      {/* Pinned NFTs Section */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+            <h3 className="text-2xl font-bold tracking-tight">Pinned NFT Creations</h3>
         </div>
-      )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {nfts.slice(0, 4).map(nft => (
+            <NFTCard key={`port-nft-${nft.id}`} nft={nft} />
+          ))}
+          {nfts.length === 0 && <p className="text-sm text-muted-foreground">No NFTs created yet.</p>}
+        </div>
+      </section>
     </div>
   );
 };

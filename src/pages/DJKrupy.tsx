@@ -86,7 +86,6 @@ const DJKrupy: React.FC = () => {
 
   const handleLyricsRequest = () => {
     if (!currentTrack) {
-        toast.error("No sonic stream detected. Play a track to view lyrics.");
         return;
     }
     if (!currentTrack.lyrics) {

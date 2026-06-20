@@ -26,7 +26,7 @@ import { subscribeToCommunity } from '@/services/fanEngagementService';
 import { createActivityPost } from '@/services/socialService';
 import SocialFeed from '@/components/SocialFeed';
 import { ArtistSummaryCard } from '@/components/ArtistSummaryCard';
-import { PortfolioSection } from '@/components/PortfolioSection';
+import { ArtistPortfolio } from '@/components/ArtistPortfolio';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FanTokenHub } from '@/components/FanTokenHub';
@@ -569,7 +569,7 @@ const ArtistProfile: React.FC = () => {
 
             {/* PORTFOLIO */}
             <TabsContent value="portfolio" className="m-0 focus-visible:outline-none">
-                <PortfolioSection tracks={artistTracks} nfts={artistNFTs} isOwnProfile={isOwnProfile} />
+                <ArtistPortfolio artist={artist} tracks={artistTracks} />
             </TabsContent>
 
             {/* NFTS */}

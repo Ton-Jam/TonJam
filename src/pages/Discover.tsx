@@ -9,7 +9,7 @@ import {
   X, 
   Mic, 
   MicOff, 
-  Play, 
+  Play,
   TrendingUp, 
   Clock, 
   ChevronRight,
@@ -28,6 +28,8 @@ import {
   Sliders,
   Heart
 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { GENRES, MOODS, MOCK_ALBUMS } from '@/constants';
 import { auth } from '@/lib/firebase';
 import { APP_LOGO } from '@/constants';
@@ -51,10 +53,8 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { getPlaceholderImage, cn } from '@/lib/utils';
+import SocialFeed from '@/components/SocialFeed';
 
-// shadcn imports
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -121,8 +121,196 @@ const Discover: React.FC = () => {
     isDiscoverFiltersOpen,
     setIsDiscoverFiltersOpen,
     generateDiscoverWeekly,
-    playlists: allUserPlaylists
+    playlists: allUserPlaylists,
+    toggleFollowUser,
+    userNFTs,
+    posts,
+    deletePost
   } = useAudio();
+
+  // 1. Intelligent Analyzer for User Listening Habits
+  const userListeningHabits = useMemo(() => {
+    const genreCounts: { [key: string]: number } = {};
+    const moodCounts: { [key: string]: number } = {};
+    const artistCounts: { [key: string]: number } = {};
+
+    recentlyPlayed?.forEach(t => {
+      if (t.genre) genreCounts[t.genre] = (genreCounts[t.genre] || 0) + 2;
+      if (t.mood) moodCounts[t.mood] = (moodCounts[t.mood] || 0) + 2;
+      if (t.artistId) artistCounts[t.artistId] = (artistCounts[t.artistId] || 0) + 2;
+    });
+
+    likedTrackIds?.forEach(id => {
+      const t = allTracks.find(track => track.id === id);
+      if (t) {
+        if (t.genre) genreCounts[t.genre] = (genreCounts[t.genre] || 0) + 3;
+        if (t.mood) moodCounts[t.mood] = (moodCounts[t.mood] || 0) + 3;
+        if (t.artistId) artistCounts[t.artistId] = (artistCounts[t.artistId] || 0) + 3;
+      }
+    });
+
+    followedUserIds?.forEach(id => {
+      artistCounts[id] = (artistCounts[id] || 0) + 4;
+    });
+
+    userNFTs?.forEach(nft => {
+      if (nft.artistId) artistCounts[nft.artistId] = (artistCounts[nft.artistId] || 0) + 5;
+      const subTrack = allTracks.find(t => t.id === nft.trackId);
+      if (subTrack) {
+        if (subTrack.genre) genreCounts[subTrack.genre] = (genreCounts[subTrack.genre] || 0) + 4;
+        if (subTrack.mood) moodCounts[subTrack.mood] = (moodCounts[subTrack.mood] || 0) + 4;
+      }
+    });
+
+    let favoriteGenre = '';
+    let maxGenreCount = 0;
+    Object.entries(genreCounts).forEach(([genre, count]) => {
+      if (count > maxGenreCount) {
+        maxGenreCount = count;
+        favoriteGenre = genre;
+      }
+    });
+
+    let favoriteMood = '';
+    let maxMoodCount = 0;
+    Object.entries(moodCounts).forEach(([mood, count]) => {
+      if (count > maxMoodCount) {
+        maxMoodCount = count;
+        favoriteMood = mood;
+      }
+    });
+
+    const hasInteractions = maxGenreCount > 0 || maxMoodCount > 0 || followedUserIds.length > 0 || (userNFTs && userNFTs.length > 0);
+
+    return {
+      favoriteGenre,
+      favoriteMood,
+      artistInteractions: artistCounts,
+      hasInteractions
+    };
+  }, [recentlyPlayed, likedTrackIds, followedUserIds, userNFTs, allTracks]);
+
+  // 2. Personalized Suggestions for new music based on analytic profile
+  const recommendedTracks = useMemo(() => {
+    const scored = allTracks.map(track => {
+      let score = 0;
+      const reasons: string[] = [];
+
+      const isLiked = likedTrackIds.includes(track.id);
+      const isPlayed = recentlyPlayed.some(rp => rp.id === track.id);
+
+      if (userListeningHabits.favoriteGenre && track.genre === userListeningHabits.favoriteGenre) {
+        score += 8;
+        reasons.push(`matches your preferred ${track.genre}`);
+      }
+
+      if (userListeningHabits.favoriteMood && track.mood === userListeningHabits.favoriteMood) {
+        score += 5;
+        reasons.push(`matches your typical ${track.mood} mood`);
+      }
+
+      const artistAffinity = userListeningHabits.artistInteractions[track.artistId] || 0;
+      if (artistAffinity > 0) {
+        score += Math.min(15, artistAffinity * 2);
+        reasons.push(`from artists you interact with`);
+      }
+
+      if (followedUserIds.includes(track.artistId)) {
+        score += 12;
+        reasons.push("by a creator you follow");
+      }
+
+      // Slight penalty if played recently or liked to focus on discovering other new items
+      if (isPlayed) score -= 10;
+      if (isLiked) score -= 5;
+
+      // Fallback cold-start scoring if user is new
+      if (!userListeningHabits.hasInteractions) {
+        score = (track.playCount || 0) * 0.1 + (track.likes || 0) * 0.5;
+        reasons.push("Hot upcoming release");
+      }
+
+      return {
+        ...track,
+        recommendationScore: score,
+        recommendationReason: reasons.slice(0, 2).join(" & ") || "Trending signal"
+      };
+    });
+
+    return scored
+      .filter(t => t.id)
+      .sort((a, b) => b.recommendationScore - a.recommendationScore)
+      .slice(0, 4);
+  }, [allTracks, userListeningHabits, likedTrackIds, recentlyPlayed, followedUserIds]);
+
+  // 3. Trending Tracks (high engagement indices)
+  const trendingTracks = useMemo(() => {
+    return [...allTracks]
+      .sort((a, b) => {
+        const scoreA = (a.playCount || 0) + (a.likes || 0) * 12;
+        const scoreB = (b.playCount || 0) + (b.likes || 0) * 12;
+        return scoreB - scoreA;
+      })
+      .slice(0, 4);
+  }, [allTracks]);
+
+  // 4. Emerging Artists Section (fresh growing creators)
+  const emergingArtists = useMemo(() => {
+    const currentUserUid = auth.currentUser?.uid;
+    const candidates = artists.filter(a => a.uid !== currentUserUid && !followedUserIds.includes(a.uid));
+    
+    const scored = candidates.map(artist => {
+      let score = 0;
+      const followerCount = artist.followers || 0;
+      const isEmerging = followerCount < 3000;
+      
+      if (isEmerging) score += 15;
+      if (userListeningHabits.favoriteGenre && artist.genre && artist.genre.toLowerCase() === userListeningHabits.favoriteGenre.toLowerCase()) {
+        score += 10;
+      }
+      if (artist.verified) score += 5;
+
+      return {
+        ...artist,
+        score,
+        isEmerging
+      };
+    });
+
+    const results = scored.sort((a, b) => b.score - a.score).slice(0, 4);
+    
+    // Fallback if no candidate artists to discover
+    if (results.length === 0) {
+      return artists.slice(0, 4);
+    }
+    return results;
+  }, [artists, followedUserIds, userListeningHabits]);
+
+  // 5. Featured Curated NFT Releases
+  const featuredNFTReleases = useMemo(() => {
+    const candidates = allNFTs.filter(n => n.ownerId !== auth.currentUser?.uid && n.owner !== auth.currentUser?.uid);
+
+    const scored = candidates.map(nft => {
+      let score = 0;
+      if (followedUserIds.includes(nft.artistId || '')) score += 15;
+      
+      if (userListeningHabits.favoriteGenre) {
+        const trackObj = allTracks.find(t => t.id === nft.trackId);
+        if (trackObj && trackObj.genre === userListeningHabits.favoriteGenre) {
+          score += 10;
+        }
+      }
+      if (nft.listingType === 'auction' || nft.isAuction) score += 5;
+      
+      return { ...nft, calculatedScore: score };
+    });
+
+    const results = scored.sort((a, b) => b.calculatedScore - a.calculatedScore).slice(0, 4);
+    if (results.length === 0) {
+      return allNFTs.slice(0, 4);
+    }
+    return results;
+  }, [allNFTs, followedUserIds, userListeningHabits, allTracks]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [customVibe, setCustomVibe] = useState('');
@@ -157,7 +345,7 @@ const Discover: React.FC = () => {
 
   const [isVoiceSearchActive, setIsVoiceSearchActive] = useState(false);
   const [isVibeSearch, setIsVibeSearch] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'tracks' | 'nfts' | 'artists' | 'playlists' | 'users'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'tracks' | 'nfts' | 'artists' | 'playlists' | 'users' | 'community'>('all');
   const [aiVibeResults, setAiVibeResults] = useState<any[] | null>(null);
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -347,211 +535,51 @@ const Discover: React.FC = () => {
         continuous
       />
 
-      {/* Search & Filter Header - Sticky & Atmospheric with zero padding gap */}
-      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-lg py-2 w-full border-b border-blue-500/10 transition-colors duration-300 flex flex-col gap-1">
-        <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
-          <form 
-            onSubmit={handleSearchSubmit} 
-            className="relative flex-1 group"
-          >
-            {/* Search Input Container - Cleaned up */}
-            <div className={`relative flex items-center h-12 bg-card border border-border/60 rounded-full overflow-hidden transition-all ${isFocused ? 'ring-1 ring-primary' : ''}`}>
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                <Search className={`h-4 w-4 ${isFocused ? 'text-primary' : 'text-muted-foreground'}`} />
+
+
+
+        {/* Search & Filter Header - Sticky & Atmospheric */}
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg py-2 w-full border-b border-blue-500/10 transition-colors duration-300 flex flex-col gap-1">
+          <div className="w-full flex items-center gap-3 px-4 md:px-8 lg:px-12">
+            <form 
+              onSubmit={handleSearchSubmit} 
+              className="relative flex-1 group"
+            >
+               {/* Simple Search Input Container */}
+              <div className="relative flex items-center h-12 bg-card border border-border/60 rounded-full overflow-hidden transition-all">
+                
+                <Input
+                  type="text"
+                  placeholder="Search artists, tracks, or nfts..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-4 h-full bg-transparent border-none focus-visible:ring-0 rounded-none text-xs font-bold uppercase tracking-widest z-10"
+                />
               </div>
-               
-              <Input
-                type="text"
-                placeholder={aiVibeResults ? "Enter a vibe description..." : "artists, tracks, or nfts..."}
-                value={searchQuery}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-32 h-full bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none transition-all discover-search-input text-xs font-bold uppercase tracking-widest text-zinc-900 placeholder:text-zinc-400 z-10"
-              />
+            </form>
 
-              {aiVibeResults && (
-                <Badge className="absolute right-28 h-6 bg-cyan-900/40 text-cyan-400 border-cyan-800/50 hover:bg-cyan-900/60 uppercase text-[9px] font-bold tracking-widest">
-                  AI VIBE
-                </Badge>
-              )}
-
-              <div className="absolute right-3 flex items-center gap-1 z-20">
-                <AnimatePresence>
-                  {searchQuery && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        onClick={() => setSearchQuery('')}
-                        className="h-8 w-8 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-full"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <div className="w-[1px] h-4 bg-zinc-200 mx-1" />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  type="button"
-                  onClick={handleVoiceSearch}
-                  className={`h-9 w-9 rounded-full transition-all ${isVoiceSearchActive ? 'text-rose-600 bg-rose-50 animate-pulse' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}
-                >
-                  {isVoiceSearchActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-
-            {/* Suggestions Command Palette */}
-            <AnimatePresence>
-              {isFocused && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 4, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                  className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-[0_10px_40px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden z-50 p-2"
-                >
-                  <Command className="bg-transparent border-none">
-                    <CommandList className="max-h-[300px]">
-                      <CommandEmpty className="py-6 text-center text-xs text-muted-foreground uppercase tracking-widest font-semibold">No results identified</CommandEmpty>
-                      
-                      {searchQuery ? (
-                        <CommandGroup heading="Suggestions">
-                           {filteredResults.tracks.slice(0, 3).map((track) => (
-                             <CommandItem 
-                               key={`track-${track.id}`}
-                               onSelect={() => {
-                                 setSearchQuery(track.title);
-                                 setIsFocused(false);
-                                 navigate(`/track/${track.id}`);
-                               }}
-                               className="rounded-[4px] flex items-center justify-between group cursor-pointer"
-                             >
-                               <div className="flex items-center gap-3">
-                                 <Music className="h-3.5 w-3.5 text-zinc-500" />
-                                 <span className="text-sm font-medium">{track.title}</span>
-                               </div>
-                             </CommandItem>
-                           ))}
-                           {filteredResults.artists.slice(0, 3).map((artist) => (
-                             <CommandItem 
-                               key={`artist-${artist.uid}`}
-                               onSelect={() => {
-                                 setSearchQuery(artist.name);
-                                 setIsFocused(false);
-                                 navigate(`/artist/${artist.uid}`);
-                               }}
-                               className="rounded-[4px] flex items-center justify-between group cursor-pointer"
-                             >
-                               <div className="flex items-center gap-3">
-                                 <User className="h-3.5 w-3.5 text-zinc-500" />
-                                 <span className="text-sm font-medium">{artist.name}</span>
-                               </div>
-                             </CommandItem>
-                           ))}
-                        </CommandGroup>
-                      ) : (
-                        <>
-                          {searchHistory.length > 0 && (
-                            <CommandGroup heading={<span className="flex items-center gap-2"><History className="h-3 w-3" /> Recent Searches</span>}>
-                              {searchHistory.map((item, index) => (
-                                <CommandItem 
-                                  key={`hist-${index}`}
-                                  onSelect={() => {
-                                    setSearchQuery(item);
-                                    setIsFocused(false);
-                                  }}
-                                  className="rounded-[4px] flex items-center justify-between group cursor-pointer"
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <Search className="h-3.5 w-3.5 text-zinc-500" />
-                                    <span className="text-sm font-medium">{item}</span>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 opacity-0 group-hover:opacity-100"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSearchHistory(prev => prev.filter(t => t !== item));
-                                    }}
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          )}
-                          
-                          <CommandSeparator className="bg-white/5" />
-                          
-                          <CommandGroup heading={<span className="flex items-center gap-2"><TrendingUp className="h-3 w-3" /> Trending</span>}>
-                            {trendingTopics.map((topic, index) => (
-                              <CommandItem 
-                                key={`trend-${index}`}
-                                onSelect={() => {
-                                    setSearchQuery(topic);
-                                    setIsFocused(false);
-                                }}
-                                className="rounded-[4px] flex items-center gap-3 cursor-pointer"
-                              >
-                                <Zap className="h-3.5 w-3.5 text-blue-500" />
-                                <span className="text-sm font-medium">{topic}</span>
-                                <CommandShortcut className="text-blue-500/50">#hot</CommandShortcut>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </form>
-
-          {/* Advanced Filters Sheet */}
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => setIsDiscoverFiltersOpen(true)}
-            className={cn("h-10 w-10 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0 relative", 
-                (bpmRange[0] !== 60 || bpmRange[1] !== 180 || selectedMoods.length > 0 || onlyVerified) && "border-blue-500")}
-          >
-            <ListFilter className="h-4 w-4 text-foreground" />
-            {(bpmRange[0] !== 60 || bpmRange[1] !== 180 || selectedMoods.length > 0 || onlyVerified) && (
-                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-blue-500 rounded-full" />
-            )}
-          </Button>
-        </div>
-
-        <div className="w-full filter-tabs pt-1 pb-1 px-4 md:px-8 lg:px-12">
-          <FilterPills
-            selectedGenre={activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
-            onSelect={(v) => setActiveFilter((v ? v.toLowerCase() : 'all') as any)}
-            categories={['All', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users']}
-          />
-        </div>
-
-        {/* Active Filter Summary Bar */}
-        {(bpmRange[0] !== 60 || bpmRange[1] !== 180 || selectedMoods.length > 0 || onlyVerified) && (
-          <div className="px-4 md:px-8 lg:px-12 pb-1 flex flex-wrap gap-2 text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-            { (bpmRange[0] !== 60 || bpmRange[1] !== 180) && <span>BPM: {bpmRange[0]}-{bpmRange[1]}</span> }
-            { selectedMoods.length > 0 && <span>Mood: {selectedMoods.join(', ')}</span> }
-            { onlyVerified && <span>Verified Only</span> }
+            {/* Filters Button */}
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => setIsDiscoverFiltersOpen(true)}
+              className="h-10 w-10 rounded-[4px] bg-muted/20 border border-border/40 text-muted-foreground hover:bg-muted/40 transition-all shrink-0"
+            >
+              <ListFilter className="h-4 w-4 text-foreground" />
+            </Button>
           </div>
-        )}
-      </div>
+
+          <div className="w-full filter-tabs pt-1 pb-1 px-4 md:px-8 lg:px-12">
+            <FilterPills
+              selectedGenre={activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
+              onSelect={(v) => setActiveFilter((v ? v.toLowerCase() : 'all') as any)}
+              categories={['All', 'Community', 'Tracks', 'Artists', 'NFTs', 'Playlists', 'Users']}
+            />
+          </div>
+        </div>
 
 
-      <div className="w-full max-w-full px-4 md:px-8 lg:px-12 pb-24 space-y-8 mt-6">
+      <div className="w-full max-w-full px-4 md:px-8 lg:px-12 pb-32 space-y-12 md:space-y-16 mt-8 md:mt-12">
         
 
         {isLoading ? (
@@ -572,188 +600,83 @@ const Discover: React.FC = () => {
             </div>
           </div>
         ) : !searchQuery ? (
-          <>
-            {/* Discover Weekly Banner & AI Lab Section */}
+          activeFilter === 'community' ? (
+            <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-blue-500 animate-ping" />
+                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.25em]">TonJam Radio Relay</span>
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white font-display">Community Feed & Broadcasts</h2>
+                </div>
+              </div>
+              <div className="max-w-3xl mx-auto space-y-6">
+                <SocialFeed posts={posts || []} onDeletePost={deletePost} emptyMessage="No community broadcasts found. Connect and tune in." />
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Discover Weekly Banner & AI Lab Section */}
             {auth.currentUser && discoverWeekly && (
-              <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <section className="w-full">
                 
-                {/* Left Side: Premium Banner */}
-                <div className="xl:col-span-2">
-                  <motion.div
-                    whileHover={{ 
-                      scale: 1.015,
-                      y: -4,
-                      boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.25)"
-                    }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer"
+                {/* Premium Banner */}
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.005,
+                    y: -2,
+                    boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.25)"
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className="relative h-48 md:h-80 rounded-2xl overflow-hidden cursor-pointer"
+                >
+                  <Card 
+                    onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
+                    className="relative h-full w-full rounded-2xl overflow-hidden bg-white/5 backdrop-blur-md shadow-2xl group transition-all duration-500 border-none"
                   >
-                    <Card 
-                      onClick={() => navigate(`/playlist/${discoverWeekly.id}`)}
-                      className="relative h-full w-full rounded-2xl overflow-hidden bg-white/5 backdrop-blur-md shadow-2xl group transition-all duration-500 border-none"
-                    >
-                      <img 
-                        src={discoverWeekly.coverUrl} 
-                        alt="Discover Weekly" 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-                      <CardContent className="absolute bottom-0 left-0 p-6 md:p-10 w-full flex justify-between items-end">
-                        <div className="space-y-2 md:space-y-4 max-w-[75%]">
-                          <div className="flex items-center gap-2 md:gap-3">
-                            <Badge className="bg-blue-600 hover:bg-blue-600 text-[7px] md:text-[9px] font-bold uppercase tracking-[0.2em] rounded-sm py-0.5 md:py-1 border-none">
-                              AI DISCOVERY
-                            </Badge>
-                            <span className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live.Sync_2026</span>
-                          </div>
-                          <div>
-                            <h2 className="text-2xl md:text-5xl font-bold uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
-                            <p className="text-[10px] md:text-xs text-blue-400 font-extrabold max-w-md mt-2 md:mt-3 line-clamp-2">
-                              {discoverWeekly.description || "Personalized frequency stream generated by Gemini based on your unique neural listening patterns."}
-                            </p>
-                          </div>
+                    <img 
+                      src={discoverWeekly.coverUrl} 
+                      alt="Discover Weekly" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+                    <CardContent className="absolute bottom-0 left-0 p-6 md:p-10 w-full flex justify-between items-end">
+                      <div className="space-y-2 md:space-y-4 max-w-[75%]">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <Badge className="bg-blue-600 hover:bg-blue-600 text-[7px] md:text-[9px] font-bold uppercase tracking-[0.2em] rounded-sm py-0.5 md:py-1 border-none">
+                            AI DISCOVERY
+                          </Badge>
+                          <span className="text-[8px] md:text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live.Sync_2026</span>
                         </div>
-                        <Button 
-                          size="icon" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const tracks = discoverWeekly.trackIds?.map(id => allTracks.find(t => t.id === id)).filter(Boolean) as any[];
-                            if (tracks && tracks.length > 0) playAll(tracks);
-                          }}
-                          className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-blue-600 hover:bg-blue-500 text-white hover:scale-110 transition-all border-none flex-shrink-0"
-                        >
-                          <Play className="h-5 w-5 md:h-6 md:w-6 fill-current" />
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </div>
-
-                {/* Right Side: Gemini AI Customizer Lab */}
-                <div className="bg-card border border-border/60 backdrop-blur-md rounded-xl p-6 flex flex-col justify-between space-y-4 shadow-none">
-                  {/* Lab Header */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-                        <h3 className="section-title !text-xs !tracking-widest">Gemini AI Lab</h3>
+                        <div>
+                          <h2 className="text-2xl md:text-5xl font-bold uppercase tracking-tighter text-white leading-[0.9]">Discover<br />Weekly</h2>
+                          <p className="text-[10px] md:text-xs text-blue-400 font-extrabold max-w-md mt-2 md:mt-3 line-clamp-2">
+                            {discoverWeekly.description || "Personalized frequency stream generated by Gemini based on your unique neural listening patterns."}
+                          </p>
+                        </div>
                       </div>
-                      <Badge className="bg-primary/10 text-primary text-[8px] font-black tracking-widest uppercase border-none py-0.5">
-                        ACTIVE
-                      </Badge>
-                    </div>
-                    <p className="micro-label !text-muted-foreground leading-snug">
-                      Your listening patterns and likes are continuously indexed. Direct our Gemini-powered AI engine to generate your Weekly discovery mix.
-                    </p>
-                  </div>
-
-                  {/* Telemetry/Insight Badges (no borders) */}
-                  <div className="grid grid-cols-3 gap-2 bg-black/30 p-2.5 rounded-xl">
-                    <div className="flex flex-col items-center text-center p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                      <Heart className="h-3 w-3 text-pink-500 mb-1" />
-                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Favorites</span>
-                      <span className="text-[10px] text-white font-black mt-0.5">{likedTrackIds?.length || 0}</span>
-                    </div>
-                    <div className="flex flex-col items-center text-center p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                      <History className="h-3 w-3 text-cyan-400 mb-1" />
-                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">History</span>
-                      <span className="text-[10px] text-white font-black mt-0.5">{recentlyPlayed?.length || 0}</span>
-                    </div>
-                    <div className="flex flex-col items-center text-center p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                      <Zap className="h-3 w-3 text-purple-400 mb-1" />
-                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Engine</span>
-                      <span className="text-[10px] text-purple-400 font-black mt-0.5">GEMINI 3.5</span>
-                    </div>
-                  </div>
-
-                  {/* Input form */}
-                  <div className="space-y-2">
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Guide the AI Mix (Optional)</p>
-                    <div className="relative">
-                      <textarea
-                        value={customVibe}
-                        onChange={(e) => setCustomVibe(e.target.value)}
-                        placeholder="e.g. ambient ethereal techno for night drives, lo-fi beats with warm synth bass..."
-                        rows={2}
-                        className="w-full bg-black/40 text-xs text-white rounded-xl p-3 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Action/Submit */}
-                  <button
-                    onClick={async () => {
-                      if (isGeneratingWeekly) return;
-                      setIsGeneratingWeekly(true);
-                      try {
-                        await generateDiscoverWeekly(customVibe, true);
-                      } catch (err) {
-                        console.error(err);
-                      } finally {
-                        setIsGeneratingWeekly(false);
-                      }
-                    }}
-                    disabled={isGeneratingWeekly}
-                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black uppercase text-[10px] tracking-widest py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 transition-all cursor-pointer"
-                  >
-                    {isGeneratingWeekly ? (
-                      <>
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        <span>SYNTHESIZING...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-3.5 w-3.5 animate-pulse" />
-                        <span>REGENERATE DISCOVERY MIX</span>
-                      </>
-                    )}
-                  </button>
-
-                  {/* Mini-track list peek rendering inside (without border lines) */}
-                  {discoverWeekly.trackIds && discoverWeekly.trackIds.length > 0 && (
-                    <div className="space-y-1.5 pt-1">
-                      <div className="flex items-center justify-between text-zinc-500 text-[8px] font-black uppercase tracking-widest">
-                        <span>Curated Selections</span>
-                        <span>{discoverWeekly.trackIds.length} tracks</span>
-                      </div>
-                      <div className="space-y-1 max-h-[110px] overflow-y-auto pr-1 select-none">
-                        {discoverWeekly.trackIds.map((id) => {
-                          const tr = allTracks.find(t => t.id === id);
-                          if (!tr) return null;
-                          return (
-                            <div 
-                              key={`dw-peek-${id}`}
-                              className="group/item flex items-center justify-between p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-                              onClick={() => {
-                                playTrack(tr);
-                              }}
-                            >
-                              <div className="flex items-center gap-2 truncate">
-                                <span className="text-[10px] text-zinc-600 font-mono group-hover/item:text-cyan-400">▶</span>
-                                <div className="truncate">
-                                  <p className="text-[10px] text-white font-bold truncate">{tr.title}</p>
-                                  <p className="text-[8px] text-zinc-500 truncate">{tr.artist}</p>
-                                </div>
-                              </div>
-                              <span className="text-[8px] text-cyan-400 bg-cyan-400/10 px-1 py-0.5 rounded font-mono uppercase">
-                                {tr.genre}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-
+                      <Button 
+                        size="icon" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const tracks = discoverWeekly.trackIds?.map(id => allTracks.find(t => t.id === id)).filter(Boolean) as any[];
+                          if (tracks && tracks.length > 0) playAll(tracks);
+                        }}
+                        className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-blue-600 hover:bg-blue-500 text-white hover:scale-110 transition-all border-none flex-shrink-0"
+                      >
+                        <Play className="h-5 w-5 md:h-6 md:w-6 fill-current" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </section>
             )}
 
             {searchHistory.length > 0 && (
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800">Recent exploration</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Recent exploration</h2>
                   <Button variant="ghost" size="sm" onClick={clearSearchHistory} className="h-auto p-0 text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-foreground">
                     Clear all
                   </Button>
@@ -774,8 +697,8 @@ const Discover: React.FC = () => {
             )}
 
             {/* Browse Categories - Modern Bento Grid */}
-            <section className="space-y-2">
-              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800 font-ui">Browse Dimensions</h2>
+            <section className="space-y-4">
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white font-ui">Browse Dimensions</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {BROWSE_CATEGORIES.map((category, idx) => (
                   <motion.div 
@@ -808,9 +731,233 @@ const Discover: React.FC = () => {
               </div>
             </section>
 
+            {/* PERSONALIZED RECOMMENDATION HUB ANALYTICS & REASONING */}
+            <section className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-purple-500 animate-pulse" />
+                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.25em]">Neural Recommendation Engine</span>
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tighter text-foreground font-display">Personalized for You</h2>
+                </div>
+                
+                {/* Micro Analysis Tags showing actual items parsed */}
+                <div className="flex flex-wrap items-center gap-2 text-[9px] font-mono text-muted-foreground uppercase font-semibold">
+                  <span className="bg-muted/10 px-2 py-1 rounded">History: {recentlyPlayed?.length || 0}</span>
+                  <span className="bg-pink-500/5 text-pink-500 px-2 py-1 rounded">Likes: {likedTrackIds?.length || 0}</span>
+                  <span className="bg-cyan-500/5 text-cyan-400 px-2 py-1 rounded">Follows: {followedUserIds?.length || 0}</span>
+                  <span className="bg-yellow-500/5 text-yellow-500 px-2 py-1 rounded">NFTs: {userNFTs?.length || 0}</span>
+                </div>
+              </div>
+
+              {/* Personalization Reason Toast / Context */}
+              {userListeningHabits.hasInteractions ? (
+                <div className="p-4 bg-purple-500/5 rounded-2xl flex items-center gap-3 text-xs text-purple-300 uppercase tracking-wider font-semibold">
+                  <Zap className="h-4 w-4 shrink-0 text-purple-400 animate-pulse" />
+                  <span>
+                    Synchronizing your waves: We found a passion for <strong className="text-white">{userListeningHabits.favoriteGenre || "various"}</strong> music matched with <strong className="text-white">{userListeningHabits.favoriteMood || "your general"}</strong> vibes. Here is your custom daily stream.
+                  </span>
+                </div>
+              ) : (
+                <div className="p-4 bg-blue-500/5 rounded-2xl flex items-center gap-3 text-xs text-blue-300 uppercase tracking-wider font-semibold">
+                  <Zap className="h-4 w-4 shrink-0 text-blue-400" />
+                  <span>
+                    New synapse detected: To unlock higher personalization accuracy, stream music, follow artists, or collect item drops. Displaying live network signals.
+                  </span>
+                </div>
+              )}
+
+              {/* Personalized recommended track cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {recommendedTracks.map((track) => (
+                  <motion.div 
+                    key={`rec-track-${track.id}`}
+                    whileHover={{ y: -3 }}
+                    className="p-4 rounded-xl bg-card hover:bg-[#121A3E]/30 relative transition-all duration-300 group flex items-center gap-4 cursor-pointer"
+                    onClick={() => playTrack(track)}
+                  >
+                    <div className="relative h-16 w-16 rounded-lg overflow-hidden shrink-0">
+                      <img src={track.coverUrl || getPlaceholderImage(track.title)} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                        <Play className="h-6 w-6 text-white fill-current" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 pr-3 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[8px] bg-purple-400/10 text-purple-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                          {track.recommendationReason}
+                        </span>
+                      </div>
+                      <h3 className="text-xs font-bold text-white truncate uppercase tracking-wide group-hover:text-purple-400 transition-colors">
+                        {track.title}
+                      </h3>
+                      <p className="text-[10px] text-zinc-400 truncate">{track.artist}</p>
+                    </div>
+                    <Badge variant="outline" className="text-[8px] border-none text-zinc-500 uppercase tracking-widest font-mono font-bold">
+                      {track.genre}
+                    </Badge>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            {/* TRENDING TRACKS */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-emerald-400" />
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.25em]">Network Heatmeter</span>
+                  </div>
+                  <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Trending Tracks</h2>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => playAll(trendingTracks)}
+                  className="text-[10px] uppercase font-bold tracking-widest text-[#5B6BFF] hover:text-white"
+                >
+                  Play All Trending
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {trendingTracks.map((track, index) => (
+                  <motion.div 
+                    key={`trending-track-${track.id}`}
+                    whileHover={{ y: -4 }}
+                    onClick={() => playTrack(track)}
+                    className="group relative bg-[#0B0F2A] hover:bg-[#121A3E]/30 p-4 rounded-xl flex flex-col justify-between aspect-square transition-all duration-300 cursor-pointer"
+                  >
+                    <div className="relative h-2/3 w-full rounded-lg overflow-hidden shrink-0">
+                      <img src={track.coverUrl || getPlaceholderImage(track.title)} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-md h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white font-mono">
+                        #{index + 1}
+                      </div>
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                        <Play className="h-8 w-8 text-white fill-current" />
+                      </div>
+                    </div>
+                    <div className="mt-3 truncate space-y-0.5">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-[#5B6BFF] transition-colors">{track.title}</h4>
+                      <p className="text-[10px] text-zinc-400 truncate">{track.artist}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            {/* EMERGING ARTISTS */}
+            <section className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.25em]">Boutique Signals</span>
+                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Emerging Artists</h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {emergingArtists.map((artist) => {
+                  const isFollowing = followedUserIds.includes(artist.uid);
+                  return (
+                    <motion.div 
+                      key={`emerging-${artist.uid}`}
+                      whileHover={{ y: -3 }}
+                      className="group bg-[#0B0F2A] hover:bg-[#121A3E]/30 p-4 rounded-xl text-center flex flex-col items-center justify-between space-y-4 duration-300 transition-all"
+                    >
+                      <div className="relative cursor-pointer" onClick={() => navigate(`/artist/${artist.uid}`)}>
+                        <Avatar className="h-20 w-20 ring-4 ring-white/5 group-hover:ring-cyan-500/30 transition-all duration-300">
+                          <AvatarImage src={artist.avatarUrl || getPlaceholderImage(artist.name)} className="object-cover" />
+                          <AvatarFallback><User className="h-8 w-8 text-neutral-400" /></AvatarFallback>
+                        </Avatar>
+                      </div>
+
+                      <div className="space-y-1 text-center truncate w-full">
+                        <h4 className="text-[12px] font-bold uppercase tracking-wider text-white group-hover:text-cyan-400 transition-colors cursor-pointer truncate" onClick={() => navigate(`/artist/${artist.uid}`)}>
+                          {artist.name}
+                        </h4>
+                        <p className="text-[9px] text-[#5B6BFF] font-bold uppercase tracking-widest truncate">{artist.genre || "Independent"} Wave</p>
+                        <p className="text-[9px] text-zinc-500 truncate">{artist.followers || 0} Followers</p>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        variant={isFollowing ? "outline" : "default"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFollowUser(artist.uid);
+                        }}
+                        className={`w-full py-1 text-[8px] font-bold uppercase tracking-widest rounded-lg h-8 transition-colors ${
+                          isFollowing 
+                            ? "bg-transparent border border-white/20 text-white hover:bg-white/5" 
+                            : "bg-[#5B6BFF] text-white hover:bg-[#5B6BFF]/80"
+                        }`}
+                      >
+                        {isFollowing ? "FOLLOWING" : "+ FOLLOW"}
+                      </Button>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* FEATURED NFT RELEASES */}
+            <section className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.25em]">Mints & Collectibles</span>
+                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-white">Featured NFT Releases</h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {featuredNFTReleases.map((nft) => (
+                  <motion.div 
+                    key={`drop-nft-${nft.id}`}
+                    whileHover={{ y: -4 }}
+                    onClick={() => navigate(`/nft/${nft.id}`)}
+                    className="group bg-[#0B0F2A] hover:bg-[#121A3E]/30 p-4 rounded-xl flex flex-col justify-between aspect-square transition-all duration-300 cursor-pointer"
+                  >
+                    <div className="relative h-2/3 w-full rounded-lg overflow-hidden shrink-0">
+                      <img src={nft.coverUrl || nft.imageUrl || getPlaceholderImage(nft.title)} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute top-2 right-2 bg-yellow-500/90 text-black text-[7px] font-black uppercase px-2 py-0.5 rounded tracking-widest">
+                        {nft.listingType || "Fixed"}
+                      </div>
+                    </div>
+                    <div className="mt-3 truncate space-y-1">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-yellow-500 transition-colors">{nft.title}</h4>
+                      <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                        <span>{nft.edition}</span>
+                        <span className="text-yellow-400 font-bold">{nft.price} TON</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            {/* Community Activity Feed Widget */}
+            {posts && posts.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold text-[#5B6BFF] uppercase tracking-[0.25em]">Live Network Hub</span>
+                    <h2 className="text-sm font-black uppercase tracking-tight text-white">Community Sync Feed</h2>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setActiveFilter('community')}
+                    className="h-auto p-0 text-[10px] uppercase font-bold tracking-widest text-[#5B6BFF] hover:text-[#5B6BFF]/80 hover:bg-transparent"
+                  >
+                    Enter Live Lobby →
+                  </Button>
+                </div>
+                <div className="bg-[#0B0F2A] rounded-xl p-4 space-y-4">
+                  <SocialFeed posts={posts.slice(0, 3)} onDeletePost={deletePost} />
+                </div>
+              </section>
+            )}
+
             {/* Albums Section */}
-            <section className="space-y-2">
-              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-800">Featured Albums</h2>
+            <section className="space-y-4">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white font-bold">Featured Albums</h2>
               <Carousel
                 opts={{
                   align: "start",
@@ -825,7 +972,7 @@ const Discover: React.FC = () => {
               >
                 <CarouselContent>
                   {MOCK_ALBUMS.map((album, index) => (
-                    <CarouselItem key={album.id} className="md:basis-1/3 lg:basis-1/4 xl:basis-1/6">
+                    <CarouselItem key={album.id} className="basis-[45%] sm:basis-[30%] md:basis-[22%] lg:basis-[18%] xl:basis-[12.5%] pl-3">
                       <AlbumCard album={album} index={index} />
                     </CarouselItem>
                   ))}
@@ -834,17 +981,16 @@ const Discover: React.FC = () => {
             </section>
 
             {/* Trending Artist Leaderboard with Sparklines */}
-            <section className="space-y-2">
+            <section className="space-y-4">
               <TrendingArtistLeaderboard limit={5} />
             </section>
             
             {/* Artist Leaderboard */}
-            <section className="space-y-2">
+            <section className="space-y-4">
               <ArtistLeaderboard artists={artists.slice(0, 5)} title="Top Artists" />
             </section>
-
-            {/* AI Dj Krupy Section removed to avoid duplication on Home screen context */}
           </>
+          )
         ) : (
           <div className="space-y-12">
             {hasResults ? (
@@ -857,7 +1003,7 @@ const Discover: React.FC = () => {
                     {/* Top Result */}
                     {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 0 && (
                       <section>
-                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-800/60 mb-6">Discovery Identification</h2>
+                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60 mb-6">Discovery Identification</h2>
                         <Card 
                           onClick={() => navigate(`/artist/${filteredResults.artists[0].uid}`)}
                           className="max-w-2xl bg-white/[0.02] hover:bg-white/[0.05] border-none transition-all p-8 rounded-[4px] group cursor-pointer"
@@ -900,7 +1046,7 @@ const Discover: React.FC = () => {
                     {(activeFilter === 'all' || activeFilter === 'tracks') && filteredResults.tracks.length > 0 && (
                       <section className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-800/60 font-bold">Sonic Archive</h2>
+                          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60 font-bold">Sonic Archive</h2>
                           {activeFilter === 'all' && filteredResults.tracks.length > 4 && (
                             <Button variant="ghost" onClick={() => setActiveFilter('tracks')} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
                               View all
@@ -928,7 +1074,7 @@ const Discover: React.FC = () => {
                   {/* Artists */}
                   {(activeFilter === 'all' || activeFilter === 'artists') && filteredResults.artists.length > 1 && (
                     <section className="space-y-8">
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800/60">Similar Signals</h2>
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Similar Signals</h2>
                       <div className="flex flex-col gap-2">
                         {filteredResults.artists.slice(activeFilter === 'all' ? 1 : 0).map((artist) => (
                           <ArtistListItem key={artist.uid} artist={artist} />
@@ -940,7 +1086,7 @@ const Discover: React.FC = () => {
                   {/* Users */}
                   {(activeFilter === 'all' || activeFilter === 'users') && filteredResults.users.length > 0 && (
                     <section className="space-y-8">
-                      <h2 className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-800/60">Network Nodes</h2>
+                      <h2 className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/60">Network Nodes</h2>
                       <div className="flex flex-col gap-2">
                         {filteredResults.users.map((u) => (
                           <div 
@@ -966,7 +1112,7 @@ const Discover: React.FC = () => {
                   {(activeFilter === 'all' || activeFilter === 'nfts') && (
                     filteredResults.nfts.length > 0 ? (
                       <section className="space-y-8">
-                        <h2 className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-800/60">Digital Collectibles</h2>
+                        <h2 className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/60">Digital Collectibles</h2>
                         <div className="flex flex-col gap-2">
                           {filteredResults.nfts.map((nft) => (
                             <NFTCard key={nft.id} nft={nft} variant="row" />

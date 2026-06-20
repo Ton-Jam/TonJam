@@ -575,10 +575,30 @@ const NFTDetail: React.FC = () => {
         duration: "24h",
       };
 
+      // Check if there was a previous highest bidder to notify
+      const previousHighestOffer = localNft.offers && localNft.offers.length > 0 ? localNft.offers[0] : null;
+      
       updateNFT(localNft.id, {
         price: bidValue.toString(),
         offers: [newOffer, ...(localNft.offers || [])],
       });
+
+      // Notify previous bidder if applicable (simulated)
+      if (previousHighestOffer && previousHighestOffer.offerer !== userAddress) {
+        console.log(`Simulating outbid notification for ${previousHighestOffer.offerer}`);
+        // In a real app, this would be a server-side notification trigger.
+        // For now, we'll just show a toast if the current user IS the one who was outbid.
+        if (previousHighestOffer.offerer === userProfile.walletAddress) {
+            import('sonner').then(({ toast }) => {
+              toast.error("You've been outbid!", {
+                description: `Your bid of ${previousHighestOffer.price} TON on ${localNft.title} has been surpassed.`,
+              });
+            });
+            
+            // Still using addNotification context if needed
+            addNotification(`You've been outbid on ${localNft.title}!`, "warning");
+        }
+      }
 
       addNotification(`Bid of ${bidValue} TON placed!`, "success");
       setInlineBidAmount("");

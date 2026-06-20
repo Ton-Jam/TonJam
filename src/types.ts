@@ -261,6 +261,7 @@ export interface Artist {
   events?: ArtistEvent[];
   collaborations?: Collaboration[];
   collaborators?: Collaborator[];
+  pinnedNftIds?: string[];
   profileTheme?: 'light' | 'dark' | 'cyberpunk' | 'ocean' | 'neon';
   playCount?: number;
   location?: string;
